@@ -1,0 +1,145 @@
+import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+import scipy
+from scipy.stats import multivariate_normal
+from scipy.integrate import odeint
+import pandas as pd
+from tprmodel import tprequation
+class ip:
+    #Ip for 'inverse problem'. Initialize prior chain starting point, chain burn-in length and total length, and Q (for proposal samples).  Initialize experimental data.  Theta is initialized as the starting point of the chain.  It is placed at the prior mean.
+    mcmc_length = 1000
+    mcmc_burn_in = 100 # Number of samples trimmed off the beginning of the Markov chain.
+    mu_prior = np.array([41.5, 41.5, 13.0, 13.0, 0.1, 0.1]) # Ea1_mean, Ea2_mean, log_A1_mean, log_A2_mean, gamma_1_mean, gamma_2_mean
+    cov_prior = np.array([[20.0, 0., 0., 0., 0., 0.],
+                          [0., 20.0, 0., 0., 0., 0.],
+                          [0., 0., 13.0, 0., 0., 0.],
+                          [0., 0., 0., 13.0, 0., 0.],
+                          [0., 0., 0., 0., 0.1, 0.],
+                          [0., 0., 0., 0., 0., 0.1]])
+    experiments_df = pd.read_csv('ExperimentalDataAcetaldehydeTPDCeO2111MullinsTruncatedLargerErrors.csv')
+    dT = experiments_df['dT'][0] # assuming dT and dt are constant throughout
+    dt = experiments_df['dt'][0]
+    start_T = experiments_df['AcH - T'][0]
+    times = experiments_df['time'].to_numpy()
+    experiment = experiments_df['AcHBackgroundSubtracted'].to_numpy()/1000
+    errors = experiments_df['Errors'].to_numpy()
+    Q_mu = np.array([0.,0.,0.,0.,0.,0.]) # Q samples the next step at any point in the chain.  The next step may be accepted or rejected.  Q_mu is centered (0) around the current theta.
+    Q_cov = cov_prior/20 # Take small steps.
+
+    #main function to get samples
+    def MetropolisHastings(self):
+        samples = np.zeros((self.mcmc_length,len(self.mu_prior)))
+        samples[0,:] = self.mu_prior # Initialize the chain. Theta is initialized as the starting point of the chain.  It is placed at the prior mean.
+        likelihoods_vec = np.zeros((self.mcmc_length,1))
+        posteriors_un_normed_vec = np.zeros((self.mcmc_length,1))
+        priors_vec = np.zeros((self.mcmc_length,1))
+        for i in range(1,self.mcmc_length):
+            print(i)
+            proposal_sample = samples[i-1,:] + np.random.multivariate_normal(self.Q_mu,self.Q_cov)
+            prior_proposal = self.prior(proposal_sample)
+            likelihood_proposal = self.likelihood(proposal_sample)
+            prior_current_location = self.prior(samples[i-1,:])
+            likelihood_current_location = self.likelihood(samples[i-1,:])
+            accept_pro = (likelihood_proposal*prior_proposal)/(likelihood_current_location*prior_current_location)
+            uni_rand = np.random.uniform()
+            if uni_rand<accept_pro:
+                samples[i,:] = proposal_sample
+                posteriors_un_normed_vec[i] = likelihood_proposal*prior_proposal
+                likelihoods_vec[i] = likelihood_proposal
+                priors_vec[i] = prior_proposal
+            else:
+                samples[i,:] = samples[i-1,:]
+                posteriors_un_normed_vec[i] = likelihood_current_location*prior_current_location
+                likelihoods_vec[i] = likelihood_current_location
+                priors_vec[i] = prior_current_location
+            ########################################
+        samples = samples[self.mcmc_burn_in:]
+        posteriors_un_normed_vec = posteriors_un_normed_vec[self.mcmc_burn_in:]
+        likelihoods_vec = likelihoods_vec[self.mcmc_burn_in:]
+        priors_vec = priors_vec[self.mcmc_burn_in:]
+        # posterior probabilites are transformed to a standard normal (std=1) for obtaining the evidence:
+        evidence = np.mean(posteriors_un_normed_vec)*np.sqrt(2*np.pi*np.std(samples)**2)
+        posteriors_vec = posteriors_un_normed_vec/evidence
+        log_ratios = np.log(posteriors_vec/priors_vec)
+        log_ratios[np.isinf(log_ratios)] = 0
+        log_ratios = np.nan_to_num(log_ratios)
+        info_gain = np.mean(log_ratios)
+        return [evidence, info_gain, samples]
+    def prior(self,sample):
+        probability = multivariate_normal.pdf(x=sample,mean=self.mu_prior,cov=self.cov_prior)
+        return probability
+    def likelihood(self,sample):
+        tpr_theta = odeint(tprequation, [0.5, 0.5], self.times, args = (sample[0], sample[1], sample[2], sample[3], sample[4], sample[5],self.dT,self.dt,self.start_T)) # [0.5, 0.5] are the initial theta's.
+        rate = tprequation(tpr_theta, self.times, sample[0], sample[1], sample[2], sample[3], sample[4], sample[5], self.dT,self.dt,self.start_T)
+        rate_tot = -np.sum(rate, axis=0)
+        #intermediate_metric = np.mean(np.square(rate_tot - self.experiment) / np.square(self.errors ))
+        probability_metric = multivariate_normal.pdf(x=rate_tot,mean=self.experiment,cov=self.errors)
+        print('likelihood probability',probability_metric)
+        return probability_metric
+
+ip_object = ip()
+[evidence, info_gain, samples] = ip_object.MetropolisHastings()
+############################################# The computation portion is contained above.
+post_mean = np.mean(samples, axis=0)
+experiments_df = pd.read_csv('ExperimentalDataAcetaldehydeTPDCeO2111MullinsTruncatedLargerErrors.csv')
+dT = experiments_df['dT'][0] # assuming dT and dt are constant throughout
+dt = experiments_df['dt'][0]
+start_T = experiments_df['AcH - T'][0]
+times = experiments_df['time'].to_numpy()
+experiment = experiments_df['AcHBackgroundSubtracted'].to_numpy()/1000
+errors = experiments_df['Errors'].to_numpy()
+tpr_theta = odeint(tprequation, [0.5, 0.5], times, args = (post_mean[0], post_mean[1], post_mean[2], post_mean[3], post_mean[4], post_mean[5],dT,dt,start_T)) # [0.5, 0.5] are the initial theta's.
+rate = tprequation(tpr_theta, times, post_mean[0], post_mean[1], post_mean[2], post_mean[3], post_mean[4], post_mean[5], dT,dt,start_T)
+rate_tot = -np.sum(rate, axis=0)
+fig1, ax1 = plt.subplots()
+ax1.plot(experiments_df['AcH - T'].to_numpy(),rate_tot, 'r')
+ax1.plot(experiments_df['AcH - T'].to_numpy(),experiments_df['AcHBackgroundSubtracted'].to_numpy()/1000,'g')
+ax1.set_xlabel('T (K)')
+ax1.set_ylabel(r'$rate (s^{-1})$')
+ax1.legend(['model posterior', 'experiments'])
+fig1.tight_layout()
+fig1.savefig('tprposterior.png', dpi=220)
+
+fig2, ax2 = plt.subplots()
+ax2.hist(samples[:,0])
+ax2.set_ylabel('frequency')
+ax2.set_xlabel(r'$E_{a1}$')
+fig2.tight_layout()
+fig2.savefig('Ea1.png', dpi=220)
+
+fig3, ax3 = plt.subplots()
+ax3.hist(samples[:,1])
+ax3.set_ylabel('frequency')
+ax3.set_xlabel(r'$E_{a2}$')
+fig3.tight_layout()
+fig3.savefig('Ea2.png', dpi=220)
+
+fig4, ax4 = plt.subplots()
+ax4.hist(samples[:,2])
+ax4.set_ylabel('frequency')
+ax4.set_xlabel(r'$log(A_{1})$')
+fig4.tight_layout()
+fig4.savefig('logA1.png', dpi=220)
+
+fig5, ax5 = plt.subplots()
+ax5.hist(samples[:,3])
+ax5.set_ylabel('frequency')
+ax5.set_xlabel(r'$log(A_{2})$')
+fig5.tight_layout()
+fig5.savefig('logA2.png', dpi=220)
+
+fig6, ax6 = plt.subplots()
+ax6.hist(samples[:,4])
+ax6.set_ylabel('frequency')
+ax6.set_xlabel(r'$\gamma_{1}$')
+fig6.tight_layout()
+fig6.savefig('gamma1.png', dpi=220)
+
+fig7, ax7 = plt.subplots()
+ax7.hist(samples[:,5])
+ax7.set_ylabel('frequency')
+ax7.set_xlabel(r'$\gamma_{2}$')
+fig7.tight_layout()
+fig7.savefig('gamma2.png', dpi=220)
