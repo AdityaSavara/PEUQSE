@@ -97,55 +97,40 @@ tpr_theta = odeint(tprequation, UserInput.initial_concentrations_array, times, a
 rate = tprequation(tpr_theta, times, post_mean[0], post_mean[1], post_mean[2], post_mean[3], post_mean[4], post_mean[5], UserInput.beta_dTdt, start_T)
 rate_tot = -np.sum(rate, axis=0)
 
-fig1, ax1 = plt.subplots()
+fig0, ax0 = plt.subplots()
 
 
-ax1.plot(np.array(experiments_df['AcH - T']),rate_tot, 'r')
-ax1.plot(np.array(experiments_df['AcH - T']),np.array(experiments_df['AcHBackgroundSubtracted'])/1000,'g')
-ax1.set_xlabel('T (K)')
-ax1.set_ylabel(r'$rate (s^{-1})$')
-ax1.legend(['model posterior', 'experiments'])
-fig1.tight_layout()
-fig1.savefig('tprposterior.png', dpi=220)
+ax0.plot(np.array(experiments_df['AcH - T']),rate_tot, 'r')
+ax0.plot(np.array(experiments_df['AcH - T']),np.array(experiments_df['AcHBackgroundSubtracted'])/1000,'g')
+ax0.set_xlabel('T (K)')
+ax0.set_ylabel(r'$rate (s^{-1})$')
+ax0.legend(['model posterior', 'experiments'])
+fig0.tight_layout()
+fig0.savefig('tprposterior.png', dpi=220)
 
-fig2, ax2 = plt.subplots()
-ax2.hist(samples[:,0])
-ax2.set_ylabel('frequency')
-ax2.set_xlabel(r'$E_{a1}$')
-fig2.tight_layout()
-fig2.savefig('Ea1.png', dpi=220)
+def sampledParameterFigureMaker(parameterName,parameterNamesAndMathTypeExpressionsDict, sampledParameterFiguresDictionary, sampledParameterAxesDictionary):
+        parameterIndex = list(parameterNamesAndMathTypeExpressionsDict).index(parameterName)
+        sampledParameterFiguresDictionary['parameterName'], sampledParameterAxesDictionary['parameterName'] = plt.subplots()   #making plt objects    
+        sampledParameterAxesDictionary['parameterName'].hist(samples[:,parameterIndex]) #filling the object with data
+        #setting the labels etc. and then exporting.
+        sampledParameterAxesDictionary['parameterName'].set_ylabel('frequency')
+        sampledParameterAxesDictionary['parameterName'].set_xlabel(UserInput.parameterNamesAndMathTypeExpressionsDict[parameterName])
+        sampledParameterFiguresDictionary['parameterName'].tight_layout()
+        sampledParameterFiguresDictionary['parameterName'].savefig(parameterName+'.png', dpi=220)
 
-fig3, ax3 = plt.subplots()
-ax3.hist(samples[:,1])
-ax3.set_ylabel('frequency')
-ax3.set_xlabel(r'$E_{a2}$')
-fig3.tight_layout()
-fig3.savefig('Ea2.png', dpi=220)
+        #The above block makes code kind of like this in a dynamic fashion. Since we know how many we will need, a dictionary is used to avoid the need for 'exec' statements when making new parameters.
+        # fig2, ax2 = plt.subplots()
+        # ax2.hist(samples[:,1])
+        # ax2.set_ylabel('frequency')
+        # ax2.set_xlabel(r'$E_{a2}$')
+        # fig2.tight_layout()
+        # fig2.savefig('Ea2.png', dpi=220)
 
-fig4, ax4 = plt.subplots()
-ax4.hist(samples[:,2])
-ax4.set_ylabel('frequency')
-ax4.set_xlabel(r'$log(A_{1})$')
-fig4.tight_layout()
-fig4.savefig('logA1.png', dpi=220)
 
-fig5, ax5 = plt.subplots()
-ax5.hist(samples[:,3])
-ax5.set_ylabel('frequency')
-ax5.set_xlabel(r'$log(A_{2})$')
-fig5.tight_layout()
-fig5.savefig('logA2.png', dpi=220)
-
-fig6, ax6 = plt.subplots()
-ax6.hist(samples[:,4])
-ax6.set_ylabel('frequency')
-ax6.set_xlabel(r'$\gamma_{1}$')
-fig6.tight_layout()
-fig6.savefig('gamma1.png', dpi=220)
-
-fig7, ax7 = plt.subplots()
-ax7.hist(samples[:,5])
-ax7.set_ylabel('frequency')
-ax7.set_xlabel(r'$\gamma_{2}$')
-fig7.tight_layout()
-fig7.savefig('gamma2.png', dpi=220)
+parameterNamesAndMathTypeExpressionsDict = UserInput.parameterNamesAndMathTypeExpressionsDict
+import copy
+sampledParameterFiguresDictionary = copy.deepcopy(parameterNamesAndMathTypeExpressionsDict)
+sampledParameterAxesDictionary = copy.deepcopy(parameterNamesAndMathTypeExpressionsDict)
+for key in parameterNamesAndMathTypeExpressionsDict:
+    parameterName = key
+    sampledParameterFigureMaker(parameterName,parameterNamesAndMathTypeExpressionsDict, sampledParameterFiguresDictionary, sampledParameterAxesDictionary)

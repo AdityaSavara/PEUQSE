@@ -14,7 +14,7 @@ T_0 = 152.96 #this is the starting temperature.
 Filename = 'ExperimentalDataAcetaldehydeTPDCeO2111MullinsTruncatedLargerErrors.csv'
 
 #####Chemical Kinetic Model Input Files#####
-
+parameterNamesAndMathTypeExpressionsDict = {'Ea_1':r'$E_{a1}$','Ea_2':r'$E_{a2}$','log_A1':r'$log(A_{1})$','log_A2':r'$log(A_{2})$','gamma1':r'$\gamma_{1}$','gamma2':r'$\gamma_{2}$'}
 
 #####Chemical Kinetic Model Initial Concentrations#####
 initial_concentrations_dict = {}
