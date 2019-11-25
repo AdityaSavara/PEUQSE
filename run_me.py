@@ -7,24 +7,22 @@ from scipy.stats import multivariate_normal
 from scipy.integrate import odeint
 import pandas as pd
 from tprmodel import tprequation
+import UserInput_ODE_KIN_BAYES_SG_EW as UserInput
+verbose = True
+
 class ip:
     #Ip for 'inverse problem'. Initialize prior chain starting point, chain burn-in length and total length, and Q (for proposal samples).  Initialize experimental data.  Theta is initialized as the starting point of the chain.  It is placed at the prior mean.
-    mcmc_length = 1000
-    mcmc_burn_in = 100 # Number of samples trimmed off the beginning of the Markov chain.
-    mu_prior = np.array([41.5, 41.5, 13.0, 13.0, 0.1, 0.1]) # Ea1_mean, Ea2_mean, log_A1_mean, log_A2_mean, gamma_1_mean, gamma_2_mean
-    cov_prior = np.array([[20.0, 0., 0., 0., 0., 0.],
-                          [0., 20.0, 0., 0., 0., 0.],
-                          [0., 0., 13.0, 0., 0., 0.],
-                          [0., 0., 0., 13.0, 0., 0.],
-                          [0., 0., 0., 0., 0.1, 0.],
-                          [0., 0., 0., 0., 0., 0.1]])
+    mcmc_length = UserInput.mcmc_length
+    mcmc_burn_in = UserInput.mcmc_burn_in # Number of samples trimmed off the beginning of the Markov chain.
+    mu_prior = UserInput.mu_prior
+    cov_prior = UserInput.cov_prior
     experiments_df = pd.read_csv('ExperimentalDataAcetaldehydeTPDCeO2111MullinsTruncatedLargerErrors.csv')
     dT = experiments_df['dT'][0] # assuming dT and dt are constant throughout
     dt = experiments_df['dt'][0]
     start_T = experiments_df['AcH - T'][0]
-    times = experiments_df['time'].to_numpy()
-    experiment = experiments_df['AcHBackgroundSubtracted'].to_numpy()/1000
-    errors = experiments_df['Errors'].to_numpy()
+    times = np.array(experiments_df['time']) #experiments_df['time'].to_numpy() #The to_numpy() syntax was not working for Ashi.
+    experiment = np.array(experiments_df['AcHBackgroundSubtracted'])/1000  #experiments_df['AcHBackgroundSubtracted'].to_numpy()/1000
+    errors = np.array(experiments_df['Errors']) #.to_numpy()
     Q_mu = np.array([0.,0.,0.,0.,0.,0.]) # Q samples the next step at any point in the chain.  The next step may be accepted or rejected.  Q_mu is centered (0) around the current theta.
     Q_cov = cov_prior/20 # Take small steps.
 
@@ -36,7 +34,7 @@ class ip:
         posteriors_un_normed_vec = np.zeros((self.mcmc_length,1))
         priors_vec = np.zeros((self.mcmc_length,1))
         for i in range(1,self.mcmc_length):
-            print(i)
+            if verbose: print(i)
             proposal_sample = samples[i-1,:] + np.random.multivariate_normal(self.Q_mu,self.Q_cov)
             prior_proposal = self.prior(proposal_sample)
             likelihood_proposal = self.likelihood(proposal_sample)
@@ -76,7 +74,7 @@ class ip:
         rate_tot = -np.sum(rate, axis=0)
         #intermediate_metric = np.mean(np.square(rate_tot - self.experiment) / np.square(self.errors ))
         probability_metric = multivariate_normal.pdf(x=rate_tot,mean=self.experiment,cov=self.errors)
-        print('likelihood probability',probability_metric)
+        if verbose: print('likelihood probability',probability_metric)
         return probability_metric
 
 ip_object = ip()
@@ -87,15 +85,18 @@ experiments_df = pd.read_csv('ExperimentalDataAcetaldehydeTPDCeO2111MullinsTrunc
 dT = experiments_df['dT'][0] # assuming dT and dt are constant throughout
 dt = experiments_df['dt'][0]
 start_T = experiments_df['AcH - T'][0]
-times = experiments_df['time'].to_numpy()
-experiment = experiments_df['AcHBackgroundSubtracted'].to_numpy()/1000
-errors = experiments_df['Errors'].to_numpy()
+times = np.array(experiments_df['time']) #experiments_df['time'].to_numpy() #The to_numpy() syntax was not working for Ashi.
+experiment = np.array(experiments_df['AcHBackgroundSubtracted'])/1000  #experiments_df['AcHBackgroundSubtracted'].to_numpy()/1000
+errors = np.array(experiments_df['Errors']) #.to_numpy()
 tpr_theta = odeint(tprequation, [0.5, 0.5], times, args = (post_mean[0], post_mean[1], post_mean[2], post_mean[3], post_mean[4], post_mean[5],dT,dt,start_T)) # [0.5, 0.5] are the initial theta's.
 rate = tprequation(tpr_theta, times, post_mean[0], post_mean[1], post_mean[2], post_mean[3], post_mean[4], post_mean[5], dT,dt,start_T)
 rate_tot = -np.sum(rate, axis=0)
+
 fig1, ax1 = plt.subplots()
-ax1.plot(experiments_df['AcH - T'].to_numpy(),rate_tot, 'r')
-ax1.plot(experiments_df['AcH - T'].to_numpy(),experiments_df['AcHBackgroundSubtracted'].to_numpy()/1000,'g')
+
+
+ax1.plot(np.array(experiments_df['AcH - T']),rate_tot, 'r')
+ax1.plot(np.array(experiments_df['AcH - T']),np.array(experiments_df['AcHBackgroundSubtracted'])/1000,'g')
 ax1.set_xlabel('T (K)')
 ax1.set_ylabel(r'$rate (s^{-1})$')
 ax1.legend(['model posterior', 'experiments'])
