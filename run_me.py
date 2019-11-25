@@ -24,16 +24,36 @@ import numpy as np\n\
 \n\
 # The below function must return a vector of rates. \n\
 def tprequation(tpr_theta,t," + UserInput.stringOfParameterNames + ",beta_dTdt,start_T): #beta_dTdT is the heating rate. \n\
+    if tpr_theta.ndim == 1:  #for consistency, making tpr_theta a 2D array if it does not start as 2D. \n\
+        tpr_theta2D = np.atleast_2d(tpr_theta)  \n\
     if tpr_theta.ndim == 2: \n\
-        theta_1 = tpr_theta[:,0] \n\
-        theta_2 = tpr_theta[:,1] \n\
-    else: \n\
-        [theta_1, theta_2] = tpr_theta \n\
-    T = start_T + beta_dTdt*t \n\
-    kB = 1.380649e-26*6.0221409e+23 #kJ mol^-1 K^-1 \n\
-    rate_1 = theta_1*np.exp(-(Ea_1-kB*T*log_A1-gamma1*theta_1)/(kB*T)) \n\
-    rate_2 = theta_2*np.exp(-(Ea_2-kB*T*log_A2-gamma2*theta_2)/(kB*T)) \n\
-    return [-rate_1, -rate_2] \n\
+        tpr_theta2D = np.array(tpr_theta) \n\
+    #Now find out how many species concentrations there are from the data: \n\
+    num_of_concentrations = len(tpr_theta2D[0]) \n\
+    Ea_Array = [Ea_1,Ea_2] \n\
+    log_A_array = [log_A1, log_A2] \n\
+    gamma_array = [gamma1, gamma2] \n\
+    \n\
+    T = start_T + beta_dTdt*t  \n\
+    kB = 1.380649e-26*6.0221409e+23 #kJ mol^-1 K^-1  \n\
+    \n\
+    ratesList = [] \n\
+    for rateIndex in range(num_of_concentrations): \n\
+        rate = -tpr_theta2D[:,rateIndex]*np.exp(-(Ea_Array[rateIndex]-kB*T*log_A_array[rateIndex]-gamma_array[rateIndex]*tpr_theta2D[:,rateIndex])/(kB*T))  \n\
+    \n\
+        #Shortened below to one line (above) \n\
+        # theta_i = tpr_theta2D[:,rateIndex] \n\
+        # Ea_i = Ea_Array[rateIndex] \n\
+        # log_A_i = log_A_array[rateIndex] \n\
+        # gamma_i = gamma_array[rateIndex] \n\
+        # rate = -theta_i*np.exp(-(Ea_i-kB*T*log_A_i-gamma_i*theta_i)/(kB*T))  \n\
+      \n\
+        #The above expression is the general form of this: rate_2 = -theta_2*np.exp(-(Ea_2-kB*T*log_A2-gamma2*theta_2)/(kB*T))       \n\
+        ratesList.append(rate) \n\
+    \n\
+    if tpr_theta.ndim == 1: \n\
+        ratesList = list(np.array(ratesList).flatten()) #for some reason, needs to be flattened for the MCMC. \n\
+    return ratesList \n\
     ")
     
 writeTPRModelFile()
@@ -73,7 +93,7 @@ class ip:
         posteriors_un_normed_vec = np.zeros((self.mcmc_length,1))
         priors_vec = np.zeros((self.mcmc_length,1))
         for i in range(1,self.mcmc_length):
-            if self.verbose: print(i)
+            if self.verbose: print("MCMC sample number", i)
             proposal_sample = samples[i-1,:] + np.random.multivariate_normal(self.Q_mu,self.Q_cov)
             prior_proposal = self.prior(proposal_sample)
             likelihood_proposal = self.likelihood(proposal_sample)
