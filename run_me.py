@@ -8,29 +8,30 @@ from scipy.integrate import odeint
 import pandas as pd
 from tprmodel import tprequation
 import UserInput_ODE_KIN_BAYES_SG_EW as UserInput
-verbose = True
 
 
 class ip:
     #Ip for 'inverse problem'. Initialize prior chain starting point, chain burn-in length and total length, and Q (for proposal samples).  Initialize experimental data.  Theta is initialized as the starting point of the chain.  It is placed at the prior mean.
-    def __init__(self, UserInput = UserInput, verbose = True):
-        if verbose: print("Bayes Model Initialized")
+    def __init__(self, UserInput = UserInput):
+        self.verbose = UserInput.verbose
+        if self.verbose: 
+            print("Bayes Model Initialized")
         self.mcmc_length = UserInput.mcmc_length
         self.mcmc_burn_in = UserInput.mcmc_burn_in # Number of samples trimmed off the beginning of the Markov chain.
         self.mu_prior = UserInput.mu_prior
         self.start_T = UserInput.T_0
+        self.beta_dTdt = UserInput.beta_dTdt
         self.cov_prior = UserInput.cov_prior
+        self.Q_mu = self.mu_prior*0 # Q samples the next step at any point in the chain.  The next step may be accepted or rejected.  Q_mu is centered (0) around the current theta.  
+        self.Q_cov = self.cov_prior/20 # Take small steps. <-- looks like this 20 should be a user defined variable.
+        self.initial_concentrations_array = UserInput.initial_concentrations_array
         
     def import_experimental_settings(self):
-        experiments_df = pd.read_csv('ExperimentalDataAcetaldehydeTPDCeO2111MullinsTruncatedLargerErrors.csv')
-        self.dT = experiments_df['dT'][0] # assuming dT and dt are constant throughout
-        self.dt = experiments_df['dt'][0]
+        experiments_df = pd.read_csv(UserInput.Filename)
         self.times = np.array(experiments_df['time']) #experiments_df['time'].to_numpy() #The to_numpy() syntax was not working for Ashi.
         self.experiment = np.array(experiments_df['AcHBackgroundSubtracted'])/1000  #experiments_df['AcHBackgroundSubtracted'].to_numpy()/1000
         self.errors = np.array(experiments_df['Errors']) #.to_numpy()
-        self.Q_mu = np.array([0.,0.,0.,0.,0.,0.]) # Q samples the next step at any point in the chain.  The next step may be accepted or rejected.  Q_mu is centered (0) around the current theta.
-        self.Q_cov = self.cov_prior/20 # Take small steps.
-    
+
     #main function to get samples
     def MetropolisHastings(self):
         self.import_experimental_settings()
@@ -40,7 +41,7 @@ class ip:
         posteriors_un_normed_vec = np.zeros((self.mcmc_length,1))
         priors_vec = np.zeros((self.mcmc_length,1))
         for i in range(1,self.mcmc_length):
-            if verbose: print(i)
+            if self.verbose: print(i)
             proposal_sample = samples[i-1,:] + np.random.multivariate_normal(self.Q_mu,self.Q_cov)
             prior_proposal = self.prior(proposal_sample)
             likelihood_proposal = self.likelihood(proposal_sample)
@@ -74,12 +75,12 @@ class ip:
         probability = multivariate_normal.pdf(x=sample,mean=self.mu_prior,cov=self.cov_prior)
         return probability
     def likelihood(self,sample):
-        tpr_theta = odeint(tprequation, [0.5, 0.5], self.times, args = (sample[0], sample[1], sample[2], sample[3], sample[4], sample[5],self.dT,self.dt,self.start_T)) # [0.5, 0.5] are the initial theta's.
-        rate = tprequation(tpr_theta, self.times, sample[0], sample[1], sample[2], sample[3], sample[4], sample[5], self.dT,self.dt,self.start_T)
+        tpr_theta = odeint(tprequation, self.initial_concentrations_array, self.times, args = (sample[0], sample[1], sample[2], sample[3], sample[4], sample[5],self.beta_dTdt,self.start_T)) # [0.5, 0.5] are the initial theta's.
+        rate = tprequation(tpr_theta, self.times, sample[0], sample[1], sample[2], sample[3], sample[4], sample[5], self.beta_dTdt,self.start_T)
         rate_tot = -np.sum(rate, axis=0)
         #intermediate_metric = np.mean(np.square(rate_tot - self.experiment) / np.square(self.errors ))
         probability_metric = multivariate_normal.pdf(x=rate_tot,mean=self.experiment,cov=self.errors)
-        if verbose: print('likelihood probability',probability_metric)
+        if self.verbose: print('likelihood probability',probability_metric)
         return probability_metric
         
     
@@ -87,15 +88,13 @@ ip_object = ip()
 [evidence, info_gain, samples] = ip_object.MetropolisHastings()
 ############################################# The computation portion is contained above.
 post_mean = np.mean(samples, axis=0)
-experiments_df = pd.read_csv('ExperimentalDataAcetaldehydeTPDCeO2111MullinsTruncatedLargerErrors.csv')
-dT = experiments_df['dT'][0] # assuming dT and dt are constant throughout
-dt = experiments_df['dt'][0]
-start_T = experiments_df['AcH - T'][0]
+experiments_df = pd.read_csv(UserInput.Filename)
+start_T = UserInput.T_0 #this is the starting temperature.
 times = np.array(experiments_df['time']) #experiments_df['time'].to_numpy() #The to_numpy() syntax was not working for Ashi.
 experiment = np.array(experiments_df['AcHBackgroundSubtracted'])/1000  #experiments_df['AcHBackgroundSubtracted'].to_numpy()/1000
 errors = np.array(experiments_df['Errors']) #.to_numpy()
-tpr_theta = odeint(tprequation, [0.5, 0.5], times, args = (post_mean[0], post_mean[1], post_mean[2], post_mean[3], post_mean[4], post_mean[5],dT,dt,start_T)) # [0.5, 0.5] are the initial theta's.
-rate = tprequation(tpr_theta, times, post_mean[0], post_mean[1], post_mean[2], post_mean[3], post_mean[4], post_mean[5], dT,dt,start_T)
+tpr_theta = odeint(tprequation, UserInput.initial_concentrations_array, times, args = (post_mean[0], post_mean[1], post_mean[2], post_mean[3], post_mean[4], post_mean[5],UserInput.beta_dTdt, start_T)) # [0.5, 0.5] are the initial theta's.
+rate = tprequation(tpr_theta, times, post_mean[0], post_mean[1], post_mean[2], post_mean[3], post_mean[4], post_mean[5], UserInput.beta_dTdt, start_T)
 rate_tot = -np.sum(rate, axis=0)
 
 fig1, ax1 = plt.subplots()
