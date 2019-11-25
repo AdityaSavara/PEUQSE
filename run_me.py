@@ -23,8 +23,8 @@ class ip:
         
     def import_experimental_settings(self):
         experiments_df = pd.read_csv('ExperimentalDataAcetaldehydeTPDCeO2111MullinsTruncatedLargerErrors.csv')
-        # self.dT = experiments_df['dT'][0] # assuming dT and dt are constant throughout
-        # self.dt = experiments_df['dt'][0]
+        self.dT = experiments_df['dT'][0] # assuming dT and dt are constant throughout
+        self.dt = experiments_df['dt'][0]
         self.times = np.array(experiments_df['time']) #experiments_df['time'].to_numpy() #The to_numpy() syntax was not working for Ashi.
         self.experiment = np.array(experiments_df['AcHBackgroundSubtracted'])/1000  #experiments_df['AcHBackgroundSubtracted'].to_numpy()/1000
         self.errors = np.array(experiments_df['Errors']) #.to_numpy()
