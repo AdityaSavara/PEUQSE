@@ -6,8 +6,40 @@ import scipy
 from scipy.stats import multivariate_normal
 from scipy.integrate import odeint
 import pandas as pd
-from tprmodel import tprequation
 import UserInput_ODE_KIN_BAYES_SG_EW as UserInput
+import copy
+
+
+#Now will automatically populate some variables from above.    
+def parseUserInputParameters():
+    UserInput.parameterNamesList = list(UserInput.parameterNamesAndMathTypeExpressionsDict.keys())
+    UserInput.stringOfParameterNames = str(UserInput.parameterNamesList).replace("'","")[1:-1]
+parseUserInputParameters()
+
+
+def writeTPRModelFile():
+    with open("tprmodel.py", "w") as myfile:
+        myfile.write("\n\
+import numpy as np\n\
+\n\
+# The below function must return a vector of rates. \n\
+def tprequation(tpr_theta,t," + UserInput.stringOfParameterNames + ",beta_dTdt,start_T): #beta_dTdT is the heating rate. \n\
+    if tpr_theta.ndim == 2: \n\
+        theta_1 = tpr_theta[:,0] \n\
+        theta_2 = tpr_theta[:,1] \n\
+    else: \n\
+        [theta_1, theta_2] = tpr_theta \n\
+    T = start_T + beta_dTdt*t \n\
+    kB = 1.380649e-26*6.0221409e+23 #kJ mol^-1 K^-1 \n\
+    rate_1 = theta_1*np.exp(-(Ea_1-kB*T*log_A1-gamma1*theta_1)/(kB*T)) \n\
+    rate_2 = theta_2*np.exp(-(Ea_2-kB*T*log_A2-gamma2*theta_2)/(kB*T)) \n\
+    return [-rate_1, -rate_2] \n\
+    ")
+    
+writeTPRModelFile()
+    
+from tprmodel import tprequation
+    
 
 
 class ip:
@@ -74,9 +106,10 @@ class ip:
     def prior(self,sample):
         probability = multivariate_normal.pdf(x=sample,mean=self.mu_prior,cov=self.cov_prior)
         return probability
-    def likelihood(self,sample):
-        tpr_theta = odeint(tprequation, self.initial_concentrations_array, self.times, args = (sample[0], sample[1], sample[2], sample[3], sample[4], sample[5],self.beta_dTdt,self.start_T)) # [0.5, 0.5] are the initial theta's.
-        rate = tprequation(tpr_theta, self.times, sample[0], sample[1], sample[2], sample[3], sample[4], sample[5], self.beta_dTdt,self.start_T)
+    def likelihood(self,sample): #The variable sample represents a vector of values for the parameters being sampled. So it represents a single point in the multidimensional parameter space.
+        sample_list = list(sample) #converting to list so can use list expansion in arguments. 
+        tpr_theta = odeint(tprequation, self.initial_concentrations_array, self.times, args = (*sample_list,self.beta_dTdt,self.start_T)) # [0.5, 0.5] are the initial theta's.
+        rate = tprequation(tpr_theta, self.times, *sample_list, self.beta_dTdt,self.start_T)
         rate_tot = -np.sum(rate, axis=0)
         #intermediate_metric = np.mean(np.square(rate_tot - self.experiment) / np.square(self.errors ))
         probability_metric = multivariate_normal.pdf(x=rate_tot,mean=self.experiment,cov=self.errors)
@@ -93,13 +126,12 @@ start_T = UserInput.T_0 #this is the starting temperature.
 times = np.array(experiments_df['time']) #experiments_df['time'].to_numpy() #The to_numpy() syntax was not working for Ashi.
 experiment = np.array(experiments_df['AcHBackgroundSubtracted'])/1000  #experiments_df['AcHBackgroundSubtracted'].to_numpy()/1000
 errors = np.array(experiments_df['Errors']) #.to_numpy()
-tpr_theta = odeint(tprequation, UserInput.initial_concentrations_array, times, args = (post_mean[0], post_mean[1], post_mean[2], post_mean[3], post_mean[4], post_mean[5],UserInput.beta_dTdt, start_T)) # [0.5, 0.5] are the initial theta's.
-rate = tprequation(tpr_theta, times, post_mean[0], post_mean[1], post_mean[2], post_mean[3], post_mean[4], post_mean[5], UserInput.beta_dTdt, start_T)
+post_mean_list = list(post_mean) #converting to list so can use list expansion in arguments.
+tpr_theta = odeint(tprequation, UserInput.initial_concentrations_array, times, args = (*post_mean_list,UserInput.beta_dTdt, start_T)) # [0.5, 0.5] are the initial theta's.
+rate = tprequation(tpr_theta, times, *post_mean_list, UserInput.beta_dTdt, start_T)
 rate_tot = -np.sum(rate, axis=0)
 
 fig0, ax0 = plt.subplots()
-
-
 ax0.plot(np.array(experiments_df['AcH - T']),rate_tot, 'r')
 ax0.plot(np.array(experiments_df['AcH - T']),np.array(experiments_df['AcHBackgroundSubtracted'])/1000,'g')
 ax0.set_xlabel('T (K)')
@@ -108,7 +140,9 @@ ax0.legend(['model posterior', 'experiments'])
 fig0.tight_layout()
 fig0.savefig('tprposterior.png', dpi=220)
 
-def sampledParameterFigureMaker(parameterName,parameterNamesAndMathTypeExpressionsDict, sampledParameterFiguresDictionary, sampledParameterAxesDictionary):
+#######Below function and codee makes the Histograms for each parameter#####
+
+def sampledParameterHistogramMaker(parameterName,parameterNamesAndMathTypeExpressionsDict, sampledParameterFiguresDictionary, sampledParameterAxesDictionary):
         parameterIndex = list(parameterNamesAndMathTypeExpressionsDict).index(parameterName)
         sampledParameterFiguresDictionary['parameterName'], sampledParameterAxesDictionary['parameterName'] = plt.subplots()   #making plt objects    
         sampledParameterAxesDictionary['parameterName'].hist(samples[:,parameterIndex]) #filling the object with data
@@ -127,10 +161,11 @@ def sampledParameterFigureMaker(parameterName,parameterNamesAndMathTypeExpressio
         # fig2.savefig('Ea2.png', dpi=220)
 
 
-parameterNamesAndMathTypeExpressionsDict = UserInput.parameterNamesAndMathTypeExpressionsDict
-import copy
-sampledParameterFiguresDictionary = copy.deepcopy(parameterNamesAndMathTypeExpressionsDict)
-sampledParameterAxesDictionary = copy.deepcopy(parameterNamesAndMathTypeExpressionsDict)
-for key in parameterNamesAndMathTypeExpressionsDict:
+#Make histograms for each parameter. Need to make some dictionaries where relevant objects will be stored.
+sampledParameterFiguresDictionary = copy.deepcopy(UserInput.parameterNamesAndMathTypeExpressionsDict)
+sampledParameterAxesDictionary = copy.deepcopy(UserInput.parameterNamesAndMathTypeExpressionsDict)
+for key in UserInput.parameterNamesAndMathTypeExpressionsDict:
     parameterName = key
-    sampledParameterFigureMaker(parameterName,parameterNamesAndMathTypeExpressionsDict, sampledParameterFiguresDictionary, sampledParameterAxesDictionary)
+    sampledParameterHistogramMaker(parameterName,UserInput.parameterNamesAndMathTypeExpressionsDict, sampledParameterFiguresDictionary, sampledParameterAxesDictionary)
+
+#TODO: Make 2D parameter response surfaces like in the perspective figures. Can make it for each variable pair. Should have it as an option in the UserInput as True, False, or a list of pairs for which ones to make.

@@ -39,7 +39,4 @@ mcmc_length = 1000
 mcmc_burn_in = 100 
 
 ######gridSamplingSettings#####
-gridSampling = False
-
-
-    
+gridSampling = False    
