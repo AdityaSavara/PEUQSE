@@ -10,24 +10,30 @@ from tprmodel import tprequation
 import UserInput_ODE_KIN_BAYES_SG_EW as UserInput
 verbose = True
 
+
 class ip:
     #Ip for 'inverse problem'. Initialize prior chain starting point, chain burn-in length and total length, and Q (for proposal samples).  Initialize experimental data.  Theta is initialized as the starting point of the chain.  It is placed at the prior mean.
-    mcmc_length = UserInput.mcmc_length
-    mcmc_burn_in = UserInput.mcmc_burn_in # Number of samples trimmed off the beginning of the Markov chain.
-    mu_prior = UserInput.mu_prior
-    cov_prior = UserInput.cov_prior
-    experiments_df = pd.read_csv('ExperimentalDataAcetaldehydeTPDCeO2111MullinsTruncatedLargerErrors.csv')
-    dT = experiments_df['dT'][0] # assuming dT and dt are constant throughout
-    dt = experiments_df['dt'][0]
-    start_T = experiments_df['AcH - T'][0]
-    times = np.array(experiments_df['time']) #experiments_df['time'].to_numpy() #The to_numpy() syntax was not working for Ashi.
-    experiment = np.array(experiments_df['AcHBackgroundSubtracted'])/1000  #experiments_df['AcHBackgroundSubtracted'].to_numpy()/1000
-    errors = np.array(experiments_df['Errors']) #.to_numpy()
-    Q_mu = np.array([0.,0.,0.,0.,0.,0.]) # Q samples the next step at any point in the chain.  The next step may be accepted or rejected.  Q_mu is centered (0) around the current theta.
-    Q_cov = cov_prior/20 # Take small steps.
-
+    def __init__(self, UserInput = UserInput, verbose = True):
+        if verbose: print("Bayes Model Initialized")
+        self.mcmc_length = UserInput.mcmc_length
+        self.mcmc_burn_in = UserInput.mcmc_burn_in # Number of samples trimmed off the beginning of the Markov chain.
+        self.mu_prior = UserInput.mu_prior
+        self.start_T = UserInput.T_0
+        self.cov_prior = UserInput.cov_prior
+        
+    def import_experimental_settings(self):
+        experiments_df = pd.read_csv('ExperimentalDataAcetaldehydeTPDCeO2111MullinsTruncatedLargerErrors.csv')
+        # self.dT = experiments_df['dT'][0] # assuming dT and dt are constant throughout
+        # self.dt = experiments_df['dt'][0]
+        self.times = np.array(experiments_df['time']) #experiments_df['time'].to_numpy() #The to_numpy() syntax was not working for Ashi.
+        self.experiment = np.array(experiments_df['AcHBackgroundSubtracted'])/1000  #experiments_df['AcHBackgroundSubtracted'].to_numpy()/1000
+        self.errors = np.array(experiments_df['Errors']) #.to_numpy()
+        self.Q_mu = np.array([0.,0.,0.,0.,0.,0.]) # Q samples the next step at any point in the chain.  The next step may be accepted or rejected.  Q_mu is centered (0) around the current theta.
+        self.Q_cov = self.cov_prior/20 # Take small steps.
+    
     #main function to get samples
     def MetropolisHastings(self):
+        self.import_experimental_settings()
         samples = np.zeros((self.mcmc_length,len(self.mu_prior)))
         samples[0,:] = self.mu_prior # Initialize the chain. Theta is initialized as the starting point of the chain.  It is placed at the prior mean.
         likelihoods_vec = np.zeros((self.mcmc_length,1))
@@ -40,9 +46,8 @@ class ip:
             likelihood_proposal = self.likelihood(proposal_sample)
             prior_current_location = self.prior(samples[i-1,:])
             likelihood_current_location = self.likelihood(samples[i-1,:])
-            accept_pro = (likelihood_proposal*prior_proposal)/(likelihood_current_location*prior_current_location)
-            uni_rand = np.random.uniform()
-            if uni_rand<accept_pro:
+            accept_pro = (likelihood_proposal*prior_proposal)/(likelihood_current_location*prior_current_location) ###QUESTION: Is "pro" for probability of acceptance?
+            if accept_pro> np.random.uniform():  #TODO: keep a log of the accept and reject. If the reject ratio is >90% or some other such number, warn the user.
                 samples[i,:] = proposal_sample
                 posteriors_un_normed_vec[i] = likelihood_proposal*prior_proposal
                 likelihoods_vec[i] = likelihood_proposal
@@ -76,7 +81,8 @@ class ip:
         probability_metric = multivariate_normal.pdf(x=rate_tot,mean=self.experiment,cov=self.errors)
         if verbose: print('likelihood probability',probability_metric)
         return probability_metric
-
+        
+    
 ip_object = ip()
 [evidence, info_gain, samples] = ip_object.MetropolisHastings()
 ############################################# The computation portion is contained above.
