@@ -56,8 +56,7 @@ def tprequation(tpr_theta,t," + UserInput.stringOfParameterNames + ",beta_dTdt,s
     return ratesList \n\
     ")
     
-writeTPRModelFile()
-    
+writeTPRModelFile() #####This line should be commented out if tprmodel.py is going to be edited manually.
 from tprmodel import tprequation
     
 
