@@ -6,45 +6,100 @@ import scipy
 from scipy.stats import multivariate_normal
 from scipy.integrate import odeint
 import pandas as pd
+import UserInput_ODE_KIN_BAYES_SG_EW as UserInput
+import copy
+
+
+#Now will automatically populate some variables from above.    
+def parseUserInputParameters():
+    UserInput.parameterNamesList = list(UserInput.parameterNamesAndMathTypeExpressionsDict.keys())
+    UserInput.stringOfParameterNames = str(UserInput.parameterNamesList).replace("'","")[1:-1]
+parseUserInputParameters()
+
+
+def writeTPRModelFile():
+    with open("tprmodel.py", "w") as myfile:
+        myfile.write("\n\
+import numpy as np\n\
+\n\
+# The below function must return a vector of rates. \n\
+def tprequation(tpr_theta,t," + UserInput.stringOfParameterNames + ",beta_dTdt,start_T): #beta_dTdT is the heating rate. \n\
+    if tpr_theta.ndim == 1:  #for consistency, making tpr_theta a 2D array if it does not start as 2D. \n\
+        tpr_theta2D = np.atleast_2d(tpr_theta)  \n\
+    if tpr_theta.ndim == 2: \n\
+        tpr_theta2D = np.array(tpr_theta) \n\
+    #Now find out how many species concentrations there are from the data: \n\
+    num_of_concentrations = len(tpr_theta2D[0]) \n\
+    Ea_Array = [Ea_1,Ea_2] \n\
+    log_A_array = [log_A1, log_A2] \n\
+    gamma_array = [gamma1, gamma2] \n\
+    \n\
+    T = start_T + beta_dTdt*t  \n\
+    kB = 1.380649e-26*6.0221409e+23 #kJ mol^-1 K^-1  \n\
+    \n\
+    ratesList = [] \n\
+    for rateIndex in range(num_of_concentrations): \n\
+        rate = -tpr_theta2D[:,rateIndex]*np.exp(-(Ea_Array[rateIndex]-kB*T*log_A_array[rateIndex]-gamma_array[rateIndex]*tpr_theta2D[:,rateIndex])/(kB*T))  \n\
+    \n\
+        #Shortened below to one line (above) \n\
+        # theta_i = tpr_theta2D[:,rateIndex] \n\
+        # Ea_i = Ea_Array[rateIndex] \n\
+        # log_A_i = log_A_array[rateIndex] \n\
+        # gamma_i = gamma_array[rateIndex] \n\
+        # rate = -theta_i*np.exp(-(Ea_i-kB*T*log_A_i-gamma_i*theta_i)/(kB*T))  \n\
+      \n\
+        #The above expression is the general form of this: rate_2 = -theta_2*np.exp(-(Ea_2-kB*T*log_A2-gamma2*theta_2)/(kB*T))       \n\
+        ratesList.append(rate) \n\
+    \n\
+    if tpr_theta.ndim == 1: \n\
+        ratesList = list(np.array(ratesList).flatten()) #for some reason, needs to be flattened for the MCMC. \n\
+    return ratesList \n\
+    ")
+    
+writeTPRModelFile() #####This line should be commented out if tprmodel.py is going to be edited manually.
 from tprmodel import tprequation
+    
+
+
 class ip:
     #Ip for 'inverse problem'. Initialize prior chain starting point, chain burn-in length and total length, and Q (for proposal samples).  Initialize experimental data.  Theta is initialized as the starting point of the chain.  It is placed at the prior mean.
-    mcmc_length = 1000
-    mcmc_burn_in = 100 # Number of samples trimmed off the beginning of the Markov chain.
-    mu_prior = np.array([41.5, 41.5, 13.0, 13.0, 0.1, 0.1]) # Ea1_mean, Ea2_mean, log_A1_mean, log_A2_mean, gamma_1_mean, gamma_2_mean
-    cov_prior = np.array([[20.0, 0., 0., 0., 0., 0.],
-                          [0., 20.0, 0., 0., 0., 0.],
-                          [0., 0., 13.0, 0., 0., 0.],
-                          [0., 0., 0., 13.0, 0., 0.],
-                          [0., 0., 0., 0., 0.1, 0.],
-                          [0., 0., 0., 0., 0., 0.1]])
-    experiments_df = pd.read_csv('ExperimentalDataAcetaldehydeTPDCeO2111MullinsTruncatedLargerErrors.csv')
-    dT = experiments_df['dT'][0] # assuming dT and dt are constant throughout
-    dt = experiments_df['dt'][0]
-    start_T = experiments_df['AcH - T'][0]
-    times = experiments_df['time'].to_numpy()
-    experiment = experiments_df['AcHBackgroundSubtracted'].to_numpy()/1000
-    errors = experiments_df['Errors'].to_numpy()
-    Q_mu = np.array([0.,0.,0.,0.,0.,0.]) # Q samples the next step at any point in the chain.  The next step may be accepted or rejected.  Q_mu is centered (0) around the current theta.
-    Q_cov = cov_prior/20 # Take small steps.
+    def __init__(self, UserInput = UserInput):
+        self.verbose = UserInput.verbose
+        if self.verbose: 
+            print("Bayes Model Initialized")
+        self.mcmc_length = UserInput.mcmc_length
+        self.mcmc_burn_in = UserInput.mcmc_burn_in # Number of samples trimmed off the beginning of the Markov chain.
+        self.mu_prior = UserInput.mu_prior
+        self.start_T = UserInput.T_0
+        self.beta_dTdt = UserInput.beta_dTdt
+        self.cov_prior = UserInput.cov_prior
+        self.Q_mu = self.mu_prior*0 # Q samples the next step at any point in the chain.  The next step may be accepted or rejected.  Q_mu is centered (0) around the current theta.  
+        self.Q_cov = self.cov_prior/20 # Take small steps. <-- looks like this 20 should be a user defined variable.
+        self.initial_concentrations_array = UserInput.initial_concentrations_array
+        
+    def import_experimental_settings(self):
+        experiments_df = pd.read_csv(UserInput.Filename)
+        self.times = np.array(experiments_df['time']) #experiments_df['time'].to_numpy() #The to_numpy() syntax was not working for Ashi.
+        self.experiment = np.array(experiments_df['AcHBackgroundSubtracted'])/1000  #experiments_df['AcHBackgroundSubtracted'].to_numpy()/1000
+        self.errors = np.array(experiments_df['Errors']) #.to_numpy()
 
     #main function to get samples
     def MetropolisHastings(self):
+        self.import_experimental_settings()
         samples = np.zeros((self.mcmc_length,len(self.mu_prior)))
         samples[0,:] = self.mu_prior # Initialize the chain. Theta is initialized as the starting point of the chain.  It is placed at the prior mean.
         likelihoods_vec = np.zeros((self.mcmc_length,1))
         posteriors_un_normed_vec = np.zeros((self.mcmc_length,1))
         priors_vec = np.zeros((self.mcmc_length,1))
         for i in range(1,self.mcmc_length):
-            print(i)
+            if self.verbose: print("MCMC sample number", i)
             proposal_sample = samples[i-1,:] + np.random.multivariate_normal(self.Q_mu,self.Q_cov)
             prior_proposal = self.prior(proposal_sample)
             likelihood_proposal = self.likelihood(proposal_sample)
             prior_current_location = self.prior(samples[i-1,:])
             likelihood_current_location = self.likelihood(samples[i-1,:])
-            accept_pro = (likelihood_proposal*prior_proposal)/(likelihood_current_location*prior_current_location)
-            uni_rand = np.random.uniform()
-            if uni_rand<accept_pro:
+            accept_pro = (likelihood_proposal*prior_proposal)/(likelihood_current_location*prior_current_location) ###QUESTION: Is "pro" for probability of acceptance?
+            if accept_pro> np.random.uniform():  #TODO: keep a log of the accept and reject. If the reject ratio is >90% or some other such number, warn the user.
                 samples[i,:] = proposal_sample
                 posteriors_un_normed_vec[i] = likelihood_proposal*prior_proposal
                 likelihoods_vec[i] = likelihood_proposal
@@ -70,76 +125,66 @@ class ip:
     def prior(self,sample):
         probability = multivariate_normal.pdf(x=sample,mean=self.mu_prior,cov=self.cov_prior)
         return probability
-    def likelihood(self,sample):
-        tpr_theta = odeint(tprequation, [0.5, 0.5], self.times, args = (sample[0], sample[1], sample[2], sample[3], sample[4], sample[5],self.dT,self.dt,self.start_T)) # [0.5, 0.5] are the initial theta's.
-        rate = tprequation(tpr_theta, self.times, sample[0], sample[1], sample[2], sample[3], sample[4], sample[5], self.dT,self.dt,self.start_T)
+    def likelihood(self,sample): #The variable sample represents a vector of values for the parameters being sampled. So it represents a single point in the multidimensional parameter space.
+        sample_list = list(sample) #converting to list so can use list expansion in arguments. 
+        tpr_theta = odeint(tprequation, self.initial_concentrations_array, self.times, args = (*sample_list,self.beta_dTdt,self.start_T)) # [0.5, 0.5] are the initial theta's.
+        rate = tprequation(tpr_theta, self.times, *sample_list, self.beta_dTdt,self.start_T)
         rate_tot = -np.sum(rate, axis=0)
         #intermediate_metric = np.mean(np.square(rate_tot - self.experiment) / np.square(self.errors ))
         probability_metric = multivariate_normal.pdf(x=rate_tot,mean=self.experiment,cov=self.errors)
-        print('likelihood probability',probability_metric)
+        if self.verbose: print('likelihood probability',probability_metric)
         return probability_metric
-
+        
+    
 ip_object = ip()
 [evidence, info_gain, samples] = ip_object.MetropolisHastings()
 ############################################# The computation portion is contained above.
 post_mean = np.mean(samples, axis=0)
-experiments_df = pd.read_csv('ExperimentalDataAcetaldehydeTPDCeO2111MullinsTruncatedLargerErrors.csv')
-dT = experiments_df['dT'][0] # assuming dT and dt are constant throughout
-dt = experiments_df['dt'][0]
-start_T = experiments_df['AcH - T'][0]
-times = experiments_df['time'].to_numpy()
-experiment = experiments_df['AcHBackgroundSubtracted'].to_numpy()/1000
-errors = experiments_df['Errors'].to_numpy()
-tpr_theta = odeint(tprequation, [0.5, 0.5], times, args = (post_mean[0], post_mean[1], post_mean[2], post_mean[3], post_mean[4], post_mean[5],dT,dt,start_T)) # [0.5, 0.5] are the initial theta's.
-rate = tprequation(tpr_theta, times, post_mean[0], post_mean[1], post_mean[2], post_mean[3], post_mean[4], post_mean[5], dT,dt,start_T)
+experiments_df = pd.read_csv(UserInput.Filename)
+start_T = UserInput.T_0 #this is the starting temperature.
+times = np.array(experiments_df['time']) #experiments_df['time'].to_numpy() #The to_numpy() syntax was not working for Ashi.
+experiment = np.array(experiments_df['AcHBackgroundSubtracted'])/1000  #experiments_df['AcHBackgroundSubtracted'].to_numpy()/1000
+errors = np.array(experiments_df['Errors']) #.to_numpy()
+post_mean_list = list(post_mean) #converting to list so can use list expansion in arguments.
+tpr_theta = odeint(tprequation, UserInput.initial_concentrations_array, times, args = (*post_mean_list,UserInput.beta_dTdt, start_T)) # [0.5, 0.5] are the initial theta's.
+rate = tprequation(tpr_theta, times, *post_mean_list, UserInput.beta_dTdt, start_T)
 rate_tot = -np.sum(rate, axis=0)
-fig1, ax1 = plt.subplots()
-ax1.plot(experiments_df['AcH - T'].to_numpy(),rate_tot, 'r')
-ax1.plot(experiments_df['AcH - T'].to_numpy(),experiments_df['AcHBackgroundSubtracted'].to_numpy()/1000,'g')
-ax1.set_xlabel('T (K)')
-ax1.set_ylabel(r'$rate (s^{-1})$')
-ax1.legend(['model posterior', 'experiments'])
-fig1.tight_layout()
-fig1.savefig('tprposterior.png', dpi=220)
 
-fig2, ax2 = plt.subplots()
-ax2.hist(samples[:,0])
-ax2.set_ylabel('frequency')
-ax2.set_xlabel(r'$E_{a1}$')
-fig2.tight_layout()
-fig2.savefig('Ea1.png', dpi=220)
+fig0, ax0 = plt.subplots()
+ax0.plot(np.array(experiments_df['AcH - T']),rate_tot, 'r')
+ax0.plot(np.array(experiments_df['AcH - T']),np.array(experiments_df['AcHBackgroundSubtracted'])/1000,'g')
+ax0.set_xlabel('T (K)')
+ax0.set_ylabel(r'$rate (s^{-1})$')
+ax0.legend(['model posterior', 'experiments'])
+fig0.tight_layout()
+fig0.savefig('tprposterior.png', dpi=220)
 
-fig3, ax3 = plt.subplots()
-ax3.hist(samples[:,1])
-ax3.set_ylabel('frequency')
-ax3.set_xlabel(r'$E_{a2}$')
-fig3.tight_layout()
-fig3.savefig('Ea2.png', dpi=220)
+#######Below function and codee makes the Histograms for each parameter#####
 
-fig4, ax4 = plt.subplots()
-ax4.hist(samples[:,2])
-ax4.set_ylabel('frequency')
-ax4.set_xlabel(r'$log(A_{1})$')
-fig4.tight_layout()
-fig4.savefig('logA1.png', dpi=220)
+def sampledParameterHistogramMaker(parameterName,parameterNamesAndMathTypeExpressionsDict, sampledParameterFiguresDictionary, sampledParameterAxesDictionary):
+        parameterIndex = list(parameterNamesAndMathTypeExpressionsDict).index(parameterName)
+        sampledParameterFiguresDictionary['parameterName'], sampledParameterAxesDictionary['parameterName'] = plt.subplots()   #making plt objects    
+        sampledParameterAxesDictionary['parameterName'].hist(samples[:,parameterIndex]) #filling the object with data
+        #setting the labels etc. and then exporting.
+        sampledParameterAxesDictionary['parameterName'].set_ylabel('frequency')
+        sampledParameterAxesDictionary['parameterName'].set_xlabel(UserInput.parameterNamesAndMathTypeExpressionsDict[parameterName])
+        sampledParameterFiguresDictionary['parameterName'].tight_layout()
+        sampledParameterFiguresDictionary['parameterName'].savefig(parameterName+'.png', dpi=220)
 
-fig5, ax5 = plt.subplots()
-ax5.hist(samples[:,3])
-ax5.set_ylabel('frequency')
-ax5.set_xlabel(r'$log(A_{2})$')
-fig5.tight_layout()
-fig5.savefig('logA2.png', dpi=220)
+        #The above block makes code kind of like this in a dynamic fashion. Since we know how many we will need, a dictionary is used to avoid the need for 'exec' statements when making new parameters.
+        # fig2, ax2 = plt.subplots()
+        # ax2.hist(samples[:,1])
+        # ax2.set_ylabel('frequency')
+        # ax2.set_xlabel(r'$E_{a2}$')
+        # fig2.tight_layout()
+        # fig2.savefig('Ea2.png', dpi=220)
 
-fig6, ax6 = plt.subplots()
-ax6.hist(samples[:,4])
-ax6.set_ylabel('frequency')
-ax6.set_xlabel(r'$\gamma_{1}$')
-fig6.tight_layout()
-fig6.savefig('gamma1.png', dpi=220)
 
-fig7, ax7 = plt.subplots()
-ax7.hist(samples[:,5])
-ax7.set_ylabel('frequency')
-ax7.set_xlabel(r'$\gamma_{2}$')
-fig7.tight_layout()
-fig7.savefig('gamma2.png', dpi=220)
+#Make histograms for each parameter. Need to make some dictionaries where relevant objects will be stored.
+sampledParameterFiguresDictionary = copy.deepcopy(UserInput.parameterNamesAndMathTypeExpressionsDict)
+sampledParameterAxesDictionary = copy.deepcopy(UserInput.parameterNamesAndMathTypeExpressionsDict)
+for key in UserInput.parameterNamesAndMathTypeExpressionsDict:
+    parameterName = key
+    sampledParameterHistogramMaker(parameterName,UserInput.parameterNamesAndMathTypeExpressionsDict, sampledParameterFiguresDictionary, sampledParameterAxesDictionary)
+
+#TODO: Make 2D parameter response surfaces like in the perspective figures. Can make it for each variable pair. Should have it as an option in the UserInput as True, False, or a list of pairs for which ones to make.
