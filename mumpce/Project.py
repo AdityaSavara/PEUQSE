@@ -827,45 +827,83 @@ class Project(object):
             
     #def perturb_model(self,x):
         
-    def _single_pdf_plot(self,factors=[0,1],ax=None):
-        
+    def _single_pdf_plot(self,factors=[0,1],ax=None, contour_settings_custom = False, contour_settings_auto=False):
+       
         if len(factors) > 2:
-            raise ValueError
-        
+            raise ValueError       
         active_params = self.active_parameters[factors]
-        
         params_info = self.model_parameter_info[active_params]
-        
-        zred = self.solution.x[factors]
-        
+        zred = self.solution.x[factors]      
         alphared = self.solution.alpha[factors]
         
-        pts = np.arange(-1.5,1.5,0.01)
-        xx,yy = np.meshgrid(pts,pts)
-        
+        if contour_settings_auto=True:
+            #FIXME: ERIC TO ADD SOME CODE HERE
+            #Code should automatically choose contour_axis_range, resolution, and tick spacing based on prior and posterior cov matrices.
+            mumpceProjectObject.solution.contour_axis_range = np.array([[-3.0,1.5],[-1.5,3.0],[-1.5,1.5],[-1.5,1.5],[-1,1],[-1,1],[-1,1]]) #this must be made into a numpy array.
+            mumpceProjectObject.solution.contour_resolution = np.array([0.01,0.01,0.01,0.01,0.01,0.01])
+            mumpceProjectObject.solution.axis_tick_spacing = np.array([1,1.5,1,1,1,1])
+            mumpceProjectObject.solution.contour_levels = np.exp((np.arange(-2,0,0.5) ** 2) * -1)
+        if contour_settings_custom == False:
+            #We will change the default to spreading from -1.0 to 1.0, but will plot a bit further than that in each direction (as before)
+            contour_axis_range_horizontal = [-1.0, 1.0]
+            contour_axis_range_vertical = [-1.0, 1.0]
+            contour_resolution_horizontal = 0.01
+            contour_resolution_vertical = 0.01
+            contour_axis_span_horizontal = float(np.diff(contour_axis_range_horizontal))
+            contour_axis_span_vertical = float(np.diff(contour_axis_range_vertical))
+            levels = np.exp((np.arange(-2,0,0.5) ** 2) * -1)
+            x_tick_spacing = 1
+            y_tick_spacing = 1
+        if contour_settings_custom == True:
+            contour_axis_range_horizontal = self.solution.contour_axis_range[factors[0]]
+            contour_resolution_horizontal = self.solution.contour_resolution[factors[0]]
+            contour_axis_range_vertical = self.solution.contour_axis_range[factors[1]]
+            contour_resolution_vertical = self.solution.contour_resolution[factors[1]]
+            contour_axis_span_horizontal = float(np.diff(contour_axis_range_horizontal))
+            contour_axis_span_vertical = float(np.diff(contour_axis_range_vertical))
+            xpts = np.arange(contour_axis_range_horizontal[0]-contour_axis_span_horizontal/4,contour_axis_range_horizontal[1]+contour_axis_span_horizontal/4,contour_resolution_horizontal)
+            ypts = np.arange(contour_axis_range_vertical[0]-contour_axis_span_vertical/4,contour_axis_range_vertical[1]+contour_axis_span_vertical/4,contour_resolution_vertical)
+            x_tick_spacing = self.solution.axis_tick_spacing[factors[0]]
+            y_tick_spacing = self.solution.axis_tick_spacing[factors[1]]
+            levels = self.solution.contour_levels
+
+        #Below is where we set the actual x and y points to calculate, and go further than the specified range.
+        #We will also plot more than the specified range. The intent is that if a distrubtion has a certain 'expected width', we will plot a bit further.
+        xpts = np.arange(contour_axis_range_horizontal[0]-contour_axis_span_horizontal/4,contour_axis_range_horizontal[1]+contour_axis_span_horizontal/4,contour_resolution_horizontal)
+        ypts = np.arange(contour_axis_range_vertical[0]-contour_axis_span_vertical/4,contour_axis_range_vertical[1]+contour_axis_span_vertical/4,contour_resolution_vertical)
+        xx,yy = np.meshgrid(xpts,ypts)            
+
         XX  = np.stack((xx,yy),axis=2)
-        
         S = np.dot(alphared,alphared.T)
-        
         Sinv = np.linalg.inv(S)
-        
+       
         r2  = np.zeros_like(xx)
         xi2 = np.zeros_like(xx)
         
-        #Get a row of the XX vector
-        for rownum,row in enumerate(XX):
-            #Get a single point from that row
-            for colnum,point in enumerate(row):
-                r2[rownum,colnum] = np.dot(point,point.T) * 4
-                
-                point_translate = point - zred
-                xi2[rownum,colnum] = np.dot(point_translate,np.dot(Sinv,point_translate))
-            
-        prior_pdf = np.exp(-1*r2)
-        posterior_pdf = np.exp(-1*xi2)
+        if contour_settings_custom == False:
+            #Get a row of the XX vector
+            for rownum,row in enumerate(XX):
+                #Get a single point from that row
+                for colnum,point in enumerate(row):
+                    r2[rownum,colnum] = np.dot(point,point.T) * 4                    
+                    point_translate = point - zred
+                    xi2[rownum,colnum] = np.dot(point_translate,np.dot(Sinv,point_translate))
+            prior_pdf = np.exp(-1*r2)
+            posterior_pdf = np.exp(-1*xi2)
+        #FIXME: Eric to fix below code for the case where we have a custom prior.
+        #Will need to put our prior into solutions object, and then access it from here using
+        #self.solution.yyyyyy where yyyyyy refers to the variable you have added.
+        if contour_settings_custom == True:
+            #Get a row of the XX vector
+            for rownum,row in enumerate(XX):
+                #Get a single point from that row
+                for colnum,point in enumerate(row):
+                    r2[rownum,colnum] = np.dot(point,point.T) * 4                    
+                    point_translate = point - zred
+                    xi2[rownum,colnum] = np.dot(point_translate,np.dot(Sinv,point_translate))
+            prior_pdf = np.exp(-1*r2)
+            posterior_pdf = np.exp(-1*xi2)
         
-        levels = np.exp((np.arange(-2,0,0.5) ** 2) * -1)
-    
         #cpr`ior = ax.contour(xx,yy,prior_pdf,levels=np.exp(np.arange(-2,0,0.5)),colors='k',linestyles='dotted')
         #cposte = ax.contour(xx,yy,posterior_pdf,levels=np.exp(np.arange(-2,0,0.5)),colors='k')
         cprior = ax.contour(xx,yy,prior_pdf,levels=levels,colors='k',linestyles='dotted')
@@ -874,13 +912,16 @@ class Project(object):
         ax.set_xlabel(params_info[0]['parameter_name'])
         ax.set_ylabel(params_info[1]['parameter_name'])
         
-        ax.set_xticks([-2,-1,0,1,2])
-        ax.set_yticks([-2,-1,0,1,2])
-        
+        x_ticks = np.arange(contour_axis_range_horizontal[0],contour_axis_range_horizontal[1]+x_tick_spacing, x_tick_spacing)
+        y_ticks = np.arange(contour_axis_range_vertical[0],contour_axis_range_vertical[1]+y_tick_spacing, y_tick_spacing)
+        ax.set_xticks(x_ticks)
+        ax.set_yticks(y_ticks)
+        # ax.set_xticks([-2,-1,0,1,2])
+        # ax.set_yticks([-2,-1,0,1,2])
         ax.axis('square')
         return
     
-    def plot_pdfs(self,factors_list=[[0,1]]):
+    def plot_pdfs(self,factors_list=[[0,1]], contour_settings_custom = False, contour_settings_auto=False):
         """Generates a plot of the joint probability density functions for several pairs of parameters.
         
         :param factors_list: A list of pairs of parameters. For each pair [x, y] the parameter x will appear on the x axis and the parameter y will appear on the y axis. If this parameter is not supplied, it defaults to [0,1].
@@ -895,7 +936,7 @@ class Project(object):
         
         #Plot the individual subplots
         for ax,factors in zip(axes,factors_list):
-            self._single_pdf_plot(factors=factors,ax=ax)
+            self._single_pdf_plot(factors=factors,ax=ax, contour_settings_custom = contour_settings_custom, contour_settings_auto=contour_settings_auto)
     
         return fig
     
