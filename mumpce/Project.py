@@ -839,10 +839,11 @@ class Project(object):
         if contour_settings_auto==True:
             #FIXME: ERIC TO ADD SOME CODE HERE
             #Code should automatically choose contour_axis_range, resolution, and tick spacing based on prior and posterior cov matrices.
-            mumpceProjectObject.solution.contour_axis_range = np.array([[-3.0,1.5],[-1.5,3.0],[-1.5,1.5],[-1.5,1.5],[-1,1],[-1,1],[-1,1]]) #this must be made into a numpy array.
-            mumpceProjectObject.solution.contour_resolution = np.array([0.01,0.01,0.01,0.01,0.01,0.01])
-            mumpceProjectObject.solution.axis_tick_spacing = np.array([1,1.5,1,1,1,1])
-            mumpceProjectObject.solution.contour_levels = np.exp((np.arange(-2,0,0.5) ** 2) * -1)
+            self.solution.contour_axis_range = np.array([[-1.0,1.0],[-1.0,1.0],[-1.0,1.0],[-1.0,1.0],[-1,1],[-1,1],[-1,1]]) #this must be made into a numpy array.
+            self.solution.contour_resolution = np.array([0.01,0.01,0.01,0.01,0.01,0.01])
+            self.solution.axis_tick_spacing = np.array([0.5,0.5,0.5,1,1,1])
+            self.solution.contour_levels = np.exp((np.arange(-2,0,0.5) ** 2) * -1)
+            contour_settings_custom = True
         if contour_settings_custom == False:
             #We will change the default to spreading from -1.0 to 1.0, but will plot a bit further than that in each direction (as before)
             contour_axis_range_horizontal = [-1.0, 1.0]
