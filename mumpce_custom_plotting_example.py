@@ -47,3 +47,7 @@ mumpceProjectObject.solution.contour_resolution = np.array([0.01,0.01,0.01,0.01,
 mumpceProjectObject.solution.axis_tick_spacing = np.array([1,1.5,1,1,1,1])
 mumpceProjectObject.solution.contour_levels = np.exp((np.arange(-2,0,0.5) ** 2) * -1)
 mumpceProjectObject.plot_pdfs(mumpceProjectObject.pairsOfParameterIndices, contour_settings_custom = True)
+
+#Here is the graph after Eric has made the needed changes to have contour_settings_auto....
+#Right now it produces fairly similar looking graphs. Later, it will change things more!
+mumpceProjectObject.plot_pdfs(mumpceProjectObject.pairsOfParameterIndices, contour_settings_auto= True)
