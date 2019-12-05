@@ -836,7 +836,7 @@ class Project(object):
         zred = self.solution.x[factors]      
         alphared = self.solution.alpha[factors]
         
-        if contour_settings_auto=True:
+        if contour_settings_auto==True:
             #FIXME: ERIC TO ADD SOME CODE HERE
             #Code should automatically choose contour_axis_range, resolution, and tick spacing based on prior and posterior cov matrices.
             mumpceProjectObject.solution.contour_axis_range = np.array([[-3.0,1.5],[-1.5,3.0],[-1.5,1.5],[-1.5,1.5],[-1,1],[-1,1],[-1,1]]) #this must be made into a numpy array.
