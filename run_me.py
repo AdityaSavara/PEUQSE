@@ -8,6 +8,8 @@ from scipy.integrate import odeint
 import pandas as pd
 import UserInput_ODE_KIN_BAYES_SG_EW as UserInput
 import copy
+import mumce_py.Project as mumce_pyProject
+import mumce_py.solution mumce_pySolution
 
 
 #Now will automatically populate some variables from above.    
@@ -186,5 +188,3 @@ sampledParameterAxesDictionary = copy.deepcopy(UserInput.parameterNamesAndMathTy
 for key in UserInput.parameterNamesAndMathTypeExpressionsDict:
     parameterName = key
     sampledParameterHistogramMaker(parameterName,UserInput.parameterNamesAndMathTypeExpressionsDict, sampledParameterFiguresDictionary, sampledParameterAxesDictionary)
-
-#TODO: Make 2D parameter response surfaces like in the perspective figures. Can make it for each variable pair. Should have it as an option in the UserInput as True, False, or a list of pairs for which ones to make.
