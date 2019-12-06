@@ -8,8 +8,8 @@ from scipy.integrate import odeint
 import pandas as pd
 import UserInput_ODE_KIN_BAYES_SG_EW as UserInput
 import copy
-import mumce_py.Project as mumce_pyProject
-import mumce_py.solution mumce_pySolution
+#import mumce_py.Project as mumce_pyProject
+#import mumce_py.solution mumce_pySolution
 
 
 #Now will automatically populate some variables from above.    
@@ -76,18 +76,19 @@ class ip:
         self.beta_dTdt = UserInput.beta_dTdt
         self.cov_prior = UserInput.cov_prior
         self.Q_mu = self.mu_prior*0 # Q samples the next step at any point in the chain.  The next step may be accepted or rejected.  Q_mu is centered (0) around the current theta.  
-        self.Q_cov = self.cov_prior/20 # Take small steps. <-- looks like this 20 should be a user defined variable.
+        self.Q_cov = self.cov_prior/10 # Take small steps. <-- looks like this 20 should be a user defined variable.
         self.initial_concentrations_array = UserInput.initial_concentrations_array
         
     def import_experimental_settings(self):
         experiments_df = pd.read_csv(UserInput.Filename)
         self.times = np.array(experiments_df['time']) #experiments_df['time'].to_numpy() #The to_numpy() syntax was not working for Ashi.
-        self.experiment = np.array(experiments_df['AcHBackgroundSubtracted'])/1000  #experiments_df['AcHBackgroundSubtracted'].to_numpy()/1000
+        self.experiment = np.array(experiments_df['AcHBackgroundSubtracted'])/2000  #experiments_df['AcHBackgroundSubtracted'].to_numpy()/1000
         self.errors = np.array(experiments_df['Errors']) #.to_numpy()
 
     #main function to get samples
     def MetropolisHastings(self):
         self.import_experimental_settings()
+        rate_tot_array = np.zeros((self.mcmc_length,len(self.experiment)))
         samples = np.zeros((self.mcmc_length,len(self.mu_prior)))
         samples[0,:] = self.mu_prior # Initialize the chain. Theta is initialized as the starting point of the chain.  It is placed at the prior mean.
         likelihoods_vec = np.zeros((self.mcmc_length,1))
@@ -97,17 +98,23 @@ class ip:
             if self.verbose: print("MCMC sample number", i)
             proposal_sample = samples[i-1,:] + np.random.multivariate_normal(self.Q_mu,self.Q_cov)
             prior_proposal = self.prior(proposal_sample)
-            likelihood_proposal = self.likelihood(proposal_sample)
+            [likelihood_proposal, rate_tot_proposal] = self.likelihood(proposal_sample)
             prior_current_location = self.prior(samples[i-1,:])
-            likelihood_current_location = self.likelihood(samples[i-1,:])
+            [likelihood_current_location, rate_tot_current_location] = self.likelihood(samples[i-1,:])
             accept_pro = (likelihood_proposal*prior_proposal)/(likelihood_current_location*prior_current_location) ###QUESTION: Is "pro" for probability of acceptance?
             if accept_pro> np.random.uniform():  #TODO: keep a log of the accept and reject. If the reject ratio is >90% or some other such number, warn the user.
+                print('accept')
+                print(rate_tot_proposal)
                 samples[i,:] = proposal_sample
+                rate_tot_array[i,:] = rate_tot_proposal
                 posteriors_un_normed_vec[i] = likelihood_proposal*prior_proposal
                 likelihoods_vec[i] = likelihood_proposal
                 priors_vec[i] = prior_proposal
             else:
+                print('reject')
+                print(rate_tot_current_location)
                 samples[i,:] = samples[i-1,:]
+                rate_tot_array[i,:] = rate_tot_current_location
                 posteriors_un_normed_vec[i] = likelihood_current_location*prior_current_location
                 likelihoods_vec[i] = likelihood_current_location
                 priors_vec[i] = prior_current_location
@@ -123,7 +130,7 @@ class ip:
         log_ratios[np.isinf(log_ratios)] = 0
         log_ratios = np.nan_to_num(log_ratios)
         info_gain = np.mean(log_ratios)
-        return [evidence, info_gain, samples]
+        return [evidence, info_gain, samples, rate_tot_array]
     def prior(self,sample):
         probability = multivariate_normal.pdf(x=sample,mean=self.mu_prior,cov=self.cov_prior)
         return probability
@@ -133,28 +140,31 @@ class ip:
         rate = tprequation(tpr_theta, self.times, *sample_list, self.beta_dTdt,self.start_T)
         rate_tot = -np.sum(rate, axis=0)
         #intermediate_metric = np.mean(np.square(rate_tot - self.experiment) / np.square(self.errors ))
-        probability_metric = multivariate_normal.pdf(x=rate_tot,mean=self.experiment,cov=self.errors)
-        if self.verbose: print('likelihood probability',probability_metric)
-        return probability_metric
+        temp_points = np.array([91])
+        probability_metric = multivariate_normal.pdf(x=np.log10(rate_tot[temp_points]),mean=np.log10(self.experiment[temp_points]),cov=self.errors[temp_points])
+        if self.verbose: print('likelihood probability',probability_metric,'log10(rate_tot)',np.log10(rate_tot[temp_points]), 'log10(experiment)', np.log10(self.experiment[temp_points]), 'error', self.errors[temp_points])
+        return probability_metric, rate_tot
         
     
 ip_object = ip()
-[evidence, info_gain, samples] = ip_object.MetropolisHastings()
+[evidence, info_gain, samples, rate_tot_array] = ip_object.MetropolisHastings()
 ############################################# The computation portion is contained above.
 post_mean = np.mean(samples, axis=0)
 experiments_df = pd.read_csv(UserInput.Filename)
 start_T = UserInput.T_0 #this is the starting temperature.
 times = np.array(experiments_df['time']) #experiments_df['time'].to_numpy() #The to_numpy() syntax was not working for Ashi.
-experiment = np.array(experiments_df['AcHBackgroundSubtracted'])/1000  #experiments_df['AcHBackgroundSubtracted'].to_numpy()/1000
+experiment = np.array(experiments_df['AcHBackgroundSubtracted'])/2000  #experiments_df['AcHBackgroundSubtracted'].to_numpy()/1000
 errors = np.array(experiments_df['Errors']) #.to_numpy()
 post_mean_list = list(post_mean) #converting to list so can use list expansion in arguments.
-tpr_theta = odeint(tprequation, UserInput.initial_concentrations_array, times, args = (*post_mean_list,UserInput.beta_dTdt, start_T)) # [0.5, 0.5] are the initial theta's.
-rate = tprequation(tpr_theta, times, *post_mean_list, UserInput.beta_dTdt, start_T)
-rate_tot = -np.sum(rate, axis=0)
+#tpr_theta = odeint(tprequation, UserInput.initial_concentrations_array, times, args = (*post_mean_list,UserInput.beta_dTdt, start_T)) # [0.5, 0.5] are the initial theta's.
+#rate = tprequation(tpr_theta, times, *post_mean_list, UserInput.beta_dTdt, start_T)
+#rate_tot = -np.sum(rate, axis=0)
 
 fig0, ax0 = plt.subplots()
-ax0.plot(np.array(experiments_df['AcH - T']),rate_tot, 'r')
-ax0.plot(np.array(experiments_df['AcH - T']),np.array(experiments_df['AcHBackgroundSubtracted'])/1000,'g')
+print(np.mean(rate_tot_array,axis = 0))
+ax0.plot(np.array(experiments_df['AcH - T']),np.mean(rate_tot_array,axis = 0), 'r')
+ax0.plot(np.array(experiments_df['AcH - T']),np.array(experiments_df['AcHBackgroundSubtracted'])/2000,'g')
+ax0.set_ylim([0.00, 0.025])
 ax0.set_xlabel('T (K)')
 ax0.set_ylabel(r'$rate (s^{-1})$')
 ax0.legend(['model posterior', 'experiments'])
