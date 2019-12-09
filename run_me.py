@@ -103,16 +103,18 @@ class ip:
             [likelihood_current_location, rate_tot_current_location] = self.likelihood(samples[i-1,:])
             accept_pro = (likelihood_proposal*prior_proposal)/(likelihood_current_location*prior_current_location) ###QUESTION: Is "pro" for probability of acceptance?
             if accept_pro> np.random.uniform():  #TODO: keep a log of the accept and reject. If the reject ratio is >90% or some other such number, warn the user.
-                print('accept')
-                print(rate_tot_proposal)
+                if self.verbose:
+                  print('accept')
+                  print(rate_tot_proposal)
                 samples[i,:] = proposal_sample
                 rate_tot_array[i,:] = rate_tot_proposal
                 posteriors_un_normed_vec[i] = likelihood_proposal*prior_proposal
                 likelihoods_vec[i] = likelihood_proposal
                 priors_vec[i] = prior_proposal
             else:
-                print('reject')
-                print(rate_tot_current_location)
+                if self.verbose:
+                  print('reject')
+                  print(rate_tot_current_location)
                 samples[i,:] = samples[i-1,:]
                 rate_tot_array[i,:] = rate_tot_current_location
                 posteriors_un_normed_vec[i] = likelihood_current_location*prior_current_location
@@ -140,7 +142,7 @@ class ip:
         rate = tprequation(tpr_theta, self.times, *sample_list, self.beta_dTdt,self.start_T)
         rate_tot = -np.sum(rate, axis=0)
         #intermediate_metric = np.mean(np.square(rate_tot - self.experiment) / np.square(self.errors ))
-        temp_points = np.array([91])
+        temp_points = np.array([0,49,99,149]) #range(225)
         probability_metric = multivariate_normal.pdf(x=np.log10(rate_tot[temp_points]),mean=np.log10(self.experiment[temp_points]),cov=self.errors[temp_points])
         if self.verbose: print('likelihood probability',probability_metric,'log10(rate_tot)',np.log10(rate_tot[temp_points]), 'log10(experiment)', np.log10(self.experiment[temp_points]), 'error', self.errors[temp_points])
         return probability_metric, rate_tot
@@ -161,7 +163,8 @@ post_mean_list = list(post_mean) #converting to list so can use list expansion i
 #rate_tot = -np.sum(rate, axis=0)
 
 fig0, ax0 = plt.subplots()
-print(np.mean(rate_tot_array,axis = 0))
+if self.verbose:
+  print(np.mean(rate_tot_array,axis = 0))
 ax0.plot(np.array(experiments_df['AcH - T']),np.mean(rate_tot_array,axis = 0), 'r')
 ax0.plot(np.array(experiments_df['AcH - T']),np.array(experiments_df['AcHBackgroundSubtracted'])/2000,'g')
 ax0.set_ylim([0.00, 0.025])
@@ -170,7 +173,9 @@ ax0.set_ylabel(r'$rate (s^{-1})$')
 ax0.legend(['model posterior', 'experiments'])
 fig0.tight_layout()
 fig0.savefig('tprposterior.png', dpi=220)
-
+posterior_df = pd.DataFrame(samples,columns=[UserInput.parameterNamesAndMathTypeExpressionsDict[x] for x in UserInput.parameterNamesList])
+pd.plotting.scatter_matrix(posterior_df)
+plt.savefig('scatter_matrix_posterior.png',dpi=220)
 #######Below function and codee makes the Histograms for each parameter#####
 
 def sampledParameterHistogramMaker(parameterName,parameterNamesAndMathTypeExpressionsDict, sampledParameterFiguresDictionary, sampledParameterAxesDictionary):
