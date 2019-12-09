@@ -24,8 +24,8 @@ initial_concentrations_array = [0.5, 0.5]
 #####Bayesian Probability Parameters#####
 verbose = True
 mu_prior = np.array([41.5, 41.5, 13.0, 13.0, 0.1, 0.1]) # Ea1_mean, Ea2_mean, log_A1_mean, log_A2_mean, gamma_1_mean, gamma_2_mean
-cov_prior = np.array([[20.0, 0., 0., 0., 0., 0.],
-                          [0., 20.0, 0., 0., 0., 0.],
+cov_prior = np.array([[200.0, 0., 0., 0., 0., 0.],
+                          [0., 200.0, 0., 0., 0., 0.],
                           [0., 0., 13.0, 0., 0., 0.],
                           [0., 0., 0., 13.0, 0., 0.],
                           [0., 0., 0., 0., 0.1, 0.],
@@ -35,8 +35,8 @@ cov_prior = np.array([[20.0, 0., 0., 0., 0., 0.],
 						  
 ######MCMC settings:#####
 mcmc = True 
-mcmc_length = 1000
-mcmc_burn_in = 100 
+mcmc_length = 2000
+mcmc_burn_in = 500 
 
 ######gridSamplingSettings#####
 gridSampling = False    
