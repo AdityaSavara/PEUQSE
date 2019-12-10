@@ -78,6 +78,7 @@ class ip:
         self.Q_mu = self.mu_prior*0 # Q samples the next step at any point in the chain.  The next step may be accepted or rejected.  Q_mu is centered (0) around the current theta.  
         self.Q_cov = self.cov_prior/10 # Take small steps. <-- looks like this 20 should be a user defined variable.
         self.initial_concentrations_array = UserInput.initial_concentrations_array
+        self.modulate_accept_probability = UserInput.modulate_accept_probability
         
     def import_experimental_settings(self):
         experiments_df = pd.read_csv(UserInput.Filename)
@@ -101,8 +102,11 @@ class ip:
             [likelihood_proposal, rate_tot_proposal] = self.likelihood(proposal_sample)
             prior_current_location = self.prior(samples[i-1,:])
             [likelihood_current_location, rate_tot_current_location] = self.likelihood(samples[i-1,:])
-            accept_pro = (likelihood_proposal*prior_proposal)/(likelihood_current_location*prior_current_location) ###QUESTION: Is "pro" for probability of acceptance?
-            if accept_pro> np.random.uniform():  #TODO: keep a log of the accept and reject. If the reject ratio is >90% or some other such number, warn the user.
+            accept_probability = (likelihood_proposal*prior_proposal)/(likelihood_current_location*prior_current_location) ###QUESTION: Is "pro" for probability of acceptance?
+            if self.modulate_accept_probability != 0: #This flattens the posterior by accepting low values more often. It can be useful when greater sampling is more important than accuracy.
+                N_flatten = float(self.flatten_accept_probability)
+                accept_probability = 1.0/(10.0**((1.0-accept_probability)/N_flatten))
+            if accept_probability > np.random.uniform():  #TODO: keep a log of the accept and reject. If the reject ratio is >90% or some other such number, warn the user.
                 if self.verbose:
                   print('accept')
                   print(rate_tot_proposal)
@@ -163,7 +167,7 @@ post_mean_list = list(post_mean) #converting to list so can use list expansion i
 #rate_tot = -np.sum(rate, axis=0)
 
 fig0, ax0 = plt.subplots()
-if self.verbose:
+if UserInput.verbose:
   print(np.mean(rate_tot_array,axis = 0))
 ax0.plot(np.array(experiments_df['AcH - T']),np.mean(rate_tot_array,axis = 0), 'r')
 ax0.plot(np.array(experiments_df['AcH - T']),np.array(experiments_df['AcHBackgroundSubtracted'])/2000,'g')
