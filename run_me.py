@@ -105,7 +105,7 @@ class ip:
             accept_probability = (likelihood_proposal*prior_proposal)/(likelihood_current_location*prior_current_location) ###QUESTION: Is "pro" for probability of acceptance?
             if self.modulate_accept_probability != 0: #This flattens the posterior by accepting low values more often. It can be useful when greater sampling is more important than accuracy.
                 N_flatten = float(self.flatten_accept_probability)
-                accept_probability = 1.0/(10.0**((1.0-accept_probability)/N_flatten))
+                accept_probability = accept_probability**(1/N_flatten)
             if accept_probability > np.random.uniform():  #TODO: keep a log of the accept and reject. If the reject ratio is >90% or some other such number, warn the user.
                 if self.verbose:
                   print('accept')
