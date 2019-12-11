@@ -2,7 +2,7 @@ import numpy as np
 
 ###User sets their model equation####
 from tprmodel import tprequation #Added here to facilitate generalization. This equation is now passed into the ip class with the UserInput module. I'm mainly putting this here so Eric can see more clearly what I meant about how to go forward with generalizing.
-simulationFunction  = tprmodel
+simulationFunction  = tprequation
 
 #####Temperature Programmed Reaction Settings#####
 TPR = True #Set to false if doing an isothermal experiment.
@@ -14,8 +14,8 @@ dT = 0.77 #Set this to 0 for an isothermal experiment.
 dt = 0.385
 beta_dTdt = dt/dT #This beta is heating rate. This will be set to 0 if somebody sets TPR to false. Not to be confused with 1/(T*k_b) which is often also called beta. User can put beta in manually.
 T_0 = 152.96 #this is the starting temperature.
-InputParameterValues = [] #TODO: HERE IS THE BLANK LIST TO FILL WITH PARAMETERS
-InputParametersUncertainties = [] #If user wants to use a prior with covariance, set this to [] and fill out cov_prior below.
+InputParameterInitialValues = [41.5, 41.5, 13.0, 13.0, 0.1, 0.1] # Ea1_mean, Ea2_mean, log_A1_mean, log_A2_mean, gamma_1_mean, gamma_2_mean 
+InputParametersInitialValuesUncertainties = [200, 200, 13, 13, 0.1, 0.1] #If user wants to use a prior with covariance, then this must be a 2D array/ list. To assume no covariance, a 1D array can be used.
 InputConstants= [] #TODO: ERIC, WE SHOULD EITHER DESIGN YOUR CODE TO ALLOW CONSTANTS SEPARATELY, OR TO HAVE UNCERTAINTIES OF ZERO TO MAKE THINGS INTO A CONSTANT. THAT IS UP TO YOU AT THIS STAGE.
 
 #####Experimental Data Input Files#####
@@ -32,20 +32,22 @@ initial_concentrations_array = [0.5, 0.5]
 #####Bayesian Probability Parameters#####
 verbose = False
 #TODO: I think that we should replace below with mu_prior = np.array(InputParameterValues). That will make it easier for most users.
-mu_prior = np.array([41.5, 41.5, 13.0, 13.0, 0.1, 0.1]) # Ea1_mean, Ea2_mean, log_A1_mean, log_A2_mean, gamma_1_mean, gamma_2_mean 
+mu_prior = np.array(InputParameterInitialValues)
+#mu_prior = np.array([41.5, 41.5, 13.0, 13.0, 0.1, 0.1]) 
 
-if len(np.shape(InputParametersUncertainties)) == 1:
-    cov_prior = np.diagflat(InputParametersUncertainties) 
-elif len(np.shape(InputParametersUncertainties)) > 1:
-    cov_prior = InputParametersUncertainties
-else: #If user wants to use a prior with covariance, they can do so below.
-    cov_prior = np.array([[200.0, 0., 0., 0., 0., 0.], 
-                          [0., 200.0, 0., 0., 0., 0.],
-                          [0., 0., 13.0, 0., 0., 0.],
-                          [0., 0., 0., 13.0, 0., 0.],
-                          [0., 0., 0., 0., 0.1, 0.],
-                          [0., 0., 0., 0., 0., 0.1]])
-
+if len(np.shape(InputParametersInitialValuesUncertainties)) == 1 and (len(InputParametersInitialValuesUncertainties) > 0): #If it's a 1D array/list that is filled, we'll diagonalize it.
+    cov_prior = np.diagflat(InputParametersInitialValuesUncertainties) 
+elif len(np.shape(InputParametersInitialValuesUncertainties)) > 1: #If it's non-1D, we assume it's already a covariance matrix.
+    cov_prior = InputParametersInitialValuesUncertainties
+else: #If a blank list is received, that means the user
+    print("The covariance of the priors is undefined because InputParametersInitialValuesUncertainties is blank.")
+#    cov_prior = np.array([[200.0, 0., 0., 0., 0., 0.], 
+#                          [0., 200.0, 0., 0., 0., 0.],
+#                          [0., 0., 13.0, 0., 0., 0.],
+#                          [0., 0., 0., 13.0, 0., 0.],
+#                          [0., 0., 0., 0., 0.1, 0.],
+#                          [0., 0., 0., 0., 0., 0.1]])
+#
 
 						  
 ######MCMC settings:#####
