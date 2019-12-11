@@ -1,14 +1,22 @@
 import numpy as np
 
+###User sets their model equation####
+from tprmodel import tprequation #Added here to facilitate generalization. This equation is now passed into the ip class with the UserInput module. I'm mainly putting this here so Eric can see more clearly what I meant about how to go forward with generalizing.
+simulationFunction  = tprmodel
+
 #####Temperature Programmed Reaction Settings#####
 TPR = True #Set to false if doing an isothermal experiment.
 
+
+####BELOW ARE MODEL PARAMETERS, WE WILL WANT TO COMBINE THESE INTO A LIST OF PARAMETERS###
 #Need to define beta directly, or define dt and dT.
 dT = 0.77 #Set this to 0 for an isothermal experiment.
 dt = 0.385
 beta_dTdt = dt/dT #This beta is heating rate. This will be set to 0 if somebody sets TPR to false. Not to be confused with 1/(T*k_b) which is often also called beta. User can put beta in manually.
-
 T_0 = 152.96 #this is the starting temperature.
+InputParameterValues = [] #TODO: HERE IS THE BLANK LIST TO FILL WITH PARAMETERS
+InputParametersUncertainties = [] #If user wants to use a prior with covariance, set this to [] and fill out cov_prior below.
+InputConstants= [] #TODO: ERIC, WE SHOULD EITHER DESIGN YOUR CODE TO ALLOW CONSTANTS SEPARATELY, OR TO HAVE UNCERTAINTIES OF ZERO TO MAKE THINGS INTO A CONSTANT. THAT IS UP TO YOU AT THIS STAGE.
 
 #####Experimental Data Input Files#####
 Filename = 'ExperimentalDataAcetaldehydeTPDCeO2111MullinsTruncatedLargerErrors.csv'
@@ -23,8 +31,15 @@ initial_concentrations_array = [0.5, 0.5]
 
 #####Bayesian Probability Parameters#####
 verbose = False
-mu_prior = np.array([41.5, 41.5, 13.0, 13.0, 0.1, 0.1]) # Ea1_mean, Ea2_mean, log_A1_mean, log_A2_mean, gamma_1_mean, gamma_2_mean
-cov_prior = np.array([[200.0, 0., 0., 0., 0., 0.],
+#TODO: I think that we should replace below with mu_prior = np.array(InputParameterValues). That will make it easier for most users.
+mu_prior = np.array([41.5, 41.5, 13.0, 13.0, 0.1, 0.1]) # Ea1_mean, Ea2_mean, log_A1_mean, log_A2_mean, gamma_1_mean, gamma_2_mean 
+
+if len(np.shape(InputParametersUncertainties)) == 1:
+    cov_prior = np.diagflat(InputParametersUncertainties) 
+elif len(np.shape(InputParametersUncertainties)) > 1:
+    cov_prior = InputParametersUncertainties
+else: #If user wants to use a prior with covariance, they can do so below.
+    cov_prior = np.array([[200.0, 0., 0., 0., 0., 0.], 
                           [0., 200.0, 0., 0., 0., 0.],
                           [0., 0., 13.0, 0., 0., 0.],
                           [0., 0., 0., 13.0, 0., 0.],
