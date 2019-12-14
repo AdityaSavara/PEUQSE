@@ -8,7 +8,7 @@ from scipy.integrate import odeint
 import pandas as pd
 import UserInput_ODE_KIN_BAYES_SG_EW as UserInput
 import copy
-#import mumce_py.Project as mumce_pyProject #FIXME: Eric to fix plotting/graphing issue described in issue 9 -- https://github.com/AdityaSavara/ODE-KIN-BAYES-SG-EW/issues/9
+#import mumce_py.Project as mumce_pyProject
 #import mumce_py.solution mumce_pySolution
 
 
@@ -18,47 +18,47 @@ def parseUserInputParameters():
     UserInput.stringOfParameterNames = str(UserInput.parameterNamesList).replace("'","")[1:-1]
 parseUserInputParameters()
 
-#TURNING OFF THE WRITING OF FUNCTION FEATURE RIGHT NOW, TO PREVENT ERIC FROM HAVING TO WORRY ABOUT IT IF IT AFFECTS HIS WORK
-# def writeTPRModelFile():
-    # with open("tprmodel.py", "w") as myfile:
-        # myfile.write("\n\
-# import numpy as np\n\
-# \n\
-# # The below function must return a vector of rates. \n\
-# def tprequation(tpr_theta,t," + UserInput.stringOfParameterNames + ",beta_dTdt,start_T): #beta_dTdT is the heating rate. \n\
-    # if tpr_theta.ndim == 1:  #for consistency, making tpr_theta a 2D array if it does not start as 2D. \n\
-        # tpr_theta2D = np.atleast_2d(tpr_theta)  \n\
-    # if tpr_theta.ndim == 2: \n\
-        # tpr_theta2D = np.array(tpr_theta) \n\
-    # #Now find out how many species concentrations there are from the data: \n\
-    # num_of_concentrations = len(tpr_theta2D[0]) \n\
-    # Ea_Array = [Ea_1,Ea_2] \n\
-    # log_A_array = [log_A1, log_A2] \n\
-    # gamma_array = [gamma1, gamma2] \n\
-    # \n\
-    # T = start_T + beta_dTdt*t  \n\
-    # kB = 1.380649e-26*6.0221409e+23 #kJ mol^-1 K^-1  \n\
-    # \n\
-    # ratesList = [] \n\
-    # for rateIndex in range(num_of_concentrations): \n\
-        # rate = -tpr_theta2D[:,rateIndex]*np.exp(-(Ea_Array[rateIndex]-kB*T*log_A_array[rateIndex]-gamma_array[rateIndex]*tpr_theta2D[:,rateIndex])/(kB*T))  \n\
-    # \n\
-        # #Shortened below to one line (above) \n\
-        # # theta_i = tpr_theta2D[:,rateIndex] \n\
-        # # Ea_i = Ea_Array[rateIndex] \n\
-        # # log_A_i = log_A_array[rateIndex] \n\
-        # # gamma_i = gamma_array[rateIndex] \n\
-        # # rate = -theta_i*np.exp(-(Ea_i-kB*T*log_A_i-gamma_i*theta_i)/(kB*T))  \n\
-      # \n\
-        # #The above expression is the general form of this: rate_2 = -theta_2*np.exp(-(Ea_2-kB*T*log_A2-gamma2*theta_2)/(kB*T))       \n\
-        # ratesList.append(rate) \n\
-    # \n\
-    # if tpr_theta.ndim == 1: \n\
-        # ratesList = list(np.array(ratesList).flatten()) #for some reason, needs to be flattened for the MCMC. \n\
-    # return ratesList \n\
-    # ")
+
+def writeTPRModelFile():
+    with open("tprmodel.py", "w") as myfile:
+        myfile.write("\n\
+import numpy as np\n\
+\n\
+# The below function must return a vector of rates. \n\
+def tprequation(tpr_theta,t," + UserInput.stringOfParameterNames + ",beta_dTdt,start_T): #beta_dTdT is the heating rate. \n\
+    if tpr_theta.ndim == 1:  #for consistency, making tpr_theta a 2D array if it does not start as 2D. \n\
+        tpr_theta2D = np.atleast_2d(tpr_theta)  \n\
+    if tpr_theta.ndim == 2: \n\
+        tpr_theta2D = np.array(tpr_theta) \n\
+    #Now find out how many species concentrations there are from the data: \n\
+    num_of_concentrations = len(tpr_theta2D[0]) \n\
+    Ea_Array = [Ea_1,Ea_2] \n\
+    log_A_array = [log_A1, log_A2] \n\
+    gamma_array = [gamma1, gamma2] \n\
+    \n\
+    T = start_T + beta_dTdt*t  \n\
+    kB = 1.380649e-26*6.0221409e+23 #kJ mol^-1 K^-1  \n\
+    \n\
+    ratesList = [] \n\
+    for rateIndex in range(num_of_concentrations): \n\
+        rate = -tpr_theta2D[:,rateIndex]*np.exp(-(Ea_Array[rateIndex]-kB*T*log_A_array[rateIndex]-gamma_array[rateIndex]*tpr_theta2D[:,rateIndex])/(kB*T))  \n\
+    \n\
+        #Shortened below to one line (above) \n\
+        # theta_i = tpr_theta2D[:,rateIndex] \n\
+        # Ea_i = Ea_Array[rateIndex] \n\
+        # log_A_i = log_A_array[rateIndex] \n\
+        # gamma_i = gamma_array[rateIndex] \n\
+        # rate = -theta_i*np.exp(-(Ea_i-kB*T*log_A_i-gamma_i*theta_i)/(kB*T))  \n\
+      \n\
+        #The above expression is the general form of this: rate_2 = -theta_2*np.exp(-(Ea_2-kB*T*log_A2-gamma2*theta_2)/(kB*T))       \n\
+        ratesList.append(rate) \n\
+    \n\
+    if tpr_theta.ndim == 1: \n\
+        ratesList = list(np.array(ratesList).flatten()) #for some reason, needs to be flattened for the MCMC. \n\
+    return ratesList \n\
+    ")
     
-# writeTPRModelFile() #####This line should be commented out if tprmodel.py is going to be edited manually.
+writeTPRModelFile() #####This line should be commented out if tprmodel.py is going to be edited manually.
 from tprmodel import tprequation
     
 
@@ -66,7 +66,6 @@ from tprmodel import tprequation
 class ip:
     #Ip for 'inverse problem'. Initialize prior chain starting point, chain burn-in length and total length, and Q (for proposal samples).  Initialize experimental data.  Theta is initialized as the starting point of the chain.  It is placed at the prior mean.
     def __init__(self, UserInput = UserInput):
-        self.Userinput = UserInput
         self.verbose = UserInput.verbose
         if self.verbose: 
             print("Bayes Model Initialized")
@@ -113,7 +112,7 @@ class ip:
                   print(rate_tot_proposal)
                 samples[i,:] = proposal_sample
                 rate_tot_array[i,:] = rate_tot_proposal
-                posteriors_un_normed_vec[i] = likelihood_proposal*prior_proposal #FIXME: Separate this block of code out into a helper function in the class, that way I can create another helper function for non-MCMC sampling.
+                posteriors_un_normed_vec[i] = likelihood_proposal*prior_proposal
                 likelihoods_vec[i] = likelihood_proposal
                 priors_vec[i] = prior_proposal
             else:
@@ -142,18 +141,12 @@ class ip:
         probability = multivariate_normal.pdf(x=sample,mean=self.mu_prior,cov=self.cov_prior)
         return probability
     def likelihood(self,sample): #The variable sample represents a vector of values for the parameters being sampled. So it represents a single point in the multidimensional parameter space.
-        sample_list = list(sample) #converting to list so can use list expansion in arguments.        
-        #The below few lines replace what used to look like this: #tpr_theta = odeint(tprequation, self.initial_concentrations_array, self.times, args = (*sample_list,self.beta_dTdt,self.start_T))      
-        simulationInputArguments = [tprequation, self.initial_concentrations_array, self.times, (*sample_list,self.beta_dTdt,self.start_T) ] #FIXME: This needs to be passed in from UserInput, and called as self.UserInput.simulationInputArguments. right now it's hard coded here. The tuple is args. Right now, we will not support named arguments (maybe later I will add code to do it).
-        tpr_theta = odeint(*simulationInputArguments) # [0.5, 0.5] are the initial theta's. #FIXME: initialArgs and equation should come from UserInput, not be hardcoded here.
+        sample_list = list(sample) #converting to list so can use list expansion in arguments. 
+        tpr_theta = odeint(tprequation, self.initial_concentrations_array, self.times, args = (*sample_list,self.beta_dTdt,self.start_T)) # [0.5, 0.5] are the initial theta's.
         rate = tprequation(tpr_theta, self.times, *sample_list, self.beta_dTdt,self.start_T)
-        simulationOutput = rate #FIXME: code should look like simulationOutput = simulationFunction(*simulationInputArguments). That way code is a black box. Actually, it should be simulationOutput = self.UserInput.simulationFunction(*self.UserInput.simulationInputArguments)
-        def rate_tot(rate):  #FIXME: this is a function that should be passed in from userinput as described here https://github.com/AdityaSavara/ODE-KIN-BAYES-SG-EW/issues/11. This will become passed in as simulationOutputProcessingFunction
-            -np.sum(rate, axis=0)   
-        simulationOutputProcessingFunction  = rate_tot 
-        simulatedResponses = simulationOutputProcessingFunction(simulationOutput) #FIXME: this line to become simulatedResponses = UserInput.self.simulationOutputProcessingFunction(simulationOutput)
+        rate_tot = -np.sum(rate, axis=0)
         #intermediate_metric = np.mean(np.square(rate_tot - self.experiment) / np.square(self.errors ))
-        temp_points = np.array([0,49,99,149]) #range(225) #FIXME: There should be nothing hard coded here. You can hard code it in userinput if you want.
+        temp_points = np.array([0,49,99,149]) #range(225)
         probability_metric = multivariate_normal.pdf(x=np.log10(rate_tot[temp_points]),mean=np.log10(self.experiment[temp_points]),cov=self.errors[temp_points])
         if self.verbose: print('likelihood probability',probability_metric,'log10(rate_tot)',np.log10(rate_tot[temp_points]), 'log10(experiment)', np.log10(self.experiment[temp_points]), 'error', self.errors[temp_points])
         return probability_metric, rate_tot
