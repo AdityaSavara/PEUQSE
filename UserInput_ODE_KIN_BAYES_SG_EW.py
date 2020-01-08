@@ -49,7 +49,8 @@ else: #If a blank list is received, that means the user
 #                          [0., 0., 0., 0., 0., 0.1]])
 #
 
-						  
+
+model_function_name = tprequation # EAW 2020/01/08						  
 ######MCMC settings:#####
 mcmc = True 
 mcmc_length = 1000
