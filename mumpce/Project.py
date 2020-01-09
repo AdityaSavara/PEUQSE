@@ -850,6 +850,7 @@ class Project(object):
         y_axis_min = min(self.solution.mu_prior[factors[1]]-num_std_devs*np.sqrt(self.solution.cov_prior[factors[1],factors[1]]), self.solution.x[factors[1]]-num_std_devs*np.sqrt(self.solution.cov[factors[1],factors[1]])) #EAW 2020/01/08
         y_axis_max = max(self.solution.mu_prior[factors[1]]+num_std_devs*np.sqrt(self.solution.cov_prior[factors[1],factors[1]]), self.solution.x[factors[1]]+num_std_devs*np.sqrt(self.solution.cov[factors[1],factors[1]])) #EAW 2020/01/08
     
+
         if contour_settings_auto==True:
             #FIXME: ERIC TO ADD SOME CODE HERE
             #Code should automatically choose contour_axis_range, resolution, and tick spacing based on prior and posterior cov matrices.
@@ -886,6 +887,12 @@ class Project(object):
         #We will also plot more than the specified range. The intent is that if a distrubtion has a certain 'expected width', we will plot a bit further.
         #xpts = np.arange(contour_axis_range_horizontal[0]-contour_axis_span_horizontal/4,contour_axis_range_horizontal[1]+contour_axis_span_horizontal/4,contour_resolution_horizontal)
         #ypts = np.arange(contour_axis_range_vertical[0]-contour_axis_span_vertical/4,contour_axis_range_vertical[1]+contour_axis_span_vertical/4,contour_resolution_vertical)
+
+
+        if hasattr(self.solution,'num_pts'):
+            num_pts = self.solution.num_pts
+        else:
+            num_pts = 500
         xpts = np.linspace(x_axis_min,x_axis_max,self.solution.num_pts) # EAW 2020/01/08
         ypts = np.linspace(y_axis_min,y_axis_max,self.solution.num_pts) # EAW 2020/01/08
         x_mesh, y_mesh = np.meshgrid(xpts, ypts) # EAW 2020/01/08
