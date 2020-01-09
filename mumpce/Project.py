@@ -888,6 +888,7 @@ class Project(object):
         #xpts = np.arange(contour_axis_range_horizontal[0]-contour_axis_span_horizontal/4,contour_axis_range_horizontal[1]+contour_axis_span_horizontal/4,contour_resolution_horizontal)
         #ypts = np.arange(contour_axis_range_vertical[0]-contour_axis_span_vertical/4,contour_axis_range_vertical[1]+contour_axis_span_vertical/4,contour_resolution_vertical)
 
+
         if hasattr(self.solution,'num_pts'):
             num_pts = self.solution.num_pts
         else:

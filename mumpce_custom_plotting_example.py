@@ -46,6 +46,8 @@ mumpceProjectObject.solution.cov_prior = 10*Posterior_cov_vector
 
 #This makes the figures as originally programmed. It assumes/requries things be normalized to 1.
 mumpceProjectObject.solution.figure_name='mumpce_plots_alpha.png'
+mumpceProjectObject.solution.num_pts = 500
+
 mumpceProjectObject.plot_pdfs(mumpceProjectObject.pairsOfParameterIndices, contour_settings_custom = False)
 cmap = cm.Reds
 
