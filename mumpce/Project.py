@@ -8,6 +8,9 @@ import copy
 import math
 import matplotlib
 import matplotlib.pyplot as plt
+from matplotlib import cm # EAW 2020/01/07
+import scipy # EAW 2020/01/08
+from scipy.stats import multivariate_normal # EAW 2020/01/08
 
 def load_project(name='project'):
     """Loads a Project from a pickled representation on disk.
@@ -827,7 +830,7 @@ class Project(object):
             
     #def perturb_model(self,x):
         
-    def _single_pdf_plot(self,factors=[0,1],ax=None, contour_settings_custom = False, contour_settings_auto=False):
+    def _single_pdf_plot(self,factors=[0,1],ax=None, fig=None, contour_settings_custom = False, contour_settings_auto=False):
        
         if len(factors) > 2:
             raise ValueError       
@@ -835,7 +838,18 @@ class Project(object):
         params_info = self.model_parameter_info[active_params]
         zred = self.solution.x[factors]      
         alphared = self.solution.alpha[factors]
-        
+        print('factors',factors) #EAW 2020/01/07
+        print('posterior_mu_x_axis,posterior_mu_y_axis',self.solution.x[factors]) #EAW 2020/01/07
+        print('posterior_var_x_axis,posterior_var_y_axis',self.solution.cov[factors[0],factors[0]],self.solution.cov[factors[1],factors[1]]) #EAW 2020/01/07        
+        print('prior_mu_x_axis,prior_mu_y_axis',self.solution.mu_prior[factors])
+        print('prior_var_x_axis,prior_var_y_axis',self.solution.cov_prior[factors[0],factors[0]],self.solution.cov_prior[factors[1],factors[1]])
+        num_std_devs = 2.5
+        print('number of standard deviations around mean to define plot axis area: ',num_std_devs)
+        x_axis_min = min(self.solution.mu_prior[factors[0]]-num_std_devs*np.sqrt(self.solution.cov_prior[factors[0],factors[0]]), self.solution.x[factors[0]]-num_std_devs*np.sqrt(self.solution.cov[factors[0],factors[0]])) #EAW 2020/01/08
+        x_axis_max = max(self.solution.mu_prior[factors[0]]+num_std_devs*np.sqrt(self.solution.cov_prior[factors[0],factors[0]]), self.solution.x[factors[0]]+num_std_devs*np.sqrt(self.solution.cov[factors[0],factors[0]])) #EAW 2020/01/08
+        y_axis_min = min(self.solution.mu_prior[factors[1]]-num_std_devs*np.sqrt(self.solution.cov_prior[factors[1],factors[1]]), self.solution.x[factors[1]]-num_std_devs*np.sqrt(self.solution.cov[factors[1],factors[1]])) #EAW 2020/01/08
+        y_axis_max = max(self.solution.mu_prior[factors[1]]+num_std_devs*np.sqrt(self.solution.cov_prior[factors[1],factors[1]]), self.solution.x[factors[1]]+num_std_devs*np.sqrt(self.solution.cov[factors[1],factors[1]])) #EAW 2020/01/08
+    
         if contour_settings_auto==True:
             #FIXME: ERIC TO ADD SOME CODE HERE
             #Code should automatically choose contour_axis_range, resolution, and tick spacing based on prior and posterior cov matrices.
@@ -870,8 +884,20 @@ class Project(object):
 
         #Below is where we set the actual x and y points to calculate, and go further than the specified range.
         #We will also plot more than the specified range. The intent is that if a distrubtion has a certain 'expected width', we will plot a bit further.
-        xpts = np.arange(contour_axis_range_horizontal[0]-contour_axis_span_horizontal/4,contour_axis_range_horizontal[1]+contour_axis_span_horizontal/4,contour_resolution_horizontal)
-        ypts = np.arange(contour_axis_range_vertical[0]-contour_axis_span_vertical/4,contour_axis_range_vertical[1]+contour_axis_span_vertical/4,contour_resolution_vertical)
+        #xpts = np.arange(contour_axis_range_horizontal[0]-contour_axis_span_horizontal/4,contour_axis_range_horizontal[1]+contour_axis_span_horizontal/4,contour_resolution_horizontal)
+        #ypts = np.arange(contour_axis_range_vertical[0]-contour_axis_span_vertical/4,contour_axis_range_vertical[1]+contour_axis_span_vertical/4,contour_resolution_vertical)
+        xpts = np.linspace(x_axis_min,x_axis_max,self.solution.num_pts) # EAW 2020/01/08
+        ypts = np.linspace(y_axis_min,y_axis_max,self.solution.num_pts) # EAW 2020/01/08
+        x_mesh, y_mesh = np.meshgrid(xpts, ypts) # EAW 2020/01/08
+        pos = np.dstack((x_mesh, y_mesh)) # EAW 2020/01/08
+        prior_mean = np.array(self.solution.mu_prior[factors]) # EAW 2020/01/08
+        prior_covariance = np.array([[self.solution.cov_prior[factors[0],factors[0]], self.solution.cov_prior[factors[0],factors[1]]], [self.solution.cov_prior[factors[1],factors[0]], self.solution.cov_prior[factors[1],factors[1]]]]) # EAW 2020/01/08
+        poste_mean = np.array(self.solution.x[factors]) # EAW 2020/01/08
+        poste_covariance = np.array([[self.solution.cov[factors[0],factors[0]], self.solution.cov[factors[0],factors[1]]], [self.solution.cov[factors[1],factors[0]], self.solution.cov[factors[1],factors[1]]]]) # EAW 2020/01/08
+        prior_prob_operator = multivariate_normal(prior_mean, prior_covariance) # EAW 2020/01/08
+        poste_prob_operator = multivariate_normal(poste_mean, poste_covariance) # EAW 2020/01/08
+        prior_prob_mesh = prior_prob_operator.pdf(pos) # EAW 2020/01/08
+        poste_prob_mesh = poste_prob_operator.pdf(pos) # EAW 2020/01/08
         xx,yy = np.meshgrid(xpts,ypts)            
 
         XX  = np.stack((xx,yy),axis=2)
@@ -907,19 +933,23 @@ class Project(object):
         
         #cpr`ior = ax.contour(xx,yy,prior_pdf,levels=np.exp(np.arange(-2,0,0.5)),colors='k',linestyles='dotted')
         #cposte = ax.contour(xx,yy,posterior_pdf,levels=np.exp(np.arange(-2,0,0.5)),colors='k')
-        cprior = ax.contour(xx,yy,prior_pdf,levels=levels,colors='k',linestyles='dotted')
-        cposte = ax.contour(xx,yy,posterior_pdf,levels=levels,colors='k')
-        
+        cprior = ax.contour(x_mesh,y_mesh,prior_prob_mesh,cmap=cm.Reds) # EAW 2020/01/08 xx,yy,prior_pdf,colors='k',linestyles='dotted',levels=levels
+        prior_colorbar = fig.colorbar(cprior,ax=ax,orientation='horizontal') #EAW 2020/01/07
+        prior_colorbar.set_label('prior') #EAW 2020/01/07
+        cposte = ax.contour(x_mesh,y_mesh,poste_prob_mesh,cmap=cm.Greens) #EAW 2020/01/08 levels=levels
+        poste_colorbar = fig.colorbar(cposte,ax=ax) # EAW 2020/01/07
+        poste_colorbar.set_label('posterior') # EAW 2020/01/07
+       
         ax.set_xlabel(params_info[0]['parameter_name'])
         ax.set_ylabel(params_info[1]['parameter_name'])
         
-        x_ticks = np.arange(contour_axis_range_horizontal[0],contour_axis_range_horizontal[1]+x_tick_spacing, x_tick_spacing)
-        y_ticks = np.arange(contour_axis_range_vertical[0],contour_axis_range_vertical[1]+y_tick_spacing, y_tick_spacing)
-        ax.set_xticks(x_ticks)
-        ax.set_yticks(y_ticks)
+        #x_ticks = np.arange(contour_axis_range_horizontal[0],contour_axis_range_horizontal[1]+x_tick_spacing, x_tick_spacing)
+        #y_ticks = np.arange(contour_axis_range_vertical[0],contour_axis_range_vertical[1]+y_tick_spacing, y_tick_spacing)
+        #ax.set_xticks(x_ticks)
+        #ax.set_yticks(y_ticks)
         # ax.set_xticks([-2,-1,0,1,2])
         # ax.set_yticks([-2,-1,0,1,2])
-        ax.axis('square')
+        #ax.axis('square') commented out EAW 2020/01/08
         return
     
     def plot_pdfs(self,factors_list=[[0,1]], contour_settings_custom = False, contour_settings_auto=False):
@@ -937,8 +967,10 @@ class Project(object):
         
         #Plot the individual subplots
         for ax,factors in zip(axes,factors_list):
-            self._single_pdf_plot(factors=factors,ax=ax, contour_settings_custom = contour_settings_custom, contour_settings_auto=contour_settings_auto)
-    
+            self._single_pdf_plot(factors=factors,ax=ax, fig=fig, contour_settings_custom = contour_settings_custom, contour_settings_auto=contour_settings_auto)
+
+        fig.tight_layout() #EAW 2020/01/07
+        fig.savefig(self.solution.figure_name,dpi=220) #EAW 2020/01/07
         return fig
     
     def plot_covariance(self,factors_list=None):
