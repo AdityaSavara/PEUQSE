@@ -904,12 +904,12 @@ class Project(object):
             x_axis_max = max(self.solution.mu_prior[factors[0]]+num_std_devs*np.sqrt(self.solution.cov_prior[factors[0],factors[0]]), self.solution.x[factors[0]]+num_std_devs*np.sqrt(self.solution.cov[factors[0],factors[0]])) #EAW 2020/01/08
             y_axis_min = min(self.solution.mu_prior[factors[1]]-num_std_devs*np.sqrt(self.solution.cov_prior[factors[1],factors[1]]), self.solution.x[factors[1]]-num_std_devs*np.sqrt(self.solution.cov[factors[1],factors[1]])) #EAW 2020/01/08
             y_axis_max = max(self.solution.mu_prior[factors[1]]+num_std_devs*np.sqrt(self.solution.cov_prior[factors[1],factors[1]]), self.solution.x[factors[1]]+num_std_devs*np.sqrt(self.solution.cov[factors[1],factors[1]])) #EAW 2020/01/08
-            if hasattr(self.solution,'num_pts'):
-                num_pts = self.solution.num_pts
+            if hasattr(self.solution,'num_pts_per_axis'):
+                num_pts_per_axis = self.solution.num_pts_per_axis
             else:
-                num_pts = 500
-            xpts = np.linspace(x_axis_min,x_axis_max,self.solution.num_pts) # EAW 2020/01/08
-            ypts = np.linspace(y_axis_min,y_axis_max,self.solution.num_pts) # EAW 2020/01/08
+                num_pts_per_axis = 500
+            xpts = np.linspace(x_axis_min,x_axis_max,num_pts_per_axis) # EAW 2020/01/08
+            ypts = np.linspace(y_axis_min,y_axis_max,num_pts_per_axis) # EAW 2020/01/08
             x_mesh, y_mesh = np.meshgrid(xpts, ypts) # EAW 2020/01/08
             pos = np.dstack((x_mesh, y_mesh)) # EAW 2020/01/08
             prior_mean = np.array(self.solution.mu_prior[factors]) # EAW 2020/01/08
