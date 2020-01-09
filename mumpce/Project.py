@@ -920,12 +920,12 @@ class Project(object):
             poste_prob_operator = multivariate_normal(poste_mean, poste_covariance) # EAW 2020/01/08
             prior_prob_mesh = prior_prob_operator.pdf(pos) # EAW 2020/01/08
             poste_prob_mesh = poste_prob_operator.pdf(pos) # EAW 2020/01/08
-            cposte = ax.contour(x_mesh,y_mesh,poste_prob_mesh,cmap=cm.Greens) #EAW 2020/01/08 levels=levels
+            cprior = ax.contour(x_mesh,y_mesh,prior_prob_mesh,cmap=cm.Greens) # EAW 2020/01/08 xx,yy,prior_pdf,colors='k',linestyles='dotted',levels=levels
+            cposte = ax.contour(x_mesh,y_mesh,poste_prob_mesh,cmap=cm.Reds) #EAW 2020/01/08 levels=levels
             poste_colorbar = fig.colorbar(cposte,ax=ax,orientation='horizontal') # EAW 2020/01/07
-            poste_colorbar.set_label('posterior') # EAW 2020/01/07
-            cprior = ax.contour(x_mesh,y_mesh,prior_prob_mesh,cmap=cm.Reds) # EAW 2020/01/08 xx,yy,prior_pdf,colors='k',linestyles='dotted',levels=levels
             prior_colorbar = fig.colorbar(cprior,ax=ax) #EAW 2020/01/07
             prior_colorbar.set_label('prior') #EAW 2020/01/07
+            poste_colorbar.set_label('posterior') # EAW 2020/01/07
             ax.set_xlabel(params_info[0]['parameter_name'])
             ax.set_ylabel(params_info[1]['parameter_name'])
             return
