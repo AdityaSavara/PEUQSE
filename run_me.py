@@ -8,6 +8,8 @@ from scipy.integrate import odeint
 import pandas as pd
 import UserInput_ODE_KIN_BAYES_SG_EW as UserInput
 import copy
+import tprmodel
+from tprmodel import tprequation # moved from likelihood so import is not repeated at every sample EAW 2020/01/08
 #import mumce_py.Project as mumce_pyProject #FIXME: Eric to fix plotting/graphing issue described in issue 9 -- https://github.com/AdityaSavara/ODE-KIN-BAYES-SG-EW/issues/9
 #import mumce_py.solution mumce_pySolution
 
@@ -139,7 +141,7 @@ class ip:
         log_ratios[np.isinf(log_ratios)] = 0
         log_ratios = np.nan_to_num(log_ratios)
         info_gain = np.mean(log_ratios)
-        return [evidence, info_gain, samples, rate_tot_array]
+        return [evidence, info_gain, samples, rate_tot_array, np.log(posteriors_un_normed_vec)] # EAW 2020/01/08
     def prior(self,discreteParameterVector):
         probability = multivariate_normal.pdf(x=discreteParameterVector,mean=self.mu_prior,cov=self.cov_prior)
         return probability
@@ -157,13 +159,13 @@ class ip:
         #Want to achief: simulationOutput = simulationWrapper(discreteParameterVector)
         
         def simulationFunctionWrapper(discreteParameterVector): #FIXME: This should be defined in UserInput and passed in. User is responsible for it.
-            from tprmodel import tprequation
+            # from tprmodel import tprequation # This is moved to the beginning of this file EAW 2020/01/08
             sample_list = list(discreteParameterVector) #converting to list so can use list expansion in arguments.        
             tpr_theta_Arguments = [tprequation, self.UserInput.initial_concentrations_array, self.times, (*sample_list,self.UserInput.beta_dTdt,self.UserInput.T_0) ] #FIXME: Times needs to occur in UserInput. This needs to all occur in some kind of UserFunctions module called from UserInput, should not be passed in here. 
             tpr_theta = odeint(*tpr_theta_Arguments) # [0.5, 0.5] are the initial theta's. #FIXME: initialArgs and equation should come from UserInput, not be hardcoded here.            
             simulationInputArguments = [tpr_theta, self.times, *sample_list, self.UserInput.beta_dTdt,self.UserInput.T_0] #FIXME: To be passed in from userInput
             simulationFunction = tprequation #FIXME: To be passed in from userInput
-            simulationOutput = simulationFunction(*simulationInputArguments)
+            simulationOutput = UserInput.model_function_name(*simulationInputArguments) # EAW 2020/01/08
             return simulationOutput
         
         simulationOutput = simulationFunctionWrapper(discreteParameterVector) #FIXME: code should look like simulationOutput = self.UserInput.simulationFunction(*self.UserInput.simulationInputArguments)
@@ -208,8 +210,9 @@ class ip:
         
     
 ip_object = ip()
-[evidence, info_gain, samples, rate_tot_array] = ip_object.MetropolisHastings()
+[evidence, info_gain, samples, rate_tot_array, logP] = ip_object.MetropolisHastings()
 ############################################# The computation portion is contained above.
+np.savetxt('logP.csv',logP) # EAW 2020/01/08
 post_mean = np.mean(samples, axis=0)
 experiments_df = pd.read_csv(UserInput.Filename)
 start_T = UserInput.T_0 #this is the starting temperature.
@@ -217,9 +220,10 @@ times = np.array(experiments_df['time']) #experiments_df['time'].to_numpy() #The
 experiment = np.array(experiments_df['AcHBackgroundSubtracted'])/2000  #experiments_df['AcHBackgroundSubtracted'].to_numpy()/1000
 errors = np.array(experiments_df['Errors']) #.to_numpy()
 post_mean_list = list(post_mean) #converting to list so can use list expansion in arguments.
+#The simulation outputs are passed in the 'rate_tot_array', and so calling the model again in the following lines is no longer necessary.
 #tpr_theta = odeint(tprequation, UserInput.initial_concentrations_array, times, args = (*post_mean_list,UserInput.beta_dTdt, start_T)) # [0.5, 0.5] are the initial theta's.
 #rate = tprequation(tpr_theta, times, *post_mean_list, UserInput.beta_dTdt, start_T)
-#rate_tot = -np.sum(rate, axis=0)
+#rate_tot = -np.sum(rate, axis=0) 
 
 fig0, ax0 = plt.subplots()
 if UserInput.verbose:
