@@ -893,13 +893,13 @@ class Project(object):
 
         if contour_settings_custom == True:
             #FIXME: Eric to fix below code for the case where we have a custom prior.
-            print('factors',factors) #EAW 2020/01/07
-            print('posterior_mu_x_axis,posterior_mu_y_axis',self.solution.x[factors]) #EAW 2020/01/07
-            print('posterior_var_x_axis,posterior_var_y_axis',self.solution.cov[factors[0],factors[0]],self.solution.cov[factors[1],factors[1]]) #EAW 2020/01/07        
-            print('prior_mu_x_axis,prior_mu_y_axis',self.solution.mu_prior[factors])
-            print('prior_var_x_axis,prior_var_y_axis',self.solution.cov_prior[factors[0],factors[0]],self.solution.cov_prior[factors[1],factors[1]])
+            #print('factors',factors) #EAW 2020/01/07
+            #print('posterior_mu_x_axis,posterior_mu_y_axis',self.solution.x[factors]) #EAW 2020/01/07
+            #print('posterior_var_x_axis,posterior_var_y_axis',self.solution.cov[factors[0],factors[0]],self.solution.cov[factors[1],factors[1]]) #EAW 2020/01/07        
+            #print('prior_mu_x_axis,prior_mu_y_axis',self.solution.mu_prior[factors])
+            #print('prior_var_x_axis,prior_var_y_axis',self.solution.cov_prior[factors[0],factors[0]],self.solution.cov_prior[factors[1],factors[1]])
             num_std_devs = 2.5
-            print('number of standard deviations around mean to define plot axis area: ',num_std_devs)
+            #print('number of standard deviations around mean to define plot axis area: ',num_std_devs)
             x_axis_min = min(self.solution.mu_prior[factors[0]]-num_std_devs*np.sqrt(self.solution.cov_prior[factors[0],factors[0]]), self.solution.x[factors[0]]-num_std_devs*np.sqrt(self.solution.cov[factors[0],factors[0]])) #EAW 2020/01/08
             x_axis_max = max(self.solution.mu_prior[factors[0]]+num_std_devs*np.sqrt(self.solution.cov_prior[factors[0],factors[0]]), self.solution.x[factors[0]]+num_std_devs*np.sqrt(self.solution.cov[factors[0],factors[0]])) #EAW 2020/01/08
             y_axis_min = min(self.solution.mu_prior[factors[1]]-num_std_devs*np.sqrt(self.solution.cov_prior[factors[1],factors[1]]), self.solution.x[factors[1]]-num_std_devs*np.sqrt(self.solution.cov[factors[1],factors[1]])) #EAW 2020/01/08
@@ -920,12 +920,12 @@ class Project(object):
             poste_prob_operator = multivariate_normal(poste_mean, poste_covariance) # EAW 2020/01/08
             prior_prob_mesh = prior_prob_operator.pdf(pos) # EAW 2020/01/08
             poste_prob_mesh = poste_prob_operator.pdf(pos) # EAW 2020/01/08
-            cprior = ax.contour(x_mesh,y_mesh,prior_prob_mesh,cmap=cm.Reds) # EAW 2020/01/08 xx,yy,prior_pdf,colors='k',linestyles='dotted',levels=levels
-            prior_colorbar = fig.colorbar(cprior,ax=ax,orientation='horizontal') #EAW 2020/01/07
-            prior_colorbar.set_label('prior') #EAW 2020/01/07
             cposte = ax.contour(x_mesh,y_mesh,poste_prob_mesh,cmap=cm.Greens) #EAW 2020/01/08 levels=levels
-            poste_colorbar = fig.colorbar(cposte,ax=ax) # EAW 2020/01/07
+            poste_colorbar = fig.colorbar(cposte,ax=ax,orientation='horizontal') # EAW 2020/01/07
             poste_colorbar.set_label('posterior') # EAW 2020/01/07
+            cprior = ax.contour(x_mesh,y_mesh,prior_prob_mesh,cmap=cm.Reds) # EAW 2020/01/08 xx,yy,prior_pdf,colors='k',linestyles='dotted',levels=levels
+            prior_colorbar = fig.colorbar(cprior,ax=ax) #EAW 2020/01/07
+            prior_colorbar.set_label('prior') #EAW 2020/01/07
             ax.set_xlabel(params_info[0]['parameter_name'])
             ax.set_ylabel(params_info[1]['parameter_name'])
             return
