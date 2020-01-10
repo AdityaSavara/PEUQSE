@@ -63,4 +63,5 @@ mumpceProjectObject.plot_pdfs(mumpceProjectObject.pairsOfParameterIndices, conto
 #Here is the graph after Eric has made the needed changes to have contour_settings_auto....
 #Right now it produces fairly similar looking graphs. Later, it will change things more!
 mumpceProjectObject.solution.figure_name='mumpce_plots_gamma.png'
+mumpceProjectObject.solution.colormap_posterior = "Blues"
 mumpceProjectObject.plot_pdfs(mumpceProjectObject.pairsOfParameterIndices, contour_settings_auto= True)
