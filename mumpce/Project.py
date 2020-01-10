@@ -908,6 +908,14 @@ class Project(object):
                 num_pts_per_axis = self.solution.num_pts_per_axis
             else:
                 num_pts_per_axis = 500
+            if hasattr(self.solution,'colormap_prior'):
+                colormap_prior = self.solution.colormap_prior
+            else:
+                colormap_prior = "Greens"
+            if hasattr(self.solution,'colormap_posterior'):
+                colormap_posterior = self.solution.colormap_posterior
+            else: 
+                colormap_posterior = "Reds"
             xpts = np.linspace(x_axis_min,x_axis_max,num_pts_per_axis) # EAW 2020/01/08
             ypts = np.linspace(y_axis_min,y_axis_max,num_pts_per_axis) # EAW 2020/01/08
             x_mesh, y_mesh = np.meshgrid(xpts, ypts) # EAW 2020/01/08
@@ -920,8 +928,8 @@ class Project(object):
             poste_prob_operator = multivariate_normal(poste_mean, poste_covariance) # EAW 2020/01/08
             prior_prob_mesh = prior_prob_operator.pdf(pos) # EAW 2020/01/08
             poste_prob_mesh = poste_prob_operator.pdf(pos) # EAW 2020/01/08
-            cprior = ax.contour(x_mesh,y_mesh,prior_prob_mesh,cmap=cm.Greens) # EAW 2020/01/08 xx,yy,prior_pdf,colors='k',linestyles='dotted',levels=levels
-            cposte = ax.contour(x_mesh,y_mesh,poste_prob_mesh,cmap=cm.Reds) #EAW 2020/01/08 levels=levels
+            cprior = ax.contour(x_mesh,y_mesh,prior_prob_mesh,cmap=eval('cm.'+colormap_prior)) # EAW 2020/01/08 xx,yy,prior_pdf,colors='k',linestyles='dotted',levels=levels
+            cposte = ax.contour(x_mesh,y_mesh,poste_prob_mesh,cmap=eval('cm.'+colormap_posterior)) #EAW 2020/01/08 levels=levels
             poste_colorbar = fig.colorbar(cposte,ax=ax,orientation='horizontal') # EAW 2020/01/07
             prior_colorbar = fig.colorbar(cprior,ax=ax) #EAW 2020/01/07
             prior_colorbar.set_label('prior') #EAW 2020/01/07
