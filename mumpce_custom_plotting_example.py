@@ -33,11 +33,13 @@ Posterior_cov_vector = np.array([[ 0.0148872,-0.01894579, -0.01047339,0.01325883
  [ 0.01325883, -0.04801795,0.01588293,0.08171972,0.00875017],
  [ 0.04734254, -0.04545703, -0.05618226,0.00875017,0.20669273]]) #This will become solution.cov. It does not need to be a numpy array, but we make it one for consistency.
 
-mumpceSolutionsObject = mumpceSolution.Solution(Posterior_mu_vector, Posterior_cov_vector)
+Prior_mu_vector = np.array([-0.98888733,0.8200355, 0.01204044, -7.02385888,0.40439847])
+Prior_cov_vector = 10*Posterior_cov_vector
+
+mumpceSolutionsObject = mumpceSolution.Solution(Posterior_mu_vector, Posterior_cov_vector, initial_x=Prior_mu_vector, initial_covariance=Prior_cov_vector)
 mumpceProjectObject.solution = mumpceSolutionsObject
 mumpceProjectObject.pairsOfParameterIndices = [[0, 1], [1, 2],[3, 4]]
-mumpceProjectObject.solution.mu_prior = np.array([-0.98888733,0.8200355, 0.01204044, -1.02385888,0.40439847])
-mumpceProjectObject.solution.cov_prior = 10*Posterior_cov_vector
+
 #np.array([[ 0.0148872,-0.01894579, -0.01047339,0.01325883,0.04734254],
 # [-0.01894579,0.04284732, -0.00131389, -0.04801795, -0.04545703],
 # [-0.01047339, -0.00131389,0.02343653,0.01588293, -0.05618226],
@@ -45,9 +47,9 @@ mumpceProjectObject.solution.cov_prior = 10*Posterior_cov_vector
 # [ 0.04734254, -0.04545703, -0.05618226,0.00875017,0.20669273]])
 
 #This makes the figures as originally programmed. It assumes/requries things be normalized to 1.
-mumpceProjectObject.solution.figure_name='mumpce_plots_alpha.png'
+mumpceProjectObject.solution.figure_name='mumpce_plots_alpha'
 #mumpceProjectObject.solution.num_pts_per_axis = 500
-mumpceProjectObject.plot_pdfs(mumpceProjectObject.pairsOfParameterIndices, contour_settings_custom = False)
+mumpceProjectObject.plot_pdfs(mumpceProjectObject.pairsOfParameterIndices)
 cmap = cm.Reds
 
 
@@ -57,11 +59,22 @@ mumpceProjectObject.solution.contour_axis_range = np.array([[-3.0,1.5],[-1.5,3.0
 mumpceProjectObject.solution.contour_resolution = np.array([0.01,0.01,0.01,0.01,0.01,0.01])
 mumpceProjectObject.solution.axis_tick_spacing = np.array([1,1.5,1,1,1,1])
 mumpceProjectObject.solution.contour_levels = np.exp((np.arange(-2,0,0.5) ** 2) * -1)
-mumpceProjectObject.solution.figure_name='mumpce_plots_beta.png'
-mumpceProjectObject.plot_pdfs(mumpceProjectObject.pairsOfParameterIndices, contour_settings_custom = True)
+mumpceProjectObject.solution.figure_name='mumpce_plots_beta'
+mumpceProjectObject.plot_pdfs(mumpceProjectObject.pairsOfParameterIndices, contour_settings_custom = {"colored":True})
+
+mumpceProjectObject.solution.figure_name='mumpce_plots_beta2'
+contour_settings_custom = {}
+contour_settings_custom['colored'] = True
+contour_settings_custom['colorbars'] = False
+mumpceProjectObject.plot_pdfs(mumpceProjectObject.pairsOfParameterIndices, contour_settings_custom = contour_settings_custom)
 
 #Here is the graph after Eric has made the needed changes to have contour_settings_auto....
 #Right now it produces fairly similar looking graphs. Later, it will change things more!
-mumpceProjectObject.solution.figure_name='mumpce_plots_gamma.png'
-mumpceProjectObject.solution.colormap_posterior = "Blues"
-mumpceProjectObject.plot_pdfs(mumpceProjectObject.pairsOfParameterIndices, contour_settings_auto= True)
+mumpceProjectObject.solution.figure_name='mumpce_plots_gamma'
+contour_settings_custom = {}
+contour_settings_custom['colored'] = True
+contour_settings_custom['colormap_posterior_customized'] = "Oranges"
+contour_settings_custom['colormap_prior_customized'] = "Greens"
+contour_settings_custom['contours_normalized'] = False
+contour_settings_custom['center_on'] = 'prior'
+mumpceProjectObject.plot_pdfs(mumpceProjectObject.pairsOfParameterIndices, contour_settings_custom = contour_settings_custom)
