@@ -913,8 +913,16 @@ class Project(object):
                 x_axis_max = max(mu_prior[factors[0]]+contour_settings_custom['zoom_std_devs']*np.sqrt(cov_prior[factors[0],factors[0]]), self.solution.x[factors[0]]+contour_settings_custom['zoom_std_devs']*np.sqrt(self.solution.cov[factors[0],factors[0]])) 
                 y_axis_min = min(mu_prior[factors[1]]-contour_settings_custom['zoom_std_devs']*np.sqrt(cov_prior[factors[1],factors[1]]), self.solution.x[factors[1]]-contour_settings_custom['zoom_std_devs']*np.sqrt(self.solution.cov[factors[1],factors[1]])) 
                 y_axis_max = max(mu_prior[factors[1]]+contour_settings_custom['zoom_std_devs']*np.sqrt(cov_prior[factors[1],factors[1]]), self.solution.x[factors[1]]+contour_settings_custom['zoom_std_devs']*np.sqrt(self.solution.cov[factors[1],factors[1]]))             
+            if 'fontsize' not in contour_settings_custom:
+                contour_settings_custom['fontsize']=20
+            if contour_settings_custom['fontsize'] == 'auto':
+                contour_settings_custom['fontsize']=None #The argument "None" uses the matplotlib/pyplot defaults.
+            if 'num_x_ticks' not in contour_settings_custom:
+                contour_settings_custom['num_x_ticks'] =4 #actually sets a maximum number. Matplotlib and pyplot often put one less.
+            if 'num_y_ticks' not in contour_settings_custom:
+                contour_settings_custom['num_y_ticks'] =4 #actually sets a maximum number. Matplotlib and pyplot often put one less.               
             if "colorbars" not in contour_settings_custom: #This is to turn the color bars on or off.
-                contour_settings_custom["colorbars"] = True
+                contour_settings_custom["colorbars"] = False
             if 'num_pts_per_axis' not in contour_settings_custom: #This sets the resolution of the contours.
                 contour_settings_custom['num_pts_per_axis'] = 500
             if "cmap_levels" not in contour_settings_custom: #This is the number of contours.
@@ -974,20 +982,19 @@ class Project(object):
                     prior_colorbar.update_ticks()
             ax.set_xlabel(params_info[0]['parameter_name'])
             ax.set_ylabel(params_info[1]['parameter_name'])      
-            if 'num_x_ticks' in contour_settings_custom:
+            if type(contour_settings_custom['num_x_ticks']) == type(int(1)): #This is because if the word 'auto' or None type are received then we skip these lines.
                 from matplotlib.ticker import MaxNLocator
                 ax.xaxis.set_major_locator( MaxNLocator(nbins = contour_settings_custom['num_x_ticks'] ) )
-            if 'num_y_ticks' in contour_settings_custom:         
+            if type(contour_settings_custom['num_y_ticks']) == type(int(1)): #This is because if the word 'auto' or None type are received then we skip these lines.
                 from matplotlib.ticker import MaxNLocator
                 ax.yaxis.set_major_locator( MaxNLocator(nbins = contour_settings_custom['num_y_ticks'] ) )
-            if 'x_ticks' in  contour_settings_custom:
+            if 'x_ticks' in  contour_settings_custom: #This feature is not recommended to be used.
                 ax.set_xticks(contour_settings_custom['x_ticks'])
-            if 'y_ticks' in  contour_settings_custom:
+            if 'y_ticks' in  contour_settings_custom: #This feature is not recommended to be used.
                 ax.set_yticks(contour_settings_custom['y_ticks'])     
-            if 'fontsize' in contour_settings_custom:
-                for item in ([ax.title, ax.xaxis.label, ax.yaxis.label] +
-                    ax.get_xticklabels() + ax.get_yticklabels()):
-                    item.set_fontsize(contour_settings_custom['fontsize'])
+            for item in ([ax.title, ax.xaxis.label, ax.yaxis.label] +
+                ax.get_xticklabels() + ax.get_yticklabels()):
+                item.set_fontsize(contour_settings_custom['fontsize'])
         return ax
     
     def plot_pdfs(self,factors_list=[[0,1]], contour_settings_custom = {}):
@@ -1008,7 +1015,10 @@ class Project(object):
         if len(contour_settings_custom) > 0: 
             for ax,factors in zip(axes,factors_list):
                 self._single_pdf_plot(factors=factors,ax=ax, fig=fig, contour_settings_custom = contour_settings_custom)
-            fig.tight_layout()
+            fig.tight_layout() 
+            if 'space_between_subplots' not in contour_settings_custom:
+                contour_settings_custom['space_between_subplots'] = 0.40
+            fig.subplots_adjust(wspace = contour_settings_custom['space_between_subplots']) 
             if 'figure_name' in contour_settings_custom:
                 fig.savefig(contour_settings_custom['figure_name']+".png",dpi=220)
         return fig
