@@ -909,7 +909,6 @@ class Project(object):
                 y_axis_min = (self.solution.x[factors[1]]+contour_settings_custom['zoom_std_devs']*np.sqrt(self.solution.cov[factors[1],factors[1]])) 
                 y_axis_max = (self.solution.x[factors[1]]+contour_settings_custom['zoom_std_devs']*np.sqrt(self.solution.cov[factors[1],factors[1]]))             
             if contour_settings_custom['center_on'] == 'all':        
-                print("getting in here")
                 x_axis_min = min(mu_prior[factors[0]]-contour_settings_custom['zoom_std_devs']*np.sqrt(cov_prior[factors[0],factors[0]]), self.solution.x[factors[0]]-contour_settings_custom['zoom_std_devs']*np.sqrt(self.solution.cov[factors[0],factors[0]])) 
                 x_axis_max = max(mu_prior[factors[0]]+contour_settings_custom['zoom_std_devs']*np.sqrt(cov_prior[factors[0],factors[0]]), self.solution.x[factors[0]]+contour_settings_custom['zoom_std_devs']*np.sqrt(self.solution.cov[factors[0],factors[0]])) 
                 y_axis_min = min(mu_prior[factors[1]]-contour_settings_custom['zoom_std_devs']*np.sqrt(cov_prior[factors[1],factors[1]]), self.solution.x[factors[1]]-contour_settings_custom['zoom_std_devs']*np.sqrt(self.solution.cov[factors[1],factors[1]])) 
@@ -944,7 +943,7 @@ class Project(object):
                     contour_settings_custom['cmap_posterior'] = matplotlib.colors.LinearSegmentedColormap.from_list('custom posterior colors', 
                                            contour_settings_custom['colormap_posterior_customized'], N=256)
             if 'contours_normalized' not in contour_settings_custom: #This makes the contours heights normalized from 0 to 1.
-                contour_settings_custom['contours_normalized'] = True
+                contour_settings_custom['contours_normalized'] = True            
             #This makes the locations of the points in the contours.
             xpts = np.linspace(x_axis_min,x_axis_max,contour_settings_custom['num_pts_per_axis'])
             ypts = np.linspace(y_axis_min,y_axis_max,contour_settings_custom['num_pts_per_axis'])
@@ -975,6 +974,12 @@ class Project(object):
                     prior_colorbar.update_ticks()
             ax.set_xlabel(params_info[0]['parameter_name'])
             ax.set_ylabel(params_info[1]['parameter_name'])      
+            if 'num_x_ticks' in contour_settings_custom:
+                from matplotlib.ticker import MaxNLocator
+                ax.xaxis.set_major_locator( MaxNLocator(nbins = contour_settings_custom['num_x_ticks'] ) )
+            if 'num_y_ticks' in contour_settings_custom:         
+                from matplotlib.ticker import MaxNLocator
+                ax.yaxis.set_major_locator( MaxNLocator(nbins = contour_settings_custom['num_y_ticks'] ) )
             if 'x_ticks' in  contour_settings_custom:
                 ax.set_xticks(contour_settings_custom['x_ticks'])
             if 'y_ticks' in  contour_settings_custom:
@@ -991,7 +996,6 @@ class Project(object):
         :param factors_list: A list of pairs of parameters. For each pair [x, y] the parameter x will appear on the x axis and the parameter y will appear on the y axis. If this parameter is not supplied, it defaults to [0,1].
         :type factors_list: list of length-2 lists.
         """
-        
         #Get the number of plots that will be created
         num_plots = len(factors_list)
         
