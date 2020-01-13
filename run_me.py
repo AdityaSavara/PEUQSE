@@ -62,9 +62,6 @@ parseUserInputParameters()
 
     # ")
     
-# writeTPRModelFile() #####This line should be commented out if tprmodel.py is going to be edited manually.
-from tprmodel import tprequation
-    
 
 
 class ip:
@@ -93,9 +90,6 @@ class ip:
 
     #main function to get samples
     def MetropolisHastings(self):
-        if hasattr(self.UserInput, "mcmc_random_seed"):
-            if type(UserInput.mcmc_random_seed) == type(1): #if it's an integer, then it's not a "None" type or string, and we will use it.
-                np.random.seed(UserInput.mcmc_random_seed)
         self.import_experimental_settings()
         rate_tot_array = np.zeros((self.mcmc_length,len(self.experiment)))
         samples = np.zeros((self.mcmc_length,len(self.mu_prior)))
@@ -164,10 +158,10 @@ class ip:
         def simulationFunctionWrapper(discreteParameterVector): #FIXME: This should be defined in UserInput and passed in. User is responsible for it.
             # from tprmodel import tprequation # This is moved to the beginning of this file EAW 2020/01/08
             sample_list = list(discreteParameterVector) #converting to list so can use list expansion in arguments.        
-            tpr_theta_Arguments = [tprequation, self.UserInput.initial_concentrations_array, self.times, (*sample_list,self.UserInput.beta_dTdt,self.UserInput.T_0) ] #FIXME: Times needs to occur in UserInput. This needs to all occur in some kind of UserFunctions module called from UserInput, should not be passed in here. 
+            tpr_theta_Arguments = [UserInput.model_function_name, self.UserInput.initial_concentrations_array, self.times, (*sample_list,self.UserInput.beta_dTdt,self.UserInput.T_0) ] #FIXME: Times needs to occur in UserInput. This needs to all occur in some kind of UserFunctions module called from UserInput, should not be passed in here. 
             tpr_theta = odeint(*tpr_theta_Arguments) # [0.5, 0.5] are the initial theta's. #FIXME: initialArgs and equation should come from UserInput, not be hardcoded here.            
             simulationInputArguments = [tpr_theta, self.times, *sample_list, self.UserInput.beta_dTdt,self.UserInput.T_0] #FIXME: To be passed in from userInput
-            simulationFunction = tprequation #FIXME: To be passed in from userInput
+            simulationFunction = UserInput.model_function_name #FIXME: To be passed in from userInput
             simulationOutput = UserInput.model_function_name(*simulationInputArguments) # EAW 2020/01/08
             return simulationOutput
         
@@ -178,11 +172,11 @@ class ip:
 #        simulationOutput = simulationFunction(*simulationInputArguments) #FIXME: code should look like simulationOutput = self.UserInput.simulationFunction(*self.UserInput.simulationInputArguments)
         
 
-        sample_list = list(discreteParameterVector) #converting to list so can use list expansion in arguments.        
-        tpr_theta_Arguments = [tprequation, self.UserInput.initial_concentrations_array, self.times, (*sample_list,self.UserInput.beta_dTdt,self.UserInput.T_0) ] #FIXME: This needs to be passed in from UserInput, and called as self.UserInput.simulationInputArguments. right now it's hard coded here. The tuple is args. Right now, we will not support named arguments (maybe later I will add code to do it).
-        tpr_theta = odeint(*tpr_theta_Arguments) # [0.5, 0.5] are the initial theta's. #FIXME: initialArgs and equation should come from UserInput, not be hardcoded here.
-        rate = tprequation(tpr_theta, self.times, *sample_list, self.UserInput.beta_dTdt,self.UserInput.T_0) #This is old code for Eric to delete when he understands the code and has fixed the "return" part of the likelihood.
-        rate_tot = -np.sum(rate, axis=0) #This is old code for Eric to delete when he understands the code and has fixed the "return" part of the likelihood.
+        #sample_list = list(discreteParameterVector) #converting to list so can use list expansion in arguments.        
+        #tpr_theta_Arguments = [tprequation, self.UserInput.initial_concentrations_array, self.times, (*sample_list,self.UserInput.beta_dTdt,self.UserInput.T_0) ] #FIXME: This needs to be passed in from UserInput, and called as self.UserInput.simulationInputArguments. right now it's hard coded here. The tuple is args. Right now, we will not support named arguments (maybe later I will add code to do it).
+        #tpr_theta = odeint(*tpr_theta_Arguments) # [0.5, 0.5] are the initial theta's. #FIXME: initialArgs and equation should come from UserInput, not be hardcoded here.
+        #rate = tprequation(tpr_theta, self.times, *sample_list, self.UserInput.beta_dTdt,self.UserInput.T_0) #This is old code for Eric to delete when he understands the code and has fixed the "return" part of the likelihood.
+        #rate_tot = -np.sum(rate, axis=0) #This is old code for Eric to delete when he understands the code and has fixed the "return" part of the likelihood.
         #temp_points = np.array([0,49,99,149]) #range(225)        #This was a temporary line that should be deleted once Eric understands code flow.
         #simulatedResponses = np.log10(rate_tot[temp_points]) #This was a temporary line that should be deleted once Eric understands code flow.
         
@@ -209,6 +203,7 @@ class ip:
         #probability_metric = multivariate_normal.pdf(x=np.log10(rate_tot[temp_points]),mean=np.log10(self.experiment[temp_points]),cov=self.errors[temp_points]) #ERIC, THIS WAS THE PREVIOUS LINE. I BELIEVE YOUR LOG10 TRANSFORM IS NOT SOMETHING WE WOULD NORMALLY DO. AM I CORRECT?
         probability_metric = multivariate_normal.pdf(x=simulatedResponses,mean=observedResponses,cov=cov) #FIXME: should become self.UserInput.responseUncertantiesCov or something like that.
         if self.verbose: print('likelihood probability',probability_metric,'log10(rate_tot)',np.log10(rate_tot[temp_points]), 'log10(experiment)', np.log10(self.experiment[temp_points]), 'error', self.errors[temp_points])
+        rate_tot = rate_tot_summing_func(simulationOutput)
         return probability_metric, rate_tot #FIXME: This needs to say probability_metric, simulatedResponses or something like that, but right now the sizes of the arrays do not match.
         
     
