@@ -1,8 +1,7 @@
 import numpy as np
-
 ###User sets their model equation####
-from tprmodel import tprequation #Added here to facilitate generalization. This equation is now passed into the ip class with the UserInput module. I'm mainly putting this here so Eric can see more clearly what I meant about how to go forward with generalizing.
-simulationFunction  = tprequation
+from tprmodel import tprequation # EAW 2020/01/13 
+model_function_name = tprequation # EAW 2020/01/08
 
 #####Temperature Programmed Reaction Settings#####
 TPR = True #Set to false if doing an isothermal experiment.
@@ -49,8 +48,7 @@ else: #If a blank list is received, that means the user
 #                          [0., 0., 0., 0., 0., 0.1]])
 #
 
-
-model_function_name = tprequation # EAW 2020/01/08						  
+				  
 ######MCMC settings:#####
 mcmc = True 
 mcmc_length = 1000

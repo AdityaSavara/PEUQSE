@@ -8,8 +8,8 @@ from scipy.integrate import odeint
 import pandas as pd
 import UserInput_ODE_KIN_BAYES_SG_EW as UserInput
 import copy
-import tprmodel
-from tprmodel import tprequation # moved from likelihood so import is not repeated at every sample EAW 2020/01/08
+#import tprmodel
+#from tprmodel import tprequation # moved from likelihood so import is not repeated at every sample EAW 2020/01/08
 #import mumce_py.Project as mumce_pyProject #FIXME: Eric to fix plotting/graphing issue described in issue 9 -- https://github.com/AdityaSavara/ODE-KIN-BAYES-SG-EW/issues/9
 #import mumce_py.solution mumce_pySolution
 
