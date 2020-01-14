@@ -90,6 +90,9 @@ class ip:
 
     #main function to get samples
     def MetropolisHastings(self):
+        if hasattr(self.UserInput, "mcmc_random_seed"):
+            if type(UserInput.mcmc_random_seed) == type(1): #if it's an integer, then it's not a "None" type or string, and we will use it.
+                np.random.seed(UserInput.mcmc_random_seed)
         self.import_experimental_settings()
         rate_tot_array = np.zeros((self.mcmc_length,len(self.experiment)))
         samples = np.zeros((self.mcmc_length,len(self.mu_prior)))
