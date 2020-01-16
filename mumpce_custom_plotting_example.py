@@ -11,7 +11,7 @@ import mumpce.solution as mumpceSolution
 import numpy as np
 import matplotlib
 from matplotlib import cm #EAW 2020/01/07
-#matplotlib.use('Agg') #EAW 2020/01/07
+matplotlib.use('Agg') #EAW 2020/01/07
 
 '''
 THIS FILE IS TO DEMONSTRATE CUSTOM PLOTTING WITH MUMPCE SOLUTION OBJECTS
