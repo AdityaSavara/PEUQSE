@@ -8,9 +8,6 @@ import copy
 import math
 import matplotlib
 import matplotlib.pyplot as plt
-from matplotlib import cm # EAW 2020/01/07
-import scipy # EAW 2020/01/08
-from scipy.stats import multivariate_normal # EAW 2020/01/08
 
 def load_project(name='project'):
     """Loads a Project from a pickled representation on disk.
@@ -830,129 +827,200 @@ class Project(object):
             
     #def perturb_model(self,x):
         
-    def _single_pdf_plot(self,factors=[0,1],ax=None, fig=None, contour_settings_custom = False, contour_settings_auto=False):
-       
+    def _single_pdf_plot(self,factors=[0,1],ax=None, fig=None, contour_settings_custom = {}):
+        
         if len(factors) > 2:
-            raise ValueError       
+            raise ValueError
+        
         active_params = self.active_parameters[factors]
+        
         params_info = self.model_parameter_info[active_params]
-        zred = self.solution.x[factors]      
-        alphared = self.solution.alpha[factors]
-   
-        if contour_settings_auto==True:
-            #FIXME: ERIC TO ADD SOME CODE HERE
-            #Code should automatically choose contour_axis_range, resolution, and tick spacing based on prior and posterior cov matrices.
-            self.solution.contour_axis_range = np.array([[-1.0,1.0],[-1.0,1.0],[-1.0,1.0],[-1.0,1.0],[-1,1],[-1,1],[-1,1]]) #this must be made into a numpy array.
-            self.solution.contour_resolution = np.array([0.01,0.01,0.01,0.01,0.01,0.01])
-            self.solution.axis_tick_spacing = np.array([0.5,0.5,0.5,1,1,1])
-            self.solution.contour_levels = np.exp((np.arange(-2,0,0.5) ** 2) * -1)
-            contour_settings_custom = True
-        if contour_settings_custom == False:
-            #We will change the default to spreading from -1.0 to 1.0, but will plot a bit further than that in each direction (as before)
-            contour_axis_range_horizontal = [-1.0, 1.0]
-            contour_axis_range_vertical = [-1.0, 1.0]
-            contour_resolution_horizontal = 0.01
-            contour_resolution_vertical = 0.01
-            contour_axis_span_horizontal = float(np.diff(contour_axis_range_horizontal))
-            contour_axis_span_vertical = float(np.diff(contour_axis_range_vertical))
-            levels = np.exp((np.arange(-2,0,0.5) ** 2) * -1)
-            x_tick_spacing = 1
-            y_tick_spacing = 1
-            #Below is where we set the actual x and y points to calculate, and go further than the specified range.
-            #We will also plot more than the specified range. The intent is that if a distrubtion has a certain 'expected width', we will plot a bit further.
-            xpts = np.arange(contour_axis_range_horizontal[0]-contour_axis_span_horizontal/4,contour_axis_range_horizontal[1]+contour_axis_span_horizontal/4,contour_resolution_horizontal)
-            ypts = np.arange(contour_axis_range_vertical[0]-contour_axis_span_vertical/4,contour_axis_range_vertical[1]+contour_axis_span_vertical/4,contour_resolution_vertical)
-            xx,yy = np.meshgrid(xpts,ypts)            
+        
+        if len(contour_settings_custom)==0:
+            zred = self.solution.x[factors]
+            
+            alphared = self.solution.alpha[factors]
+            
+            pts = np.arange(-1.5,1.5,0.01)
+            xx,yy = np.meshgrid(pts,pts)
+            
             XX  = np.stack((xx,yy),axis=2)
+            
             S = np.dot(alphared,alphared.T)
+            
             Sinv = np.linalg.inv(S)
+            
             r2  = np.zeros_like(xx)
             xi2 = np.zeros_like(xx)
+            
+            #Get a row of the XX vector
             for rownum,row in enumerate(XX):
                 #Get a single point from that row
                 for colnum,point in enumerate(row):
-                    r2[rownum,colnum] = np.dot(point,point.T) * 4                    
+                    r2[rownum,colnum] = np.dot(point,point.T) * 4
+                    
                     point_translate = point - zred
                     xi2[rownum,colnum] = np.dot(point_translate,np.dot(Sinv,point_translate))
+                
             prior_pdf = np.exp(-1*r2)
             posterior_pdf = np.exp(-1*xi2)
+            
+            levels = np.exp((np.arange(-2,0,0.5) ** 2) * -1)
+        
+            #cpr`ior = ax.contour(xx,yy,prior_pdf,levels=np.exp(np.arange(-2,0,0.5)),colors='k',linestyles='dotted')
+            #cposte = ax.contour(xx,yy,posterior_pdf,levels=np.exp(np.arange(-2,0,0.5)),colors='k')
             cprior = ax.contour(xx,yy,prior_pdf,levels=levels,colors='k',linestyles='dotted')
             cposte = ax.contour(xx,yy,posterior_pdf,levels=levels,colors='k')
-            prior_pdf = np.exp(-1*r2)
-            posterior_pdf = np.exp(-1*xi2)
+            
             ax.set_xlabel(params_info[0]['parameter_name'])
             ax.set_ylabel(params_info[1]['parameter_name'])
-            x_ticks = np.arange(contour_axis_range_horizontal[0],contour_axis_range_horizontal[1]+x_tick_spacing, x_tick_spacing)
-            y_ticks = np.arange(contour_axis_range_vertical[0],contour_axis_range_vertical[1]+y_tick_spacing, y_tick_spacing)
-            ax.set_xticks(x_ticks)
-            ax.set_yticks(y_ticks)
-            # ax.set_xticks([-2,-1,0,1,2])
-            # ax.set_yticks([-2,-1,0,1,2])
+            
+            ax.set_xticks([-2,-1,0,1,2])
+            ax.set_yticks([-2,-1,0,1,2])
+            
             ax.axis('square')
-            return
-
-        if contour_settings_custom == True:
-            #FIXME: Eric to fix below code for the case where we have a custom prior.
-            #print('factors',factors) #EAW 2020/01/07
-            #print('posterior_mu_x_axis,posterior_mu_y_axis',self.solution.x[factors]) #EAW 2020/01/07
-            #print('posterior_var_x_axis,posterior_var_y_axis',self.solution.cov[factors[0],factors[0]],self.solution.cov[factors[1],factors[1]]) #EAW 2020/01/07        
-            #print('prior_mu_x_axis,prior_mu_y_axis',self.solution.mu_prior[factors])
-            #print('prior_var_x_axis,prior_var_y_axis',self.solution.cov_prior[factors[0],factors[0]],self.solution.cov_prior[factors[1],factors[1]])
-            num_std_devs = 2.5
-            #print('number of standard deviations around mean to define plot axis area: ',num_std_devs)
-            x_axis_min = min(self.solution.mu_prior[factors[0]]-num_std_devs*np.sqrt(self.solution.cov_prior[factors[0],factors[0]]), self.solution.x[factors[0]]-num_std_devs*np.sqrt(self.solution.cov[factors[0],factors[0]])) #EAW 2020/01/08
-            x_axis_max = max(self.solution.mu_prior[factors[0]]+num_std_devs*np.sqrt(self.solution.cov_prior[factors[0],factors[0]]), self.solution.x[factors[0]]+num_std_devs*np.sqrt(self.solution.cov[factors[0],factors[0]])) #EAW 2020/01/08
-            y_axis_min = min(self.solution.mu_prior[factors[1]]-num_std_devs*np.sqrt(self.solution.cov_prior[factors[1],factors[1]]), self.solution.x[factors[1]]-num_std_devs*np.sqrt(self.solution.cov[factors[1],factors[1]])) #EAW 2020/01/08
-            y_axis_max = max(self.solution.mu_prior[factors[1]]+num_std_devs*np.sqrt(self.solution.cov_prior[factors[1],factors[1]]), self.solution.x[factors[1]]+num_std_devs*np.sqrt(self.solution.cov[factors[1],factors[1]])) #EAW 2020/01/08
-            if hasattr(self.solution,'num_pts_per_axis'):
-                num_pts_per_axis = self.solution.num_pts_per_axis
-            else:
-                num_pts_per_axis = 500
-            xpts = np.linspace(x_axis_min,x_axis_max,num_pts_per_axis) # EAW 2020/01/08
-            ypts = np.linspace(y_axis_min,y_axis_max,num_pts_per_axis) # EAW 2020/01/08
-            x_mesh, y_mesh = np.meshgrid(xpts, ypts) # EAW 2020/01/08
-            pos = np.dstack((x_mesh, y_mesh)) # EAW 2020/01/08
-            prior_mean = np.array(self.solution.mu_prior[factors]) # EAW 2020/01/08
-            prior_covariance = np.array([[self.solution.cov_prior[factors[0],factors[0]], self.solution.cov_prior[factors[0],factors[1]]], [self.solution.cov_prior[factors[1],factors[0]], self.solution.cov_prior[factors[1],factors[1]]]]) # EAW 2020/01/08
-            poste_mean = np.array(self.solution.x[factors]) # EAW 2020/01/08
-            poste_covariance = np.array([[self.solution.cov[factors[0],factors[0]], self.solution.cov[factors[0],factors[1]]], [self.solution.cov[factors[1],factors[0]], self.solution.cov[factors[1],factors[1]]]]) # EAW 2020/01/08
-            prior_prob_operator = multivariate_normal(prior_mean, prior_covariance) # EAW 2020/01/08
-            poste_prob_operator = multivariate_normal(poste_mean, poste_covariance) # EAW 2020/01/08
-            prior_prob_mesh = prior_prob_operator.pdf(pos) # EAW 2020/01/08
-            poste_prob_mesh = poste_prob_operator.pdf(pos) # EAW 2020/01/08
-            cprior = ax.contour(x_mesh,y_mesh,prior_prob_mesh,cmap=cm.Greens) # EAW 2020/01/08 xx,yy,prior_pdf,colors='k',linestyles='dotted',levels=levels
-            cposte = ax.contour(x_mesh,y_mesh,poste_prob_mesh,cmap=cm.Reds) #EAW 2020/01/08 levels=levels
-            poste_colorbar = fig.colorbar(cposte,ax=ax,orientation='horizontal') # EAW 2020/01/07
-            prior_colorbar = fig.colorbar(cprior,ax=ax) #EAW 2020/01/07
-            prior_colorbar.set_label('prior') #EAW 2020/01/07
-            poste_colorbar.set_label('posterior') # EAW 2020/01/07
+        if len(contour_settings_custom)>0:
+            from matplotlib import cm 
+            import scipy 
+            from scipy.stats import multivariate_normal 
+            #connect some variables
+            mu_posterior = self.solution.x
+            cov_posterior = self.solution.cov
+            mu_prior = self.solution.x_i
+            cov_prior = self.solution.cov_i
+            if (type(mu_prior) == type(None)) or (type(cov_prior) == type(None)):
+                print("Warning: contour_settings_custom requires a prior and a 2D prior cov to be present in the solution object. As one or both are not present, unit circles will be used.")
+                mu_prior = np.zeros(len(mu_posterior))
+                cov_prior = np.diagflat(np.ones(len(mu_posterior))) #making a diagonal matrix of ones.
+            #Next, will set anything to default which is not chosen by user.
+            # it is posible to feed in contour_settings_custom['x_ticks'] and contour_settings_custom['y_ticks'] as well as contour_settings_custom['fontsize']. No default is set here because the internal package defaults are used as the default.
+            if 'zoom_std_devs' not in contour_settings_custom:
+                contour_settings_custom['zoom_std_devs'] = 2.5
+            if ('center_on' not in contour_settings_custom): #this can be centered on prior, posterior, or all
+                contour_settings_custom['center_on'] = 'all'
+            if contour_settings_custom['center_on'] == 'prior':        
+                x_axis_min = (mu_prior[factors[0]]-contour_settings_custom['zoom_std_devs']*np.sqrt(cov_prior[factors[0],factors[0]]))
+                x_axis_max = (mu_prior[factors[0]]+contour_settings_custom['zoom_std_devs']*np.sqrt(cov_prior[factors[0],factors[0]])) 
+                y_axis_min = (mu_prior[factors[1]]-contour_settings_custom['zoom_std_devs']*np.sqrt(cov_prior[factors[1],factors[1]])) 
+                y_axis_max = (mu_prior[factors[1]]+contour_settings_custom['zoom_std_devs']*np.sqrt(cov_prior[factors[1],factors[1]])) 
+            if contour_settings_custom['center_on'] == 'posterior':        
+                x_axis_min = (self.solution.x[factors[0]]+contour_settings_custom['zoom_std_devs']*np.sqrt(self.solution.cov[factors[0],factors[0]]))
+                x_axis_max = (self.solution.x[factors[0]]+contour_settings_custom['zoom_std_devs']*np.sqrt(self.solution.cov[factors[0],factors[0]])) 
+                y_axis_min = (self.solution.x[factors[1]]+contour_settings_custom['zoom_std_devs']*np.sqrt(self.solution.cov[factors[1],factors[1]])) 
+                y_axis_max = (self.solution.x[factors[1]]+contour_settings_custom['zoom_std_devs']*np.sqrt(self.solution.cov[factors[1],factors[1]]))             
+            if contour_settings_custom['center_on'] == 'all':        
+                x_axis_min = min(mu_prior[factors[0]]-contour_settings_custom['zoom_std_devs']*np.sqrt(cov_prior[factors[0],factors[0]]), self.solution.x[factors[0]]-contour_settings_custom['zoom_std_devs']*np.sqrt(self.solution.cov[factors[0],factors[0]])) 
+                x_axis_max = max(mu_prior[factors[0]]+contour_settings_custom['zoom_std_devs']*np.sqrt(cov_prior[factors[0],factors[0]]), self.solution.x[factors[0]]+contour_settings_custom['zoom_std_devs']*np.sqrt(self.solution.cov[factors[0],factors[0]])) 
+                y_axis_min = min(mu_prior[factors[1]]-contour_settings_custom['zoom_std_devs']*np.sqrt(cov_prior[factors[1],factors[1]]), self.solution.x[factors[1]]-contour_settings_custom['zoom_std_devs']*np.sqrt(self.solution.cov[factors[1],factors[1]])) 
+                y_axis_max = max(mu_prior[factors[1]]+contour_settings_custom['zoom_std_devs']*np.sqrt(cov_prior[factors[1],factors[1]]), self.solution.x[factors[1]]+contour_settings_custom['zoom_std_devs']*np.sqrt(self.solution.cov[factors[1],factors[1]]))             
+            if 'fontsize' not in contour_settings_custom:
+                contour_settings_custom['fontsize']=20
+            if contour_settings_custom['fontsize'] == 'auto':
+                contour_settings_custom['fontsize']=None #The argument "None" uses the matplotlib/pyplot defaults.
+            if 'num_x_ticks' not in contour_settings_custom:
+                contour_settings_custom['num_x_ticks'] =4 #actually sets a maximum number. Matplotlib and pyplot often put one less.
+            if 'num_y_ticks' not in contour_settings_custom:
+                contour_settings_custom['num_y_ticks'] =4 #actually sets a maximum number. Matplotlib and pyplot often put one less.               
+            if "colorbars" not in contour_settings_custom: #This is to turn the color bars on or off.
+                contour_settings_custom["colorbars"] = False
+            if 'num_pts_per_axis' not in contour_settings_custom: #This sets the resolution of the contours.
+                contour_settings_custom['num_pts_per_axis'] = 500
+            if "cmap_levels" not in contour_settings_custom: #This is the number of contours.
+                contour_settings_custom["cmap_levels"] = 4
+            #The below lines of code are all geared towards making the colormaps for the prior and posterior and allowing versatility.
+            #Defining cmap prior
+            if ('cmap_prior' not in contour_settings_custom) and ('colormap_prior_customized' not in contour_settings_custom):
+                contour_settings_custom['cmap_prior'] = matplotlib.colors.LinearSegmentedColormap.from_list('custom prior colors', 
+                 [(0,    '#00FFFF'),#colors can be obtained from: https://www.htmlcsscolor.com/hex/244162
+                  (1,    '#0000FF')], N=256)                       
+            if "colormap_prior_customized" in contour_settings_custom: #A custom color map can be provided as a string or as a list of tuples with 0-to-1 values and colors to interpolate between.
+                if type(contour_settings_custom['colormap_prior_customized']) == type("str"):   #checking if a string was provided.  Can have value like 'winter' or 'rainbow' for built in colormaps.          
+                    contour_settings_custom['cmap_prior'] = plt.cm.get_cmap(contour_settings_custom['colormap_prior_customized'], contour_settings_custom["cmap_levels"])
+                if type(contour_settings_custom['colormap_prior_customized']) == type([]): #checking if a list was provided.
+                    contour_settings_custom['cmap_prior'] = matplotlib.colors.LinearSegmentedColormap.from_list('custom prior colors', 
+                                           contour_settings_custom['colormap_prior_customized'], N=256)      
+            #Defining cmap posterior
+            if ('cmap_posterior' not in contour_settings_custom) and ('colormap_posterior_customized' not in contour_settings_custom):
+                contour_settings_custom['cmap_posterior'] = matplotlib.colors.LinearSegmentedColormap.from_list('custom posterior colors', 
+                 [(0,    '#FFFF00'), #colors can be obtained from: https://www.htmlcsscolor.com/hex/244162
+                  (1,    '#FF0000')], N=256)                               
+            if "colormap_posterior_customized" in contour_settings_custom: #A custom color map can be provided as a string or as a list of tuples with 0-to-1 values and colors to interpolate between.
+                if type(contour_settings_custom['colormap_posterior_customized']) == type("str"):   #checking if a string was provided.  Can have value like 'winter' or 'rainbow' for built in colormaps.
+                    contour_settings_custom['cmap_posterior'] = plt.cm.get_cmap(contour_settings_custom['colormap_posterior_customized'], contour_settings_custom["cmap_levels"])
+                if type(contour_settings_custom['cmap_posterior']) == type([]): #checking if a list was provided.
+                    contour_settings_custom['cmap_posterior'] = matplotlib.colors.LinearSegmentedColormap.from_list('custom posterior colors', 
+                                           contour_settings_custom['colormap_posterior_customized'], N=256)
+            if 'contours_normalized' not in contour_settings_custom: #This makes the contours heights normalized from 0 to 1.
+                contour_settings_custom['contours_normalized'] = True            
+            #This makes the locations of the points in the contours.
+            xpts = np.linspace(x_axis_min,x_axis_max,contour_settings_custom['num_pts_per_axis'])
+            ypts = np.linspace(y_axis_min,y_axis_max,contour_settings_custom['num_pts_per_axis'])
+            x_mesh, y_mesh = np.meshgrid(xpts, ypts) 
+            pos = np.dstack((x_mesh, y_mesh)) 
+            #Now need to actually populate the points.
+            prior_mean = np.array(mu_prior[factors]) 
+            prior_covariance = np.array([[cov_prior[factors[0],factors[0]], cov_prior[factors[0],factors[1]]], [cov_prior[factors[1],factors[0]], cov_prior[factors[1],factors[1]]]])
+            poste_mean = np.array(self.solution.x[factors])
+            poste_covariance = np.array([[self.solution.cov[factors[0],factors[0]], self.solution.cov[factors[0],factors[1]]], [self.solution.cov[factors[1],factors[0]], self.solution.cov[factors[1],factors[1]]]]) 
+            prior_prob_operator = multivariate_normal(prior_mean, prior_covariance) 
+            poste_prob_operator = multivariate_normal(poste_mean, poste_covariance) 
+            prior_prob_mesh = prior_prob_operator.pdf(pos) 
+            poste_prob_mesh = poste_prob_operator.pdf(pos) 
+            if contour_settings_custom['contours_normalized'] == True:
+                prior_prob_mesh = prior_prob_mesh/prior_prob_mesh.max()
+                poste_prob_mesh = poste_prob_mesh/poste_prob_mesh.max()
+            cprior = ax.contour(x_mesh,y_mesh,prior_prob_mesh,levels = contour_settings_custom["cmap_levels"] +1, cmap=contour_settings_custom['cmap_prior']) 
+            cposte = ax.contour(x_mesh,y_mesh,poste_prob_mesh, levels = contour_settings_custom["cmap_levels"]+1, cmap=contour_settings_custom['cmap_posterior'])
+            if contour_settings_custom["colorbars"] == True:
+                poste_colorbar = fig.colorbar(cposte,ax=ax,orientation='horizontal')
+                prior_colorbar = fig.colorbar(cprior,ax=ax)
+                prior_colorbar.set_label('prior') 
+                poste_colorbar.set_label('posterior') 
+                if contour_settings_custom['contours_normalized'] == True:
+                    poste_colorbar.set_ticks([0.0, 0.20, 0.40, 0.60, 0.80, 1.0])
+                    prior_colorbar.set_ticks([0.0, 0.20, 0.40, 0.60, 0.80, 1.0])
+                    prior_colorbar.update_ticks()
             ax.set_xlabel(params_info[0]['parameter_name'])
-            ax.set_ylabel(params_info[1]['parameter_name'])
-            return
+            ax.set_ylabel(params_info[1]['parameter_name'])      
+            if type(contour_settings_custom['num_x_ticks']) == type(int(1)): #This is because if the word 'auto' or None type are received then we skip these lines.
+                from matplotlib.ticker import MaxNLocator
+                ax.xaxis.set_major_locator( MaxNLocator(nbins = contour_settings_custom['num_x_ticks'] ) )
+            if type(contour_settings_custom['num_y_ticks']) == type(int(1)): #This is because if the word 'auto' or None type are received then we skip these lines.
+                from matplotlib.ticker import MaxNLocator
+                ax.yaxis.set_major_locator( MaxNLocator(nbins = contour_settings_custom['num_y_ticks'] ) )
+            if 'x_ticks' in  contour_settings_custom: #This feature is not recommended to be used.
+                ax.set_xticks(contour_settings_custom['x_ticks'])
+            if 'y_ticks' in  contour_settings_custom: #This feature is not recommended to be used.
+                ax.set_yticks(contour_settings_custom['y_ticks'])     
+            for item in ([ax.title, ax.xaxis.label, ax.yaxis.label] +
+                ax.get_xticklabels() + ax.get_yticklabels()):
+                item.set_fontsize(contour_settings_custom['fontsize'])
+        return ax
     
-    def plot_pdfs(self,factors_list=[[0,1]], contour_settings_custom = False, contour_settings_auto=False):
+    def plot_pdfs(self,factors_list=[[0,1]], contour_settings_custom = {}):
         """Generates a plot of the joint probability density functions for several pairs of parameters.
         
         :param factors_list: A list of pairs of parameters. For each pair [x, y] the parameter x will appear on the x axis and the parameter y will appear on the y axis. If this parameter is not supplied, it defaults to [0,1].
         :type factors_list: list of length-2 lists.
         """
-        
         #Get the number of plots that will be created
         num_plots = len(factors_list)
         
         #Create the matplotlib figure and subplots
         fig,axes=plt.subplots(1,num_plots,figsize=(num_plots*5,5))
-        
         #Plot the individual subplots
-        if contour_settings_custom == True or contour_settings_auto==True: # EAW 2020/01/09
+        if len(contour_settings_custom) == 0: 
             for ax,factors in zip(axes,factors_list):
-                self._single_pdf_plot(factors=factors,ax=ax, fig=fig, contour_settings_custom = contour_settings_custom, contour_settings_auto=contour_settings_auto) # EAW 2020/01/09
-            fig.tight_layout() #EAW 2020/01/07
-            fig.savefig(self.solution.figure_name,dpi=220) #EAW 2020/01/07
-        else:
+                self._single_pdf_plot(factors=factors,ax=ax)
+        if len(contour_settings_custom) > 0: 
             for ax,factors in zip(axes,factors_list):
-                self._single_pdf_plot(factors=factors,ax=ax, contour_settings_custom = contour_settings_custom, contour_settings_auto=contour_settings_auto)
-            fig.savefig(self.solution.figure_name,dpi=220) #EAW 2020/01/07
+                self._single_pdf_plot(factors=factors,ax=ax, fig=fig, contour_settings_custom = contour_settings_custom)
+            fig.tight_layout() 
+            if 'space_between_subplots' not in contour_settings_custom:
+                contour_settings_custom['space_between_subplots'] = 0.40
+            fig.subplots_adjust(wspace = contour_settings_custom['space_between_subplots']) 
+            if 'figure_name' in contour_settings_custom:
+                fig.savefig(contour_settings_custom['figure_name']+".png",dpi=220)
         return fig
     
     def plot_covariance(self,factors_list=None):
