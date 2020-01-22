@@ -13,9 +13,38 @@ import matplotlib
 from matplotlib import cm #EAW 2020/01/07
 matplotlib.use('Agg') #EAW 2020/01/07
 
-#TODO: Make 2D parameter response surfaces like in the perspective figures. Can make it for each variable pair. Should have it as an option in the UserInput as True, False, or a list of pairs for which ones to make.
-#Below is pseudo code to begin doing that. See more info at https://github.com/AdityaSavara/ODE-KIN-BAYES-SG-EW/issues/9
-#active_params= ['a']
+'''
+THIS FILE IS TO DEMONSTRATE CUSTOM PLOTTING WITH MUMPCE SOLUTION OBJECTS
+The method for using the custom plotting features is to make a dictionary named contour_settings_custom
+and to pass this dictionary as an optional argument into either plot_pdfs or _single_pdf_plot
+which are functions in the Project class from Project.py of mumpce.
+
+#Only one or more key:item pair needs to be added into contour_settings_custom to turn it on.
+The item added does not even need to be a real option.
+#So for example:; contour_settings_custom['on'] = True #would turn it on.
+
+The options are:
+contour_settings_custom['zoom_std_devs'] = 2.5 #how zoomed in the image is.
+contour_settings_custom['center_on'] = 'all' #can be 'all', 'prior' or 'posterior'. 
+contour_settings_custom['fontsize'] #sets the fontsize for everything except the colorbars. Can be an integer or the word 'auto', or the word "None". Should change space_between_subplots if fontsize is changed. 
+contour_settings_custom['space_between_subplots'] #Typically a value between 0.20 and 5.0. Set to 4.0 by default. Should be changed when font size is changed. Fontsize 'auto' tends to make small fonts which needs smaller values like 0.20.
+contour_settings_custom["colorbars"] = True #can be true or false.
+contour_settings_custom['num_pts_per_axis'] = 500 #This sets the resolution of the contours.
+contour_settings_custom["cmap_levels"] = 4   #This is the number of contours.
+contour_settings_custom['cmap_prior'] #define a color map directly
+contour_settings_custom['cmap_posterior']  #define a color map directly
+contour_settings_custom['colormap_prior_customized'] #accepts a string (matplotlib colormap names) or a list of tuples with 0-to-1 and colornames to interpolate between.
+contour_settings_custom['colormap_posterior_customized'] #accepts a string (matplotlib colormap names) or a list of tuples with 0-to-1 and colornames to interpolate between.
+contour_settings_custom['contours_normalized'] = True #Makes the maximum 1, with the contours at 0.2, 0.4, 0.6., 0.8
+contour_settings_custom['num_y_ticks'] #adusts number of y ticks (actually sets a maximum number of them)
+contour_settings_custom['num_x_ticks'] #adjusts number of x ticks (actually sets a maximum number of them)
+contour_settings_custom['x_ticks'] #feed in an array of directly. Not recommended.
+contour_settings_custom['y_ticks'] #feed in an array of directly. Not recommended.
+
+
+'''
+
+###THE BELOW LINES OF CODE SETUP THE DATA IN THE MUMPCE PROJECT OBJECT####
 mumpceProjectObject = mumpceProject.Project()
 mumpceProjectObject.model_parameter_info = np.array([{'parameter_number': 0, 'parameter_name': 'Parameter 0', 'parameter_value': 1.0},
  {'parameter_number': 1, 'parameter_name': 'Parameter 1', 'parameter_value': 1.0}, #The parameter values are not used in making these contour plots.
@@ -33,34 +62,55 @@ Posterior_cov_vector = np.array([[ 0.0148872,-0.01894579, -0.01047339,0.01325883
  [ 0.01325883, -0.04801795,0.01588293,0.08171972,0.00875017],
  [ 0.04734254, -0.04545703, -0.05618226,0.00875017,0.20669273]]) #This will become solution.cov. It does not need to be a numpy array, but we make it one for consistency.
 
-mumpceSolutionsObject = mumpceSolution.Solution(Posterior_mu_vector, Posterior_cov_vector)
+Prior_mu_vector = np.array([-0.98888733,0.8200355, 0.01204044, -7.02385888,0.40439847])
+Prior_cov_vector = 10*Posterior_cov_vector
+
+mumpceSolutionsObject = mumpceSolution.Solution(Posterior_mu_vector, Posterior_cov_vector, initial_x=Prior_mu_vector, initial_covariance=Prior_cov_vector)
 mumpceProjectObject.solution = mumpceSolutionsObject
 mumpceProjectObject.pairsOfParameterIndices = [[0, 1], [1, 2],[3, 4]]
-mumpceProjectObject.solution.mu_prior = np.array([-0.98888733,0.8200355, 0.01204044, -1.02385888,0.40439847])
-mumpceProjectObject.solution.cov_prior = 10*Posterior_cov_vector
-#np.array([[ 0.0148872,-0.01894579, -0.01047339,0.01325883,0.04734254],
-# [-0.01894579,0.04284732, -0.00131389, -0.04801795, -0.04545703],
-# [-0.01047339, -0.00131389,0.02343653,0.01588293, -0.05618226],
-# [ 0.01325883, -0.04801795,0.01588293,0.08171972,0.00875017],
-# [ 0.04734254, -0.04545703, -0.05618226,0.00875017,0.20669273]])
 
-#This makes the figures as originally programmed. It assumes/requries things be normalized to 1.
-mumpceProjectObject.solution.figure_name='mumpce_plots_alpha.png'
-#mumpceProjectObject.solution.num_pts_per_axis = 500
-mumpceProjectObject.plot_pdfs(mumpceProjectObject.pairsOfParameterIndices, contour_settings_custom = False)
-cmap = cm.Reds
 
+###THE BELOW LINES OF CODE MAKE EXAMPLE PLOTS WITH THE DEFAULT AND WITH THE NEW REVISED WAY####
+
+#This makes the figures as originally programmed in mumpce, which assumes/requries the cov to be normalized to 1.
+mumpceProjectObject.plot_pdfs(mumpceProjectObject.pairsOfParameterIndices)
 
 #I have expanded the code to allow more versatility an optional argument called contour_settings_custom.
-#  It does not assume/require that things be normalized to 1, but requires the below variables to be populated.
-mumpceProjectObject.solution.contour_axis_range = np.array([[-3.0,1.5],[-1.5,3.0],[-1.5,1.5],[-1.5,1.5],[-1,1],[-1,1],[-1,1]]) #this must be made into a numpy array.
-mumpceProjectObject.solution.contour_resolution = np.array([0.01,0.01,0.01,0.01,0.01,0.01])
-mumpceProjectObject.solution.axis_tick_spacing = np.array([1,1.5,1,1,1,1])
-mumpceProjectObject.solution.contour_levels = np.exp((np.arange(-2,0,0.5) ** 2) * -1)
-mumpceProjectObject.solution.figure_name='mumpce_plots_beta.png'
-mumpceProjectObject.plot_pdfs(mumpceProjectObject.pairsOfParameterIndices, contour_settings_custom = True)
+#It does not assume/require that things be normalized to 1.
 
-#Here is the graph after Eric has made the needed changes to have contour_settings_auto....
-#Right now it produces fairly similar looking graphs. Later, it will change things more!
-mumpceProjectObject.solution.figure_name='mumpce_plots_gamma.png'
-mumpceProjectObject.plot_pdfs(mumpceProjectObject.pairsOfParameterIndices, contour_settings_auto= True)
+contour_settings_custom = {} 
+contour_settings_custom['figure_name']='mumpce_plots_02'
+mumpceProjectObject.plot_pdfs(mumpceProjectObject.pairsOfParameterIndices, contour_settings_custom = contour_settings_custom)
+
+
+contour_settings_custom={}
+contour_settings_custom['figure_name']='mumpce_plots_03'
+contour_settings_custom['fontsize'] = 'auto'
+contour_settings_custom['num_y_ticks'] = 'auto'
+contour_settings_custom['num_x_ticks'] = 'auto'
+contour_settings_custom['colorbars'] = True
+contour_settings_custom['space_between_subplots'] = 0.20
+mumpceProjectObject.plot_pdfs(mumpceProjectObject.pairsOfParameterIndices, contour_settings_custom = contour_settings_custom)
+
+contour_settings_custom = {}
+contour_settings_custom['figure_name']='mumpce_plots_04'
+contour_settings_custom['fontsize'] = 'auto'
+contour_settings_custom['num_y_ticks'] = 'auto'
+contour_settings_custom['num_x_ticks'] = 'auto'
+contour_settings_custom['colormap_posterior_customized'] = "Oranges"
+contour_settings_custom['colormap_prior_customized'] = "Greens"
+contour_settings_custom['contours_normalized'] = False
+contour_settings_custom['center_on'] = 'prior'
+contour_settings_custom['colorbars'] = True
+mumpceProjectObject.plot_pdfs(mumpceProjectObject.pairsOfParameterIndices, contour_settings_custom = contour_settings_custom)
+
+contour_settings_custom = {}
+contour_settings_custom['figure_name']='mumpce_plots_5'
+contour_settings_custom['space_between_subplots'] = 0.50
+mumpceProjectObject.plot_pdfs(mumpceProjectObject.pairsOfParameterIndices, contour_settings_custom = contour_settings_custom)
+
+contour_settings_custom = {}
+contour_settings_custom['figure_name']='mumpce_plots_06'
+contour_settings_custom['colorbars'] = True
+contour_settings_custom['space_between_subplots'] = 0.50
+mumpceProjectObject.plot_pdfs(mumpceProjectObject.pairsOfParameterIndices, contour_settings_custom = contour_settings_custom)
