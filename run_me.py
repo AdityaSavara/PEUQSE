@@ -82,18 +82,18 @@ class ip:
 #        self.initial_concentrations_array = UserInput.initial_concentrations_array
         self.modulate_accept_probability = UserInput.modulate_accept_probability
         
-    def import_experimental_settings(self): #FIXME: This is obviously not very general. Though actually, we don't need it here. This should just go into UserInput as code rather than a function. These variables will become something like: UserInput.times, UserInput.observedResponse, UserInput.responseUncertainties.
-        experiments_df = pd.read_csv(UserInput.Filename)
-        self.times = np.array(experiments_df['time']) #experiments_df['time'].to_numpy() #The to_numpy() syntax was not working for Ashi.
-        self.experiment = np.array(experiments_df['AcHBackgroundSubtracted'])/2000  #experiments_df['AcHBackgroundSubtracted'].to_numpy()/1000
-        self.errors = np.array(experiments_df['Errors']) #.to_numpy()
+#    def import_experimental_settings(self): #FIXME: This is obviously not very general. Though actually, we don't need it here. This should just go into UserInput as code rather than a function. These variables will become something like: UserInput.times, UserInput.observedResponse, UserInput.responseUncertainties.
+#        experiments_df = pd.read_csv(UserInput.Filename)
+#        self.times = np.array(experiments_df['time']) #experiments_df['time'].to_numpy() #The to_numpy() syntax was not working for Ashi.
+#        self.experiment = np.array(experiments_df['AcHBackgroundSubtracted'])/2000  #experiments_df['AcHBackgroundSubtracted'].to_numpy()/1000
+#        self.errors = np.array(experiments_df['Errors']) #.to_numpy()
 
     #main function to get samples
     def MetropolisHastings(self):
         if hasattr(self.UserInput, "mcmc_random_seed"):
             if type(UserInput.mcmc_random_seed) == type(1): #if it's an integer, then it's not a "None" type or string, and we will use it.
                 np.random.seed(UserInput.mcmc_random_seed)
-        self.import_experimental_settings()
+        self.UserInput.import_experimental_settings(self)
         rate_tot_array = np.zeros((self.mcmc_length,len(self.experiment)))
         samples = np.zeros((self.mcmc_length,len(self.mu_prior)))
         samples[0,:] = self.mu_prior # Initialize the chain. Theta is initialized as the starting point of the chain.  It is placed at the prior mean.
@@ -158,17 +158,17 @@ class ip:
        
         #Want to achief: simulationOutput = simulationWrapper(discreteParameterVector)
         
-        def simulationFunctionWrapper(discreteParameterVector): #FIXME: This should be defined in UserInput and passed in. User is responsible for it.
-            # from tprmodel import tprequation # This is moved to the beginning of this file EAW 2020/01/08
-            sample_list = list(discreteParameterVector) #converting to list so can use list expansion in arguments.        
-            tpr_theta_Arguments = [UserInput.model_function_name, self.UserInput.initial_concentrations_array, self.times, (*sample_list,self.UserInput.beta_dTdt,self.UserInput.T_0) ] #FIXME: Times needs to occur in UserInput. This needs to all occur in some kind of UserFunctions module called from UserInput, should not be passed in here. 
-            tpr_theta = odeint(*tpr_theta_Arguments) # [0.5, 0.5] are the initial theta's. #FIXME: initialArgs and equation should come from UserInput, not be hardcoded here.            
-            simulationInputArguments = [tpr_theta, self.times, *sample_list, self.UserInput.beta_dTdt,self.UserInput.T_0] #FIXME: To be passed in from userInput
-            simulationFunction = UserInput.model_function_name #FIXME: To be passed in from userInput
-            simulationOutput = UserInput.model_function_name(*simulationInputArguments) # EAW 2020/01/08
-            return simulationOutput
+#        def simulationFunctionWrapper(discreteParameterVector): #FIXME: This should be defined in UserInput and passed in. User is responsible for it.
+#            # from tprmodel import tprequation # This is moved to the beginning of this file EAW 2020/01/08
+#            sample_list = list(discreteParameterVector) #converting to list so can use list expansion in arguments.        
+#            tpr_theta_Arguments = [UserInput.model_function_name, self.UserInput.initial_concentrations_array, self.times, (*sample_list,self.UserInput.beta_dTdt,self.UserInput.T_0) ] #FIXME: Times needs to occur in UserInput. This needs to all occur in some kind of UserFunctions module called from UserInput, should not be passed in here. 
+#            tpr_theta = odeint(*tpr_theta_Arguments) # [0.5, 0.5] are the initial theta's. #FIXME: initialArgs and equation should come from UserInput, not be hardcoded here.            
+#            simulationInputArguments = [tpr_theta, self.times, *sample_list, self.UserInput.beta_dTdt,self.UserInput.T_0] #FIXME: To be passed in from userInput
+#            simulationFunction = UserInput.model_function_name #FIXME: To be passed in from userInput
+#            simulationOutput = UserInput.model_function_name(*simulationInputArguments) # EAW 2020/01/08
+#            return simulationOutput
         
-        simulationOutput = simulationFunctionWrapper(discreteParameterVector) #FIXME: code should look like simulationOutput = self.UserInput.simulationFunction(*self.UserInput.simulationInputArguments)
+        simulationOutput = self.UserInput.simulationFunctionWrapper(self,discreteParameterVector) #FIXME: code should look like simulationOutput = self.UserInput.simulationFunction(*self.UserInput.simulationInputArguments)
 
         #intermediate_metric = np.mean(np.square(rate_tot - self.experiment) / np.square(self.errors ))            
         
@@ -184,29 +184,29 @@ class ip:
         #simulatedResponses = np.log10(rate_tot[temp_points]) #This was a temporary line that should be deleted once Eric understands code flow.
         
         #FIXME: the below wrapper functions can be combined, but either way should be in userinput as described below.
-        def rate_tot_summing_func(rate):  
-            rate_tot = -np.sum(rate, axis=0)   
-            return rate_tot
-        def rate_tot_four_points_func(rate): #Multiple layers of wrapper functions are fine.
-            rate_tot = rate_tot_summing_func(rate)
-            temp_points = np.array([0,49,99,149]) #range(225) #FIXME: There should be nothing hard coded here. You can hard code it in userinput if you want.
-            rate_tot_four_points = np.array(rate_tot[temp_points])
-            return rate_tot_four_points
-        def log10_wrapper_func(rate):
-            rate_tot_four_points = rate_tot_four_points_func(rate)
-            loggedRateValues = np.log10(rate_tot_four_points)
-            return loggedRateValues
+#        def rate_tot_summing_func(rate):  
+#            rate_tot = -np.sum(rate, axis=0)   
+#            return rate_tot
+#        def rate_tot_four_points_func(rate): #Multiple layers of wrapper functions are fine.
+#            rate_tot = rate_tot_summing_func(rate)
+#            temp_points = np.array([0,49,99,149]) #range(225) #FIXME: There should be nothing hard coded here. You can hard code it in userinput if you want.
+#            rate_tot_four_points = np.array(rate_tot[temp_points])
+#            return rate_tot_four_points
+#        def log10_wrapper_func(rate):
+#            rate_tot_four_points = rate_tot_four_points_func(rate)
+#            loggedRateValues = np.log10(rate_tot_four_points)
+#            return loggedRateValues
             
-        simulationOutputProcessingFunction = log10_wrapper_func #FIXME: this will become fed in as self.UserInput.simulationOutputProcessingFunction
-        simulatedResponses = simulationOutputProcessingFunction(simulationOutput) #This will become simulatedResponses = self.UserInput.simulationOutputProcessingFunction(simulationOutput)
+        #simulationOutputProcessingFunction = self.UserInput.log10_wrapper_func #FIXME: this will become fed in as self.UserInput.simulationOutputProcessingFunction
+        simulatedResponses = self.UserInput.simulationOutputProcessingFunction(simulationOutput) #This will become simulatedResponses = self.UserInput.simulationOutputProcessingFunction(simulationOutput)
             
-        temp_points = np.array([0,49,99,149])
-        observedResponses = np.log10(self.experiment[temp_points]) #FIXME: This should not be hard coded here. Should be self.UserInput.obseredResponses
-        cov = self.errors[temp_points]
+        #temp_points = np.array([0,49,99,149]) moved to UserInput EAW 2020/01/27
+        observedResponses = self.UserInput.observedResponses(self.experiment)#np.log10(self.experiment[temp_points]) #FIXME: This should not be hard coded here. Should be self.UserInput.obseredResponses
+        cov = self.errors[self.UserInput.temp_points]
         #probability_metric = multivariate_normal.pdf(x=np.log10(rate_tot[temp_points]),mean=np.log10(self.experiment[temp_points]),cov=self.errors[temp_points]) #ERIC, THIS WAS THE PREVIOUS LINE. I BELIEVE YOUR LOG10 TRANSFORM IS NOT SOMETHING WE WOULD NORMALLY DO. AM I CORRECT?
         probability_metric = multivariate_normal.pdf(x=simulatedResponses,mean=observedResponses,cov=cov) #FIXME: should become self.UserInput.responseUncertantiesCov or something like that.
         if self.verbose: print('likelihood probability',probability_metric,'log10(rate_tot)',np.log10(rate_tot[temp_points]), 'log10(experiment)', np.log10(self.experiment[temp_points]), 'error', self.errors[temp_points])
-        rate_tot = rate_tot_summing_func(simulationOutput)
+        rate_tot = self.UserInput.rate_tot_summing_func(simulationOutput)
         return probability_metric, rate_tot #FIXME: This needs to say probability_metric, simulatedResponses or something like that, but right now the sizes of the arrays do not match.
         
     

@@ -2,7 +2,7 @@ import numpy as np
 ###User sets their model equation####
 from tprmodel import tprequation # EAW 2020/01/13 
 model_function_name = tprequation # EAW 2020/01/08
-
+from processing_functions_tpd_odeint import rate_tot_summing_func, rate_tot_four_points_func, log10_wrapper_func, observedResponses, simulationFunctionWrapper, import_experimental_settings
 #####Temperature Programmed Reaction Settings#####
 TPR = True #Set to false if doing an isothermal experiment.
 
@@ -59,6 +59,16 @@ modulate_accept_probability = 0 #Default value of 0. Changing this value sharpen
 ######gridSamplingSettings#####
 gridSampling = False    
 
+
+######processing functions for odeint-based temperature-programmed desorption model##########
+temp_points = np.array([0,49,99,149])
+simulationOutputProcessingFunction = log10_wrapper_func
+rate_tot_summing_func = rate_tot_summing_func 
+rate_tot_four_points_func = rate_tot_four_points_func 
+log10_wrapper_func = log10_wrapper_func
+observedResponses = observedResponses
+simulationFunctionWrapper = simulationFunctionWrapper
+import_experimental_settings = import_experimental_settings
 
 ######mumpce plots#####
 model_parameter_info = np.array([{'parameter_number': 0, 'parameter_name': 'Parameter 0', 'parameter_value': 1.0},
