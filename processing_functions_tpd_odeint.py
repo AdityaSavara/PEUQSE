@@ -5,6 +5,12 @@ import scipy
 from scipy.integrate import odeint
 import pandas as pd
 
+#Need to define beta directly, or define dt and dT.
+dT = 0.77 #Set this to 0 for an isothermal experiment.
+dt = 0.385
+beta_dTdt = dt/dT #This beta is heating rate. This will be set to 0 if somebody sets TPR to false. Not to be confused with 1/(T*k_b) which is often also called beta. User can put beta in manually.
+T_0 = 152.96 #this is the starting temperature.
+
 def rate_tot_summing_func(rate):
     rate_tot = -np.sum(rate, axis=0)
     return rate_tot
@@ -20,22 +26,28 @@ def log10_wrapper_func(rate):
     loggedRateValues = np.log10(rate_tot_four_points)
     return loggedRateValues
 
-def observedResponses(experiment):
+def observedResponses():
+    global experiment
     return np.log10(experiment[UserInput.temp_points])
 
-def simulationFunctionWrapper(self, discreteParameterVector): #FIXME: This should be defined in UserInput and passed in. User is responsible for it.
-    # from tprmodel import tprequation # This is moved to the beginning of this file EAW 2020/01/08
+def TPR_simulationFunctionWrapper(discreteParameterVector): 
+    global times
     sample_list = list(discreteParameterVector) #converting to list so can use list expansion in arguments.        
-    tpr_theta_Arguments = [UserInput.model_function_name, UserInput.initial_concentrations_array, self.times, (*sample_list,self.UserInput.beta_dTdt,self.UserInput.T_0) ] #FIXME: Times needs to occur in UserInput. This needs to all occur in somekind of UserFunctions module called from UserInput, should not be passed in here. 
+    tpr_theta_Arguments = [UserInput.model_function_name, UserInput.initial_concentrations_array, times, (*sample_list,beta_dTdt,T_0) ] #FIXME: Times needs to occur in UserInput. This needs to all occur in somekind of UserFunctions module called from UserInput, should not be passed in here. 
     tpr_theta = odeint(*tpr_theta_Arguments) # [0.5, 0.5] are the initial theta's. #FIXME: initialArgs and equation should come from UserInput, not be hardcoded here.            
-    simulationInputArguments = [tpr_theta, self.times, *sample_list, self.UserInput.beta_dTdt,self.UserInput.T_0] #FIXME:To be passed in from userInput
+    simulationInputArguments = [tpr_theta, times, *sample_list, beta_dTdt,T_0] #FIXME:To be passed in from userInput
     simulationFunction = UserInput.model_function_name #FIXME: To be passed in from userInput
     simulationOutput = UserInput.model_function_name(*simulationInputArguments) # EAW 2020/01/08
     return simulationOutput
 
-def import_experimental_settings(self): #FIXME: This is obviously not very general. Though actually, we don't need it here. This should just go into UserInput as code rather than a function. These variables will become something like: UserInput.times, UserInput.observedResponse, UserInput.responseUncertainties.
-    experiments_df = pd.read_csv(UserInput.Filename)
-    self.times = np.array(experiments_df['time']) #experiments_df['time'].to_numpy() #The to_numpy() syntax was not working for Ashi.
-    self.experiment = np.array(experiments_df['AcHBackgroundSubtracted'])/2000  #experiments_df['AcHBackgroundSubtracted'].to_numpy()/1000
-    self.errors = np.array(experiments_df['Errors']) #.to_numpy()
-    #return self.times, self.experiment, self.errors
+def import_experimental_settings(Filename): #FIXME: This is obviously not very general. Though actually, we don't need it here. This should just go into UserInput as code rather than a function. These variables will become something like: UserInput.times, UserInput.observedResponse, UserInput.responseUncertainties.
+    global times
+    global experiment
+    global errors
+    experiments_df = pd.read_csv(Filename)
+    times = np.array(experiments_df['time']) #experiments_df['time'].to_numpy() #The to_numpy() syntax was not working for Ashi.
+    experiment = np.array(experiments_df['AcHBackgroundSubtracted'])/2000 
+    print(len(experiment))
+    #experiments_df['AcHBackgroundSubtracted'].to_numpy()/1000
+    errors = np.array(experiments_df['Errors']) #.to_numpy()
+    return times, experiment, errors
