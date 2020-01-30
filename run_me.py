@@ -145,28 +145,24 @@ class ip:
         #This is more in accordance with https://github.com/AdityaSavara/ODE-KIN-BAYES-SG-EW/issues/11. 
         simulationOutputProcessingFunction = self.UserInput.simulationOutputProcessingFunction
         simulationFunctionWrapper =  self.UserInput.simulationFunctionWrapper
-
-        simulationOutput =simulationFunctionWrapper(discreteParameterVector) #FIXME: code should look like simulationOutput = self.UserInput.simulationFunction(*self.UserInput.simulationInputArguments)
         
-        
-        #simulationOutputProcessingFunction = self.UserInput.log10_wrapper_func #FIXME: this will become fed in as self.UserInput.simulationOutputProcessingFunction
+        simulationOutput =simulationFunctionWrapper(discreteParameterVector) 
         if type(simulationOutputProcessingFunction) == type(None):
             simulatedResponses = simulationOutput
         if type(simulationOutputProcessingFunction) != type(None):
             simulatedResponses = self.UserInput.simulationOutputProcessingFunction(simulationOutput) #This will become simulatedResponses = self.UserInput.simulationOutputProcessingFunction(simulationOutput)
-
-            
-        #temp_points = np.array([0,49,99,149]) moved to UserInput EAW 2020/01/27
+          
         observedResponses = self.UserInput.observedResponses()#np.log10(self.experiment[temp_points]) #FIXME: This should not be hard coded here. Should be self.UserInput.obseredResponses
         
         #To find the relevant covariance, we take the errors from the points.
-        cov = UserInput.errors[UserInput.temp_points] #FIXME: We should not be doing subset of points like this here. Should happen at user input level.
+        cov = UserInput.errors #[UserInput.temp_points] #FIXME: We should not be doing subset of points like this here. Should happen at user input level.
         #FIXME should become:
         #cov = self.UserInput.observedResponses_uncertainties
         
         
         #probability_metric = multivariate_normal.pdf(x=np.log10(rate_tot[temp_points]),mean=np.log10(self.experiment[temp_points]),cov=self.errors[temp_points]) #ERIC, THIS WAS THE PREVIOUS LINE. I BELIEVE YOUR LOG10 TRANSFORM IS NOT SOMETHING WE WOULD NORMALLY DO. AM I CORRECT?
         probability_metric = multivariate_normal.pdf(x=simulatedResponses,mean=observedResponses,cov=cov) #FIXME: should become self.UserInput.responseUncertantiesCov or something like that.
+        print("line 165", probability_metric)
         simulationOutput = self.UserInput.rate_tot_summing_func(simulationOutput)
         #temp_points = self.UserInput.temp_points
         #if self.UserInput.verbose: print('likelihood probability',probability_metric,'log10(rate_tot)',np.log10(rate_tot[temp_points]), 'log10(experiment)', np.log10(self.experiment[temp_points]), 'error', self.errors[temp_points])

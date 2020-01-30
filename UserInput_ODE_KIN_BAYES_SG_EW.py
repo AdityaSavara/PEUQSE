@@ -15,8 +15,7 @@ InputConstants= [] #TODO: ERIC, WE SHOULD EITHER DESIGN YOUR CODE TO ALLOW CONST
 
 #####Experimental Data Input Files#####
 Filename = 'ExperimentalDataAcetaldehydeTPDCeO2111MullinsTruncatedLargerErrors.csv'
-times, experiment, errors = import_experimental_settings(Filename)
-
+times, experiment, observedResponses_uncertainties = import_experimental_settings(Filename)
 
 #####Chemical Kinetic Model Input Files#####
 parameterNamesAndMathTypeExpressionsDict = {'Ea_1':r'$E_{a1}$','Ea_2':r'$E_{a2}$','log_A1':r'$log(A_{1})$','log_A2':r'$log(A_{2})$','gamma1':r'$\gamma_{1}$','gamma2':r'$\gamma_{2}$'}
@@ -64,7 +63,7 @@ simulationOutputProcessingFunction = log10_wrapper_func #Can be None.
 #rate_tot_summing_func = rate_tot_summing_func 
 #rate_tot_four_points_func = rate_tot_four_points_func 
 #log10_wrapper_func = log10_wrapper_func
-#observedResponses = observedResponses
+observedResponses = observedResponsesFunc()
 simulationFunctionWrapper = TPR_simulationFunctionWrapper
 import_experimental_settings = import_experimental_settings
 

@@ -17,18 +17,20 @@ def rate_tot_summing_func(rate):
 
 def rate_tot_four_points_func(rate): #Multiple layers of wrapper functions are fine.
     rate_tot = rate_tot_summing_func(rate)
-    temp_points = UserInput.temp_points #range(225) #FIXME: There should be nothing hard coded here. You can hard code it in userinput if you want.
-    rate_tot_four_points = np.array(rate_tot[temp_points])
-    return rate_tot_four_points
+    #rate_tot_four_points = np.array(rate_tot[temp_points])
+    return rate_tot
 
-def log10_wrapper_func(rate):
-    rate_tot_four_points = rate_tot_four_points_func(rate)
-    loggedRateValues = np.log10(rate_tot_four_points)
+def log10_wrapper_func(rate, fourpoints = False):
+    if fourpoints == True:
+        temp_points = UserInput.temp_points #range(225) #FIXME: There should be nothing hard coded here. You can hard code it in userinput if you want.
+        rate = rate[temp_points]
+    loggedRateValues = np.log10(rate)
     return loggedRateValues
 
 def observedResponses():
     global experiment
-    return np.log10(experiment[UserInput.temp_points])
+    #return np.log10(experiment[UserInput.temp_points])
+    return np.log10(experiment)
 
 def TPR_simulationFunctionWrapper(discreteParameterVector): 
     global times
