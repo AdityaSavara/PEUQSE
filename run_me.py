@@ -85,7 +85,7 @@ class ip:
         if hasattr(self.UserInput, "mcmc_random_seed"):
             if type(UserInput.mcmc_random_seed) == type(1): #if it's an integer, then it's not a "None" type or string, and we will use it.
                 np.random.seed(UserInput.mcmc_random_seed)
-        samples_simulatedOutputs = np.zeros((self.UserInput.mcmc_length,self.UserInput.num_data_points))
+        samples_simulatedOutputs = np.zeros((self.UserInput.mcmc_length,self.UserInput.num_data_points)) #TODO: Consider moving this out of this function.
         samples = np.zeros((self.UserInput.mcmc_length,len(self.UserInput.mu_prior)))
         samples[0,:] = self.UserInput.mu_prior # Initialize the chain. Theta is initialized as the starting point of the chain.  It is placed at the prior mean.
         likelihoods_vec = np.zeros((self.UserInput.mcmc_length,1))
@@ -118,6 +118,7 @@ class ip:
                   #print(simulationOutput_current_location)
                 samples[i,:] = samples[i-1,:]
                 samples_simulatedOutputs[i,:] = simulationOutput_current_location
+                print("line 121", simulationOutput_current_location)
                 posteriors_un_normed_vec[i] = likelihood_current_location*prior_current_location
                 likelihoods_vec[i] = likelihood_current_location
                 priors_vec[i] = prior_current_location
@@ -168,15 +169,19 @@ class ip:
         simulationOutput =simulationFunctionWrapper(discreteParameterVector) #FIXME: code should look like simulationOutput = self.UserInput.simulationFunction(*self.UserInput.simulationInputArguments)       
         #simulationOutputProcessingFunction = self.UserInput.log10_wrapper_func #FIXME: this will become fed in as self.UserInput.simulationOutputProcessingFunction
         if type(simulationOutputProcessingFunction) == type(None):
-            simulatedResponses = simulationOutput
+            simulatedResponsesFake = simulationOutput #Is this the log of the rate? If so, Why?
         if type(simulationOutputProcessingFunction) != type(None):
-            simulatedResponses = self.UserInput.simulationOutputProcessingFunction(simulationOutput) #This will become simulatedResponses = self.UserInput.simulationOutputProcessingFunction(simulationOutput)
-        observedResponses = self.UserInput.observedResponses
+            simulatedResponsesFake = self.UserInput.simulationOutputProcessingFunction(simulationOutput) #This will become simulatedResponses = self.UserInput.simulationOutputProcessingFunction(simulationOutput)
+        observedResponsesFake = self.UserInput.observedResponses
+        print("line 172, ", len(simulatedResponsesFake), len(observedResponsesFake))
         #To find the relevant covariance, we take the errors from the points.
         cov = UserInput.observedResponses_uncertainties #FIXME: We should not be doing subset of points like this here. Should happen at user input level.
-        probability_metric = multivariate_normal.pdf(x=simulatedResponses,mean=observedResponses,cov=cov)
-        simulationOutput = self.UserInput.rate_tot_summing_func(simulationOutput)
-        return probability_metric, simulationOutput #FIXME: This needs to say probability_metric, simulatedResponses or something like that, but right now the sizes of the arrays do not match.
+        probability_metric = multivariate_normal.pdf(x=simulatedResponsesFake,mean=observedResponsesFake,cov=cov)
+        #FIXME: simulatedResponses is the actual simulatedResponses.
+        simulatedResponses = self.UserInput.rate_tot_summing_func(simulationOutput)
+        print("line 177", len(cov), len(simulatedResponses), np.shape(simulatedResponses), len(simulatedResponsesFake), np.shape(simulatedResponsesFake))
+        print("line 178", simulatedResponses, simulatedResponsesFake)
+        return probability_metric, simulatedResponses #FIXME: This needs to say probability_metric, simulatedResponses or something like that, but right now the sizes of the arrays do not match.
 
 
 def sampledParameterHistogramMaker(parameterName,parameterNamesAndMathTypeExpressionsDict, sampledParameterFiguresDictionary, sampledParameterAxesDictionary):
@@ -226,8 +231,9 @@ if __name__ == "__main__":
     fig0, ax0 = plt.subplots()
     if UserInput.verbose:
       #print(np.mean(samples_simulatedOutputs,axis = 0))
+      print("line 233", samples_simulatedOutputs[0])
       pass
-    ax0.plot(np.array(experiments_df['AcH - T']),np.mean(samples_simulatedOutputs,axis = 0), 'r')
+    ax0.plot(np.array(experiments_df['AcH - T'][UserInput.temp_points]),np.mean(samples_simulatedOutputs,axis = 0), 'r')
     ax0.plot(np.array(experiments_df['AcH - T']),np.array(experiments_df['AcHBackgroundSubtracted'])/2000,'g')
     ax0.set_ylim([0.00, 0.025])
     ax0.set_xlabel('T (K)')
