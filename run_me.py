@@ -67,45 +67,45 @@ class ip:
         #Now will automatically populate some variables from UserInput
         UserInput.parameterNamesList = list(UserInput.parameterNamesAndMathTypeExpressionsDict.keys())
         UserInput.stringOfParameterNames = str(UserInput.parameterNamesList).replace("'","")[1:-1]
-        self.UserInput = UserInput
+        self.UserInput = UserInput #Note that this is a pointer, so the last two lines effects are within this object.
         if self.UserInput.verbose: 
             print("Bayes Model Initialized")
-        self.mcmc_length = UserInput.mcmc_length
-        self.mcmc_burn_in = UserInput.mcmc_burn_in # Number of samples trimmed off the beginning of the Markov chain.
-        self.mu_prior = UserInput.mu_prior
-        self.cov_prior = UserInput.cov_prior
-        self.Q_mu = self.mu_prior*0 # Q samples the next step at any point in the chain.  The next step may be accepted or rejected.  Q_mu is centered (0) around the current theta.  
-        self.Q_cov = self.cov_prior/10 # Take small steps. <-- looks like this 20 should be a user defined variable.
+        #self.mcmc_length = UserInput.mcmc_length
+        #self.mcmc_burn_in = UserInput.mcmc_burn_in # Number of samples trimmed off the beginning of the Markov chain.
+        #self.mu_prior = UserInput.mu_prior
+        #self.cov_prior = UserInput.cov_prior
+        self.Q_mu = self.UserInput.mu_prior*0 # Q samples the next step at any point in the chain.  The next step may be accepted or rejected.  Q_mu is centered (0) around the current theta.  
+        self.Q_cov = self.UserInput.cov_prior/10 # Take small steps. <-- looks like this 20 should be a user defined variable.
 #        self.initial_concentrations_array = UserInput.initial_concentrations_array
-        self.modulate_accept_probability = UserInput.modulate_accept_probability
-        
+        #self.modulate_accept_probability = UserInput.modulate_accept_probability
+        #self.UserInput.import_experimental_settings(UserInput.Filename) #FIXME: This needs to get out of this function.
 
     #main function to get samples
     def MetropolisHastings(self):
         if hasattr(self.UserInput, "mcmc_random_seed"):
             if type(UserInput.mcmc_random_seed) == type(1): #if it's an integer, then it's not a "None" type or string, and we will use it.
                 np.random.seed(UserInput.mcmc_random_seed)
-        self.UserInput.import_experimental_settings(UserInput.Filename) #FIXME: This needs to get out of this function.
-        samples_simulatedOutputs = np.zeros((self.mcmc_length,self.UserInput.num_data_points))
-        samples = np.zeros((self.mcmc_length,len(self.mu_prior)))
-        samples[0,:] = self.mu_prior # Initialize the chain. Theta is initialized as the starting point of the chain.  It is placed at the prior mean.
-        likelihoods_vec = np.zeros((self.mcmc_length,1))
-        posteriors_un_normed_vec = np.zeros((self.mcmc_length,1))
-        priors_vec = np.zeros((self.mcmc_length,1))
-        for i in range(1,self.mcmc_length):
+        samples_simulatedOutputs = np.zeros((self.UserInput.mcmc_length,self.UserInput.num_data_points))
+        samples = np.zeros((self.UserInput.mcmc_length,len(self.UserInput.mu_prior)))
+        samples[0,:] = self.UserInput.mu_prior # Initialize the chain. Theta is initialized as the starting point of the chain.  It is placed at the prior mean.
+        likelihoods_vec = np.zeros((self.UserInput.mcmc_length,1))
+        posteriors_un_normed_vec = np.zeros((self.UserInput.mcmc_length,1))
+        priors_vec = np.zeros((self.UserInput.mcmc_length,1))
+        for i in range(1,self.UserInput.mcmc_length):
             if self.UserInput.verbose: print("MCMC sample number", i)
             proposal_sample = samples[i-1,:] + np.random.multivariate_normal(self.Q_mu,self.Q_cov)
             prior_proposal = self.prior(proposal_sample)
             [likelihood_proposal, simulationOutput_proposal] = self.likelihood(proposal_sample)
-            prior_current_location = self.prior(samples[i-1,:])
-            [likelihood_current_location, rate_tot_current_location] = self.likelihood(samples[i-1,:])
+            prior_current_location = self.prior(samples[i-1,:]) 
+            [likelihood_current_location, simulationOutput_current_location] = self.likelihood(samples[i-1,:]) #FIXME: the previous likelihood should be stored so that it doesn't need to be calculated again.
             accept_probability = (likelihood_proposal*prior_proposal)/(likelihood_current_location*prior_current_location) 
-            if self.modulate_accept_probability != 0: #This flattens the posterior by accepting low values more often. It can be useful when greater sampling is more important than accuracy.
+            if self.UserInput.verbose: print('Current likelihood',likelihood_current_location, 'Proposed likelihood', likelihood_proposal, '\nAccept_probability (gauranteed if above 1)', accept_probability)
+            if self.UserInput.modulate_accept_probability != 0: #This flattens the posterior by accepting low values more often. It can be useful when greater sampling is more important than accuracy.
                 N_flatten = float(self.flatten_accept_probability)
                 accept_probability = accept_probability**(1/N_flatten) #TODO: add code that unflattens the final histograms, that way even with more sampling we still get an accurate final posterior distribution. We can also then add a flag if the person wants to keep the posterior flattened.
             if accept_probability > np.random.uniform():  #TODO: keep a log of the accept and reject. If the reject ratio is >90% or some other such number, warn the user.
                 if self.UserInput.verbose:
-                  print('accept')
+                  print('accept', proposal_sample)
                   #print(simulationOutput_proposal)
                 samples[i,:] = proposal_sample
                 samples_simulatedOutputs[i,:] = simulationOutput_proposal
@@ -114,18 +114,18 @@ class ip:
                 priors_vec[i] = prior_proposal
             else:
                 if self.UserInput.verbose:
-                  print('reject')
-                  #print(rate_tot_current_location)
+                  print('reject', proposal_sample)
+                  #print(simulationOutput_current_location)
                 samples[i,:] = samples[i-1,:]
-                samples_simulatedOutputs[i,:] = rate_tot_current_location
+                samples_simulatedOutputs[i,:] = simulationOutput_current_location
                 posteriors_un_normed_vec[i] = likelihood_current_location*prior_current_location
                 likelihoods_vec[i] = likelihood_current_location
                 priors_vec[i] = prior_current_location
             ########################################
-        samples = samples[self.mcmc_burn_in:]
-        posteriors_un_normed_vec = posteriors_un_normed_vec[self.mcmc_burn_in:]
-        likelihoods_vec = likelihoods_vec[self.mcmc_burn_in:]
-        priors_vec = priors_vec[self.mcmc_burn_in:]
+        samples = samples[self.UserInput.mcmc_burn_in:]
+        posteriors_un_normed_vec = posteriors_un_normed_vec[self.UserInput.mcmc_burn_in:]
+        likelihoods_vec = likelihoods_vec[self.UserInput.mcmc_burn_in:]
+        priors_vec = priors_vec[self.UserInput.mcmc_burn_in:]
         # posterior probabilites are transformed to a standard normal (std=1) for obtaining the evidence:
         evidence = np.mean(posteriors_un_normed_vec)*np.sqrt(2*np.pi*np.std(samples)**2)
         posteriors_vec = posteriors_un_normed_vec/evidence
@@ -139,7 +139,7 @@ class ip:
             #np.savetxt('mcmc_output.csv',mcmc_output) # EAW 2020/01/08
         return [evidence, info_gain, samples, samples_simulatedOutputs, np.log(posteriors_un_normed_vec)] # EAW 2020/01/08
     def prior(self,discreteParameterVector):
-        probability = multivariate_normal.pdf(x=discreteParameterVector,mean=self.mu_prior,cov=self.cov_prior)
+        probability = multivariate_normal.pdf(x=discreteParameterVector,mean=self.UserInput.mu_prior,cov=self.UserInput.cov_prior)
         return probability
     def likelihood(self,discreteParameterVector): #The variable discreteParameterVector represents a vector of values for the parameters being sampled. So it represents a single point in the multidimensional parameter space.
         #This is more in accordance with https://github.com/AdityaSavara/ODE-KIN-BAYES-SG-EW/issues/11. 
@@ -153,7 +153,6 @@ class ip:
         if type(simulationOutputProcessingFunction) == type(None):
             simulatedResponses = simulationOutput
         if type(simulationOutputProcessingFunction) != type(None):
-            print("getting here")
             simulatedResponses = self.UserInput.simulationOutputProcessingFunction(simulationOutput) #This will become simulatedResponses = self.UserInput.simulationOutputProcessingFunction(simulationOutput)
 
             
@@ -170,7 +169,6 @@ class ip:
         probability_metric = multivariate_normal.pdf(x=simulatedResponses,mean=observedResponses,cov=cov) #FIXME: should become self.UserInput.responseUncertantiesCov or something like that.
         simulationOutput = self.UserInput.rate_tot_summing_func(simulationOutput)
         #temp_points = self.UserInput.temp_points
-        if self.UserInput.verbose: print('likelihood probability',probability_metric)
         #if self.UserInput.verbose: print('likelihood probability',probability_metric,'log10(rate_tot)',np.log10(rate_tot[temp_points]), 'log10(experiment)', np.log10(self.experiment[temp_points]), 'error', self.errors[temp_points])
         return probability_metric, simulationOutput #FIXME: This needs to say probability_metric, simulatedResponses or something like that, but right now the sizes of the arrays do not match.
 
