@@ -122,22 +122,42 @@ class ip:
                 likelihoods_vec[i] = likelihood_current_location
                 priors_vec[i] = prior_current_location
             ########################################
-        samples = samples[self.UserInput.mcmc_burn_in:]
-        posteriors_un_normed_vec = posteriors_un_normed_vec[self.UserInput.mcmc_burn_in:]
-        likelihoods_vec = likelihoods_vec[self.UserInput.mcmc_burn_in:]
-        priors_vec = priors_vec[self.UserInput.mcmc_burn_in:]
+        post_burn_in_samples = samples[self.UserInput.mcmc_burn_in:]
+        post_burn_in_samples_simulatedOutputs = samples_simulatedOutputs[self.UserInput.mcmc_burn_in:]
+        post_burn_in_posteriors_un_normed_vec = posteriors_un_normed_vec[self.UserInput.mcmc_burn_in:]
+        post_burn_in_logP_un_normed_vec = np.log(post_burn_in_posteriors_un_normed_vec)
+        post_burn_in_likelihoods_vec = likelihoods_vec[self.UserInput.mcmc_burn_in:]
+        post_burn_in_priors_vec = priors_vec[self.UserInput.mcmc_burn_in:]
         # posterior probabilites are transformed to a standard normal (std=1) for obtaining the evidence:
-        evidence = np.mean(posteriors_un_normed_vec)*np.sqrt(2*np.pi*np.std(samples)**2)
-        posteriors_vec = posteriors_un_normed_vec/evidence
-        log_ratios = np.log(posteriors_vec/priors_vec)
+        evidence = np.mean(post_burn_in_posteriors_un_normed_vec)*np.sqrt(2*np.pi*np.std(post_burn_in_samples)**2)
+        post_burn_in_posteriors_vec = post_burn_in_posteriors_un_normed_vec/evidence
+        log_ratios = np.log(post_burn_in_posteriors_vec/post_burn_in_priors_vec)
         log_ratios[np.isinf(log_ratios)] = 0
         log_ratios = np.nan_to_num(log_ratios)
         info_gain = np.mean(log_ratios)
+        map_logP = max(post_burn_in_logP_un_normed_vec)
+        map_index = list(post_burn_in_logP_un_normed_vec).index(map_logP)
+        map_parameter_set = post_burn_in_samples[map_index]
         if self.UserInput.verbose == True:
-            print("line 146", (evidence), (info_gain), len(samples), len(samples_simulatedOutputs), len(np.log(posteriors_un_normed_vec)))
-            #mcmc_output = np.vstack((evidence, info_gain, samples, samples_simulatedOutputs, np.log(posteriors_un_normed_vec)))
-            #np.savetxt('mcmc_output.csv',mcmc_output) # EAW 2020/01/08
-        return [evidence, info_gain, samples, samples_simulatedOutputs, np.log(posteriors_un_normed_vec)] # EAW 2020/01/08
+            #The post_burn_in_samples_simulatedOutputs has length of ALL sampling including burn_in
+            #The post_burn_in_samples is only AFTER burn in.
+            #The post_burn_in_posteriors_un_normed_vec is AFTER burn in.
+            
+            print("line 146", (evidence), (info_gain), len(post_burn_in_samples), len(post_burn_in_samples_simulatedOutputs), len(post_burn_in_logP_un_normed_vec))
+            print("line 147", np.shape(post_burn_in_samples), np.shape(post_burn_in_samples_simulatedOutputs), np.shape(post_burn_in_logP_un_normed_vec))
+            mcmc_output = np.hstack((post_burn_in_logP_un_normed_vec,post_burn_in_samples,post_burn_in_samples_simulatedOutputs))
+            #TODO: Make header for mcmc_output
+            np.savetxt('mcmc_output.csv',mcmc_output, delimiter=",") 
+            
+            with open("mcmc_log_file.txt", 'w') as out_file:
+                out_file.write("map_logP:" +  str(map_logP) + "\n")
+                out_file.write("map_index:" +  str(map_index) + "\n")
+                out_file.write("map_parameter_set:" + str( map_parameter_set) + "\n")
+                out_file.write("info_gain:" +  str(info_gain) + "\n")
+                out_file.write("evidence:" + str(evidence) + "\n")
+                
+            
+        return [evidence, info_gain, post_burn_in_samples, post_burn_in_samples_simulatedOutputs, post_burn_in_logP_un_normed_vec] # EAW 2020/01/08
     def prior(self,discreteParameterVector):
         probability = multivariate_normal.pdf(x=discreteParameterVector,mean=self.UserInput.mu_prior,cov=self.UserInput.cov_prior)
         return probability
@@ -145,27 +165,17 @@ class ip:
         #This is more in accordance with https://github.com/AdityaSavara/ODE-KIN-BAYES-SG-EW/issues/11. 
         simulationOutputProcessingFunction = self.UserInput.simulationOutputProcessingFunction
         simulationFunctionWrapper =  self.UserInput.simulationFunctionWrapper
-        
-        simulationOutput =simulationFunctionWrapper(discreteParameterVector) 
+        simulationOutput =simulationFunctionWrapper(discreteParameterVector) #FIXME: code should look like simulationOutput = self.UserInput.simulationFunction(*self.UserInput.simulationInputArguments)       
+        #simulationOutputProcessingFunction = self.UserInput.log10_wrapper_func #FIXME: this will become fed in as self.UserInput.simulationOutputProcessingFunction
         if type(simulationOutputProcessingFunction) == type(None):
             simulatedResponses = simulationOutput
         if type(simulationOutputProcessingFunction) != type(None):
             simulatedResponses = self.UserInput.simulationOutputProcessingFunction(simulationOutput) #This will become simulatedResponses = self.UserInput.simulationOutputProcessingFunction(simulationOutput)
-          
-        observedResponses = self.UserInput.observedResponses()#np.log10(self.experiment[temp_points]) #FIXME: This should not be hard coded here. Should be self.UserInput.obseredResponses
-        
+        observedResponses = self.UserInput.observedResponses
         #To find the relevant covariance, we take the errors from the points.
-        cov = UserInput.errors #[UserInput.temp_points] #FIXME: We should not be doing subset of points like this here. Should happen at user input level.
-        #FIXME should become:
-        #cov = self.UserInput.observedResponses_uncertainties
-        
-        
-        #probability_metric = multivariate_normal.pdf(x=np.log10(rate_tot[temp_points]),mean=np.log10(self.experiment[temp_points]),cov=self.errors[temp_points]) #ERIC, THIS WAS THE PREVIOUS LINE. I BELIEVE YOUR LOG10 TRANSFORM IS NOT SOMETHING WE WOULD NORMALLY DO. AM I CORRECT?
-        probability_metric = multivariate_normal.pdf(x=simulatedResponses,mean=observedResponses,cov=cov) #FIXME: should become self.UserInput.responseUncertantiesCov or something like that.
-        print("line 165", probability_metric)
+        cov = UserInput.observedResponses_uncertainties #FIXME: We should not be doing subset of points like this here. Should happen at user input level.
+        probability_metric = multivariate_normal.pdf(x=simulatedResponses,mean=observedResponses,cov=cov)
         simulationOutput = self.UserInput.rate_tot_summing_func(simulationOutput)
-        #temp_points = self.UserInput.temp_points
-        #if self.UserInput.verbose: print('likelihood probability',probability_metric,'log10(rate_tot)',np.log10(rate_tot[temp_points]), 'log10(experiment)', np.log10(self.experiment[temp_points]), 'error', self.errors[temp_points])
         return probability_metric, simulationOutput #FIXME: This needs to say probability_metric, simulatedResponses or something like that, but right now the sizes of the arrays do not match.
 
 
@@ -212,14 +222,16 @@ if __name__ == "__main__":
     #rate = tprequation(tpr_theta, times, *post_mean_list, UserInput.beta_dTdt, start_T)
     #rate_tot = -np.sum(rate, axis=0) 
     
+    #TODO: make the below into a generalized function.
     fig0, ax0 = plt.subplots()
     if UserInput.verbose:
-      print(np.mean(samples_simulatedOutputs,axis = 0))
+      #print(np.mean(samples_simulatedOutputs,axis = 0))
+      pass
     ax0.plot(np.array(experiments_df['AcH - T']),np.mean(samples_simulatedOutputs,axis = 0), 'r')
     ax0.plot(np.array(experiments_df['AcH - T']),np.array(experiments_df['AcHBackgroundSubtracted'])/2000,'g')
     ax0.set_ylim([0.00, 0.025])
     ax0.set_xlabel('T (K)')
-    ax0.set_ylabel(r'$rate (s^{-1})$')
+    ax0.set_ylabel(r'$rate (s^{-1})$') #TODO: THis is not yet generalized (will be a function)
     ax0.legend(['model posterior', 'experiments'])
     fig0.tight_layout()
     fig0.savefig('tprposterior.png', dpi=220)
