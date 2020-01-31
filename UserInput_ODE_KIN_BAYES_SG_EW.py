@@ -2,7 +2,7 @@ import numpy as np
 ###User sets their model equation####
 from tprmodel import tprequation # EAW 2020/01/13 
 model_function_name = tprequation # EAW 2020/01/08
-from processing_functions_tpd_odeint import rate_tot_summing_func, log10_wrapper_func, observedResponsesFunc, observedResponsesProxyFunc, TPR_simulationFunctionWrapper, import_experimental_settings, no_log_wrapper_func
+from processing_functions_tpd_odeint import rate_tot_summing_func, observedResponsesFunc,  TPR_simulationFunctionWrapper, import_experimental_settings, no_log_wrapper_func #,observedResponsesProxyFunc, log10_wrapper_func 
 #####Temperature Programmed Reaction Settings#####
 TPR = True #Set to false if doing an isothermal experiment.
 
@@ -22,8 +22,8 @@ times, experiment, observedResponses_uncertainties = import_experimental_setting
 parameterNamesAndMathTypeExpressionsDict = {'Ea_1':r'$E_{a1}$','Ea_2':r'$E_{a2}$','log_A1':r'$log(A_{1})$','log_A2':r'$log(A_{2})$','gamma1':r'$\gamma_{1}$','gamma2':r'$\gamma_{2}$'}
 
 #####Chemical Kinetic Model Initial Concentrations#####
-initial_concentrations_dict = {}
-initial_concentrations_array = [0.5, 0.5]
+#initial_concentrations_dict = {}
+#initial_concentrations_array = [0.5, 0.5]
 
 
 #####Bayesian Probability Parameters#####
@@ -62,13 +62,8 @@ gridSampling = False
 simulationFunctionWrapper = TPR_simulationFunctionWrapper
 import_experimental_settings = import_experimental_settings
 
-processingFunctionCase = "None" #can be "log10_wrapper_func" or "None"
-if processingFunctionCase == ("log10_wrapper_func"):   
-    simulationOutputProcessingFunction = log10_wrapper_func # log10_wrapper_func #Can be None.
-    observedResponses = observedResponsesProxyFunc()
-else:
-    simulationOutputProcessingFunction = no_log_wrapper_func
-    observedResponses = observedResponsesFunc()
+simulationOutputProcessingFunction = no_log_wrapper_func
+observedResponses = observedResponsesFunc()
 
 ######mumpce plots#####
 model_parameter_info = np.array([{'parameter_number': 0, 'parameter_name': 'Parameter 0', 'parameter_value': 1.0},

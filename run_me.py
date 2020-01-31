@@ -166,21 +166,15 @@ class ip:
         simulationOutput =simulationFunctionWrapper(discreteParameterVector) #FIXME: code should look like simulationOutput = self.UserInput.simulationFunction(*self.UserInput.simulationInputArguments)       
         #simulationOutputProcessingFunction = self.UserInput.log10_wrapper_func #FIXME: this will become fed in as self.UserInput.simulationOutputProcessingFunction
         if type(simulationOutputProcessingFunction) == type(None):
-            simulatedResponsesProxy = simulationOutput #Is this the log of the rate? If so, Why?
+            simulatedResponses = simulationOutput #Is this the log of the rate? If so, Why?
 #            print("line 168", simulatedResponsesProxy)
         if type(simulationOutputProcessingFunction) != type(None):
-            simulatedResponsesProxy = self.UserInput.simulationOutputProcessingFunction(simulationOutput) #This will become simulatedResponses = self.UserInput.simulationOutputProcessingFunction(simulationOutput)
+            simulatedResponses = self.UserInput.simulationOutputProcessingFunction(simulationOutput) #This will become simulatedResponses = self.UserInput.simulationOutputProcessingFunction(simulationOutput)
 #            print("line 170", simulatedResponsesProxy)
-        observedResponsesProxy = self.UserInput.observedResponses
-        print("line 171", discreteParameterVector)
-        print("line 172, ", len(simulatedResponsesProxy), len(observedResponsesProxy))
-#        print("line 173, ", (simulatedResponsesProxy), (observedResponsesProxy))
+        observedResponses = self.UserInput.observedResponses
         #To find the relevant covariance, we take the errors from the points.
         cov = UserInput.observedResponses_uncertainties #FIXME: We should not be doing subset of points like this here. Should happen at user input level.
-        probability_metric = multivariate_normal.pdf(x=simulatedResponsesProxy,mean=observedResponsesProxy,cov=cov)
-        #FIXME: simulatedResponses is the actual simulatedResponses.
-        simulatedResponses = self.UserInput.rate_tot_summing_func(simulationOutput)
-        print("line 177", len(cov), len(simulatedResponses), np.shape(simulatedResponses), len(simulatedResponsesProxy), np.shape(simulatedResponsesProxy))
+        probability_metric = multivariate_normal.pdf(x=simulatedResponses,mean=observedResponses,cov=cov)
 #        print("line 178", simulatedResponses, simulatedResponsesProxy)
         return probability_metric, simulatedResponses #FIXME: This needs to say probability_metric, simulatedResponses or something like that, but right now the sizes of the arrays do not match.
 
