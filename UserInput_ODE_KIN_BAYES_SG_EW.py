@@ -6,7 +6,8 @@ from processing_functions_tpd_odeint import rate_tot_summing_func, log10_wrapper
 #####Temperature Programmed Reaction Settings#####
 TPR = True #Set to false if doing an isothermal experiment.
 
-num_data_points = 4 #FIXME: This is temporary hardcoding to get it out of the run_me file.
+import processing_functions_tpd_odeint
+num_data_points = len(processing_functions_tpd_odeint.temp_points) #FIXME: This is temporary hardcoding to get it out of the run_me file.
 
 ####BELOW ARE MODEL PARAMETERS, WE WILL WANT TO COMBINE THESE INTO A LIST OF PARAMETERS###
 InputParameterInitialValues = [41.5, 41.5, 13.0, 13.0, 0.1, 0.1] # Ea1_mean, Ea2_mean, log_A1_mean, log_A2_mean, gamma_1_mean, gamma_2_mean 
@@ -61,7 +62,7 @@ gridSampling = False
 simulationFunctionWrapper = TPR_simulationFunctionWrapper
 import_experimental_settings = import_experimental_settings
 
-processingFunctionCase = "log10_wrapper_func" #can be "log10_wrapper_func" or "None"
+processingFunctionCase = "None" #can be "log10_wrapper_func" or "None"
 if processingFunctionCase == ("log10_wrapper_func"):   
     simulationOutputProcessingFunction = log10_wrapper_func # log10_wrapper_func #Can be None.
     observedResponses = observedResponsesProxyFunc()

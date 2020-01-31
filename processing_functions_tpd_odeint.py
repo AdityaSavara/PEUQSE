@@ -11,6 +11,7 @@ dt = 0.385
 beta_dTdt = dt/dT #This beta is heating rate. This will be set to 0 if somebody sets TPR to false. Not to be confused with 1/(T*k_b) which is often also called beta. User can put beta in manually.
 T_0 = 152.96 #this is the starting temperature.
 temp_points = np.array([0,49,99,149])
+temp_points = (np.linspace(0,224, num=225)).astype(int)
 
 def rate_tot_summing_func(rate):
     rate_tot = -np.sum(rate, axis=0)
@@ -61,7 +62,8 @@ def import_experimental_settings(Filename): #FIXME: This is obviously not very g
     global fourPoints
     fourPoints = True
     if fourPoints == True:
-        
+        print(temp_points)
+        print(len(temp_points))
         errors = errors[temp_points]
         times = times[temp_points]
     return times, experiment, errors

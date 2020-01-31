@@ -119,7 +119,7 @@ class ip:
                   #print(simulationOutput_current_location)
                 samples[i,:] = samples[i-1,:]
                 samples_simulatedOutputs[i,:] = simulationOutput_current_location
-                print("line 121", simulationOutput_current_location)
+#                print("line 121", simulationOutput_current_location)
                 posteriors_un_normed_vec[i] = likelihood_current_location*prior_current_location
                 likelihoods_vec[i] = likelihood_current_location
                 priors_vec[i] = prior_current_location
@@ -167,21 +167,21 @@ class ip:
         #simulationOutputProcessingFunction = self.UserInput.log10_wrapper_func #FIXME: this will become fed in as self.UserInput.simulationOutputProcessingFunction
         if type(simulationOutputProcessingFunction) == type(None):
             simulatedResponsesProxy = simulationOutput #Is this the log of the rate? If so, Why?
-            print("line 168", simulatedResponsesProxy)
+#            print("line 168", simulatedResponsesProxy)
         if type(simulationOutputProcessingFunction) != type(None):
             simulatedResponsesProxy = self.UserInput.simulationOutputProcessingFunction(simulationOutput) #This will become simulatedResponses = self.UserInput.simulationOutputProcessingFunction(simulationOutput)
-            print("line 170", simulatedResponsesProxy)
+#            print("line 170", simulatedResponsesProxy)
         observedResponsesProxy = self.UserInput.observedResponses
         print("line 171", discreteParameterVector)
         print("line 172, ", len(simulatedResponsesProxy), len(observedResponsesProxy))
-        print("line 173, ", (simulatedResponsesProxy), (observedResponsesProxy))
+#        print("line 173, ", (simulatedResponsesProxy), (observedResponsesProxy))
         #To find the relevant covariance, we take the errors from the points.
         cov = UserInput.observedResponses_uncertainties #FIXME: We should not be doing subset of points like this here. Should happen at user input level.
         probability_metric = multivariate_normal.pdf(x=simulatedResponsesProxy,mean=observedResponsesProxy,cov=cov)
         #FIXME: simulatedResponses is the actual simulatedResponses.
         simulatedResponses = self.UserInput.rate_tot_summing_func(simulationOutput)
         print("line 177", len(cov), len(simulatedResponses), np.shape(simulatedResponses), len(simulatedResponsesProxy), np.shape(simulatedResponsesProxy))
-        print("line 178", simulatedResponses, simulatedResponsesProxy)
+#        print("line 178", simulatedResponses, simulatedResponsesProxy)
         return probability_metric, simulatedResponses #FIXME: This needs to say probability_metric, simulatedResponses or something like that, but right now the sizes of the arrays do not match.
 
 
@@ -207,8 +207,8 @@ def sampledParameterHistogramMaker(parameterName,parameterNamesAndMathTypeExpres
 if __name__ == "__main__":
     import UserInput_ODE_KIN_BAYES_SG_EW as UserInput
     UserInput.verbose = True    
-    UserInput.mcmc_burn_in = 500
-    UserInput.mcmc_length = 1000
+    UserInput.mcmc_burn_in = 300
+    UserInput.mcmc_length = 600
     ip_object = ip(UserInput)
     [map_parameter_set, evidence, info_gain, samples, samples_simulatedOutputs, logP] = ip_object.MetropolisHastings()
     ############################################# The computation portion is contained above.
@@ -232,13 +232,13 @@ if __name__ == "__main__":
     fig0, ax0 = plt.subplots()
     if UserInput.verbose:
       #print(np.mean(samples_simulatedOutputs,axis = 0))
-      print("line 233", samples_simulatedOutputs[0])
+#      print("line 233", samples_simulatedOutputs[0])
       pass
     import processing_functions_tpd_odeint  
     map_SimulatedOutput = UserInput.simulationFunctionWrapper(map_parameter_set)
     map_SimulatedResponses = processing_functions_tpd_odeint.no_log_wrapper_func(map_SimulatedOutput) #for this line, always no log wrapper because want actual response and not proxy.
     print("line 236", map_parameter_set)
-    print("line 238", map_SimulatedResponses, np.mean(samples_simulatedOutputs,axis = 0))
+#    print("line 238", map_SimulatedResponses, np.mean(samples_simulatedOutputs,axis = 0))
     ax0.plot(np.array(experiments_df['AcH - T'][processing_functions_tpd_odeint.temp_points]),np.mean(samples_simulatedOutputs,axis = 0), 'r')
     ax0.plot(np.array(experiments_df['AcH - T']),np.array(experiments_df['AcHBackgroundSubtracted'])/2000,'g')
     ax0.plot(np.array(experiments_df['AcH - T'][processing_functions_tpd_odeint.temp_points]),map_SimulatedResponses, 'b')
