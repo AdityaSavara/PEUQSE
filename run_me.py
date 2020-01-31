@@ -100,8 +100,9 @@ class ip:
             [likelihood_current_location, simulationOutput_current_location] = self.likelihood(samples[i-1,:]) #FIXME: the previous likelihood should be stored so that it doesn't need to be calculated again.
             accept_probability = (likelihood_proposal*prior_proposal)/(likelihood_current_location*prior_current_location) 
             if self.UserInput.verbose: print('Current likelihood',likelihood_current_location, 'Proposed likelihood', likelihood_proposal, '\nAccept_probability (gauranteed if above 1)', accept_probability)
+            if self.UserInput.verbose: print('Current posterior',likelihood_current_location*prior_current_location, 'Proposed Posterior', likelihood_proposal*prior_proposal)
             if self.UserInput.modulate_accept_probability != 0: #This flattens the posterior by accepting low values more often. It can be useful when greater sampling is more important than accuracy.
-                N_flatten = float(self.flatten_accept_probability)
+                N_flatten = float(self.UserInput.modulate_accept_probability)
                 accept_probability = accept_probability**(1/N_flatten) #TODO: add code that unflattens the final histograms, that way even with more sampling we still get an accurate final posterior distribution. We can also then add a flag if the person wants to keep the posterior flattened.
             if accept_probability > np.random.uniform():  #TODO: keep a log of the accept and reject. If the reject ratio is >90% or some other such number, warn the user.
                 if self.UserInput.verbose:
@@ -142,23 +143,19 @@ class ip:
         if self.UserInput.verbose == True:
             #The post_burn_in_samples_simulatedOutputs has length of ALL sampling including burn_in
             #The post_burn_in_samples is only AFTER burn in.
-            #The post_burn_in_posteriors_un_normed_vec is AFTER burn in.
-            
+            #The post_burn_in_posteriors_un_normed_vec is AFTER burn in.           
             print("line 146", (evidence), (info_gain), len(post_burn_in_samples), len(post_burn_in_samples_simulatedOutputs), len(post_burn_in_logP_un_normed_vec))
             print("line 147", np.shape(post_burn_in_samples), np.shape(post_burn_in_samples_simulatedOutputs), np.shape(post_burn_in_logP_un_normed_vec))
             mcmc_output = np.hstack((post_burn_in_logP_un_normed_vec,post_burn_in_samples,post_burn_in_samples_simulatedOutputs))
             #TODO: Make header for mcmc_output
-            np.savetxt('mcmc_output.csv',mcmc_output, delimiter=",") 
-            
+            np.savetxt('mcmc_output.csv',mcmc_output, delimiter=",")             
             with open("mcmc_log_file.txt", 'w') as out_file:
                 out_file.write("map_logP:" +  str(map_logP) + "\n")
                 out_file.write("map_index:" +  str(map_index) + "\n")
                 out_file.write("map_parameter_set:" + str( map_parameter_set) + "\n")
                 out_file.write("info_gain:" +  str(info_gain) + "\n")
                 out_file.write("evidence:" + str(evidence) + "\n")
-                
-            
-        return [evidence, info_gain, post_burn_in_samples, post_burn_in_samples_simulatedOutputs, post_burn_in_logP_un_normed_vec] # EAW 2020/01/08
+        return [map_parameter_set, evidence, info_gain, post_burn_in_samples, post_burn_in_samples_simulatedOutputs, post_burn_in_logP_un_normed_vec] # EAW 2020/01/08
     def prior(self,discreteParameterVector):
         probability = multivariate_normal.pdf(x=discreteParameterVector,mean=self.UserInput.mu_prior,cov=self.UserInput.cov_prior)
         return probability
@@ -169,18 +166,22 @@ class ip:
         simulationOutput =simulationFunctionWrapper(discreteParameterVector) #FIXME: code should look like simulationOutput = self.UserInput.simulationFunction(*self.UserInput.simulationInputArguments)       
         #simulationOutputProcessingFunction = self.UserInput.log10_wrapper_func #FIXME: this will become fed in as self.UserInput.simulationOutputProcessingFunction
         if type(simulationOutputProcessingFunction) == type(None):
-            simulatedResponsesFake = simulationOutput #Is this the log of the rate? If so, Why?
+            simulatedResponsesProxy = simulationOutput #Is this the log of the rate? If so, Why?
+            print("line 168", simulatedResponsesProxy)
         if type(simulationOutputProcessingFunction) != type(None):
-            simulatedResponsesFake = self.UserInput.simulationOutputProcessingFunction(simulationOutput) #This will become simulatedResponses = self.UserInput.simulationOutputProcessingFunction(simulationOutput)
-        observedResponsesFake = self.UserInput.observedResponses
-        print("line 172, ", len(simulatedResponsesFake), len(observedResponsesFake))
+            simulatedResponsesProxy = self.UserInput.simulationOutputProcessingFunction(simulationOutput) #This will become simulatedResponses = self.UserInput.simulationOutputProcessingFunction(simulationOutput)
+            print("line 170", simulatedResponsesProxy)
+        observedResponsesProxy = self.UserInput.observedResponses
+        print("line 171", discreteParameterVector)
+        print("line 172, ", len(simulatedResponsesProxy), len(observedResponsesProxy))
+        print("line 173, ", (simulatedResponsesProxy), (observedResponsesProxy))
         #To find the relevant covariance, we take the errors from the points.
         cov = UserInput.observedResponses_uncertainties #FIXME: We should not be doing subset of points like this here. Should happen at user input level.
-        probability_metric = multivariate_normal.pdf(x=simulatedResponsesFake,mean=observedResponsesFake,cov=cov)
+        probability_metric = multivariate_normal.pdf(x=simulatedResponsesProxy,mean=observedResponsesProxy,cov=cov)
         #FIXME: simulatedResponses is the actual simulatedResponses.
         simulatedResponses = self.UserInput.rate_tot_summing_func(simulationOutput)
-        print("line 177", len(cov), len(simulatedResponses), np.shape(simulatedResponses), len(simulatedResponsesFake), np.shape(simulatedResponsesFake))
-        print("line 178", simulatedResponses, simulatedResponsesFake)
+        print("line 177", len(cov), len(simulatedResponses), np.shape(simulatedResponses), len(simulatedResponsesProxy), np.shape(simulatedResponsesProxy))
+        print("line 178", simulatedResponses, simulatedResponsesProxy)
         return probability_metric, simulatedResponses #FIXME: This needs to say probability_metric, simulatedResponses or something like that, but right now the sizes of the arrays do not match.
 
 
@@ -209,7 +210,7 @@ if __name__ == "__main__":
     UserInput.mcmc_burn_in = 500
     UserInput.mcmc_length = 1000
     ip_object = ip(UserInput)
-    [evidence, info_gain, samples, samples_simulatedOutputs, logP] = ip_object.MetropolisHastings()
+    [map_parameter_set, evidence, info_gain, samples, samples_simulatedOutputs, logP] = ip_object.MetropolisHastings()
     ############################################# The computation portion is contained above.
 #    print(samples)
     np.savetxt('logP.csv',logP) # EAW 2020/01/08
@@ -233,12 +234,18 @@ if __name__ == "__main__":
       #print(np.mean(samples_simulatedOutputs,axis = 0))
       print("line 233", samples_simulatedOutputs[0])
       pass
-    ax0.plot(np.array(experiments_df['AcH - T'][UserInput.temp_points]),np.mean(samples_simulatedOutputs,axis = 0), 'r')
+    import processing_functions_tpd_odeint  
+    map_SimulatedOutput = UserInput.simulationFunctionWrapper(map_parameter_set)
+    map_SimulatedResponses = processing_functions_tpd_odeint.no_log_wrapper_func(map_SimulatedOutput) #for this line, always no log wrapper because want actual response and not proxy.
+    print("line 236", map_parameter_set)
+    print("line 238", map_SimulatedResponses, np.mean(samples_simulatedOutputs,axis = 0))
+    ax0.plot(np.array(experiments_df['AcH - T'][processing_functions_tpd_odeint.temp_points]),np.mean(samples_simulatedOutputs,axis = 0), 'r')
     ax0.plot(np.array(experiments_df['AcH - T']),np.array(experiments_df['AcHBackgroundSubtracted'])/2000,'g')
+    ax0.plot(np.array(experiments_df['AcH - T'][processing_functions_tpd_odeint.temp_points]),map_SimulatedResponses, 'b')
     ax0.set_ylim([0.00, 0.025])
     ax0.set_xlabel('T (K)')
     ax0.set_ylabel(r'$rate (s^{-1})$') #TODO: THis is not yet generalized (will be a function)
-    ax0.legend(['model posterior', 'experiments'])
+    ax0.legend(['model posterior', 'experiments', 'map'])
     fig0.tight_layout()
     fig0.savefig('tprposterior.png', dpi=220)
     posterior_df = pd.DataFrame(samples,columns=[UserInput.parameterNamesAndMathTypeExpressionsDict[x] for x in UserInput.parameterNamesList])

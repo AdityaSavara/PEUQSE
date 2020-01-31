@@ -10,27 +10,32 @@ dT = 0.77 #Set this to 0 for an isothermal experiment.
 dt = 0.385
 beta_dTdt = dt/dT #This beta is heating rate. This will be set to 0 if somebody sets TPR to false. Not to be confused with 1/(T*k_b) which is often also called beta. User can put beta in manually.
 T_0 = 152.96 #this is the starting temperature.
+temp_points = np.array([0,49,99,149])
 
 def rate_tot_summing_func(rate):
     rate_tot = -np.sum(rate, axis=0)
     return rate_tot
 
-def rate_tot_four_points_func(rate): #Multiple layers of wrapper functions are fine.
-    rate_tot = rate_tot_summing_func(rate)
-    #rate_tot_four_points = np.array(rate_tot[temp_points])
-    return rate_tot
-
-def log10_wrapper_func(rate, fourpoints = False):
-    if fourpoints == True:
-        temp_points = UserInput.temp_points #range(225) #FIXME: There should be nothing hard coded here. You can hard code it in userinput if you want.
-        rate = rate[temp_points]
-    loggedRateValues = np.log10(rate)
+def log10_wrapper_func(rate):
+    rate_tot_four_points = rate_tot_summing_func(rate)
+    loggedRateValues = np.log10(rate_tot_four_points)
     return loggedRateValues
 
-def observedResponses():
+def no_log_wrapper_func(rate):
+    rate_tot_four_points = rate_tot_summing_func(rate)
+    return rate_tot_four_points
+
+def observedResponsesFunc():
     global experiment
-    #return np.log10(experiment[UserInput.temp_points])
-    return np.log10(experiment)
+    values = experiment[temp_points]
+    print("line 31, processing", values)
+    return values
+
+def observedResponsesProxyFunc():
+    global experiment
+    log10Values = np.log10(experiment[temp_points])
+    print("line 37, processing", log10Values)
+    return log10Values
 
 def TPR_simulationFunctionWrapper(discreteParameterVector): 
     global times
@@ -46,10 +51,17 @@ def import_experimental_settings(Filename): #FIXME: This is obviously not very g
     global times
     global experiment
     global errors
+    
     experiments_df = pd.read_csv(Filename)
     times = np.array(experiments_df['time']) #experiments_df['time'].to_numpy() #The to_numpy() syntax was not working for Ashi.
     experiment = np.array(experiments_df['AcHBackgroundSubtracted'])/2000 
     print(len(experiment))
     #experiments_df['AcHBackgroundSubtracted'].to_numpy()/1000
     errors = np.array(experiments_df['Errors']) #.to_numpy()
+    global fourPoints
+    fourPoints = True
+    if fourPoints == True:
+        
+        errors = errors[temp_points]
+        times = times[temp_points]
     return times, experiment, errors

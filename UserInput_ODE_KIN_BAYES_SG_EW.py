@@ -2,11 +2,11 @@ import numpy as np
 ###User sets their model equation####
 from tprmodel import tprequation # EAW 2020/01/13 
 model_function_name = tprequation # EAW 2020/01/08
-from processing_functions_tpd_odeint import rate_tot_summing_func, rate_tot_four_points_func, log10_wrapper_func, observedResponses, TPR_simulationFunctionWrapper, import_experimental_settings
+from processing_functions_tpd_odeint import rate_tot_summing_func, log10_wrapper_func, observedResponsesFunc, observedResponsesProxyFunc, TPR_simulationFunctionWrapper, import_experimental_settings, no_log_wrapper_func
 #####Temperature Programmed Reaction Settings#####
 TPR = True #Set to false if doing an isothermal experiment.
 
-num_data_points = 225 #FIXME: This is temporary hardcoding to get it out of the run_me file.
+num_data_points = 4 #FIXME: This is temporary hardcoding to get it out of the run_me file.
 
 ####BELOW ARE MODEL PARAMETERS, WE WILL WANT TO COMBINE THESE INTO A LIST OF PARAMETERS###
 InputParameterInitialValues = [41.5, 41.5, 13.0, 13.0, 0.1, 0.1] # Ea1_mean, Ea2_mean, log_A1_mean, log_A2_mean, gamma_1_mean, gamma_2_mean 
@@ -58,14 +58,16 @@ gridSampling = False
 
 
 ######processing functions for odeint-based temperature-programmed desorption model##########
-temp_points = np.array([0,49,99,149])
-simulationOutputProcessingFunction = log10_wrapper_func #Can be None.
-#rate_tot_summing_func = rate_tot_summing_func 
-#rate_tot_four_points_func = rate_tot_four_points_func 
-#log10_wrapper_func = log10_wrapper_func
-observedResponses = observedResponsesFunc()
 simulationFunctionWrapper = TPR_simulationFunctionWrapper
 import_experimental_settings = import_experimental_settings
+
+processingFunctionCase = "log10_wrapper_func" #can be "log10_wrapper_func" or "None"
+if processingFunctionCase == ("log10_wrapper_func"):   
+    simulationOutputProcessingFunction = log10_wrapper_func # log10_wrapper_func #Can be None.
+    observedResponses = observedResponsesProxyFunc()
+else:
+    simulationOutputProcessingFunction = no_log_wrapper_func
+    observedResponses = observedResponsesFunc()
 
 ######mumpce plots#####
 model_parameter_info = np.array([{'parameter_number': 0, 'parameter_name': 'Parameter 0', 'parameter_value': 1.0},
