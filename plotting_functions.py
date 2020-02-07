@@ -18,8 +18,7 @@ class plotting_functions():
         cov = np.cov(self.samples,rowvar=False)
         return mu, cov
 
-    def mumpce_plots(self, model_parameter_info = {}, active_parameters = [], pairs_of_parameter_indices = [], posterior_mu_vector = [], posterior_cov_matrix = [], prior_mu_vector = [], prior_cov_matrix = []): # Pass empty keyword arguments for important parameters.  That way, warnings may be issued if they are not set.  There is not really a good default for these keyword arguments.  They depend entirely on the nature of the data being plotted.
-        contour_settings_custom = {'figure_name','fontsize','num_y_ticks','num_x_ticks','colormap_posterior_customized','colormap_prior_customized','contours_normalized','colorbars'} # Here are the dictionary options, unassigned yet
+    def mumpce_plots(self, model_parameter_info = {}, active_parameters = [], pairs_of_parameter_indices = [], posterior_mu_vector = [], posterior_cov_matrix = [], prior_mu_vector = [], prior_cov_matrix = [], contour_settings_custom = {}): # Pass empty keyword arguments for important parameters.  That way, warnings may be issued if they are not set.  There is not really a good default for these keyword arguments.  They depend entirely on the nature of the data being plotted.
         mumpceProjectObject = mumpceProject.Project() # A mumpce project object must be created.
         if len(model_parameter_info) == 0:
             print("Pass the 'model_parameter_info' argument to the mumpce_plots function.")
@@ -48,43 +47,6 @@ class plotting_functions():
         mumpceProjectObject.model_parameter_info = model_parameter_info
         mumpceSolutionsObject = mumpceSolution.Solution(posterior_mu_vector, posterior_cov_matrix, initial_x=prior_mu_vector, initial_covariance=prior_cov_matrix)
         mumpceProjectObject.solution = mumpceSolutionsObject
-        contour_settings_custom = {}
-        if hasattr(UserInput,'figure_name'):
-            contour_settings_custom['figure_name']=UserInput.figure_name
-        else:
-            contour_settings_custom['figure_name']='mumpce_plots_04'
-        if hasattr(UserInput,'fontsize'):
-            contour_settings_custom['fontsize'] = UserInput.fontsize        
-        else:
-            contour_settings_custom['fontsize'] = 'auto'
-        if hasattr(UserInput,'num_y_ticks'):
-            contour_settings_custom['num_y_ticks'] = UserInput.num_y_ticks
-        else:
-            contour_settings_custom['num_y_ticks'] = 'auto'
-        if hasattr(UserInput,'num_x_ticks'):
-            contour_settings_custom['num_x_ticks'] = UserInput.num_x_ticks
-        else:
-            contour_settings_custom['num_x_ticks'] = 'auto'
-        if hasattr(UserInput,'colormap_posterior_customized'):
-            contour_settings_custom['colormap_posterior_customized'] = UserInput.colormap_posterior_customized
-        else:
-            contour_settings_custom['colormap_posterior_customized'] = "Oranges"
-        if hasattr(UserInput,'colormap_prior_customized'):
-            contour_settings_custom['colormap_prior_customized'] = UserInput.colormap_prior_customized
-        else:
-            contour_settings_custom['colormap_prior_customized'] = "Greens"
-        if hasattr(UserInput,'contours_normalized'):
-            contour_settings_custom['contours_normalized'] = UserInput.contours_normalized
-        else:
-            contour_settings_custom['contours_normalized'] = False
-        if hasattr(UserInput,'center_on'):
-            contour_settings_custom['center_on'] = UserInput.center_on
-        else:
-            contour_settings_custom['center_on'] = 'prior'
-        if hasattr(UserInput,'colorbars'):
-            contour_settings_custom['colorbars'] = UserInput.colorbars
-        else:
-            contour_settings_custom['colorbars'] = True
         mumpceProjectObject.plot_pdfs(mumpceProjectObject.pairsOfParameterIndices, contour_settings_custom = contour_settings_custom)
 
 

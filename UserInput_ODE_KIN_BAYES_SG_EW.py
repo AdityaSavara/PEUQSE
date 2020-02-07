@@ -70,6 +70,8 @@ observedResponses = observedResponses
 simulationFunctionWrapper = simulationFunctionWrapper
 import_experimental_settings = import_experimental_settings
 
+contour_settings_custom = {'figure_name': 'mumpce_plots_demo','fontsize':'auto' ,'num_y_ticks': 'auto','num_x_ticks':'auto','colormap_posterior_customized':'Oranges','colormap_prior_customized':'Greens','contours_normalized':False,'center_on':'prior','colorbars':True}
+
 ######mumpce plots#####
 model_parameter_info = np.array([{'parameter_number': 0, 'parameter_name': 'Parameter 0', 'parameter_value': 1.0},
  {'parameter_number': 1, 'parameter_name': 'Parameter 1'},
