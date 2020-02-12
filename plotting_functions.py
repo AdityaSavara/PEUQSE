@@ -51,6 +51,12 @@ class plotting_functions():
 
 
     def seaborn_scatterplot_matrix(self):
+        posterior_df = pd.DataFrame(self.samples,columns=[UserInput.parameterNamesAndMathTypeExpressionsDict[x] for x in UserInput.parameterNamesList])
+        pd.plotting.scatter_matrix(posterior_df)
+        plt.savefig('scatter_matrix_posterior.png',dpi=220)
+        return
+
+    def rate_tot_plot(self):
         #fig0, ax0 = plt.subplots()
         #if UserInput.verbose:
         #    print(np.mean(rate_tot_array,axis = 0))
@@ -62,10 +68,4 @@ class plotting_functions():
         #ax0.legend(['model posterior', 'experiments'])
         #fig0.tight_layout()
         #fig0.savefig('tprposterior.png', dpi=220)
-        #posterior_df = pd.DataFrame(samples,columns=[UserInput.parameterNamesAndMathTypeExpressionsDict[x] for x in UserInput.parameterNamesList])
-        #pd.plotting.scatter_matrix(posterior_df)
-        #plt.savefig('scatter_matrix_posterior.png',dpi=220)
-        return
-
-    def rate_tot_plot(self):
         return
