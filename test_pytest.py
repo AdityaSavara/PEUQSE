@@ -4,7 +4,6 @@ import plotting_functions
 from plotting_functions import plotting_functions
 import UserInput_ODE_KIN_BAYES_SG_EW as UserInput
 import run_me
-from run_me import parseUserInputParameters
 from run_me import ip
 
 def test_mumpce_plots():

@@ -6,7 +6,7 @@ import scipy
 from scipy.stats import multivariate_normal
 from scipy.integrate import odeint
 import pandas as pd
-import UserInput_ODE_KIN_BAYES_SG_EW as UserInput
+
 import copy
 #import tprmodel
 #from tprmodel import tprequation # moved from likelihood so import is not repeated at every sample EAW 2020/01/08
@@ -14,11 +14,8 @@ import copy
 #import mumce_py.solution mumce_pySolution
 
 
-#Now will automatically populate some variables from above.    
-def parseUserInputParameters():
-    UserInput.parameterNamesList = list(UserInput.parameterNamesAndMathTypeExpressionsDict.keys())
-    UserInput.stringOfParameterNames = str(UserInput.parameterNamesList).replace("'","")[1:-1]
-parseUserInputParameters()
+
+
 
 #TURNING OFF THE WRITING OF FUNCTION FEATURE RIGHT NOW, TO PREVENT ERIC FROM HAVING TO WORRY ABOUT IT IF IT AFFECTS HIS WORK
 # def writeTPRModelFile():
@@ -66,181 +63,121 @@ parseUserInputParameters()
 
 class ip:
     #Ip for 'inverse problem'. Initialize prior chain starting point, chain burn-in length and total length, and Q (for proposal samples).  Initialize experimental data.  Theta is initialized as the starting point of the chain.  It is placed at the prior mean.
-    def __init__(self, UserInput = UserInput):
-        self.UserInput = UserInput
-        self.verbose = UserInput.verbose
-        if self.verbose: 
+    def __init__(self, UserInput = None):
+        #Now will automatically populate some variables from UserInput
+        UserInput.parameterNamesList = list(UserInput.parameterNamesAndMathTypeExpressionsDict.keys())
+        UserInput.stringOfParameterNames = str(UserInput.parameterNamesList).replace("'","")[1:-1]
+        self.UserInput = UserInput #Note that this is a pointer, so the last two lines effects are within this object.
+        if self.UserInput.verbose: 
             print("Bayes Model Initialized")
-        self.mcmc_length = UserInput.mcmc_length
-        self.mcmc_burn_in = UserInput.mcmc_burn_in # Number of samples trimmed off the beginning of the Markov chain.
-        self.mu_prior = UserInput.mu_prior
-#        self.start_T = UserInput.T_0
-#        self.beta_dTdt = UserInput.beta_dTdt
-        self.cov_prior = UserInput.cov_prior
-        self.Q_mu = self.mu_prior*0 # Q samples the next step at any point in the chain.  The next step may be accepted or rejected.  Q_mu is centered (0) around the current theta.  
-        self.Q_cov = self.cov_prior/10 # Take small steps. <-- looks like this 20 should be a user defined variable.
+        #self.mcmc_length = UserInput.mcmc_length
+        #self.mcmc_burn_in = UserInput.mcmc_burn_in # Number of samples trimmed off the beginning of the Markov chain.
+        #self.mu_prior = UserInput.mu_prior
+        #self.cov_prior = UserInput.cov_prior
+        self.Q_mu = self.UserInput.mu_prior*0 # Q samples the next step at any point in the chain.  The next step may be accepted or rejected.  Q_mu is centered (0) around the current theta.  
+        self.Q_cov = self.UserInput.cov_prior/10 # Take small steps. <-- looks like this 20 should be a user defined variable.
 #        self.initial_concentrations_array = UserInput.initial_concentrations_array
-        self.modulate_accept_probability = UserInput.modulate_accept_probability
-        
-#    def import_experimental_settings(self): #FIXME: This is obviously not very general. Though actually, we don't need it here. This should just go into UserInput as code rather than a function. These variables will become something like: UserInput.times, UserInput.observedResponse, UserInput.responseUncertainties.
-#        experiments_df = pd.read_csv(UserInput.Filename)
-#        self.times = np.array(experiments_df['time']) #experiments_df['time'].to_numpy() #The to_numpy() syntax was not working for Ashi.
-#        self.experiment = np.array(experiments_df['AcHBackgroundSubtracted'])/2000  #experiments_df['AcHBackgroundSubtracted'].to_numpy()/1000
-#        self.errors = np.array(experiments_df['Errors']) #.to_numpy()
+        #self.modulate_accept_probability = UserInput.modulate_accept_probability
+        #self.UserInput.import_experimental_settings(UserInput.Filename) #FIXME: This needs to get out of this function.
 
     #main function to get samples
     def MetropolisHastings(self):
         if hasattr(self.UserInput, "mcmc_random_seed"):
             if type(UserInput.mcmc_random_seed) == type(1): #if it's an integer, then it's not a "None" type or string, and we will use it.
                 np.random.seed(UserInput.mcmc_random_seed)
-        self.UserInput.import_experimental_settings(self)
-        rate_tot_array = np.zeros((self.mcmc_length,len(self.experiment)))
-        samples = np.zeros((self.mcmc_length,len(self.mu_prior)))
-        samples[0,:] = self.mu_prior # Initialize the chain. Theta is initialized as the starting point of the chain.  It is placed at the prior mean.
-        likelihoods_vec = np.zeros((self.mcmc_length,1))
-        posteriors_un_normed_vec = np.zeros((self.mcmc_length,1))
-        priors_vec = np.zeros((self.mcmc_length,1))
-        for i in range(1,self.mcmc_length):
-            if self.verbose: print("MCMC sample number", i)
+        samples_simulatedOutputs = np.zeros((self.UserInput.mcmc_length,self.UserInput.num_data_points)) #TODO: Consider moving this out of this function.
+        samples = np.zeros((self.UserInput.mcmc_length,len(self.UserInput.mu_prior)))
+        samples[0,:] = self.UserInput.mu_prior # Initialize the chain. Theta is initialized as the starting point of the chain.  It is placed at the prior mean.
+        likelihoods_vec = np.zeros((self.UserInput.mcmc_length,1))
+        posteriors_un_normed_vec = np.zeros((self.UserInput.mcmc_length,1))
+        priors_vec = np.zeros((self.UserInput.mcmc_length,1))
+        for i in range(1,self.UserInput.mcmc_length):
+            if self.UserInput.verbose: print("MCMC sample number", i)
             proposal_sample = samples[i-1,:] + np.random.multivariate_normal(self.Q_mu,self.Q_cov)
             prior_proposal = self.prior(proposal_sample)
-            [likelihood_proposal, rate_tot_proposal] = self.likelihood(proposal_sample)
-            prior_current_location = self.prior(samples[i-1,:])
-            [likelihood_current_location, rate_tot_current_location] = self.likelihood(samples[i-1,:])
+            [likelihood_proposal, simulationOutput_proposal] = self.likelihood(proposal_sample)
+            prior_current_location = self.prior(samples[i-1,:]) 
+            [likelihood_current_location, simulationOutput_current_location] = self.likelihood(samples[i-1,:]) #FIXME: the previous likelihood should be stored so that it doesn't need to be calculated again.
             accept_probability = (likelihood_proposal*prior_proposal)/(likelihood_current_location*prior_current_location) 
-            if self.modulate_accept_probability != 0: #This flattens the posterior by accepting low values more often. It can be useful when greater sampling is more important than accuracy.
-                N_flatten = float(self.flatten_accept_probability)
+            if self.UserInput.verbose: print('Current likelihood',likelihood_current_location, 'Proposed likelihood', likelihood_proposal, '\nAccept_probability (gauranteed if above 1)', accept_probability)
+            if self.UserInput.verbose: print('Current posterior',likelihood_current_location*prior_current_location, 'Proposed Posterior', likelihood_proposal*prior_proposal)
+            if self.UserInput.modulate_accept_probability != 0: #This flattens the posterior by accepting low values more often. It can be useful when greater sampling is more important than accuracy.
+                N_flatten = float(self.UserInput.modulate_accept_probability)
                 accept_probability = accept_probability**(1/N_flatten) #TODO: add code that unflattens the final histograms, that way even with more sampling we still get an accurate final posterior distribution. We can also then add a flag if the person wants to keep the posterior flattened.
             if accept_probability > np.random.uniform():  #TODO: keep a log of the accept and reject. If the reject ratio is >90% or some other such number, warn the user.
-                if self.verbose:
-                  print('accept')
-                  print(rate_tot_proposal)
+                if self.UserInput.verbose:
+                  print('accept', proposal_sample)
+                  #print(simulationOutput_proposal)
                 samples[i,:] = proposal_sample
-                rate_tot_array[i,:] = rate_tot_proposal
+                samples_simulatedOutputs[i,:] = simulationOutput_proposal
                 posteriors_un_normed_vec[i] = likelihood_proposal*prior_proposal #FIXME: Separate this block of code out into a helper function in the class, that way I can create another helper function for non-MCMC sampling.
                 likelihoods_vec[i] = likelihood_proposal
                 priors_vec[i] = prior_proposal
             else:
-                if self.verbose:
-                  print('reject')
-                  print(rate_tot_current_location)
+                if self.UserInput.verbose:
+                  print('reject', proposal_sample)
+                  #print(simulationOutput_current_location)
                 samples[i,:] = samples[i-1,:]
-                rate_tot_array[i,:] = rate_tot_current_location
+                samples_simulatedOutputs[i,:] = simulationOutput_current_location
+#                print("line 121", simulationOutput_current_location)
                 posteriors_un_normed_vec[i] = likelihood_current_location*prior_current_location
                 likelihoods_vec[i] = likelihood_current_location
                 priors_vec[i] = prior_current_location
             ########################################
-        samples = samples[self.mcmc_burn_in:]
-        posteriors_un_normed_vec = posteriors_un_normed_vec[self.mcmc_burn_in:]
-        likelihoods_vec = likelihoods_vec[self.mcmc_burn_in:]
-        priors_vec = priors_vec[self.mcmc_burn_in:]
+        post_burn_in_samples = samples[self.UserInput.mcmc_burn_in:]
+        post_burn_in_samples_simulatedOutputs = samples_simulatedOutputs[self.UserInput.mcmc_burn_in:]
+        post_burn_in_posteriors_un_normed_vec = posteriors_un_normed_vec[self.UserInput.mcmc_burn_in:]
+        post_burn_in_logP_un_normed_vec = np.log(post_burn_in_posteriors_un_normed_vec)
+        post_burn_in_likelihoods_vec = likelihoods_vec[self.UserInput.mcmc_burn_in:]
+        post_burn_in_priors_vec = priors_vec[self.UserInput.mcmc_burn_in:]
         # posterior probabilites are transformed to a standard normal (std=1) for obtaining the evidence:
-        evidence = np.mean(posteriors_un_normed_vec)*np.sqrt(2*np.pi*np.std(samples)**2)
-        posteriors_vec = posteriors_un_normed_vec/evidence
-        log_ratios = np.log(posteriors_vec/priors_vec)
+        evidence = np.mean(post_burn_in_posteriors_un_normed_vec)*np.sqrt(2*np.pi*np.std(post_burn_in_samples)**2)
+        post_burn_in_posteriors_vec = post_burn_in_posteriors_un_normed_vec/evidence
+        log_ratios = np.log(post_burn_in_posteriors_vec/post_burn_in_priors_vec)
         log_ratios[np.isinf(log_ratios)] = 0
         log_ratios = np.nan_to_num(log_ratios)
         info_gain = np.mean(log_ratios)
-        return [evidence, info_gain, samples, rate_tot_array, np.log(posteriors_un_normed_vec)] # EAW 2020/01/08
+        map_logP = max(post_burn_in_logP_un_normed_vec)
+        map_index = list(post_burn_in_logP_un_normed_vec).index(map_logP)
+        map_parameter_set = post_burn_in_samples[map_index]
+        if self.UserInput.verbose == True:
+            #The post_burn_in_samples_simulatedOutputs has length of ALL sampling including burn_in
+            #The post_burn_in_samples is only AFTER burn in.
+            #The post_burn_in_posteriors_un_normed_vec is AFTER burn in.           
+            print("line 146", (evidence), (info_gain), len(post_burn_in_samples), len(post_burn_in_samples_simulatedOutputs), len(post_burn_in_logP_un_normed_vec))
+            print("line 147", np.shape(post_burn_in_samples), np.shape(post_burn_in_samples_simulatedOutputs), np.shape(post_burn_in_logP_un_normed_vec))
+            mcmc_output = np.hstack((post_burn_in_logP_un_normed_vec,post_burn_in_samples,post_burn_in_samples_simulatedOutputs))
+            #TODO: Make header for mcmc_output
+            np.savetxt('mcmc_output.csv',mcmc_output, delimiter=",")             
+            with open("mcmc_log_file.txt", 'w') as out_file:
+                out_file.write("map_logP:" +  str(map_logP) + "\n")
+                out_file.write("map_index:" +  str(map_index) + "\n")
+                out_file.write("map_parameter_set:" + str( map_parameter_set) + "\n")
+                out_file.write("info_gain:" +  str(info_gain) + "\n")
+                out_file.write("evidence:" + str(evidence) + "\n")
+        return [map_parameter_set, evidence, info_gain, post_burn_in_samples, post_burn_in_samples_simulatedOutputs, post_burn_in_logP_un_normed_vec] # EAW 2020/01/08
     def prior(self,discreteParameterVector):
-        probability = multivariate_normal.pdf(x=discreteParameterVector,mean=self.mu_prior,cov=self.cov_prior)
+        probability = multivariate_normal.pdf(x=discreteParameterVector,mean=self.UserInput.mu_prior,cov=self.UserInput.cov_prior)
         return probability
     def likelihood(self,discreteParameterVector): #The variable discreteParameterVector represents a vector of values for the parameters being sampled. So it represents a single point in the multidimensional parameter space.
-        #Ashi has made a bunch of  FIXME below according to https://github.com/AdityaSavara/ODE-KIN-BAYES-SG-EW/issues/11. 
-
-
-        #The below few lines replace what used to look like this: #tpr_theta = odeint(tprequation, self.initial_concentrations_array, self.times, args = (*sample_list,self.beta_dTdt,self.start_T))      
-
-        #tprEquationOutput = tprequation(tpr_theta, self.times, *sample_list, self.beta_dTdt,self.start_T) #FIXME: this will be in UserInput, only arguments and function and highest level function will be passed in.
-
-
-#        simulationInputArguments = [tpr_theta, self.times, *sample_list, self.UserInput.beta_dTdt,self.UserInput.T_0] #FIXME: To be passed in from userInput
-       
-        #Want to achief: simulationOutput = simulationWrapper(discreteParameterVector)
-        
-#        def simulationFunctionWrapper(discreteParameterVector): #FIXME: This should be defined in UserInput and passed in. User is responsible for it.
-#            # from tprmodel import tprequation # This is moved to the beginning of this file EAW 2020/01/08
-#            sample_list = list(discreteParameterVector) #converting to list so can use list expansion in arguments.        
-#            tpr_theta_Arguments = [UserInput.model_function_name, self.UserInput.initial_concentrations_array, self.times, (*sample_list,self.UserInput.beta_dTdt,self.UserInput.T_0) ] #FIXME: Times needs to occur in UserInput. This needs to all occur in some kind of UserFunctions module called from UserInput, should not be passed in here. 
-#            tpr_theta = odeint(*tpr_theta_Arguments) # [0.5, 0.5] are the initial theta's. #FIXME: initialArgs and equation should come from UserInput, not be hardcoded here.            
-#            simulationInputArguments = [tpr_theta, self.times, *sample_list, self.UserInput.beta_dTdt,self.UserInput.T_0] #FIXME: To be passed in from userInput
-#            simulationFunction = UserInput.model_function_name #FIXME: To be passed in from userInput
-#            simulationOutput = UserInput.model_function_name(*simulationInputArguments) # EAW 2020/01/08
-#            return simulationOutput
-        
-        simulationOutput = self.UserInput.simulationFunctionWrapper(self,discreteParameterVector) #FIXME: code should look like simulationOutput = self.UserInput.simulationFunction(*self.UserInput.simulationInputArguments)
-
-        #intermediate_metric = np.mean(np.square(rate_tot - self.experiment) / np.square(self.errors ))            
-        
-#        simulationOutput = simulationFunction(*simulationInputArguments) #FIXME: code should look like simulationOutput = self.UserInput.simulationFunction(*self.UserInput.simulationInputArguments)
-        
-
-        #sample_list = list(discreteParameterVector) #converting to list so can use list expansion in arguments.        
-        #tpr_theta_Arguments = [tprequation, self.UserInput.initial_concentrations_array, self.times, (*sample_list,self.UserInput.beta_dTdt,self.UserInput.T_0) ] #FIXME: This needs to be passed in from UserInput, and called as self.UserInput.simulationInputArguments. right now it's hard coded here. The tuple is args. Right now, we will not support named arguments (maybe later I will add code to do it).
-        #tpr_theta = odeint(*tpr_theta_Arguments) # [0.5, 0.5] are the initial theta's. #FIXME: initialArgs and equation should come from UserInput, not be hardcoded here.
-        #rate = tprequation(tpr_theta, self.times, *sample_list, self.UserInput.beta_dTdt,self.UserInput.T_0) #This is old code for Eric to delete when he understands the code and has fixed the "return" part of the likelihood.
-        #rate_tot = -np.sum(rate, axis=0) #This is old code for Eric to delete when he understands the code and has fixed the "return" part of the likelihood.
-        #temp_points = np.array([0,49,99,149]) #range(225)        #This was a temporary line that should be deleted once Eric understands code flow.
-        #simulatedResponses = np.log10(rate_tot[temp_points]) #This was a temporary line that should be deleted once Eric understands code flow.
-        
-        #FIXME: the below wrapper functions can be combined, but either way should be in userinput as described below.
-#        def rate_tot_summing_func(rate):  
-#            rate_tot = -np.sum(rate, axis=0)   
-#            return rate_tot
-#        def rate_tot_four_points_func(rate): #Multiple layers of wrapper functions are fine.
-#            rate_tot = rate_tot_summing_func(rate)
-#            temp_points = np.array([0,49,99,149]) #range(225) #FIXME: There should be nothing hard coded here. You can hard code it in userinput if you want.
-#            rate_tot_four_points = np.array(rate_tot[temp_points])
-#            return rate_tot_four_points
-#        def log10_wrapper_func(rate):
-#            rate_tot_four_points = rate_tot_four_points_func(rate)
-#            loggedRateValues = np.log10(rate_tot_four_points)
-#            return loggedRateValues
-            
+        #This is more in accordance with https://github.com/AdityaSavara/ODE-KIN-BAYES-SG-EW/issues/11. 
+        simulationOutputProcessingFunction = self.UserInput.simulationOutputProcessingFunction
+        simulationFunctionWrapper =  self.UserInput.simulationFunctionWrapper
+        simulationOutput =simulationFunctionWrapper(discreteParameterVector) #FIXME: code should look like simulationOutput = self.UserInput.simulationFunction(*self.UserInput.simulationInputArguments)       
         #simulationOutputProcessingFunction = self.UserInput.log10_wrapper_func #FIXME: this will become fed in as self.UserInput.simulationOutputProcessingFunction
-        simulatedResponses = self.UserInput.simulationOutputProcessingFunction(simulationOutput) #This will become simulatedResponses = self.UserInput.simulationOutputProcessingFunction(simulationOutput)
-            
-        #temp_points = np.array([0,49,99,149]) moved to UserInput EAW 2020/01/27
-        observedResponses = self.UserInput.observedResponses(self.experiment)#np.log10(self.experiment[temp_points]) #FIXME: This should not be hard coded here. Should be self.UserInput.obseredResponses
-        cov = self.errors[self.UserInput.temp_points]
-        #probability_metric = multivariate_normal.pdf(x=np.log10(rate_tot[temp_points]),mean=np.log10(self.experiment[temp_points]),cov=self.errors[temp_points]) #ERIC, THIS WAS THE PREVIOUS LINE. I BELIEVE YOUR LOG10 TRANSFORM IS NOT SOMETHING WE WOULD NORMALLY DO. AM I CORRECT?
-        probability_metric = multivariate_normal.pdf(x=simulatedResponses,mean=observedResponses,cov=cov) #FIXME: should become self.UserInput.responseUncertantiesCov or something like that.
-        if self.verbose: print('likelihood probability',probability_metric,'log10(rate_tot)',np.log10(rate_tot[temp_points]), 'log10(experiment)', np.log10(self.experiment[temp_points]), 'error', self.errors[temp_points])
-        rate_tot = self.UserInput.rate_tot_summing_func(simulationOutput)
-        return probability_metric, rate_tot #FIXME: This needs to say probability_metric, simulatedResponses or something like that, but right now the sizes of the arrays do not match.
-        
-    
-ip_object = ip()
-[evidence, info_gain, samples, rate_tot_array, logP] = ip_object.MetropolisHastings()
-############################################# The computation portion is contained above.
-np.savetxt('logP.csv',logP) # EAW 2020/01/08
-post_mean = np.mean(samples, axis=0)
-experiments_df = pd.read_csv(UserInput.Filename)
-start_T = UserInput.T_0 #this is the starting temperature.
-times = np.array(experiments_df['time']) #experiments_df['time'].to_numpy() #The to_numpy() syntax was not working for Ashi.
-experiment = np.array(experiments_df['AcHBackgroundSubtracted'])/2000  #experiments_df['AcHBackgroundSubtracted'].to_numpy()/1000
-errors = np.array(experiments_df['Errors']) #.to_numpy()
-post_mean_list = list(post_mean) #converting to list so can use list expansion in arguments.
-#The simulation outputs are passed in the 'rate_tot_array', and so calling the model again in the following lines is no longer necessary.
-#tpr_theta = odeint(tprequation, UserInput.initial_concentrations_array, times, args = (*post_mean_list,UserInput.beta_dTdt, start_T)) # [0.5, 0.5] are the initial theta's.
-#rate = tprequation(tpr_theta, times, *post_mean_list, UserInput.beta_dTdt, start_T)
-#rate_tot = -np.sum(rate, axis=0) 
+        if type(simulationOutputProcessingFunction) == type(None):
+            simulatedResponses = simulationOutput #Is this the log of the rate? If so, Why?
+#            print("line 168", simulatedResponsesProxy)
+        if type(simulationOutputProcessingFunction) != type(None):
+            simulatedResponses = self.UserInput.simulationOutputProcessingFunction(simulationOutput) #This will become simulatedResponses = self.UserInput.simulationOutputProcessingFunction(simulationOutput)
+#            print("line 170", simulatedResponsesProxy)
+        observedResponses = self.UserInput.observedResponses
+        #To find the relevant covariance, we take the errors from the points.
+        cov = UserInput.observedResponses_uncertainties #FIXME: We should not be doing subset of points like this here. Should happen at user input level.
+        probability_metric = multivariate_normal.pdf(x=simulatedResponses,mean=observedResponses,cov=cov)
+#        print("line 178", simulatedResponses, simulatedResponsesProxy)
+        return probability_metric, simulatedResponses #FIXME: This needs to say probability_metric, simulatedResponses or something like that, but right now the sizes of the arrays do not match.
 
-fig0, ax0 = plt.subplots()
-if UserInput.verbose:
-  print(np.mean(rate_tot_array,axis = 0))
-ax0.plot(np.array(experiments_df['AcH - T']),np.mean(rate_tot_array,axis = 0), 'r')
-ax0.plot(np.array(experiments_df['AcH - T']),np.array(experiments_df['AcHBackgroundSubtracted'])/2000,'g')
-ax0.set_ylim([0.00, 0.025])
-ax0.set_xlabel('T (K)')
-ax0.set_ylabel(r'$rate (s^{-1})$')
-ax0.legend(['model posterior', 'experiments'])
-fig0.tight_layout()
-fig0.savefig('tprposterior.png', dpi=220)
-posterior_df = pd.DataFrame(samples,columns=[UserInput.parameterNamesAndMathTypeExpressionsDict[x] for x in UserInput.parameterNamesList])
-pd.plotting.scatter_matrix(posterior_df)
-plt.savefig('scatter_matrix_posterior.png',dpi=220)
-#######Below function and codee makes the Histograms for each parameter#####
 
 def sampledParameterHistogramMaker(parameterName,parameterNamesAndMathTypeExpressionsDict, sampledParameterFiguresDictionary, sampledParameterAxesDictionary):
         parameterIndex = list(parameterNamesAndMathTypeExpressionsDict).index(parameterName)
@@ -259,11 +196,62 @@ def sampledParameterHistogramMaker(parameterName,parameterNamesAndMathTypeExpres
         # ax2.set_xlabel(r'$E_{a2}$')
         # fig2.tight_layout()
         # fig2.savefig('Ea2.png', dpi=220)
+        
 
-
-#Make histograms for each parameter. Need to make some dictionaries where relevant objects will be stored.
-sampledParameterFiguresDictionary = copy.deepcopy(UserInput.parameterNamesAndMathTypeExpressionsDict)
-sampledParameterAxesDictionary = copy.deepcopy(UserInput.parameterNamesAndMathTypeExpressionsDict)
-for key in UserInput.parameterNamesAndMathTypeExpressionsDict:
-    parameterName = key
-    sampledParameterHistogramMaker(parameterName,UserInput.parameterNamesAndMathTypeExpressionsDict, sampledParameterFiguresDictionary, sampledParameterAxesDictionary)
+if __name__ == "__main__":
+    import UserInput_ODE_KIN_BAYES_SG_EW as UserInput
+    UserInput.verbose = True    
+    UserInput.mcmc_burn_in = 300
+    UserInput.mcmc_length = 600
+    ip_object = ip(UserInput)
+    [map_parameter_set, evidence, info_gain, samples, samples_simulatedOutputs, logP] = ip_object.MetropolisHastings()
+    ############################################# The computation portion is contained above.
+#    print(samples)
+    np.savetxt('logP.csv',logP) # EAW 2020/01/08
+    #post_mean = np.mean(samples, axis=0)
+    experiments_df = pd.read_csv(UserInput.Filename)
+#    print(experiments_df)
+#    sys.exit()
+    #start_T = UserInput.T_0 #this is the starting temperature.
+    #times = np.array(experiments_df['time']) #experiments_df['time'].to_numpy() #The to_numpy() syntax was not working for Ashi.
+    #experiment = np.array(experiments_df['AcHBackgroundSubtracted'])/2000  #experiments_df['AcHBackgroundSubtracted'].to_numpy()/1000
+    #errors = np.array(experiments_df['Errors']) #.to_numpy()
+    #post_mean_list = list(post_mean) #converting to list so can use list expansion in arguments.
+    #The simulation outputs are passed in the 'samples_simulatedOutputs', and so calling the model again in the following lines is no longer necessary.
+    #tpr_theta = odeint(tprequation, UserInput.initial_concentrations_array, times, args = (*post_mean_list,UserInput.beta_dTdt, start_T)) # [0.5, 0.5] are the initial theta's.
+    #rate = tprequation(tpr_theta, times, *post_mean_list, UserInput.beta_dTdt, start_T)
+    #rate_tot = -np.sum(rate, axis=0) 
+    
+    #TODO: make the below into a generalized function.
+    fig0, ax0 = plt.subplots()
+    if UserInput.verbose:
+      #print(np.mean(samples_simulatedOutputs,axis = 0))
+#      print("line 233", samples_simulatedOutputs[0])
+      pass
+    import processing_functions_tpd_odeint  
+    map_SimulatedOutput = UserInput.simulationFunctionWrapper(map_parameter_set)
+    map_SimulatedResponses = processing_functions_tpd_odeint.no_log_wrapper_func(map_SimulatedOutput) #for this line, always no log wrapper because want actual response and not proxy.
+    print("line 236", map_parameter_set)
+#    print("line 238", map_SimulatedResponses, np.mean(samples_simulatedOutputs,axis = 0))
+    ax0.plot(np.array(experiments_df['AcH - T'][processing_functions_tpd_odeint.temp_points]),np.mean(samples_simulatedOutputs,axis = 0), 'r')
+    ax0.plot(np.array(experiments_df['AcH - T']),np.array(experiments_df['AcHBackgroundSubtracted'])/2000,'g')
+    ax0.plot(np.array(experiments_df['AcH - T'][processing_functions_tpd_odeint.temp_points]),map_SimulatedResponses, 'b')
+    ax0.set_ylim([0.00, 0.025])
+    ax0.set_xlabel('T (K)')
+    ax0.set_ylabel(r'$rate (s^{-1})$') #TODO: THis is not yet generalized (will be a function)
+    ax0.legend(['model posterior', 'experiments', 'map'])
+    fig0.tight_layout()
+    fig0.savefig('tprposterior.png', dpi=220)
+    posterior_df = pd.DataFrame(samples,columns=[UserInput.parameterNamesAndMathTypeExpressionsDict[x] for x in UserInput.parameterNamesList])
+    pd.plotting.scatter_matrix(posterior_df)
+    plt.savefig('scatter_matrix_posterior.png',dpi=220)
+    #######Below function and codee makes the Histograms for each parameter#####
+    
+    
+    
+    #Make histograms for each parameter. Need to make some dictionaries where relevant objects will be stored.
+    sampledParameterFiguresDictionary = copy.deepcopy(UserInput.parameterNamesAndMathTypeExpressionsDict)
+    sampledParameterAxesDictionary = copy.deepcopy(UserInput.parameterNamesAndMathTypeExpressionsDict)
+    for key in UserInput.parameterNamesAndMathTypeExpressionsDict:
+        parameterName = key
+        sampledParameterHistogramMaker(parameterName,UserInput.parameterNamesAndMathTypeExpressionsDict, sampledParameterFiguresDictionary, sampledParameterAxesDictionary)
