@@ -2,17 +2,14 @@ import numpy as np
 ###User sets their model equation####
 from tprmodel import tprequation # EAW 2020/01/13 
 model_function_name = tprequation # EAW 2020/01/08
+
 from processing_functions_tpd_odeint import rate_tot_summing_func, rate_tot_four_points_func, log10_wrapper_func, observedResponses, simulationFunctionWrapper, import_experimental_settings
+from processing_functions_tpd_odeint import rate_tot_summing_func, observedResponsesFunc,  TPR_simulationFunctionWrapper, import_experimental_settings, no_log_wrapper_func #,observedResponsesProxyFunc, log10_wrapper_funcI
 #####Temperature Programmed Reaction Settings#####
 TPR = True #Set to false if doing an isothermal experiment.
 
 
 ####BELOW ARE MODEL PARAMETERS, WE WILL WANT TO COMBINE THESE INTO A LIST OF PARAMETERS###
-#Need to define beta directly, or define dt and dT.
-dT = 0.77 #Set this to 0 for an isothermal experiment.
-dt = 0.385
-beta_dTdt = dt/dT #This beta is heating rate. This will be set to 0 if somebody sets TPR to false. Not to be confused with 1/(T*k_b) which is often also called beta. User can put beta in manually.
-T_0 = 152.96 #this is the starting temperature.
 InputParameterInitialValues = [41.5, 41.5, 13.0, 13.0, 0.1, 0.1] # Ea1_mean, Ea2_mean, log_A1_mean, log_A2_mean, gamma_1_mean, gamma_2_mean 
 InputParametersInitialValuesUncertainties = [200, 200, 13, 13, 0.1, 0.1] #If user wants to use a prior with covariance, then this must be a 2D array/ list. To assume no covariance, a 1D array can be used.
 InputConstants= [] #TODO: ERIC, WE SHOULD EITHER DESIGN YOUR CODE TO ALLOW CONSTANTS SEPARATELY, OR TO HAVE UNCERTAINTIES OF ZERO TO MAKE THINGS INTO A CONSTANT. THAT IS UP TO YOU AT THIS STAGE.
@@ -24,9 +21,8 @@ Filename = 'ExperimentalDataAcetaldehydeTPDCeO2111MullinsTruncatedLargerErrors.c
 parameterNamesAndMathTypeExpressionsDict = {'Ea_1':r'$E_{a1}$','Ea_2':r'$E_{a2}$','log_A1':r'$log(A_{1})$','log_A2':r'$log(A_{2})$','gamma1':r'$\gamma_{1}$','gamma2':r'$\gamma_{2}$'}
 
 #####Chemical Kinetic Model Initial Concentrations#####
-initial_concentrations_dict = {}
-initial_concentrations_array = [0.5, 0.5]
-
+#initial_concentrations_dict = {}
+#initial_concentrations_array = [0.5, 0.5]
 
 #####Bayesian Probability Parameters#####
 verbose = False
@@ -61,14 +57,11 @@ gridSampling = False
 
 
 ######processing functions for odeint-based temperature-programmed desorption model##########
-temp_points = np.array([0,49,99,149])
-simulationOutputProcessingFunction = log10_wrapper_func
-rate_tot_summing_func = rate_tot_summing_func 
-rate_tot_four_points_func = rate_tot_four_points_func 
-log10_wrapper_func = log10_wrapper_func
-observedResponses = observedResponses
-simulationFunctionWrapper = simulationFunctionWrapper
+simulationFunctionWrapper = TPR_simulationFunctionWrapper
 import_experimental_settings = import_experimental_settings
+
+simulationOutputProcessingFunction = no_log_wrapper_func
+observedResponses = observedResponsesFunc()
 
 contour_settings_custom = {'figure_name': 'mumpce_plots_demo','fontsize':'auto' ,'num_y_ticks': 'auto','num_x_ticks':'auto','colormap_posterior_customized':'Oranges','colormap_prior_customized':'Greens','contours_normalized':False,'center_on':'prior','colorbars':True}
 
