@@ -2,12 +2,12 @@ import numpy as np
 ###User sets their model equation####
 from tprmodel import tprequation # EAW 2020/01/13 
 model_function_name = tprequation # EAW 2020/01/08
-
-from processing_functions_tpd_odeint import rate_tot_summing_func, rate_tot_four_points_func, log10_wrapper_func, observedResponses, simulationFunctionWrapper, import_experimental_settings
-from processing_functions_tpd_odeint import rate_tot_summing_func, observedResponsesFunc,  TPR_simulationFunctionWrapper, import_experimental_settings, no_log_wrapper_func #,observedResponsesProxyFunc, log10_wrapper_funcI
+from processing_functions_tpd_odeint import rate_tot_summing_func, observedResponsesFunc,  TPR_simulationFunctionWrapper, import_experimental_settings, no_log_wrapper_func #,observedResponsesProxyFunc, log10_wrapper_func 
 #####Temperature Programmed Reaction Settings#####
 TPR = True #Set to false if doing an isothermal experiment.
 
+import processing_functions_tpd_odeint
+num_data_points = len(processing_functions_tpd_odeint.temp_points) #FIXME: This is temporary hardcoding to get it out of the run_me file.
 
 ####BELOW ARE MODEL PARAMETERS, WE WILL WANT TO COMBINE THESE INTO A LIST OF PARAMETERS###
 InputParameterInitialValues = [41.5, 41.5, 13.0, 13.0, 0.1, 0.1] # Ea1_mean, Ea2_mean, log_A1_mean, log_A2_mean, gamma_1_mean, gamma_2_mean 
@@ -16,6 +16,7 @@ InputConstants= [] #TODO: ERIC, WE SHOULD EITHER DESIGN YOUR CODE TO ALLOW CONST
 
 #####Experimental Data Input Files#####
 Filename = 'ExperimentalDataAcetaldehydeTPDCeO2111MullinsTruncatedLargerErrors.csv'
+times, experiment, observedResponses_uncertainties = import_experimental_settings(Filename)
 
 #####Chemical Kinetic Model Input Files#####
 parameterNamesAndMathTypeExpressionsDict = {'Ea_1':r'$E_{a1}$','Ea_2':r'$E_{a2}$','log_A1':r'$log(A_{1})$','log_A2':r'$log(A_{2})$','gamma1':r'$\gamma_{1}$','gamma2':r'$\gamma_{2}$'}
@@ -23,6 +24,7 @@ parameterNamesAndMathTypeExpressionsDict = {'Ea_1':r'$E_{a1}$','Ea_2':r'$E_{a2}$
 #####Chemical Kinetic Model Initial Concentrations#####
 #initial_concentrations_dict = {}
 #initial_concentrations_array = [0.5, 0.5]
+
 
 #####Bayesian Probability Parameters#####
 verbose = False
@@ -63,8 +65,6 @@ import_experimental_settings = import_experimental_settings
 simulationOutputProcessingFunction = no_log_wrapper_func
 observedResponses = observedResponsesFunc()
 
-contour_settings_custom = {'figure_name': 'mumpce_plots_demo','fontsize':'auto' ,'num_y_ticks': 'auto','num_x_ticks':'auto','colormap_posterior_customized':'Oranges','colormap_prior_customized':'Greens','contours_normalized':False,'center_on':'prior','colorbars':True}
-
 ######mumpce plots#####
 model_parameter_info = np.array([{'parameter_number': 0, 'parameter_name': 'Parameter 0', 'parameter_value': 1.0},
  {'parameter_number': 1, 'parameter_name': 'Parameter 1'},
@@ -84,3 +84,4 @@ prior_mu_vector = np.array([-0.98888733,0.8200355, 0.01204044, -7.02385888,0.404
 prior_cov_matrix = 10*posterior_cov_matrix
 pairs_of_parameter_indices = [[0, 1], [1, 2],[3, 4]]
 # Other options include: figure_name, fontsize, num_y_ticks, num_x_ticks, colormap_posterior_customized, colormap_prior_customized, contours_normalized, colorbars
+contour_settings_custom = {'figure_name': 'mumpce_plots_demo','fontsize':'auto' ,'num_y_ticks': 'auto','num_x_ticks':'auto','colormap_posterior_customized':'Oranges','colormap_prior_customized':'Greens','contours_normalized':False,'center_on':'prior','colorbars':True}
