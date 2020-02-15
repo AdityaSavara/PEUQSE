@@ -4,8 +4,10 @@ import mumpce.Project as mumpceProject
 import mumpce.solution as mumpceSolution
 import numpy as np
 import matplotlib
+import matplotlib.pyplot as plt
 from matplotlib import cm #EAW 2020/01/07
 import UserInput_ODE_KIN_BAYES_SG_EW as UserInput
+import copy
 
 class plotting_functions():
     def __init__(self, UserInput = UserInput, samples = False): # The plots require samples.  Other plot settings are probably plotting-package specific.
@@ -18,7 +20,8 @@ class plotting_functions():
         cov = np.cov(self.samples,rowvar=False)
         return mu, cov
 
-    def mumpce_plots(self, model_parameter_info = {}, active_parameters = [], pairs_of_parameter_indices = [], posterior_mu_vector = [], posterior_cov_matrix = [], prior_mu_vector = [], prior_cov_matrix = [], contour_settings_custom = {}): # Pass empty keyword arguments for important parameters.  That way, warnings may be issued if they are not set.  There is not really a good default for these keyword arguments.  They depend entirely on the nature of the data being plotted.
+    def mumpce_plots(self, model_parameter_info = {}, active_parameters = [], pairs_of_parameter_indices = [], posterior_mu_vector = [], posterior_cov_matrix = [], prior_mu_vector = [], prior_cov_matrix = []): # Pass empty keyword arguments for important parameters.  That way, warnings may be issued if they are not set.  There is not really a good default for these keyword arguments.  They depend entirely on the nature of the data being plotted.
+        contour_settings_custom = {'figure_name','fontsize','num_y_ticks','num_x_ticks','colormap_posterior_customized','colormap_prior_customized','contours_normalized','colorbars'} # Here are the dictionary options, unassigned yet
         mumpceProjectObject = mumpceProject.Project() # A mumpce project object must be created.
         if len(model_parameter_info) == 0:
             print("Pass the 'model_parameter_info' argument to the mumpce_plots function.")
@@ -47,16 +50,47 @@ class plotting_functions():
         mumpceProjectObject.model_parameter_info = model_parameter_info
         mumpceSolutionsObject = mumpceSolution.Solution(posterior_mu_vector, posterior_cov_matrix, initial_x=prior_mu_vector, initial_covariance=prior_cov_matrix)
         mumpceProjectObject.solution = mumpceSolutionsObject
+        contour_settings_custom = {}
+        if hasattr(UserInput,'figure_name'):
+            contour_settings_custom['figure_name']=UserInput.figure_name
+        else:
+            contour_settings_custom['figure_name']='mumpce_plots_04'
+        if hasattr(UserInput,'fontsize'):
+            contour_settings_custom['fontsize'] = UserInput.fontsize        
+        else:
+            contour_settings_custom['fontsize'] = 'auto'
+        if hasattr(UserInput,'num_y_ticks'):
+            contour_settings_custom['num_y_ticks'] = UserInput.num_y_ticks
+        else:
+            contour_settings_custom['num_y_ticks'] = 'auto'
+        if hasattr(UserInput,'num_x_ticks'):
+            contour_settings_custom['num_x_ticks'] = UserInput.num_x_ticks
+        else:
+            contour_settings_custom['num_x_ticks'] = 'auto'
+        if hasattr(UserInput,'colormap_posterior_customized'):
+            contour_settings_custom['colormap_posterior_customized'] = UserInput.colormap_posterior_customized
+        else:
+            contour_settings_custom['colormap_posterior_customized'] = "Oranges"
+        if hasattr(UserInput,'colormap_prior_customized'):
+            contour_settings_custom['colormap_prior_customized'] = UserInput.colormap_prior_customized
+        else:
+            contour_settings_custom['colormap_prior_customized'] = "Greens"
+        if hasattr(UserInput,'contours_normalized'):
+            contour_settings_custom['contours_normalized'] = UserInput.contours_normalized
+        else:
+            contour_settings_custom['contours_normalized'] = False
+        if hasattr(UserInput,'center_on'):
+            contour_settings_custom['center_on'] = UserInput.center_on
+        else:
+            contour_settings_custom['center_on'] = 'prior'
+        if hasattr(UserInput,'colorbars'):
+            contour_settings_custom['colorbars'] = UserInput.colorbars
+        else:
+            contour_settings_custom['colorbars'] = True
         mumpceProjectObject.plot_pdfs(mumpceProjectObject.pairsOfParameterIndices, contour_settings_custom = contour_settings_custom)
 
 
     def seaborn_scatterplot_matrix(self):
-        posterior_df = pd.DataFrame(self.samples,columns=[UserInput.parameterNamesAndMathTypeExpressionsDict[x] for x in UserInput.parameterNamesList])
-        pd.plotting.scatter_matrix(posterior_df)
-        plt.savefig('scatter_matrix_posterior.png',dpi=220)
-        return
-
-    def rate_tot_plot(self):
         #fig0, ax0 = plt.subplots()
         #if UserInput.verbose:
         #    print(np.mean(rate_tot_array,axis = 0))
@@ -68,4 +102,35 @@ class plotting_functions():
         #ax0.legend(['model posterior', 'experiments'])
         #fig0.tight_layout()
         #fig0.savefig('tprposterior.png', dpi=220)
+        #posterior_df = pd.DataFrame(samples,columns=[UserInput.parameterNamesAndMathTypeExpressionsDict[x] for x in UserInput.parameterNamesList])
+        #pd.plotting.scatter_matrix(posterior_df)
+        #plt.savefig('scatter_matrix_posterior.png',dpi=220)
         return
+
+    def rate_tot_plot(self):
+        return
+
+def sampledParameterHistogramMaker(parameterSamples, parameterName,parameterNamesAndMathTypeExpressionsDict, sampledParameterFiguresDictionary, sampledParameterAxesDictionary):
+        parameterIndex = list(parameterNamesAndMathTypeExpressionsDict).index(parameterName)
+        sampledParameterFiguresDictionary['parameterName'], sampledParameterAxesDictionary['parameterName'] = plt.subplots()   #making plt objects    
+        sampledParameterAxesDictionary['parameterName'].hist(parameterSamples[:,parameterIndex]) #filling the object with data
+        #setting the labels etc. and then exporting.
+        sampledParameterAxesDictionary['parameterName'].set_ylabel('frequency')
+        sampledParameterAxesDictionary['parameterName'].set_xlabel(parameterNamesAndMathTypeExpressionsDict[parameterName])
+        sampledParameterFiguresDictionary['parameterName'].tight_layout()
+        sampledParameterFiguresDictionary['parameterName'].savefig(parameterName+'.png', dpi=220)
+        #The above block makes code kind of like this in a dynamic fashion. Since we know how many we will need, a dictionary is used to avoid the need for 'exec' statements when making new parameters.
+        # fig2, ax2 = plt.subplots()
+        # ax2.hist(samples[:,1])
+        # ax2.set_ylabel('frequency')
+        # ax2.set_xlabel(r'$E_{a2}$')
+        # fig2.tight_layout()
+        # fig2.savefig('Ea2.png', dpi=220)
+
+    #Make histograms for each parameter. Need to make some dictionaries where relevant objects will be stored.
+def makeHistogramsForEachParameter(parameterNamesAndMathTypeExpressionsDict, parameterSamples):
+    sampledParameterFiguresDictionary = copy.deepcopy(parameterNamesAndMathTypeExpressionsDict) #This must be a deep copy to perserve original.
+    sampledParameterAxesDictionary = copy.deepcopy(parameterNamesAndMathTypeExpressionsDict) #This must be a deep copy to preserve original.
+    for key in parameterNamesAndMathTypeExpressionsDict:
+        parameterName = key
+        sampledParameterHistogramMaker(parameterSamples, parameterName,UserInput.parameterNamesAndMathTypeExpressionsDict, sampledParameterFiguresDictionary, sampledParameterAxesDictionary)        
