@@ -6,11 +6,11 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib import cm #EAW 2020/01/07
-import UserInput_ODE_KIN_BAYES_SG_EW as UserInput
+#import UserInput_ODE_KIN_BAYES_SG_EW as UserInput
 import copy
 
 class plotting_functions():
-    def __init__(self, UserInput = UserInput, samples = False): # The plots require samples.  Other plot settings are probably plotting-package specific.
+    def __init__(self, UserInput, samples = False): # The plots require samples.  Other plot settings are probably plotting-package specific.
         self.UserInput = UserInput
         if not samples:
             print("Warning: Pass in the 'samples' keyword argument containing a numpy array of samples to plot.")
@@ -133,7 +133,7 @@ def makeHistogramsForEachParameter(parameterSamples,parameterNamesAndMathTypeExp
     sampledParameterAxesDictionary = copy.deepcopy(parameterNamesAndMathTypeExpressionsDict) #This must be a deep copy to preserve original.
     for key in parameterNamesAndMathTypeExpressionsDict:
         parameterName = key
-        sampledParameterHistogramMaker(parameterSamples, parameterName,UserInput.parameterNamesAndMathTypeExpressionsDict, sampledParameterFiguresDictionary, sampledParameterAxesDictionary)        
+        sampledParameterHistogramMaker(parameterSamples, parameterName,parameterNamesAndMathTypeExpressionsDict, sampledParameterFiguresDictionary, sampledParameterAxesDictionary)        
 
 def createSimulatedResponsesPlot(x_values, listOfYArrays, plot_settings=[]):
     #First put some defaults in if not already defined.
@@ -145,8 +145,7 @@ def createSimulatedResponsesPlot(x_values, listOfYArrays, plot_settings=[]):
     fig0, ax0 = plt.subplots()
     ax0.set_xlabel(plot_settings['x_label'])
     ax0.set_ylabel(plot_settings['y_label']) #TODO: THis is not yet generalized (will be a function)
-    if 'y_range' not in plot_settings: ax0.set_ylim(plot_settings['y_range'] )
-       #listofYdata =
+    if 'y_range' in plot_settings: ax0.set_ylim(plot_settings['y_range'] )
     if len(listOfYArrays) == 3:
         for seriesIndex in range(len(listOfYArrays)):
             ax0.plot(x_values,listOfYArrays[0],'g')
