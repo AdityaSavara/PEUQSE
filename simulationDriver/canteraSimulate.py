@@ -1,3 +1,9 @@
+#These lines are to make sure that the module has access to canteraKineticsParametersParser
+import os
+import sys
+file_dir = os.path.dirname(__file__)
+sys.path.append(file_dir)
+
 import cantera as ct
 import numpy as np
 import csv
@@ -82,14 +88,6 @@ def simulatePFRorTPRwithCantera(model_name, canteraGasPhaseObject, canteraSurfac
     canteraPhases['gas'] = gas
     canteraPhases['surf'] = surf
        
-    #Initiate concentrations output file and headers.
-    concentrations_output_filename = model_name + "_output_concentrations.csv"
-    outfile = open(concentrations_output_filename,'w')
-    writer = csv.writer(outfile)
-    concentrationsArrayHeaderList = ['Distance (m)', 'time(s)',  'T_gas (K)', 'T_surf (K)', 'P (atm)'] + \
-                    gas.species_names + surf.species_names
-    concentrationsArrayHeader = str(concentrationsArrayHeaderList)[1:-1]
-    writer.writerow(concentrationsArrayHeaderList) #The species names were imported when "surf" and "gas" objects were created.
     
     '''Now the code that handles *either* isothermal PFR or surface TPR. In future, will allow PFR TPR as well'''
     #We are going to model things as a flow reactor made of CSTRs, with no flow for the surface TPR case, following this example: https://cantera.org/examples/python/reactors/surf_pfr.py.html
@@ -119,6 +117,18 @@ def simulatePFRorTPRwithCantera(model_name, canteraGasPhaseObject, canteraSurfac
     exportOutputs = simulation_settings_module.exportOutputs
     '''END OF settings that users should change.'''
     
+
+
+    #Initiate concentrations output file and headers.
+    if exportOutputs == True:
+        concentrations_output_filename = model_name + "_output_concentrations.csv"
+        outfile = open(concentrations_output_filename,'w')
+        writer = csv.writer(outfile)
+    concentrationsArrayHeaderList = ['Distance (m)', 'time(s)',  'T_gas (K)', 'T_surf (K)', 'P (atm)'] + \
+                    gas.species_names + surf.species_names
+    concentrationsArrayHeader = str(concentrationsArrayHeaderList)[1:-1] #The species names were imported when "surf" and "gas" objects were created.
+    if exportOutputs == True:    
+        writer.writerow(concentrationsArrayHeaderList)
     
     
     if flow_type == "Static":
@@ -270,7 +280,7 @@ def simulatePFRorTPRwithCantera(model_name, canteraGasPhaseObject, canteraSurfac
     if exportOutputs == True:
         np.savetxt(model_name + "_output_rates_all.csv", rates_all_array, delimiter=",", comments = '', header = rates_all_array_header)
         np.savetxt(model_name + "_output_rates_gas.csv", gasRatesArray, delimiter=",", comments = '', header = gasRatesArrayHeader )
-        np.savetxt(model_name + "_output_rates_surf.csv", surfaceRatesArray, delimiter=",", comments = '', header = surfaceRatesArrayHeader)
-    
-    outfile.close()
+        np.savetxt(model_name + "_output_rates_surf.csv", surfaceRatesArray, delimiter=",", comments = '', header = surfaceRatesArrayHeader)     
+    if exportOutputs == True:    
+        outfile.close()
     return concentrationsArray, concentrationsArrayHeader, rates_all_array, rates_all_array_header, cantera_phase_rates, canteraPhases, cantera_phase_rates_headers, canteraSimulationsObject
