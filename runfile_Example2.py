@@ -1,6 +1,13 @@
-import CheKiPEUQ as CKPQ
-import processing_functions_tpd_odeint
 import pandas as pd
+import CheKiPEUQ as CKPQ
+
+import cantera as ct
+import cantera.ck2cti as ck2cti
+import canteraSimulate
+import numpy as np
+import canteraKineticsParametersParser 
+
+
 
 if __name__ == "__main__":
     import UserInput_CKPQ_Example1 as UserInput
