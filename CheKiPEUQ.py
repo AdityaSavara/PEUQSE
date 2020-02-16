@@ -41,7 +41,7 @@ class parameter_estimation:
         self.UserInput.mu_prior = np.array(UserInput.model['InputParameterInitialValues']) 
         #self.cov_prior = UserInput.cov_prior
         self.Q_mu = self.UserInput.mu_prior*0 # Q samples the next step at any point in the chain.  The next step may be accepted or rejected.  Q_mu is centered (0) around the current theta.  
-        self.Q_cov = self.UserInput.cov_prior/10 # Take small steps. <-- looks like this 20 should be a user defined variable.
+        self.Q_cov = self.UserInput.cov_prior*UserInput.parameter_estimation_settings['mcmc_relative_step_length'] # Take small steps. 
 #        self.initial_concentrations_array = UserInput.initial_concentrations_array
         #self.modulate_accept_probability = UserInput.modulate_accept_probability
         #self.UserInput.import_experimental_settings(UserInput.Filename) #FIXME: This needs to get out of this function.
