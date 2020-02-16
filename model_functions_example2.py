@@ -20,8 +20,16 @@ with open(cti_top_info_filename, "r") as cti_top_info_file:
 
 initial_reactions_parameters_array = np.genfromtxt(model_location+ model_name + "_input_reactions_parameters.csv", delimiter=",", dtype="str", skip_header=1)
 #ow, looking at the paramters array file, we can see where the different parameters positions are that we can modify.
-
 print(initial_reactions_parameters_array)
+
+global observed_x_values #This can be set initially, then changed later if desired.
+import processing_functions_tpd_odeint
+observed_data_Filename = 'ExperimentalDataAcetaldehydeTPDCeO2111MullinsTruncatedLargerErrors.csv'
+observed_x_values, responses_observed, observedResponses_uncertainties = processing_functions_tpd_odeint.import_experimental_settings(observed_data_Filename)
+
+global firstSimulation
+firstSimulation = True
+
 
 def cantera_simulation_wrapper_example2(parametersArray): #This takes in *only* the adjustable parameters.
     #Now we modify the 'initial' parameters array accordingly.
@@ -42,9 +50,16 @@ def cantera_simulation_wrapper_example2(parametersArray): #This takes in *only* 
     modified_reactions_parameters_array[1][8] = 10**parametersArray[4]
     modified_reactions_parameters_array[3][8] = 10**parametersArray[5]        
     
-    #Now we do the simulation.
-    concentrationsArray, concentrationsArrayHeader, rates_all_array, rates_all_array_header, cantera_phase_rates, canteraPhases, cantera_phase_rates_headers, canteraSimulationsObject = \
-    canteraSimulate.create_cti_and_SimulatePFRorTPRwithCantera("ceO2", modified_reactions_parameters_array, ceO2_input_simulation_settings, cti_top_info_string = cti_top_info_string)
+    #Now we do the simulation. The first time, we need to do a full simulation flow.  But second time and later we can just modify the cantera phases object and run again.
+    global firstSimulation
+    global canteraPhases #need to make it global so the object sticks around for next function call.
+    if firstSimulation == True:
+        concentrationsArray, concentrationsArrayHeader, rates_all_array, rates_all_array_header, cantera_phase_rates, canteraPhases, cantera_phase_rates_headers, canteraSimulationsObject = \
+        canteraSimulate.create_cti_and_SimulatePFRorTPRwithCantera(model_name, modified_reactions_parameters_array, ceO2_input_simulation_settings, cti_top_info_string = cti_top_info_string)
+        firstSimulation = False
+    elif firstSimulation == False: #This must be an elif, otherwise it will always be executed. In this function, the cantera phases object will be created the first time the function is called. Then will exist for later.
+        concentrationsArray, concentrationsArrayHeader, rates_all_array, rates_all_array_header, cantera_phase_rates, canteraPhases, cantera_phase_rates_headers, canteraSimulationsObject = \
+        canteraSimulate.modify_reactions_and_SimulatePFRorTPRwithCantera(model_name, modified_reactions_parameters_array, ceO2_input_simulation_settings, canteraPhases=canteraPhases)        
     
     #Now we parse the output.
     times = cantera_phase_rates['surf'][:,1] #This is in seconds.
@@ -57,16 +72,21 @@ def cantera_simulation_wrapper_example2(parametersArray): #This takes in *only* 
     totalAbsoluteRate = totalAbsoluteRate / 2.72E-9 #now should be moles produced per moles of site, which is molecules per site per second.
     
     #Now we need to interpolate to the x_values that we need.
-    return(totalAbsoluteRate)
+    #we use a global called x_values and assume that our output is a continuous function.
+    global observed_x_values
+    interpolatedRate = np.interp(observed_x_values, times, totalAbsoluteRate)
+    
+    
+    return interpolatedRate
 
 totalAbsoluteRate = cantera_simulation_wrapper_example2([61.5, 41.5, 13.0, 13.0, 0.1, 0.1])
 
 from matplotlib import pyplot as plt
 import numpy as np
-x = temperatures
+x = observed_x_values
 y = totalAbsoluteRate
 plt.plot(x,y)
-plt.xlabel("temperature")
+plt.xlabel("time (s)")
 plt.ylabel("total rate")
 plt.title('Acetaldehyde Desorption Rate')
 plt.show()    
@@ -75,10 +95,10 @@ totalAbsoluteRate = cantera_simulation_wrapper_example2([51.5, 51.5, 13.0, 13.0,
 
 from matplotlib import pyplot as plt
 import numpy as np
-x = temperatures
+x = observed_x_values
 y = totalAbsoluteRate
 plt.plot(x,y)
-plt.xlabel("temperature")
+plt.xlabel("time (s)")
 plt.ylabel("total rate")
 plt.title('Acetaldehyde Desorption Rate')
 plt.show()    

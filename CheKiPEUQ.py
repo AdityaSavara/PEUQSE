@@ -7,7 +7,7 @@ from scipy.stats import multivariate_normal
 from scipy.integrate import odeint
 import pandas as pd
 import sys
-
+import timeit
 import copy
 #import mumce_py.Project as mumce_pyProject #FIXME: Eric to fix plotting/graphing issue described in issue 9 -- https://github.com/AdityaSavara/ODE-KIN-BAYES-SG-EW/issues/9
 #import mumce_py.solution mumce_pySolution
@@ -56,10 +56,15 @@ class parameter_estimation:
         likelihoods_vec = np.zeros((self.UserInput.parameter_estimation_settings['mcmc_length'],1))
         posteriors_un_normed_vec = np.zeros((self.UserInput.parameter_estimation_settings['mcmc_length'],1))
         priors_vec = np.zeros((self.UserInput.parameter_estimation_settings['mcmc_length'],1))
+        #Code to initialize checkpoints.
+        if type(self.UserInput.parameter_estimation_settings['checkPointFrequency']) != type(None):
+            print("Starting MCMC sampling.")
+            import timeit
+            timeOfFirstCheckpoint = timeit.time.clock()
+            timeCheckpoint = timeOfFirstCheckpoint #First checkpoint at time 0.
+            numCheckPoints = self.UserInput.parameter_estimation_settings['mcmc_length']/self.UserInput.parameter_estimation_settings['checkPointFrequency']
         for i in range(1,self.UserInput.parameter_estimation_settings['mcmc_length']):
-            if self.UserInput.parameter_estimation_settings['verbose']: print("MCMC sample number", i)
-            if type(self.UserInput.parameter_estimation_settings['checkPointFrequency']) != type(None):
-                if i%self.UserInput.parameter_estimation_settings['checkPointFrequency'] == 0: print("MCMC sample number", i) #The % is a modulus function.
+            if self.UserInput.parameter_estimation_settings['verbose']: print("MCMC sample number", i)                  
             proposal_sample = samples[i-1,:] + np.random.multivariate_normal(self.Q_mu,self.Q_cov)
             prior_proposal = self.getPrior(proposal_sample)
             [likelihood_proposal, simulationOutput_proposal] = self.getLikelihood(proposal_sample)
@@ -92,6 +97,16 @@ class parameter_estimation:
                 posteriors_un_normed_vec[i] = likelihood_current_location*prior_current_location
                 likelihoods_vec[i] = likelihood_current_location
                 priors_vec[i] = prior_current_location
+            if type(self.UserInput.parameter_estimation_settings['checkPointFrequency']) != type(None):
+                if i%self.UserInput.parameter_estimation_settings['checkPointFrequency'] == 0: #The % is a modulus function.
+                    timeSinceLastCheckPoint = timeit.time.clock() -  timeCheckpoint
+                    timeCheckpoint = timeit.time.clock() - timeOfFirstCheckpoint
+                    checkPointNumber = i/self.UserInput.parameter_estimation_settings['checkPointFrequency']
+                    averagetimePerSampling = timeCheckpoint/i
+                    print("MCMC sample number ", i, "checkpoint", checkPointNumber, "out of", numCheckPoints) 
+                    print("averagetimePerSampling", averagetimePerSampling, "seconds")
+                    print("timeSinceLastCheckPoint", timeSinceLastCheckPoint, "seconds")
+                    print("Estimated time remaining", averagetimePerSampling*(self.UserInput.parameter_estimation_settings['mcmc_length']-i), "seconds")
             ########################################
         self.burn_in_samples = samples[:self.UserInput.parameter_estimation_settings['mcmc_burn_in']]
         self.post_burn_in_samples = samples[self.UserInput.parameter_estimation_settings['mcmc_burn_in']:]
@@ -146,7 +161,7 @@ class parameter_estimation:
         if type(simulationOutputProcessingFunction) == type(None):
             simulatedResponses = simulationOutput #Is this the log of the rate? If so, Why?
         if type(simulationOutputProcessingFunction) != type(None):
-            simulatedResponses = simulationOutputProcessingFunction(simulationOutput) #This will become simulatedResponses = self.UserInput.simulationOutputProcessingFunction(simulationOutput)
+            simulatedResponses = simulationOutputProcessingFunction(simulationOutput) 
         observedResponses = self.UserInput.responses['responses_observed']
         #To find the relevant covariance, we take the errors from the points.
         responses_cov = self.UserInput.responses['responses_observed_uncertainties'] 
@@ -172,10 +187,18 @@ class parameter_estimation:
     def createSimulatedResponsesPlot(self, x_values=[], listOfYArrays=[], plot_settings={}):            
         if x_values == []: x_values = self.UserInput.responses['responses_abscissa']       
         if listOfYArrays ==[]:
-            self.map_SimulatedOutput = self.UserInput.model['simulateByInputParametersOnlyFunction'](self.map_parameter_set)
-            self.map_SimulatedResponses = self.UserInput.model['simulationOutputProcessingFunction'](self.map_SimulatedOutput) #for this line, always no log wrapper because want actual response and not proxy.            
+            #Get map simiulated output and simulated responses.
+            self.map_SimulatedOutput = self.UserInput.model['simulateByInputParametersOnlyFunction'](self.map_parameter_set)           
+            if type(self.UserInput.model['simulationOutputProcessingFunction']) == type(None):
+                self.map_SimulatedResponses = self.map_SimulatedOutput #Is this the log of the rate? If so, Why?
+            if type(self.UserInput.model['simulationOutputProcessingFunction']) != type(None):
+                self.map_SimulatedResponses =  self.UserInput.model['simulationOutputProcessingFunction'](self.map_SimulatedOutput)                    
+            #Get muap simiulated output and simulated responses.
             self.muap_SimulatedOutput = self.UserInput.model['simulateByInputParametersOnlyFunction'](self.muap_parameter_set)
-            self.muap_SimulatedResponses = self.UserInput.model['simulationOutputProcessingFunction'](self.muap_SimulatedOutput) #for this line, always no log wrapper because want actual response and not proxy.
+            if type(self.UserInput.model['simulationOutputProcessingFunction']) == type(None):
+                self.muap_SimulatedResponses = self.muap_SimulatedOutput #Is this the log of the rate? If so, Why?
+            if type(self.UserInput.model['simulationOutputProcessingFunction']) != type(None):
+                self.muap_SimulatedResponses =  self.UserInput.model['simulationOutputProcessingFunction'](self.muap_SimulatedOutput) 
             listOfYArrays = [self.UserInput.responses['responses_observed'],self.map_SimulatedResponses, self.muap_SimulatedResponses]        
         if plot_settings == {}: 
             plot_settings = self.UserInput.simulated_response_plot_settings
