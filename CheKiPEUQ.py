@@ -61,7 +61,7 @@ class parameter_estimation:
             print("Starting MCMC sampling.")
             import timeit
             timeOfFirstCheckpoint = timeit.time.clock()
-            timeCheckpoint = timeOfFirstCheckpoint #First checkpoint at time 0.
+            timeCheckpoint = timeit.time.clock() - timeOfFirstCheckpoint #First checkpoint at time 0.
             numCheckPoints = self.UserInput.parameter_estimation_settings['mcmc_length']/self.UserInput.parameter_estimation_settings['checkPointFrequency']
         for i in range(1,self.UserInput.parameter_estimation_settings['mcmc_length']):
             if self.UserInput.parameter_estimation_settings['verbose']: print("MCMC sample number", i)                  
@@ -99,7 +99,7 @@ class parameter_estimation:
                 priors_vec[i] = prior_current_location
             if type(self.UserInput.parameter_estimation_settings['checkPointFrequency']) != type(None):
                 if i%self.UserInput.parameter_estimation_settings['checkPointFrequency'] == 0: #The % is a modulus function.
-                    timeSinceLastCheckPoint = timeit.time.clock() -  timeCheckpoint
+                    timeSinceLastCheckPoint = (timeit.time.clock() - timeOfFirstCheckpoint) -  timeCheckpoint
                     timeCheckpoint = timeit.time.clock() - timeOfFirstCheckpoint
                     checkPointNumber = i/self.UserInput.parameter_estimation_settings['checkPointFrequency']
                     averagetimePerSampling = timeCheckpoint/i
