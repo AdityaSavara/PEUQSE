@@ -2,7 +2,7 @@ import numpy as np
 ###User sets their model equation####
 from tprmodel import tprequation # EAW 2020/01/13 
 model_function_name = tprequation # EAW 2020/01/08
-from processing_functions_tpd_odeint import observedResponsesFunc,  TPR_simulationFunctionWrapper, import_experimental_settings, no_log_wrapper_func #,observedResponsesProxyFunc, log10_wrapper_func 
+from processing_functions_tpd_odeint import rate_tot_summing_func, observedResponsesFunc,  TPR_simulationFunctionWrapper, import_experimental_settings, no_log_wrapper_func #,observedResponsesProxyFunc, log10_wrapper_func 
 #####Temperature Programmed Reaction Settings#####
 TPR = True #Set to false if doing an isothermal experiment.
 

@@ -4,11 +4,13 @@ import mumpce.Project as mumpceProject
 import mumpce.solution as mumpceSolution
 import numpy as np
 import matplotlib
+import matplotlib.pyplot as plt
 from matplotlib import cm #EAW 2020/01/07
-import UserInput_ODE_KIN_BAYES_SG_EW as UserInput
+#import UserInput_ODE_KIN_BAYES_SG_EW as UserInput
+import copy
 
 class plotting_functions():
-    def __init__(self, UserInput = UserInput, samples = False): # The plots require samples.  Other plot settings are probably plotting-package specific.
+    def __init__(self, UserInput, samples = False): # The plots require samples.  Other plot settings are probably plotting-package specific.
         self.UserInput = UserInput
         if not samples:
             print("Warning: Pass in the 'samples' keyword argument containing a numpy array of samples to plot.")
@@ -107,3 +109,52 @@ class plotting_functions():
 
     def rate_tot_plot(self):
         return
+
+def sampledParameterHistogramMaker(parameterSamples, parameterName,parameterNamesAndMathTypeExpressionsDict, sampledParameterFiguresDictionary, sampledParameterAxesDictionary):
+        parameterIndex = list(parameterNamesAndMathTypeExpressionsDict).index(parameterName)
+        sampledParameterFiguresDictionary['parameterName'], sampledParameterAxesDictionary['parameterName'] = plt.subplots()   #making plt objects    
+        sampledParameterAxesDictionary['parameterName'].hist(parameterSamples[:,parameterIndex]) #filling the object with data
+        #setting the labels etc. and then exporting.
+        sampledParameterAxesDictionary['parameterName'].set_ylabel('frequency')
+        sampledParameterAxesDictionary['parameterName'].set_xlabel(parameterNamesAndMathTypeExpressionsDict[parameterName])
+        sampledParameterFiguresDictionary['parameterName'].tight_layout()
+        sampledParameterFiguresDictionary['parameterName'].savefig(parameterName+'.png', dpi=220)
+        #The above block makes code kind of like this in a dynamic fashion. Since we know how many we will need, a dictionary is used to avoid the need for 'exec' statements when making new parameters.
+        # fig2, ax2 = plt.subplots()
+        # ax2.hist(samples[:,1])
+        # ax2.set_ylabel('frequency')
+        # ax2.set_xlabel(r'$E_{a2}$')
+        # fig2.tight_layout()
+        # fig2.savefig('Ea2.png', dpi=220)
+
+    #Make histograms for each parameter. Need to make some dictionaries where relevant objects will be stored.
+def makeHistogramsForEachParameter(parameterSamples,parameterNamesAndMathTypeExpressionsDict):
+    sampledParameterFiguresDictionary = copy.deepcopy(parameterNamesAndMathTypeExpressionsDict) #This must be a deep copy to perserve original.
+    sampledParameterAxesDictionary = copy.deepcopy(parameterNamesAndMathTypeExpressionsDict) #This must be a deep copy to preserve original.
+    for key in parameterNamesAndMathTypeExpressionsDict:
+        parameterName = key
+        sampledParameterHistogramMaker(parameterSamples, parameterName,parameterNamesAndMathTypeExpressionsDict, sampledParameterFiguresDictionary, sampledParameterAxesDictionary)        
+
+def createSimulatedResponsesPlot(x_values, listOfYArrays, plot_settings=[]):
+    #First put some defaults in if not already defined.
+    if 'x_label' not in plot_settings: plot_settings['x_label'] = ''
+    if 'y_label' not in plot_settings: plot_settings['y_label'] = ''
+    if 'legendLabels' not in plot_settings: plot_settings['legendLabels'] = ''
+    if 'figure_name' not in plot_settings: plot_settings['figure_name'] = 'simulatedResponsesPlot'
+    if 'dpi' not in plot_settings: plot_settings['dpi']=220          
+    fig0, ax0 = plt.subplots()
+    ax0.set_xlabel(plot_settings['x_label'])
+    ax0.set_ylabel(plot_settings['y_label']) #TODO: THis is not yet generalized (will be a function)
+    if 'y_range' in plot_settings: ax0.set_ylim(plot_settings['y_range'] )
+    if len(listOfYArrays) == 3:
+        for seriesIndex in range(len(listOfYArrays)):
+            ax0.plot(x_values,listOfYArrays[0],'g')
+            ax0.plot(x_values,listOfYArrays[1], 'b')
+            ax0.plot(x_values,listOfYArrays[2], 'r') 
+    else:
+        for seriesIndex in range(len(listOfYArrays)):
+            ax0.plot(x_values,listOfYArrays[seriesIndex])
+    ax0.legend(plot_settings['legendLabels']) #legends must be after plots are made.
+    fig0.tight_layout()
+    fig0.savefig(plot_settings['figure_name'] + '.png', dpi=plot_settings['dpi'])
+    return fig0

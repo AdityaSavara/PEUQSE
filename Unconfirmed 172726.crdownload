@@ -1,5 +1,6 @@
 # These functions are for using the odeint-based temperature-programmed desorption model.  These functions set up the odeint call and process the data for obtaining the rates and the output values feed to the likelihood probability computation in 'run_me.py'.  These functions are imported in UserInput and the names are set there to be accessed here by 'UserInput. ' syntax.  EAW moved code here originally written by AS 2020/01/27.
 import numpy as np
+import UserInput_ODE_KIN_BAYES_SG_EW as UserInput
 import scipy
 from scipy.integrate import odeint
 import pandas as pd
@@ -31,7 +32,7 @@ def no_log_wrapper_func(rate):
 def observedResponsesFunc():
     global experiment
     values = experiment[temp_points]
-    #print("line 31, processing", values)
+    print("line 31, processing", values)
     return values
 
 # def observedResponsesProxyFunc():
@@ -58,14 +59,14 @@ def import_experimental_settings(Filename):
     experiments_df = pd.read_csv(Filename)
     times = np.array(experiments_df['time']) #experiments_df['time'].to_numpy() #The to_numpy() syntax was not working for Ashi.
     experiment = np.array(experiments_df['AcHBackgroundSubtracted'])/2000 
-    #print(len(experiment))
+    print(len(experiment))
     #experiments_df['AcHBackgroundSubtracted'].to_numpy()/1000
     errors = np.array(experiments_df['Errors']) #.to_numpy()
     global fourPoints
     fourPoints = True
     if fourPoints == True:
-        #print(temp_points)
-        #print(len(temp_points))
+        print(temp_points)
+        print(len(temp_points))
         errors = errors[temp_points]
         times = times[temp_points]
     return times, experiment, errors
