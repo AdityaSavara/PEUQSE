@@ -151,6 +151,12 @@ def createSimulatedResponsesPlot(x_values, listOfYArrays, plot_settings=[]):
             ax0.plot(x_values,listOfYArrays[0],'g')
             ax0.plot(x_values,listOfYArrays[1], 'b')
             ax0.plot(x_values,listOfYArrays[2], 'r') 
+    elif len(listOfYArrays) == 4:
+        for seriesIndex in range(len(listOfYArrays)):
+            ax0.plot(x_values,listOfYArrays[0],'green')
+            ax0.plot(x_values,listOfYArrays[1], 'b')
+            ax0.plot(x_values,listOfYArrays[2], 'red') 
+            ax0.plot(x_values,listOfYArrays[3], 'black') 
     else:
         for seriesIndex in range(len(listOfYArrays)):
             ax0.plot(x_values,listOfYArrays[seriesIndex])

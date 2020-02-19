@@ -13,7 +13,7 @@ import copy
 #import mumce_py.solution mumce_pySolution
 
 class parameter_estimation:
-    #Ip for 'inverse problem'. Initialize prior chain starting point, chain burn-in length and total length, and Q (for proposal samples).  Initialize experimental data.  Theta is initialized as the starting point of the chain.  It is placed at the prior mean.
+    #Ip for 'inverse problem'. Initialize chain with initial guess (prior if not provided) as starting point, chain burn-in length and total length, and Q (for proposal samples).  Initialize experimental data.  Theta is initialized as the starting point of the chain.  
     def __init__(self, UserInput = None):
         self.UserInput = UserInput #Note that this is a pointer, so the later lines are within this object.
         #Now will automatically populate some variables from UserInput
@@ -22,13 +22,13 @@ class parameter_estimation:
         if self.UserInput.parameter_estimation_settings['verbose']: 
             print("Bayes Model Initialized")
         #Leaving the original dictionary object intact, but making a new object to make cov_prior.
-        UserInput.InputParametersInitialValuesUncertainties = UserInput.model['InputParametersInitialValuesUncertainties']     
-        if len(np.shape(UserInput.InputParametersInitialValuesUncertainties)) == 1 and (len(UserInput.InputParametersInitialValuesUncertainties) > 0): #If it's a 1D array/list that is filled, we'll diagonalize it.
-            UserInput.cov_prior = np.diagflat(UserInput.InputParametersInitialValuesUncertainties) 
-        elif len(np.shape(UserInput.InputParametersInitialValuesUncertainties)) > 1: #If it's non-1D, we assume it's already a covariance matrix.
-            UserInput.cov_prior = UserInput.InputParametersInitialValuesUncertainties
+        UserInput.InputParametersPriorValuesUncertainties = UserInput.model['InputParametersPriorValuesUncertainties']     
+        if len(np.shape(UserInput.InputParametersPriorValuesUncertainties)) == 1 and (len(UserInput.InputParametersPriorValuesUncertainties) > 0): #If it's a 1D array/list that is filled, we'll diagonalize it.
+            UserInput.cov_prior = np.diagflat(UserInput.InputParametersPriorValuesUncertainties) 
+        elif len(np.shape(UserInput.InputParametersPriorValuesUncertainties)) > 1: #If it's non-1D, we assume it's already a covariance matrix.
+            UserInput.cov_prior = UserInput.InputParametersPriorValuesUncertainties
         else: #If a blank list is received, that means the user
-            print("The covariance of the priors is undefined because InputParametersInitialValuesUncertainties is blank.")
+            print("The covariance of the priors is undefined because InputParametersPriorValuesUncertainties is blank.")
         #    cov_prior = np.array([[200.0, 0., 0., 0., 0., 0.], 
         #                          [0., 200.0, 0., 0., 0., 0.],
         #                          [0., 0., 13.0, 0., 0., 0.],
@@ -38,7 +38,7 @@ class parameter_estimation:
 #
 
         self.UserInput.num_data_points = len(UserInput.responses['responses_abscissa'])
-        self.UserInput.mu_prior = np.array(UserInput.model['InputParameterInitialValues']) 
+        self.UserInput.mu_prior = np.array(UserInput.model['InputParameterPriorValues']) 
         #self.cov_prior = UserInput.cov_prior
         self.Q_mu = self.UserInput.mu_prior*0 # Q samples the next step at any point in the chain.  The next step may be accepted or rejected.  Q_mu is centered (0) around the current theta.  
         self.Q_cov = self.UserInput.cov_prior # Take small steps. 
@@ -53,7 +53,9 @@ class parameter_estimation:
         samples_simulatedOutputs = np.zeros((self.UserInput.parameter_estimation_settings['mcmc_length'],self.UserInput.num_data_points)) #TODO: Consider moving this out of this function.
         samples = np.zeros((self.UserInput.parameter_estimation_settings['mcmc_length'],len(self.UserInput.mu_prior)))
         mcmc_step_modulation_history = np.zeros((self.UserInput.parameter_estimation_settings['mcmc_length'])) #TODO: Make this optional for efficiency. #This allows the steps to be larger or smaller. Make this same length as samples. In future, should probably be same in other dimension also, but that would require 2D sampling with each step.                                                                          
-        samples[0,:] = self.UserInput.mu_prior # Initialize the chain. Theta is initialized as the starting point of the chain.  It is placed at the prior mean.
+        if 'InputParameterInitialGuess' not in self.UserInput.model: #if an initial guess is not provided, we use the prior.
+            self.UserInput.model['InputParameterInitialGuess'] = self.UserInput.mu_prior
+        samples[0,:]=self.UserInput.model['InputParameterInitialGuess']  # Initialize the chain. Theta is initialized as the starting point of the chain.  It is placed at the prior mean if an initial guess is not provided..
         samples_drawn = samples*1.0 #this includes points that were rejected. #TODO: make this optional for efficiency.               
         likelihoods_vec = np.zeros((self.UserInput.parameter_estimation_settings['mcmc_length'],1))
         posteriors_un_normed_vec = np.zeros((self.UserInput.parameter_estimation_settings['mcmc_length'],1))
@@ -143,9 +145,11 @@ class parameter_estimation:
                         #The slope is in the 2nd index of linearFit, despite what the documentation says.
                         #A positive slope means that bigger steps have better outcomes, on average.
                         if linearFit[1] > 0:
-                            mcmc_step_dynamic_coefficient = mcmc_step_dynamic_coefficient*1.05
+                            if mcmc_step_dynamic_coefficient < 10:
+                                mcmc_step_dynamic_coefficient = mcmc_step_dynamic_coefficient*1.05
                         if linearFit[1] < 0:
-                            mcmc_step_dynamic_coefficient = mcmc_step_dynamic_coefficient*0.95
+                            if mcmc_step_dynamic_coefficient > 0.1:
+                                mcmc_step_dynamic_coefficient = mcmc_step_dynamic_coefficient*0.95
             ########################################
         self.burn_in_samples = samples[:self.UserInput.parameter_estimation_settings['mcmc_burn_in']]
         self.post_burn_in_samples = samples[self.UserInput.parameter_estimation_settings['mcmc_burn_in']:]
@@ -165,12 +169,12 @@ class parameter_estimation:
         map_logP = max(self.post_burn_in_logP_un_normed_vec)
         self.map_index = list(self.post_burn_in_logP_un_normed_vec).index(map_logP)
         self.map_parameter_set = self.post_burn_in_samples[self.map_index] #This  is the point with the highest probability in the posterior.
-        self.muap_parameter_set = np.mean(self.post_burn_in_samples, axis=0) #This is the mean of the posterior, and is the point with the highest expected value of the posterior (for most distributions). For the simplest cases, map and muap will be the same.
-        self.stdap_parameter_set = np.std(self.post_burn_in_samples, axis=0) #This is the mean of the posterior, and is the point with the highest expected value of the posterior (for most distributions). For the simplest cases, map and muap will be the same.
+        self.mu_AP_parameter_set = np.mean(self.post_burn_in_samples, axis=0) #This is the mean of the posterior, and is the point with the highest expected value of the posterior (for most distributions). For the simplest cases, map and mu_AP will be the same.
+        self.stdap_parameter_set = np.std(self.post_burn_in_samples, axis=0) #This is the mean of the posterior, and is the point with the highest expected value of the posterior (for most distributions). For the simplest cases, map and mu_AP will be the same.
         #TODO: should return the variance of each sample in the post_burn_in
         if self.UserInput.parameter_estimation_settings['verbose'] == True:
             print(self.map_parameter_set)
-            print(self.muap_parameter_set)
+            print(self.mu_AP_parameter_set)
             print(self.stdap_parameter_set)
         if self.UserInput.parameter_estimation_settings['exportLog'] == True:
             #The self.post_burn_in_samples_simulatedOutputs has length of ALL sampling including burn_in
@@ -185,10 +189,14 @@ class parameter_estimation:
                 out_file.write("MAP_logP:" +  str(map_logP) + "\n")
                 out_file.write("self.map_index:" +  str(self.map_index) + "\n")
                 out_file.write("self.map_parameter_set:" + str( self.map_parameter_set) + "\n")
-                out_file.write("self.muap_parameter_set:" + str( self.muap_parameter_set) + "\n")
+                out_file.write("self.mu_AP_parameter_set:" + str( self.mu_AP_parameter_set) + "\n")
                 out_file.write("self.info_gain:" +  str(self.info_gain) + "\n")
                 out_file.write("evidence:" + str(self.evidence) + "\n")
-        return [self.map_parameter_set, self.muap_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_logP_un_normed_vec] # EAW 2020/01/08
+                if abs((self.map_parameter_set - self.mu_AP_parameter_set)/self.mu_AP_parameter_set).any() > 0.10:
+                    out_file.write("Warning: The MAP parameter set and mu_AP parameter set differ by more than 10% in at least one parameter. This may mean that you need to increase your mcmc_length, increase or decrease your mcmc_relative_step_length, or change what is used for the model response.  There is no general method for knowing the right  value for mcmc_relative_step_length since it depends on the sharpness and smoothness of the response. See for example https://www.sciencedirect.com/science/article/pii/S0039602816300632")
+        if abs((self.map_parameter_set - self.mu_AP_parameter_set)/self.mu_AP_parameter_set).any() > 0.10:
+            print("Warning: The MAP parameter set and mu_AP parameter set differ by more than 10% in at least one parameter. This may mean that you need to increase your mcmc_length, increase or decrease your mcmc_relative_step_length, or change what is used for the model response.  There is no general method for knowing the right  value for mcmc_relative_step_length since it depends on the sharpness and smoothness of the response. See for example https://www.sciencedirect.com/science/article/pii/S0039602816300632  ")
+        return [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_logP_un_normed_vec] # EAW 2020/01/08
     def getPrior(self,discreteParameterVector):
         probability = multivariate_normal.pdf(x=discreteParameterVector,mean=self.UserInput.mu_prior,cov=self.UserInput.cov_prior)
         return probability
@@ -232,16 +240,22 @@ class parameter_estimation:
                 self.map_SimulatedResponses = self.map_SimulatedOutput #Is this the log of the rate? If so, Why?
             if type(self.UserInput.model['simulationOutputProcessingFunction']) != type(None):
                 self.map_SimulatedResponses =  self.UserInput.model['simulationOutputProcessingFunction'](self.map_SimulatedOutput)                    
-            #Get muap simiulated output and simulated responses.
-            self.muap_SimulatedOutput = self.UserInput.model['simulateByInputParametersOnlyFunction'](self.muap_parameter_set)
+            #Get mu_AP simiulated output and simulated responses.
+            self.mu_AP_SimulatedOutput = self.UserInput.model['simulateByInputParametersOnlyFunction'](self.mu_AP_parameter_set)
             if type(self.UserInput.model['simulationOutputProcessingFunction']) == type(None):
-                self.muap_SimulatedResponses = self.muap_SimulatedOutput #Is this the log of the rate? If so, Why?
+                self.mu_AP_SimulatedResponses = self.mu_AP_SimulatedOutput #Is this the log of the rate? If so, Why?
             if type(self.UserInput.model['simulationOutputProcessingFunction']) != type(None):
-                self.muap_SimulatedResponses =  self.UserInput.model['simulationOutputProcessingFunction'](self.muap_SimulatedOutput) 
-            listOfYArrays = [self.UserInput.responses['responses_observed'],self.map_SimulatedResponses, self.muap_SimulatedResponses]        
+                self.mu_AP_SimulatedResponses =  self.UserInput.model['simulationOutputProcessingFunction'](self.mu_AP_SimulatedOutput) 
+            #Get mu_guess simulated output and responses. 
+            self.mu_guess_SimulatedOutput = self.UserInput.model['simulateByInputParametersOnlyFunction']( self.UserInput.model['InputParameterInitialGuess'])
+            if type(self.UserInput.model['simulationOutputProcessingFunction']) == type(None):
+                self.mu_guess_SimulatedResponses = self.mu_guess_SimulatedOutput #Is this the log of the rate? If so, Why?
+            if type(self.UserInput.model['simulationOutputProcessingFunction']) != type(None):
+                self.mu_guess_SimulatedResponses =  self.UserInput.model['simulationOutputProcessingFunction'](self.mu_guess_SimulatedOutput)                               
+            listOfYArrays = [self.UserInput.responses['responses_observed'],self.map_SimulatedResponses, self.mu_AP_SimulatedResponses, self.mu_guess_SimulatedResponses]        
         if plot_settings == {}: 
             plot_settings = self.UserInput.simulated_response_plot_settings
-            plot_settings['legendLabels'] = ['experiments', 'MAP','mu_AP']
+            plot_settings['legendLabels'] = ['experiments', 'MAP','mu_posterior', 'mu_guess']
             #Other allowed settings are like this, but will be fed in as simulated_response_plot_settings keys rather than plot_settings keys.
             #plot_settings['x_label'] = 'T (K)'
             #plot_settings['y_label'] = r'$rate (s^{-1})$'
