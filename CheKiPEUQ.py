@@ -41,7 +41,7 @@ class parameter_estimation:
         self.UserInput.mu_prior = np.array(UserInput.model['InputParameterInitialValues']) 
         #self.cov_prior = UserInput.cov_prior
         self.Q_mu = self.UserInput.mu_prior*0 # Q samples the next step at any point in the chain.  The next step may be accepted or rejected.  Q_mu is centered (0) around the current theta.  
-        self.Q_cov = self.UserInput.cov_prior*UserInput.parameter_estimation_settings['mcmc_relative_step_length'] # Take small steps. 
+        self.Q_cov = self.UserInput.cov_prior # Take small steps. 
 #        self.initial_concentrations_array = UserInput.initial_concentrations_array
         #self.modulate_accept_probability = UserInput.modulate_accept_probability
         #self.UserInput.import_experimental_settings(UserInput.Filename) #FIXME: This needs to get out of this function.
@@ -52,9 +52,12 @@ class parameter_estimation:
                 np.random.seed(self.UserInput.parameter_estimation_settings['mcmc_random_seed'])
         samples_simulatedOutputs = np.zeros((self.UserInput.parameter_estimation_settings['mcmc_length'],self.UserInput.num_data_points)) #TODO: Consider moving this out of this function.
         samples = np.zeros((self.UserInput.parameter_estimation_settings['mcmc_length'],len(self.UserInput.mu_prior)))
+        mcmc_step_modulation_history = np.zeros((self.UserInput.parameter_estimation_settings['mcmc_length'])) #TODO: Make this optional for efficiency. #This allows the steps to be larger or smaller. Make this same length as samples. In future, should probably be same in other dimension also, but that would require 2D sampling with each step.                                                                          
         samples[0,:] = self.UserInput.mu_prior # Initialize the chain. Theta is initialized as the starting point of the chain.  It is placed at the prior mean.
+        samples_drawn = samples*1.0 #this includes points that were rejected. #TODO: make this optional for efficiency.               
         likelihoods_vec = np.zeros((self.UserInput.parameter_estimation_settings['mcmc_length'],1))
         posteriors_un_normed_vec = np.zeros((self.UserInput.parameter_estimation_settings['mcmc_length'],1))
+        log_postereriors_drawn = np.zeros((self.UserInput.parameter_estimation_settings['mcmc_length'])) #TODO: make this optional for efficiency. We don't want this to be 2D, so we don't copy posteriors_un_normed_vec.
         priors_vec = np.zeros((self.UserInput.parameter_estimation_settings['mcmc_length'],1))
         #Code to initialize checkpoints.
         if type(self.UserInput.parameter_estimation_settings['checkPointFrequency']) != type(None):
@@ -63,9 +66,15 @@ class parameter_estimation:
             timeOfFirstCheckpoint = timeit.time.clock()
             timeCheckpoint = timeit.time.clock() - timeOfFirstCheckpoint #First checkpoint at time 0.
             numCheckPoints = self.UserInput.parameter_estimation_settings['mcmc_length']/self.UserInput.parameter_estimation_settings['checkPointFrequency']
-        for i in range(1,self.UserInput.parameter_estimation_settings['mcmc_length']):
+        for i in range(1,self.UserInput.parameter_estimation_settings['mcmc_length']): #FIXME: Don't we need to start with i of 0?
             if self.UserInput.parameter_estimation_settings['verbose']: print("MCMC sample number", i)                  
-            proposal_sample = samples[i-1,:] + np.random.multivariate_normal(self.Q_mu,self.Q_cov)
+            if self.UserInput.parameter_estimation_settings['mcmc_mode'] == 'unbiased':
+                proposal_sample = samples[i-1,:] + np.random.multivariate_normal(self.Q_mu,self.Q_cov*self.UserInput.parameter_estimation_settings['mcmc_relative_step_length'])
+            if self.UserInput.parameter_estimation_settings['mcmc_mode'] == 'MAP_finding':
+                if i == 1: mcmc_step_dynamic_coefficient = 1
+                mcmc_step_modulation_coefficient = np.random.uniform() + 0.5 #TODO: make this a 2D array. One for each parameter.
+                mcmc_step_modulation_history[i] = mcmc_step_modulation_coefficient
+                proposal_sample = samples[i-1,:] + np.random.multivariate_normal(self.Q_mu,self.Q_cov*mcmc_step_dynamic_coefficient*mcmc_step_modulation_coefficient*self.UserInput.parameter_estimation_settings['mcmc_relative_step_length'])
             prior_proposal = self.getPrior(proposal_sample)
             [likelihood_proposal, simulationOutput_proposal] = self.getLikelihood(proposal_sample)
             prior_current_location = self.getPrior(samples[i-1,:]) 
@@ -82,6 +91,8 @@ class parameter_estimation:
                   sys.stdout.flush()
                   #print(simulationOutput_proposal)
                 samples[i,:] = proposal_sample
+                samples_drawn[i,:] = proposal_sample
+                log_postereriors_drawn[i] = np.log(likelihood_proposal*prior_proposal)
                 samples_simulatedOutputs[i,:] = simulationOutput_proposal
                 posteriors_un_normed_vec[i] = likelihood_proposal*prior_proposal #FIXME: Separate this block of code out into a helper function in the class, that way I can create another helper function for non-MCMC sampling.
                 likelihoods_vec[i] = likelihood_proposal
@@ -91,7 +102,9 @@ class parameter_estimation:
                   print('reject', proposal_sample)
                   sys.stdout.flush()
                   #print(simulationOutput_current_location)
-                samples[i,:] = samples[i-1,:]
+                samples[i,:] = samples[i-1,:] #the sample is not kept if it is rejected, though we still store it in the samples_drawn.
+                samples_drawn[i,:] = proposal_sample
+                log_postereriors_drawn[i] = np.log(likelihood_proposal*prior_proposal)
                 samples_simulatedOutputs[i,:] = simulationOutput_current_location
 #                print("line 121", simulationOutput_current_location)
                 posteriors_un_normed_vec[i] = likelihood_current_location*prior_current_location
@@ -107,6 +120,32 @@ class parameter_estimation:
                     print("averagetimePerSampling", averagetimePerSampling, "seconds")
                     print("timeSinceLastCheckPoint", timeSinceLastCheckPoint, "seconds")
                     print("Estimated time remaining", averagetimePerSampling*(self.UserInput.parameter_estimation_settings['mcmc_length']-i), "seconds")
+                    if self.UserInput.parameter_estimation_settings['mcmc_mode'] != 'unbiased':
+                        print("Most recent mcmc_step_dynamic_coefficient:", mcmc_step_dynamic_coefficient)
+            if self.UserInput.parameter_estimation_settings['mcmc_mode'] != 'unbiased':
+                if i%100== 0: #The % is a modulus function to change the modulation coefficient every n steps.
+                    if self.UserInput.parameter_estimation_settings['mcmc_mode'] == 'MAP_finding':
+                        recent_log_postereriors_drawn=log_postereriors_drawn[i-100:i] 
+                        recent_mcmc_step_modulation_history=mcmc_step_modulation_history[i-100:i]
+                        #Make a 2D array and remove anything that is not finite.
+                        #let's find out where the posterior is not finite:
+                        recent_log_postereriors_drawn_is_finite = np.isfinite(recent_log_postereriors_drawn) #gives 1 if is finite, 0 if not.
+                        #Now let's find the cases that were not...
+                        not_finite_indices = np.where(recent_log_postereriors_drawn_is_finite == 0)
+                        #Now delete the indices we don't want.
+                        recent_log_postereriors_drawn = np.delete(recent_log_postereriors_drawn, not_finite_indices)
+                        recent_mcmc_step_modulation_history = np.delete(recent_mcmc_step_modulation_history, not_finite_indices)
+#                        recent_stacked = np.vstack((recent_log_postereriors_drawn,recent_mcmc_step_modulation_history)).transpose()                                              
+#                        print(recent_stacked)
+#                        np.savetxt("recent_stacked.csv",recent_stacked, delimiter=',')
+                        #Numpy polyfit uses "x, y, degree" for nomenclature. We want posterior as function of modulation history.
+                        linearFit = np.polynomial.polynomial.polyfit(recent_mcmc_step_modulation_history, recent_log_postereriors_drawn, 1) #In future, use multidimensional and numpy.gradient or something like that? 
+                        #The slope is in the 2nd index of linearFit, despite what the documentation says.
+                        #A positive slope means that bigger steps have better outcomes, on average.
+                        if linearFit[1] > 0:
+                            mcmc_step_dynamic_coefficient = mcmc_step_dynamic_coefficient*1.05
+                        if linearFit[1] < 0:
+                            mcmc_step_dynamic_coefficient = mcmc_step_dynamic_coefficient*0.95
             ########################################
         self.burn_in_samples = samples[:self.UserInput.parameter_estimation_settings['mcmc_burn_in']]
         self.post_burn_in_samples = samples[self.UserInput.parameter_estimation_settings['mcmc_burn_in']:]
