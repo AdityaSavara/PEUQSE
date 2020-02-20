@@ -201,7 +201,6 @@ class parameter_estimation:
         probability = multivariate_normal.pdf(x=discreteParameterVector,mean=self.UserInput.mu_prior,cov=self.UserInput.cov_prior)
         return probability
     def getLikelihood(self,discreteParameterVector): #The variable discreteParameterVector represents a vector of values for the parameters being sampled. So it represents a single point in the multidimensional parameter space.
-        #This is more in accordance with https://github.com/AdityaSavara/ODE-KIN-BAYES-SG-EW/issues/11. 
         simulationFunction = self.UserInput.model['simulateByInputParametersOnlyFunction']
         simulationOutputProcessingFunction = self.UserInput.model['simulationOutputProcessingFunction']
         simulationOutput =simulationFunction(discreteParameterVector) 
@@ -212,6 +211,8 @@ class parameter_estimation:
         observedResponses = self.UserInput.responses['responses_observed']
         #To find the relevant covariance, we take the errors from the points.
         responses_cov = self.UserInput.responses['responses_observed_uncertainties'] 
+        #If our likelihood is  “probability of Response given Theta”…  we have a continuous probability distribution for both the response and theta. That means the pdf  must use binning on both variables. Eric notes that the pdf returns a probability density, not a probability mass. So the pdf function here divides by the width of whatever small bin is being used and then returns the density accordingly. Because of this, our what we are calling likelihood is not actually probability (it’s not the actual likelihood) but is proportional to the likelihood.
+        #This we call it a probability_metric and not a probability. #TODO: consider changing likelihood and get likelihood to "likelihoodMetric" and "getLikelihoodMetric"
         probability_metric = multivariate_normal.pdf(x=simulatedResponses,mean=observedResponses,cov=responses_cov)
         return probability_metric, simulatedResponses
 
