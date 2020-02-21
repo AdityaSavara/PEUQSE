@@ -271,6 +271,56 @@ class parameter_estimation:
         self.makeHistogramsForEachParameter()    
         self.makeSamplingScatterMatrixPlot()
         self.createSimulatedResponsesPlot()
+
+
+'''Below are a bunch of functions for Euler's Method.'''
+#This takes an array of dydt values. #Note this is a local dydtArray, it is NOT a local deltaYArray.
+def littleEulerGivenArray(y_initial, t_values, dydtArray): 
+    #numPoints = len(t_values)
+    simulated_t_values = t_values #we'll simulate at the t_values given.
+    simulated_y_values = np.zeros(len(simulated_t_values)) #just initializing.
+    simulated_y_values[0] = y_initial
+    dydt_values = dydtArray #We already have them, just need to calculate the delta_y values.
+    for y_index in range(len(simulated_y_values)-1):
+        localSlope = dydtArray[y_index]
+        deltat_resolution = t_values[y_index+1]-t_values[y_index]
+        simulated_y_values[y_index+1] = simulated_y_values[y_index] + localSlope * deltat_resolution
+#        print(simulated_t_values[y_index+1], simulated_y_values[y_index+1], localSlope, localSlope * deltat_resolution)
+#        print(simulated_y_values[y_index], simulated_t_values[y_index]*10-(simulated_t_values[y_index]**2)/2 +2)
+    return simulated_t_values, simulated_y_values, dydt_values
+
+#The initial_y_uncertainty is a scalar, the dydt_uncertainties is an array. t_values is an arrray, so the npoints don't need to be evenly spaced.
+def littleEulerUncertaintyPropagation(dydt_uncertainties, t_values, initial_y_uncertainty=0):
+    y_uncertainties = dydt_uncertainties*0.0
+    y_uncertainties[0] = initial_y_uncertainty #We have no way to make an uncertainty for point 0, so we just use the same formula.
+    for index in range(len(dydt_uncertainties)-1): #The uncertainty for each next point is propagated through the uncertainty of the current value and the delta_t*(dy/dt uncertainty), since we are adding two values.
+        deltat_resolution = t_values[index+1]-t_values[index]
+        y_uncertainties[index+1] = ((y_uncertainties[index])**2+(dydt_uncertainties[index]*deltat_resolution)**2)**0.5
+    return y_uncertainties
+
+#for calculating y at time t from dy/dt.  
+def littleEulerGivenFunction(y_initial, deltat_resolution, dydtFunction, t_initial, t_final):
+    numPoints = int((t_final-t_initial)/deltat_resolution)+1
+    simulated_t_values = np.linspace(t_initial, t_final, numPoints)
+    simulated_y_values = np.zeros(len(simulated_t_values)) #just initializing.
+    dydt_values = np.zeros(len(simulated_t_values)) #just initializing.
+    simulated_y_values[0] = y_initial
+    for y_index in range(len(simulated_y_values)-1):
+        localSlope = dydtFunction(simulated_t_values[y_index] ) 
+        dydt_values[y_index]=localSlope
+        simulated_y_values[y_index+1] = simulated_y_values[y_index] + localSlope * deltat_resolution
+#        print(simulated_t_values[y_index+1], simulated_y_values[y_index+1], localSlope, localSlope * deltat_resolution)
+#        print(simulated_y_values[y_index], simulated_t_values[y_index]*10-(simulated_t_values[y_index]**2)/2 +2)
+    return simulated_t_values, simulated_y_values, dydt_values
+
+def dydtNumericalExtraction(t_values, y_values, last_point_derivative = 0):
+    lastIndex = len(simulated_y_values)-1
+    delta_y_numerical = np.diff(np.insert(simulated_y_values,lastIndex,simulated_y_values[lastIndex])) #The diff command gives one less than what is fed in, so we insert the last value again. This gives a final value derivative of 0.
+    delta_y_numerical[lastIndex] = last_point_derivative #now we set that last point to the optional argument.
+    #It is ASSUMED that the t_values are evenly spaced.
+    delta_t = t_values[1]-t_values[0]
+    dydtNumerical = delta_y_numerical/delta_t
+    return dydtNumerical
         
 if __name__ == "__main__":
     pass
