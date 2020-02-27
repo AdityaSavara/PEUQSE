@@ -34,6 +34,9 @@ model = {}
 model['InputParameterInitialValues'] = [41.5, 41.5, 13.0, 13.0, 0.1, 0.1] # Ea1_mean, Ea2_mean, log_A1_mean, log_A2_mean, gamma_1_mean, gamma_2_mean 
 #InputParameterInitialValues = [41.5, 41.5, 13.0, 13.0, 0.1, 0.1] # Ea1_mean, Ea2_mean, log_A1_mean, log_A2_mean, gamma_1_mean, gamma_2_mean 
 model['InputParametersInitialValuesUncertainties'] = [200, 200, 13, 13, 0.1, 0.1] #If user wants to use a prior with covariance, then this must be a 2D array/ list. To assume no covariance, a 1D
+prep_cov_mat = np.zeros((6,6))
+np.fill_diagonal(prep_cov_mat,model['InputParametersInitialValuesUncertainties'])
+model['PriorCovarianceMatrix'] = prep_cov_mat
 model['parameterNamesAndMathTypeExpressionsDict'] = {'Ea_1':r'$E_{a1}$','Ea_2':r'$E_{a2}$','log_A1':r'$log(A_{1})$','log_A2':r'$log(A_{2})$','gamma1':r'$\gamma_{1}$','gamma2':r'$\gamma_{2}$'}
 #InputParametersInitialValuesUncertainties = [200, 200, 13, 13, 0.1, 0.1] #If user wants to use a prior with covariance, then this must be a 2D array/ list. To assume no covariance, a 1D array can be used.
 model['simulateByInputParametersOnlyFunction'] = TPR_simulationFunctionWrapper
@@ -72,21 +75,12 @@ parameter_estimation_settings['gridSampling'] = False
 
 
 ######mumpce plots#####
-model_parameter_info = np.array([{'parameter_number': 0, 'parameter_name': 'Parameter 0', 'parameter_value': 1.0},
- {'parameter_number': 1, 'parameter_name': 'Parameter 1'},
- {'parameter_number': 2, 'parameter_name': 'Parameter 2'},
- {'parameter_number': 3, 'parameter_name': 'Parameter 3'},
- {'parameter_number': 4, 'parameter_name': 'Parameter 4'},
- {'parameter_number': 5, 'parameter_name': 'Parameter 5'},
- {'parameter_number': 6, 'parameter_name': 'Parameter 6'}])
-active_parameters = np.array([0, 1, 2, 4, 6])
-posterior_mu_vector = np.array([-0.58888733,1.1200355, 0.00704044, -1.62385888,0.80439847])
-posterior_cov_matrix = np.array([[ 0.0148872,-0.01894579, -0.01047339,0.01325883,0.04734254],
- [-0.01894579,0.04284732, -0.00131389, -0.04801795, -0.04545703],
- [-0.01047339, -0.00131389,0.02343653,0.01588293, -0.05618226],
- [ 0.01325883, -0.04801795,0.01588293,0.08171972,0.00875017],
- [ 0.04734254, -0.04545703, -0.05618226,0.00875017,0.20669273]])
-prior_mu_vector = np.array([-0.98888733,0.8200355, 0.01204044, -7.02385888,0.40439847])
-prior_cov_matrix = 10*posterior_cov_matrix
-pairs_of_parameter_indices = [[0, 1], [1, 2],[3, 4]]
-# Other options include: figure_name, fontsize, num_y_ticks, num_x_ticks, colormap_posterior_customized, colormap_prior_customized, contours_normalized, colorbars
+model_parameter_info = np.array([{'parameter_number': 0, 'parameter_name': r'$E_{a1}$'},
+{'parameter_number': 1, 'parameter_name': r'$E_{a2}$'},
+{'parameter_number': 2, 'parameter_name': r'$log(A_{1})$'},
+{'parameter_number': 3, 'parameter_name': r'$log(A_{2})$'},
+{'parameter_number': 4, 'parameter_name': r'$\gamma_{1}$'},
+{'parameter_number': 5, 'parameter_name': r'$\gamma_{2}$'}])
+active_parameters = np.array([0, 1, 2, 3, 4, 5])
+pairs_of_parameter_indices = [[0, 1], [1, 2],[2, 3],[3, 4],[4, 5]]
+contour_settings_custom = {'figure_name': 'Example_1_plots_mumpce','fontsize':'auto' ,'num_y_ticks': 'auto','num_x_ticks':'auto','colormap_posterior_customized':'Oranges','colormap_prior_customized':'Greens','contours_normalized':False,'center_on':'prior','colorbars':True}

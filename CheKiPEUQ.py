@@ -267,11 +267,22 @@ class parameter_estimation:
         figureObject = plotting_functions.createSimulatedResponsesPlot(x_values, listOfYArrays, plot_settings)
         return figureObject #This figure is a matplotlib.pyplot as plt object.
 
+    def createMumpcePlots(self):
+        import plotting_functions
+        from plotting_functions import plotting_functions
+        figureObject_beta = plotting_functions(self.UserInput) # The "beta" is only to prevent namespace conflicts with 'figureObject'.
+        parameterSamples = self.post_burn_in_samples
+        posterior_mu_vector = np.mean(parameterSamples, axis=0)
+        posterior_cov_matrix = np.cov(self.post_burn_in_samples.T)
+        print('posterior_mu_vector: ',posterior_mu_vector, 'posterior_cov_matrix: ', posterior_cov_matrix)
+        figureObject_beta.mumpce_plots(model_parameter_info = self.UserInput.model_parameter_info, active_parameters = self.UserInput.active_parameters, pairs_of_parameter_indices = self.UserInput.pairs_of_parameter_indices, posterior_mu_vector = posterior_mu_vector, posterior_cov_matrix = posterior_cov_matrix, prior_mu_vector = np.array(self.UserInput.model['InputParameterInitialValues']), prior_cov_matrix = self.UserInput.model['PriorCovarianceMatrix'], contour_settings_custom = self.UserInput.contour_settings_custom)
+        return figureObject_beta
+
     def createAllPlots(self):
         self.makeHistogramsForEachParameter()    
         self.makeSamplingScatterMatrixPlot()
         self.createSimulatedResponsesPlot()
-
+        self.createMumpcePlots()
 
 '''Below are a bunch of functions for Euler's Method.'''
 #This takes an array of dydt values. #Note this is a local dydtArray, it is NOT a local deltaYArray.
