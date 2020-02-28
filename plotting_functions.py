@@ -6,10 +6,9 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib import cm #EAW 2020/01/07
-#import UserInput_ODE_KIN_BAYES_SG_EW as UserInput
 import copy
 
-class plotting_functions():
+class plotting_functions_class():
     def __init__(self, UserInput, samples = False): # The plots require samples.  Other plot settings are probably plotting-package specific.
         self.UserInput = UserInput
         if not samples:

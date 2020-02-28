@@ -269,13 +269,37 @@ class parameter_estimation:
 
     def createMumpcePlots(self):
         import plotting_functions
-        from plotting_functions import plotting_functions
-        figureObject_beta = plotting_functions(self.UserInput) # The "beta" is only to prevent namespace conflicts with 'figureObject'.
+        from plotting_functions import plotting_functions_class
+        figureObject_beta = plotting_functions_class(self.UserInput) # The "beta" is only to prevent namespace conflicts with 'figureObject'.
         parameterSamples = self.post_burn_in_samples
         posterior_mu_vector = np.mean(parameterSamples, axis=0)
         posterior_cov_matrix = np.cov(self.post_burn_in_samples.T)
-        print('posterior_mu_vector: ',posterior_mu_vector, 'posterior_cov_matrix: ', posterior_cov_matrix)
-        figureObject_beta.mumpce_plots(model_parameter_info = self.UserInput.model_parameter_info, active_parameters = self.UserInput.active_parameters, pairs_of_parameter_indices = self.UserInput.pairs_of_parameter_indices, posterior_mu_vector = posterior_mu_vector, posterior_cov_matrix = posterior_cov_matrix, prior_mu_vector = np.array(self.UserInput.model['InputParameterInitialValues']), prior_cov_matrix = self.UserInput.model['PriorCovarianceMatrix'], contour_settings_custom = self.UserInput.contour_settings_custom)
+        #TODO: In future, worry about whether there are constants or not, since then we will have to trim down the prior.
+        #Make the model_parameter_info object that mumpce Project class needs.
+        self.UserInput.model_parameter_info = []#This variable name is for mumpce definition of variable names. Not what we would choose otherwise.
+        for parameterIndex, parameterName in enumerate(self.UserInput.model['parameterNamesAndMathTypeExpressionsDict']):
+            individual_model_parameter_dictionary = {'parameter_number': parameterIndex, 'parameter_name': self.UserInput.model['parameterNamesAndMathTypeExpressionsDict'][parameterName]} #we are actually putting the MathTypeExpression as the parameter name when feeding to mum_pce.
+            self.UserInput.model_parameter_info.append(individual_model_parameter_dictionary)
+        self.UserInput.model_parameter_info = np.array(self.UserInput.model_parameter_info)
+        numParams = len(self.UserInput.model_parameter_info)
+        active_parameters = np.linspace(0, numParams-1, numParams) #just a list of whole numbers.
+        active_parameters = np.array(active_parameters, dtype='int')
+        #TODO: reduce active_parameters by anything that has been set as a constant.
+        pairs_of_parameter_indices = self.UserInput.parmeter_pairs_for_contour_plots
+        if pairs_of_parameter_indices == []:
+            import itertools 
+            all_pairs_iter = itertools.combinations(active_parameters, 2)
+            all_pairs_list = list(all_pairs_iter)
+            pairs_of_parameter_indices = all_pairs_list #right now these are tuples, and we need lists inside.
+            for  pairIndex in range(len(pairs_of_parameter_indices)):
+                pairs_of_parameter_indices[pairIndex] = list(pairs_of_parameter_indices[pairIndex])
+        elif type(pairs_of_parameter_indices[0]) == type('string'):
+            pairs_of_parameter_indices = self.UserInput.pairs_of_parameter_indices
+            for  pairIndex in range(len(pairs_of_parameter_indices)):
+                firstParameter = int(self.UserInput.model['parameterNamesAndMathTypeExpressionsDict'][pairIndex[0]])
+                secondParameter = int(self.UserInput.model['parameterNamesAndMathTypeExpressionsDict'][pairIndex[0]])
+                pairs_of_parameter_indices[pairIndex] = [firstParameter, secondParameter]        
+        figureObject_beta.mumpce_plots(model_parameter_info = self.UserInput.model_parameter_info, active_parameters = self.UserInput.active_parameters, pairs_of_parameter_indices = pairs_of_parameter_indices, posterior_mu_vector = posterior_mu_vector, posterior_cov_matrix = posterior_cov_matrix, prior_mu_vector = np.array(self.UserInput.model['InputParameterInitialValues']), prior_cov_matrix = self.UserInput.cov_prior, contour_settings_custom = self.UserInput.contour_settings_custom)
         return figureObject_beta
 
     def createAllPlots(self):
