@@ -272,6 +272,8 @@ class parameter_estimation:
         from plotting_functions import plotting_functions_class
         figureObject_beta = plotting_functions_class(self.UserInput) # The "beta" is only to prevent namespace conflicts with 'figureObject'.
         parameterSamples = self.post_burn_in_samples
+        
+        #TODO: the posterior mu_vector and cov_matrix should be calculated elsewhere.
         posterior_mu_vector = np.mean(parameterSamples, axis=0)
         posterior_cov_matrix = np.cov(self.post_burn_in_samples.T)
         #TODO: In future, worry about whether there are constants or not, since then we will have to trim down the prior.
@@ -285,7 +287,7 @@ class parameter_estimation:
         active_parameters = np.linspace(0, numParams-1, numParams) #just a list of whole numbers.
         active_parameters = np.array(active_parameters, dtype='int')
         #TODO: reduce active_parameters by anything that has been set as a constant.
-        pairs_of_parameter_indices = self.UserInput.parmeter_pairs_for_contour_plots
+        pairs_of_parameter_indices = self.UserInput.parameter_pairs_for_contour_plots
         if pairs_of_parameter_indices == []:
             import itertools 
             all_pairs_iter = itertools.combinations(active_parameters, 2)

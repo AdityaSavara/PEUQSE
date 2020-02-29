@@ -11,8 +11,8 @@ import copy
 class plotting_functions_class():
     def __init__(self, UserInput, samples = False): # The plots require samples.  Other plot settings are probably plotting-package specific.
         self.UserInput = UserInput
-        if not samples:
-            print("Warning: Pass in the 'samples' keyword argument containing a numpy array of samples to plot.")
+#        if not samples: #Deprecated.
+#            print("Warning: Pass in the 'samples' keyword argument containing a numpy array of samples to plot.")
     
     def mu_and_cov_from_samples(self):
         mu = np.mean(self.samples, axis = 0)
