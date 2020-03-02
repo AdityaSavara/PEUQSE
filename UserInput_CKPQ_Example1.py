@@ -83,4 +83,5 @@ model_parameter_info = np.array([{'parameter_number': 0, 'parameter_name': r'$E_
 {'parameter_number': 5, 'parameter_name': r'$\gamma_{2}$'}])
 active_parameters = np.array([0, 1, 2, 3, 4, 5])
 pairs_of_parameter_indices = [[0, 1], [1, 2],[2, 3],[3, 4],[4, 5]]
-contour_settings_custom = {'figure_name': 'Example_1_plots_mumpce','fontsize':'auto' ,'num_y_ticks': 'auto','num_x_ticks':'auto','colormap_posterior_customized':'Oranges','colormap_prior_customized':'Greens','contours_normalized':False,'center_on':'prior','colorbars':True}
+contour_settings_custom = {'figure_name': 'Example_1_plots_mumpce','fontsize':'auto' ,'num_y_ticks': 'auto','num_x_ticks':'auto','contours_normalized':False,'center_on':'all','colorbars':True} #'colormap_posterior_customized':'Oranges','colormap_prior_customized':'Greens'
+parameter_pairs_for_contour_plots = [] #This will accept either strings (for variable names) or integers for positions.
