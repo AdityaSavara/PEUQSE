@@ -36,7 +36,7 @@ class parameter_estimation:
         #                          [0., 0., 0., 0., 0.1, 0.],
         #                          [0., 0., 0., 0., 0., 0.1]])
 #
-
+        self.UserInput.var_prior = np.diagonal(UserInput.cov_prior)
         self.UserInput.num_data_points = len(UserInput.responses['responses_abscissa'])
         self.UserInput.mu_prior = np.array(UserInput.model['InputParameterPriorValues']) 
         #self.cov_prior = UserInput.cov_prior
@@ -45,6 +45,52 @@ class parameter_estimation:
 #        self.initial_concentrations_array = UserInput.initial_concentrations_array
         #self.modulate_accept_probability = UserInput.modulate_accept_probability
         #self.UserInput.import_experimental_settings(UserInput.Filename) #FIXME: This needs to get out of this function.
+    
+    def doGridSearch(self, searchType='doMetropolisHastings', export = True, verbose = False, gridSamplingRadii = []):
+        # gridSamplingRadii is the number of variations to check in units of variance for each parameter. Can be 0 if you don't want to vary a particular parameter in the grid search.
+        import CombinationGeneratorModule
+        numParameters = len(self.UserInput.parameterNamesList)
+        if len(gridSamplingRadii) == 0:
+            gridSamplingRadii = np.ones(numParameters, dtype='int') #By default, will make ones.
+        else: gridSamplingRadii = np.array(gridSamplingRadii, dtype='int')
+        gridCombinations = CombinationGeneratorModule.combinationGenerator(self.UserInput.mu_prior, self.UserInput.var_prior, gridSamplingRadii, SpreadType="Addition",toFile=False)
+        numGridPoints = 3**numParameters
+        allGridResults = []
+        
+        #Initialize some things before loop.
+        if type(self.UserInput.parameter_estimation_settings['checkPointFrequency']) != type(None):
+                import timeit
+                timeAtGridStart = timeit.time.clock()
+                timeAtLastGridPoint = timeAtGridStart #just initializing
+        highest_logP = float('-inf') #Just initializing.
+        #Start grid search loop.
+        for combinationIndex,combination in enumerate(gridCombinations):
+            self.UserInput.model['InputParameterInitialGuess'] = combination
+            if searchType == 'simplegrid':
+                self.map_logP = 0 #TODO: Eric to put code here to get logP.
+            if searchType == 'doMetropolisHastings':
+                thisResult = self.doMetropolisHastings()
+            if type(self.UserInput.parameter_estimation_settings['checkPointFrequency']) != type(None):
+                timeAtThisGridPoint = timeit.time.clock()
+                timeOfThisGridPoint = timeAtThisGridPoint - timeAtLastGridPoint
+                averageTimePerGridPoint = (timeAtThisGridPoint - timeAtGridStart)/(combinationIndex+1)
+                numRemainingGridPoints = numGridPoints - combinationIndex+1
+                print("GridPoint", combinationIndex, "out of", numGridPoints, "timeOfThisGridPoint", timeOfThisGridPoint)
+                print("GridPoint", combinationIndex, "averageTimePerGridPoint", "%.2f" % round(averageTimePerGridPoint,2), "estimated time remaining", "%.2f" % round( numRemainingGridPoints*averageTimePerGridPoint,2), "s" )
+                print("GridPoint", combinationIndex, "current logP", self.map_logP, "highest logP", highest_logP)
+                timeAtLastGridPoint = timeAtThisGridPoint #Updating.
+            if self.map_logP > highest_logP: #This is the grid point in space with the highest value found so far and will be kept.
+                bestResultSoFar = thisResult
+                highest_logP = self.map_logP
+            allGridResults.append(thisResult)
+        #TODO: export the allGridResults to file at end of search in a nicer format.        
+        with open("gridsearch_log_file.txt", 'w') as out_file:
+            out_file.write("result: " + "self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_logP_un_normed_vec" + "\n")
+            for resultIndex, result in enumerate(allGridResults):
+                out_file.write("result:" + str(resultIndex) +  str(result) + "\n")
+        [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_logP_un_normed_vec] = bestResultSoFar
+            
+        
     #main function to get samples
     def doMetropolisHastings(self):
         if 'mcmc_random_seed' in self.UserInput.parameter_estimation_settings:
@@ -167,6 +213,7 @@ class parameter_estimation:
         log_ratios = np.nan_to_num(log_ratios)
         self.info_gain = np.mean(log_ratios)
         map_logP = max(self.post_burn_in_logP_un_normed_vec)
+        self.map_logP = map_logP
         self.map_index = list(self.post_burn_in_logP_un_normed_vec).index(map_logP)
         self.map_parameter_set = self.post_burn_in_samples[self.map_index] #This  is the point with the highest probability in the posterior.
         self.mu_AP_parameter_set = np.mean(self.post_burn_in_samples, axis=0) #This is the mean of the posterior, and is the point with the highest expected value of the posterior (for most distributions). For the simplest cases, map and mu_AP will be the same.

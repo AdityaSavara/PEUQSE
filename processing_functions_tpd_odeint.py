@@ -3,7 +3,7 @@ import numpy as np
 import scipy
 from scipy.integrate import odeint
 import pandas as pd
-from tprmodel import tprequation
+from tprmodel import tprequation, tprequationPiecewise
 
 #Need to define beta directly, or define dt and dT.
 dT = 0.77 #Set this to 0 for an isothermal experiment.
@@ -42,13 +42,22 @@ def observedResponsesFunc():
 
 def TPR_simulationFunctionWrapper(discreteParameterVector): 
     global times
-    sample_list = list(discreteParameterVector) #converting to list so can use list expansion in arguments.        
-    tpr_theta_Arguments = [tprequation, initial_concentrations_array, times, (*sample_list,beta_dTdt,T_0) ] 
+    discreteParameterVectorList = list(discreteParameterVector) #converting to list so can use list expansion in arguments.        
+    tpr_theta_Arguments = [tprequation, initial_concentrations_array, times, (*discreteParameterVectorList,beta_dTdt,T_0) ] 
     tpr_theta = odeint(*tpr_theta_Arguments) # [0.5, 0.5] are the initial theta's. 
-    simulationInputArguments = [tpr_theta, times, *sample_list, beta_dTdt,T_0] 
+    simulationInputArguments = [tpr_theta, times, *discreteParameterVectorList, beta_dTdt,T_0] 
     simulationOutput = tprequation(*simulationInputArguments) # EAW 2020/01/08
     return simulationOutput
 
+def TPR_simulationFunctionWrapperPiecewise(discreteParameterVector): 
+    global times
+    discreteParameterVectorList = list(discreteParameterVector) #converting to list so can use list expansion in arguments.        
+    tpr_theta_Arguments = [tprequation, initial_concentrations_array, times, (*discreteParameterVectorList,beta_dTdt,T_0) ] 
+    tpr_theta = odeint(*tpr_theta_Arguments) # [0.5, 0.5] are the initial theta's. 
+    simulationInputArguments = [tpr_theta, times, *discreteParameterVectorList, beta_dTdt,T_0] 
+    simulationOutput = tprequation(*simulationInputArguments) # EAW 2020/01/08
+    return simulationOutput 
+    
 
 def TPR_integerated_simulationFunctionWrapper(discreteParameterVector): 
     simulationOutput = TPR_simulationFunctionWrapper(discreteParameterVector)
@@ -58,6 +67,14 @@ def TPR_integerated_simulationFunctionWrapper(discreteParameterVector):
     times, integrated_desorption, rate = littleEulerGivenArray(0, times, rate)
     return integrated_desorption
 
+def TPR_integerated_simulationFunctionWrapperPiecewise(discreteParameterVector): 
+    simulationOutput = TPR_simulationFunctionWrapperPiecewise(discreteParameterVector)
+    rate = no_log_wrapper_func(simulationOutput)
+    global times
+    from CheKiPEUQ import littleEulerGivenArray
+    times, integrated_desorption, rate = littleEulerGivenArray(0, times, rate)
+    return integrated_desorption  
+    
 def import_experimental_settings(Filename): 
     global times
     global experiment_rates
