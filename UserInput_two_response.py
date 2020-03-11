@@ -18,7 +18,7 @@ InputConstants= [] #TODO: ERIC, WE SHOULD EITHER DESIGN YOUR CODE TO ALLOW CONST
 #####Experimental Data Input Files#####
 responses = {}
 responses['responses_abscissa'] = np.array([0, 1]) # These represent theta_1 and theta_2
-responses['responses_observed'] = np.array([2, 3])
+responses['responses_observed'] = np.array([[2], [3]]) # [2, 3], a 1-D array, may be also tested.  It should yield a similar result, apart from the randomness involved in every new simulation instance.
 responses['responses_observed_uncertainties'] = np.array([1, 1])
 #####Parameter Estimation Inputs#####
 parameter_estimation_settings = {}
