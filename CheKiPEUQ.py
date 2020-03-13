@@ -106,6 +106,7 @@ class parameter_estimation:
             out_file.write("result: " + "self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_logP_un_normed_vec" + "\n")
             for resultIndex, result in enumerate(allGridResults):
                 out_file.write("result:" + str(resultIndex) +  str(result) + "\n")
+            print("Final map results from gridsearch:", self.map_parameter_set, "final logP:", self.map_logP)
         if searchType == 'doMetropolisHastings':
             #Metropolis hastings has other variables to populate.
             #[self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_logP_un_normed_vec] =
@@ -126,7 +127,7 @@ class parameter_estimation:
         neg_log_postererior = -1*self.getLogP(proposal_sample)
         return neg_log_postererior
 
-    def doOptimizeNegLogP(self, simulationFunctionAdditionalArgs = (), method = None, optimizationAdditionalArgs = {}):
+    def doOptimizeNegLogP(self, simulationFunctionAdditionalArgs = (), method = None, optimizationAdditionalArgs = {}, printOptimum = False):
         #THe intention of the optional arguments is to pass them into the scipy.optimize.minimize function.
         # the 'method' argument is for Nelder-Mead, BFGS, SLSQP etc. https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html#scipy.optimize.minimize
         initialGuess = self.UserInput.model['InputParameterInitialGuess']
@@ -134,6 +135,8 @@ class parameter_estimation:
         optimizeResult = scipy.optimize.minimize(self.getNegLogP, initialGuess, method = method)
         self.map_parameter_set = optimizeResult.x #This is the map location.
         self.map_logP = -1.0*optimizeResult.fun #This is the map logP
+        if printOptimum == True:
+            print("Final results from doOptimizeNegLogP:", self.map_parameter_set, "final logP:", self.map_logP)
         return [self.map_parameter_set, self.map_logP]
     
     #main function to get samples #TODO: Maybe Should return map_log_P and mu_AP_log_P?
