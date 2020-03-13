@@ -36,9 +36,9 @@ class parameter_estimation:
         #                          [0., 0., 0., 0., 0.1, 0.],
         #                          [0., 0., 0., 0., 0., 0.1]])
 #
+        self.UserInput.mu_prior = np.array(UserInput.model['InputParameterPriorValues']) 
         self.UserInput.var_prior = np.diagonal(UserInput.cov_prior)
         self.UserInput.num_data_points = len(UserInput.responses['responses_abscissa'])
-        self.UserInput.mu_prior = np.array(UserInput.model['InputParameterPriorValues']) 
         #self.cov_prior = UserInput.cov_prior
         self.Q_mu = self.UserInput.mu_prior*0 # Q samples the next step at any point in the chain.  The next step may be accepted or rejected.  Q_mu is centered (0) around the current theta.  
         self.Q_cov = self.UserInput.cov_prior # Take small steps. 
@@ -285,10 +285,10 @@ class parameter_estimation:
                 out_file.write("self.mu_AP_parameter_set:" + str( self.mu_AP_parameter_set) + "\n")
                 out_file.write("self.info_gain:" +  str(self.info_gain) + "\n")
                 out_file.write("evidence:" + str(self.evidence) + "\n")
-                if abs((self.map_parameter_set - self.mu_AP_parameter_set)/self.mu_AP_parameter_set).any() > 0.10:
-                    out_file.write("Warning: The MAP parameter set and mu_AP parameter set differ by more than 10% in at least one parameter. This may mean that you need to increase your mcmc_length, increase or decrease your mcmc_relative_step_length, or change what is used for the model response.  There is no general method for knowing the right  value for mcmc_relative_step_length since it depends on the sharpness and smoothness of the response. See for example https://www.sciencedirect.com/science/article/pii/S0039602816300632")
-        if abs((self.map_parameter_set - self.mu_AP_parameter_set)/self.mu_AP_parameter_set).any() > 0.10:
-            print("Warning: The MAP parameter set and mu_AP parameter set differ by more than 10% in at least one parameter. This may mean that you need to increase your mcmc_length, increase or decrease your mcmc_relative_step_length, or change what is used for the model response.  There is no general method for knowing the right  value for mcmc_relative_step_length since it depends on the sharpness and smoothness of the response. See for example https://www.sciencedirect.com/science/article/pii/S0039602816300632  ")
+                if abs((self.map_parameter_set - self.mu_AP_parameter_set)/self.UserInput.var_prior).any() > 0.10:
+                    out_file.write("Warning: The MAP parameter set and mu_AP parameter set differ by more than 10% of prior variance in at least one parameter. This may mean that you need to increase your mcmc_length, increase or decrease your mcmc_relative_step_length, or change what is used for the model response.  There is no general method for knowing the right  value for mcmc_relative_step_length since it depends on the sharpness and smoothness of the response. See for example https://www.sciencedirect.com/science/article/pii/S0039602816300632")
+        if abs((self.map_parameter_set - self.mu_AP_parameter_set)/self.UserInput.var_prior).any() > 0.10:  
+            print("Warning: The MAP parameter set and mu_AP parameter set differ by more than 10% of prior variance in at least one parameter. This may mean that you need to increase your mcmc_length, increase or decrease your mcmc_relative_step_length, or change what is used for the model response.  There is no general method for knowing the right  value for mcmc_relative_step_length since it depends on the sharpness and smoothness of the response. See for example https://www.sciencedirect.com/science/article/pii/S0039602816300632  ")
         return [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_logP_un_normed_vec] # EAW 2020/01/08
     def getPrior(self,discreteParameterVector):
         probability = multivariate_normal.pdf(x=discreteParameterVector,mean=self.UserInput.mu_prior,cov=self.UserInput.cov_prior)
@@ -344,7 +344,7 @@ class parameter_estimation:
             if type(self.UserInput.model['simulationOutputProcessingFunction']) != type(None):
                 self.map_SimulatedResponses =  self.UserInput.model['simulationOutputProcessingFunction'](self.map_SimulatedOutput)                    
             
-            if hasattr(self, 'mu_AP_SimulatedOutput'): #Check if a mu_AP has been assigned. It is normally only assigned if mcmc was used.           
+            if hasattr(self, 'mu_AP_parameter_set'): #Check if a mu_AP has been assigned. It is normally only assigned if mcmc was used.           
                 #Get mu_AP simiulated output and simulated responses.
                 self.mu_AP_SimulatedOutput = self.UserInput.model['simulateByInputParametersOnlyFunction'](self.mu_AP_parameter_set)
                 if type(self.UserInput.model['simulationOutputProcessingFunction']) == type(None):
@@ -356,7 +356,7 @@ class parameter_estimation:
                 listOfYArrays = [self.UserInput.responses['responses_observed'], self.mu_guess_SimulatedResponses, self.map_SimulatedResponses]        
         if plot_settings == {}: 
             plot_settings = self.UserInput.simulated_response_plot_settings
-            if hasattr(self, 'mu_AP_SimulatedOutput'): 
+            if hasattr(self, 'mu_AP_parameter_set'): 
                 plot_settings['legendLabels'] = ['experiments',  'mu_guess', 'MAP','mu_AP']
             else: #Else there is no mu_AP.
                 plot_settings['legendLabels'] = ['experiments',  'mu_guess', 'MAP']
