@@ -45,16 +45,25 @@ class parameter_estimation:
 #        self.initial_concentrations_array = UserInput.initial_concentrations_array
         #self.modulate_accept_probability = UserInput.modulate_accept_probability
         #self.UserInput.import_experimental_settings(UserInput.Filename) #FIXME: This needs to get out of this function.
+        if 'InputParameterInitialGuess' not in self.UserInput.model: #if an initial guess is not provided, we use the prior.
+            self.UserInput.model['InputParameterInitialGuess'] = self.UserInput.mu_prior
     
-    def doGridSearch(self, searchType='doMetropolisHastings', export = True, verbose = False, gridSamplingRadii = []):
+    def doGridSearch(self, searchType='doMetropolisHastings', export = True, verbose = False, gridSamplingIntervalSize = [], gridSamplingRadii = [], passThroughArgs = {}):
         # gridSamplingRadii is the number of variations to check in units of variance for each parameter. Can be 0 if you don't want to vary a particular parameter in the grid search.
         import CombinationGeneratorModule
         numParameters = len(self.UserInput.parameterNamesList)
         if len(gridSamplingRadii) == 0:
             gridSamplingRadii = np.ones(numParameters, dtype='int') #By default, will make ones.
-        else: gridSamplingRadii = np.array(gridSamplingRadii, dtype='int')
-        gridCombinations = CombinationGeneratorModule.combinationGenerator(self.UserInput.mu_prior, self.UserInput.var_prior, gridSamplingRadii, SpreadType="Addition",toFile=False)
-        numGridPoints = 3**numParameters
+            numGridPoints = 3**numParameters
+        else: 
+            gridSamplingRadii = np.array(gridSamplingRadii, dtype='int')
+            numGridPoints = 1 #just initializing.
+            for radius in gridSamplingRadii:
+                numGridPoints=numGridPoints*(2*radius+1)
+        if len(gridSamplingIntervalSize) == 0:
+            gridSamplingIntervalSize = self.UserInput.var_prior #By default, we use the variances associated with the priors.
+        else: gridSamplingIntervalSize = np.array(gridSamplingRadii, dtype='float')
+        gridCombinations = CombinationGeneratorModule.combinationGenerator(self.UserInput.model['InputParameterInitialGuess'], gridSamplingIntervalSize, gridSamplingRadii, SpreadType="Addition",toFile=False)
         allGridResults = []
         
         #Initialize some things before loop.
@@ -66,32 +75,68 @@ class parameter_estimation:
         #Start grid search loop.
         for combinationIndex,combination in enumerate(gridCombinations):
             self.UserInput.model['InputParameterInitialGuess'] = combination
-            if searchType == 'simplegrid':
-                self.map_logP = 0 #TODO: Eric to put code here to get logP.
+            if searchType == 'getLogP':
+                thisResult = self.getLogP(combination)
+                self.map_logP = thisResult #The getLogP function does not fill map_logP by itself.
+                self.map_parameter_set = combination
             if searchType == 'doMetropolisHastings':
                 thisResult = self.doMetropolisHastings()
+            if searchType == 'doOptimizeNegLogP':
+                thisResult = self.doOptimizeNegLogP(**passThroughArgs)
             if type(self.UserInput.parameter_estimation_settings['checkPointFrequency']) != type(None):
                 timeAtThisGridPoint = timeit.time.clock()
                 timeOfThisGridPoint = timeAtThisGridPoint - timeAtLastGridPoint
                 averageTimePerGridPoint = (timeAtThisGridPoint - timeAtGridStart)/(combinationIndex+1)
                 numRemainingGridPoints = numGridPoints - combinationIndex+1
-                print("GridPoint", combinationIndex, "out of", numGridPoints, "timeOfThisGridPoint", timeOfThisGridPoint)
-                print("GridPoint", combinationIndex, "averageTimePerGridPoint", "%.2f" % round(averageTimePerGridPoint,2), "estimated time remaining", "%.2f" % round( numRemainingGridPoints*averageTimePerGridPoint,2), "s" )
-                print("GridPoint", combinationIndex, "current logP", self.map_logP, "highest logP", highest_logP)
                 timeAtLastGridPoint = timeAtThisGridPoint #Updating.
             if self.map_logP > highest_logP: #This is the grid point in space with the highest value found so far and will be kept.
                 bestResultSoFar = thisResult
                 highest_logP = self.map_logP
+                highest_logP_parameter_set = self.map_parameter_set
             allGridResults.append(thisResult)
+            if verbose == True:
+                print("GridPoint", combination, "number", combinationIndex, "out of", numGridPoints, "timeOfThisGridPoint", timeOfThisGridPoint)
+                print("GridPoint", combinationIndex, "averageTimePerGridPoint", "%.2f" % round(averageTimePerGridPoint,2), "estimated time remaining", "%.2f" % round( numRemainingGridPoints*averageTimePerGridPoint,2), "s" )
+                print("GridPoint", combinationIndex, "current logP", self.map_logP, "highest logP", highest_logP)
         #TODO: export the allGridResults to file at end of search in a nicer format.        
+        #Now populate the map etc. with those of the best result.
+        self.map_logP = highest_logP 
+        self.map_parameter_set = highest_logP_parameter_set 
         with open("gridsearch_log_file.txt", 'w') as out_file:
             out_file.write("result: " + "self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_logP_un_normed_vec" + "\n")
             for resultIndex, result in enumerate(allGridResults):
                 out_file.write("result:" + str(resultIndex) +  str(result) + "\n")
-        [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_logP_un_normed_vec] = bestResultSoFar
+        if searchType == 'doMetropolisHastings':
+            #Metropolis hastings has other variables to populate.
+            #[self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_logP_un_normed_vec] =
+            return bestResultSoFar # [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_logP_un_normed_vec] 
+        if searchType == 'doOptimizeNegLogP':            
+            return bestResultSoFar# [self.map_parameter_set, self.map_logP]
+        if searchType == 'simplegrid':          
+            return bestResultSoFar# [self.map_parameter_set, self.map_logP]
             
+
+    def getLogP(self, proposal_sample): #The proposal sample is specific parameter vector.
+        [likelihood_proposal, simulationOutput_proposal] = self.getLikelihood(proposal_sample)
+        prior_proposal = self.getPrior(proposal_sample)
+        log_postererior = np.log(likelihood_proposal*prior_proposal)
+        return log_postererior
         
-    #main function to get samples
+    def getNegLogP(self, proposal_sample): #The proposal sample is specific parameter vector. We are using negative of log P because scipy optimize doesn't do maximizing. It's recommended minimize the negative in this situation.
+        neg_log_postererior = -1*self.getLogP(proposal_sample)
+        return neg_log_postererior
+
+    def doOptimizeNegLogP(self, simulationFunctionAdditionalArgs = (), method = None, optimizationAdditionalArgs = {}):
+        #THe intention of the optional arguments is to pass them into the scipy.optimize.minimize function.
+        # the 'method' argument is for Nelder-Mead, BFGS, SLSQP etc. https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html#scipy.optimize.minimize
+        initialGuess = self.UserInput.model['InputParameterInitialGuess']
+        import scipy.optimize
+        optimizeResult = scipy.optimize.minimize(self.getNegLogP, initialGuess, method = method)
+        self.map_parameter_set = optimizeResult.x #This is the map location.
+        self.map_logP = -1.0*optimizeResult.fun #This is the map logP
+        return [self.map_parameter_set, self.map_logP]
+    
+    #main function to get samples #TODO: Maybe Should return map_log_P and mu_AP_log_P?
     def doMetropolisHastings(self):
         if 'mcmc_random_seed' in self.UserInput.parameter_estimation_settings:
             if type(self.UserInput.parameter_estimation_settings['mcmc_random_seed']) == type(1): #if it's an integer, then it's not a "None" type or string, and we will use it.
@@ -99,8 +144,6 @@ class parameter_estimation:
         samples_simulatedOutputs = np.zeros((self.UserInput.parameter_estimation_settings['mcmc_length'],self.UserInput.num_data_points)) #TODO: Consider moving this out of this function.
         samples = np.zeros((self.UserInput.parameter_estimation_settings['mcmc_length'],len(self.UserInput.mu_prior)))
         mcmc_step_modulation_history = np.zeros((self.UserInput.parameter_estimation_settings['mcmc_length'])) #TODO: Make this optional for efficiency. #This allows the steps to be larger or smaller. Make this same length as samples. In future, should probably be same in other dimension also, but that would require 2D sampling with each step.                                                                          
-        if 'InputParameterInitialGuess' not in self.UserInput.model: #if an initial guess is not provided, we use the prior.
-            self.UserInput.model['InputParameterInitialGuess'] = self.UserInput.mu_prior
         samples[0,:]=self.UserInput.model['InputParameterInitialGuess']  # Initialize the chain. Theta is initialized as the starting point of the chain.  It is placed at the prior mean if an initial guess is not provided..
         samples_drawn = samples*1.0 #this includes points that were rejected. #TODO: make this optional for efficiency.               
         likelihoods_vec = np.zeros((self.UserInput.parameter_estimation_settings['mcmc_length'],1))
@@ -250,7 +293,10 @@ class parameter_estimation:
     def getLikelihood(self,discreteParameterVector): #The variable discreteParameterVector represents a vector of values for the parameters being sampled. So it represents a single point in the multidimensional parameter space.
         simulationFunction = self.UserInput.model['simulateByInputParametersOnlyFunction']
         simulationOutputProcessingFunction = self.UserInput.model['simulationOutputProcessingFunction']
-        simulationOutput =simulationFunction(discreteParameterVector) 
+        try:
+            simulationOutput =simulationFunction(discreteParameterVector) 
+        except:
+            return 0, None #This is for the case that the simulation fails. Should be made better in future.
         if type(simulationOutputProcessingFunction) == type(None):
             simulatedResponses = simulationOutput #Is this the log of the rate? If so, Why?
         if type(simulationOutputProcessingFunction) != type(None):
@@ -282,28 +328,35 @@ class parameter_estimation:
     def createSimulatedResponsesPlot(self, x_values=[], listOfYArrays=[], plot_settings={}):            
         if x_values == []: x_values = self.UserInput.responses['responses_abscissa']       
         if listOfYArrays ==[]:
-            #Get map simiulated output and simulated responses.
-            self.map_SimulatedOutput = self.UserInput.model['simulateByInputParametersOnlyFunction'](self.map_parameter_set)           
-            if type(self.UserInput.model['simulationOutputProcessingFunction']) == type(None):
-                self.map_SimulatedResponses = self.map_SimulatedOutput #Is this the log of the rate? If so, Why?
-            if type(self.UserInput.model['simulationOutputProcessingFunction']) != type(None):
-                self.map_SimulatedResponses =  self.UserInput.model['simulationOutputProcessingFunction'](self.map_SimulatedOutput)                    
-            #Get mu_AP simiulated output and simulated responses.
-            self.mu_AP_SimulatedOutput = self.UserInput.model['simulateByInputParametersOnlyFunction'](self.mu_AP_parameter_set)
-            if type(self.UserInput.model['simulationOutputProcessingFunction']) == type(None):
-                self.mu_AP_SimulatedResponses = self.mu_AP_SimulatedOutput #Is this the log of the rate? If so, Why?
-            if type(self.UserInput.model['simulationOutputProcessingFunction']) != type(None):
-                self.mu_AP_SimulatedResponses =  self.UserInput.model['simulationOutputProcessingFunction'](self.mu_AP_SimulatedOutput) 
             #Get mu_guess simulated output and responses. 
             self.mu_guess_SimulatedOutput = self.UserInput.model['simulateByInputParametersOnlyFunction']( self.UserInput.model['InputParameterInitialGuess'])
             if type(self.UserInput.model['simulationOutputProcessingFunction']) == type(None):
                 self.mu_guess_SimulatedResponses = self.mu_guess_SimulatedOutput #Is this the log of the rate? If so, Why?
             if type(self.UserInput.model['simulationOutputProcessingFunction']) != type(None):
                 self.mu_guess_SimulatedResponses =  self.UserInput.model['simulationOutputProcessingFunction'](self.mu_guess_SimulatedOutput)                               
-            listOfYArrays = [self.UserInput.responses['responses_observed'],self.map_SimulatedResponses, self.mu_AP_SimulatedResponses, self.mu_guess_SimulatedResponses]        
+            #Get map simiulated output and simulated responses.
+            self.map_SimulatedOutput = self.UserInput.model['simulateByInputParametersOnlyFunction'](self.map_parameter_set)           
+            if type(self.UserInput.model['simulationOutputProcessingFunction']) == type(None):
+                self.map_SimulatedResponses = self.map_SimulatedOutput #Is this the log of the rate? If so, Why?
+            if type(self.UserInput.model['simulationOutputProcessingFunction']) != type(None):
+                self.map_SimulatedResponses =  self.UserInput.model['simulationOutputProcessingFunction'](self.map_SimulatedOutput)                    
+            
+            if hasattr(self, 'mu_AP_SimulatedOutput'): #Check if a mu_AP has been assigned. It is normally only assigned if mcmc was used.           
+                #Get mu_AP simiulated output and simulated responses.
+                self.mu_AP_SimulatedOutput = self.UserInput.model['simulateByInputParametersOnlyFunction'](self.mu_AP_parameter_set)
+                if type(self.UserInput.model['simulationOutputProcessingFunction']) == type(None):
+                    self.mu_AP_SimulatedResponses = self.mu_AP_SimulatedOutput #Is this the log of the rate? If so, Why?
+                if type(self.UserInput.model['simulationOutputProcessingFunction']) != type(None):
+                    self.mu_AP_SimulatedResponses =  self.UserInput.model['simulationOutputProcessingFunction'](self.mu_AP_SimulatedOutput) 
+                listOfYArrays = [self.UserInput.responses['responses_observed'], self.mu_guess_SimulatedResponses, self.map_SimulatedResponses, self.mu_AP_SimulatedResponses]        
+            else: #Else there is no mu_AP.
+                listOfYArrays = [self.UserInput.responses['responses_observed'], self.mu_guess_SimulatedResponses, self.map_SimulatedResponses]        
         if plot_settings == {}: 
             plot_settings = self.UserInput.simulated_response_plot_settings
-            plot_settings['legendLabels'] = ['experiments', 'MAP','mu_posterior', 'mu_guess']
+            if hasattr(self, 'mu_AP_SimulatedOutput'): 
+                plot_settings['legendLabels'] = ['experiments',  'mu_guess', 'MAP','mu_AP']
+            else: #Else there is no mu_AP.
+                plot_settings['legendLabels'] = ['experiments',  'mu_guess', 'MAP']
             #Other allowed settings are like this, but will be fed in as simulated_response_plot_settings keys rather than plot_settings keys.
             #plot_settings['x_label'] = 'T (K)'
             #plot_settings['y_label'] = r'$rate (s^{-1})$'
@@ -352,10 +405,14 @@ class parameter_estimation:
         return figureObject_beta
 
     def createAllPlots(self):
-        self.makeHistogramsForEachParameter()    
-        self.makeSamplingScatterMatrixPlot()
+        try:
+            self.makeHistogramsForEachParameter()    
+            self.makeSamplingScatterMatrixPlot()
+            self.createMumpcePlots()
+        except: #TODO: do something better than try & accept. Right now, this is because the above plots are designed for mcmc sampling and don't work if pure grid search or pure optimize is used.
+            pass
         self.createSimulatedResponsesPlot()
-        self.createMumpcePlots()
+
 
 '''Below are a bunch of functions for Euler's Method.'''
 #This takes an array of dydt values. #Note this is a local dydtArray, it is NOT a local deltaYArray.
