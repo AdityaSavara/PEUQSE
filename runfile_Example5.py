@@ -23,13 +23,20 @@ if __name__ == "__main__":
     UserInput.responses['responses_observed_uncertainties'] = observedResponses_uncertainties
 
 
-    UserInput.model['parameterNamesAndMathTypeExpressionsDict'] = {'Ea_1':r'$E_{a1}$','Ea_2':r'$E_{a2}$','log_A1':r'$log(A_{1})$','log_A2':r'$log(A_{2})$','gamma1':r'$\gamma_{1}$','gamma2':r'$\gamma_{2}$'}
-    UserInput.model['InputParameterPriorValues'] = [41.5, 41.5, 13.0, 13.0, 0.1, 0.1] # Ea1_mean, Ea2_mean, log_A1_mean, log_A2_mean, gamma_1_mean, gamma_2_mean 
+    UserInput.model['parameterNamesAndMathTypeExpressionsDict'] = {'Ea_1':r'$E_{a1}$','Ea_2':r'$E_{a2}$','log_A1':r'$log(A_{1})$','log_A2':r'$log(A_{2})$','gamma1':r'$\gamma_{1}$','gamma2':r'$\gamma_{2}$', 'modA1':'modA1', 'modA2':'modA2', 'modA3':'modA3', 'modA4':'modA4', 'modA5':'modA5', 'modA6':'modA6', 'modA7':'modA7' ,  'modE1':'modE1', 'modE2':'modE2', 'modE3':'modE3', 'modE4':'modE4', 'modE5':'modE5', 'modE6':'modE6', 'modE7':'modE7' }
+    UserInput.model['InputParameterPriorValues'] = [41.5, 41.5, 13.0, 13.0, 0.1, 0.1, # Ea1_mean, Ea2_mean, log_A1_mean, log_A2_mean, gamma_1_mean, gamma_2_mean 
+                                                     -1,-1,-1,-1,-1,-1,0 , #A modifiers.
+                                                     60000,50000,40000,30000,20000,10000,0] #E modifiers.
+
     #InputParameterInitialValues = [41.5, 41.5, 13.0, 13.0, 0.1, 0.1] # Ea1_mean, Ea2_mean, log_A1_mean, log_A2_mean, gamma_1_mean, gamma_2_mean 
-    UserInput.model['InputParametersPriorValuesUncertainties'] = [200, 200, 13, 13, 0.1, 0.1] #If user wants to use a prior with covariance, then this must be a 2D array/ list. To assume no covariance, a 1D variance is acceptable.
+    UserInput.model['InputParametersPriorValuesUncertainties'] = [200, 200, 13, 13, 0.1, 0.1,
+                                                     1,1,1,1,1,1,1 , #A modifiers.
+                                                     10000,10000,10000,10000,10000,10000,10000 #E modifiers.
+                                                     ] 
+                                                                   #If user wants to use a prior with covariance, then this must be a 2D array/ list. To assume no covariance, a 1D variance is acceptable.
     
-    from model_functions_example2 import cantera_simulation_wrapper_example2
-    UserInput.model['simulateByInputParametersOnlyFunction'] = cantera_simulation_wrapper_example2 #This must simulate with *only* the parameters listed above, and no other arguments.
+    from model_functions_example5 import cantera_simulation_wrapper_example5
+    UserInput.model['simulateByInputParametersOnlyFunction'] = cantera_simulation_wrapper_example5 #This must simulate with *only* the parameters listed above, and no other arguments.
     UserInput.model['simulationOutputProcessingFunction'] = None #Optional: a function to process what comes out of the simulation Function and then return an observable vector.
     
     UserInput.parameter_estimation_settings['verbose'] = False 

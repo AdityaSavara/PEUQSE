@@ -28,8 +28,8 @@ if __name__ == "__main__":
     #InputParameterInitialValues = [41.5, 41.5, 13.0, 13.0, 0.1, 0.1] # Ea1_mean, Ea2_mean, log_A1_mean, log_A2_mean, gamma_1_mean, gamma_2_mean 
     UserInput.model['InputParametersPriorValuesUncertainties'] = [200, 200, 13, 13, 0.1, 0.1] #If user wants to use a prior with covariance, then this must be a 2D array/ list. To assume no covariance, a 1D variance is acceptable.
     
-    from model_functions_example2 import cantera_simulation_wrapper_example2
-    UserInput.model['simulateByInputParametersOnlyFunction'] = cantera_simulation_wrapper_example2 #This must simulate with *only* the parameters listed above, and no other arguments.
+    from model_functions_example4 import cantera_simulation_wrapper_example4
+    UserInput.model['simulateByInputParametersOnlyFunction'] = cantera_simulation_wrapper_example4 #This must simulate with *only* the parameters listed above, and no other arguments.
     UserInput.model['simulationOutputProcessingFunction'] = None #Optional: a function to process what comes out of the simulation Function and then return an observable vector.
     
     UserInput.parameter_estimation_settings['verbose'] = False 

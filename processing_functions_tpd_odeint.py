@@ -3,7 +3,7 @@ import numpy as np
 import scipy
 from scipy.integrate import odeint
 import pandas as pd
-from tprmodel import tprequation
+from tprmodel import tprequation, tprequationPiecewise
 
 #Need to define beta directly, or define dt and dT.
 dT = 0.77 #Set this to 0 for an isothermal experiment.
@@ -24,13 +24,13 @@ def rate_tot_summing_func(rate):
     # loggedRateValues = np.log10(rate_tot_four_points)
     # return loggedRateValues
 
-def no_log_wrapper_func(rate):
-    rate = rate_tot_summing_func(rate)
+def no_log_wrapper_func(individual_rates_vector):
+    rate = rate_tot_summing_func(individual_rates_vector)
     return rate
 
 def observedResponsesFunc():
-    global experiment
-    values = experiment[temp_points]
+    global experiment_rates
+    values = experiment_rates[temp_points]
     #print("line 31, processing", values)
     return values
 
@@ -42,22 +42,47 @@ def observedResponsesFunc():
 
 def TPR_simulationFunctionWrapper(discreteParameterVector): 
     global times
-    sample_list = list(discreteParameterVector) #converting to list so can use list expansion in arguments.        
-    tpr_theta_Arguments = [tprequation, initial_concentrations_array, times, (*sample_list,beta_dTdt,T_0) ] 
+    discreteParameterVectorList = list(discreteParameterVector) #converting to list so can use list expansion in arguments.        
+    tpr_theta_Arguments = [tprequation, initial_concentrations_array, times, (*discreteParameterVectorList,beta_dTdt,T_0) ] 
     tpr_theta = odeint(*tpr_theta_Arguments) # [0.5, 0.5] are the initial theta's. 
-    simulationInputArguments = [tpr_theta, times, *sample_list, beta_dTdt,T_0] 
-    simulationFunction = tprequation
+    simulationInputArguments = [tpr_theta, times, *discreteParameterVectorList, beta_dTdt,T_0] 
     simulationOutput = tprequation(*simulationInputArguments) # EAW 2020/01/08
     return simulationOutput
 
+def TPR_simulationFunctionWrapperPiecewise(discreteParameterVector): 
+    global times
+    discreteParameterVectorList = list(discreteParameterVector) #converting to list so can use list expansion in arguments.        
+    tpr_theta_Arguments = [tprequation, initial_concentrations_array, times, (*discreteParameterVectorList,beta_dTdt,T_0) ] 
+    tpr_theta = odeint(*tpr_theta_Arguments) # [0.5, 0.5] are the initial theta's. 
+    simulationInputArguments = [tpr_theta, times, *discreteParameterVectorList, beta_dTdt,T_0] 
+    simulationOutput = tprequation(*simulationInputArguments) # EAW 2020/01/08
+    return simulationOutput 
+    
+
+def TPR_integerated_simulationFunctionWrapper(discreteParameterVector): 
+    simulationOutput = TPR_simulationFunctionWrapper(discreteParameterVector)
+    rate = no_log_wrapper_func(simulationOutput)
+    global times
+    from CheKiPEUQ import littleEulerGivenArray
+    times, integrated_desorption, rate = littleEulerGivenArray(0, times, rate)
+    return integrated_desorption
+
+def TPR_integerated_simulationFunctionWrapperPiecewise(discreteParameterVector): 
+    simulationOutput = TPR_simulationFunctionWrapperPiecewise(discreteParameterVector)
+    rate = no_log_wrapper_func(simulationOutput)
+    global times
+    from CheKiPEUQ import littleEulerGivenArray
+    times, integrated_desorption, rate = littleEulerGivenArray(0, times, rate)
+    return integrated_desorption  
+    
 def import_experimental_settings(Filename): 
     global times
-    global experiment
+    global experiment_rates
     global errors
     
     experiments_df = pd.read_csv(Filename)
     times = np.array(experiments_df['time']) #experiments_df['time'].to_numpy() #The to_numpy() syntax was not working for Ashi.
-    experiment = np.array(experiments_df['AcHBackgroundSubtracted'])/2000 
+    experiment_rates = np.array(experiments_df['AcHBackgroundSubtracted'])/2000 
     #print(len(experiment))
     #experiments_df['AcHBackgroundSubtracted'].to_numpy()/1000
     errors = np.array(experiments_df['Errors']) #.to_numpy()
@@ -68,4 +93,13 @@ def import_experimental_settings(Filename):
         #print(len(temp_points))
         errors = errors[temp_points]
         times = times[temp_points]
-    return times, experiment, errors
+    return times, experiment_rates, errors
+
+
+def import_integrals_settings(Filename): 
+    times, experiment_rates, experiment_rates_uncertainties = import_experimental_settings(Filename)
+    from CheKiPEUQ import littleEulerGivenArray, littleEulerUncertaintyPropagation
+    times, integrated_desorption, experiment_rates = littleEulerGivenArray(0, times, experiment_rates)
+    integrated_desorption_uncertainties = littleEulerUncertaintyPropagation(experiment_rates_uncertainties, times, 0.2)#The 0.2 is an initial coverage uncertainty.
+    return times, integrated_desorption, integrated_desorption_uncertainties
+        

@@ -1,0 +1,274 @@
+ Anaconda Python 3.7 version 2019.10 has been loaded. 
+
+Currently Loaded Modules:
+  1) python/py37-anaconda-2019.10
+
+ 
+
+/projects/academic/ericwalk/ORNL/ODE-KIN-BAYES-SG-EW-plotting_class/CheKiPEUQ.py:109: RuntimeWarning: divide by zero encountered in log
+  log_postereriors_drawn[i] = np.log(likelihood_proposal*prior_proposal)
+Starting MCMC sampling.
+MCMC sample number  100 checkpoint 1.0 out of 50.0
+averagetimePerSampling 0.023000000000000003 seconds
+timeSinceLastCheckPoint 2.3000000000000003 seconds
+Estimated time remaining 112.70000000000002 seconds
+Most recent mcmc_step_dynamic_coefficient: 1
+MCMC sample number  200 checkpoint 2.0 out of 50.0
+averagetimePerSampling 0.023399999999999997 seconds
+timeSinceLastCheckPoint 2.3799999999999994 seconds
+Estimated time remaining 112.32 seconds
+Most recent mcmc_step_dynamic_coefficient: 1.05
+MCMC sample number  300 checkpoint 3.0 out of 50.0
+averagetimePerSampling 0.023166666666666665 seconds
+timeSinceLastCheckPoint 2.2699999999999996 seconds
+Estimated time remaining 108.88333333333333 seconds
+Most recent mcmc_step_dynamic_coefficient: 1.1025
+MCMC sample number  400 checkpoint 4.0 out of 50.0
+averagetimePerSampling 0.023125 seconds
+timeSinceLastCheckPoint 2.3000000000000007 seconds
+Estimated time remaining 106.375 seconds
+Most recent mcmc_step_dynamic_coefficient: 1.047375
+MCMC sample number  500 checkpoint 5.0 out of 50.0
+averagetimePerSampling 0.02218 seconds
+timeSinceLastCheckPoint 1.8399999999999999 seconds
+Estimated time remaining 99.80999999999999 seconds
+Most recent mcmc_step_dynamic_coefficient: 0.9950062499999999
+MCMC sample number  600 checkpoint 6.0 out of 50.0
+averagetimePerSampling 0.021566666666666665 seconds
+timeSinceLastCheckPoint 1.8499999999999996 seconds
+Estimated time remaining 94.89333333333333 seconds
+Most recent mcmc_step_dynamic_coefficient: 1.0447565625
+MCMC sample number  700 checkpoint 7.0 out of 50.0
+averagetimePerSampling 0.0218 seconds
+timeSinceLastCheckPoint 2.3200000000000003 seconds
+Estimated time remaining 93.74 seconds
+Most recent mcmc_step_dynamic_coefficient: 1.096994390625
+MCMC sample number  800 checkpoint 8.0 out of 50.0
+averagetimePerSampling 0.021712500000000003 seconds
+timeSinceLastCheckPoint 2.110000000000001 seconds
+Estimated time remaining 91.19250000000001 seconds
+Most recent mcmc_step_dynamic_coefficient: 1.15184411015625
+MCMC sample number  900 checkpoint 9.0 out of 50.0
+averagetimePerSampling 0.02196666666666667 seconds
+timeSinceLastCheckPoint 2.400000000000002 seconds
+Estimated time remaining 90.06333333333335 seconds
+Most recent mcmc_step_dynamic_coefficient: 1.0942519046484374
+MCMC sample number  1000 checkpoint 10.0 out of 50.0
+averagetimePerSampling 0.021650000000000003 seconds
+timeSinceLastCheckPoint 1.879999999999999 seconds
+Estimated time remaining 86.60000000000001 seconds
+Most recent mcmc_step_dynamic_coefficient: 1.0395393094160155
+MCMC sample number  1100 checkpoint 11.0 out of 50.0
+averagetimePerSampling 0.0217 seconds
+timeSinceLastCheckPoint 2.219999999999999 seconds
+Estimated time remaining 84.63 seconds
+Most recent mcmc_step_dynamic_coefficient: 1.0915162748868164
+MCMC sample number  1200 checkpoint 12.0 out of 50.0
+averagetimePerSampling 0.022175000000000004 seconds
+timeSinceLastCheckPoint 2.740000000000002 seconds
+Estimated time remaining 84.26500000000001 seconds
+Most recent mcmc_step_dynamic_coefficient: 1.0369404611424755
+MCMC sample number  1300 checkpoint 13.0 out of 50.0
+averagetimePerSampling 0.021884615384615388 seconds
+timeSinceLastCheckPoint 1.8399999999999999 seconds
+Estimated time remaining 80.97307692307693 seconds
+Most recent mcmc_step_dynamic_coefficient: 0.9850934380853517
+MCMC sample number  1400 checkpoint 14.0 out of 50.0
+averagetimePerSampling 0.02177857142857143 seconds
+timeSinceLastCheckPoint 2.039999999999999 seconds
+Estimated time remaining 78.40285714285714 seconds
+Most recent mcmc_step_dynamic_coefficient: 0.9358387661810841
+MCMC sample number  1500 checkpoint 15.0 out of 50.0
+averagetimePerSampling 0.021853333333333336 seconds
+timeSinceLastCheckPoint 2.289999999999999 seconds
+Estimated time remaining 76.48666666666668 seconds
+Most recent mcmc_step_dynamic_coefficient: 0.8890468278720298
+MCMC sample number  1600 checkpoint 16.0 out of 50.0
+averagetimePerSampling 0.021781250000000002 seconds
+timeSinceLastCheckPoint 2.0700000000000003 seconds
+Estimated time remaining 74.05625 seconds
+Most recent mcmc_step_dynamic_coefficient: 0.8445944864784283
+MCMC sample number  1700 checkpoint 17.0 out of 50.0
+averagetimePerSampling 0.021841176470588235 seconds
+timeSinceLastCheckPoint 2.280000000000001 seconds
+Estimated time remaining 72.07588235294118 seconds
+Most recent mcmc_step_dynamic_coefficient: 0.8868242108023497
+MCMC sample number  1800 checkpoint 18.0 out of 50.0
+averagetimePerSampling 0.021744444444444445 seconds
+timeSinceLastCheckPoint 2.009999999999998 seconds
+Estimated time remaining 69.58222222222223 seconds
+Most recent mcmc_step_dynamic_coefficient: 0.8424830002622322
+MCMC sample number  1900 checkpoint 19.0 out of 50.0
+averagetimePerSampling 0.021815789473684212 seconds
+timeSinceLastCheckPoint 2.3100000000000023 seconds
+Estimated time remaining 67.62894736842105 seconds
+Most recent mcmc_step_dynamic_coefficient: 0.8846071502753439
+MCMC sample number  2000 checkpoint 20.0 out of 50.0
+averagetimePerSampling 0.02186 seconds
+timeSinceLastCheckPoint 2.269999999999996 seconds
+Estimated time remaining 65.58 seconds
+Most recent mcmc_step_dynamic_coefficient: 0.8403767927615766
+MCMC sample number  2100 checkpoint 21.0 out of 50.0
+averagetimePerSampling 0.021857142857142856 seconds
+timeSinceLastCheckPoint 2.1799999999999997 seconds
+Estimated time remaining 63.385714285714286 seconds
+Most recent mcmc_step_dynamic_coefficient: 0.7983579531234978
+MCMC sample number  2200 checkpoint 22.0 out of 50.0
+averagetimePerSampling 0.021554545454545455 seconds
+timeSinceLastCheckPoint 1.5200000000000031 seconds
+Estimated time remaining 60.35272727272727 seconds
+Most recent mcmc_step_dynamic_coefficient: 0.8382758507796727
+MCMC sample number  2300 checkpoint 23.0 out of 50.0
+averagetimePerSampling 0.021456521739130437 seconds
+timeSinceLastCheckPoint 1.9299999999999997 seconds
+Estimated time remaining 57.93260869565218 seconds
+Most recent mcmc_step_dynamic_coefficient: 0.7963620582406891
+MCMC sample number  2400 checkpoint 24.0 out of 50.0
+averagetimePerSampling 0.021358333333333333 seconds
+timeSinceLastCheckPoint 1.9099999999999966 seconds
+Estimated time remaining 55.531666666666666 seconds
+Most recent mcmc_step_dynamic_coefficient: 0.7565439553286546
+MCMC sample number  2500 checkpoint 25.0 out of 50.0
+averagetimePerSampling 0.021384 seconds
+timeSinceLastCheckPoint 2.200000000000003 seconds
+Estimated time remaining 53.46 seconds
+Most recent mcmc_step_dynamic_coefficient: 0.7187167575622219
+MCMC sample number  2600 checkpoint 26.0 out of 50.0
+averagetimePerSampling 0.021415384615384614 seconds
+timeSinceLastCheckPoint 2.219999999999999 seconds
+Estimated time remaining 51.39692307692307 seconds
+Most recent mcmc_step_dynamic_coefficient: 0.754652595440333
+MCMC sample number  2700 checkpoint 27.0 out of 50.0
+averagetimePerSampling 0.021244444444444444 seconds
+timeSinceLastCheckPoint 1.6799999999999997 seconds
+Estimated time remaining 48.86222222222222 seconds
+Most recent mcmc_step_dynamic_coefficient: 0.7169199656683164
+MCMC sample number  2800 checkpoint 28.0 out of 50.0
+averagetimePerSampling 0.02117857142857143 seconds
+timeSinceLastCheckPoint 1.9400000000000048 seconds
+Estimated time remaining 46.59285714285714 seconds
+Most recent mcmc_step_dynamic_coefficient: 0.7527659639517322
+MCMC sample number  2900 checkpoint 29.0 out of 50.0
+averagetimePerSampling 0.02130344827586207 seconds
+timeSinceLastCheckPoint 2.479999999999997 seconds
+Estimated time remaining 44.73724137931034 seconds
+Most recent mcmc_step_dynamic_coefficient: 0.7151276657541455
+MCMC sample number  3000 checkpoint 30.0 out of 50.0
+averagetimePerSampling 0.021426666666666667 seconds
+timeSinceLastCheckPoint 2.5 seconds
+Estimated time remaining 42.85333333333333 seconds
+Most recent mcmc_step_dynamic_coefficient: 0.6793712824664382
+MCMC sample number  3100 checkpoint 31.0 out of 50.0
+averagetimePerSampling 0.021441935483870966 seconds
+timeSinceLastCheckPoint 2.1899999999999977 seconds
+Estimated time remaining 40.739677419354834 seconds
+Most recent mcmc_step_dynamic_coefficient: 0.7133398465897601
+MCMC sample number  3200 checkpoint 32.0 out of 50.0
+averagetimePerSampling 0.021509375 seconds
+timeSinceLastCheckPoint 2.3599999999999994 seconds
+Estimated time remaining 38.716875 seconds
+Most recent mcmc_step_dynamic_coefficient: 0.7490068389192481
+MCMC sample number  3300 checkpoint 33.0 out of 50.0
+averagetimePerSampling 0.02144242424242424 seconds
+timeSinceLastCheckPoint 1.9299999999999926 seconds
+Estimated time remaining 36.452121212121206 seconds
+Most recent mcmc_step_dynamic_coefficient: 0.7864571808652105
+MCMC sample number  3400 checkpoint 34.0 out of 50.0
+averagetimePerSampling 0.02131176470588235 seconds
+timeSinceLastCheckPoint 1.7000000000000028 seconds
+Estimated time remaining 34.09882352941176 seconds
+Most recent mcmc_step_dynamic_coefficient: 0.8257800399084712
+MCMC sample number  3500 checkpoint 35.0 out of 50.0
+averagetimePerSampling 0.021337142857142857 seconds
+timeSinceLastCheckPoint 2.219999999999999 seconds
+Estimated time remaining 32.005714285714284 seconds
+Most recent mcmc_step_dynamic_coefficient: 0.7844910379130475
+MCMC sample number  3600 checkpoint 36.0 out of 50.0
+averagetimePerSampling 0.021291666666666664 seconds
+timeSinceLastCheckPoint 1.9699999999999989 seconds
+Estimated time remaining 29.80833333333333 seconds
+Most recent mcmc_step_dynamic_coefficient: 0.7452664860173951
+MCMC sample number  3700 checkpoint 37.0 out of 50.0
+averagetimePerSampling 0.021327027027027025 seconds
+timeSinceLastCheckPoint 2.260000000000005 seconds
+Estimated time remaining 27.725135135135133 seconds
+Most recent mcmc_step_dynamic_coefficient: 0.7825298103182649
+MCMC sample number  3800 checkpoint 38.0 out of 50.0
+averagetimePerSampling 0.021189473684210525 seconds
+timeSinceLastCheckPoint 1.6099999999999994 seconds
+Estimated time remaining 25.42736842105263 seconds
+Most recent mcmc_step_dynamic_coefficient: 0.7434033198023515
+MCMC sample number  3900 checkpoint 39.0 out of 50.0
+averagetimePerSampling 0.021166666666666667 seconds
+timeSinceLastCheckPoint 2.030000000000001 seconds
+Estimated time remaining 23.283333333333335 seconds
+Most recent mcmc_step_dynamic_coefficient: 0.706233153812234
+MCMC sample number  4000 checkpoint 40.0 out of 50.0
+averagetimePerSampling 0.0211575 seconds
+timeSinceLastCheckPoint 2.0799999999999983 seconds
+Estimated time remaining 21.1575 seconds
+Most recent mcmc_step_dynamic_coefficient: 0.7415448115028457
+MCMC sample number  4100 checkpoint 41.0 out of 50.0
+averagetimePerSampling 0.02112682926829268 seconds
+timeSinceLastCheckPoint 1.9899999999999949 seconds
+Estimated time remaining 19.014146341463412 seconds
+Most recent mcmc_step_dynamic_coefficient: 0.7044675709277034
+MCMC sample number  4200 checkpoint 42.0 out of 50.0
+averagetimePerSampling 0.021240476190476188 seconds
+timeSinceLastCheckPoint 2.5900000000000034 seconds
+Estimated time remaining 16.99238095238095 seconds
+Most recent mcmc_step_dynamic_coefficient: 0.7396909494740886
+MCMC sample number  4300 checkpoint 43.0 out of 50.0
+averagetimePerSampling 0.0213046511627907 seconds
+timeSinceLastCheckPoint 2.4000000000000057 seconds
+Estimated time remaining 14.913255813953489 seconds
+Most recent mcmc_step_dynamic_coefficient: 0.7027064020003841
+MCMC sample number  4400 checkpoint 44.0 out of 50.0
+averagetimePerSampling 0.021379545454545453 seconds
+timeSinceLastCheckPoint 2.4599999999999937 seconds
+Estimated time remaining 12.827727272727271 seconds
+Most recent mcmc_step_dynamic_coefficient: 0.667571081900365
+MCMC sample number  4500 checkpoint 45.0 out of 50.0
+averagetimePerSampling 0.021493333333333333 seconds
+timeSinceLastCheckPoint 2.6500000000000057 seconds
+Estimated time remaining 10.746666666666666 seconds
+Most recent mcmc_step_dynamic_coefficient: 0.7009496359953833
+MCMC sample number  4600 checkpoint 46.0 out of 50.0
+averagetimePerSampling 0.02153913043478261 seconds
+timeSinceLastCheckPoint 2.3599999999999994 seconds
+Estimated time remaining 8.615652173913043 seconds
+Most recent mcmc_step_dynamic_coefficient: 0.7359971177951525
+MCMC sample number  4700 checkpoint 47.0 out of 50.0
+averagetimePerSampling 0.02157659574468085 seconds
+timeSinceLastCheckPoint 2.3299999999999983 seconds
+Estimated time remaining 6.472978723404255 seconds
+Most recent mcmc_step_dynamic_coefficient: 0.6991972619053949
+MCMC sample number  4800 checkpoint 48.0 out of 50.0
+averagetimePerSampling 0.021591666666666665 seconds
+timeSinceLastCheckPoint 2.230000000000004 seconds
+Estimated time remaining 4.318333333333333 seconds
+Most recent mcmc_step_dynamic_coefficient: 0.7341571250006647
+MCMC sample number  4900 checkpoint 49.0 out of 50.0
+averagetimePerSampling 0.02150816326530612 seconds
+timeSinceLastCheckPoint 1.75 seconds
+Estimated time remaining 2.150816326530612 seconds
+Most recent mcmc_step_dynamic_coefficient: 0.6974492687506314
+Warning: The MAP parameter set and mu_AP parameter set differ by more than 10% in at least one parameter. This may mean that you need to increase your mcmc_length, increase or decrease your mcmc_relative_step_length, or change what is used for the model response.  There is no general method for knowing the right  value for mcmc_relative_step_length since it depends on the sharpness and smoothness of the response. See for example https://www.sciencedirect.com/science/article/pii/S0039602816300632  
+Warning: Pass in the 'samples' keyword argument containing a numpy array of samples to plot.
+posterior_mu_vector:  [40.9370989  40.49547535 12.68599233 13.12029463  0.11387533  0.09379276] posterior_cov_matrix:  [[ 1.71309373e+02 -5.26152286e+00 -2.01457072e+00  9.33149069e-01
+  -3.70624326e-01  1.69168654e-01]
+ [-5.26152286e+00  1.67371024e+02  2.46227084e+00  2.74048846e+00
+  -1.78714824e-01 -1.84496030e-01]
+ [-2.01457072e+00  2.46227084e+00  1.30075286e+01 -9.22971547e-02
+  -6.89694276e-02 -6.57129232e-02]
+ [ 9.33149069e-01  2.74048846e+00 -9.22971547e-02  1.20367290e+01
+   2.24458106e-02  1.06376196e-01]
+ [-3.70624326e-01 -1.78714824e-01 -6.89694276e-02  2.24458106e-02
+   1.04965846e-01  8.99771056e-03]
+ [ 1.69168654e-01 -1.84496030e-01 -6.57129232e-02  1.06376196e-01
+   8.99771056e-03  1.07862696e-01]]
+mu_prior [41.5 41.5 13.  13.   0.1  0.1] factors [0, 1]
+mu_prior [41.5 41.5 13.  13.   0.1  0.1] factors [1, 2]
+mu_prior [41.5 41.5 13.  13.   0.1  0.1] factors [2, 3]
+mu_prior [41.5 41.5 13.  13.   0.1  0.1] factors [3, 4]
+mu_prior [41.5 41.5 13.  13.   0.1  0.1] factors [4, 5]
