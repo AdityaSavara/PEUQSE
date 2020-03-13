@@ -38,7 +38,14 @@ class parameter_estimation:
 #
         self.UserInput.mu_prior = np.array(UserInput.model['InputParameterPriorValues']) 
         self.UserInput.var_prior = np.diagonal(UserInput.cov_prior)
+        print('\nresponses_abscissa: ', UserInput.responses['responses_abscissa'],'\n')
+        print('\nresponses_abscissa shape: ', UserInput.responses['responses_abscissa'].shape, '\n')
+        print('\nresponses_abscissa shape length, or the number of responses: ', len(UserInput.responses['responses_abscissa'].shape), '\n')
+        self.UserInput.num_responses = len(UserInput.responses['responses_abscissa'].shape)
         self.UserInput.num_data_points = len(UserInput.responses['responses_abscissa'])
+        UserInput.responses['responses_abscissa'] = np.atleast_2d(UserInput.responses['responses_abscissa'])
+        print('\nnum_data_points: ', self.UserInput.num_data_points, '\n')
+        print('\nresponses_abscissa shape at least 2D: ', UserInput.responses['responses_abscissa'].shape, '\n')
         #self.cov_prior = UserInput.cov_prior
         self.Q_mu = self.UserInput.mu_prior*0 # Q samples the next step at any point in the chain.  The next step may be accepted or rejected.  Q_mu is centered (0) around the current theta.  
         self.Q_cov = self.UserInput.cov_prior # Take small steps. 
@@ -304,12 +311,13 @@ class parameter_estimation:
             simulatedResponses = simulationOutput #Is this the log of the rate? If so, Why?
         if type(simulationOutputProcessingFunction) != type(None):
             simulatedResponses = simulationOutputProcessingFunction(simulationOutput) 
-        observedResponses = self.UserInput.responses['responses_observed']
+        observedResponses = np.atleast_2d(self.UserInput.responses['responses_observed'])
+        simulatedResponses = np.atleast_2d(simulatedResponses)
         #To find the relevant covariance, we take the errors from the points.
         responses_cov = self.UserInput.responses['responses_observed_uncertainties'] 
         #If our likelihood is  “probability of Response given Theta”…  we have a continuous probability distribution for both the response and theta. That means the pdf  must use binning on both variables. Eric notes that the pdf returns a probability density, not a probability mass. So the pdf function here divides by the width of whatever small bin is being used and then returns the density accordingly. Because of this, our what we are calling likelihood is not actually probability (it’s not the actual likelihood) but is proportional to the likelihood.
         #This we call it a probability_metric and not a probability. #TODO: consider changing likelihood and get likelihood to "likelihoodMetric" and "getLikelihoodMetric"
-        probability_metric = multivariate_normal.pdf(x=simulatedResponses,mean=observedResponses,cov=responses_cov)
+        probability_metric = multivariate_normal.pdf(x=simulatedResponses.flatten(),mean=observedResponses.flatten(),cov=responses_cov)
         return probability_metric, simulatedResponses
 
     def makeHistogramsForEachParameter(self):

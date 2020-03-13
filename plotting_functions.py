@@ -145,15 +145,15 @@ def createSimulatedResponsesPlot(x_values, listOfYArrays, plot_settings=[]):
     if 'y_range' in plot_settings: ax0.set_ylim(plot_settings['y_range'] )
     if len(listOfYArrays) == 3:
         for seriesIndex in range(len(listOfYArrays)):
-            ax0.plot(x_values,listOfYArrays[0],'g')
-            ax0.plot(x_values,listOfYArrays[1], 'b')
-            ax0.plot(x_values,listOfYArrays[2], 'r') 
+            ax0.plot(x_values,np.atleast_2d(listOfYArrays[0]).reshape(1,-1),'g')
+            ax0.plot(x_values,np.atleast_2d(listOfYArrays[1]).reshape(1,-1), 'b')
+            ax0.plot(x_values,np.atleast_2d(listOfYArrays[2]).reshape(1,-1), 'r') 
     elif len(listOfYArrays) == 4:
         for seriesIndex in range(len(listOfYArrays)):
-            ax0.plot(x_values,listOfYArrays[0],'green')
-            ax0.plot(x_values,listOfYArrays[1], 'b')
-            ax0.plot(x_values,listOfYArrays[2], 'red') 
-            ax0.plot(x_values,listOfYArrays[3], 'black') 
+            ax0.plot(x_values,np.atleast_2d(listOfYArrays[0]).reshape(1,-1),'green')
+            ax0.plot(x_values,np.atleast_2d(listOfYArrays[1]).reshape(1,-1), 'b')
+            ax0.plot(x_values,np.atleast_2d(listOfYArrays[2]).reshape(1,-1), 'red') 
+            ax0.plot(x_values,np.atleast_2d(listOfYArrays[3]).reshape(1,-1), 'black') 
     else:
         for seriesIndex in range(len(listOfYArrays)):
             ax0.plot(x_values,listOfYArrays[seriesIndex])
