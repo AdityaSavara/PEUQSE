@@ -36,6 +36,7 @@ class parameter_estimation:
         #                          [0., 0., 0., 0., 0.1, 0.],
         #                          [0., 0., 0., 0., 0., 0.1]])
 #
+        self.UserInput.mu_prior = np.array(UserInput.model['InputParameterPriorValues'])
         self.UserInput.var_prior = np.diagonal(UserInput.cov_prior)
         print('\nresponses_abscissa: ', UserInput.responses['responses_abscissa'],'\n')
         print('\nresponses_abscissa shape: ', UserInput.responses['responses_abscissa'].shape, '\n')
@@ -45,7 +46,6 @@ class parameter_estimation:
         UserInput.responses['responses_abscissa'] = np.atleast_2d(UserInput.responses['responses_abscissa'])
         print('\nnum_data_points: ', self.UserInput.num_data_points, '\n')
         print('\nresponses_abscissa shape at least 2D: ', UserInput.responses['responses_abscissa'].shape, '\n')
-        self.UserInput.mu_prior = np.array(UserInput.model['InputParameterPriorValues']) 
         #self.cov_prior = UserInput.cov_prior
         self.Q_mu = self.UserInput.mu_prior*0 # Q samples the next step at any point in the chain.  The next step may be accepted or rejected.  Q_mu is centered (0) around the current theta.  
         self.Q_cov = self.UserInput.cov_prior # Take small steps. 
