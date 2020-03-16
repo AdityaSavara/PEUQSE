@@ -60,6 +60,9 @@ parameter_estimation_settings['verbose'] = False
 parameter_estimation_settings['exportLog'] = True
 parameter_estimation_settings['exportAllSimulatedOutputs'] = False
 parameter_estimation_settings['checkPointFrequency'] = None
+parameter_estimation_settings['gridsearch'] = False
+parameter_estimation_settings['verbose']
+parameter_estimation_settings['scaling_uncertainties_type'] = "std"
 				  
 ######MCMC settings:#####
 parameter_estimation_settings['mcmc'] = True 
