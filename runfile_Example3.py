@@ -17,7 +17,7 @@ if __name__ == "__main__":
     UserInput.simulated_response_plot_settings['x_label'] = 'time (s)'
     UserInput.simulated_response_plot_settings['y_label'] = r'$rate (s^{-1})$'
     #UserInput.simulated_response_plot_settings['y_range'] = [0.00, 0.025] #optional.
-    UserInput.simulated_response_plot_settings['figure_name'] = 'Posterior_Example1' #This creates the filename, also.
+    UserInput.simulated_response_plot_settings['figure_name'] = 'Posterior_Example3' #This creates the filename, also.
 
     UserInput.model['parameterNamesAndMathTypeExpressionsDict'] = {'Ea_1':r'$E_{a1}$','Ea_2':r'$E_{a2}$','log_A1':r'$log(A_{1})$','log_A2':r'$log(A_{2})$','gamma1':r'$\gamma_{1}$','gamma2':r'$\gamma_{2}$'}
     UserInput.model['InputParameterPriorValues'] = [41.5, 41.5, 13.0, 13.0, 0.1, 0.1] # Ea1_mean, Ea2_mean, log_A1_mean, log_A2_mean, gamma_1_mean, gamma_2_mean 

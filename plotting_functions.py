@@ -139,21 +139,23 @@ def createSimulatedResponsesPlot(x_values, listOfYArrays, plot_settings=[]):
     if 'legendLabels' not in plot_settings: plot_settings['legendLabels'] = ''
     if 'figure_name' not in plot_settings: plot_settings['figure_name'] = 'simulatedResponsesPlot'
     if 'dpi' not in plot_settings: plot_settings['dpi']=220          
+    print('\nlistOfYArrays: ', listOfYArrays)
     fig0, ax0 = plt.subplots()
     ax0.set_xlabel(plot_settings['x_label'])
     ax0.set_ylabel(plot_settings['y_label']) #TODO: THis is not yet generalized (will be a function)
     if 'y_range' in plot_settings: ax0.set_ylim(plot_settings['y_range'] )
     if len(listOfYArrays) == 3:
         for seriesIndex in range(len(listOfYArrays)):
-            ax0.plot(x_values,np.atleast_2d(listOfYArrays[0]).reshape(1,-1),'g')
-            ax0.plot(x_values,np.atleast_2d(listOfYArrays[1]).reshape(1,-1), 'b')
-            ax0.plot(x_values,np.atleast_2d(listOfYArrays[2]).reshape(1,-1), 'r') 
+            ax0.plot(x_values[0][:],listOfYArrays[0][:],'g')
+            ax0.plot(x_values[0][:],listOfYArrays[1][:], 'b')
+            ax0.plot(x_values[0][:],listOfYArrays[2][:], 'r') 
     elif len(listOfYArrays) == 4:
         for seriesIndex in range(len(listOfYArrays)):
-            ax0.plot(x_values,np.atleast_2d(listOfYArrays[0]).reshape(1,-1),'green')
-            ax0.plot(x_values,np.atleast_2d(listOfYArrays[1]).reshape(1,-1), 'b')
-            ax0.plot(x_values,np.atleast_2d(listOfYArrays[2]).reshape(1,-1), 'red') 
-            ax0.plot(x_values,np.atleast_2d(listOfYArrays[3]).reshape(1,-1), 'black') 
+            print('\nlistOfYArrays[0][:]',listOfYArrays[0][:], '\n', 'x_values[0][:]: ', x_values[0][:], '\n')
+            ax0.plot(x_values[0][:],listOfYArrays[0][:],'green')
+            ax0.plot(x_values[0][:],listOfYArrays[1][:], 'b')
+            ax0.plot(x_values[0][:],listOfYArrays[2][:], 'red') 
+            ax0.plot(x_values[0][:],listOfYArrays[3][:], 'black') 
     else:
         for seriesIndex in range(len(listOfYArrays)):
             ax0.plot(x_values,listOfYArrays[seriesIndex])
