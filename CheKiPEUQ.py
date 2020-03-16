@@ -24,9 +24,13 @@ class parameter_estimation:
         #Leaving the original dictionary object intact, but making a new object to make cov_prior.
         UserInput.InputParametersPriorValuesUncertainties = UserInput.model['InputParametersPriorValuesUncertainties']     
         if len(np.shape(UserInput.InputParametersPriorValuesUncertainties)) == 1 and (len(UserInput.InputParametersPriorValuesUncertainties) > 0): #If it's a 1D array/list that is filled, we'll diagonalize it.
-            UserInput.cov_prior = np.diagflat(UserInput.InputParametersPriorValuesUncertainties) 
+            UserInput.std_prior = np.array(UserInput.InputParametersPriorValuesUncertainties, dtype='float32') #using 32 since not everyone has 64.
+            UserInput.var_prior = np.power(UserInput.InputParametersPriorValuesUncertainties,2)
+            UserInput.cov_prior = np.diagflat(self.UserInput.var_prior) 
         elif len(np.shape(UserInput.InputParametersPriorValuesUncertainties)) > 1: #If it's non-1D, we assume it's already a covariance matrix.
-            UserInput.cov_prior = UserInput.InputParametersPriorValuesUncertainties
+            UserInput.cov_prior = np.array(UserInput.InputParametersPriorValuesUncertainties, dtype='float32')
+            UserInput.var_prior = np.diagonal(UserInput.cov_prior)
+            UserInput.std_prior = np.power(UserInput.cov_prior,0.5)
         else: #If a blank list is received, that means the user
             print("The covariance of the priors is undefined because InputParametersPriorValuesUncertainties is blank.")
         #    cov_prior = np.array([[200.0, 0., 0., 0., 0., 0.], 
@@ -37,8 +41,21 @@ class parameter_estimation:
         #                          [0., 0., 0., 0., 0., 0.1]])
 #
         self.UserInput.mu_prior = np.array(UserInput.model['InputParameterPriorValues']) 
-        self.UserInput.var_prior = np.diagonal(UserInput.cov_prior)
         self.UserInput.num_data_points = len(UserInput.responses['responses_abscissa'])
+        #Now scale things as needed:
+        if UserInput.parameter_estimation_settings['scaling_uncertainties_type'] == "std":
+            self.UserInput.scaling_uncertainties = UserInput.std_prior #Could also be by mu_prior.  The reason a separate variable is made is because this will be used in the getPrior function as well, and having a separate variable makes it easier to trace. This scaling helps prevent numerical errors in returning the pdf.
+        elif UserInput.parameter_estimation_settings['scaling_uncertainties_type'] == "mu":
+            self.UserInput.scaling_uncertainties = UserInput.mu_prior
+        #TODO: consider a separate scaling for each variable, taking the greater of either mu_prior or std_prior.
+        self.UserInput.mu_prior_scaled = np.array(UserInput.mu_prior/UserInput.scaling_uncertainties)
+        self.UserInput.var_prior_scaled = np.array(UserInput.var_prior/(UserInput.scaling_uncertainties*UserInput.scaling_uncertainties))
+        self.UserInput.cov_prior_scaled = self.UserInput.cov_prior*1.0 #First initialize, then fill.
+        for parameterIndex, parameterValue in enumerate(UserInput.scaling_uncertainties):
+            UserInput.cov_prior_scaled[parameterIndex,:] = UserInput.cov_prior[parameterIndex,:]/parameterValue
+            UserInput.cov_prior_scaled[:,parameterIndex] = UserInput.cov_prior[:,parameterIndex]/parameterValue    
+
+        
         #self.cov_prior = UserInput.cov_prior
         self.Q_mu = self.UserInput.mu_prior*0 # Q samples the next step at any point in the chain.  The next step may be accepted or rejected.  Q_mu is centered (0) around the current theta.  
         self.Q_cov = self.UserInput.cov_prior # Take small steps. 
@@ -127,12 +144,18 @@ class parameter_estimation:
         neg_log_postererior = -1*self.getLogP(proposal_sample)
         return neg_log_postererior
 
-    def doOptimizeNegLogP(self, simulationFunctionAdditionalArgs = (), method = None, optimizationAdditionalArgs = {}, printOptimum = False):
+    def doOptimizeNegLogP(self, simulationFunctionAdditionalArgs = (), method = None, optimizationAdditionalArgs = {}, printOptimum = True, verbose=True):
         #THe intention of the optional arguments is to pass them into the scipy.optimize.minimize function.
         # the 'method' argument is for Nelder-Mead, BFGS, SLSQP etc. https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html#scipy.optimize.minimize
         initialGuess = self.UserInput.model['InputParameterInitialGuess']
         import scipy.optimize
-        optimizeResult = scipy.optimize.minimize(self.getNegLogP, initialGuess, method = method)
+        if verbose == False:
+            optimizeResult = scipy.optimize.minimize(self.getNegLogP, initialGuess, method = method)
+        if verbose == True:
+            verbose_simulator = verbose_optimization_wrapper(self.getNegLogP)
+            optimizeResult = scipy.optimize.minimize(verbose_simulator.simulate, initialGuess, method=method, callback=verbose_simulator.callback, options={"disp": True})
+            #print(f"Number of calls to Simulator instance {verbose_simulator.num_calls}") <-- this is the same as the "Function evaluations" field that gets printed.
+            
         self.map_parameter_set = optimizeResult.x #This is the map location.
         self.map_logP = -1.0*optimizeResult.fun #This is the map logP
         if printOptimum == True:
@@ -291,7 +314,8 @@ class parameter_estimation:
             print("Warning: The MAP parameter set and mu_AP parameter set differ by more than 10% of prior variance in at least one parameter. This may mean that you need to increase your mcmc_length, increase or decrease your mcmc_relative_step_length, or change what is used for the model response.  There is no general method for knowing the right  value for mcmc_relative_step_length since it depends on the sharpness and smoothness of the response. See for example https://www.sciencedirect.com/science/article/pii/S0039602816300632  ")
         return [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_logP_un_normed_vec] # EAW 2020/01/08
     def getPrior(self,discreteParameterVector):
-        probability = multivariate_normal.pdf(x=discreteParameterVector,mean=self.UserInput.mu_prior,cov=self.UserInput.cov_prior)
+        discreteParameterVector_scaled = np.array(discreteParameterVector/self.UserInput.scaling_uncertainties)
+        probability = multivariate_normal.pdf(x=discreteParameterVector_scaled,mean=self.UserInput.mu_prior_scaled,cov=self.UserInput.cov_prior_scaled)
         return probability
     def getLikelihood(self,discreteParameterVector): #The variable discreteParameterVector represents a vector of values for the parameters being sampled. So it represents a single point in the multidimensional parameter space.
         simulationFunction = self.UserInput.model['simulateByInputParametersOnlyFunction']
@@ -416,6 +440,66 @@ class parameter_estimation:
             pass
         self.createSimulatedResponsesPlot()
 
+
+class verbose_optimization_wrapper: #Modified slightly From https://stackoverflow.com/questions/16739065/how-to-display-progress-of-scipy-optimize-function
+    def __init__(self, function):
+        self.f = function # actual objective function
+        self.num_calls = 0 # how many times f has been called
+        self.callback_count = 0 # number of times callback has been called, also measures iteration count
+        self.list_calls_inp = [] # input of all calls
+        self.list_calls_res = [] # result of all calls
+        self.decreasing_list_calls_inp = [] # input of calls that resulted in decrease
+        self.decreasing_list_calls_res = [] # result of calls that resulted in decrease
+        self.list_callback_inp = [] # only appends inputs on callback, as such they correspond to the iterations
+        self.list_callback_res = [] # only appends results on callback, as such they correspond to the iterations
+    
+    def simulate(self, x):
+        """Executes the actual simulation and returns the result, while
+        updating the lists too. Pass to optimizer without arguments or
+        parentheses."""
+        result = self.f(x) # the actual evaluation of the function
+        if not self.num_calls: # first call is stored in all lists
+            self.decreasing_list_calls_inp.append(x)
+            self.decreasing_list_calls_res.append(result)
+            self.list_callback_inp.append(x)
+            self.list_callback_res.append(result)
+        elif result < self.decreasing_list_calls_res[-1]:
+            self.decreasing_list_calls_inp.append(x)
+            self.decreasing_list_calls_res.append(result)
+        self.list_calls_inp.append(x)
+        self.list_calls_res.append(result)
+        self.num_calls += 1
+        return result
+    
+    def callback(self, xk, *_):
+        """Callback function that can be used by optimizers of scipy.optimize.
+        The third argument "*_" makes sure that it still works when the
+        optimizer calls the callback function with more than one argument. Pass
+        to optimizer without arguments or parentheses."""
+        
+        s1 = "{0:4d}  ".format(self.callback_count)
+        xk = np.atleast_1d(xk)
+        # search backwards in input list for input corresponding to xk
+        for i, x in reversed(list(enumerate(self.list_calls_inp))):
+            x = np.atleast_1d(x)
+            if np.allclose(x, xk):
+                break
+    
+        for comp in xk:
+            s1 += f"{comp:10.5e}\t"
+        s1 += f"{self.list_calls_res[i]:10.5e}"
+        self.list_callback_inp.append(xk)
+        self.list_callback_res.append(self.list_calls_res[i])
+    
+        if not self.callback_count:
+            s0 = "Iter  "
+            for j, _ in enumerate(xk):
+                tmp = f"Par-{j+1}"
+                s0 += f"{tmp:10s}\t"
+            s0 += "ObjectiveF"
+            print(s0)
+        print(s1)
+        self.callback_count += 1
 
 '''Below are a bunch of functions for Euler's Method.'''
 #This takes an array of dydt values. #Note this is a local dydtArray, it is NOT a local deltaYArray.

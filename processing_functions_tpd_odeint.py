@@ -15,30 +15,15 @@ temp_points = np.array([0,49,99,149])
 temp_points = (np.linspace(0,224, num=225)).astype(int)
 
 
-def rate_tot_summing_func(rate):
-    rate_tot = -np.sum(rate, axis=0)
-    return rate_tot
-
-# def log10_wrapper_func(rate):
-    # rate_tot_four_points = rate_tot_summing_func(rate)
-    # loggedRateValues = np.log10(rate_tot_four_points)
-    # return loggedRateValues
-
 def no_log_wrapper_func(individual_rates_vector):
-    rate = rate_tot_summing_func(individual_rates_vector)
-    return rate
+    rate_tot = -np.sum(individual_rates_vector, axis=0)
+    return rate_tot
 
 def observedResponsesFunc():
     global experiment_rates
     values = experiment_rates[temp_points]
     #print("line 31, processing", values)
     return values
-
-# def observedResponsesProxyFunc():
-    # global experiment
-    # log10Values = np.log10(experiment[temp_points])
-    # print("line 37, processing", log10Values)
-    # return log10Values
 
 def TPR_simulationFunctionWrapper(discreteParameterVector): 
     global times
@@ -57,7 +42,6 @@ def TPR_simulationFunctionWrapperPiecewise(discreteParameterVector):
     simulationInputArguments = [tpr_theta, times, *discreteParameterVectorList, beta_dTdt,T_0] 
     simulationOutput = tprequation(*simulationInputArguments) # EAW 2020/01/08
     return simulationOutput 
-    
 
 def TPR_integerated_simulationFunctionWrapper(discreteParameterVector): 
     simulationOutput = TPR_simulationFunctionWrapper(discreteParameterVector)
