@@ -41,7 +41,12 @@ class parameter_estimation:
         #                          [0., 0., 0., 0., 0., 0.1]])
 
         self.UserInput.mu_prior = np.array(UserInput.model['InputParameterPriorValues']) 
-        self.UserInput.num_data_points = len(UserInput.responses['responses_abscissa'])
+        #Making things at least 2d.
+        UserInput.responses['responses_abscissa'] = np.atleast_2d(UserInput.responses['responses_abscissa'])
+        UserInput.responses['responses_observed'] = np.atleast_2d(UserInput.responses['responses_observed'])
+        UserInput.responses['responses_observed_uncertainties'] = np.atleast_2d(UserInput.responses['responses_observed_uncertainties'])
+         
+        self.UserInput.num_data_points = len(UserInput.responses['responses_observed'].flatten()) #FIXME: This is only true for transient data.
         #Now scale things as needed:
         if UserInput.parameter_estimation_settings['scaling_uncertainties_type'] == "std":
             self.UserInput.scaling_uncertainties = UserInput.std_prior #Could also be by mu_prior.  The reason a separate variable is made is because this will be used in the getPrior function as well, and having a separate variable makes it easier to trace. This scaling helps prevent numerical errors in returning the pdf.
@@ -54,7 +59,7 @@ class parameter_estimation:
         for parameterIndex, parameterValue in enumerate(UserInput.scaling_uncertainties):
             UserInput.cov_prior_scaled[parameterIndex,:] = UserInput.cov_prior[parameterIndex,:]/parameterValue
             UserInput.cov_prior_scaled[:,parameterIndex] = UserInput.cov_prior[:,parameterIndex]/parameterValue           
-        UserInput.responses['responses_abscissa'] = np.atleast_2d(UserInput.responses['responses_abscissa'])
+
         self.UserInput.num_responses = np.shape(UserInput.responses['responses_abscissa'])[0] #The first index of shape is the num of responses, but has to be after at_least2d is performed.
         #self.cov_prior = UserInput.cov_prior
         self.Q_mu = self.UserInput.mu_prior*0 # Q samples the next step at any point in the chain.  The next step may be accepted or rejected.  Q_mu is centered (0) around the current theta.  
@@ -328,11 +333,11 @@ class parameter_estimation:
         observedResponses = np.atleast_2d(self.UserInput.responses['responses_observed'])
         simulatedResponses = np.atleast_2d(simulatedResponses)
         #To find the relevant covariance, we take the errors from the points.
-        responses_cov = self.UserInput.responses['responses_observed_uncertainties'] 
+        responses_cov = self.UserInput.responses['responses_observed_uncertainties'] #FIXME: Should be extended beyond this many dimensions. Currently only works for variance, not cov_matrix.
         #If our likelihood is  “probability of Response given Theta”…  we have a continuous probability distribution for both the response and theta. That means the pdf  must use binning on both variables. Eric notes that the pdf returns a probability density, not a probability mass. So the pdf function here divides by the width of whatever small bin is being used and then returns the density accordingly. Because of this, our what we are calling likelihood is not actually probability (it’s not the actual likelihood) but is proportional to the likelihood.
         #This we call it a probability_metric and not a probability. #TODO: consider changing likelihood and get likelihood to "likelihoodMetric" and "getLikelihoodMetric"
-        probability_metric = multivariate_normal.pdf(x=simulatedResponses.flatten(),mean=observedResponses.flatten(),cov=responses_cov)
-        return probability_metric, simulatedResponses
+        probability_metric = multivariate_normal.pdf(x=simulatedResponses.flatten(),mean=observedResponses.flatten(),cov=responses_cov.flatten())
+        return probability_metric, simulatedResponses.flatten()
 
     def makeHistogramsForEachParameter(self):
         import plotting_functions
@@ -350,32 +355,39 @@ class parameter_estimation:
         pd.plotting.scatter_matrix(posterior_df)
         plt.savefig(plot_settings['figure_name'],dpi=plot_settings['dpi'])
         
-    def createSimulatedResponsesPlot(self, x_values=[], listOfYArrays=[], plot_settings={}):            
-        if x_values == []: x_values = self.UserInput.responses['responses_abscissa']       
-        if listOfYArrays ==[]:
+    def createSimulatedResponsesPlots(self, allResponses_x_values=[], allResponsesListsOfYArrays =[], plot_settings={},allResponsesListsOfYUncertainties=[] ): 
+        #allResponsesListsOfYArrays  is to have 3 layers of lists: Response > Responses Observed, mu_guess Simulated Responses, map_Simulated Responses, (mu_AP_simulatedResponses) > Values
+        if allResponses_x_values == []: allResponses_x_values = self.UserInput.responses['responses_abscissa']       
+        if allResponsesListsOfYUncertainties == []: allResponsesListsOfYUncertainties = self.UserInput.responses['responses_observed_uncertainties']
+        if allResponsesListsOfYArrays  ==[]:
             #Get mu_guess simulated output and responses. 
             self.mu_guess_SimulatedOutput = self.UserInput.model['simulateByInputParametersOnlyFunction']( self.UserInput.model['InputParameterInitialGuess'])
             if type(self.UserInput.model['simulationOutputProcessingFunction']) == type(None):
-                self.mu_guess_SimulatedResponses = self.mu_guess_SimulatedOutput #Is this the log of the rate? If so, Why?
+                self.mu_guess_SimulatedResponses = np.atleast_2d(self.mu_guess_SimulatedOutput)
             if type(self.UserInput.model['simulationOutputProcessingFunction']) != type(None):
-                self.mu_guess_SimulatedResponses =  self.UserInput.model['simulationOutputProcessingFunction'](self.mu_guess_SimulatedOutput)                               
+                self.mu_guess_SimulatedResponses =  np.atleast_2d(     self.UserInput.model['simulationOutputProcessingFunction'](self.mu_guess_SimulatedOutput)     )
+                
             #Get map simiulated output and simulated responses.
             self.map_SimulatedOutput = self.UserInput.model['simulateByInputParametersOnlyFunction'](self.map_parameter_set)           
             if type(self.UserInput.model['simulationOutputProcessingFunction']) == type(None):
-                self.map_SimulatedResponses = self.map_SimulatedOutput #Is this the log of the rate? If so, Why?
+                self.map_SimulatedResponses = np.atleast_2d(self.map_SimulatedOutput)
             if type(self.UserInput.model['simulationOutputProcessingFunction']) != type(None):
-                self.map_SimulatedResponses =  self.UserInput.model['simulationOutputProcessingFunction'](self.map_SimulatedOutput)                    
+                self.map_SimulatedResponses =  np.atleast_2d(     self.UserInput.model['simulationOutputProcessingFunction'](self.map_SimulatedOutput)     )
             
             if hasattr(self, 'mu_AP_parameter_set'): #Check if a mu_AP has been assigned. It is normally only assigned if mcmc was used.           
                 #Get mu_AP simiulated output and simulated responses.
                 self.mu_AP_SimulatedOutput = self.UserInput.model['simulateByInputParametersOnlyFunction'](self.mu_AP_parameter_set)
                 if type(self.UserInput.model['simulationOutputProcessingFunction']) == type(None):
-                    self.mu_AP_SimulatedResponses = self.mu_AP_SimulatedOutput #Is this the log of the rate? If so, Why?
+                    self.mu_AP_SimulatedResponses = np.atleast_2d(self.mu_AP_SimulatedOutput)
                 if type(self.UserInput.model['simulationOutputProcessingFunction']) != type(None):
-                    self.mu_AP_SimulatedResponses =  self.UserInput.model['simulationOutputProcessingFunction'](self.mu_AP_SimulatedOutput) 
-                listOfYArrays = [self.UserInput.responses['responses_observed'], self.mu_guess_SimulatedResponses, self.map_SimulatedResponses, self.mu_AP_SimulatedResponses]        
+                    self.mu_AP_SimulatedResponses =  np.atleast_2d(     self.UserInput.model['simulationOutputProcessingFunction'](self.mu_AP_SimulatedOutput)      )
+                for responseIndex in range(self.UserInput.num_responses):
+                    listOfYArrays = [self.UserInput.responses['responses_observed'][responseIndex], self.mu_guess_SimulatedResponses[responseIndex], self.map_SimulatedResponses[responseIndex], self.mu_AP_SimulatedResponses[responseIndex]]        
+                    allResponsesListsOfYArrays.append(listOfYArrays)
             else: #Else there is no mu_AP.
-                listOfYArrays = [self.UserInput.responses['responses_observed'], self.mu_guess_SimulatedResponses, self.map_SimulatedResponses]        
+                for responseIndex in range(self.UserInput.num_responses):
+                    listOfYArrays = [self.UserInput.responses['responses_observed'][responseIndex], self.mu_guess_SimulatedResponses[responseIndex], self.map_SimulatedResponses[responseIndex]]        
+                    allResponsesListsOfYArrays.append(listOfYArrays)
         if plot_settings == {}: 
             plot_settings = self.UserInput.simulated_response_plot_settings
             if hasattr(self, 'mu_AP_parameter_set'): 
@@ -387,10 +399,15 @@ class parameter_estimation:
             #plot_settings['y_label'] = r'$rate (s^{-1})$'
             #plot_settings['y_range'] = [0.00, 0.025] #optional.
             #plot_settings['figure_name'] = 'tprposterior'
-            
         import plotting_functions
-        figureObject = plotting_functions.createSimulatedResponsesPlot(x_values, listOfYArrays, plot_settings)
-        return figureObject #This figure is a matplotlib.pyplot as plt object.
+        allResponsesFigureObjectsList = []
+        for responseIndex in range(self.UserInput.num_responses):
+            if np.shape(allResponses_x_values)[0] == 1: #This means a single abscissa for all responses.
+                figureObject = plotting_functions.createSimulatedResponsesPlot(allResponses_x_values[0], allResponsesListsOfYArrays[responseIndex], plot_settings, listOfYUncertainties=allResponsesListsOfYUncertainties[responseIndex])
+            if np.shape(allResponses_x_values)[0] > 1: #This means a separate abscissa for each response.
+                figureObject = plotting_functions.createSimulatedResponsesPlot(allResponses_x_values[responseIndex], allResponsesListsOfYArrays[responseIndex], plot_settings, listOfYUncertainties=allResponsesListsOfYUncertainties[responseIndex])
+            allResponsesFigureObjectsList.append(figureObject)
+        return allResponsesFigureObjectsList  #This is a list of matplotlib.pyplot as plt objects.
 
     def createMumpcePlots(self):
         import plotting_functions
@@ -436,7 +453,7 @@ class parameter_estimation:
             self.createMumpcePlots()
         except: #TODO: do something better than try & accept. Right now, this is because the above plots are designed for mcmc sampling and don't work if pure grid search or pure optimize is used.
             pass
-        self.createSimulatedResponsesPlot()
+        self.createSimulatedResponsesPlots()
 
 
 class verbose_optimization_wrapper: #Modified slightly From https://stackoverflow.com/questions/16739065/how-to-display-progress-of-scipy-optimize-function

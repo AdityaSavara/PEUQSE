@@ -13,18 +13,18 @@ if __name__ == "__main__":
     UserInput.model['InputParametersPriorValuesUncertainties'] = [1, 1] #If user wants to use a prior with covariance, then this must be a 2D array/ list. To assume no covariance, a 1D
     UserInput.model['InputParameterInitialGuess'] = [1, 5] #This is where the mcmc chain will start.
     
-    UserInput.model['simulateByInputParametersOnlyFunction'] = fun.direct_parameters_to_observations #This must simulate with *only* the parameters listed above, and no other arguments.
+    UserInput.model['simulateByInputParametersOnlyFunction'] = fun.split_to_separated_lists #This must simulate with *only* the parameters listed above, and no other arguments.
     
     UserInput.parameter_estimation_settings['verbose'] = False 
     UserInput.parameter_estimation_settings['checkPointFrequency'] = 100
     UserInput.parameter_estimation_settings['mcmc'] = True 
     UserInput.parameter_estimation_settings['mcmc_mode'] = 'MAP_finding'
     UserInput.parameter_estimation_settings['mcmc_random_seed'] = 0 #Normally set to None so that mcmc is set to be random. To get the same results repeatedly, such as for testing purposes, set the random seed to 0 or another integer for testing purposes.
-    UserInput.parameter_estimation_settings['mcmc_burn_in'] = 10
+    UserInput.parameter_estimation_settings['mcmc_burn_in'] = 100
     UserInput.parameter_estimation_settings['mcmc_length'] = 1000 
     UserInput.parameter_estimation_settings['mcmc_relative_step_length'] = 1.0
     UserInput.parameter_estimation_settings['mcmc_modulate_accept_probability']  = 0 #Default value of 0. Changing this value sharpens or flattens the posterior. A value greater than 1 flattens the posterior by accepting low values more often. It can be useful when greater sampling is more important than accuracy. One way of using this feature is to try with a value of 0, then with the value equal to the number of priors for comparison, and then to gradually decrease this number as low as is useful (to minimize distortion of the result). A downside of changing changing this variable to greater than 1 is that it slows the the ascent to the maximum of the prior, so there is a balance in using it. In contrast, numbers increasingly less than one (such as 0.90 or 0.10) will speed up the ascent to the maximum of the posterior, but will also result in fewer points being retained.
-    
+    UserInput.parameter_estimation_settings['scaling_uncertainties_type'] = "std"
     UserInput.parameter_pairs_for_contour_plots = [[0, 1],[1, 0]]
     UserInput.contour_settings_custom['contours_normalized'] = False
 

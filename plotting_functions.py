@@ -132,33 +132,65 @@ def makeHistogramsForEachParameter(parameterSamples,parameterNamesAndMathTypeExp
         parameterName = key
         sampledParameterHistogramMaker(parameterSamples, parameterName,parameterNamesAndMathTypeExpressionsDict, sampledParameterFiguresDictionary, sampledParameterAxesDictionary)        
 
-def createSimulatedResponsesPlot(x_values, listOfYArrays, plot_settings=[]):
+def createSimulatedResponsesPlot(x_values, listOfYArrays, plot_settings=[], listOfYUncertainties=[]):
     #First put some defaults in if not already defined.
     if 'x_label' not in plot_settings: plot_settings['x_label'] = ''
     if 'y_label' not in plot_settings: plot_settings['y_label'] = ''
     if 'legendLabels' not in plot_settings: plot_settings['legendLabels'] = ''
     if 'figure_name' not in plot_settings: plot_settings['figure_name'] = 'simulatedResponsesPlot'
     if 'dpi' not in plot_settings: plot_settings['dpi']=220          
-    print('\nlistOfYArrays: ', listOfYArrays)
     fig0, ax0 = plt.subplots()
     ax0.set_xlabel(plot_settings['x_label'])
     ax0.set_ylabel(plot_settings['y_label']) #TODO: THis is not yet generalized (will be a function)
     if 'y_range' in plot_settings: ax0.set_ylim(plot_settings['y_range'] )
     if len(listOfYArrays) == 3:
-        for seriesIndex in range(len(listOfYArrays)):
-            ax0.plot(x_values[0][:],listOfYArrays[0][:],'g')
-            ax0.plot(x_values[0][:],listOfYArrays[1][:], 'b')
-            ax0.plot(x_values[0][:],listOfYArrays[2][:], 'r') 
+        if len(x_values) > 1: #This means there are enough data to make lines.        
+            for seriesIndex in range(len(listOfYArrays)):           
+                if len(listOfYUncertainties) == 0: #If length is zero, no uncertainties.
+                    ax0.plot(x_values,listOfYArrays[0],'g')
+                elif len(listOfYUncertainties) > 0: #If length is 1, uncertainties only for first data set.
+                    ax0.plot(x_values,listOfYArrays[0],'g') #Need both of these lines to get legend to turn out right.
+                    ax0.errorbar(x_values, listOfYArrays[0], yerr=listOfYUncertainties, fmt='.', barsabove=False, markersize=0, elinewidth=1, color="gray", ecolor="lightgray") #markersize=0 because we want no marker for experiments data series, just a line.
+                ax0.plot(x_values,listOfYArrays[1], '#00A5DF')
+                ax0.plot(x_values,listOfYArrays[2], 'r') 
+        if len(x_values) == 1: #This means there are single points, and we need to make symbols, by adding an "o".
+            for seriesIndex in range(len(listOfYArrays)):           
+                if len(listOfYUncertainties) == 0: #If length is zero, no uncertainties.
+                    ax0.plot(x_values,listOfYArrays[0],'go')
+                elif len(listOfYUncertainties) > 0: #If length is >0, uncertainties only for first data set.
+                    ax0.plot(x_values,listOfYArrays[0],'go') #Need both of these lines to get legend to turn out right.
+                    ax0.errorbar(x_values, listOfYArrays[0], yerr=listOfYUncertainties, fmt='o', barsabove=False, markersize=0, elinewidth=1, color="gray", ecolor="lightgray") #markersize=0 because we want no marker for experiments data series, just a line.
+                ax0.plot(x_values,listOfYArrays[1], 'co')
+                ax0.plot(x_values,listOfYArrays[2], 'ro') 
+
     elif len(listOfYArrays) == 4:
-        for seriesIndex in range(len(listOfYArrays)):
-            print('\nlistOfYArrays[0][:]',listOfYArrays[0][:], '\n', 'x_values[0][:]: ', x_values[0][:], '\n')
-            ax0.plot(x_values[0][:],listOfYArrays[0][:],'green')
-            ax0.plot(x_values[0][:],listOfYArrays[1][:], 'b')
-            ax0.plot(x_values[0][:],listOfYArrays[2][:], 'red') 
-            ax0.plot(x_values[0][:],listOfYArrays[3][:], 'black') 
+        if len(x_values) > 1: #This means there are enough data to make lines.        
+            for seriesIndex in range(len(listOfYArrays)):
+                if len (listOfYUncertainties) == 0: #If length is zero, no uncertainties.               
+                    ax0.plot(x_values,listOfYArrays[0],'g')
+                elif len(listOfYUncertainties) > 0: #If length is >0, uncertainties only for first data set.
+                    ax0.plot(x_values,listOfYArrays[0],'g') #Need both of these lines to get legend to turn out right.
+                    ax0.errorbar(x_values, listOfYArrays[0], yerr=listOfYUncertainties, fmt='.', barsabove=False, markersize=0, elinewidth=1, color="gray", ecolor="lightgray") #markersize=0 because we want no marker for experiments data series, just a line.
+                ax0.plot(x_values,listOfYArrays[1], '#00A5DF')
+                ax0.plot(x_values,listOfYArrays[2], 'r') 
+                ax0.plot(x_values,listOfYArrays[3], 'k')  #k is black.
+        if len(x_values) == 1: #This means there are single points, and we need to make symbols, by adding an "o".
+                if len (listOfYUncertainties) == 0: #If length is zero, no uncertainties.               
+                    ax0.plot(x_values,listOfYArrays[0],'go')
+                elif len(listOfYUncertainties) > 0: #If length is >0, uncertainties only for first data set.
+                    ax0.plot(x_values,listOfYArrays[0],'go') #Need both of these lines to get legend to turn out right.
+                    ax0.errorbar(x_values, listOfYArrays[0], yerr=listOfYUncertainties, fmt='.', barsabove=False, markersize=0, elinewidth=1, color="gray", ecolor="lightgray") #markersize=0 because we want no marker for experiments data series, just a line.
+                ax0.plot(x_values,listOfYArrays[1], 'co')
+                ax0.plot(x_values,listOfYArrays[2], 'ro') 
+                ax0.plot(x_values,listOfYArrays[3], 'ko')  #k is black. https://matplotlib.org/3.1.0/api/_as_gen/matplotlib.pyplot.plot.html#matplotlib.pyplot.plot
+            
     else:
-        for seriesIndex in range(len(listOfYArrays)):
-            ax0.plot(x_values,listOfYArrays[seriesIndex])
+        if len(x_values) > 1: #This means there are enough data to make lines.        
+            for seriesIndex in range(len(listOfYArrays)):
+                ax0.plot(x_values[0],listOfYArrays[seriesIndex])
+        if len(x_values) == 1: #This means there are single points, and we need to make symbols.
+            for seriesIndex in range(len(listOfYArrays)):
+                ax0.plot(x_values[0],listOfYArrays[seriesIndex], 'o')            
     ax0.legend(plot_settings['legendLabels']) #legends must be after plots are made.
     fig0.tight_layout()
     fig0.savefig(plot_settings['figure_name'] + '.png', dpi=plot_settings['dpi'])

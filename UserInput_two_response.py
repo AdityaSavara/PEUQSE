@@ -7,7 +7,7 @@ simulated_response_plot_settings = {}
 model = {} 
 model['InputParameterInitialValues'] = [1, 5] # theta_1, theta_2
 model['InputParametersInitialValuesUncertainties'] = [1, 1] #If user wants to use a prior with covariance, then this must be a 2D array/ list. To assume no covariance, a 1D
-model['simulationOutputProcessingFunction'] = fun.direct_parameters_to_observations
+model['simulationOutputProcessingFunction'] = None
 prep_cov_mat = np.zeros((2,2))
 np.fill_diagonal(prep_cov_mat,model['InputParametersInitialValuesUncertainties'])
 model['PriorCovarianceMatrix'] = prep_cov_mat
@@ -17,9 +17,9 @@ InputConstants= [] #TODO: ERIC, WE SHOULD EITHER DESIGN YOUR CODE TO ALLOW CONST
 
 #####Experimental Data Input Files#####
 responses = {}
-responses['responses_abscissa'] = np.array([0, 1]) # These represent theta_1 and theta_2
+responses['responses_abscissa'] = np.array([[0], [1]]) # These represent theta_1 and theta_2
 responses['responses_observed'] = np.array([[2], [3]]) # [2, 3], a 1-D array, may be also tested.  It should yield a similar result, apart from the randomness involved in every new simulation instance.
-responses['responses_observed_uncertainties'] = np.array([1, 1])
+responses['responses_observed_uncertainties'] = np.array([[1], [1]])
 #####Parameter Estimation Inputs#####
 parameter_estimation_settings = {}
 parameter_estimation_settings['verbose'] = False
