@@ -39,7 +39,7 @@ class parameter_estimation:
         #                          [0., 0., 0., 13.0, 0., 0.],
         #                          [0., 0., 0., 0., 0.1, 0.],
         #                          [0., 0., 0., 0., 0., 0.1]])
-#
+
         self.UserInput.mu_prior = np.array(UserInput.model['InputParameterPriorValues']) 
         self.UserInput.num_data_points = len(UserInput.responses['responses_abscissa'])
         #Now scale things as needed:
@@ -53,18 +53,15 @@ class parameter_estimation:
         self.UserInput.cov_prior_scaled = self.UserInput.cov_prior*1.0 #First initialize, then fill.
         for parameterIndex, parameterValue in enumerate(UserInput.scaling_uncertainties):
             UserInput.cov_prior_scaled[parameterIndex,:] = UserInput.cov_prior[parameterIndex,:]/parameterValue
-            UserInput.cov_prior_scaled[:,parameterIndex] = UserInput.cov_prior[:,parameterIndex]/parameterValue    
-
-        
+            UserInput.cov_prior_scaled[:,parameterIndex] = UserInput.cov_prior[:,parameterIndex]/parameterValue           
+        UserInput.responses['responses_abscissa'] = np.atleast_2d(UserInput.responses['responses_abscissa'])
+        self.UserInput.num_responses = np.shape(UserInput.responses['responses_abscissa'])[0] #The first index of shape is the num of responses, but has to be after at_least2d is performed.
         #self.cov_prior = UserInput.cov_prior
         self.Q_mu = self.UserInput.mu_prior*0 # Q samples the next step at any point in the chain.  The next step may be accepted or rejected.  Q_mu is centered (0) around the current theta.  
         self.Q_cov = self.UserInput.cov_prior # Take small steps. 
-#        self.initial_concentrations_array = UserInput.initial_concentrations_array
-        #self.modulate_accept_probability = UserInput.modulate_accept_probability
-        #self.UserInput.import_experimental_settings(UserInput.Filename) #FIXME: This needs to get out of this function.
         if 'InputParameterInitialGuess' not in self.UserInput.model: #if an initial guess is not provided, we use the prior.
             self.UserInput.model['InputParameterInitialGuess'] = self.UserInput.mu_prior
-    
+        
     def doGridSearch(self, searchType='doMetropolisHastings', export = True, verbose = False, gridSamplingIntervalSize = [], gridSamplingRadii = [], passThroughArgs = {}):
         # gridSamplingRadii is the number of variations to check in units of variance for each parameter. Can be 0 if you don't want to vary a particular parameter in the grid search.
         import CombinationGeneratorModule
@@ -328,12 +325,13 @@ class parameter_estimation:
             simulatedResponses = simulationOutput #Is this the log of the rate? If so, Why?
         if type(simulationOutputProcessingFunction) != type(None):
             simulatedResponses = simulationOutputProcessingFunction(simulationOutput) 
-        observedResponses = self.UserInput.responses['responses_observed']
+        observedResponses = np.atleast_2d(self.UserInput.responses['responses_observed'])
+        simulatedResponses = np.atleast_2d(simulatedResponses)
         #To find the relevant covariance, we take the errors from the points.
         responses_cov = self.UserInput.responses['responses_observed_uncertainties'] 
         #If our likelihood is  “probability of Response given Theta”…  we have a continuous probability distribution for both the response and theta. That means the pdf  must use binning on both variables. Eric notes that the pdf returns a probability density, not a probability mass. So the pdf function here divides by the width of whatever small bin is being used and then returns the density accordingly. Because of this, our what we are calling likelihood is not actually probability (it’s not the actual likelihood) but is proportional to the likelihood.
         #This we call it a probability_metric and not a probability. #TODO: consider changing likelihood and get likelihood to "likelihoodMetric" and "getLikelihoodMetric"
-        probability_metric = multivariate_normal.pdf(x=simulatedResponses,mean=observedResponses,cov=responses_cov)
+        probability_metric = multivariate_normal.pdf(x=simulatedResponses.flatten(),mean=observedResponses.flatten(),cov=responses_cov)
         return probability_metric, simulatedResponses
 
     def makeHistogramsForEachParameter(self):
