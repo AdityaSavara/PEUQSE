@@ -21,27 +21,32 @@ class parameter_estimation:
         UserInput.stringOfParameterNames = str(UserInput.parameterNamesList).replace("'","")[1:-1]
         if self.UserInput.parameter_estimation_settings['verbose']: 
             print("Bayes Model Initialized")
-        #Leaving the original dictionary object intact, but making a new object to make cov_prior.
+        #Leaving the original dictionary object intact, but making a new object to make covmat_prior.
         UserInput.InputParametersPriorValuesUncertainties = UserInput.model['InputParametersPriorValuesUncertainties']     
         if len(np.shape(UserInput.InputParametersPriorValuesUncertainties)) == 1 and (len(UserInput.InputParametersPriorValuesUncertainties) > 0): #If it's a 1D array/list that is filled, we'll diagonalize it.
             UserInput.std_prior = np.array(UserInput.InputParametersPriorValuesUncertainties, dtype='float32') #using 32 since not everyone has 64.
             UserInput.var_prior = np.power(UserInput.InputParametersPriorValuesUncertainties,2)
-            UserInput.cov_prior = np.diagflat(self.UserInput.var_prior) 
+            UserInput.covmat_prior = np.diagflat(self.UserInput.var_prior) 
         elif len(np.shape(UserInput.InputParametersPriorValuesUncertainties)) > 1: #If it's non-1D, we assume it's already a covariance matrix.
-            UserInput.cov_prior = np.array(UserInput.InputParametersPriorValuesUncertainties, dtype='float32')
-            UserInput.var_prior = np.diagonal(UserInput.cov_prior)
-            UserInput.std_prior = np.power(UserInput.cov_prior,0.5)
+            UserInput.covmat_prior = np.array(UserInput.InputParametersPriorValuesUncertainties, dtype='float32')
+            UserInput.var_prior = np.diagonal(UserInput.covmat_prior)
+            UserInput.std_prior = np.power(UserInput.covmat_prior,0.5)
         else: #If a blank list is received, that means the user
-            print("The covariance of the priors is undefined because InputParametersPriorValuesUncertainties is blank.")
+            print("The covariance matrix of the priors is undefined because InputParametersPriorValuesUncertainties is blank.")
         #    cov_prior = np.array([[200.0, 0., 0., 0., 0., 0.], 
         #                          [0., 200.0, 0., 0., 0., 0.],
         #                          [0., 0., 13.0, 0., 0., 0.],
         #                          [0., 0., 0., 13.0, 0., 0.],
         #                          [0., 0., 0., 0., 0.1, 0.],
         #                          [0., 0., 0., 0., 0., 0.1]])
-#
+
         self.UserInput.mu_prior = np.array(UserInput.model['InputParameterPriorValues']) 
-        self.UserInput.num_data_points = len(UserInput.responses['responses_abscissa'])
+        #Making things at least 2d.
+        UserInput.responses['responses_abscissa'] = np.atleast_2d(UserInput.responses['responses_abscissa'])
+        UserInput.responses['responses_observed'] = np.atleast_2d(UserInput.responses['responses_observed'])
+        UserInput.responses['responses_observed_uncertainties'] = np.atleast_2d(UserInput.responses['responses_observed_uncertainties'])
+         
+        self.UserInput.num_data_points = len(UserInput.responses['responses_observed'].flatten()) #FIXME: This is only true for transient data.
         #Now scale things as needed:
         if UserInput.parameter_estimation_settings['scaling_uncertainties_type'] == "std":
             self.UserInput.scaling_uncertainties = UserInput.std_prior #Could also be by mu_prior.  The reason a separate variable is made is because this will be used in the getPrior function as well, and having a separate variable makes it easier to trace. This scaling helps prevent numerical errors in returning the pdf.
@@ -50,21 +55,18 @@ class parameter_estimation:
         #TODO: consider a separate scaling for each variable, taking the greater of either mu_prior or std_prior.
         self.UserInput.mu_prior_scaled = np.array(UserInput.mu_prior/UserInput.scaling_uncertainties)
         self.UserInput.var_prior_scaled = np.array(UserInput.var_prior/(UserInput.scaling_uncertainties*UserInput.scaling_uncertainties))
-        self.UserInput.cov_prior_scaled = self.UserInput.cov_prior*1.0 #First initialize, then fill.
+        self.UserInput.covmat_prior_scaled = self.UserInput.covmat_prior*1.0 #First initialize, then fill.
         for parameterIndex, parameterValue in enumerate(UserInput.scaling_uncertainties):
-            UserInput.cov_prior_scaled[parameterIndex,:] = UserInput.cov_prior[parameterIndex,:]/parameterValue
-            UserInput.cov_prior_scaled[:,parameterIndex] = UserInput.cov_prior[:,parameterIndex]/parameterValue    
+            UserInput.covmat_prior_scaled[parameterIndex,:] = UserInput.covmat_prior[parameterIndex,:]/parameterValue
+            UserInput.covmat_prior_scaled[:,parameterIndex] = UserInput.covmat_prior[:,parameterIndex]/parameterValue           
 
-        
-        #self.cov_prior = UserInput.cov_prior
+        self.UserInput.num_response_dimensions = np.shape(UserInput.responses['responses_abscissa'])[0] #The first index of shape is the num of responses, but has to be after at_least2d is performed.
+        #self.covmat_prior = UserInput.covmat_prior
         self.Q_mu = self.UserInput.mu_prior*0 # Q samples the next step at any point in the chain.  The next step may be accepted or rejected.  Q_mu is centered (0) around the current theta.  
-        self.Q_cov = self.UserInput.cov_prior # Take small steps. 
-#        self.initial_concentrations_array = UserInput.initial_concentrations_array
-        #self.modulate_accept_probability = UserInput.modulate_accept_probability
-        #self.UserInput.import_experimental_settings(UserInput.Filename) #FIXME: This needs to get out of this function.
+        self.Q_covmat = self.UserInput.covmat_prior # Take small steps. 
         if 'InputParameterInitialGuess' not in self.UserInput.model: #if an initial guess is not provided, we use the prior.
             self.UserInput.model['InputParameterInitialGuess'] = self.UserInput.mu_prior
-    
+        
     def doGridSearch(self, searchType='doMetropolisHastings', export = True, verbose = False, gridSamplingIntervalSize = [], gridSamplingRadii = [], passThroughArgs = {}):
         # gridSamplingRadii is the number of variations to check in units of variance for each parameter. Can be 0 if you don't want to vary a particular parameter in the grid search.
         import CombinationGeneratorModule
@@ -186,12 +188,12 @@ class parameter_estimation:
         for i in range(1,self.UserInput.parameter_estimation_settings['mcmc_length']): #FIXME: Don't we need to start with i of 0?
             if self.UserInput.parameter_estimation_settings['verbose']: print("MCMC sample number", i)                  
             if self.UserInput.parameter_estimation_settings['mcmc_mode'] == 'unbiased':
-                proposal_sample = samples[i-1,:] + np.random.multivariate_normal(self.Q_mu,self.Q_cov*self.UserInput.parameter_estimation_settings['mcmc_relative_step_length'])
+                proposal_sample = samples[i-1,:] + np.random.multivariate_normal(self.Q_mu,self.Q_covmat*self.UserInput.parameter_estimation_settings['mcmc_relative_step_length'])
             if self.UserInput.parameter_estimation_settings['mcmc_mode'] == 'MAP_finding':
                 if i == 1: mcmc_step_dynamic_coefficient = 1
                 mcmc_step_modulation_coefficient = np.random.uniform() + 0.5 #TODO: make this a 2D array. One for each parameter.
                 mcmc_step_modulation_history[i] = mcmc_step_modulation_coefficient
-                proposal_sample = samples[i-1,:] + np.random.multivariate_normal(self.Q_mu,self.Q_cov*mcmc_step_dynamic_coefficient*mcmc_step_modulation_coefficient*self.UserInput.parameter_estimation_settings['mcmc_relative_step_length'])
+                proposal_sample = samples[i-1,:] + np.random.multivariate_normal(self.Q_mu,self.Q_covmat*mcmc_step_dynamic_coefficient*mcmc_step_modulation_coefficient*self.UserInput.parameter_estimation_settings['mcmc_relative_step_length'])
             prior_proposal = self.getPrior(proposal_sample)
             [likelihood_proposal, simulationOutput_proposal] = self.getLikelihood(proposal_sample)
             prior_current_location = self.getPrior(samples[i-1,:]) 
@@ -315,7 +317,7 @@ class parameter_estimation:
         return [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_logP_un_normed_vec] # EAW 2020/01/08
     def getPrior(self,discreteParameterVector):
         discreteParameterVector_scaled = np.array(discreteParameterVector/self.UserInput.scaling_uncertainties)
-        probability = multivariate_normal.pdf(x=discreteParameterVector_scaled,mean=self.UserInput.mu_prior_scaled,cov=self.UserInput.cov_prior_scaled)
+        probability = multivariate_normal.pdf(x=discreteParameterVector_scaled,mean=self.UserInput.mu_prior_scaled,cov=self.UserInput.covmat_prior_scaled)
         return probability
     def getLikelihood(self,discreteParameterVector): #The variable discreteParameterVector represents a vector of values for the parameters being sampled. So it represents a single point in the multidimensional parameter space.
         simulationFunction = self.UserInput.model['simulateByInputParametersOnlyFunction']
@@ -328,13 +330,33 @@ class parameter_estimation:
             simulatedResponses = simulationOutput #Is this the log of the rate? If so, Why?
         if type(simulationOutputProcessingFunction) != type(None):
             simulatedResponses = simulationOutputProcessingFunction(simulationOutput) 
-        observedResponses = self.UserInput.responses['responses_observed']
-        #To find the relevant covariance, we take the errors from the points.
-        responses_cov = self.UserInput.responses['responses_observed_uncertainties'] 
+        observedResponses = np.atleast_2d(self.UserInput.responses['responses_observed'])
+        simulatedResponses = np.atleast_2d(simulatedResponses)
+        #To find the relevant covariance matrix, we take the errors from the points.
+        
+        if self.UserInput.num_response_dimensions == 1:
+            responses_covmat = np.array(self.UserInput.responses['responses_observed_uncertainties']) #Filling variable.
+            if np.shape(responses_covmat)[0] == (1): #This means it's just a list of standard deviations and needs to be squared to become variances.
+                responses_covmat = np.square(responses_covmat)
+            else:
+                responses_covmat = responses_covmat
+        elif self.UserInput.num_response_dimensions > 1:  #if the dimensionality of responses is greater than 1, we only support providing standard deviations. Will flatten and square.
+            responses_covmat = np.array(self.UserInput.responses['responses_observed_uncertainties']) #Filling variable.
+            responses_covmat = responses_covmat.flatten() 
+            responses_covmat = np.square(responses_covmat) 
         #If our likelihood is  “probability of Response given Theta”…  we have a continuous probability distribution for both the response and theta. That means the pdf  must use binning on both variables. Eric notes that the pdf returns a probability density, not a probability mass. So the pdf function here divides by the width of whatever small bin is being used and then returns the density accordingly. Because of this, our what we are calling likelihood is not actually probability (it’s not the actual likelihood) but is proportional to the likelihood.
         #This we call it a probability_metric and not a probability. #TODO: consider changing likelihood and get likelihood to "likelihoodMetric" and "getLikelihoodMetric"
-        probability_metric = multivariate_normal.pdf(x=simulatedResponses,mean=observedResponses,cov=responses_cov)
-        return probability_metric, simulatedResponses
+        
+        #Now we will check whether responses_covmat is square or not. If it's square, we take it as is. If it's not square, we take the nested object inside since the multivariate_normal.pdf function requires a diagonal values vector to be 1D.
+        responses_covmat_shape = np.shape(responses_covmat)
+        if len(responses_covmat_shape) == 1: #Matrix is square because has only one value.
+            probability_metric = multivariate_normal.pdf(x=simulatedResponses.flatten(),mean=observedResponses.flatten(),cov=responses_covmat)
+        elif responses_covmat_shape[0] == responses_covmat_shape[1]:  #Else it is 2D, check if it's square.
+            probability_metric = multivariate_normal.pdf(x=simulatedResponses.flatten(),mean=observedResponses.flatten(),cov=responses_covmat)
+        else:  #If it is not square, it's a list of variances so we need to take the 1D vector version.
+            probability_metric = multivariate_normal.pdf(x=simulatedResponses.flatten(),mean=observedResponses.flatten(),cov=responses_covmat[0])    
+        
+        return probability_metric, simulatedResponses.flatten()
 
     def makeHistogramsForEachParameter(self):
         import plotting_functions
@@ -352,32 +374,39 @@ class parameter_estimation:
         pd.plotting.scatter_matrix(posterior_df)
         plt.savefig(plot_settings['figure_name'],dpi=plot_settings['dpi'])
         
-    def createSimulatedResponsesPlot(self, x_values=[], listOfYArrays=[], plot_settings={}):            
-        if x_values == []: x_values = self.UserInput.responses['responses_abscissa']       
-        if listOfYArrays ==[]:
+    def createSimulatedResponsesPlots(self, allResponses_x_values=[], allResponsesListsOfYArrays =[], plot_settings={},allResponsesListsOfYUncertainties=[] ): 
+        #allResponsesListsOfYArrays  is to have 3 layers of lists: Response > Responses Observed, mu_guess Simulated Responses, map_Simulated Responses, (mu_AP_simulatedResponses) > Values
+        if allResponses_x_values == []: allResponses_x_values = self.UserInput.responses['responses_abscissa']       
+        if allResponsesListsOfYUncertainties == []: allResponsesListsOfYUncertainties = self.UserInput.responses['responses_observed_uncertainties']
+        if allResponsesListsOfYArrays  ==[]:
             #Get mu_guess simulated output and responses. 
             self.mu_guess_SimulatedOutput = self.UserInput.model['simulateByInputParametersOnlyFunction']( self.UserInput.model['InputParameterInitialGuess'])
             if type(self.UserInput.model['simulationOutputProcessingFunction']) == type(None):
-                self.mu_guess_SimulatedResponses = self.mu_guess_SimulatedOutput #Is this the log of the rate? If so, Why?
+                self.mu_guess_SimulatedResponses = np.atleast_2d(self.mu_guess_SimulatedOutput)
             if type(self.UserInput.model['simulationOutputProcessingFunction']) != type(None):
-                self.mu_guess_SimulatedResponses =  self.UserInput.model['simulationOutputProcessingFunction'](self.mu_guess_SimulatedOutput)                               
+                self.mu_guess_SimulatedResponses =  np.atleast_2d(     self.UserInput.model['simulationOutputProcessingFunction'](self.mu_guess_SimulatedOutput)     )
+                
             #Get map simiulated output and simulated responses.
             self.map_SimulatedOutput = self.UserInput.model['simulateByInputParametersOnlyFunction'](self.map_parameter_set)           
             if type(self.UserInput.model['simulationOutputProcessingFunction']) == type(None):
-                self.map_SimulatedResponses = self.map_SimulatedOutput #Is this the log of the rate? If so, Why?
+                self.map_SimulatedResponses = np.atleast_2d(self.map_SimulatedOutput)
             if type(self.UserInput.model['simulationOutputProcessingFunction']) != type(None):
-                self.map_SimulatedResponses =  self.UserInput.model['simulationOutputProcessingFunction'](self.map_SimulatedOutput)                    
+                self.map_SimulatedResponses =  np.atleast_2d(     self.UserInput.model['simulationOutputProcessingFunction'](self.map_SimulatedOutput)     )
             
             if hasattr(self, 'mu_AP_parameter_set'): #Check if a mu_AP has been assigned. It is normally only assigned if mcmc was used.           
                 #Get mu_AP simiulated output and simulated responses.
                 self.mu_AP_SimulatedOutput = self.UserInput.model['simulateByInputParametersOnlyFunction'](self.mu_AP_parameter_set)
                 if type(self.UserInput.model['simulationOutputProcessingFunction']) == type(None):
-                    self.mu_AP_SimulatedResponses = self.mu_AP_SimulatedOutput #Is this the log of the rate? If so, Why?
+                    self.mu_AP_SimulatedResponses = np.atleast_2d(self.mu_AP_SimulatedOutput)
                 if type(self.UserInput.model['simulationOutputProcessingFunction']) != type(None):
-                    self.mu_AP_SimulatedResponses =  self.UserInput.model['simulationOutputProcessingFunction'](self.mu_AP_SimulatedOutput) 
-                listOfYArrays = [self.UserInput.responses['responses_observed'], self.mu_guess_SimulatedResponses, self.map_SimulatedResponses, self.mu_AP_SimulatedResponses]        
+                    self.mu_AP_SimulatedResponses =  np.atleast_2d(     self.UserInput.model['simulationOutputProcessingFunction'](self.mu_AP_SimulatedOutput)      )
+                for responseDimIndex in range(self.UserInput.num_response_dimensions):
+                    listOfYArrays = [self.UserInput.responses['responses_observed'][responseDimIndex], self.mu_guess_SimulatedResponses[responseDimIndex], self.map_SimulatedResponses[responseDimIndex], self.mu_AP_SimulatedResponses[responseDimIndex]]        
+                    allResponsesListsOfYArrays.append(listOfYArrays)
             else: #Else there is no mu_AP.
-                listOfYArrays = [self.UserInput.responses['responses_observed'], self.mu_guess_SimulatedResponses, self.map_SimulatedResponses]        
+                for responseDimIndex in range(self.UserInput.num_response_dimensions):
+                    listOfYArrays = [self.UserInput.responses['responses_observed'][responseDimIndex], self.mu_guess_SimulatedResponses[responseDimIndex], self.map_SimulatedResponses[responseDimIndex]]        
+                    allResponsesListsOfYArrays.append(listOfYArrays)
         if plot_settings == {}: 
             plot_settings = self.UserInput.simulated_response_plot_settings
             if hasattr(self, 'mu_AP_parameter_set'): 
@@ -389,10 +418,15 @@ class parameter_estimation:
             #plot_settings['y_label'] = r'$rate (s^{-1})$'
             #plot_settings['y_range'] = [0.00, 0.025] #optional.
             #plot_settings['figure_name'] = 'tprposterior'
-            
         import plotting_functions
-        figureObject = plotting_functions.createSimulatedResponsesPlot(x_values, listOfYArrays, plot_settings)
-        return figureObject #This figure is a matplotlib.pyplot as plt object.
+        allResponsesFigureObjectsList = []
+        for responseDimIndex in range(self.UserInput.num_response_dimensions):
+            if np.shape(allResponses_x_values)[0] == 1: #This means a single abscissa for all responses.
+                figureObject = plotting_functions.createSimulatedResponsesPlot(allResponses_x_values[0], allResponsesListsOfYArrays[responseDimIndex], plot_settings, listOfYUncertainties=allResponsesListsOfYUncertainties[responseDimIndex])
+            if np.shape(allResponses_x_values)[0] > 1: #This means a separate abscissa for each response.
+                figureObject = plotting_functions.createSimulatedResponsesPlot(allResponses_x_values[responseDimIndex], allResponsesListsOfYArrays[responseDimIndex], plot_settings, listOfYUncertainties=allResponsesListsOfYUncertainties[responseDimIndex])
+            allResponsesFigureObjectsList.append(figureObject)
+        return allResponsesFigureObjectsList  #This is a list of matplotlib.pyplot as plt objects.
 
     def createMumpcePlots(self):
         import plotting_functions
@@ -428,7 +462,7 @@ class parameter_estimation:
                 firstParameter = int(self.UserInput.model['parameterNamesAndMathTypeExpressionsDict'][pairIndex[0]])
                 secondParameter = int(self.UserInput.model['parameterNamesAndMathTypeExpressionsDict'][pairIndex[0]])
                 pairs_of_parameter_indices[pairIndex] = [firstParameter, secondParameter]        
-        figureObject_beta.mumpce_plots(model_parameter_info = self.UserInput.model_parameter_info, active_parameters = self.UserInput.active_parameters, pairs_of_parameter_indices = pairs_of_parameter_indices, posterior_mu_vector = posterior_mu_vector, posterior_cov_matrix = posterior_cov_matrix, prior_mu_vector = np.array(self.UserInput.model['InputParameterInitialValues']), prior_cov_matrix = self.UserInput.cov_prior, contour_settings_custom = self.UserInput.contour_settings_custom)
+        figureObject_beta.mumpce_plots(model_parameter_info = self.UserInput.model_parameter_info, active_parameters = self.UserInput.active_parameters, pairs_of_parameter_indices = pairs_of_parameter_indices, posterior_mu_vector = posterior_mu_vector, posterior_cov_matrix = posterior_cov_matrix, prior_mu_vector = np.array(self.UserInput.model['InputParameterInitialValues']), prior_cov_matrix = self.UserInput.covmat_prior, contour_settings_custom = self.UserInput.contour_settings_custom)
         return figureObject_beta
 
     def createAllPlots(self):
@@ -438,7 +472,7 @@ class parameter_estimation:
             self.createMumpcePlots()
         except: #TODO: do something better than try & accept. Right now, this is because the above plots are designed for mcmc sampling and don't work if pure grid search or pure optimize is used.
             pass
-        self.createSimulatedResponsesPlot()
+        self.createSimulatedResponsesPlots()
 
 
 class verbose_optimization_wrapper: #Modified slightly From https://stackoverflow.com/questions/16739065/how-to-display-progress-of-scipy-optimize-function
