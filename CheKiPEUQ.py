@@ -418,13 +418,31 @@ class parameter_estimation:
             #plot_settings['y_label'] = r'$rate (s^{-1})$'
             #plot_settings['y_range'] = [0.00, 0.025] #optional.
             #plot_settings['figure_name'] = 'tprposterior'
+        if 'figure_name' not in plot_settings:
+            plot_settings['figurename'] = 'Posterior'
         import plotting_functions
         allResponsesFigureObjectsList = []
-        for responseDimIndex in range(self.UserInput.num_response_dimensions):
+        for responseDimIndex in range(self.UserInput.num_response_dimensions): #TODO: Move the exporting out of the plot creation and/or rename the function and possibly have options about whether exporting graph, data, or both.
+            #Some code for setting up individual plot settings in case there are multiple response dimensions.
+            individual_plot_settings = copy.deepcopy(plot_settings) #we need to edit the plot settings slightly for each plot.
+            if self.UserInput.num_response_dimensions == 1:
+                responseSuffix = '' #If there is only 1 dimension, we don't need to add a suffix to the files created. That would only confuse people.
+            if self.UserInput.num_response_dimensions > 1:
+                responseSuffix = "_"+str(responseDimIndex)
+            individual_plot_settings['figure_name'] = individual_plot_settings['figure_name']+responseSuffix          
+            if 'x_label' in plot_settings:
+                if type(plot_settings['x_label']) == type(['list']) and len(plot_settings['x_label']) > 1: #the  label can be a single string, or a list of multiple response's labels. If it's a list of greater than 1 length, then we need to use the response index.
+                    individual_plot_settings['x_label'] = plot_settings['x_label'][responseDimIndex]
+            if 'y_label' in plot_settings:
+                if type(plot_settings['y_label']) == type(['list']) and len(plot_settings['y_label']) > 1: #the  label can be a single string, or a list of multiple response's labels. If it's a list of greater than 1 length, then we need to use the response index.
+                    individual_plot_settings['y_label'] = plot_settings['y_label'][responseDimIndex]                
+            #TODO, low priority: we can check if x_range and y_range are nested, and thereby allow individual response dimension values for those.                               
             if np.shape(allResponses_x_values)[0] == 1: #This means a single abscissa for all responses.
                 figureObject = plotting_functions.createSimulatedResponsesPlot(allResponses_x_values[0], allResponsesListsOfYArrays[responseDimIndex], plot_settings, listOfYUncertainties=allResponsesListsOfYUncertainties[responseDimIndex])
+                np.savetxt(individual_plot_settings['figure_name']+".csv", np.vstack((allResponses_x_values[0], allResponsesListsOfYArrays[responseDimIndex])).transpose(), delimiter=",", header='x_values, observed, sim_initial_guess, sim_MAP, sim_mu_AP', comments='')
             if np.shape(allResponses_x_values)[0] > 1: #This means a separate abscissa for each response.
                 figureObject = plotting_functions.createSimulatedResponsesPlot(allResponses_x_values[responseDimIndex], allResponsesListsOfYArrays[responseDimIndex], plot_settings, listOfYUncertainties=allResponsesListsOfYUncertainties[responseDimIndex])
+                np.savetxt(individual_plot_settings['figure_name']+".csv", np.vstack((allResponses_x_values[responseDimIndex], allResponsesListsOfYArrays[responseDimIndex])).transpose(), delimiter=",", header='x_values, observed, sim_initial_guess, sim_MAP, sim_mu_AP', comments='')
             allResponsesFigureObjectsList.append(figureObject)
         return allResponsesFigureObjectsList  #This is a list of matplotlib.pyplot as plt objects.
 
