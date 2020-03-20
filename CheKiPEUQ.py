@@ -45,7 +45,10 @@ class parameter_estimation:
         UserInput.responses['responses_abscissa'] = np.atleast_2d(UserInput.responses['responses_abscissa'])
         UserInput.responses['responses_observed'] = np.atleast_2d(UserInput.responses['responses_observed'])
         UserInput.responses['responses_observed_uncertainties'] = np.atleast_2d(UserInput.responses['responses_observed_uncertainties'])
-         
+
+
+        UserInput.responses['responses_observed_transformed'], UserInput.responses['responses_observed_transformed_uncertainties']  = self.transform_responses(UserInput.responses['responses_observed'], UserInput.responses['responses_observed_uncertainties']) #This creates transforms for any data that we might need it. The same transforms will also be applied during parameter estimation.
+             
         self.UserInput.num_data_points = len(UserInput.responses['responses_observed'].flatten()) #FIXME: This is only true for transient data.
         #Now scale things as needed:
         if UserInput.parameter_estimation_settings['scaling_uncertainties_type'] == "std":
@@ -64,8 +67,91 @@ class parameter_estimation:
         #self.covmat_prior = UserInput.covmat_prior
         self.Q_mu = self.UserInput.mu_prior*0 # Q samples the next step at any point in the chain.  The next step may be accepted or rejected.  Q_mu is centered (0) around the current theta.  
         self.Q_covmat = self.UserInput.covmat_prior # Take small steps. 
+
+        #To find the relevant covariance matrix, we take the errors from the points. This is needed for the likelihood.
+        if self.UserInput.num_response_dimensions == 1:
+            responses_covmat = np.array(self.UserInput.responses['responses_observed_transformed_uncertainties']) #Filling variable.
+            if np.shape(responses_covmat)[0] == (1): #This means it's just a list of standard deviations and needs to be squared to become variances.
+                responses_covmat = np.square(responses_covmat)
+            else:
+                responses_covmat = responses_covmat
+        elif self.UserInput.num_response_dimensions > 1:  #if the dimensionality of responses is greater than 1, we only support providing standard deviations. Will flatten and square.
+            responses_covmat = np.array(self.UserInput.responses['responses_observed_transformed_uncertainties']) #Filling variable.
+            responses_covmat = responses_covmat.flatten() 
+            responses_covmat = np.square(responses_covmat)
+        self.responses_covmat = responses_covmat
+
         if 'InputParameterInitialGuess' not in self.UserInput.model: #if an initial guess is not provided, we use the prior.
             self.UserInput.model['InputParameterInitialGuess'] = self.UserInput.mu_prior
+
+
+    def transform_responses(self, nestedAllResponsesArray, nestedAllResponsesUncertainties = []):
+        nestedAllResponsesArray_transformed = copy.deepcopy(nestedAllResponsesArray) #First make a copy to populate with transformed values.
+        nestedAllResponsesUncertainties_transformed = copy.deepcopy(nestedAllResponsesUncertainties) #First make a copy to populate with transformed values. If blank, we won't populate it.        
+        UserInput = self.UserInput
+        
+        #TODO: Make little function for interpolation in case it's necessary (see below).
+#        def littleInterpolator():
+#            abscissaRange = UserInput.responses['responses_abscissa'][responseIndex][-1] - UserInput.responses['responses_abscissa'][responseIndex][0] #Last value minus first value.
+#            UserInput.responses['responses_observed'] = np.atleast_2d(UserInput.responses['responses_observed'])
+#            UserInput.responses['responses_observed_uncertainties'] = np.atleast_2d(UserInput.responses['responses_observed_uncertainties'])
+        if 'kinetics_type' not in UserInput.model:  #To make backwards compatibility.
+            UserInput.model['kinetics_type'] = ''
+        if UserInput.model['kinetics_type'] == 'transient': #This assumes that the abscissa is always time.
+            for responseIndex, response in enumerate(UserInput.responses['responses_observed']):
+                #We will need the abscissa also, so need to check if there are independent abscissa or not:
+                if len(UserInput.responses['responses_abscissa']) == 1: #This means there is only one abscissa.
+                    abscissaIndex = 0
+                else:
+                    abscissaIndex = responseIndex
+                #Now to do the transforms.
+                if UserInput.responses['response_types'][responseIndex] == 'I':	 #For intermediate
+                    if UserInput.responses['response_data_type'][responseIndex] == 'c':
+                        t_values, nestedAllResponsesArray_transformed[responseIndex], dydt_values = littleEulerGivenArray(0, UserInput.responses['responses_abscissa'][abscissaIndex], nestedAllResponsesArray[responseIndex])
+                        if len(nestedAllResponsesUncertainties) > 0:
+                            nestedAllResponsesUncertainties_transformed[responseIndex] = littleEulerUncertaintyPropagation(nestedAllResponsesUncertainties[responseIndex], UserInput.responses['responses_abscissa'][abscissaIndex], np.mean(nestedAllResponsesUncertainties[responseIndex])/10) 
+                    if UserInput.responses['response_data_type'][responseIndex] == 'r':
+                        #Perform the littleEuler twice.
+                        t_values, nestedAllResponsesArray_transformed[responseIndex], dydt_values = littleEulerGivenArray(0, UserInput.responses['responses_abscissa'][abscissaIndex], nestedAllResponsesArray[responseIndex])
+                        if len(nestedAllResponsesUncertainties) > 0:
+                            nestedAllResponsesUncertainties_transformed[responseIndex] = littleEulerUncertaintyPropagation(nestedAllResponsesUncertainties[responseIndex], UserInput.responses['responses_abscissa'][abscissaIndex], np.mean(nestedAllResponsesUncertainties[responseIndex])/10) 
+                        t_values, nestedAllResponsesArray_transformed[responseIndex], dydt_values = littleEulerGivenArray(0, UserInput.responses['responses_abscissa'][abscissaIndex], nestedAllResponsesArray_transformed[responseIndex])
+                        if len(nestedAllResponsesUncertainties) > 0:
+                            nestedAllResponsesUncertainties_transformed[responseIndex] = littleEulerUncertaintyPropagation(nestedAllResponsesUncertainties_transformed[responseIndex], UserInput.responses['responses_abscissa'][abscissaIndex], np.mean(nestedAllResponsesUncertainties[responseIndex])/10) 
+                if UserInput.responses['response_types'][responseIndex] == 'R':	#For reactant
+                    if UserInput.responses['response_data_type'][responseIndex] == 'c':
+                        pass
+                    if UserInput.responses['response_data_type'][responseIndex] == 'r':
+                        LittleEuler
+                if UserInput.responses['response_types'][responseIndex] == 'P':	 #For product
+                    if UserInput.responses['response_data_type'][responseIndex] == 'c':
+                        pass
+                    if UserInput.responses['response_data_type'][responseIndex] == 'r':
+                        #TODO: use responses['points_if_transformed'] variable to interpolate the right number of points. This is for data that's not already evenly spaced.
+                        t_values, nestedAllResponsesArray_transformed[responseIndex], dydt_values = littleEulerGivenArray(0, UserInput.responses['responses_abscissa'][abscissaIndex], nestedAllResponsesArray[responseIndex])
+                        if len(nestedAllResponsesUncertainties) > 0:
+                            nestedAllResponsesUncertainties_transformed[responseIndex] = littleEulerUncertaintyPropagation(nestedAllResponsesUncertainties[responseIndex], UserInput.responses['responses_abscissa'][abscissaIndex], np.mean(nestedAllResponsesUncertainties[responseIndex])/10) 
+                if UserInput.responses['response_types'][responseIndex] == 'o':
+                    if UserInput.responses['response_data_type'][responseIndex] == 'o':
+                        pass
+                    if UserInput.responses['response_data_type'][responseIndex] == 'c':
+                        LittleEuler
+                    if UserInput.responses['response_data_type'][responseIndex] == 'r':
+                        LittleEulerTwice
+        if UserInput.model['kinetics_type'] == 'steady_state': #TODO: so far, this does not do anything. It assumes that the abscissa is never time.
+            for responseIndex, response in enumerate(UserInput.responses['responses_observed']):
+                if UserInput.responses['response_types'][responseIndex] == 'T':	 #For abscissa of temperature dependence. Will probably do a log transform.
+                    if UserInput.responses['response_data_type'][responseIndex] == 'c':
+                        pass
+                    if UserInput.responses['response_data_type'][responseIndex] == 'r':
+                        pass
+                if UserInput.responses['response_types'][responseIndex] == 'c':	 #For abscissa of concentration dependence.
+                    if UserInput.responses['response_data_type'][responseIndex] == 'c':
+                        pass
+                    if UserInput.responses['response_data_type'][responseIndex] == 'r':
+                        pass
+        return nestedAllResponsesArray_transformed, nestedAllResponsesUncertainties_transformed
+
         
     def doGridSearch(self, searchType='doMetropolisHastings', export = True, verbose = False, gridSamplingIntervalSize = [], gridSamplingRadii = [], passThroughArgs = {}):
         # gridSamplingRadii is the number of variations to check in units of variance for each parameter. Can be 0 if you don't want to vary a particular parameter in the grid search.
@@ -330,32 +416,34 @@ class parameter_estimation:
             simulatedResponses = simulationOutput #Is this the log of the rate? If so, Why?
         if type(simulationOutputProcessingFunction) != type(None):
             simulatedResponses = simulationOutputProcessingFunction(simulationOutput) 
-        observedResponses = np.atleast_2d(self.UserInput.responses['responses_observed'])
         simulatedResponses = np.atleast_2d(simulatedResponses)
-        #To find the relevant covariance matrix, we take the errors from the points.
-        
-        if self.UserInput.num_response_dimensions == 1:
-            responses_covmat = np.array(self.UserInput.responses['responses_observed_uncertainties']) #Filling variable.
-            if np.shape(responses_covmat)[0] == (1): #This means it's just a list of standard deviations and needs to be squared to become variances.
-                responses_covmat = np.square(responses_covmat)
-            else:
-                responses_covmat = responses_covmat
-        elif self.UserInput.num_response_dimensions > 1:  #if the dimensionality of responses is greater than 1, we only support providing standard deviations. Will flatten and square.
-            responses_covmat = np.array(self.UserInput.responses['responses_observed_uncertainties']) #Filling variable.
-            responses_covmat = responses_covmat.flatten() 
-            responses_covmat = np.square(responses_covmat) 
+        simulatedResponses_transformed, blank_list = self.transform_responses(simulatedResponses) #This creates transforms for any data that we might need it. The same transforms were also applied to the observed responses.
+        observedResponses_transformed = self.UserInput.responses['responses_observed_transformed']
+        simulatedResponses_transformed_flattened = np.array(simulatedResponses_transformed).flatten()
+        observedResponses_transformed_flattened = np.array(observedResponses_transformed).flatten()
+ 
         #If our likelihood is  “probability of Response given Theta”…  we have a continuous probability distribution for both the response and theta. That means the pdf  must use binning on both variables. Eric notes that the pdf returns a probability density, not a probability mass. So the pdf function here divides by the width of whatever small bin is being used and then returns the density accordingly. Because of this, our what we are calling likelihood is not actually probability (it’s not the actual likelihood) but is proportional to the likelihood.
         #This we call it a probability_metric and not a probability. #TODO: consider changing likelihood and get likelihood to "likelihoodMetric" and "getLikelihoodMetric"
         
         #Now we will check whether responses_covmat is square or not. If it's square, we take it as is. If it's not square, we take the nested object inside since the multivariate_normal.pdf function requires a diagonal values vector to be 1D.
+        responses_covmat = self.responses_covmat
         responses_covmat_shape = np.shape(responses_covmat)
         if len(responses_covmat_shape) == 1: #Matrix is square because has only one value.
-            probability_metric = multivariate_normal.pdf(x=simulatedResponses.flatten(),mean=observedResponses.flatten(),cov=responses_covmat)
+            probability_metric = multivariate_normal.pdf(x=simulatedResponses_transformed_flattened,mean=observedResponses_transformed_flattened,cov=responses_covmat)
         elif responses_covmat_shape[0] == responses_covmat_shape[1]:  #Else it is 2D, check if it's square.
-            probability_metric = multivariate_normal.pdf(x=simulatedResponses.flatten(),mean=observedResponses.flatten(),cov=responses_covmat)
+            probability_metric = multivariate_normal.pdf(x=simulatedResponses_transformed_flattened,mean=observedResponses_transformed_flattened,cov=responses_covmat)
+            #TODO: Put in near-diagonal solution described in github.
         else:  #If it is not square, it's a list of variances so we need to take the 1D vector version.
-            probability_metric = multivariate_normal.pdf(x=simulatedResponses.flatten(),mean=observedResponses.flatten(),cov=responses_covmat[0])    
-        
+            probability_metric = multivariate_normal.pdf(x=simulatedResponses_transformed_flattened,mean=observedResponses_transformed_flattened,cov=responses_covmat[0])    
+            if probability_metric == 0:
+                log_probability_metric = 0 #Just initializing, then will multiply by each probability separately.
+                for responseValueIndex in range(len(simulatedResponses_transformed_flattened)):
+                    current_probability_metric = multivariate_normal.pdf(x=simulatedResponses_transformed_flattened[responseValueIndex],mean=observedResponses_transformed_flattened[responseValueIndex],cov=responses_covmat[0][responseValueIndex])    
+                    if current_probability_metric != 0:
+                        log_current_probability_metric = np.log10(current_probability_metric)
+                        log_probability_metric = log_current_probability_metric + log_probability_metric
+                print(log_probability_metric)
+                probability_metric = 10**(log_probability_metric)
         return probability_metric, simulatedResponses.flatten()
 
     def makeHistogramsForEachParameter(self):
@@ -604,3 +692,4 @@ def dydtNumericalExtraction(t_values, y_values, last_point_derivative = 0):
         
 if __name__ == "__main__":
     pass
+

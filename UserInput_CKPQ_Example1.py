@@ -41,6 +41,8 @@ model['parameterNamesAndMathTypeExpressionsDict'] = {'Ea_1':r'$E_{a1}$','Ea_2':r
 #InputParametersInitialValuesUncertainties = [200, 200, 13, 13, 0.1, 0.1] #If user wants to use a prior with covariance, then this must be a 2D array/ list. To assume no covariance, a 1D array can be used.
 model['simulateByInputParametersOnlyFunction'] = TPR_simulationFunctionWrapper
 model['simulationOutputProcessingFunction'] = None
+model['kinetics_type'] = '' #can be 'transient' or 'steady_state', anything else is ignored.
+
 
 InputConstants= [] #TODO: ERIC, WE SHOULD EITHER DESIGN YOUR CODE TO ALLOW CONSTANTS SEPARATELY, OR TO HAVE UNCERTAINTIES OF ZERO TO MAKE THINGS INTO A CONSTANT. THAT IS UP TO YOU AT THIS STAGE.
 
@@ -51,6 +53,7 @@ responses['responses_observed'] = np.array(experiments_df['AcHBackgroundSubtract
 responses['responses_observed_uncertainties'] = observedResponses_uncertainties
 #responses_abscissa = np.array(experiments_df['AcH - T'])
 #responses_observed = np.array(experiments_df['AcHBackgroundSubtracted'])/2000
+responses['points_if_transformed'] = 100 #Typically want 100 or 1000 etc.
 observedResponses = observedResponsesFunc()
 
 

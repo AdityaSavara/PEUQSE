@@ -5,13 +5,17 @@ import pandas as pd
 if __name__ == "__main__":
     import UserInput_CKPQ_Example1 as UserInput
     observed_data_Filename = 'ExperimentalDataAcetaldehydeTPDCeO2111MullinsTruncatedLargerErrors.csv'
-    times, responses_observed, observedResponses_uncertainties = processing_functions_tpd_odeint.import_integrals_settings(observed_data_Filename)
+    times, responses_observed, observedResponses_uncertainties = processing_functions_tpd_odeint.import_experimental_settings(observed_data_Filename)
     #experiments_datarame = pd.read_csv(observed_data_Filename)    
     
     
     UserInput.responses['responses_abscissa'] = times
     UserInput.responses['responses_observed'] = responses_observed
-    UserInput.responses['responses_observed_uncertainties'] = observedResponses_uncertainties*1
+    UserInput.responses['responses_observed_uncertainties'] = observedResponses_uncertainties*5.0
+
+    UserInput.model['kinetics_type'] = 'transient'
+    UserInput.responses['response_types']=['P'] 
+    UserInput.responses['response_data_type']=['r']
 
     
     UserInput.simulated_response_plot_settings['x_label'] = 'time (s)'
@@ -25,11 +29,9 @@ if __name__ == "__main__":
     UserInput.model['InputParameterInitialGuess'] = [40, 25, 13, 13.0, 0.1, 0.2]#[39.08033543, 25.85946199, 10.02022149, 14.67430303, -0.41925677,  0.62673177] #This is where the mcmc chain will start.
     #InputParameterInitialValues = [41.5, 41.5, 13.0, 13.0, 0.1, 0.1] # Ea1_mean, Ea2_mean, log_A1_mean, log_A2_mean, gamma_1_mean, gamma_2_mean 
     
-    UserInput.model['InitialConcentrations'] = [] #only needed if kinetic transforms desired.
-    
     #InputParametersInitialValuesUncertainties = [200, 200, 13, 13, 0.1, 0.1] #If user wants to use a prior with covariance, then this must be a 2D array/ list. To assume no covariance, a 1D array can be used.
-    UserInput.model['simulateByInputParametersOnlyFunction'] = processing_functions_tpd_odeint.TPR_integerated_simulationFunctionWrapper #This must simulate with *only* the parameters listed above, and no other arguments.
-    UserInput.model['simulationOutputProcessingFunction'] = None  #Optional: a function to process what comes out of the simulation Function and then return an observable vector.
+    UserInput.model['simulateByInputParametersOnlyFunction'] = processing_functions_tpd_odeint.TPR_simulationFunctionWrapper #This must simulate with *only* the parameters listed above, and no other arguments.
+    UserInput.model['simulationOutputProcessingFunction'] = processing_functions_tpd_odeint.no_log_wrapper_func  #Optional: a function to process what comes out of the simulation Function and then return an observable vector.
         
     UserInput.parameter_estimation_settings['verbose'] = False 
     UserInput.parameter_estimation_settings['checkPointFrequency'] = 100
