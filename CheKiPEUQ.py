@@ -67,6 +67,7 @@ class parameter_estimation:
             UserInput.covmat_prior_scaled[:,parameterIndex] = UserInput.covmat_prior[:,parameterIndex]/parameterValue           
 
         #To find the responses covariance matrix, we take the errors from the points. This is needed for the likelihood.
+        self.UserInput.num_response_dimensions = np.shape(UserInput.responses['responses_abscissa'])[0] #The first index of shape is the num of responses, but has to be after at_least2d is performed.
         if self.UserInput.num_response_dimensions == 1:
             responses_covmat = np.array(self.UserInput.responses['responses_observed_transformed_uncertainties']) #Filling variable.
             if np.shape(responses_covmat)[0] == (1): #This means it's just a list of standard deviations and needs to be squared to become variances.
@@ -79,7 +80,6 @@ class parameter_estimation:
             responses_covmat = np.square(responses_covmat)
         self.responses_covmat = responses_covmat            
                        
-        self.UserInput.num_response_dimensions = np.shape(UserInput.responses['responses_abscissa'])[0] #The first index of shape is the num of responses, but has to be after at_least2d is performed.
         #self.covmat_prior = UserInput.covmat_prior
         self.Q_mu = self.UserInput.mu_prior*0 # Q samples the next step at any point in the chain.  The next step may be accepted or rejected.  Q_mu is centered (0) around the current theta.  
         self.Q_covmat = self.UserInput.covmat_prior # Take small steps. 
@@ -225,6 +225,7 @@ class parameter_estimation:
   
     def doGridSearch(self, searchType='doMetropolisHastings', export = True, verbose = False, gridSamplingIntervalSize = [], gridSamplingRadii = [], passThroughArgs = {}):
         # gridSamplingRadii is the number of variations to check in units of variance for each parameter. Can be 0 if you don't want to vary a particular parameter in the grid search.
+        #TODO: the upper part of the gridsearch may not be compatibile with reduced parameter space. Needs to be checked.
         import CombinationGeneratorModule
         numParameters = len(self.UserInput.parameterNamesList)
         if len(gridSamplingRadii) == 0:
@@ -236,11 +237,11 @@ class parameter_estimation:
             for radius in gridSamplingRadii:
                 numGridPoints=numGridPoints*(2*radius+1)
         if len(gridSamplingIntervalSize) == 0:
-            gridSamplingIntervalSize = self.UserInput.var_prior #By default, we use the variances associated with the priors.
+            gridSamplingIntervalSize = self.UserInput.std_prior #By default, we use the standard deviations associated with the priors.
         else: gridSamplingIntervalSize = np.array(gridSamplingRadii, dtype='float')
-        gridCombinations = CombinationGeneratorModule.combinationGenerator(self.UserInput.InputParameterInitialGuess, gridSamplingIntervalSize, gridSamplingRadii, SpreadType="Addition",toFile=False)
+        gridCenter = self.UserInput.InputParameterInitialGuess #We take what is in the variable self.UserInput.InputParameterInitialGuess for the center of the grid.
+        gridCombinations = CombinationGeneratorModule.combinationGenerator(gridCenter, gridSamplingIntervalSize, gridSamplingRadii, SpreadType="Addition",toFile=False)
         allGridResults = []
-        
         #Initialize some things before loop.
         if type(self.UserInput.parameter_estimation_settings['checkPointFrequency']) != type(None):
                 import timeit
@@ -249,7 +250,7 @@ class parameter_estimation:
         highest_logP = float('-inf') #Just initializing.
         #Start grid search loop.
         for combinationIndex,combination in enumerate(gridCombinations):
-            self.UserInput.InputParameterInitialGuess = combination
+            self.UserInput.InputParameterInitialGuess = combination #We need to fill the variable InputParameterInitialGuess with the combination being checked.
             if searchType == 'getLogP':
                 thisResult = self.getLogP(combination)
                 self.map_logP = thisResult #The getLogP function does not fill map_logP by itself.
@@ -274,6 +275,8 @@ class parameter_estimation:
                 print("GridPoint", combinationIndex, "averageTimePerGridPoint", "%.2f" % round(averageTimePerGridPoint,2), "estimated time remaining", "%.2f" % round( numRemainingGridPoints*averageTimePerGridPoint,2), "s" )
                 print("GridPoint", combinationIndex, "current logP", self.map_logP, "highest logP", highest_logP)
         #TODO: export the allGridResults to file at end of search in a nicer format.        
+        #First set the initial guess back to the center of the grid.
+        self.UserInput.InputParameterInitialGuess = gridCenter
         #Now populate the map etc. with those of the best result.
         self.map_logP = highest_logP 
         self.map_parameter_set = highest_logP_parameter_set 
