@@ -223,9 +223,9 @@ class parameter_estimation:
             
 
     def getLogP(self, proposal_sample): #The proposal sample is specific parameter vector.
-        [likelihood_proposal, simulationOutput_proposal] = self.getLogLikelihood(proposal_sample)
-        prior_proposal = self.getLogPrior(proposal_sample)
-        log_numerator_or_denominator = likelihood_proposal+prior_proposal #Of the Metropolis-Hastings accept/reject ratio
+        [log_likelihood_proposal, simulationOutput_proposal] = self.getLogLikelihood(proposal_sample)
+        log_prior_proposal = self.getLogPrior(proposal_sample)
+        log_numerator_or_denominator = log_likelihood_proposal+log_prior_proposal #Of the Metropolis-Hastings accept/reject ratio
         return log_numerator_or_denominator
         
     def getNegLogP(self, proposal_sample): #The proposal sample is specific parameter vector. We are using negative of log P because scipy optimize doesn't do maximizing. It's recommended minimize the negative in this situation.
@@ -260,10 +260,10 @@ class parameter_estimation:
         mcmc_step_modulation_history = np.zeros((self.UserInput.parameter_estimation_settings['mcmc_length'])) #TODO: Make this optional for efficiency. #This allows the steps to be larger or smaller. Make this same length as samples. In future, should probably be same in other dimension also, but that would require 2D sampling with each step.                                                                          
         samples[0,:]=self.UserInput.model['InputParameterInitialGuess']  # Initialize the chain. Theta is initialized as the starting point of the chain.  It is placed at the prior mean if an initial guess is not provided..
         samples_drawn = samples*1.0 #this includes points that were rejected. #TODO: make this optional for efficiency.               
-        likelihoods_vec = np.zeros((self.UserInput.parameter_estimation_settings['mcmc_length'],1))
-        posteriors_un_normed_vec = np.zeros((self.UserInput.parameter_estimation_settings['mcmc_length'],1))
-        log_postereriors_drawn = np.zeros((self.UserInput.parameter_estimation_settings['mcmc_length'])) #TODO: make this optional for efficiency. We don't want this to be 2D, so we don't copy posteriors_un_normed_vec.
-        priors_vec = np.zeros((self.UserInput.parameter_estimation_settings['mcmc_length'],1))
+        log_likelihoods_vec = np.zeros((self.UserInput.parameter_estimation_settings['mcmc_length'],1))
+        log_posteriors_un_normed_vec = np.zeros((self.UserInput.parameter_estimation_settings['mcmc_length'],1))
+        log_postereriors_drawn = np.zeros((self.UserInput.parameter_estimation_settings['mcmc_length'])) #TODO: make this optional for efficiency. We don't want this to be 2D, so we don't copy log_posteriors_un_normed_vec.
+        log_priors_vec = np.zeros((self.UserInput.parameter_estimation_settings['mcmc_length'],1))
         #Code to initialize checkpoints.
         if type(self.UserInput.parameter_estimation_settings['checkPointFrequency']) != type(None):
             print("Starting MCMC sampling.")
@@ -280,13 +280,13 @@ class parameter_estimation:
                 mcmc_step_modulation_coefficient = np.random.uniform() + 0.5 #TODO: make this a 2D array. One for each parameter.
                 mcmc_step_modulation_history[i] = mcmc_step_modulation_coefficient
                 proposal_sample = samples[i-1,:] + np.random.multivariate_normal(self.Q_mu,self.Q_covmat*mcmc_step_dynamic_coefficient*mcmc_step_modulation_coefficient*self.UserInput.parameter_estimation_settings['mcmc_relative_step_length'])
-            prior_proposal = self.getLogPrior(proposal_sample)
-            [likelihood_proposal, simulationOutput_proposal] = self.getLogLikelihood(proposal_sample)
-            prior_current_location = self.getLogPrior(samples[i-1,:]) 
-            [likelihood_current_location, simulationOutput_current_location] = self.getLogLikelihood(samples[i-1,:]) #FIXME: the previous likelihood should be stored so that it doesn't need to be calculated again.
-            accept_probability = (likelihood_proposal + prior_proposal) - (likelihood_current_location + prior_current_location) 
-            if self.UserInput.parameter_estimation_settings['verbose']: print('Current likelihood',likelihood_current_location, 'Proposed likelihood', likelihood_proposal, '\nAccept_probability (gauranteed if above 1)', accept_probability)
-            if self.UserInput.parameter_estimation_settings['verbose']: print('Current posterior',likelihood_current_location*prior_current_location, 'Proposed Posterior', likelihood_proposal*prior_proposal)
+            log_prior_proposal = self.getLogPrior(proposal_sample)
+            [log_likelihood_proposal, simulationOutput_proposal] = self.getLogLikelihood(proposal_sample)
+            log_prior_current_location = self.getLogPrior(samples[i-1,:]) 
+            [log_likelihood_current_location, simulationOutput_current_location] = self.getLogLikelihood(samples[i-1,:]) #FIXME: the previous likelihood should be stored so that it doesn't need to be calculated again.
+            accept_probability = (log_likelihood_proposal + log_prior_proposal) - (log_likelihood_current_location + log_prior_current_location) 
+            if self.UserInput.parameter_estimation_settings['verbose']: print('Current log_likelihood',log_likelihood_current_location, 'Proposed log_likelihood', log_likelihood_proposal, '\nAccept_probability (gauranteed if above 1)', accept_probability)
+            if self.UserInput.parameter_estimation_settings['verbose']: print('Current posterior',log_likelihood_current_location*log_prior_current_location, 'Proposed Posterior', log_likelihood_proposal*log_prior_proposal)
             if self.UserInput.parameter_estimation_settings['mcmc_modulate_accept_probability'] != 0: #This flattens the posterior by accepting low values more often. It can be useful when greater sampling is more important than accuracy.
                 N_flatten = float(self.UserInput.parameter_estimation_settings['mcmc_modulate_accept_probability'])
                 accept_probability = accept_probability**(1/N_flatten) #TODO: add code that unflattens the final histograms, that way even with more sampling we still get an accurate final posterior distribution. We can also then add a flag if the person wants to keep the posterior flattened.
@@ -297,11 +297,11 @@ class parameter_estimation:
                   #print(simulationOutput_proposal)
                 samples[i,:] = proposal_sample
                 samples_drawn[i,:] = proposal_sample
-                log_postereriors_drawn[i] = np.log(likelihood_proposal*prior_proposal)
+                log_postereriors_drawn[i] = (log_likelihood_proposal+log_prior_proposal) #FIXME: should be using getlogP
                 samples_simulatedOutputs[i,:] = simulationOutput_proposal
-                posteriors_un_normed_vec[i] = likelihood_proposal*prior_proposal #FIXME: Separate this block of code out into a helper function in the class, that way I can create another helper function for non-MCMC sampling.
-                likelihoods_vec[i] = likelihood_proposal
-                priors_vec[i] = prior_proposal
+                log_posteriors_un_normed_vec[i] = log_likelihood_proposal+log_prior_proposal 
+                log_likelihoods_vec[i] = log_likelihood_proposal
+                log_priors_vec[i] = log_prior_proposal
             else:
                 if self.UserInput.parameter_estimation_settings['verbose']:
                   print('reject', proposal_sample)
@@ -309,12 +309,12 @@ class parameter_estimation:
                   #print(simulationOutput_current_location)
                 samples[i,:] = samples[i-1,:] #the sample is not kept if it is rejected, though we still store it in the samples_drawn.
                 samples_drawn[i,:] = proposal_sample
-                log_postereriors_drawn[i] = np.log(likelihood_proposal*prior_proposal)
+                log_postereriors_drawn[i] = (log_likelihood_proposal+log_prior_proposal)
                 samples_simulatedOutputs[i,:] = simulationOutput_current_location
 #                print("line 121", simulationOutput_current_location)
-                posteriors_un_normed_vec[i] = likelihood_current_location*prior_current_location
-                likelihoods_vec[i] = likelihood_current_location
-                priors_vec[i] = prior_current_location
+                log_posteriors_un_normed_vec[i] = log_likelihood_current_location+log_prior_current_location
+                log_likelihoods_vec[i] = log_likelihood_current_location
+                log_priors_vec[i] = log_prior_current_location
             if type(self.UserInput.parameter_estimation_settings['checkPointFrequency']) != type(None):
                 if i%self.UserInput.parameter_estimation_settings['checkPointFrequency'] == 0: #The % is a modulus function.
                     timeSinceLastCheckPoint = (timeit.time.clock() - timeOfFirstCheckpoint) -  timeCheckpoint
@@ -358,14 +358,14 @@ class parameter_estimation:
         self.post_burn_in_samples = samples[self.UserInput.parameter_estimation_settings['mcmc_burn_in']:]
         if self.UserInput.parameter_estimation_settings['exportAllSimulatedOutputs'] == True:
             self.post_burn_in_samples_simulatedOutputs = samples_simulatedOutputs[self.UserInput.parameter_estimation_settings['mcmc_burn_in']:]
-        self.post_burn_in_posteriors_un_normed_vec = posteriors_un_normed_vec[self.UserInput.parameter_estimation_settings['mcmc_burn_in']:]
-        self.post_burn_in_logP_un_normed_vec = np.log(self.post_burn_in_posteriors_un_normed_vec)
-        self.post_burn_in_likelihoods_vec = likelihoods_vec[self.UserInput.parameter_estimation_settings['mcmc_burn_in']:]
-        self.post_burn_in_priors_vec = priors_vec[self.UserInput.parameter_estimation_settings['mcmc_burn_in']:]
+        self.post_burn_in_log_posteriors_un_normed_vec = log_posteriors_un_normed_vec[self.UserInput.parameter_estimation_settings['mcmc_burn_in']:]
+        self.post_burn_in_logP_un_normed_vec = (self.post_burn_in_log_posteriors_un_normed_vec)
+        self.post_burn_in_log_likelihoods_vec = log_likelihoods_vec[self.UserInput.parameter_estimation_settings['mcmc_burn_in']:]
+        self.post_burn_in_log_priors_vec = log_priors_vec[self.UserInput.parameter_estimation_settings['mcmc_burn_in']:]
         # posterior probabilites are transformed to a standard normal (std=1) for obtaining the evidence:
-        self.evidence = np.mean(self.post_burn_in_posteriors_un_normed_vec)*np.sqrt(2*np.pi*np.std(self.post_burn_in_samples)**2)
-        post_burn_in_posteriors_vec = self.post_burn_in_posteriors_un_normed_vec/self.evidence
-        log_ratios = np.log(post_burn_in_posteriors_vec/self.post_burn_in_priors_vec)
+        self.evidence = np.mean(self.post_burn_in_log_posteriors_un_normed_vec)*np.sqrt(2*np.pi*np.std(self.post_burn_in_samples)**2)
+        post_burn_in_log_posteriors_vec = self.post_burn_in_log_posteriors_un_normed_vec/self.evidence
+        log_ratios = (post_burn_in_log_posteriors_vec/self.post_burn_in_log_priors_vec)
         log_ratios[np.isinf(log_ratios)] = 0
         log_ratios = np.nan_to_num(log_ratios)
         self.info_gain = np.mean(log_ratios)
@@ -383,7 +383,7 @@ class parameter_estimation:
         if self.UserInput.parameter_estimation_settings['exportLog'] == True:
             #The self.post_burn_in_samples_simulatedOutputs has length of ALL sampling including burn_in
             #The self.post_burn_in_samples is only AFTER burn in.
-            #The self.post_burn_in_posteriors_un_normed_vec is AFTER burn in.           
+            #The self.post_burn_in_log_posteriors_un_normed_vec is AFTER burn in.           
             #TODO: Make header for mcmc_output
             mcmc_output = np.hstack((self.post_burn_in_logP_un_normed_vec,self.post_burn_in_samples))
             np.savetxt('mcmc_logP_and_parameter_samples.csv',mcmc_output, delimiter=",")             
@@ -445,7 +445,7 @@ class parameter_estimation:
                     if current_probability_metric != 0:
                         log_current_probability_metric = np.log10(current_probability_metric)
                         log_probability_metric = log_current_probability_metric + log_probability_metric
-            print(log_probability_metric)
+            #print(log_probability_metric)
         return log_probability_metric, simulatedResponses.flatten()
 
     def makeHistogramsForEachParameter(self):
