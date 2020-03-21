@@ -521,12 +521,9 @@ class parameter_estimation:
                 probability_metric = 0
             if probability_metric == 0:
                 log_probability_metric = 0 #Just initializing, then will multiply by each probability separately.
-                smallest_probability_metric_so_far = 100
                 for responseValueIndex in range(len(simulatedResponses_transformed_flattened)):
                     current_probability_metric = multivariate_normal.pdf(x=simulatedResponses_transformed_flattened[responseValueIndex],mean=observedResponses_transformed_flattened[responseValueIndex],cov=responses_covmat[0][responseValueIndex])    
                     if current_probability_metric != 0:
-                        if current_probability_metric < smallest_probability_metric_so_far:
-                            smallest_probability_metric_so_far = current_probability_metric
                         log_current_probability_metric = np.log10(current_probability_metric)
                         log_probability_metric = log_current_probability_metric + log_probability_metric
                     if current_probability_metric == 0:
