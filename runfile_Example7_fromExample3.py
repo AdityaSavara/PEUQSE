@@ -11,8 +11,7 @@ if __name__ == "__main__":
     
     UserInput.responses['responses_abscissa'] = times
     UserInput.responses['responses_observed'] = responses_observed
-    UserInput.responses['responses_observed_uncertainties'] = observedResponses_uncertainties*1.0
-    UserInput.logSpace = True    
+    UserInput.responses['responses_observed_uncertainties'] = observedResponses_uncertainties*5.0
 
     UserInput.model['kinetics_type'] = 'transient'
     UserInput.responses['response_types']=['P'] 

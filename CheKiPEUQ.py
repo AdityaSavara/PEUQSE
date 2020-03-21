@@ -223,10 +223,10 @@ class parameter_estimation:
             
 
     def getLogP(self, proposal_sample): #The proposal sample is specific parameter vector.
-        [likelihood_proposal, simulationOutput_proposal] = self.getLikelihood(proposal_sample)
-        prior_proposal = self.getPrior(proposal_sample)
-        log_postererior = np.log(likelihood_proposal) + np.log(prior_proposal)
-        return log_postererior, simulationOutput_proposal
+        [likelihood_proposal, simulationOutput_proposal] = self.getLogLikelihood(proposal_sample)
+        prior_proposal = self.getLogPrior(proposal_sample)
+        log_numerator_or_denominator = likelihood_proposal+prior_proposal #Of the Metropolis-Hastings accept/reject ratio
+        return log_numerator_or_denominator
         
     def getNegLogP(self, proposal_sample): #The proposal sample is specific parameter vector. We are using negative of log P because scipy optimize doesn't do maximizing. It's recommended minimize the negative in this situation.
         neg_log_postererior = -1*self.getLogP(proposal_sample)
@@ -280,22 +280,17 @@ class parameter_estimation:
                 mcmc_step_modulation_coefficient = np.random.uniform() + 0.5 #TODO: make this a 2D array. One for each parameter.
                 mcmc_step_modulation_history[i] = mcmc_step_modulation_coefficient
                 proposal_sample = samples[i-1,:] + np.random.multivariate_normal(self.Q_mu,self.Q_covmat*mcmc_step_dynamic_coefficient*mcmc_step_modulation_coefficient*self.UserInput.parameter_estimation_settings['mcmc_relative_step_length'])
-            prior_proposal = self.getPrior(proposal_sample)
-            prior_current_location = self.getPrior(samples[i-1,:]) 
-            if self.UserInput.logSpace == True:
-                [likelihood_proposal, simulationOutput_proposal] = self.getLogP(proposal_sample)    
-                [likelihood_current_location, simulationOutput_current_location] = self.getLogP(samples[i-1,:]) 
-                accept_probability = np.exp(likelihood_proposal - likelihood_current_location)
-            else:
-                [likelihood_proposal, simulationOutput_proposal] = self.getLikelihood(proposal_sample)
-                [likelihood_current_location, simulationOutput_current_location] = self.getLikelihood(samples[i-1,:]) #FIXME: the previous likelihood should be stored so that it doesn't need to be calculated again.
-                accept_probability = (likelihood_proposal*prior_proposal)/(likelihood_current_location*prior_current_location) 
+            prior_proposal = self.getLogPrior(proposal_sample)
+            [likelihood_proposal, simulationOutput_proposal] = self.getLogLikelihood(proposal_sample)
+            prior_current_location = self.getLogPrior(samples[i-1,:]) 
+            [likelihood_current_location, simulationOutput_current_location] = self.getLogLikelihood(samples[i-1,:]) #FIXME: the previous likelihood should be stored so that it doesn't need to be calculated again.
+            accept_probability = (likelihood_proposal + prior_proposal) - (likelihood_current_location + prior_current_location) 
             if self.UserInput.parameter_estimation_settings['verbose']: print('Current likelihood',likelihood_current_location, 'Proposed likelihood', likelihood_proposal, '\nAccept_probability (gauranteed if above 1)', accept_probability)
             if self.UserInput.parameter_estimation_settings['verbose']: print('Current posterior',likelihood_current_location*prior_current_location, 'Proposed Posterior', likelihood_proposal*prior_proposal)
             if self.UserInput.parameter_estimation_settings['mcmc_modulate_accept_probability'] != 0: #This flattens the posterior by accepting low values more often. It can be useful when greater sampling is more important than accuracy.
                 N_flatten = float(self.UserInput.parameter_estimation_settings['mcmc_modulate_accept_probability'])
                 accept_probability = accept_probability**(1/N_flatten) #TODO: add code that unflattens the final histograms, that way even with more sampling we still get an accurate final posterior distribution. We can also then add a flag if the person wants to keep the posterior flattened.
-            if accept_probability > np.random.uniform():  #TODO: keep a log of the accept and reject. If the reject ratio is >90% or some other such number, warn the user.
+            if accept_probability > np.power(10,np.random.uniform()):  #TODO: keep a log of the accept and reject. If the reject ratio is >90% or some other such number, warn the user.
                 if self.UserInput.parameter_estimation_settings['verbose']:
                   print('accept', proposal_sample)
                   sys.stdout.flush()
@@ -406,11 +401,11 @@ class parameter_estimation:
         if abs((self.map_parameter_set - self.mu_AP_parameter_set)/self.UserInput.var_prior).any() > 0.10:  
             print("Warning: The MAP parameter set and mu_AP parameter set differ by more than 10% of prior variance in at least one parameter. This may mean that you need to increase your mcmc_length, increase or decrease your mcmc_relative_step_length, or change what is used for the model response.  There is no general method for knowing the right  value for mcmc_relative_step_length since it depends on the sharpness and smoothness of the response. See for example https://www.sciencedirect.com/science/article/pii/S0039602816300632  ")
         return [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_logP_un_normed_vec] # EAW 2020/01/08
-    def getPrior(self,discreteParameterVector):
+    def getLogPrior(self,discreteParameterVector):
         discreteParameterVector_scaled = np.array(discreteParameterVector/self.UserInput.scaling_uncertainties)
         probability = multivariate_normal.pdf(x=discreteParameterVector_scaled,mean=self.UserInput.mu_prior_scaled,cov=self.UserInput.covmat_prior_scaled)
-        return probability
-    def getLikelihood(self,discreteParameterVector): #The variable discreteParameterVector represents a vector of values for the parameters being sampled. So it represents a single point in the multidimensional parameter space.
+        return np.log10(probability)
+    def getLogLikelihood(self,discreteParameterVector): #The variable discreteParameterVector represents a vector of values for the parameters being sampled. So it represents a single point in the multidimensional parameter space.
         simulationFunction = self.UserInput.model['simulateByInputParametersOnlyFunction']
         simulationOutputProcessingFunction = self.UserInput.model['simulationOutputProcessingFunction']
         try:
@@ -435,11 +430,14 @@ class parameter_estimation:
         responses_covmat_shape = np.shape(responses_covmat)
         if len(responses_covmat_shape) == 1: #Matrix is square because has only one value.
             probability_metric = multivariate_normal.pdf(x=simulatedResponses_transformed_flattened,mean=observedResponses_transformed_flattened,cov=responses_covmat)
+            log_probability_metric = np.log10(probability_metric)
         elif responses_covmat_shape[0] == responses_covmat_shape[1]:  #Else it is 2D, check if it's square.
             probability_metric = multivariate_normal.pdf(x=simulatedResponses_transformed_flattened,mean=observedResponses_transformed_flattened,cov=responses_covmat)
             #TODO: Put in near-diagonal solution described in github.
+            log_probability_metric = np.log10(probability_metric)
         else:  #If it is not square, it's a list of variances so we need to take the 1D vector version.
             probability_metric = multivariate_normal.pdf(x=simulatedResponses_transformed_flattened,mean=observedResponses_transformed_flattened,cov=responses_covmat[0])    
+            log_probability_metric = np.log10(probability_metric)
             if probability_metric == 0:
                 log_probability_metric = 0 #Just initializing, then will multiply by each probability separately.
                 for responseValueIndex in range(len(simulatedResponses_transformed_flattened)):
@@ -447,9 +445,8 @@ class parameter_estimation:
                     if current_probability_metric != 0:
                         log_current_probability_metric = np.log10(current_probability_metric)
                         log_probability_metric = log_current_probability_metric + log_probability_metric
-                print(log_probability_metric)
-                probability_metric = 10**(log_probability_metric)
-        return probability_metric, simulatedResponses.flatten()
+            print(log_probability_metric)
+        return log_probability_metric, simulatedResponses.flatten()
 
     def makeHistogramsForEachParameter(self):
         import plotting_functions
