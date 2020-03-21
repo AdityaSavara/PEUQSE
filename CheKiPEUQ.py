@@ -225,8 +225,8 @@ class parameter_estimation:
     def getLogP(self, proposal_sample): #The proposal sample is specific parameter vector.
         [likelihood_proposal, simulationOutput_proposal] = self.getLikelihood(proposal_sample)
         prior_proposal = self.getPrior(proposal_sample)
-        log_postererior = np.log(likelihood_proposal*prior_proposal)
-        return log_postererior
+        log_postererior = np.log(likelihood_proposal) + np.log(prior_proposal)
+        return log_postererior, simulationOutput_proposal
         
     def getNegLogP(self, proposal_sample): #The proposal sample is specific parameter vector. We are using negative of log P because scipy optimize doesn't do maximizing. It's recommended minimize the negative in this situation.
         neg_log_postererior = -1*self.getLogP(proposal_sample)
@@ -281,10 +281,15 @@ class parameter_estimation:
                 mcmc_step_modulation_history[i] = mcmc_step_modulation_coefficient
                 proposal_sample = samples[i-1,:] + np.random.multivariate_normal(self.Q_mu,self.Q_covmat*mcmc_step_dynamic_coefficient*mcmc_step_modulation_coefficient*self.UserInput.parameter_estimation_settings['mcmc_relative_step_length'])
             prior_proposal = self.getPrior(proposal_sample)
-            [likelihood_proposal, simulationOutput_proposal] = self.getLikelihood(proposal_sample)
             prior_current_location = self.getPrior(samples[i-1,:]) 
-            [likelihood_current_location, simulationOutput_current_location] = self.getLikelihood(samples[i-1,:]) #FIXME: the previous likelihood should be stored so that it doesn't need to be calculated again.
-            accept_probability = (likelihood_proposal*prior_proposal)/(likelihood_current_location*prior_current_location) 
+            if self.UserInput.logSpace == True:
+                [likelihood_proposal, simulationOutput_proposal] = self.getLogP(proposal_sample)    
+                [likelihood_current_location, simulationOutput_current_location] = self.getLogP(samples[i-1,:]) 
+                accept_probability = np.exp(likelihood_proposal - likelihood_current_location)
+            else:
+                [likelihood_proposal, simulationOutput_proposal] = self.getLikelihood(proposal_sample)
+                [likelihood_current_location, simulationOutput_current_location] = self.getLikelihood(samples[i-1,:]) #FIXME: the previous likelihood should be stored so that it doesn't need to be calculated again.
+                accept_probability = (likelihood_proposal*prior_proposal)/(likelihood_current_location*prior_current_location) 
             if self.UserInput.parameter_estimation_settings['verbose']: print('Current likelihood',likelihood_current_location, 'Proposed likelihood', likelihood_proposal, '\nAccept_probability (gauranteed if above 1)', accept_probability)
             if self.UserInput.parameter_estimation_settings['verbose']: print('Current posterior',likelihood_current_location*prior_current_location, 'Proposed Posterior', likelihood_proposal*prior_proposal)
             if self.UserInput.parameter_estimation_settings['mcmc_modulate_accept_probability'] != 0: #This flattens the posterior by accepting low values more often. It can be useful when greater sampling is more important than accuracy.
