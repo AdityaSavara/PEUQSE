@@ -12,8 +12,7 @@ prep_cov_mat = np.zeros((2,2))
 np.fill_diagonal(prep_cov_mat,model['InputParametersInitialValuesUncertainties'])
 model['PriorCovarianceMatrix'] = prep_cov_mat
 model['parameterNamesAndMathTypeExpressionsDict'] = {'theta_1':r'$/theta_{1}$','theta_2':r'$theta_{2}$'}
-
-InputConstants= [] #TODO: ERIC, WE SHOULD EITHER DESIGN YOUR CODE TO ALLOW CONSTANTS SEPARATELY, OR TO HAVE UNCERTAINTIES OF ZERO TO MAKE THINGS INTO A CONSTANT. THAT IS UP TO YOU AT THIS STAGE.
+model['reducedParameterSpace'] = [] #This is to keep parameters as 'constants'. Any parameter index in this list will be allowed to change, the rest will be held as constants.
 
 #####Experimental Data Input Files#####
 responses = {}

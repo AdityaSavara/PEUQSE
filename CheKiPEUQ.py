@@ -13,7 +13,10 @@ import copy
 #import mumce_py.solution mumce_pySolution
 
 class parameter_estimation:
-    #Ip for 'inverse problem'. Initialize chain with initial guess (prior if not provided) as starting point, chain burn-in length and total length, and Q (for proposal samples).  Initialize experimental data.  Theta is initialized as the starting point of the chain.  
+    #Inside this class, a UserInput namespace is provided. This has dictionaries of UserInput choices.
+    #However, the code initally parses those choices and then puts processed versions in the SAME name space, but no longer in the dictionaries.
+    #So functions in this class should (when possible) call the namespace variables that are not in dictionaries, unless the original userinput is desired.
+    #'inverse problem'. Initialize chain with initial guess (prior if not provided) as starting point, chain burn-in length and total length, and Q (for proposal samples).  Initialize experimental data.  Theta is initialized as the starting point of the chain.  
     def __init__(self, UserInput = None):
         self.UserInput = UserInput #Note that this is a pointer, so the later lines are within this object.
         #Now will automatically populate some variables from UserInput
@@ -63,12 +66,7 @@ class parameter_estimation:
             UserInput.covmat_prior_scaled[parameterIndex,:] = UserInput.covmat_prior[parameterIndex,:]/parameterValue
             UserInput.covmat_prior_scaled[:,parameterIndex] = UserInput.covmat_prior[:,parameterIndex]/parameterValue           
 
-        self.UserInput.num_response_dimensions = np.shape(UserInput.responses['responses_abscissa'])[0] #The first index of shape is the num of responses, but has to be after at_least2d is performed.
-        #self.covmat_prior = UserInput.covmat_prior
-        self.Q_mu = self.UserInput.mu_prior*0 # Q samples the next step at any point in the chain.  The next step may be accepted or rejected.  Q_mu is centered (0) around the current theta.  
-        self.Q_covmat = self.UserInput.covmat_prior # Take small steps. 
-
-        #To find the relevant covariance matrix, we take the errors from the points. This is needed for the likelihood.
+        #To find the responses covariance matrix, we take the errors from the points. This is needed for the likelihood.
         if self.UserInput.num_response_dimensions == 1:
             responses_covmat = np.array(self.UserInput.responses['responses_observed_transformed_uncertainties']) #Filling variable.
             if np.shape(responses_covmat)[0] == (1): #This means it's just a list of standard deviations and needs to be squared to become variances.
@@ -79,12 +77,85 @@ class parameter_estimation:
             responses_covmat = np.array(self.UserInput.responses['responses_observed_transformed_uncertainties']) #Filling variable.
             responses_covmat = responses_covmat.flatten() 
             responses_covmat = np.square(responses_covmat)
-        self.responses_covmat = responses_covmat
-
+        self.responses_covmat = responses_covmat            
+                       
+        self.UserInput.num_response_dimensions = np.shape(UserInput.responses['responses_abscissa'])[0] #The first index of shape is the num of responses, but has to be after at_least2d is performed.
+        #self.covmat_prior = UserInput.covmat_prior
+        self.Q_mu = self.UserInput.mu_prior*0 # Q samples the next step at any point in the chain.  The next step may be accepted or rejected.  Q_mu is centered (0) around the current theta.  
+        self.Q_covmat = self.UserInput.covmat_prior # Take small steps. 
+        #Getting initial guess of parameters and populating the internal variable for it.
         if 'InputParameterInitialGuess' not in self.UserInput.model: #if an initial guess is not provided, we use the prior.
             self.UserInput.model['InputParameterInitialGuess'] = self.UserInput.mu_prior
+        #From now, we switch to self.UserInput.InputParameterInitialGuess because this is needed in case we're going to do reducedParameterSpace.
+        self.UserInput.InputParameterInitialGuess = self.UserInput.model['InputParameterInitialGuess']
+        #Now populate the simulation Functions. #NOTE: These will be changed if a reduced parameter space is used.
+        self.UserInput.simulationFunction = self.UserInput.model['simulateByInputParametersOnlyFunction']
+        self.UserInput.simulationOutputProcessingFunction = self.UserInput.model['simulationOutputProcessingFunction']
+        
+        #Now reduce the parameter space if requested by the user. #TODO: consider having this as a function outside of init
+        if len(self.UserInput.model['reducedParameterSpace']) > 0:
+            print("Important: the UserInput.model['reducedParameterSpace'] is not blank. That means the only parameters allowed to change will be the ones in the indices inside 'reducedParameterSpace'.   All others will be held constant.  The values inside  'InputParameterInitialGuess will be used', and 'InputParameterPriorValues' if an initial guess was not provided.")
+            self.reduceParameterSpace()
+    
+    #This function reduces the parameter space. The only parameters allowed to change will be the ones in the indices inside 'reducedParameterSpace'.   All others will be held constant.  The values inside  'InputParameterInitialGuess will be used', and 'InputParameterPriorValues' if an initial guess was not provided.")    
+    #These lines of code started in __init__ was moved outside of initializing the class so that someday people can call it later on after making the class object, if desired.
+    #That way people can change to a different reduced parameter space without making a new object by updating what is in UserInput.model['reducedParameterSpace']
+    #However, that 'later changing' is currently not supported. The indices *at present* only work out correctly when this is called at end of initialization.
+    def reduceParameterSpace(self): 
+        UserInput = self.UserInput
+        
+        self.UserInput.simulationFunction = self.simulateWithSubsetOfParameters #Now simulateWithSubsetOfParameters will be called as the simulation function.
+        self.UserInput.simulationOutputProcessingFunction = None #We will use self.UserInput.model['simulationOutputProcessingFunction'], but we'll do it inside subsetOfParameterSpaceWrapper. So during parameter estimation there will be no separate call to a simulation output processing function.
+        #Now start reducing various inputs...
+        reducedIndices = UserInput.model['reducedParameterSpace']
+        UserInput.InputParameterInitialGuess = returnReducedIterable(UserInput.InputParameterInitialGuess, reducedIndices)
+        UserInput.parameterNamesList = returnReducedIterable(UserInput.parameterNamesList, reducedIndices)
+        #We need to reparse to populate UserInput.stringOfParameterNames, can't use return Reduced Iterable.
+        UserInput.stringOfParameterNames = str(UserInput.parameterNamesList).replace("'","")[1:-1]
+        UserInput.InputParametersPriorValuesUncertainties = returnReducedIterable(UserInput.InputParametersPriorValuesUncertainties, reducedIndices)
+        UserInput.std_prior     = returnReducedIterable( UserInput.std_prior    , reducedIndices )
+        UserInput.var_prior     = returnReducedIterable( UserInput.var_prior   , reducedIndices  )
+        UserInput.covmat_prior     = returnReducedIterable( UserInput.covmat_prior    , reducedIndices )
+        self.UserInput.scaling_uncertainties     = returnReducedIterable( self.UserInput.scaling_uncertainties    , reducedIndices )
+        self.UserInput.mu_prior     = returnReducedIterable( self.UserInput.mu_prior    , reducedIndices )
+        self.UserInput.mu_prior_scaled     = returnReducedIterable( self.UserInput.mu_prior_scaled    , reducedIndices )
+        self.UserInput.var_prior_scaled     = returnReducedIterable( self.UserInput.var_prior_scaled    , reducedIndices )
+        self.UserInput.covmat_prior_scaled     = returnReducedIterable( self.UserInput.covmat_prior_scaled    , reducedIndices )
+        self.Q_mu     = returnReducedIterable( self.Q_mu    , reducedIndices )
+        self.Q_covmat     = returnReducedIterable( self.Q_covmat    , reducedIndices )
+        #There are no returns. Everything above is an implied return.
+        return
 
-
+    def simulateWithSubsetOfParameters(self,reducedParametersVector): #This is a wrapper.
+        #This function has implied arguments of ...
+        #self.UserInput.model['InputParameterInitialGuess'] for the parameters to start with
+        #self.UserInput.model['reducedParameterSpace'] a list of indices for which parameters are the only ones to change.
+        #simulationFunction = self.UserInput.model['simulateByInputParametersOnlyFunction']
+        #simulationOutputProcessingFunction = self.UserInput.model['simulationOutputProcessingFunction']
+        #When this wrapper is used, EVERYWHERE ELSE will call it to do the simulation, by calling self.UserInput.simulationFunction and self.UserInput.simulationOutputProcessingFunction
+        simulationFunction = self.UserInput.model['simulateByInputParametersOnlyFunction']
+        simulationOutputProcessingFunction = self.UserInput.model['simulationOutputProcessingFunction']
+        
+        #now populate the discreteParameterVector first with the initial guess, then with the new reducedParameters vector.
+        discreteParameterVector = copy.deepcopy(self.UserInput.model['InputParameterInitialGuess']) #This is the original one from the user, before any reduction.
+        for reducedParameterIndex, parameterValue in enumerate(reducedParametersVector):
+            #we find which index to put things into from #self.UserInput.model['reducedParameterSpace'], which is a list of indices.
+            regularParameterIndex = self.UserInput.model['reducedParameterSpace'][reducedParameterIndex]
+            discreteParameterVector[regularParameterIndex] = parameterValue
+        try:
+            simulationOutput = simulationFunction(discreteParameterVector) 
+        except:
+            return 0, None #This is for the case that the simulation fails. Should be made better in future.
+        if type(simulationOutputProcessingFunction) == type(None):
+            simulatedResponses = simulationOutput #Is this the log of the rate? If so, Why?
+        if type(simulationOutputProcessingFunction) != type(None):
+            simulatedResponses = simulationOutputProcessingFunction(simulationOutput) 
+        
+        simulatedResponses = np.atleast_2d(simulatedResponses)
+        #This is not needed:
+        #observedResponses = np.atleast_2d(self.UserInput.responses['responses_observed'])
+        return simulatedResponses
+    
     def transform_responses(self, nestedAllResponsesArray, nestedAllResponsesUncertainties = []):
         nestedAllResponsesArray_transformed = copy.deepcopy(nestedAllResponsesArray) #First make a copy to populate with transformed values.
         nestedAllResponsesUncertainties_transformed = copy.deepcopy(nestedAllResponsesUncertainties) #First make a copy to populate with transformed values. If blank, we won't populate it.        
@@ -150,9 +221,8 @@ class parameter_estimation:
                         pass
                     if UserInput.responses['response_data_type'][responseIndex] == 'r':
                         pass
-        return nestedAllResponsesArray_transformed, nestedAllResponsesUncertainties_transformed
-
-        
+        return nestedAllResponsesArray_transformed, nestedAllResponsesUncertainties_transformed  
+  
     def doGridSearch(self, searchType='doMetropolisHastings', export = True, verbose = False, gridSamplingIntervalSize = [], gridSamplingRadii = [], passThroughArgs = {}):
         # gridSamplingRadii is the number of variations to check in units of variance for each parameter. Can be 0 if you don't want to vary a particular parameter in the grid search.
         import CombinationGeneratorModule
@@ -168,7 +238,7 @@ class parameter_estimation:
         if len(gridSamplingIntervalSize) == 0:
             gridSamplingIntervalSize = self.UserInput.var_prior #By default, we use the variances associated with the priors.
         else: gridSamplingIntervalSize = np.array(gridSamplingRadii, dtype='float')
-        gridCombinations = CombinationGeneratorModule.combinationGenerator(self.UserInput.model['InputParameterInitialGuess'], gridSamplingIntervalSize, gridSamplingRadii, SpreadType="Addition",toFile=False)
+        gridCombinations = CombinationGeneratorModule.combinationGenerator(self.UserInput.InputParameterInitialGuess, gridSamplingIntervalSize, gridSamplingRadii, SpreadType="Addition",toFile=False)
         allGridResults = []
         
         #Initialize some things before loop.
@@ -179,7 +249,7 @@ class parameter_estimation:
         highest_logP = float('-inf') #Just initializing.
         #Start grid search loop.
         for combinationIndex,combination in enumerate(gridCombinations):
-            self.UserInput.model['InputParameterInitialGuess'] = combination
+            self.UserInput.InputParameterInitialGuess = combination
             if searchType == 'getLogP':
                 thisResult = self.getLogP(combination)
                 self.map_logP = thisResult #The getLogP function does not fill map_logP by itself.
@@ -235,7 +305,7 @@ class parameter_estimation:
     def doOptimizeNegLogP(self, simulationFunctionAdditionalArgs = (), method = None, optimizationAdditionalArgs = {}, printOptimum = True, verbose=True):
         #THe intention of the optional arguments is to pass them into the scipy.optimize.minimize function.
         # the 'method' argument is for Nelder-Mead, BFGS, SLSQP etc. https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html#scipy.optimize.minimize
-        initialGuess = self.UserInput.model['InputParameterInitialGuess']
+        initialGuess = self.UserInput.InputParameterInitialGuess
         import scipy.optimize
         if verbose == False:
             optimizeResult = scipy.optimize.minimize(self.getNegLogP, initialGuess, method = method)
@@ -258,7 +328,7 @@ class parameter_estimation:
         samples_simulatedOutputs = np.zeros((self.UserInput.parameter_estimation_settings['mcmc_length'],self.UserInput.num_data_points)) #TODO: Consider moving this out of this function.
         samples = np.zeros((self.UserInput.parameter_estimation_settings['mcmc_length'],len(self.UserInput.mu_prior)))
         mcmc_step_modulation_history = np.zeros((self.UserInput.parameter_estimation_settings['mcmc_length'])) #TODO: Make this optional for efficiency. #This allows the steps to be larger or smaller. Make this same length as samples. In future, should probably be same in other dimension also, but that would require 2D sampling with each step.                                                                          
-        samples[0,:]=self.UserInput.model['InputParameterInitialGuess']  # Initialize the chain. Theta is initialized as the starting point of the chain.  It is placed at the prior mean if an initial guess is not provided..
+        samples[0,:]=self.UserInput.InputParameterInitialGuess  # Initialize the chain. Theta is initialized as the starting point of the chain.  It is placed at the prior mean if an initial guess is not provided.. Do not use self.UserInput.model['InputParameterInitialGuess']  because that doesn't work with reduced parameter space feature.
         samples_drawn = samples*1.0 #this includes points that were rejected. #TODO: make this optional for efficiency.               
         log_likelihoods_vec = np.zeros((self.UserInput.parameter_estimation_settings['mcmc_length'],1))
         log_posteriors_un_normed_vec = np.zeros((self.UserInput.parameter_estimation_settings['mcmc_length'],1))
@@ -403,11 +473,11 @@ class parameter_estimation:
         return [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_logP_un_normed_vec] # EAW 2020/01/08
     def getLogPrior(self,discreteParameterVector):
         discreteParameterVector_scaled = np.array(discreteParameterVector/self.UserInput.scaling_uncertainties)
-        probability = multivariate_normal.pdf(x=discreteParameterVector_scaled,mean=self.UserInput.mu_prior_scaled,cov=self.UserInput.covmat_prior_scaled)
-        return np.log10(probability)
+        probabilityPrior = multivariate_normal.pdf(x=discreteParameterVector_scaled,mean=self.UserInput.mu_prior_scaled,cov=self.UserInput.covmat_prior_scaled)
+        return np.log10(probabilityPrior)
     def getLogLikelihood(self,discreteParameterVector): #The variable discreteParameterVector represents a vector of values for the parameters being sampled. So it represents a single point in the multidimensional parameter space.
-        simulationFunction = self.UserInput.model['simulateByInputParametersOnlyFunction']
-        simulationOutputProcessingFunction = self.UserInput.model['simulationOutputProcessingFunction']
+        simulationFunction = self.UserInput.simulationFunction #Do NOT use self.UserInput.model['simulateByInputParametersOnlyFunction']  because that won't work with reduced parameter space requests.  
+        simulationOutputProcessingFunction = self.UserInput.simulationOutputProcessingFunction #Do NOT use self.UserInput.model['simulationOutputProcessingFunction'] because that won't work with reduced parameter space requests.
         try:
             simulationOutput =simulationFunction(discreteParameterVector) 
         except:
@@ -449,7 +519,7 @@ class parameter_estimation:
         return log_probability_metric, simulatedResponses.flatten()
 
     def makeHistogramsForEachParameter(self):
-        import plotting_functions
+        import plotting_functions #This is going to become import CheKIPEUQ.plotting_functions as plotting_functions
         parameterSamples = self.post_burn_in_samples
         parameterNamesAndMathTypeExpressionsDict = self.UserInput.model['parameterNamesAndMathTypeExpressionsDict']
         plotting_functions.makeHistogramsForEachParameter(parameterSamples,parameterNamesAndMathTypeExpressionsDict)
@@ -469,27 +539,31 @@ class parameter_estimation:
         if allResponses_x_values == []: allResponses_x_values = self.UserInput.responses['responses_abscissa']       
         if allResponsesListsOfYUncertainties == []: allResponsesListsOfYUncertainties = self.UserInput.responses['responses_observed_uncertainties']
         if allResponsesListsOfYArrays  ==[]:
+            
+            simulationFunction = self.UserInput.simulationFunction #Do NOT use self.UserInput.model['simulateByInputParametersOnlyFunction']  because that won't work with reduced parameter space requests.
+            simulationOutputProcessingFunction = self.UserInput.simulationOutputProcessingFunction #Do NOT use self.UserInput.model['simulationOutputProcessingFunction'] because that won't work with reduced parameter space requests.
+            
             #Get mu_guess simulated output and responses. 
-            self.mu_guess_SimulatedOutput = self.UserInput.model['simulateByInputParametersOnlyFunction']( self.UserInput.model['InputParameterInitialGuess'])
-            if type(self.UserInput.model['simulationOutputProcessingFunction']) == type(None):
+            self.mu_guess_SimulatedOutput = simulationFunction( self.UserInput.InputParameterInitialGuess) #Do NOT use self.UserInput.model['InputParameterInitialGuess'] because that won't work with reduced parameter space requests.
+            if type(simulationOutputProcessingFunction) == type(None):
                 self.mu_guess_SimulatedResponses = np.atleast_2d(self.mu_guess_SimulatedOutput)
-            if type(self.UserInput.model['simulationOutputProcessingFunction']) != type(None):
-                self.mu_guess_SimulatedResponses =  np.atleast_2d(     self.UserInput.model['simulationOutputProcessingFunction'](self.mu_guess_SimulatedOutput)     )
+            if type(simulationOutputProcessingFunction) != type(None):
+                self.mu_guess_SimulatedResponses =  np.atleast_2d(     simulationOutputProcessingFunction(self.mu_guess_SimulatedOutput)     )
                 
             #Get map simiulated output and simulated responses.
-            self.map_SimulatedOutput = self.UserInput.model['simulateByInputParametersOnlyFunction'](self.map_parameter_set)           
-            if type(self.UserInput.model['simulationOutputProcessingFunction']) == type(None):
+            self.map_SimulatedOutput = simulationFunction(self.map_parameter_set)           
+            if type(simulationOutputProcessingFunction) == type(None):
                 self.map_SimulatedResponses = np.atleast_2d(self.map_SimulatedOutput)
-            if type(self.UserInput.model['simulationOutputProcessingFunction']) != type(None):
-                self.map_SimulatedResponses =  np.atleast_2d(     self.UserInput.model['simulationOutputProcessingFunction'](self.map_SimulatedOutput)     )
+            if type(simulationOutputProcessingFunction) != type(None):
+                self.map_SimulatedResponses =  np.atleast_2d(     simulationOutputProcessingFunction(self.map_SimulatedOutput)     )
             
             if hasattr(self, 'mu_AP_parameter_set'): #Check if a mu_AP has been assigned. It is normally only assigned if mcmc was used.           
                 #Get mu_AP simiulated output and simulated responses.
-                self.mu_AP_SimulatedOutput = self.UserInput.model['simulateByInputParametersOnlyFunction'](self.mu_AP_parameter_set)
-                if type(self.UserInput.model['simulationOutputProcessingFunction']) == type(None):
+                self.mu_AP_SimulatedOutput = simulationFunction(self.mu_AP_parameter_set)
+                if type(simulationOutputProcessingFunction) == type(None):
                     self.mu_AP_SimulatedResponses = np.atleast_2d(self.mu_AP_SimulatedOutput)
-                if type(self.UserInput.model['simulationOutputProcessingFunction']) != type(None):
-                    self.mu_AP_SimulatedResponses =  np.atleast_2d(     self.UserInput.model['simulationOutputProcessingFunction'](self.mu_AP_SimulatedOutput)      )
+                if type(simulationOutputProcessingFunction) != type(None):
+                    self.mu_AP_SimulatedResponses =  np.atleast_2d(     simulationOutputProcessingFunction(self.mu_AP_SimulatedOutput)      )
                 for responseDimIndex in range(self.UserInput.num_response_dimensions):
                     listOfYArrays = [self.UserInput.responses['responses_observed'][responseDimIndex], self.mu_guess_SimulatedResponses[responseDimIndex], self.map_SimulatedResponses[responseDimIndex], self.mu_AP_SimulatedResponses[responseDimIndex]]        
                     allResponsesListsOfYArrays.append(listOfYArrays)
@@ -510,7 +584,7 @@ class parameter_estimation:
             #plot_settings['figure_name'] = 'tprposterior'
         if 'figure_name' not in plot_settings:
             plot_settings['figurename'] = 'Posterior'
-        import plotting_functions
+        import plotting_functions as plotting_functions #This is going to become import CheKIPEUQ.plotting_functions as plotting_functions
         allResponsesFigureObjectsList = []
         for responseDimIndex in range(self.UserInput.num_response_dimensions): #TODO: Move the exporting out of the plot creation and/or rename the function and possibly have options about whether exporting graph, data, or both.
             #Some code for setting up individual plot settings in case there are multiple response dimensions.
@@ -691,6 +765,44 @@ def dydtNumericalExtraction(t_values, y_values, last_point_derivative = 0):
     delta_t = t_values[1]-t_values[0]
     dydtNumerical = delta_y_numerical/delta_t
     return dydtNumerical
+
+
+#TODO: move this into some kind of support module for parsing. Like XYYYDataFunctions or something like that.
+def returnReducedIterable(iterableObjectToReduce, reducedIndices):
+    #If a numpy array or list is provided, the same will be returned. Else, a list will be returned.
+    #For arrays, only 1D and square 2D are supported. Anything else will only do the first axis.
+    reducedIterable = copy.deepcopy(iterableObjectToReduce) #Doing this initially so that unsupported cases will still return something.
+    
+    #In most cases, we use a little function that makes a list to do the reduction.
+    def returnReducedList(iterableObjectToReduce, reducedIndices):
+        reducedList = [] #just initializing.
+        for elementIndex,element in enumerate(iterableObjectToReduce):
+            if elementIndex in reducedIndices:
+                reducedList.append(element)
+        return reducedList
+
+    #Now to do the actual reduction.
+    if type(iterableObjectToReduce)== type(np.array([0])):
+        if len(np.shape(iterableObjectToReduce)) == 1: #If it's 1D, we can just use a list and convert back to numpy array.
+            reducedIterableAsList = returnReducedList(iterableObjectToReduce, reducedIndices)
+            reducedIterable = np.array(reducedIterableAsList)
+        if len(np.shape(iterableObjectToReduce)) == 2: #If it's a 2D square matrix, then we will still support it.
+            if np.shape(iterableObjectToReduce)[0] == np.shape(iterableObjectToReduce)[1]: #Make sure it is square before trying to do more:
+                #FIRST GO ACROSS THE ROWS.
+                reducedIterableAsList = returnReducedList(iterableObjectToReduce, reducedIndices)
+                partiallyReducedIterable = np.array(reducedIterableAsList)
+                #NOW TRANSPOSE, DO IT AGAIN, AND THEN TRANSPOSE BACK.
+                partiallyReducedIterable = partiallyReducedIterable.transpose()
+                reducedIterableAsList = returnReducedList(partiallyReducedIterable, reducedIndices)
+                reducedIterable = np.array(reducedIterableAsList).transpose() #convert to array and transpose
+            else: #If it's 2D but not square, we just reduce along the row axis (main axis)
+                reducedIterableAsList = returnReducedList(iterableObjectToReduce, reducedIndices)
+                reducedIterable = np.array(reducedIterableAsList)
+    else: # the following is included in the else, type(iterableObjectToReduce)== type(['list']):
+        reducedIterable = returnReducedList(iterableObjectToReduce, reducedIndices)
+    if np.shape(reducedIterable) == np.shape(iterableObjectToReduce):
+        print("returnReducedIterable received an object type or size that is not supported.")
+    return reducedIterable
         
 if __name__ == "__main__":
     pass
