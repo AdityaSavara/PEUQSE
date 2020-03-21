@@ -357,13 +357,18 @@ class parameter_estimation:
             [log_likelihood_proposal, simulationOutput_proposal] = self.getLogLikelihood(proposal_sample)
             log_prior_current_location = self.getLogPrior(samples[i-1,:]) 
             [log_likelihood_current_location, simulationOutput_current_location] = self.getLogLikelihood(samples[i-1,:]) #FIXME: the previous likelihood should be stored so that it doesn't need to be calculated again.
-            accept_probability = (log_likelihood_proposal + log_prior_proposal) - (log_likelihood_current_location + log_prior_current_location) 
-            if self.UserInput.parameter_estimation_settings['verbose']: print('Current log_likelihood',log_likelihood_current_location, 'Proposed log_likelihood', log_likelihood_proposal, '\nAccept_probability (gauranteed if above 1)', accept_probability)
-            if self.UserInput.parameter_estimation_settings['verbose']: print('Current posterior',log_likelihood_current_location*log_prior_current_location, 'Proposed Posterior', log_likelihood_proposal*log_prior_proposal)
+            log_accept_probability = (log_likelihood_proposal + log_prior_proposal) - (log_likelihood_current_location + log_prior_current_location) 
+            #accept_probability = np.power(10, log_accept_probability) Don't use this!
+            if self.UserInput.parameter_estimation_settings['verbose']: print('Current log_likelihood',log_likelihood_current_location, 'Proposed log_likelihood', log_likelihood_proposal, '\nLog of Accept_probability (gauranteed if above 0)', log_accept_probability)
+            if self.UserInput.parameter_estimation_settings['verbose']: print('Current posterior',log_likelihood_current_location+log_prior_current_location, 'Proposed Posterior', log_likelihood_proposal+log_prior_proposal)
             if self.UserInput.parameter_estimation_settings['mcmc_modulate_accept_probability'] != 0: #This flattens the posterior by accepting low values more often. It can be useful when greater sampling is more important than accuracy.
                 N_flatten = float(self.UserInput.parameter_estimation_settings['mcmc_modulate_accept_probability'])
+                accept_probability = np.power(10, log_accept_probability)
                 accept_probability = accept_probability**(1/N_flatten) #TODO: add code that unflattens the final histograms, that way even with more sampling we still get an accurate final posterior distribution. We can also then add a flag if the person wants to keep the posterior flattened.
-            if accept_probability > np.power(10,np.random.uniform()):  #TODO: keep a log of the accept and reject. If the reject ratio is >90% or some other such number, warn the user.
+                log_accept_probability = np.log10(accept_probability)
+            randomNumber = np.random.uniform()
+            log_randomNumber = np.log10(randomNumber)
+            if log_accept_probability > log_randomNumber:  #TODO: keep a log of the accept and reject. If the reject ratio is >90% or some other such number, warn the user.
                 if self.UserInput.parameter_estimation_settings['verbose']:
                   print('accept', proposal_sample)
                   sys.stdout.flush()
@@ -444,7 +449,7 @@ class parameter_estimation:
         self.info_gain = np.mean(log_ratios)
         map_logP = max(self.post_burn_in_logP_un_normed_vec)
         self.map_logP = map_logP
-        self.map_index = list(self.post_burn_in_logP_un_normed_vec).index(map_logP)
+        self.map_index = list(self.post_burn_in_logP_un_normed_vec).index(map_logP) #This does not have to be a unique answer, just one of them places which gives map_logP.
         self.map_parameter_set = self.post_burn_in_samples[self.map_index] #This  is the point with the highest probability in the posterior.
         self.mu_AP_parameter_set = np.mean(self.post_burn_in_samples, axis=0) #This is the mean of the posterior, and is the point with the highest expected value of the posterior (for most distributions). For the simplest cases, map and mu_AP will be the same.
         self.stdap_parameter_set = np.std(self.post_burn_in_samples, axis=0) #This is the mean of the posterior, and is the point with the highest expected value of the posterior (for most distributions). For the simplest cases, map and mu_AP will be the same.
