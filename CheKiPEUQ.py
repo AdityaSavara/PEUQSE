@@ -443,7 +443,7 @@ class parameter_estimation:
         # posterior probabilites are transformed to a standard normal (std=1) for obtaining the evidence:
         self.evidence = np.mean(self.post_burn_in_log_posteriors_un_normed_vec)*np.sqrt(2*np.pi*np.std(self.post_burn_in_samples)**2)
         post_burn_in_log_posteriors_vec = self.post_burn_in_log_posteriors_un_normed_vec/self.evidence
-        log_ratios = (post_burn_in_log_posteriors_vec/self.post_burn_in_log_priors_vec)
+        log_ratios = (post_burn_in_log_posteriors_vec-self.post_burn_in_log_priors_vec) #log10(a/b) = log10(a)-log10(b)
         log_ratios[np.isinf(log_ratios)] = 0
         log_ratios = np.nan_to_num(log_ratios)
         self.info_gain = np.mean(log_ratios)
