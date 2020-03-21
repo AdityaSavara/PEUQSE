@@ -48,7 +48,10 @@ class parameter_estimation:
         UserInput.responses['responses_abscissa'] = np.atleast_2d(UserInput.responses['responses_abscissa'])
         UserInput.responses['responses_observed'] = np.atleast_2d(UserInput.responses['responses_observed'])
         UserInput.responses['responses_observed_uncertainties'] = np.atleast_2d(UserInput.responses['responses_observed_uncertainties'])
-         
+
+
+        UserInput.responses['responses_observed_transformed'], UserInput.responses['responses_observed_transformed_uncertainties']  = self.transform_responses(UserInput.responses['responses_observed'], UserInput.responses['responses_observed_uncertainties']) #This creates transforms for any data that we might need it. The same transforms will also be applied during parameter estimation.
+             
         self.UserInput.num_data_points = len(UserInput.responses['responses_observed'].flatten()) #FIXME: This is only true for transient data.
         #Now scale things as needed:
         if UserInput.parameter_estimation_settings['scaling_uncertainties_type'] == "std":
@@ -63,6 +66,19 @@ class parameter_estimation:
             UserInput.covmat_prior_scaled[parameterIndex,:] = UserInput.covmat_prior[parameterIndex,:]/parameterValue
             UserInput.covmat_prior_scaled[:,parameterIndex] = UserInput.covmat_prior[:,parameterIndex]/parameterValue           
 
+        #To find the responses covariance matrix, we take the errors from the points. This is needed for the likelihood.
+        if self.UserInput.num_response_dimensions == 1:
+            responses_covmat = np.array(self.UserInput.responses['responses_observed_transformed_uncertainties']) #Filling variable.
+            if np.shape(responses_covmat)[0] == (1): #This means it's just a list of standard deviations and needs to be squared to become variances.
+                responses_covmat = np.square(responses_covmat)
+            else:
+                responses_covmat = responses_covmat
+        elif self.UserInput.num_response_dimensions > 1:  #if the dimensionality of responses is greater than 1, we only support providing standard deviations. Will flatten and square.
+            responses_covmat = np.array(self.UserInput.responses['responses_observed_transformed_uncertainties']) #Filling variable.
+            responses_covmat = responses_covmat.flatten() 
+            responses_covmat = np.square(responses_covmat)
+        self.responses_covmat = responses_covmat            
+                       
         self.UserInput.num_response_dimensions = np.shape(UserInput.responses['responses_abscissa'])[0] #The first index of shape is the num of responses, but has to be after at_least2d is performed.
         #self.covmat_prior = UserInput.covmat_prior
         self.Q_mu = self.UserInput.mu_prior*0 # Q samples the next step at any point in the chain.  The next step may be accepted or rejected.  Q_mu is centered (0) around the current theta.  
@@ -80,7 +96,6 @@ class parameter_estimation:
         if len(self.UserInput.model['reducedParameterSpace']) > 0:
             print("Important: the UserInput.model['reducedParameterSpace'] is not blank. That means the only parameters allowed to change will be the ones in the indices inside 'reducedParameterSpace'.   All others will be held constant.  The values inside  'InputParameterInitialGuess will be used', and 'InputParameterPriorValues' if an initial guess was not provided.")
             self.reduceParameterSpace()
-        
     
     #This function reduces the parameter space. The only parameters allowed to change will be the ones in the indices inside 'reducedParameterSpace'.   All others will be held constant.  The values inside  'InputParameterInitialGuess will be used', and 'InputParameterPriorValues' if an initial guess was not provided.")    
     #These lines of code started in __init__ was moved outside of initializing the class so that someday people can call it later on after making the class object, if desired.
@@ -140,7 +155,74 @@ class parameter_estimation:
         #This is not needed:
         #observedResponses = np.atleast_2d(self.UserInput.responses['responses_observed'])
         return simulatedResponses
+    
+    def transform_responses(self, nestedAllResponsesArray, nestedAllResponsesUncertainties = []):
+        nestedAllResponsesArray_transformed = copy.deepcopy(nestedAllResponsesArray) #First make a copy to populate with transformed values.
+        nestedAllResponsesUncertainties_transformed = copy.deepcopy(nestedAllResponsesUncertainties) #First make a copy to populate with transformed values. If blank, we won't populate it.        
+        UserInput = self.UserInput
         
+        #TODO: Make little function for interpolation in case it's necessary (see below).
+#        def littleInterpolator():
+#            abscissaRange = UserInput.responses['responses_abscissa'][responseIndex][-1] - UserInput.responses['responses_abscissa'][responseIndex][0] #Last value minus first value.
+#            UserInput.responses['responses_observed'] = np.atleast_2d(UserInput.responses['responses_observed'])
+#            UserInput.responses['responses_observed_uncertainties'] = np.atleast_2d(UserInput.responses['responses_observed_uncertainties'])
+        if 'kinetics_type' not in UserInput.model:  #To make backwards compatibility.
+            UserInput.model['kinetics_type'] = ''
+        if UserInput.model['kinetics_type'] == 'transient': #This assumes that the abscissa is always time.
+            for responseIndex, response in enumerate(UserInput.responses['responses_observed']):
+                #We will need the abscissa also, so need to check if there are independent abscissa or not:
+                if len(UserInput.responses['responses_abscissa']) == 1: #This means there is only one abscissa.
+                    abscissaIndex = 0
+                else:
+                    abscissaIndex = responseIndex
+                #Now to do the transforms.
+                if UserInput.responses['response_types'][responseIndex] == 'I':	 #For intermediate
+                    if UserInput.responses['response_data_type'][responseIndex] == 'c':
+                        t_values, nestedAllResponsesArray_transformed[responseIndex], dydt_values = littleEulerGivenArray(0, UserInput.responses['responses_abscissa'][abscissaIndex], nestedAllResponsesArray[responseIndex])
+                        if len(nestedAllResponsesUncertainties) > 0:
+                            nestedAllResponsesUncertainties_transformed[responseIndex] = littleEulerUncertaintyPropagation(nestedAllResponsesUncertainties[responseIndex], UserInput.responses['responses_abscissa'][abscissaIndex], np.mean(nestedAllResponsesUncertainties[responseIndex])/10) 
+                    if UserInput.responses['response_data_type'][responseIndex] == 'r':
+                        #Perform the littleEuler twice.
+                        t_values, nestedAllResponsesArray_transformed[responseIndex], dydt_values = littleEulerGivenArray(0, UserInput.responses['responses_abscissa'][abscissaIndex], nestedAllResponsesArray[responseIndex])
+                        if len(nestedAllResponsesUncertainties) > 0:
+                            nestedAllResponsesUncertainties_transformed[responseIndex] = littleEulerUncertaintyPropagation(nestedAllResponsesUncertainties[responseIndex], UserInput.responses['responses_abscissa'][abscissaIndex], np.mean(nestedAllResponsesUncertainties[responseIndex])/10) 
+                        t_values, nestedAllResponsesArray_transformed[responseIndex], dydt_values = littleEulerGivenArray(0, UserInput.responses['responses_abscissa'][abscissaIndex], nestedAllResponsesArray_transformed[responseIndex])
+                        if len(nestedAllResponsesUncertainties) > 0:
+                            nestedAllResponsesUncertainties_transformed[responseIndex] = littleEulerUncertaintyPropagation(nestedAllResponsesUncertainties_transformed[responseIndex], UserInput.responses['responses_abscissa'][abscissaIndex], np.mean(nestedAllResponsesUncertainties[responseIndex])/10) 
+                if UserInput.responses['response_types'][responseIndex] == 'R':	#For reactant
+                    if UserInput.responses['response_data_type'][responseIndex] == 'c':
+                        pass
+                    if UserInput.responses['response_data_type'][responseIndex] == 'r':
+                        LittleEuler
+                if UserInput.responses['response_types'][responseIndex] == 'P':	 #For product
+                    if UserInput.responses['response_data_type'][responseIndex] == 'c':
+                        pass
+                    if UserInput.responses['response_data_type'][responseIndex] == 'r':
+                        #TODO: use responses['points_if_transformed'] variable to interpolate the right number of points. This is for data that's not already evenly spaced.
+                        t_values, nestedAllResponsesArray_transformed[responseIndex], dydt_values = littleEulerGivenArray(0, UserInput.responses['responses_abscissa'][abscissaIndex], nestedAllResponsesArray[responseIndex])
+                        if len(nestedAllResponsesUncertainties) > 0:
+                            nestedAllResponsesUncertainties_transformed[responseIndex] = littleEulerUncertaintyPropagation(nestedAllResponsesUncertainties[responseIndex], UserInput.responses['responses_abscissa'][abscissaIndex], np.mean(nestedAllResponsesUncertainties[responseIndex])/10) 
+                if UserInput.responses['response_types'][responseIndex] == 'o':
+                    if UserInput.responses['response_data_type'][responseIndex] == 'o':
+                        pass
+                    if UserInput.responses['response_data_type'][responseIndex] == 'c':
+                        LittleEuler
+                    if UserInput.responses['response_data_type'][responseIndex] == 'r':
+                        LittleEulerTwice
+        if UserInput.model['kinetics_type'] == 'steady_state': #TODO: so far, this does not do anything. It assumes that the abscissa is never time.
+            for responseIndex, response in enumerate(UserInput.responses['responses_observed']):
+                if UserInput.responses['response_types'][responseIndex] == 'T':	 #For abscissa of temperature dependence. Will probably do a log transform.
+                    if UserInput.responses['response_data_type'][responseIndex] == 'c':
+                        pass
+                    if UserInput.responses['response_data_type'][responseIndex] == 'r':
+                        pass
+                if UserInput.responses['response_types'][responseIndex] == 'c':	 #For abscissa of concentration dependence.
+                    if UserInput.responses['response_data_type'][responseIndex] == 'c':
+                        pass
+                    if UserInput.responses['response_data_type'][responseIndex] == 'r':
+                        pass
+        return nestedAllResponsesArray_transformed, nestedAllResponsesUncertainties_transformed  
+  
     def doGridSearch(self, searchType='doMetropolisHastings', export = True, verbose = False, gridSamplingIntervalSize = [], gridSamplingRadii = [], passThroughArgs = {}):
         # gridSamplingRadii is the number of variations to check in units of variance for each parameter. Can be 0 if you don't want to vary a particular parameter in the grid search.
         import CombinationGeneratorModule
@@ -211,10 +293,10 @@ class parameter_estimation:
             
 
     def getLogP(self, proposal_sample): #The proposal sample is specific parameter vector.
-        [likelihood_proposal, simulationOutput_proposal] = self.getLikelihood(proposal_sample)
-        prior_proposal = self.getPrior(proposal_sample)
-        log_postererior = np.log(likelihood_proposal*prior_proposal)
-        return log_postererior
+        [log_likelihood_proposal, simulationOutput_proposal] = self.getLogLikelihood(proposal_sample)
+        log_prior_proposal = self.getLogPrior(proposal_sample)
+        log_numerator_or_denominator = log_likelihood_proposal+log_prior_proposal #Of the Metropolis-Hastings accept/reject ratio
+        return log_numerator_or_denominator
         
     def getNegLogP(self, proposal_sample): #The proposal sample is specific parameter vector. We are using negative of log P because scipy optimize doesn't do maximizing. It's recommended minimize the negative in this situation.
         neg_log_postererior = -1*self.getLogP(proposal_sample)
@@ -248,10 +330,10 @@ class parameter_estimation:
         mcmc_step_modulation_history = np.zeros((self.UserInput.parameter_estimation_settings['mcmc_length'])) #TODO: Make this optional for efficiency. #This allows the steps to be larger or smaller. Make this same length as samples. In future, should probably be same in other dimension also, but that would require 2D sampling with each step.                                                                          
         samples[0,:]=self.UserInput.InputParameterInitialGuess  # Initialize the chain. Theta is initialized as the starting point of the chain.  It is placed at the prior mean if an initial guess is not provided.. Do not use self.UserInput.model['InputParameterInitialGuess']  because that doesn't work with reduced parameter space feature.
         samples_drawn = samples*1.0 #this includes points that were rejected. #TODO: make this optional for efficiency.               
-        likelihoods_vec = np.zeros((self.UserInput.parameter_estimation_settings['mcmc_length'],1))
-        posteriors_un_normed_vec = np.zeros((self.UserInput.parameter_estimation_settings['mcmc_length'],1))
-        log_postereriors_drawn = np.zeros((self.UserInput.parameter_estimation_settings['mcmc_length'])) #TODO: make this optional for efficiency. We don't want this to be 2D, so we don't copy posteriors_un_normed_vec.
-        priors_vec = np.zeros((self.UserInput.parameter_estimation_settings['mcmc_length'],1))
+        log_likelihoods_vec = np.zeros((self.UserInput.parameter_estimation_settings['mcmc_length'],1))
+        log_posteriors_un_normed_vec = np.zeros((self.UserInput.parameter_estimation_settings['mcmc_length'],1))
+        log_postereriors_drawn = np.zeros((self.UserInput.parameter_estimation_settings['mcmc_length'])) #TODO: make this optional for efficiency. We don't want this to be 2D, so we don't copy log_posteriors_un_normed_vec.
+        log_priors_vec = np.zeros((self.UserInput.parameter_estimation_settings['mcmc_length'],1))
         #Code to initialize checkpoints.
         if type(self.UserInput.parameter_estimation_settings['checkPointFrequency']) != type(None):
             print("Starting MCMC sampling.")
@@ -268,28 +350,28 @@ class parameter_estimation:
                 mcmc_step_modulation_coefficient = np.random.uniform() + 0.5 #TODO: make this a 2D array. One for each parameter.
                 mcmc_step_modulation_history[i] = mcmc_step_modulation_coefficient
                 proposal_sample = samples[i-1,:] + np.random.multivariate_normal(self.Q_mu,self.Q_covmat*mcmc_step_dynamic_coefficient*mcmc_step_modulation_coefficient*self.UserInput.parameter_estimation_settings['mcmc_relative_step_length'])
-            prior_proposal = self.getPrior(proposal_sample)
-            [likelihood_proposal, simulationOutput_proposal] = self.getLikelihood(proposal_sample)
-            prior_current_location = self.getPrior(samples[i-1,:]) 
-            [likelihood_current_location, simulationOutput_current_location] = self.getLikelihood(samples[i-1,:]) #FIXME: the previous likelihood should be stored so that it doesn't need to be calculated again.
-            accept_probability = (likelihood_proposal*prior_proposal)/(likelihood_current_location*prior_current_location) 
-            if self.UserInput.parameter_estimation_settings['verbose']: print('Current likelihood',likelihood_current_location, 'Proposed likelihood', likelihood_proposal, '\nAccept_probability (gauranteed if above 1)', accept_probability)
-            if self.UserInput.parameter_estimation_settings['verbose']: print('Current posterior',likelihood_current_location*prior_current_location, 'Proposed Posterior', likelihood_proposal*prior_proposal)
+            log_prior_proposal = self.getLogPrior(proposal_sample)
+            [log_likelihood_proposal, simulationOutput_proposal] = self.getLogLikelihood(proposal_sample)
+            log_prior_current_location = self.getLogPrior(samples[i-1,:]) 
+            [log_likelihood_current_location, simulationOutput_current_location] = self.getLogLikelihood(samples[i-1,:]) #FIXME: the previous likelihood should be stored so that it doesn't need to be calculated again.
+            accept_probability = (log_likelihood_proposal + log_prior_proposal) - (log_likelihood_current_location + log_prior_current_location) 
+            if self.UserInput.parameter_estimation_settings['verbose']: print('Current log_likelihood',log_likelihood_current_location, 'Proposed log_likelihood', log_likelihood_proposal, '\nAccept_probability (gauranteed if above 1)', accept_probability)
+            if self.UserInput.parameter_estimation_settings['verbose']: print('Current posterior',log_likelihood_current_location*log_prior_current_location, 'Proposed Posterior', log_likelihood_proposal*log_prior_proposal)
             if self.UserInput.parameter_estimation_settings['mcmc_modulate_accept_probability'] != 0: #This flattens the posterior by accepting low values more often. It can be useful when greater sampling is more important than accuracy.
                 N_flatten = float(self.UserInput.parameter_estimation_settings['mcmc_modulate_accept_probability'])
                 accept_probability = accept_probability**(1/N_flatten) #TODO: add code that unflattens the final histograms, that way even with more sampling we still get an accurate final posterior distribution. We can also then add a flag if the person wants to keep the posterior flattened.
-            if accept_probability > np.random.uniform():  #TODO: keep a log of the accept and reject. If the reject ratio is >90% or some other such number, warn the user.
+            if accept_probability > np.power(10,np.random.uniform()):  #TODO: keep a log of the accept and reject. If the reject ratio is >90% or some other such number, warn the user.
                 if self.UserInput.parameter_estimation_settings['verbose']:
                   print('accept', proposal_sample)
                   sys.stdout.flush()
                   #print(simulationOutput_proposal)
                 samples[i,:] = proposal_sample
                 samples_drawn[i,:] = proposal_sample
-                log_postereriors_drawn[i] = np.log(likelihood_proposal*prior_proposal)
+                log_postereriors_drawn[i] = (log_likelihood_proposal+log_prior_proposal) #FIXME: should be using getlogP
                 samples_simulatedOutputs[i,:] = simulationOutput_proposal
-                posteriors_un_normed_vec[i] = likelihood_proposal*prior_proposal #FIXME: Separate this block of code out into a helper function in the class, that way I can create another helper function for non-MCMC sampling.
-                likelihoods_vec[i] = likelihood_proposal
-                priors_vec[i] = prior_proposal
+                log_posteriors_un_normed_vec[i] = log_likelihood_proposal+log_prior_proposal 
+                log_likelihoods_vec[i] = log_likelihood_proposal
+                log_priors_vec[i] = log_prior_proposal
             else:
                 if self.UserInput.parameter_estimation_settings['verbose']:
                   print('reject', proposal_sample)
@@ -297,12 +379,12 @@ class parameter_estimation:
                   #print(simulationOutput_current_location)
                 samples[i,:] = samples[i-1,:] #the sample is not kept if it is rejected, though we still store it in the samples_drawn.
                 samples_drawn[i,:] = proposal_sample
-                log_postereriors_drawn[i] = np.log(likelihood_proposal*prior_proposal)
+                log_postereriors_drawn[i] = (log_likelihood_proposal+log_prior_proposal)
                 samples_simulatedOutputs[i,:] = simulationOutput_current_location
 #                print("line 121", simulationOutput_current_location)
-                posteriors_un_normed_vec[i] = likelihood_current_location*prior_current_location
-                likelihoods_vec[i] = likelihood_current_location
-                priors_vec[i] = prior_current_location
+                log_posteriors_un_normed_vec[i] = log_likelihood_current_location+log_prior_current_location
+                log_likelihoods_vec[i] = log_likelihood_current_location
+                log_priors_vec[i] = log_prior_current_location
             if type(self.UserInput.parameter_estimation_settings['checkPointFrequency']) != type(None):
                 if i%self.UserInput.parameter_estimation_settings['checkPointFrequency'] == 0: #The % is a modulus function.
                     timeSinceLastCheckPoint = (timeit.time.clock() - timeOfFirstCheckpoint) -  timeCheckpoint
@@ -346,14 +428,14 @@ class parameter_estimation:
         self.post_burn_in_samples = samples[self.UserInput.parameter_estimation_settings['mcmc_burn_in']:]
         if self.UserInput.parameter_estimation_settings['exportAllSimulatedOutputs'] == True:
             self.post_burn_in_samples_simulatedOutputs = samples_simulatedOutputs[self.UserInput.parameter_estimation_settings['mcmc_burn_in']:]
-        self.post_burn_in_posteriors_un_normed_vec = posteriors_un_normed_vec[self.UserInput.parameter_estimation_settings['mcmc_burn_in']:]
-        self.post_burn_in_logP_un_normed_vec = np.log(self.post_burn_in_posteriors_un_normed_vec)
-        self.post_burn_in_likelihoods_vec = likelihoods_vec[self.UserInput.parameter_estimation_settings['mcmc_burn_in']:]
-        self.post_burn_in_priors_vec = priors_vec[self.UserInput.parameter_estimation_settings['mcmc_burn_in']:]
+        self.post_burn_in_log_posteriors_un_normed_vec = log_posteriors_un_normed_vec[self.UserInput.parameter_estimation_settings['mcmc_burn_in']:]
+        self.post_burn_in_logP_un_normed_vec = (self.post_burn_in_log_posteriors_un_normed_vec)
+        self.post_burn_in_log_likelihoods_vec = log_likelihoods_vec[self.UserInput.parameter_estimation_settings['mcmc_burn_in']:]
+        self.post_burn_in_log_priors_vec = log_priors_vec[self.UserInput.parameter_estimation_settings['mcmc_burn_in']:]
         # posterior probabilites are transformed to a standard normal (std=1) for obtaining the evidence:
-        self.evidence = np.mean(self.post_burn_in_posteriors_un_normed_vec)*np.sqrt(2*np.pi*np.std(self.post_burn_in_samples)**2)
-        post_burn_in_posteriors_vec = self.post_burn_in_posteriors_un_normed_vec/self.evidence
-        log_ratios = np.log(post_burn_in_posteriors_vec/self.post_burn_in_priors_vec)
+        self.evidence = np.mean(self.post_burn_in_log_posteriors_un_normed_vec)*np.sqrt(2*np.pi*np.std(self.post_burn_in_samples)**2)
+        post_burn_in_log_posteriors_vec = self.post_burn_in_log_posteriors_un_normed_vec/self.evidence
+        log_ratios = (post_burn_in_log_posteriors_vec/self.post_burn_in_log_priors_vec)
         log_ratios[np.isinf(log_ratios)] = 0
         log_ratios = np.nan_to_num(log_ratios)
         self.info_gain = np.mean(log_ratios)
@@ -371,7 +453,7 @@ class parameter_estimation:
         if self.UserInput.parameter_estimation_settings['exportLog'] == True:
             #The self.post_burn_in_samples_simulatedOutputs has length of ALL sampling including burn_in
             #The self.post_burn_in_samples is only AFTER burn in.
-            #The self.post_burn_in_posteriors_un_normed_vec is AFTER burn in.           
+            #The self.post_burn_in_log_posteriors_un_normed_vec is AFTER burn in.           
             #TODO: Make header for mcmc_output
             mcmc_output = np.hstack((self.post_burn_in_logP_un_normed_vec,self.post_burn_in_samples))
             np.savetxt('mcmc_logP_and_parameter_samples.csv',mcmc_output, delimiter=",")             
@@ -389,12 +471,12 @@ class parameter_estimation:
         if abs((self.map_parameter_set - self.mu_AP_parameter_set)/self.UserInput.var_prior).any() > 0.10:  
             print("Warning: The MAP parameter set and mu_AP parameter set differ by more than 10% of prior variance in at least one parameter. This may mean that you need to increase your mcmc_length, increase or decrease your mcmc_relative_step_length, or change what is used for the model response.  There is no general method for knowing the right  value for mcmc_relative_step_length since it depends on the sharpness and smoothness of the response. See for example https://www.sciencedirect.com/science/article/pii/S0039602816300632  ")
         return [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_logP_un_normed_vec] # EAW 2020/01/08
-    def getPrior(self,discreteParameterVector):
+    def getLogPrior(self,discreteParameterVector):
         discreteParameterVector_scaled = np.array(discreteParameterVector/self.UserInput.scaling_uncertainties)
-        probability = multivariate_normal.pdf(x=discreteParameterVector_scaled,mean=self.UserInput.mu_prior_scaled,cov=self.UserInput.covmat_prior_scaled)
-        return probability
-    def getLikelihood(self,discreteParameterVector): #The variable discreteParameterVector represents a vector of values for the parameters being sampled. So it represents a single point in the multidimensional parameter space.
-        simulationFunction = self.UserInput.simulationFunction #Do NOT use self.UserInput.model['simulateByInputParametersOnlyFunction']  because that won't work with reduced parameter space requests.
+        probabilityPrior = multivariate_normal.pdf(x=discreteParameterVector_scaled,mean=self.UserInput.mu_prior_scaled,cov=self.UserInput.covmat_prior_scaled)
+        return np.log10(probabilityPrior)
+    def getLogLikelihood(self,discreteParameterVector): #The variable discreteParameterVector represents a vector of values for the parameters being sampled. So it represents a single point in the multidimensional parameter space.
+        simulationFunction = self.UserInput.simulationFunction #Do NOT use self.UserInput.model['simulateByInputParametersOnlyFunction']  because that won't work with reduced parameter space requests.  
         simulationOutputProcessingFunction = self.UserInput.simulationOutputProcessingFunction #Do NOT use self.UserInput.model['simulationOutputProcessingFunction'] because that won't work with reduced parameter space requests.
         try:
             simulationOutput =simulationFunction(discreteParameterVector) 
@@ -404,36 +486,40 @@ class parameter_estimation:
             simulatedResponses = simulationOutput #Is this the log of the rate? If so, Why?
         if type(simulationOutputProcessingFunction) != type(None):
             simulatedResponses = simulationOutputProcessingFunction(simulationOutput) 
-        observedResponses = np.atleast_2d(self.UserInput.responses['responses_observed'])
         simulatedResponses = np.atleast_2d(simulatedResponses)
-        #To find the relevant covariance matrix, we take the errors from the points.
-        
-        if self.UserInput.num_response_dimensions == 1:
-            responses_covmat = np.array(self.UserInput.responses['responses_observed_uncertainties']) #Filling variable.
-            if np.shape(responses_covmat)[0] == (1): #This means it's just a list of standard deviations and needs to be squared to become variances.
-                responses_covmat = np.square(responses_covmat)
-            else:
-                responses_covmat = responses_covmat
-        elif self.UserInput.num_response_dimensions > 1:  #if the dimensionality of responses is greater than 1, we only support providing standard deviations. Will flatten and square.
-            responses_covmat = np.array(self.UserInput.responses['responses_observed_uncertainties']) #Filling variable.
-            responses_covmat = responses_covmat.flatten() 
-            responses_covmat = np.square(responses_covmat) 
+        simulatedResponses_transformed, blank_list = self.transform_responses(simulatedResponses) #This creates transforms for any data that we might need it. The same transforms were also applied to the observed responses.
+        observedResponses_transformed = self.UserInput.responses['responses_observed_transformed']
+        simulatedResponses_transformed_flattened = np.array(simulatedResponses_transformed).flatten()
+        observedResponses_transformed_flattened = np.array(observedResponses_transformed).flatten()
+ 
         #If our likelihood is  “probability of Response given Theta”…  we have a continuous probability distribution for both the response and theta. That means the pdf  must use binning on both variables. Eric notes that the pdf returns a probability density, not a probability mass. So the pdf function here divides by the width of whatever small bin is being used and then returns the density accordingly. Because of this, our what we are calling likelihood is not actually probability (it’s not the actual likelihood) but is proportional to the likelihood.
         #This we call it a probability_metric and not a probability. #TODO: consider changing likelihood and get likelihood to "likelihoodMetric" and "getLikelihoodMetric"
         
         #Now we will check whether responses_covmat is square or not. If it's square, we take it as is. If it's not square, we take the nested object inside since the multivariate_normal.pdf function requires a diagonal values vector to be 1D.
+        responses_covmat = self.responses_covmat
         responses_covmat_shape = np.shape(responses_covmat)
         if len(responses_covmat_shape) == 1: #Matrix is square because has only one value.
-            probability_metric = multivariate_normal.pdf(x=simulatedResponses.flatten(),mean=observedResponses.flatten(),cov=responses_covmat)
+            probability_metric = multivariate_normal.pdf(x=simulatedResponses_transformed_flattened,mean=observedResponses_transformed_flattened,cov=responses_covmat)
+            log_probability_metric = np.log10(probability_metric)
         elif responses_covmat_shape[0] == responses_covmat_shape[1]:  #Else it is 2D, check if it's square.
-            probability_metric = multivariate_normal.pdf(x=simulatedResponses.flatten(),mean=observedResponses.flatten(),cov=responses_covmat)
+            probability_metric = multivariate_normal.pdf(x=simulatedResponses_transformed_flattened,mean=observedResponses_transformed_flattened,cov=responses_covmat)
+            #TODO: Put in near-diagonal solution described in github.
+            log_probability_metric = np.log10(probability_metric)
         else:  #If it is not square, it's a list of variances so we need to take the 1D vector version.
-            probability_metric = multivariate_normal.pdf(x=simulatedResponses.flatten(),mean=observedResponses.flatten(),cov=responses_covmat[0])    
-        
-        return probability_metric, simulatedResponses.flatten()
+            probability_metric = multivariate_normal.pdf(x=simulatedResponses_transformed_flattened,mean=observedResponses_transformed_flattened,cov=responses_covmat[0])    
+            log_probability_metric = np.log10(probability_metric)
+            if probability_metric == 0:
+                log_probability_metric = 0 #Just initializing, then will multiply by each probability separately.
+                for responseValueIndex in range(len(simulatedResponses_transformed_flattened)):
+                    current_probability_metric = multivariate_normal.pdf(x=simulatedResponses_transformed_flattened[responseValueIndex],mean=observedResponses_transformed_flattened[responseValueIndex],cov=responses_covmat[0][responseValueIndex])    
+                    if current_probability_metric != 0:
+                        log_current_probability_metric = np.log10(current_probability_metric)
+                        log_probability_metric = log_current_probability_metric + log_probability_metric
+            #print(log_probability_metric)
+        return log_probability_metric, simulatedResponses.flatten()
 
     def makeHistogramsForEachParameter(self):
-        import plotting_functions
+        import plotting_functions #This is going to become import CheKIPEUQ.plotting_functions as plotting_functions
         parameterSamples = self.post_burn_in_samples
         parameterNamesAndMathTypeExpressionsDict = self.UserInput.model['parameterNamesAndMathTypeExpressionsDict']
         plotting_functions.makeHistogramsForEachParameter(parameterSamples,parameterNamesAndMathTypeExpressionsDict)
@@ -498,7 +584,7 @@ class parameter_estimation:
             #plot_settings['figure_name'] = 'tprposterior'
         if 'figure_name' not in plot_settings:
             plot_settings['figurename'] = 'Posterior'
-        import plotting_functions as plotting_functions
+        import plotting_functions as plotting_functions #This is going to become import CheKIPEUQ.plotting_functions as plotting_functions
         allResponsesFigureObjectsList = []
         for responseDimIndex in range(self.UserInput.num_response_dimensions): #TODO: Move the exporting out of the plot creation and/or rename the function and possibly have options about whether exporting graph, data, or both.
             #Some code for setting up individual plot settings in case there are multiple response dimensions.
@@ -720,3 +806,4 @@ def returnReducedIterable(iterableObjectToReduce, reducedIndices):
         
 if __name__ == "__main__":
     pass
+

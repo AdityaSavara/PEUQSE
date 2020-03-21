@@ -42,6 +42,7 @@ model['parameterNamesAndMathTypeExpressionsDict'] = {'Ea_1':r'$E_{a1}$','Ea_2':r
 model['simulateByInputParametersOnlyFunction'] = TPR_simulationFunctionWrapper
 model['simulationOutputProcessingFunction'] = None
 model['reducedParameterSpace'] = [] #This is to keep parameters as 'constants'. Any parameter index in this list will be allowed to change, the rest will be held as constants.
+model['kinetics_type'] = '' #can be 'transient' or 'steady_state', anything else is ignored.
 
 #####Experimental Data Input Files#####
 responses = {}
@@ -50,6 +51,7 @@ responses['responses_observed'] = np.array(experiments_df['AcHBackgroundSubtract
 responses['responses_observed_uncertainties'] = observedResponses_uncertainties
 #responses_abscissa = np.array(experiments_df['AcH - T'])
 #responses_observed = np.array(experiments_df['AcHBackgroundSubtracted'])/2000
+responses['points_if_transformed'] = 100 #Typically want 100 or 1000 etc.
 observedResponses = observedResponsesFunc()
 
 
