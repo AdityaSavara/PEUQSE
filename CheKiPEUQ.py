@@ -498,7 +498,7 @@ class parameter_estimation:
             #plot_settings['figure_name'] = 'tprposterior'
         if 'figure_name' not in plot_settings:
             plot_settings['figurename'] = 'Posterior'
-        import CheKiPEUQ.plotting_functions as plotting_functions
+        import plotting_functions as plotting_functions
         allResponsesFigureObjectsList = []
         for responseDimIndex in range(self.UserInput.num_response_dimensions): #TODO: Move the exporting out of the plot creation and/or rename the function and possibly have options about whether exporting graph, data, or both.
             #Some code for setting up individual plot settings in case there are multiple response dimensions.
