@@ -514,15 +514,25 @@ class parameter_estimation:
             #TODO: Put in near-diagonal solution described in github.
             log_probability_metric = np.log10(probability_metric)
         else:  #If it is not square, it's a list of variances so we need to take the 1D vector version.
-            probability_metric = multivariate_normal.pdf(x=simulatedResponses_transformed_flattened,mean=observedResponses_transformed_flattened,cov=responses_covmat[0])    
-            log_probability_metric = np.log10(probability_metric)
+            try:
+                probability_metric = multivariate_normal.pdf(x=simulatedResponses_transformed_flattened,mean=observedResponses_transformed_flattened,cov=responses_covmat[0])                
+                log_probability_metric = np.log10(probability_metric)
+            except:
+                probability_metric = 0
             if probability_metric == 0:
                 log_probability_metric = 0 #Just initializing, then will multiply by each probability separately.
+                smallest_probability_metric_so_far = 100
                 for responseValueIndex in range(len(simulatedResponses_transformed_flattened)):
                     current_probability_metric = multivariate_normal.pdf(x=simulatedResponses_transformed_flattened[responseValueIndex],mean=observedResponses_transformed_flattened[responseValueIndex],cov=responses_covmat[0][responseValueIndex])    
                     if current_probability_metric != 0:
+                        if current_probability_metric < smallest_probability_metric_so_far:
+                            smallest_probability_metric_so_far = current_probability_metric
                         log_current_probability_metric = np.log10(current_probability_metric)
                         log_probability_metric = log_current_probability_metric + log_probability_metric
+                    if current_probability_metric == 0:
+                        print("Warning: There are posterior points that have zero probability. If there are too many points like this, the MAP and mu_AP returned will not be meaningful.")
+                        log_current_probability_metric = -100 #Just choosing an arbitrarily very severe penalty. I know that I have seen 1E-48 to -303 from the multivariate pdf, and values inbetween like -171, -217, -272. I found that -1000 seems to be worse, but I don't have a systematic testing. I think -1000 was causing numerical errors.
+                        log_probability_metric = -log_current_probability_metric + log_probability_metric
             #print(log_probability_metric)
         return log_probability_metric, simulatedResponses.flatten()
 
