@@ -363,11 +363,11 @@ class parameter_estimation:
             if self.UserInput.parameter_estimation_settings['verbose']: print('Current posterior',log_likelihood_current_location+log_prior_current_location, 'Proposed Posterior', log_likelihood_proposal+log_prior_proposal)
             if self.UserInput.parameter_estimation_settings['mcmc_modulate_accept_probability'] != 0: #This flattens the posterior by accepting low values more often. It can be useful when greater sampling is more important than accuracy.
                 N_flatten = float(self.UserInput.parameter_estimation_settings['mcmc_modulate_accept_probability'])
-                accept_probability = np.power(10, log_accept_probability)
+                accept_probability = np.exp(log_accept_probability) #This is e^logP = P
                 accept_probability = accept_probability**(1/N_flatten) #TODO: add code that unflattens the final histograms, that way even with more sampling we still get an accurate final posterior distribution. We can also then add a flag if the person wants to keep the posterior flattened.
-                log_accept_probability = np.log10(accept_probability)
+                log_accept_probability = np.log(accept_probability)
             randomNumber = np.random.uniform()
-            log_randomNumber = np.log10(randomNumber)
+            log_randomNumber = np.log(randomNumber)
             if log_accept_probability > log_randomNumber:  #TODO: keep a log of the accept and reject. If the reject ratio is >90% or some other such number, warn the user.
                 if self.UserInput.parameter_estimation_settings['verbose']:
                   print('accept', proposal_sample)
@@ -441,11 +441,9 @@ class parameter_estimation:
         self.post_burn_in_log_likelihoods_vec = log_likelihoods_vec[self.UserInput.parameter_estimation_settings['mcmc_burn_in']:]
         self.post_burn_in_log_priors_vec = log_priors_vec[self.UserInput.parameter_estimation_settings['mcmc_burn_in']:]
         # posterior probabilites are transformed to a standard normal (std=1) for obtaining the evidence:
-        #FIXME: Log was not propagated correctly here. Below line used to be self.evidence = np.mean(self.post_burn_in_posteriors_un_normed_vec)*np.sqrt(2*np.pi*np.std(self.post_burn_in_samples)**2)
-        #So either need to make post_burn_in_posteriors_un_normed_vec again before this step, or need to change below line.
         self.evidence = np.mean(self.post_burn_in_log_posteriors_un_normed_vec)*np.sqrt(2*np.pi*np.std(self.post_burn_in_samples)**2)
         post_burn_in_log_posteriors_vec = self.post_burn_in_log_posteriors_un_normed_vec/self.evidence
-        log_ratios = (post_burn_in_log_posteriors_vec-self.post_burn_in_log_priors_vec) #log10(a/b) = log10(a)-log10(b)
+        log_ratios = (post_burn_in_log_posteriors_vec/self.post_burn_in_log_priors_vec)
         log_ratios[np.isinf(log_ratios)] = 0
         log_ratios = np.nan_to_num(log_ratios)
         self.info_gain = np.mean(log_ratios)
@@ -483,8 +481,8 @@ class parameter_estimation:
         return [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_logP_un_normed_vec] # EAW 2020/01/08
     def getLogPrior(self,discreteParameterVector):
         discreteParameterVector_scaled = np.array(discreteParameterVector/self.UserInput.scaling_uncertainties)
-        probabilityPrior = multivariate_normal.pdf(x=discreteParameterVector_scaled,mean=self.UserInput.mu_prior_scaled,cov=self.UserInput.covmat_prior_scaled)
-        return np.log10(probabilityPrior)
+        log_probabilityPrior = multivariate_normal.logpdf(x=discreteParameterVector_scaled,mean=self.UserInput.mu_prior_scaled,cov=self.UserInput.covmat_prior_scaled)
+        return log_probabilityPrior
     def getLogLikelihood(self,discreteParameterVector): #The variable discreteParameterVector represents a vector of values for the parameters being sampled. So it represents a single point in the multidimensional parameter space.
         simulationFunction = self.UserInput.simulationFunction #Do NOT use self.UserInput.model['simulateByInputParametersOnlyFunction']  because that won't work with reduced parameter space requests.  
         simulationOutputProcessingFunction = self.UserInput.simulationOutputProcessingFunction #Do NOT use self.UserInput.model['simulationOutputProcessingFunction'] because that won't work with reduced parameter space requests.
@@ -509,25 +507,20 @@ class parameter_estimation:
         responses_covmat = self.responses_covmat
         responses_covmat_shape = np.shape(responses_covmat)
         if len(responses_covmat_shape) == 1: #Matrix is square because has only one value.
-            probability_metric = multivariate_normal.pdf(x=simulatedResponses_transformed_flattened,mean=observedResponses_transformed_flattened,cov=responses_covmat)
-            log_probability_metric = np.log10(probability_metric)
+            log_probability_metric = multivariate_normal.logpdf(x=simulatedResponses_transformed_flattened,mean=observedResponses_transformed_flattened,cov=responses_covmat)
         elif responses_covmat_shape[0] == responses_covmat_shape[1]:  #Else it is 2D, check if it's square.
-            probability_metric = multivariate_normal.pdf(x=simulatedResponses_transformed_flattened,mean=observedResponses_transformed_flattened,cov=responses_covmat)
+            probability_metric = multivariate_normal.logpdf(x=simulatedResponses_transformed_flattened,mean=observedResponses_transformed_flattened,cov=responses_covmat)
             #TODO: Put in near-diagonal solution described in github.
-            log_probability_metric = np.log10(probability_metric)
         else:  #If it is not square, it's a list of variances so we need to take the 1D vector version.
             try:
-                probability_metric = multivariate_normal.pdf(x=simulatedResponses_transformed_flattened,mean=observedResponses_transformed_flattened,cov=responses_covmat[0])                
-                log_probability_metric = np.log10(probability_metric)
+                log_probability_metric = multivariate_normal.logpdf(x=simulatedResponses_transformed_flattened,mean=observedResponses_transformed_flattened,cov=responses_covmat[0])                
             except:
-                probability_metric = 0
-            if probability_metric == 0:
+                log_probability_metric = 1
+            if log_probability_metric == 1:
                 log_probability_metric = 0 #Just initializing, then will multiply by each probability separately.
                 for responseValueIndex in range(len(simulatedResponses_transformed_flattened)):
-                    current_probability_metric = multivariate_normal.pdf(x=simulatedResponses_transformed_flattened[responseValueIndex],mean=observedResponses_transformed_flattened[responseValueIndex],cov=responses_covmat[0][responseValueIndex])    
-                    if current_probability_metric != 0:
-                        log_current_probability_metric = np.log10(current_probability_metric)
-                        log_probability_metric = log_current_probability_metric + log_probability_metric
+                    current_probability_metric = multivariate_normal.logpdf(x=simulatedResponses_transformed_flattened[responseValueIndex],mean=observedResponses_transformed_flattened[responseValueIndex],cov=responses_covmat[0][responseValueIndex])    
+                    log_probability_metric = log_current_probability_metric + log_probability_metric
                     if current_probability_metric == 0:
                         print("Warning: There are posterior points that have zero probability. If there are too many points like this, the MAP and mu_AP returned will not be meaningful.")
                         log_current_probability_metric = -100 #Just choosing an arbitrarily very severe penalty. I know that I have seen 1E-48 to -303 from the multivariate pdf, and values inbetween like -171, -217, -272. I found that -1000 seems to be worse, but I don't have a systematic testing. I think -1000 was causing numerical errors.
