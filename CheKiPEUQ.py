@@ -441,9 +441,11 @@ class parameter_estimation:
         self.post_burn_in_log_likelihoods_vec = log_likelihoods_vec[self.UserInput.parameter_estimation_settings['mcmc_burn_in']:]
         self.post_burn_in_log_priors_vec = log_priors_vec[self.UserInput.parameter_estimation_settings['mcmc_burn_in']:]
         # posterior probabilites are transformed to a standard normal (std=1) for obtaining the evidence:
+        #FIXME: Log was not propagated correctly here. Below line used to be self.evidence = np.mean(self.post_burn_in_posteriors_un_normed_vec)*np.sqrt(2*np.pi*np.std(self.post_burn_in_samples)**2)
+        #So either need to make post_burn_in_posteriors_un_normed_vec again before this step, or need to change below line.
         self.evidence = np.mean(self.post_burn_in_log_posteriors_un_normed_vec)*np.sqrt(2*np.pi*np.std(self.post_burn_in_samples)**2)
         post_burn_in_log_posteriors_vec = self.post_burn_in_log_posteriors_un_normed_vec/self.evidence
-        log_ratios = (post_burn_in_log_posteriors_vec/self.post_burn_in_log_priors_vec)
+        log_ratios = (post_burn_in_log_posteriors_vec-self.post_burn_in_log_priors_vec) #log10(a/b) = log10(a)-log10(b)
         log_ratios[np.isinf(log_ratios)] = 0
         log_ratios = np.nan_to_num(log_ratios)
         self.info_gain = np.mean(log_ratios)
@@ -517,14 +519,14 @@ class parameter_estimation:
             except:
                 log_probability_metric = 1
             if log_probability_metric == 1:
-                log_probability_metric = 0 #Just initializing, then will multiply by each probability separately.
+                log_probability_metric = -1E100 #Just initializing, then will add each probability separately.
                 for responseValueIndex in range(len(simulatedResponses_transformed_flattened)):
-                    current_probability_metric = multivariate_normal.logpdf(x=simulatedResponses_transformed_flattened[responseValueIndex],mean=observedResponses_transformed_flattened[responseValueIndex],cov=responses_covmat[0][responseValueIndex])    
-                    log_probability_metric = log_current_probability_metric + log_probability_metric
-                    if current_probability_metric == 0:
+                    current_log_probability_metric = multivariate_normal.logpdf(x=simulatedResponses_transformed_flattened[responseValueIndex],mean=observedResponses_transformed_flattened[responseValueIndex],cov=responses_covmat[0][responseValueIndex])    
+                    log_probability_metric = current_log_probability_metric + log_probability_metric
+                    if float(current_log_probability_metric) == float('-inf'):
                         print("Warning: There are posterior points that have zero probability. If there are too many points like this, the MAP and mu_AP returned will not be meaningful.")
-                        log_current_probability_metric = -100 #Just choosing an arbitrarily very severe penalty. I know that I have seen 1E-48 to -303 from the multivariate pdf, and values inbetween like -171, -217, -272. I found that -1000 seems to be worse, but I don't have a systematic testing. I think -1000 was causing numerical errors.
-                        log_probability_metric = -log_current_probability_metric + log_probability_metric
+                        current_log_probability_metric = -1E100 #Just choosing an arbitrarily very severe penalty. I know that I have seen 1E-48 to -303 from the multivariate pdf, and values inbetween like -171, -217, -272. I found that -1000 seems to be worse, but I don't have a systematic testing. I think -1000 was causing numerical errors.
+                        log_probability_metric = current_log_probability_metric + log_probability_metric
             #print(log_probability_metric)
         return log_probability_metric, simulatedResponses.flatten()
 
