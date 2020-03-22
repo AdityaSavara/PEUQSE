@@ -22,6 +22,7 @@ class parameter_estimation:
         #Now will automatically populate some variables from UserInput
         UserInput.parameterNamesList = list(UserInput.model['parameterNamesAndMathTypeExpressionsDict'].keys())
         UserInput.stringOfParameterNames = str(UserInput.parameterNamesList).replace("'","")[1:-1]
+        UserInput.parameterNamesAndMathTypeExpressionsDict = UserInput.model['parameterNamesAndMathTypeExpressionsDict']
         if self.UserInput.parameter_estimation_settings['verbose']: 
             print("Bayes Model Initialized")
         #Leaving the original dictionary object intact, but making a new object to make covmat_prior.
@@ -112,6 +113,14 @@ class parameter_estimation:
         UserInput.parameterNamesList = returnReducedIterable(UserInput.parameterNamesList, reducedIndices)
         #We need to reparse to populate UserInput.stringOfParameterNames, can't use return Reduced Iterable.
         UserInput.stringOfParameterNames = str(UserInput.parameterNamesList).replace("'","")[1:-1]
+        #To make UserInput.parameterNamesAndMathTypeExpressionsDict we use a for loop to remove keys that should not be there anymore.
+        #need to trim the dictionary based on what is in the UserInput.parameterNamesList variable
+        parameterNamesAndMathTypeExpressionsDict = copy.deepcopy(self.UserInput.model['parameterNamesAndMathTypeExpressionsDict'])
+        for keyIndex in range(len(parameterNamesAndMathTypeExpressionsDict)):
+            key = list(self.UserInput.model['parameterNamesAndMathTypeExpressionsDict'])[keyIndex] #Need to call it out separately from original dictionary due to loop making the new dictionary smaller.
+            if key not in self.UserInput.parameterNamesList:
+                del parameterNamesAndMathTypeExpressionsDict[key] #Remove any parameters that were not in reduced parameter space.
+        UserInput.parameterNamesAndMathTypeExpressionsDict = parameterNamesAndMathTypeExpressionsDict
         UserInput.InputParametersPriorValuesUncertainties = returnReducedIterable(UserInput.InputParametersPriorValuesUncertainties, reducedIndices)
         UserInput.std_prior     = returnReducedIterable( UserInput.std_prior    , reducedIndices )
         UserInput.var_prior     = returnReducedIterable( UserInput.var_prior   , reducedIndices  )
@@ -533,15 +542,16 @@ class parameter_estimation:
     def makeHistogramsForEachParameter(self):
         import plotting_functions #This is going to become import CheKIPEUQ.plotting_functions as plotting_functions
         parameterSamples = self.post_burn_in_samples
-        parameterNamesAndMathTypeExpressionsDict = self.UserInput.model['parameterNamesAndMathTypeExpressionsDict']
+        parameterNamesAndMathTypeExpressionsDict = self.UserInput.parameterNamesAndMathTypeExpressionsDict
         plotting_functions.makeHistogramsForEachParameter(parameterSamples,parameterNamesAndMathTypeExpressionsDict)
 
     def makeSamplingScatterMatrixPlot(self, parameterSamples = [], parameterNamesAndMathTypeExpressionsDict={}, parameterNamesList =[], plot_settings={}):
         if 'dpi' not in  plot_settings:  plot_settings['dpi'] = 220
         if 'figure_name' not in  plot_settings:  plot_settings['figure_name'] = 'scatter_matrix_posterior'
         if parameterSamples  ==[] : parameterSamples = self.post_burn_in_samples
-        if parameterNamesAndMathTypeExpressionsDict == {}: parameterNamesAndMathTypeExpressionsDict = self.UserInput.model['parameterNamesAndMathTypeExpressionsDict']
+        if parameterNamesAndMathTypeExpressionsDict == {}: parameterNamesAndMathTypeExpressionsDict = self.UserInput.parameterNamesAndMathTypeExpressionsDict
         if parameterNamesList == []: parameterNamesList = self.UserInput.parameterNamesList #This is created when the parameter_estimation object is initialized.        
+
         posterior_df = pd.DataFrame(parameterSamples,columns=[parameterNamesAndMathTypeExpressionsDict[x] for x in parameterNamesList])
         pd.plotting.scatter_matrix(posterior_df)
         plt.savefig(plot_settings['figure_name'],dpi=plot_settings['dpi'])
@@ -634,8 +644,8 @@ class parameter_estimation:
         #TODO: In future, worry about whether there are constants or not, since then we will have to trim down the prior.
         #Make the model_parameter_info object that mumpce Project class needs.
         self.UserInput.model_parameter_info = []#This variable name is for mumpce definition of variable names. Not what we would choose otherwise.
-        for parameterIndex, parameterName in enumerate(self.UserInput.model['parameterNamesAndMathTypeExpressionsDict']):
-            individual_model_parameter_dictionary = {'parameter_number': parameterIndex, 'parameter_name': self.UserInput.model['parameterNamesAndMathTypeExpressionsDict'][parameterName]} #we are actually putting the MathTypeExpression as the parameter name when feeding to mum_pce.
+        for parameterIndex, parameterName in enumerate(self.UserInput.parameterNamesAndMathTypeExpressionsDict):
+            individual_model_parameter_dictionary = {'parameter_number': parameterIndex, 'parameter_name': self.UserInput.parameterNamesAndMathTypeExpressionsDict[parameterName]} #we are actually putting the MathTypeExpression as the parameter name when feeding to mum_pce.
             self.UserInput.model_parameter_info.append(individual_model_parameter_dictionary)
         self.UserInput.model_parameter_info = np.array(self.UserInput.model_parameter_info)
         numParams = len(self.UserInput.model_parameter_info)
@@ -653,16 +663,21 @@ class parameter_estimation:
         elif type(pairs_of_parameter_indices[0]) == type('string'):
             pairs_of_parameter_indices = self.UserInput.pairs_of_parameter_indices
             for  pairIndex in range(len(pairs_of_parameter_indices)):
-                firstParameter = int(self.UserInput.model['parameterNamesAndMathTypeExpressionsDict'][pairIndex[0]])
-                secondParameter = int(self.UserInput.model['parameterNamesAndMathTypeExpressionsDict'][pairIndex[0]])
+                firstParameter = int(self.UserInput.parameterNamesAndMathTypeExpressionsDict[pairIndex[0]])
+                secondParameter = int(self.UserInput.parameterNamesAndMathTypeExpressionsDict[pairIndex[0]])
                 pairs_of_parameter_indices[pairIndex] = [firstParameter, secondParameter]        
-        figureObject_beta.mumpce_plots(model_parameter_info = self.UserInput.model_parameter_info, active_parameters = self.UserInput.active_parameters, pairs_of_parameter_indices = pairs_of_parameter_indices, posterior_mu_vector = posterior_mu_vector, posterior_cov_matrix = posterior_cov_matrix, prior_mu_vector = np.array(self.UserInput.model['InputParameterInitialValues']), prior_cov_matrix = self.UserInput.covmat_prior, contour_settings_custom = self.UserInput.contour_settings_custom)
+        figureObject_beta.mumpce_plots(model_parameter_info = self.UserInput.model_parameter_info, active_parameters = self.UserInput.active_parameters, pairs_of_parameter_indices = pairs_of_parameter_indices, posterior_mu_vector = posterior_mu_vector, posterior_cov_matrix = posterior_cov_matrix, prior_mu_vector = np.array(self.UserInput.mu_prior), prior_cov_matrix = self.UserInput.covmat_prior, contour_settings_custom = self.UserInput.contour_settings_custom)
         return figureObject_beta
 
     def createAllPlots(self):
+
+
         try:
             self.makeHistogramsForEachParameter()    
             self.makeSamplingScatterMatrixPlot()
+
+
+
             self.createMumpcePlots()
         except: #TODO: do something better than try & accept. Right now, this is because the above plots are designed for mcmc sampling and don't work if pure grid search or pure optimize is used.
             pass
