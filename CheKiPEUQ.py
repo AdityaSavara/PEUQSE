@@ -373,7 +373,7 @@ class parameter_estimation:
             if self.UserInput.parameter_estimation_settings['mcmc_modulate_accept_probability'] != 0: #This flattens the posterior by accepting low values more often. It can be useful when greater sampling is more important than accuracy.
                 N_flatten = float(self.UserInput.parameter_estimation_settings['mcmc_modulate_accept_probability'])
                 #Our logP are of the type e^logP = P. #This is base 'e' because the logpdf functions are base e. Ashi checked the sourcecode.
-                #The flattening code works in part because P is always < 1, so logP is always negative. 1/N_flatten at front brings negative number closer to zero which is P closer to 1.
+                #The flattening code works in part because P is always < 1, so logP is always negative. 1/N_flatten at front brings negative number closer to zero which is P closer to 1. If logP is already positive, it will stay positive which also causes no problem.
                 #TODO: add code that unflattens the final histograms, that way even with more sampling we still get an accurate final posterior distribution. We can also then add a flag if the person wants to keep the posterior flattened.
                 log_accept_probability = (1/N_flatten)*log_accept_probability
             randomNumber = np.random.uniform()
