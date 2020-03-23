@@ -372,9 +372,9 @@ class parameter_estimation:
             if self.UserInput.parameter_estimation_settings['verbose']: print('Current posterior',log_likelihood_current_location+log_prior_current_location, 'Proposed Posterior', log_likelihood_proposal+log_prior_proposal)
             if self.UserInput.parameter_estimation_settings['mcmc_modulate_accept_probability'] != 0: #This flattens the posterior by accepting low values more often. It can be useful when greater sampling is more important than accuracy.
                 N_flatten = float(self.UserInput.parameter_estimation_settings['mcmc_modulate_accept_probability'])
-                accept_probability = np.exp(log_accept_probability) #This is e^logP = P. #This is base 'e' because the logpdf functions are base e. Ashi checked the sourcecode.
-                accept_probability = accept_probability**(1/N_flatten) #TODO: add code that unflattens the final histograms, that way even with more sampling we still get an accurate final posterior distribution. We can also then add a flag if the person wants to keep the posterior flattened.
-                log_accept_probability = np.log(accept_probability)
+                #This is e^logP = P. #This is base 'e' because the logpdf functions are base e. Ashi checked the sourcecode.
+                #TODO: add code that unflattens the final histograms, that way even with more sampling we still get an accurate final posterior distribution. We can also then add a flag if the person wants to keep the posterior flattened.
+                log_accept_probability = (1/N_flatten)*log_accept_probability
             randomNumber = np.random.uniform()
             log_randomNumber = np.log(randomNumber) #This is base 'e' because the logpdf functions are base e. Ashi checked the sourcecode.
             if log_accept_probability > log_randomNumber:  #TODO: keep a log of the accept and reject. If the reject ratio is >90% or some other such number, warn the user.
