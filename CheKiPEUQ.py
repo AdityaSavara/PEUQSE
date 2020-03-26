@@ -511,7 +511,9 @@ class parameter_estimation:
         simulatedResponses_transformed_flattened = np.array(simulatedResponses_transformed).flatten()
         observedResponses_transformed_flattened = np.array(observedResponses_transformed).flatten()
  
+        #If our likelihood is  'probability of Response given Theta...' we have a continuous probability distribution for both the response and theta. That means the pdf  must use binning on both variables. Eric notes that the pdf returns a probability density, not a probability mass. So the pdf function here divides by the width of whatever small bin is being used and then returns the density accordingly. Because of this, our what we are calling likelihood is not actually probability (it's not the actual likelihood) but is proportional to the likelihood.
         #This we call it a probability_metric and not a probability. #TODO: consider changing likelihood and get likelihood to "likelihoodMetric" and "getLikelihoodMetric"
+        
         
         #Now we will check whether responses_covmat is square or not. If it's square, we take it as is. If it's not square, we take the nested object inside since the multivariate_normal.pdf function requires a diagonal values vector to be 1D.
         responses_covmat = self.responses_covmat
