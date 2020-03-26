@@ -511,26 +511,25 @@ class parameter_estimation:
         simulatedResponses_transformed_flattened = np.array(simulatedResponses_transformed).flatten()
         observedResponses_transformed_flattened = np.array(observedResponses_transformed).flatten()
  
-        #If our likelihood is  “probability of Response given Theta”…  we have a continuous probability distribution for both the response and theta. That means the pdf  must use binning on both variables. Eric notes that the pdf returns a probability density, not a probability mass. So the pdf function here divides by the width of whatever small bin is being used and then returns the density accordingly. Because of this, our what we are calling likelihood is not actually probability (it’s not the actual likelihood) but is proportional to the likelihood.
         #This we call it a probability_metric and not a probability. #TODO: consider changing likelihood and get likelihood to "likelihoodMetric" and "getLikelihoodMetric"
         
         #Now we will check whether responses_covmat is square or not. If it's square, we take it as is. If it's not square, we take the nested object inside since the multivariate_normal.pdf function requires a diagonal values vector to be 1D.
         responses_covmat = self.responses_covmat
         responses_covmat_shape = np.shape(responses_covmat)
         if len(responses_covmat_shape) == 1: #Matrix is square because has only one value.
-            log_probability_metric = multivariate_normal.logpdf(x=simulatedResponses_transformed_flattened,mean=observedResponses_transformed_flattened,cov=responses_covmat)
+            log_probability_metric = multivariate_normal.logpdf(mean=simulatedResponses_transformed_flattened,x=observedResponses_transformed_flattened,cov=responses_covmat)
         elif responses_covmat_shape[0] == responses_covmat_shape[1]:  #Else it is 2D, check if it's square.
-            probability_metric = multivariate_normal.logpdf(x=simulatedResponses_transformed_flattened,mean=observedResponses_transformed_flattened,cov=responses_covmat)
+            probability_metric = multivariate_normal.logpdf(mean=simulatedResponses_transformed_flattened,x=observedResponses_transformed_flattened,cov=responses_covmat)
             #TODO: Put in near-diagonal solution described in github.
         else:  #If it is not square, it's a list of variances so we need to take the 1D vector version.
             try:
-                log_probability_metric = multivariate_normal.logpdf(x=simulatedResponses_transformed_flattened,mean=observedResponses_transformed_flattened,cov=responses_covmat[0])                
+                log_probability_metric = multivariate_normal.logpdf(mean=simulatedResponses_transformed_flattened,x=observedResponses_transformed_flattened,cov=responses_covmat[0])                
             except:
                 log_probability_metric = 1
             if log_probability_metric == 1:
                 log_probability_metric = -1E100 #Just initializing, then will add each probability separately.
                 for responseValueIndex in range(len(simulatedResponses_transformed_flattened)):
-                    current_log_probability_metric = multivariate_normal.logpdf(x=simulatedResponses_transformed_flattened[responseValueIndex],mean=observedResponses_transformed_flattened[responseValueIndex],cov=responses_covmat[0][responseValueIndex])    
+                    current_log_probability_metric = multivariate_normal.logpdf(mean=simulatedResponses_transformed_flattened[responseValueIndex],x=observedResponses_transformed_flattened[responseValueIndex],cov=responses_covmat[0][responseValueIndex])    
                     log_probability_metric = current_log_probability_metric + log_probability_metric
                     if float(current_log_probability_metric) == float('-inf'):
                         print("Warning: There are posterior points that have zero probability. If there are too many points like this, the MAP and mu_AP returned will not be meaningful.")
