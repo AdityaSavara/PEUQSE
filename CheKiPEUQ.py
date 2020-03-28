@@ -676,9 +676,6 @@ class parameter_estimation:
         try:
             self.makeHistogramsForEachParameter()    
             self.makeSamplingScatterMatrixPlot()
-
-
-
             self.createMumpcePlots()
         except: #TODO: do something better than try & accept. Right now, this is because the above plots are designed for mcmc sampling and don't work if pure grid search or pure optimize is used.
             pass

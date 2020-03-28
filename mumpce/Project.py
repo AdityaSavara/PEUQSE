@@ -1009,10 +1009,20 @@ class Project(object):
         #Create the matplotlib figure and subplots
         fig,axes=plt.subplots(1,num_plots,figsize=(num_plots*5,5))
         #Plot the individual subplots
-        if len(contour_settings_custom) == 0: 
+        if len(contour_settings_custom) == 0 and len(factors_list) == 1:
+            self._single_pdf_plot(factors=factors_list[0],ax=axes)
+
+        if len(contour_settings_custom) > 0 and len(factors_list) == 1:
+            self._single_pdf_plot(factors=factors_list[0],ax=axes, fig=fig, contour_settings_custom = contour_settings_custom)
+            fig.tight_layout()
+            if 'figure_name' in contour_settings_custom:
+                fig.savefig(contour_settings_custom['figure_name']+".png",dpi=220)
+
+        if len(contour_settings_custom) == 0 and not len(factors_list) == 1: 
             for ax,factors in zip(axes,factors_list):
                 self._single_pdf_plot(factors=factors,ax=ax)
-        if len(contour_settings_custom) > 0: 
+
+        if len(contour_settings_custom) > 0 and not len(factors_list) == 1: 
             for ax,factors in zip(axes,factors_list):
                 self._single_pdf_plot(factors=factors,ax=ax, fig=fig, contour_settings_custom = contour_settings_custom)
             fig.tight_layout() 
