@@ -50,7 +50,7 @@ class parameter_estimation:
         UserInput.responses['responses_observed'] = np.atleast_2d(UserInput.responses['responses_observed'])
         UserInput.responses['responses_observed_uncertainties'] = np.atleast_2d(UserInput.responses['responses_observed_uncertainties'])
 
-
+        #TODO: This only works if the uncertainties are uncorrelated.  We need to figure out what to do when the uncertainties are not simply gaussian uncertainties.
         UserInput.responses['responses_observed_transformed'], UserInput.responses['responses_observed_transformed_uncertainties']  = self.transform_responses(UserInput.responses['responses_observed'], UserInput.responses['responses_observed_uncertainties']) #This creates transforms for any data that we might need it. The same transforms will also be applied during parameter estimation.
              
         self.UserInput.num_data_points = len(UserInput.responses['responses_observed'].flatten()) #FIXME: This is only true for transient data.
@@ -67,19 +67,19 @@ class parameter_estimation:
             UserInput.covmat_prior_scaled[parameterIndex,:] = UserInput.covmat_prior[parameterIndex,:]/parameterValue
             UserInput.covmat_prior_scaled[:,parameterIndex] = UserInput.covmat_prior[:,parameterIndex]/parameterValue           
 
-        #To find the responses covariance matrix, we take the errors from the points. This is needed for the likelihood.
+        #To find the *observed* responses covariance matrix, meaning based on the uncertainties reported by the users, we take the uncertainties from the points. This is needed for the likelihood. However, it will be transformed again at that time.
         self.UserInput.num_response_dimensions = np.shape(UserInput.responses['responses_abscissa'])[0] #The first index of shape is the num of responses, but has to be after at_least2d is performed.
         if self.UserInput.num_response_dimensions == 1:
-            responses_covmat = np.array(self.UserInput.responses['responses_observed_transformed_uncertainties']) #Filling variable.
-            if np.shape(responses_covmat)[0] == (1): #This means it's just a list of standard deviations and needs to be squared to become variances.
-                responses_covmat = np.square(responses_covmat)
+            observed_responses_covmat = np.array(self.UserInput.responses['responses_observed_transformed_uncertainties']) #Filling variable.
+            if np.shape(observed_responses_covmat)[0] == (1): #This means it's just a list of standard deviations and needs to be squared to become variances.
+                observed_responses_covmat = np.square(observed_responses_covmat)
             else:
-                responses_covmat = responses_covmat
+                observed_responses_covmat = observed_responses_covmat
         elif self.UserInput.num_response_dimensions > 1:  #if the dimensionality of responses is greater than 1, we only support providing standard deviations. Will flatten and square.
-            responses_covmat = np.array(self.UserInput.responses['responses_observed_transformed_uncertainties']) #Filling variable.
-            responses_covmat = responses_covmat.flatten() 
-            responses_covmat = np.square(responses_covmat)
-        self.responses_covmat = responses_covmat            
+            observed_responses_covmat = np.array(self.UserInput.responses['responses_observed_transformed_uncertainties']) #Filling variable.
+            observed_responses_covmat = observed_responses_covmat.flatten() 
+            observed_responses_covmat = np.square(observed_responses_covmat)
+        self.observed_responses_covmat = observed_responses_covmat            
                        
         #self.covmat_prior = UserInput.covmat_prior
         self.Q_mu = self.UserInput.mu_prior*0 # Q samples the next step at any point in the chain.  The next step may be accepted or rejected.  Q_mu is centered (0) around the current theta.  
@@ -453,7 +453,7 @@ class parameter_estimation:
         # posterior probabilites are transformed to a standard normal (std=1) for obtaining the evidence:
         #FIXME: Log was not propagated correctly here. Below line used to be self.evidence = np.mean(self.post_burn_in_posteriors_un_normed_vec)*np.sqrt(2*np.pi*np.std(self.post_burn_in_samples)**2)
         #So either need to make post_burn_in_posteriors_un_normed_vec again before this step, or need to change below line.
-        self.evidence = np.mean(self.post_burn_in_log_posteriors_un_normed_vec)*np.sqrt(2*np.pi*np.std(self.post_burn_in_samples)**2)
+        self.evidence = np.mean(np.exp(self.post_burn_in_log_posteriors_un_normed_vec))/np.linalg.norm(self.post_burn_in_samples)# another variety:*np.sqrt(2*np.pi*np.std(self.post_burn_in_samples)**2)
         post_burn_in_log_posteriors_vec = self.post_burn_in_log_posteriors_un_normed_vec/self.evidence
         log_ratios = (post_burn_in_log_posteriors_vec-self.post_burn_in_log_priors_vec) #log10(a/b) = log10(a)-log10(b)
         log_ratios[np.isinf(log_ratios)] = 0
@@ -512,26 +512,37 @@ class parameter_estimation:
         simulatedResponses_transformed_flattened = np.array(simulatedResponses_transformed).flatten()
         observedResponses_transformed_flattened = np.array(observedResponses_transformed).flatten()
  
-        #If our likelihood is  “probability of Response given Theta”…  we have a continuous probability distribution for both the response and theta. That means the pdf  must use binning on both variables. Eric notes that the pdf returns a probability density, not a probability mass. So the pdf function here divides by the width of whatever small bin is being used and then returns the density accordingly. Because of this, our what we are calling likelihood is not actually probability (it’s not the actual likelihood) but is proportional to the likelihood.
+        #If our likelihood is  'probability of Response given Theta...' we have a continuous probability distribution for both the response and theta. That means the pdf  must use binning on both variables. Eric notes that the pdf returns a probability density, not a probability mass. So the pdf function here divides by the width of whatever small bin is being used and then returns the density accordingly. Because of this, our what we are calling likelihood is not actually probability (it's not the actual likelihood) but is proportional to the likelihood.
         #This we call it a probability_metric and not a probability. #TODO: consider changing likelihood and get likelihood to "likelihoodMetric" and "getLikelihoodMetric"
         
-        #Now we will check whether responses_covmat is square or not. If it's square, we take it as is. If it's not square, we take the nested object inside since the multivariate_normal.pdf function requires a diagonal values vector to be 1D.
-        responses_covmat = self.responses_covmat
-        responses_covmat_shape = np.shape(responses_covmat)
-        if len(responses_covmat_shape) == 1: #Matrix is square because has only one value.
-            log_probability_metric = multivariate_normal.logpdf(x=simulatedResponses_transformed_flattened,mean=observedResponses_transformed_flattened,cov=responses_covmat)
-        elif responses_covmat_shape[0] == responses_covmat_shape[1]:  #Else it is 2D, check if it's square.
-            probability_metric = multivariate_normal.logpdf(x=simulatedResponses_transformed_flattened,mean=observedResponses_transformed_flattened,cov=responses_covmat)
-            #TODO: Put in near-diagonal solution described in github.
+        
+        #Now we need to make the simulated_responses_covmat.
+        #First we will check whether observed_responses_covmat is square or not. The multivariate_normal.pdf function requires a diagonal values vector to be 1D.
+        observed_responses_covmat = self.observed_responses_covmat
+        observed_responses_covmat_shape = np.shape(observed_responses_covmat) 
+        
+        #In general, the covmat could be a function of the responses magnitude and independent variables. So eventually, we will use non-linear regression or something to estimate it. However, for now we simply take the observed_responses_covmat which will work for most cases.
+        #TODO: use Ashi's nonlinear regression code (which  he used in this paper https://www.sciencedirect.com/science/article/abs/pii/S0920586118310344).  Put in the response magnitudes and the independent variables.
+        #in future it will be something like: if self.UserInput.covmat_regression== True: simulated_responses_covmat = nonLinearCovmatPrediction(self.UserInput['independent_variable_values'], observed_responses_covmat)
+        #And that covmat_regression will be on by default.  We will need to have an additional argument for people to specify whether magnitude weighting and independent variable values should both be considered, or just one.
+        simulated_responses_covmat = copy.deepcopy(observed_responses_covmat)
+        simulated_responses_covmat_shape = copy.deepcopy(observed_responses_covmat_shape) #no need to take the shape of the actual simulated_responses_covmat since they must be same. This is probably slightly less computation.
+        
+        
+        if len(simulated_responses_covmat_shape) == 1: #Matrix is square because has only one value.
+            log_probability_metric = multivariate_normal.logpdf(mean=simulatedResponses_transformed_flattened,x=observedResponses_transformed_flattened,cov=simulated_responses_covmat)
+        elif simulated_responses_covmat_shape[0] == simulated_responses_covmat_shape[1]:  #Else it is 2D, check if it's square.
+            probability_metric = multivariate_normal.logpdf(mean=simulatedResponses_transformed_flattened,x=observedResponses_transformed_flattened,cov=simulated_responses_covmat)
+            #TODO: Put in near-diagonal solution described in github: https://github.com/AdityaSavara/CheKiPEUQ/issues/3
         else:  #If it is not square, it's a list of variances so we need to take the 1D vector version.
             try:
-                log_probability_metric = multivariate_normal.logpdf(x=simulatedResponses_transformed_flattened,mean=observedResponses_transformed_flattened,cov=responses_covmat[0])                
+                log_probability_metric = multivariate_normal.logpdf(mean=simulatedResponses_transformed_flattened,x=observedResponses_transformed_flattened,cov=simulated_responses_covmat[0])                
             except:
                 log_probability_metric = 1
             if log_probability_metric == 1:
                 log_probability_metric = -1E100 #Just initializing, then will add each probability separately.
                 for responseValueIndex in range(len(simulatedResponses_transformed_flattened)):
-                    current_log_probability_metric = multivariate_normal.logpdf(x=simulatedResponses_transformed_flattened[responseValueIndex],mean=observedResponses_transformed_flattened[responseValueIndex],cov=responses_covmat[0][responseValueIndex])    
+                    current_log_probability_metric = multivariate_normal.logpdf(mean=simulatedResponses_transformed_flattened[responseValueIndex],x=observedResponses_transformed_flattened[responseValueIndex],cov=simulated_responses_covmat[0][responseValueIndex])    
                     log_probability_metric = current_log_probability_metric + log_probability_metric
                     if float(current_log_probability_metric) == float('-inf'):
                         print("Warning: There are posterior points that have zero probability. If there are too many points like this, the MAP and mu_AP returned will not be meaningful.")
@@ -676,9 +687,6 @@ class parameter_estimation:
         try:
             self.makeHistogramsForEachParameter()    
             self.makeSamplingScatterMatrixPlot()
-
-
-
             self.createMumpcePlots()
         except: #TODO: do something better than try & accept. Right now, this is because the above plots are designed for mcmc sampling and don't work if pure grid search or pure optimize is used.
             pass
