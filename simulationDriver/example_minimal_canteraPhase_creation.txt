@@ -1,6 +1,0 @@
-import ceO2_simulation_settings
-import canteraSimulate
-cti_string, canteraPhases = canteraSimulate.create_cti_and_cantera_phases("ceO2", "getReactionsFromFile", ceO2_simulation_settings)
-
-gas = canteraPhases['gas']
-surf = canteraPhases['surf']

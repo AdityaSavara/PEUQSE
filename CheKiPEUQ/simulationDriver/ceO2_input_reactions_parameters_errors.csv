@@ -1,0 +1,3 @@
+reactionID,canteraReactionType,reactionEquation,A,b,E,a,m,e,coverageDependanceSpecies, is_sticking_coefficient
+0001,surface_reaction,Acetaldehyde + CeCation(S) => Acetaldehyde-Ce(S),1.0,0.0,2000.0,nan,nan,nan,None,True
+0002,surface_reaction,Acetaldehyde-Ce(S) => Acetaldehyde + CeCation(S),10000000000000.0,0.0,67400.0,0.0,0.0,-6000.000000000001,Acetaldehyde(S),False

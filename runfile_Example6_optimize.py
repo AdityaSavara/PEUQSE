@@ -2,8 +2,8 @@ import pandas as pd
 import CheKiPEUQ as CKPQ
 import cantera as ct
 import cantera.ck2cti as ck2cti
-import simulationDriver.canteraSimulate
-import simulationDriver.canteraKineticsParametersParser 
+import CheKiPEUQ.simulationDriver.canteraSimulate
+import CheKiPEUQ.simulationDriver.canteraKineticsParametersParser 
 import numpy as np
 
 
@@ -30,7 +30,7 @@ if __name__ == "__main__":
                                                      60000,50000,40000,30000,20000,10000,0] #E modifiers.
 
     #InputParameterInitialValues = [41.5, 41.5, 13.0, 13.0, 0.1, 0.1] # Ea1_mean, Ea2_mean, log_A1_mean, log_A2_mean, gamma_1_mean, gamma_2_mean 
-    UserInput.model['InputParametersPriorValuesUncertainties'] = [200, 200, 13, 13, 0.1, 0.1,
+    UserInput.model['InputParametersPriorValuesUncertainties'] = [20, 20, 13, 13, 0.1, 0.1,
                                                      1,1,1,1,1,1,1 , #A modifiers.
                                                      10000,10000,10000,10000,10000,10000,10000 #E modifiers.
                                                      ] 

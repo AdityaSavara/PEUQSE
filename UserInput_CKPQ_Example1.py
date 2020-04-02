@@ -42,7 +42,6 @@ model['parameterNamesAndMathTypeExpressionsDict'] = {'Ea_1':r'$E_{a1}$','Ea_2':r
 model['simulateByInputParametersOnlyFunction'] = TPR_simulationFunctionWrapper
 model['simulationOutputProcessingFunction'] = None
 model['reducedParameterSpace'] = [] #This is to keep parameters as 'constants'. Any parameter index in this list will be allowed to change, the rest will be held as constants.
-model['kinetics_type'] = '' #can be 'transient' or 'steady_state', anything else is ignored.
 
 #####Experimental Data Input Files#####
 responses = {}
@@ -51,7 +50,6 @@ responses['responses_observed'] = np.array(experiments_df['AcHBackgroundSubtract
 responses['responses_observed_uncertainties'] = observedResponses_uncertainties
 #responses_abscissa = np.array(experiments_df['AcH - T'])
 #responses_observed = np.array(experiments_df['AcHBackgroundSubtracted'])/2000
-responses['points_if_transformed'] = 100 #Typically want 100 or 1000 etc.
 observedResponses = observedResponsesFunc()
 
 
@@ -79,13 +77,13 @@ parameter_estimation_settings['gridSampling'] = False
 
 
 ######mumpce plots#####
-model_parameter_info = np.array([{'parameter_number': 0, 'parameter_name': r'$E_{a1}$'},
-{'parameter_number': 1, 'parameter_name': r'$E_{a2}$'},
-{'parameter_number': 2, 'parameter_name': r'$log(A_{1})$'},
-{'parameter_number': 3, 'parameter_name': r'$log(A_{2})$'},
-{'parameter_number': 4, 'parameter_name': r'$\gamma_{1}$'},
-{'parameter_number': 5, 'parameter_name': r'$\gamma_{2}$'}])
-active_parameters = np.array([0, 1, 2, 3, 4, 5])
-pairs_of_parameter_indices = [[0, 1], [1, 2],[2, 3],[3, 4],[4, 5]]
+#model_parameter_info = np.array([{'parameter_number': 0, 'parameter_name': r'$E_{a1}$'},
+#{'parameter_number': 1, 'parameter_name': r'$E_{a2}$'},
+#{'parameter_number': 2, 'parameter_name': r'$log(A_{1})$'},
+#{'parameter_number': 3, 'parameter_name': r'$log(A_{2})$'},
+#{'parameter_number': 4, 'parameter_name': r'$\gamma_{1}$'},
+#{'parameter_number': 5, 'parameter_name': r'$\gamma_{2}$'}])
+active_parameters = []
+#pairs_of_parameter_indices = [[0, 1], [1, 2],[2, 3],[3, 4],[4, 5]]
 contour_settings_custom = {'figure_name': 'Example_1_plots_mumpce','fontsize':'auto' ,'num_y_ticks': 'auto','num_x_ticks':'auto','contours_normalized':False,'center_on':'all','colorbars':True} #'colormap_posterior_customized':'Oranges','colormap_prior_customized':'Greens'
 parameter_pairs_for_contour_plots = [] #This will accept either strings (for variable names) or integers for positions.

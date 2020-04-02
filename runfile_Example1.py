@@ -22,7 +22,7 @@ if __name__ == "__main__":
     UserInput.model['parameterNamesAndMathTypeExpressionsDict'] = {'Ea_1':r'$E_{a1}$','Ea_2':r'$E_{a2}$','log_A1':r'$log(A_{1})$','log_A2':r'$log(A_{2})$','gamma1':r'$\gamma_{1}$','gamma2':r'$\gamma_{2}$'}
     UserInput.model['InputParameterPriorValues'] = [41.5, 41.5, 13.0, 13.0, 0.1, 0.1] # Ea1_mean, Ea2_mean, log_A1_mean, log_A2_mean, gamma_1_mean, gamma_2_mean 
     UserInput.model['InputParametersPriorValuesUncertainties'] = [200, 200, 13, 13, 0.1, 0.1] #If user wants to use a prior with covariance, then this must be a 2D array/ list. To assume no covariance, a 1D
-    UserInput.model['InputParameterInitialGuess'] = [21.5, 41.5, 13.0, 13.0, 0.4, 0.2] #This is where the mcmc chain will start.
+    UserInput.model['InputParameterInitialGuess'] = [21.5, 80.5, 13.0, 50.0, 0.4, 0.2] #This is where the mcmc chain will start.
     #InputParameterInitialValues = [41.5, 41.5, 13.0, 13.0, 0.1, 0.1] # Ea1_mean, Ea2_mean, log_A1_mean, log_A2_mean, gamma_1_mean, gamma_2_mean 
     
     #InputParametersInitialValuesUncertainties = [200, 200, 13, 13, 0.1, 0.1] #If user wants to use a prior with covariance, then this must be a 2D array/ list. To assume no covariance, a 1D array can be used.
@@ -46,7 +46,9 @@ if __name__ == "__main__":
     PE_object = CKPQ.parameter_estimation(UserInput)
     
     #Now we do parameter estimation.
-    PE_object.doMetropolisHastings()
+    #PE_object.doGridSearch('getLogP', verbose = False)
+    #PE_object.doMetropolisHastings()
+    PE_object.doOptimizeNegLogP(method="BFGS", printOptimum=True, verbose=True)
     #[map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, samples_simulatedOutputs, logP] = PE_object.doMetropolisHastings()
     
     PE_object.createAllPlots() #This function calls each of the below functions.

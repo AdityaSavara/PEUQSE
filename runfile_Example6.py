@@ -2,8 +2,8 @@ import pandas as pd
 import CheKiPEUQ as CKPQ
 import cantera as ct
 import cantera.ck2cti as ck2cti
-import simulationDriver.canteraSimulate
-import simulationDriver.canteraKineticsParametersParser 
+import CheKiPEUQ.simulationDriver.canteraSimulate
+import CheKiPEUQ.simulationDriver.canteraKineticsParametersParser 
 import numpy as np
 
 
