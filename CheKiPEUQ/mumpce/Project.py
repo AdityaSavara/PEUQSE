@@ -953,6 +953,8 @@ class Project(object):
             if 'contours_normalized' not in contour_settings_custom: #This makes the contours heights normalized from 0 to 1.
                 contour_settings_custom['contours_normalized'] = True            
             #This makes the locations of the points in the contours.
+            if 'axis_limits' in contour_settings_custom:
+                x_axis_min, x_axis_max, y_axis_min, y_axis_max = contour_settings_custom['axis_limits']
             xpts = np.linspace(x_axis_min,x_axis_max,contour_settings_custom['num_pts_per_axis'])
             ypts = np.linspace(y_axis_min,y_axis_max,contour_settings_custom['num_pts_per_axis'])
             x_mesh, y_mesh = np.meshgrid(xpts, ypts) 

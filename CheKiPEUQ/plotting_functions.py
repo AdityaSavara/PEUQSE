@@ -1,5 +1,5 @@
 import sys
-sys.path.insert(0, '/mumpce/')
+#sys.path.insert(0, '/mumpce/')
 import CheKiPEUQ.mumpce.Project as mumpceProject
 import CheKiPEUQ.mumpce.solution as mumpceSolution
 import numpy as np
@@ -19,7 +19,7 @@ class plotting_functions_class():
         cov = np.cov(self.samples,rowvar=False)
         return mu, cov
 
-    def mumpce_plots(self, model_parameter_info = {}, active_parameters = [], pairs_of_parameter_indices = [], posterior_mu_vector = 0, posterior_cov_matrix = 0, prior_mu_vector = 0, prior_cov_matrix = 0, contour_settings_custom = {'figure_name','fontsize','num_y_ticks','num_x_ticks','colormap_posterior_customized','colormap_prior_customized','contours_normalized','colorbars'}): # Pass empty keyword arguments for important parameters.  That way, warnings may be issued if they are not set.  There is not really a good default for these keyword arguments.  They depend entirely on the nature of the data being plotted.
+    def mumpce_plots(self, model_parameter_info = {}, active_parameters = [], pairs_of_parameter_indices = [], posterior_mu_vector = 0, posterior_cov_matrix = 0, prior_mu_vector = 0, prior_cov_matrix = 0, contour_settings_custom = {'figure_name','fontsize','num_y_ticks','num_x_ticks','colormap_posterior_customized','colormap_prior_customized','contours_normalized','colorbars','axis_limits'}): # Pass empty keyword arguments for important parameters.  That way, warnings may be issued if they are not set.  There is not really a good default for these keyword arguments.  They depend entirely on the nature of the data being plotted.
         mumpceProjectObject = mumpceProject.Project() # A mumpce project object must be created.
         if len(model_parameter_info) == 0:
             print("Pass the 'model_parameter_info' argument to the mumpce_plots function.")
