@@ -9,7 +9,7 @@ simulated_response_plot_settings = {}
 simulated_response_plot_settings['x_label'] = ''
 simulated_response_plot_settings['y_label'] = ''
 #simulated_response_plot_settings['y_range'] = [0.00, 0.025] #optional.
-simulated_response_plot_settings['figure_name'] = ''
+simulated_response_plot_settings['figure_name'] = 'Posterior_Simulated'
 
 ####BELOW ARE MODEL PARAMETERS, WE WILL WANT TO COMBINE THESE INTO A LIST OF PARAMETERS###
 model = {} 
