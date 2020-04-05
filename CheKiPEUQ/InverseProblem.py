@@ -619,7 +619,7 @@ class parameter_estimation:
                 responseSuffix = '' #If there is only 1 dimension, we don't need to add a suffix to the files created. That would only confuse people.
             if self.UserInput.num_response_dimensions > 1:
                 responseSuffix = "_"+str(responseDimIndex)
-            individual_plot_settings['figure_name'] = individual_plot_settings['figure_name']+responseSuffix          
+            individual_plot_settings['figure_name'] = individual_plot_settings['figure_name']+responseSuffix    
             if 'x_label' in plot_settings:
                 if type(plot_settings['x_label']) == type(['list']) and len(plot_settings['x_label']) > 1: #the  label can be a single string, or a list of multiple response's labels. If it's a list of greater than 1 length, then we need to use the response index.
                     individual_plot_settings['x_label'] = plot_settings['x_label'][responseDimIndex]
@@ -628,10 +628,10 @@ class parameter_estimation:
                     individual_plot_settings['y_label'] = plot_settings['y_label'][responseDimIndex]                
             #TODO, low priority: we can check if x_range and y_range are nested, and thereby allow individual response dimension values for those.                               
             if np.shape(allResponses_x_values)[0] == 1: #This means a single abscissa for all responses.
-                figureObject = plotting_functions.createSimulatedResponsesPlot(allResponses_x_values[0], allResponsesListsOfYArrays[responseDimIndex], plot_settings, listOfYUncertainties=allResponsesListsOfYUncertainties[responseDimIndex])
+                figureObject = plotting_functions.createSimulatedResponsesPlot(allResponses_x_values[0], allResponsesListsOfYArrays[responseDimIndex], individual_plot_settings, listOfYUncertainties=allResponsesListsOfYUncertainties[responseDimIndex])
                 np.savetxt(individual_plot_settings['figure_name']+".csv", np.vstack((allResponses_x_values[0], allResponsesListsOfYArrays[responseDimIndex])).transpose(), delimiter=",", header='x_values, observed, sim_initial_guess, sim_MAP, sim_mu_AP', comments='')
             if np.shape(allResponses_x_values)[0] > 1: #This means a separate abscissa for each response.
-                figureObject = plotting_functions.createSimulatedResponsesPlot(allResponses_x_values[responseDimIndex], allResponsesListsOfYArrays[responseDimIndex], plot_settings, listOfYUncertainties=allResponsesListsOfYUncertainties[responseDimIndex])
+                figureObject = plotting_functions.createSimulatedResponsesPlot(allResponses_x_values[responseDimIndex], allResponsesListsOfYArrays[responseDimIndex], individual_plot_settings, listOfYUncertainties=allResponsesListsOfYUncertainties[responseDimIndex])
                 np.savetxt(individual_plot_settings['figure_name']+".csv", np.vstack((allResponses_x_values[responseDimIndex], allResponsesListsOfYArrays[responseDimIndex])).transpose(), delimiter=",", header='x_values, observed, sim_initial_guess, sim_MAP, sim_mu_AP', comments='')
             allResponsesFigureObjectsList.append(figureObject)
         return allResponsesFigureObjectsList  #This is a list of matplotlib.pyplot as plt objects.
@@ -774,6 +774,8 @@ def littleEulerUncertaintyPropagation(dydt_uncertainties, t_values, initial_y_un
     for index in range(len(dydt_uncertainties)-1): #The uncertainty for each next point is propagated through the uncertainty of the current value and the delta_t*(dy/dt uncertainty), since we are adding two values.
         deltat_resolution = t_values[index+1]-t_values[index]
         y_uncertainties[index+1] = ((y_uncertainties[index])**2+(dydt_uncertainties[index]*deltat_resolution)**2)**0.5
+    if initial_y_uncertainty == 0:
+        y_uncertainties[0] = np.mean(y_uncertainties)    
     return y_uncertainties
 
 #for calculating y at time t from dy/dt.  

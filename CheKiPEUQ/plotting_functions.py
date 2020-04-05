@@ -115,7 +115,7 @@ def sampledParameterHistogramMaker(parameterSamples, parameterName,parameterName
         sampledParameterAxesDictionary['parameterName'].set_ylabel('frequency')
         sampledParameterAxesDictionary['parameterName'].set_xlabel(parameterNamesAndMathTypeExpressionsDict[parameterName])
         sampledParameterFiguresDictionary['parameterName'].tight_layout()
-        sampledParameterFiguresDictionary['parameterName'].savefig(parameterName+'.png', dpi=220)
+        sampledParameterFiguresDictionary['parameterName'].savefig('Histogram_sampling_'+parameterName+'.png', dpi=220)
         #The above block makes code kind of like this in a dynamic fashion. Since we know how many we will need, a dictionary is used to avoid the need for 'exec' statements when making new parameters.
         # fig2, ax2 = plt.subplots()
         # ax2.hist(samples[:,1])

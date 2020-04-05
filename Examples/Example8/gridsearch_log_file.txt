@@ -1,0 +1,4 @@
+result: self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_logP_un_normed_vec
+result:0-1358472.6397010272
+result:1-1358361.5362789477
+result:2-1358472.7149457892
