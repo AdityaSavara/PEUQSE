@@ -1,4 +1,4 @@
-import CheKiPEUQ as CKPQ
+import sys; sys.path.append('../../');  import CheKiPEUQ as CKPQ
 import processing_functions_tpd_odeint
 import pandas as pd
 

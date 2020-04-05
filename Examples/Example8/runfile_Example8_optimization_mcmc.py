@@ -1,4 +1,4 @@
-import CheKiPEUQ as CKPQ
+import sys; sys.path.append('../../');  import CheKiPEUQ as CKPQ
 
 
 if __name__ == "__main__":

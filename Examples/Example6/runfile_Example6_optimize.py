@@ -1,5 +1,5 @@
 import pandas as pd
-import CheKiPEUQ as CKPQ
+import sys; sys.path.append('../../');  import CheKiPEUQ as CKPQ
 import cantera as ct
 import cantera.ck2cti as ck2cti
 import CheKiPEUQ.simulationDriver.canteraSimulate
