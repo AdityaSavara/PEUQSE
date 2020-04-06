@@ -521,6 +521,11 @@ class parameter_estimation:
         #Now we will check whether responses_covmat is square or not. If it's square, we take it as is. If it's not square, we take the nested object inside since the multivariate_normal.pdf function requires a diagonal values vector to be 1D.
         responses_covmat = self.responses_covmat
         responses_covmat_shape = np.shape(responses_covmat)
+        if 'observed_parameter' in self.UserInput.responses:
+            simulatedResponses_transformed_flattened = simulatedResponses_transformed_flattened[self.UserInput.responses['observed_parameter']]
+            observedResponses_transformed_flattened = observedResponses_transformed_flattened[self.UserInput.responses['observed_parameter']]
+        if 'responses_covmat_shape' in self.UserInput.responses:
+            responses_covmat_shape = self.UserInput.responses['responses_covmat_shape']
         if len(responses_covmat_shape) == 1: #Matrix is square because has only one value.
             log_probability_metric = multivariate_normal.logpdf(x=simulatedResponses_transformed_flattened,mean=observedResponses_transformed_flattened,cov=responses_covmat)
         elif responses_covmat_shape[0] == responses_covmat_shape[1]:  #Else it is 2D, check if it's square.
@@ -688,7 +693,10 @@ class parameter_estimation:
         except:
             pass
         
-        self.createSimulatedResponsesPlots()
+        try:
+            self.createSimulatedResponsesPlots()
+        except:
+            pass
 
 
 class verbose_optimization_wrapper: #Modified slightly From https://stackoverflow.com/questions/16739065/how-to-display-progress-of-scipy-optimize-function
