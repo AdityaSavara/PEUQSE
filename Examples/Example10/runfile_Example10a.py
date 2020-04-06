@@ -5,6 +5,7 @@ import CheKiPEUQ as CKPQ
 if __name__ == "__main__":
     import CheKiPEUQ.UserInput as UserInput
     import processing_function_two_response as fun
+    import numpy as np
     
     ####### Useful for this example
     UserInput.model['simulationOutputProcessingFunction'] = None
@@ -27,7 +28,7 @@ if __name__ == "__main__":
     UserInput.parameter_estimation_settings['verbose'] = False 
     UserInput.parameter_estimation_settings['checkPointFrequency'] = 100
     UserInput.parameter_estimation_settings['mcmc'] = True 
-    UserInput.parameter_estimation_settings['mcmc_mode'] = 'unbiased'
+    UserInput.parameter_estimation_settings['mcmc_mode'] = 'unbiased' #This is the default.
     UserInput.parameter_estimation_settings['mcmc_random_seed'] = 0 #Normally set to None so that mcmc is set to be random. To get the same results repeatedly, such as for testing purposes, set the random seed to 0 or another integer for testing purposes.
     UserInput.parameter_estimation_settings['mcmc_burn_in'] = 1000
     UserInput.parameter_estimation_settings['mcmc_length'] = 10000 
@@ -37,10 +38,6 @@ if __name__ == "__main__":
     UserInput.parameter_pairs_for_contour_plots = [[0, 1]] #[[0, 1],[1, 0]]
     UserInput.contour_settings_custom['contours_normalized'] = False
 ######mumpce plots#####
-    UserInput.model_parameter_info = np.array([{'parameter_number': 0, 'parameter_name': r'$\theta_{1}$'},{'parameter_number': 1, 'parameter_name': r'$\theta_{2}$'}])
-    UserInput.active_parameters = np.array([0, 1])
-    UserInput.pairs_of_parameter_indices = [[0, 1]]
-    UserInput.contour_settings_custom = {'figure_name': 'Mumpce_contour_plot_two_response_parameter_0_observed','fontsize':'auto' ,'num_y_ticks': 'auto','num_x_ticks':'auto','contours_normalized':False,'center_on':'all','colorbars':True}
     UserInput.contour_settings_custom['axis_limits'] = [-1.0, 3.0, 3.0, 7.0] #[-2.0, 4.0, 1.0, 7.0]# for the alternate plot: [-1.0, 3.0, 3.0, 7.0]
     #After making the UserInput, now we make a 'parameter_estimation' object from it.
     PE_object = CKPQ.parameter_estimation(UserInput)
