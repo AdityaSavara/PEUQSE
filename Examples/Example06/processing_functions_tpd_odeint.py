@@ -3,7 +3,7 @@ import numpy as np
 import scipy
 from scipy.integrate import odeint
 import pandas as pd
-from tprmodel import tprequation, tprequationPiecewise
+#from tprmodel import tprequation, tprequationPiecewise
 
 #Need to define beta directly, or define dt and dT.
 dT = 0.77 #Set this to 0 for an isothermal experiment.
@@ -96,7 +96,7 @@ def import_integrals_settings(Filename):
     times, experiment_rates, experiment_rates_uncertainties = import_experimental_settings(Filename)
     from CheKiPEUQ import littleEulerGivenArray, littleEulerUncertaintyPropagation
     times, integrated_desorption, experiment_rates = littleEulerGivenArray(0, times, experiment_rates)
-    integrated_desorption_uncertainties = littleEulerUncertaintyPropagation(experiment_rates_uncertainties, times, 0.2)#The 0.2 is an initial coverage uncertainty.
+    integrated_desorption_uncertainties = littleEulerUncertaintyPropagation(experiment_rates_uncertainties, times, 0.0)#The 0.0 is an initial coverage uncertainty.
     return times, integrated_desorption, integrated_desorption_uncertainties
         
 #This is made for Example 8 which is using the Constant Errors and single site.

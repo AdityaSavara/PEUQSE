@@ -8,7 +8,7 @@ import copy
 #First made a 'test' in main, then made a simulation wrapper to do the same thing.
 
 #We will define some things *outside* of the function to load the model.
-model_location = ".\\CheKiPEUQ\\simulationDriver\\"
+model_location = "..\\..\\CheKiPEUQ\\simulationDriver\\"
 model_name = "ceO2"
 import ceO2_input_simulation_settings #The user may change settings in the python file with the same name.
 ceO2_input_simulation_settings.print_frequency = None #This makes the simulation not print things out during checkpoints.
@@ -21,6 +21,8 @@ print(reactions_parameters_array)
 
 #This is before any offset modification:
 ceO2_input_simulation_settings.original_reactions_parameters_array = reactions_parameters_array
+
+global piecewise_coverage_intervals
 piecewise_coverage_intervals = np.array([0,0.1,0.2,0.3,0.4,0.5,1.0])
 species_name = "Acetaldehyde1-Ce(S)" #In this example we make the parameters depend only on the coverage of species Acetaldehyde1-Ce(S).
 kineticParameterName = "A"
@@ -75,6 +77,7 @@ def cantera_simulation_wrapper_example6(parametersArray): #This takes in *only* 
     modified_reactions_parameters_array[1][8] = 10**parametersArray[4]
     modified_reactions_parameters_array[3][8] = 10**parametersArray[5]        
     
+    global piecewise_coverage_intervals
     numIntervals = len(piecewise_coverage_intervals)
     numReactions = 4 #This is hard coded right now.
     num_modifiers_A = numIntervals
@@ -161,7 +164,7 @@ plt.show()
 
 
 if __name__ == "__main__":
-    model_location = ".\\simulationDriver\\"
+    model_location = "..\\..\\CheKiPEUQ\\simulationDriver\\"
     model_name = "ceO2"
     
     import ceO2_input_simulation_settings #The user may change settings in the python file with the same name.
