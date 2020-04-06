@@ -31,6 +31,7 @@ responses = {}
 responses['responses_abscissa'] = []
 responses['responses_observed'] = []
 responses['responses_observed_uncertainties'] = []
+responses['reducedResponseSpace'] = []
 
 #####Parameter Estimation Inputs#####
 parameter_estimation_settings = {}
