@@ -1,0 +1,3209 @@
+ Anaconda Python 3.7 version 2019.10 has been loaded. 
+
+Currently Loaded Modules:
+  1) python/py37-anaconda-2019.10
+
+ 
+
+Starting MCMC sampling.
+MCMC sample number  100 checkpoint 1.0 out of 801.0
+averagetimePerSampling 0.0008000000000000007 seconds
+timeSinceLastCheckPoint 0.08000000000000007 seconds
+Estimated time remaining 64.00000000000006 seconds
+MCMC sample number  200 checkpoint 2.0 out of 801.0
+averagetimePerSampling 0.0007499999999999996 seconds
+timeSinceLastCheckPoint 0.06999999999999984 seconds
+Estimated time remaining 59.92499999999997 seconds
+MCMC sample number  300 checkpoint 3.0 out of 801.0
+averagetimePerSampling 0.0007333333333333332 seconds
+timeSinceLastCheckPoint 0.07000000000000006 seconds
+Estimated time remaining 58.51999999999999 seconds
+MCMC sample number  400 checkpoint 4.0 out of 801.0
+averagetimePerSampling 0.0007249999999999995 seconds
+timeSinceLastCheckPoint 0.06999999999999984 seconds
+Estimated time remaining 57.78249999999996 seconds
+MCMC sample number  500 checkpoint 5.0 out of 801.0
+averagetimePerSampling 0.0007200000000000002 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 57.31200000000001 seconds
+MCMC sample number  600 checkpoint 6.0 out of 801.0
+averagetimePerSampling 0.0007166666666666666 seconds
+timeSinceLastCheckPoint 0.06999999999999984 seconds
+Estimated time remaining 56.974999999999994 seconds
+MCMC sample number  700 checkpoint 7.0 out of 801.0
+averagetimePerSampling 0.0007142857142857146 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 56.71428571428574 seconds
+MCMC sample number  800 checkpoint 8.0 out of 801.0
+averagetimePerSampling 0.0007125 seconds
+timeSinceLastCheckPoint 0.06999999999999984 seconds
+Estimated time remaining 56.50125 seconds
+MCMC sample number  900 checkpoint 9.0 out of 801.0
+averagetimePerSampling 0.000711111111111111 seconds
+timeSinceLastCheckPoint 0.06999999999999984 seconds
+Estimated time remaining 56.31999999999999 seconds
+MCMC sample number  1000 checkpoint 10.0 out of 801.0
+averagetimePerSampling 0.0007100000000000002 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 56.161000000000016 seconds
+MCMC sample number  1100 checkpoint 11.0 out of 801.0
+averagetimePerSampling 0.0007090909090909091 seconds
+timeSinceLastCheckPoint 0.06999999999999984 seconds
+Estimated time remaining 56.01818181818182 seconds
+MCMC sample number  1200 checkpoint 12.0 out of 801.0
+averagetimePerSampling 0.0007083333333333333 seconds
+timeSinceLastCheckPoint 0.06999999999999984 seconds
+Estimated time remaining 55.887499999999996 seconds
+MCMC sample number  1300 checkpoint 13.0 out of 801.0
+averagetimePerSampling 0.0007076923076923078 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 55.766153846153856 seconds
+MCMC sample number  1400 checkpoint 14.0 out of 801.0
+averagetimePerSampling 0.0007071428571428571 seconds
+timeSinceLastCheckPoint 0.06999999999999984 seconds
+Estimated time remaining 55.652142857142856 seconds
+MCMC sample number  1500 checkpoint 15.0 out of 801.0
+averagetimePerSampling 0.0007066666666666665 seconds
+timeSinceLastCheckPoint 0.06999999999999984 seconds
+Estimated time remaining 55.54399999999999 seconds
+MCMC sample number  1600 checkpoint 16.0 out of 801.0
+averagetimePerSampling 0.0007062500000000001 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 55.440625000000004 seconds
+MCMC sample number  1700 checkpoint 17.0 out of 801.0
+averagetimePerSampling 0.0007058823529411764 seconds
+timeSinceLastCheckPoint 0.06999999999999984 seconds
+Estimated time remaining 55.34117647058823 seconds
+MCMC sample number  1800 checkpoint 18.0 out of 801.0
+averagetimePerSampling 0.0007055555555555554 seconds
+timeSinceLastCheckPoint 0.06999999999999984 seconds
+Estimated time remaining 55.24499999999999 seconds
+MCMC sample number  1900 checkpoint 19.0 out of 801.0
+averagetimePerSampling 0.0007052631578947369 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 55.15157894736843 seconds
+MCMC sample number  2000 checkpoint 20.0 out of 801.0
+averagetimePerSampling 0.000705 seconds
+timeSinceLastCheckPoint 0.06999999999999984 seconds
+Estimated time remaining 55.0605 seconds
+MCMC sample number  2100 checkpoint 21.0 out of 801.0
+averagetimePerSampling 0.0007047619047619049 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 54.97142857142858 seconds
+MCMC sample number  2200 checkpoint 22.0 out of 801.0
+averagetimePerSampling 0.0007045454545454546 seconds
+timeSinceLastCheckPoint 0.06999999999999984 seconds
+Estimated time remaining 54.88409090909091 seconds
+MCMC sample number  2300 checkpoint 23.0 out of 801.0
+averagetimePerSampling 0.0007043478260869565 seconds
+timeSinceLastCheckPoint 0.06999999999999984 seconds
+Estimated time remaining 54.79826086956521 seconds
+MCMC sample number  2400 checkpoint 24.0 out of 801.0
+averagetimePerSampling 0.0007041666666666667 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 54.713750000000005 seconds
+MCMC sample number  2500 checkpoint 25.0 out of 801.0
+averagetimePerSampling 0.000704 seconds
+timeSinceLastCheckPoint 0.06999999999999984 seconds
+Estimated time remaining 54.6304 seconds
+MCMC sample number  2600 checkpoint 26.0 out of 801.0
+averagetimePerSampling 0.0007038461538461537 seconds
+timeSinceLastCheckPoint 0.06999999999999984 seconds
+Estimated time remaining 54.54807692307691 seconds
+MCMC sample number  2700 checkpoint 27.0 out of 801.0
+averagetimePerSampling 0.0007037037037037038 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 54.466666666666676 seconds
+MCMC sample number  2800 checkpoint 28.0 out of 801.0
+averagetimePerSampling 0.0007035714285714285 seconds
+timeSinceLastCheckPoint 0.06999999999999984 seconds
+Estimated time remaining 54.38607142857143 seconds
+MCMC sample number  2900 checkpoint 29.0 out of 801.0
+averagetimePerSampling 0.0007034482758620689 seconds
+timeSinceLastCheckPoint 0.07000000000000006 seconds
+Estimated time remaining 54.30620689655172 seconds
+MCMC sample number  3000 checkpoint 30.0 out of 801.0
+averagetimePerSampling 0.0007033333333333335 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 54.22700000000001 seconds
+MCMC sample number  3100 checkpoint 31.0 out of 801.0
+averagetimePerSampling 0.0007032258064516128 seconds
+timeSinceLastCheckPoint 0.0699999999999994 seconds
+Estimated time remaining 54.14838709677419 seconds
+MCMC sample number  3200 checkpoint 32.0 out of 801.0
+averagetimePerSampling 0.000703125 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 54.0703125 seconds
+MCMC sample number  3300 checkpoint 33.0 out of 801.0
+averagetimePerSampling 0.0007030303030303029 seconds
+timeSinceLastCheckPoint 0.0699999999999994 seconds
+Estimated time remaining 53.992727272727265 seconds
+MCMC sample number  3400 checkpoint 34.0 out of 801.0
+averagetimePerSampling 0.0007029411764705881 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 53.91558823529411 seconds
+MCMC sample number  3500 checkpoint 35.0 out of 801.0
+averagetimePerSampling 0.0007028571428571429 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 53.838857142857144 seconds
+MCMC sample number  3600 checkpoint 36.0 out of 801.0
+averagetimePerSampling 0.0007027777777777776 seconds
+timeSinceLastCheckPoint 0.0699999999999994 seconds
+Estimated time remaining 53.76249999999999 seconds
+MCMC sample number  3700 checkpoint 37.0 out of 801.0
+averagetimePerSampling 0.0007027027027027026 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 53.68648648648648 seconds
+MCMC sample number  3800 checkpoint 38.0 out of 801.0
+averagetimePerSampling 0.0007026315789473685 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 53.610789473684214 seconds
+MCMC sample number  3900 checkpoint 39.0 out of 801.0
+averagetimePerSampling 0.0007025641025641026 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 53.53538461538462 seconds
+MCMC sample number  4000 checkpoint 40.0 out of 801.0
+averagetimePerSampling 0.0007024999999999999 seconds
+timeSinceLastCheckPoint 0.0699999999999994 seconds
+Estimated time remaining 53.460249999999995 seconds
+MCMC sample number  4100 checkpoint 41.0 out of 801.0
+averagetimePerSampling 0.0007024390243902439 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 53.385365853658534 seconds
+MCMC sample number  4200 checkpoint 42.0 out of 801.0
+averagetimePerSampling 0.0007023809523809524 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 53.31071428571428 seconds
+MCMC sample number  4300 checkpoint 43.0 out of 801.0
+averagetimePerSampling 0.0007046511627906975 seconds
+timeSinceLastCheckPoint 0.07999999999999918 seconds
+Estimated time remaining 53.41255813953487 seconds
+MCMC sample number  4400 checkpoint 44.0 out of 801.0
+averagetimePerSampling 0.0007045454545454544 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 53.334090909090904 seconds
+MCMC sample number  4500 checkpoint 45.0 out of 801.0
+averagetimePerSampling 0.0007044444444444444 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 53.25599999999999 seconds
+MCMC sample number  4600 checkpoint 46.0 out of 801.0
+averagetimePerSampling 0.0007043478260869566 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 53.17826086956522 seconds
+MCMC sample number  4700 checkpoint 47.0 out of 801.0
+averagetimePerSampling 0.0007042553191489361 seconds
+timeSinceLastCheckPoint 0.0699999999999994 seconds
+Estimated time remaining 53.10085106382978 seconds
+MCMC sample number  4800 checkpoint 48.0 out of 801.0
+averagetimePerSampling 0.0007041666666666666 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 53.02375 seconds
+MCMC sample number  4900 checkpoint 49.0 out of 801.0
+averagetimePerSampling 0.0007040816326530613 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 52.94693877551021 seconds
+MCMC sample number  5000 checkpoint 50.0 out of 801.0
+averagetimePerSampling 0.0007039999999999999 seconds
+timeSinceLastCheckPoint 0.0699999999999994 seconds
+Estimated time remaining 52.87039999999999 seconds
+MCMC sample number  5100 checkpoint 51.0 out of 801.0
+averagetimePerSampling 0.0007039215686274509 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 52.79411764705882 seconds
+MCMC sample number  5200 checkpoint 52.0 out of 801.0
+averagetimePerSampling 0.0007038461538461539 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 52.71807692307692 seconds
+MCMC sample number  5300 checkpoint 53.0 out of 801.0
+averagetimePerSampling 0.0007037735849056602 seconds
+timeSinceLastCheckPoint 0.0699999999999994 seconds
+Estimated time remaining 52.64226415094338 seconds
+MCMC sample number  5400 checkpoint 54.0 out of 801.0
+averagetimePerSampling 0.0007037037037037037 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 52.56666666666666 seconds
+MCMC sample number  5500 checkpoint 55.0 out of 801.0
+averagetimePerSampling 0.0007036363636363636 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 52.49127272727273 seconds
+MCMC sample number  5600 checkpoint 56.0 out of 801.0
+averagetimePerSampling 0.0007035714285714285 seconds
+timeSinceLastCheckPoint 0.0699999999999994 seconds
+Estimated time remaining 52.41607142857142 seconds
+MCMC sample number  5700 checkpoint 57.0 out of 801.0
+averagetimePerSampling 0.0007035087719298246 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 52.34105263157895 seconds
+MCMC sample number  5800 checkpoint 58.0 out of 801.0
+averagetimePerSampling 0.0007034482758620689 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 52.26620689655172 seconds
+MCMC sample number  5900 checkpoint 59.0 out of 801.0
+averagetimePerSampling 0.0007033898305084745 seconds
+timeSinceLastCheckPoint 0.0699999999999994 seconds
+Estimated time remaining 52.191525423728805 seconds
+MCMC sample number  6000 checkpoint 60.0 out of 801.0
+averagetimePerSampling 0.0007033333333333333 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 52.117 seconds
+MCMC sample number  6100 checkpoint 61.0 out of 801.0
+averagetimePerSampling 0.0007032786885245902 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 52.04262295081968 seconds
+MCMC sample number  6200 checkpoint 62.0 out of 801.0
+averagetimePerSampling 0.0007032258064516128 seconds
+timeSinceLastCheckPoint 0.0699999999999994 seconds
+Estimated time remaining 51.96838709677419 seconds
+MCMC sample number  6300 checkpoint 63.0 out of 801.0
+averagetimePerSampling 0.0007031746031746031 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 51.89428571428571 seconds
+MCMC sample number  6400 checkpoint 64.0 out of 801.0
+averagetimePerSampling 0.000703125 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 51.8203125 seconds
+MCMC sample number  6500 checkpoint 65.0 out of 801.0
+averagetimePerSampling 0.000703076923076923 seconds
+timeSinceLastCheckPoint 0.0699999999999994 seconds
+Estimated time remaining 51.74646153846153 seconds
+MCMC sample number  6600 checkpoint 66.0 out of 801.0
+averagetimePerSampling 0.000703030303030303 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 51.67272727272727 seconds
+MCMC sample number  6700 checkpoint 67.0 out of 801.0
+averagetimePerSampling 0.0007029850746268657 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 51.599104477611945 seconds
+MCMC sample number  6800 checkpoint 68.0 out of 801.0
+averagetimePerSampling 0.0007029411764705881 seconds
+timeSinceLastCheckPoint 0.0699999999999994 seconds
+Estimated time remaining 51.52558823529411 seconds
+MCMC sample number  6900 checkpoint 69.0 out of 801.0
+averagetimePerSampling 0.0007028985507246376 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 51.452173913043474 seconds
+MCMC sample number  7000 checkpoint 70.0 out of 801.0
+averagetimePerSampling 0.0007028571428571429 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 51.37885714285714 seconds
+MCMC sample number  7100 checkpoint 71.0 out of 801.0
+averagetimePerSampling 0.0007028169014084507 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 51.3056338028169 seconds
+MCMC sample number  7200 checkpoint 72.0 out of 801.0
+averagetimePerSampling 0.0007027777777777778 seconds
+timeSinceLastCheckPoint 0.0699999999999994 seconds
+Estimated time remaining 51.2325 seconds
+MCMC sample number  7300 checkpoint 73.0 out of 801.0
+averagetimePerSampling 0.0007027397260273972 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 51.15945205479452 seconds
+MCMC sample number  7400 checkpoint 74.0 out of 801.0
+averagetimePerSampling 0.0007027027027027027 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 51.086486486486486 seconds
+MCMC sample number  7500 checkpoint 75.0 out of 801.0
+averagetimePerSampling 0.0007039999999999999 seconds
+timeSinceLastCheckPoint 0.0699999999999994 seconds
+Estimated time remaining 51.11039999999999 seconds
+MCMC sample number  7600 checkpoint 76.0 out of 801.0
+averagetimePerSampling 0.0007039473684210526 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 51.036184210526315 seconds
+MCMC sample number  7700 checkpoint 77.0 out of 801.0
+averagetimePerSampling 0.0007038961038961039 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 50.962077922077924 seconds
+MCMC sample number  7800 checkpoint 78.0 out of 801.0
+averagetimePerSampling 0.0007038461538461539 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 50.88807692307692 seconds
+MCMC sample number  7900 checkpoint 79.0 out of 801.0
+averagetimePerSampling 0.0007037974683544304 seconds
+timeSinceLastCheckPoint 0.0699999999999994 seconds
+Estimated time remaining 50.81417721518987 seconds
+MCMC sample number  8000 checkpoint 80.0 out of 801.0
+averagetimePerSampling 0.00070375 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 50.74037499999999 seconds
+MCMC sample number  8100 checkpoint 81.0 out of 801.0
+averagetimePerSampling 0.0007037037037037037 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 50.666666666666664 seconds
+MCMC sample number  8200 checkpoint 82.0 out of 801.0
+averagetimePerSampling 0.0007036585365853658 seconds
+timeSinceLastCheckPoint 0.0699999999999994 seconds
+Estimated time remaining 50.5930487804878 seconds
+MCMC sample number  8300 checkpoint 83.0 out of 801.0
+averagetimePerSampling 0.0007036144578313252 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 50.51951807228915 seconds
+MCMC sample number  8400 checkpoint 84.0 out of 801.0
+averagetimePerSampling 0.0007035714285714286 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 50.44607142857143 seconds
+MCMC sample number  8500 checkpoint 85.0 out of 801.0
+averagetimePerSampling 0.0007035294117647058 seconds
+timeSinceLastCheckPoint 0.0699999999999994 seconds
+Estimated time remaining 50.37270588235294 seconds
+MCMC sample number  8600 checkpoint 86.0 out of 801.0
+averagetimePerSampling 0.0007034883720930232 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 50.29941860465116 seconds
+MCMC sample number  8700 checkpoint 87.0 out of 801.0
+averagetimePerSampling 0.0007034482758620689 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 50.22620689655172 seconds
+MCMC sample number  8800 checkpoint 88.0 out of 801.0
+averagetimePerSampling 0.0007034090909090908 seconds
+timeSinceLastCheckPoint 0.0699999999999994 seconds
+Estimated time remaining 50.15306818181818 seconds
+MCMC sample number  8900 checkpoint 89.0 out of 801.0
+averagetimePerSampling 0.000703370786516854 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 50.080000000000005 seconds
+MCMC sample number  9000 checkpoint 90.0 out of 801.0
+averagetimePerSampling 0.0007033333333333334 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 50.007000000000005 seconds
+MCMC sample number  9100 checkpoint 91.0 out of 801.0
+averagetimePerSampling 0.0007032967032967034 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 49.93406593406594 seconds
+MCMC sample number  9200 checkpoint 92.0 out of 801.0
+averagetimePerSampling 0.0007032608695652175 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 49.86119565217392 seconds
+MCMC sample number  9300 checkpoint 93.0 out of 801.0
+averagetimePerSampling 0.0007032258064516128 seconds
+timeSinceLastCheckPoint 0.06999999999999851 seconds
+Estimated time remaining 49.78838709677419 seconds
+MCMC sample number  9400 checkpoint 94.0 out of 801.0
+averagetimePerSampling 0.000703191489361702 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 49.71563829787233 seconds
+MCMC sample number  9500 checkpoint 95.0 out of 801.0
+averagetimePerSampling 0.0007031578947368421 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 49.64294736842105 seconds
+MCMC sample number  9600 checkpoint 96.0 out of 801.0
+averagetimePerSampling 0.000703125 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 49.5703125 seconds
+MCMC sample number  9700 checkpoint 97.0 out of 801.0
+averagetimePerSampling 0.0007030927835051546 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 49.497731958762884 seconds
+MCMC sample number  9800 checkpoint 98.0 out of 801.0
+averagetimePerSampling 0.0007030612244897959 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 49.42520408163266 seconds
+MCMC sample number  9900 checkpoint 99.0 out of 801.0
+averagetimePerSampling 0.0007030303030303029 seconds
+timeSinceLastCheckPoint 0.06999999999999851 seconds
+Estimated time remaining 49.352727272727265 seconds
+MCMC sample number  10000 checkpoint 100.0 out of 801.0
+averagetimePerSampling 0.000703 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 49.2803 seconds
+MCMC sample number  10100 checkpoint 101.0 out of 801.0
+averagetimePerSampling 0.0007029702970297029 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 49.20792079207921 seconds
+MCMC sample number  10200 checkpoint 102.0 out of 801.0
+averagetimePerSampling 0.0007029411764705883 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 49.13558823529412 seconds
+MCMC sample number  10300 checkpoint 103.0 out of 801.0
+averagetimePerSampling 0.0007029126213592233 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 49.06330097087378 seconds
+MCMC sample number  10400 checkpoint 104.0 out of 801.0
+averagetimePerSampling 0.0007028846153846154 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 48.99105769230769 seconds
+MCMC sample number  10500 checkpoint 105.0 out of 801.0
+averagetimePerSampling 0.0007038095238095239 seconds
+timeSinceLastCheckPoint 0.06999999999999851 seconds
+Estimated time remaining 48.98514285714286 seconds
+MCMC sample number  10600 checkpoint 106.0 out of 801.0
+averagetimePerSampling 0.0007037735849056602 seconds
+timeSinceLastCheckPoint 0.06999999999999851 seconds
+Estimated time remaining 48.912264150943386 seconds
+MCMC sample number  10700 checkpoint 107.0 out of 801.0
+averagetimePerSampling 0.0007037383177570093 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 48.83943925233644 seconds
+MCMC sample number  10800 checkpoint 108.0 out of 801.0
+averagetimePerSampling 0.0007037037037037037 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 48.766666666666666 seconds
+MCMC sample number  10900 checkpoint 109.0 out of 801.0
+averagetimePerSampling 0.0007036697247706422 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 48.69394495412844 seconds
+MCMC sample number  11000 checkpoint 110.0 out of 801.0
+averagetimePerSampling 0.0007036363636363636 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 48.621272727272725 seconds
+MCMC sample number  11100 checkpoint 111.0 out of 801.0
+averagetimePerSampling 0.0007036036036036036 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 48.54864864864865 seconds
+MCMC sample number  11200 checkpoint 112.0 out of 801.0
+averagetimePerSampling 0.0007035714285714285 seconds
+timeSinceLastCheckPoint 0.06999999999999851 seconds
+Estimated time remaining 48.47607142857142 seconds
+MCMC sample number  11300 checkpoint 113.0 out of 801.0
+averagetimePerSampling 0.0007035398230088495 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 48.40353982300885 seconds
+MCMC sample number  11400 checkpoint 114.0 out of 801.0
+averagetimePerSampling 0.0007035087719298246 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 48.33105263157895 seconds
+MCMC sample number  11500 checkpoint 115.0 out of 801.0
+averagetimePerSampling 0.0007034782608695652 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 48.25860869565217 seconds
+MCMC sample number  11600 checkpoint 116.0 out of 801.0
+averagetimePerSampling 0.0007034482758620689 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 48.186206896551724 seconds
+MCMC sample number  11700 checkpoint 117.0 out of 801.0
+averagetimePerSampling 0.0007034188034188034 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 48.113846153846154 seconds
+MCMC sample number  11800 checkpoint 118.0 out of 801.0
+averagetimePerSampling 0.0007033898305084745 seconds
+timeSinceLastCheckPoint 0.06999999999999851 seconds
+Estimated time remaining 48.04152542372881 seconds
+MCMC sample number  11900 checkpoint 119.0 out of 801.0
+averagetimePerSampling 0.0007033613445378151 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 47.96924369747899 seconds
+MCMC sample number  12000 checkpoint 120.0 out of 801.0
+averagetimePerSampling 0.0007033333333333333 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 47.897 seconds
+MCMC sample number  12100 checkpoint 121.0 out of 801.0
+averagetimePerSampling 0.0007033057851239669 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 47.82479338842975 seconds
+MCMC sample number  12200 checkpoint 122.0 out of 801.0
+averagetimePerSampling 0.0007032786885245902 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 47.75262295081968 seconds
+MCMC sample number  12300 checkpoint 123.0 out of 801.0
+averagetimePerSampling 0.0007032520325203252 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 47.68048780487805 seconds
+MCMC sample number  12400 checkpoint 124.0 out of 801.0
+averagetimePerSampling 0.000703225806451613 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 47.6083870967742 seconds
+MCMC sample number  12500 checkpoint 125.0 out of 801.0
+averagetimePerSampling 0.0007032 seconds
+timeSinceLastCheckPoint 0.06999999999999851 seconds
+Estimated time remaining 47.536319999999996 seconds
+MCMC sample number  12600 checkpoint 126.0 out of 801.0
+averagetimePerSampling 0.0007031746031746031 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 47.46428571428571 seconds
+MCMC sample number  12700 checkpoint 127.0 out of 801.0
+averagetimePerSampling 0.0007031496062992126 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 47.39228346456693 seconds
+MCMC sample number  12800 checkpoint 128.0 out of 801.0
+averagetimePerSampling 0.000703125 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 47.3203125 seconds
+MCMC sample number  12900 checkpoint 129.0 out of 801.0
+averagetimePerSampling 0.0007031007751937985 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 47.24837209302326 seconds
+MCMC sample number  13000 checkpoint 130.0 out of 801.0
+averagetimePerSampling 0.0007030769230769231 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 47.176461538461545 seconds
+MCMC sample number  13100 checkpoint 131.0 out of 801.0
+averagetimePerSampling 0.0007030534351145037 seconds
+timeSinceLastCheckPoint 0.06999999999999851 seconds
+Estimated time remaining 47.10458015267175 seconds
+MCMC sample number  13200 checkpoint 132.0 out of 801.0
+averagetimePerSampling 0.000703030303030303 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 47.03272727272727 seconds
+MCMC sample number  13300 checkpoint 133.0 out of 801.0
+averagetimePerSampling 0.0007030075187969924 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 46.96090225563909 seconds
+MCMC sample number  13400 checkpoint 134.0 out of 801.0
+averagetimePerSampling 0.0007029850746268657 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 46.889104477611944 seconds
+MCMC sample number  13500 checkpoint 135.0 out of 801.0
+averagetimePerSampling 0.000702962962962963 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 46.81733333333333 seconds
+MCMC sample number  13600 checkpoint 136.0 out of 801.0
+averagetimePerSampling 0.0007029411764705883 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 46.74558823529412 seconds
+MCMC sample number  13700 checkpoint 137.0 out of 801.0
+averagetimePerSampling 0.000702919708029197 seconds
+timeSinceLastCheckPoint 0.06999999999999851 seconds
+Estimated time remaining 46.67386861313868 seconds
+MCMC sample number  13800 checkpoint 138.0 out of 801.0
+averagetimePerSampling 0.0007028985507246376 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 46.60217391304347 seconds
+MCMC sample number  13900 checkpoint 139.0 out of 801.0
+averagetimePerSampling 0.0007028776978417265 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 46.5305035971223 seconds
+MCMC sample number  14000 checkpoint 140.0 out of 801.0
+averagetimePerSampling 0.0007028571428571429 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 46.45885714285714 seconds
+MCMC sample number  14100 checkpoint 141.0 out of 801.0
+averagetimePerSampling 0.0007028368794326241 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 46.387234042553196 seconds
+MCMC sample number  14200 checkpoint 142.0 out of 801.0
+averagetimePerSampling 0.0007028169014084507 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 46.3156338028169 seconds
+MCMC sample number  14300 checkpoint 143.0 out of 801.0
+averagetimePerSampling 0.0007027972027972028 seconds
+timeSinceLastCheckPoint 0.06999999999999851 seconds
+Estimated time remaining 46.244055944055944 seconds
+MCMC sample number  14400 checkpoint 144.0 out of 801.0
+averagetimePerSampling 0.0007027777777777778 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 46.1725 seconds
+MCMC sample number  14500 checkpoint 145.0 out of 801.0
+averagetimePerSampling 0.0007027586206896551 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 46.10096551724138 seconds
+MCMC sample number  14600 checkpoint 146.0 out of 801.0
+averagetimePerSampling 0.0007027397260273972 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 46.02945205479452 seconds
+MCMC sample number  14700 checkpoint 147.0 out of 801.0
+averagetimePerSampling 0.0007027210884353742 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 45.95795918367347 seconds
+MCMC sample number  14800 checkpoint 148.0 out of 801.0
+averagetimePerSampling 0.0007027027027027027 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 45.88648648648649 seconds
+MCMC sample number  14900 checkpoint 149.0 out of 801.0
+averagetimePerSampling 0.0007026845637583893 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 45.81503355704699 seconds
+MCMC sample number  15000 checkpoint 150.0 out of 801.0
+averagetimePerSampling 0.0007026666666666667 seconds
+timeSinceLastCheckPoint 0.06999999999999851 seconds
+Estimated time remaining 45.7436 seconds
+MCMC sample number  15100 checkpoint 151.0 out of 801.0
+averagetimePerSampling 0.0007026490066225165 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 45.67218543046357 seconds
+MCMC sample number  15200 checkpoint 152.0 out of 801.0
+averagetimePerSampling 0.0007026315789473685 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 45.600789473684216 seconds
+MCMC sample number  15300 checkpoint 153.0 out of 801.0
+averagetimePerSampling 0.0007026143790849674 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 45.529411764705884 seconds
+MCMC sample number  15400 checkpoint 154.0 out of 801.0
+averagetimePerSampling 0.0007025974025974026 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 45.458051948051946 seconds
+MCMC sample number  15500 checkpoint 155.0 out of 801.0
+averagetimePerSampling 0.0007025806451612903 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 45.386709677419354 seconds
+MCMC sample number  15600 checkpoint 156.0 out of 801.0
+averagetimePerSampling 0.0007025641025641025 seconds
+timeSinceLastCheckPoint 0.06999999999999851 seconds
+Estimated time remaining 45.315384615384616 seconds
+MCMC sample number  15700 checkpoint 157.0 out of 801.0
+averagetimePerSampling 0.0007025477707006369 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 45.244076433121016 seconds
+MCMC sample number  15800 checkpoint 158.0 out of 801.0
+averagetimePerSampling 0.0007025316455696203 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 45.172784810126586 seconds
+MCMC sample number  15900 checkpoint 159.0 out of 801.0
+averagetimePerSampling 0.0007025157232704402 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 45.10150943396226 seconds
+MCMC sample number  16000 checkpoint 160.0 out of 801.0
+averagetimePerSampling 0.000703125 seconds
+timeSinceLastCheckPoint 0.08000000000000007 seconds
+Estimated time remaining 45.0703125 seconds
+MCMC sample number  16100 checkpoint 161.0 out of 801.0
+averagetimePerSampling 0.0007031055900621118 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 44.998757763975156 seconds
+MCMC sample number  16200 checkpoint 162.0 out of 801.0
+averagetimePerSampling 0.0007030864197530865 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 44.92722222222223 seconds
+MCMC sample number  16300 checkpoint 163.0 out of 801.0
+averagetimePerSampling 0.0007030674846625766 seconds
+timeSinceLastCheckPoint 0.06999999999999851 seconds
+Estimated time remaining 44.85570552147239 seconds
+MCMC sample number  16400 checkpoint 164.0 out of 801.0
+averagetimePerSampling 0.0007030487804878049 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 44.78420731707317 seconds
+MCMC sample number  16500 checkpoint 165.0 out of 801.0
+averagetimePerSampling 0.000703030303030303 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 44.71272727272727 seconds
+MCMC sample number  16600 checkpoint 166.0 out of 801.0
+averagetimePerSampling 0.0007030120481927711 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 44.64126506024097 seconds
+MCMC sample number  16700 checkpoint 167.0 out of 801.0
+averagetimePerSampling 0.000702994011976048 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 44.56982035928144 seconds
+MCMC sample number  16800 checkpoint 168.0 out of 801.0
+averagetimePerSampling 0.0007029761904761905 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 44.49839285714286 seconds
+MCMC sample number  16900 checkpoint 169.0 out of 801.0
+averagetimePerSampling 0.0007029585798816567 seconds
+timeSinceLastCheckPoint 0.06999999999999851 seconds
+Estimated time remaining 44.42698224852071 seconds
+MCMC sample number  17000 checkpoint 170.0 out of 801.0
+averagetimePerSampling 0.0007029411764705881 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 44.355588235294114 seconds
+MCMC sample number  17100 checkpoint 171.0 out of 801.0
+averagetimePerSampling 0.0007029239766081872 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 44.28421052631579 seconds
+MCMC sample number  17200 checkpoint 172.0 out of 801.0
+averagetimePerSampling 0.0007029069767441861 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 44.2128488372093 seconds
+MCMC sample number  17300 checkpoint 173.0 out of 801.0
+averagetimePerSampling 0.0007028901734104046 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 44.141502890173406 seconds
+MCMC sample number  17400 checkpoint 174.0 out of 801.0
+averagetimePerSampling 0.0007028735632183908 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 44.0701724137931 seconds
+MCMC sample number  17500 checkpoint 175.0 out of 801.0
+averagetimePerSampling 0.0007028571428571428 seconds
+timeSinceLastCheckPoint 0.06999999999999851 seconds
+Estimated time remaining 43.99885714285714 seconds
+MCMC sample number  17600 checkpoint 176.0 out of 801.0
+averagetimePerSampling 0.000702840909090909 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 43.92755681818181 seconds
+MCMC sample number  17700 checkpoint 177.0 out of 801.0
+averagetimePerSampling 0.0007028248587570621 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 43.85627118644067 seconds
+MCMC sample number  17800 checkpoint 178.0 out of 801.0
+averagetimePerSampling 0.0007028089887640449 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 43.785 seconds
+MCMC sample number  17900 checkpoint 179.0 out of 801.0
+averagetimePerSampling 0.0007027932960893855 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 43.71374301675978 seconds
+MCMC sample number  18000 checkpoint 180.0 out of 801.0
+averagetimePerSampling 0.0007027777777777778 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 43.6425 seconds
+MCMC sample number  18100 checkpoint 181.0 out of 801.0
+averagetimePerSampling 0.0007027624309392266 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 43.57127071823205 seconds
+MCMC sample number  18200 checkpoint 182.0 out of 801.0
+averagetimePerSampling 0.0007027472527472527 seconds
+timeSinceLastCheckPoint 0.06999999999999851 seconds
+Estimated time remaining 43.50005494505494 seconds
+MCMC sample number  18300 checkpoint 183.0 out of 801.0
+averagetimePerSampling 0.0007027322404371584 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 43.42885245901639 seconds
+MCMC sample number  18400 checkpoint 184.0 out of 801.0
+averagetimePerSampling 0.0007027173913043478 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 43.35766304347826 seconds
+MCMC sample number  18500 checkpoint 185.0 out of 801.0
+averagetimePerSampling 0.0007027027027027027 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 43.28648648648649 seconds
+MCMC sample number  18600 checkpoint 186.0 out of 801.0
+averagetimePerSampling 0.0007026881720430107 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 43.21532258064516 seconds
+MCMC sample number  18700 checkpoint 187.0 out of 801.0
+averagetimePerSampling 0.0007026737967914439 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 43.144171122994656 seconds
+MCMC sample number  18800 checkpoint 188.0 out of 801.0
+averagetimePerSampling 0.0007026595744680851 seconds
+timeSinceLastCheckPoint 0.06999999999999851 seconds
+Estimated time remaining 43.07303191489362 seconds
+MCMC sample number  18900 checkpoint 189.0 out of 801.0
+averagetimePerSampling 0.0007026455026455026 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 43.00190476190476 seconds
+MCMC sample number  19000 checkpoint 190.0 out of 801.0
+averagetimePerSampling 0.0007026315789473685 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 42.930789473684214 seconds
+MCMC sample number  19100 checkpoint 191.0 out of 801.0
+averagetimePerSampling 0.0007026178010471205 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 42.85968586387435 seconds
+MCMC sample number  19200 checkpoint 192.0 out of 801.0
+averagetimePerSampling 0.0007026041666666667 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 42.788593750000004 seconds
+MCMC sample number  19300 checkpoint 193.0 out of 801.0
+averagetimePerSampling 0.0007025906735751296 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 42.71751295336788 seconds
+MCMC sample number  19400 checkpoint 194.0 out of 801.0
+averagetimePerSampling 0.0007025773195876288 seconds
+timeSinceLastCheckPoint 0.06999999999999851 seconds
+Estimated time remaining 42.64644329896907 seconds
+MCMC sample number  19500 checkpoint 195.0 out of 801.0
+averagetimePerSampling 0.0007025641025641025 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 42.575384615384614 seconds
+MCMC sample number  19600 checkpoint 196.0 out of 801.0
+averagetimePerSampling 0.0007025510204081633 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 42.50433673469388 seconds
+MCMC sample number  19700 checkpoint 197.0 out of 801.0
+averagetimePerSampling 0.0007025380710659898 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 42.433299492385785 seconds
+MCMC sample number  19800 checkpoint 198.0 out of 801.0
+averagetimePerSampling 0.0007025252525252525 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 42.362272727272725 seconds
+MCMC sample number  19900 checkpoint 199.0 out of 801.0
+averagetimePerSampling 0.0007025125628140704 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 42.29125628140704 seconds
+MCMC sample number  20000 checkpoint 200.0 out of 801.0
+averagetimePerSampling 0.0007025 seconds
+timeSinceLastCheckPoint 0.06999999999999851 seconds
+Estimated time remaining 42.22025 seconds
+MCMC sample number  20100 checkpoint 201.0 out of 801.0
+averagetimePerSampling 0.0007024875621890547 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 42.14925373134328 seconds
+MCMC sample number  20200 checkpoint 202.0 out of 801.0
+averagetimePerSampling 0.0007024752475247525 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 42.07826732673267 seconds
+MCMC sample number  20300 checkpoint 203.0 out of 801.0
+averagetimePerSampling 0.0007024630541871921 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 42.00729064039409 seconds
+MCMC sample number  20400 checkpoint 204.0 out of 801.0
+averagetimePerSampling 0.0007024509803921569 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 41.936323529411766 seconds
+MCMC sample number  20500 checkpoint 205.0 out of 801.0
+averagetimePerSampling 0.000702439024390244 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 41.86536585365854 seconds
+MCMC sample number  20600 checkpoint 206.0 out of 801.0
+averagetimePerSampling 0.0007024271844660194 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 41.79441747572815 seconds
+MCMC sample number  20700 checkpoint 207.0 out of 801.0
+averagetimePerSampling 0.0007024154589371981 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 41.72347826086957 seconds
+MCMC sample number  20800 checkpoint 208.0 out of 801.0
+averagetimePerSampling 0.0007024038461538462 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 41.65254807692308 seconds
+MCMC sample number  20900 checkpoint 209.0 out of 801.0
+averagetimePerSampling 0.0007023923444976078 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 41.58162679425838 seconds
+MCMC sample number  21000 checkpoint 210.0 out of 801.0
+averagetimePerSampling 0.0007023809523809523 seconds
+timeSinceLastCheckPoint 0.06999999999999673 seconds
+Estimated time remaining 41.51071428571428 seconds
+MCMC sample number  21100 checkpoint 211.0 out of 801.0
+averagetimePerSampling 0.0007023696682464455 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 41.439810426540284 seconds
+MCMC sample number  21200 checkpoint 212.0 out of 801.0
+averagetimePerSampling 0.0007023584905660377 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 41.36891509433962 seconds
+MCMC sample number  21300 checkpoint 213.0 out of 801.0
+averagetimePerSampling 0.0007023474178403756 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 41.29802816901408 seconds
+MCMC sample number  21400 checkpoint 214.0 out of 801.0
+averagetimePerSampling 0.0007023364485981308 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 41.22714953271028 seconds
+MCMC sample number  21500 checkpoint 215.0 out of 801.0
+averagetimePerSampling 0.0007023255813953488 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 41.15627906976744 seconds
+MCMC sample number  21600 checkpoint 216.0 out of 801.0
+averagetimePerSampling 0.0007023148148148148 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 41.08541666666667 seconds
+MCMC sample number  21700 checkpoint 217.0 out of 801.0
+averagetimePerSampling 0.0007023041474654378 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 41.01456221198157 seconds
+MCMC sample number  21800 checkpoint 218.0 out of 801.0
+averagetimePerSampling 0.0007027522935779815 seconds
+timeSinceLastCheckPoint 0.0799999999999983 seconds
+Estimated time remaining 40.97045871559632 seconds
+MCMC sample number  21900 checkpoint 219.0 out of 801.0
+averagetimePerSampling 0.0007027397260273972 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 40.89945205479452 seconds
+MCMC sample number  22000 checkpoint 220.0 out of 801.0
+averagetimePerSampling 0.0007027272727272727 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 40.82845454545455 seconds
+MCMC sample number  22100 checkpoint 221.0 out of 801.0
+averagetimePerSampling 0.0007027149321266968 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 40.75746606334842 seconds
+MCMC sample number  22200 checkpoint 222.0 out of 801.0
+averagetimePerSampling 0.0007027027027027027 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 40.68648648648649 seconds
+MCMC sample number  22300 checkpoint 223.0 out of 801.0
+averagetimePerSampling 0.0007026905829596412 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 40.615515695067266 seconds
+MCMC sample number  22400 checkpoint 224.0 out of 801.0
+averagetimePerSampling 0.0007026785714285714 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 40.54455357142857 seconds
+MCMC sample number  22500 checkpoint 225.0 out of 801.0
+averagetimePerSampling 0.0007026666666666667 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 40.4736 seconds
+MCMC sample number  22600 checkpoint 226.0 out of 801.0
+averagetimePerSampling 0.0007026548672566372 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 40.402654867256636 seconds
+MCMC sample number  22700 checkpoint 227.0 out of 801.0
+averagetimePerSampling 0.0007026431718061675 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 40.33171806167401 seconds
+MCMC sample number  22800 checkpoint 228.0 out of 801.0
+averagetimePerSampling 0.0007026315789473686 seconds
+timeSinceLastCheckPoint 0.07000000000000206 seconds
+Estimated time remaining 40.26078947368422 seconds
+MCMC sample number  22900 checkpoint 229.0 out of 801.0
+averagetimePerSampling 0.0007026200873362445 seconds
+timeSinceLastCheckPoint 0.06999999999999673 seconds
+Estimated time remaining 40.189868995633184 seconds
+MCMC sample number  23000 checkpoint 230.0 out of 801.0
+averagetimePerSampling 0.000702608695652174 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 40.118956521739136 seconds
+MCMC sample number  23100 checkpoint 231.0 out of 801.0
+averagetimePerSampling 0.0007025974025974026 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 40.04805194805195 seconds
+MCMC sample number  23200 checkpoint 232.0 out of 801.0
+averagetimePerSampling 0.0007025862068965517 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 39.977155172413795 seconds
+MCMC sample number  23300 checkpoint 233.0 out of 801.0
+averagetimePerSampling 0.0007025751072961373 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 39.9062660944206 seconds
+MCMC sample number  23400 checkpoint 234.0 out of 801.0
+averagetimePerSampling 0.0007025641025641026 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 39.83538461538462 seconds
+MCMC sample number  23500 checkpoint 235.0 out of 801.0
+averagetimePerSampling 0.0007025531914893618 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 39.76451063829788 seconds
+MCMC sample number  23600 checkpoint 236.0 out of 801.0
+averagetimePerSampling 0.000702542372881356 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 39.69364406779661 seconds
+MCMC sample number  23700 checkpoint 237.0 out of 801.0
+averagetimePerSampling 0.0007025316455696204 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 39.62278481012659 seconds
+MCMC sample number  23800 checkpoint 238.0 out of 801.0
+averagetimePerSampling 0.0007025210084033615 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 39.55193277310925 seconds
+MCMC sample number  23900 checkpoint 239.0 out of 801.0
+averagetimePerSampling 0.0007025104602510461 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 39.48108786610879 seconds
+MCMC sample number  24000 checkpoint 240.0 out of 801.0
+averagetimePerSampling 0.0007025000000000001 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 39.410250000000005 seconds
+MCMC sample number  24100 checkpoint 241.0 out of 801.0
+averagetimePerSampling 0.0007024896265560167 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 39.33941908713694 seconds
+MCMC sample number  24200 checkpoint 242.0 out of 801.0
+averagetimePerSampling 0.0007024793388429752 seconds
+timeSinceLastCheckPoint 0.06999999999999673 seconds
+Estimated time remaining 39.268595041322314 seconds
+MCMC sample number  24300 checkpoint 243.0 out of 801.0
+averagetimePerSampling 0.0007024691358024691 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 39.19777777777778 seconds
+MCMC sample number  24400 checkpoint 244.0 out of 801.0
+averagetimePerSampling 0.0007024590163934426 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 39.12696721311475 seconds
+MCMC sample number  24500 checkpoint 245.0 out of 801.0
+averagetimePerSampling 0.0007024489795918367 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 39.056163265306125 seconds
+MCMC sample number  24600 checkpoint 246.0 out of 801.0
+averagetimePerSampling 0.000702439024390244 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 38.98536585365854 seconds
+MCMC sample number  24700 checkpoint 247.0 out of 801.0
+averagetimePerSampling 0.0007024291497975709 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 38.914574898785425 seconds
+MCMC sample number  24800 checkpoint 248.0 out of 801.0
+averagetimePerSampling 0.0007024193548387098 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 38.84379032258065 seconds
+MCMC sample number  24900 checkpoint 249.0 out of 801.0
+averagetimePerSampling 0.000702409638554217 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 38.773012048192776 seconds
+MCMC sample number  25000 checkpoint 250.0 out of 801.0
+averagetimePerSampling 0.0007024 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 38.70224 seconds
+MCMC sample number  25100 checkpoint 251.0 out of 801.0
+averagetimePerSampling 0.000702390438247012 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 38.63147410358566 seconds
+MCMC sample number  25200 checkpoint 252.0 out of 801.0
+averagetimePerSampling 0.0007023809523809525 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 38.56071428571429 seconds
+MCMC sample number  25300 checkpoint 253.0 out of 801.0
+averagetimePerSampling 0.0007023715415019764 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 38.489960474308305 seconds
+MCMC sample number  25400 checkpoint 254.0 out of 801.0
+averagetimePerSampling 0.0007023622047244094 seconds
+timeSinceLastCheckPoint 0.06999999999999673 seconds
+Estimated time remaining 38.4192125984252 seconds
+MCMC sample number  25500 checkpoint 255.0 out of 801.0
+averagetimePerSampling 0.0007023529411764706 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 38.348470588235294 seconds
+MCMC sample number  25600 checkpoint 256.0 out of 801.0
+averagetimePerSampling 0.0007023437500000001 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 38.277734375 seconds
+MCMC sample number  25700 checkpoint 257.0 out of 801.0
+averagetimePerSampling 0.0007023346303501946 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 38.20700389105058 seconds
+MCMC sample number  25800 checkpoint 258.0 out of 801.0
+averagetimePerSampling 0.0007023255813953489 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 38.13627906976745 seconds
+MCMC sample number  25900 checkpoint 259.0 out of 801.0
+averagetimePerSampling 0.0007023166023166023 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 38.06555984555985 seconds
+MCMC sample number  26000 checkpoint 260.0 out of 801.0
+averagetimePerSampling 0.0007023076923076924 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 37.99484615384616 seconds
+MCMC sample number  26100 checkpoint 261.0 out of 801.0
+averagetimePerSampling 0.0007022988505747127 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 37.92413793103449 seconds
+MCMC sample number  26200 checkpoint 262.0 out of 801.0
+averagetimePerSampling 0.000702290076335878 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 37.853435114503824 seconds
+MCMC sample number  26300 checkpoint 263.0 out of 801.0
+averagetimePerSampling 0.0007022813688212929 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 37.78273764258556 seconds
+MCMC sample number  26400 checkpoint 264.0 out of 801.0
+averagetimePerSampling 0.0007022727272727274 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 37.71204545454546 seconds
+MCMC sample number  26500 checkpoint 265.0 out of 801.0
+averagetimePerSampling 0.0007022641509433963 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 37.64135849056604 seconds
+MCMC sample number  26600 checkpoint 266.0 out of 801.0
+averagetimePerSampling 0.0007022556390977445 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 37.57067669172933 seconds
+MCMC sample number  26700 checkpoint 267.0 out of 801.0
+averagetimePerSampling 0.0007022471910112359 seconds
+timeSinceLastCheckPoint 0.06999999999999673 seconds
+Estimated time remaining 37.5 seconds
+MCMC sample number  26800 checkpoint 268.0 out of 801.0
+averagetimePerSampling 0.0007022388059701492 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 37.429328358208956 seconds
+MCMC sample number  26900 checkpoint 269.0 out of 801.0
+averagetimePerSampling 0.0007022304832713755 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 37.358661710037175 seconds
+MCMC sample number  27000 checkpoint 270.0 out of 801.0
+averagetimePerSampling 0.0007022222222222222 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 37.288000000000004 seconds
+MCMC sample number  27100 checkpoint 271.0 out of 801.0
+averagetimePerSampling 0.0007022140221402215 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 37.217343173431736 seconds
+MCMC sample number  27200 checkpoint 272.0 out of 801.0
+averagetimePerSampling 0.0007022058823529413 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 37.14669117647059 seconds
+MCMC sample number  27300 checkpoint 273.0 out of 801.0
+averagetimePerSampling 0.0007021978021978022 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 37.076043956043954 seconds
+MCMC sample number  27400 checkpoint 274.0 out of 801.0
+averagetimePerSampling 0.0007021897810218979 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 37.00540145985401 seconds
+MCMC sample number  27500 checkpoint 275.0 out of 801.0
+averagetimePerSampling 0.0007021818181818183 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 36.93476363636364 seconds
+MCMC sample number  27600 checkpoint 276.0 out of 801.0
+averagetimePerSampling 0.0007021739130434783 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 36.86413043478261 seconds
+MCMC sample number  27700 checkpoint 277.0 out of 801.0
+averagetimePerSampling 0.0007025270758122744 seconds
+timeSinceLastCheckPoint 0.0799999999999983 seconds
+Estimated time remaining 36.81241877256318 seconds
+MCMC sample number  27800 checkpoint 278.0 out of 801.0
+averagetimePerSampling 0.0007025179856115109 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 36.74169064748202 seconds
+MCMC sample number  27900 checkpoint 279.0 out of 801.0
+averagetimePerSampling 0.0007025089605734768 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 36.67096774193549 seconds
+MCMC sample number  28000 checkpoint 280.0 out of 801.0
+averagetimePerSampling 0.0007025000000000001 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 36.60025 seconds
+MCMC sample number  28100 checkpoint 281.0 out of 801.0
+averagetimePerSampling 0.0007024911032028471 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 36.52953736654805 seconds
+MCMC sample number  28200 checkpoint 282.0 out of 801.0
+averagetimePerSampling 0.0007024822695035461 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 36.458829787234045 seconds
+MCMC sample number  28300 checkpoint 283.0 out of 801.0
+averagetimePerSampling 0.0007024734982332157 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 36.38812720848057 seconds
+MCMC sample number  28400 checkpoint 284.0 out of 801.0
+averagetimePerSampling 0.0007024647887323945 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 36.31742957746479 seconds
+MCMC sample number  28500 checkpoint 285.0 out of 801.0
+averagetimePerSampling 0.0007024561403508773 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 36.246736842105264 seconds
+MCMC sample number  28600 checkpoint 286.0 out of 801.0
+averagetimePerSampling 0.0007024475524475525 seconds
+timeSinceLastCheckPoint 0.06999999999999673 seconds
+Estimated time remaining 36.176048951048955 seconds
+MCMC sample number  28700 checkpoint 287.0 out of 801.0
+averagetimePerSampling 0.0007024390243902439 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 36.10536585365853 seconds
+MCMC sample number  28800 checkpoint 288.0 out of 801.0
+averagetimePerSampling 0.0007024305555555555 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 36.0346875 seconds
+MCMC sample number  28900 checkpoint 289.0 out of 801.0
+averagetimePerSampling 0.0007024221453287197 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 35.96401384083045 seconds
+MCMC sample number  29000 checkpoint 290.0 out of 801.0
+averagetimePerSampling 0.0007024137931034483 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 35.893344827586205 seconds
+MCMC sample number  29100 checkpoint 291.0 out of 801.0
+averagetimePerSampling 0.000702405498281787 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 35.822680412371135 seconds
+MCMC sample number  29200 checkpoint 292.0 out of 801.0
+averagetimePerSampling 0.0007023972602739726 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 35.75202054794521 seconds
+MCMC sample number  29300 checkpoint 293.0 out of 801.0
+averagetimePerSampling 0.0007023890784982936 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 35.68136518771331 seconds
+MCMC sample number  29400 checkpoint 294.0 out of 801.0
+averagetimePerSampling 0.0007023809523809525 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 35.61071428571429 seconds
+MCMC sample number  29500 checkpoint 295.0 out of 801.0
+averagetimePerSampling 0.0007023728813559323 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 35.540067796610174 seconds
+MCMC sample number  29600 checkpoint 296.0 out of 801.0
+averagetimePerSampling 0.000702364864864865 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 35.46942567567568 seconds
+MCMC sample number  29700 checkpoint 297.0 out of 801.0
+averagetimePerSampling 0.0007023569023569024 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 35.398787878787886 seconds
+MCMC sample number  29800 checkpoint 298.0 out of 801.0
+averagetimePerSampling 0.0007023489932885907 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 35.328154362416115 seconds
+MCMC sample number  29900 checkpoint 299.0 out of 801.0
+averagetimePerSampling 0.0007023411371237458 seconds
+timeSinceLastCheckPoint 0.06999999999999673 seconds
+Estimated time remaining 35.25752508361204 seconds
+MCMC sample number  30000 checkpoint 300.0 out of 801.0
+averagetimePerSampling 0.0007023333333333333 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 35.1869 seconds
+MCMC sample number  30100 checkpoint 301.0 out of 801.0
+averagetimePerSampling 0.0007023255813953488 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 35.116279069767444 seconds
+MCMC sample number  30200 checkpoint 302.0 out of 801.0
+averagetimePerSampling 0.000702317880794702 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 35.04566225165563 seconds
+MCMC sample number  30300 checkpoint 303.0 out of 801.0
+averagetimePerSampling 0.0007023102310231024 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 34.9750495049505 seconds
+MCMC sample number  30400 checkpoint 304.0 out of 801.0
+averagetimePerSampling 0.0007023026315789474 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 34.90444078947368 seconds
+MCMC sample number  30500 checkpoint 305.0 out of 801.0
+averagetimePerSampling 0.0007022950819672132 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 34.83383606557378 seconds
+MCMC sample number  30600 checkpoint 306.0 out of 801.0
+averagetimePerSampling 0.0007022875816993465 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 34.76323529411765 seconds
+MCMC sample number  30700 checkpoint 307.0 out of 801.0
+averagetimePerSampling 0.0007022801302931597 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 34.69263843648209 seconds
+MCMC sample number  30800 checkpoint 308.0 out of 801.0
+averagetimePerSampling 0.0007022727272727274 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 34.62204545454546 seconds
+MCMC sample number  30900 checkpoint 309.0 out of 801.0
+averagetimePerSampling 0.0007022653721682849 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 34.55145631067962 seconds
+MCMC sample number  31000 checkpoint 310.0 out of 801.0
+averagetimePerSampling 0.0007022580645161292 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 34.48087096774194 seconds
+MCMC sample number  31100 checkpoint 311.0 out of 801.0
+averagetimePerSampling 0.000702250803858521 seconds
+timeSinceLastCheckPoint 0.06999999999999673 seconds
+Estimated time remaining 34.41028938906753 seconds
+MCMC sample number  31200 checkpoint 312.0 out of 801.0
+averagetimePerSampling 0.0007022435897435898 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 34.339711538461536 seconds
+MCMC sample number  31300 checkpoint 313.0 out of 801.0
+averagetimePerSampling 0.0007022364217252397 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 34.269137380191694 seconds
+MCMC sample number  31400 checkpoint 314.0 out of 801.0
+averagetimePerSampling 0.0007022292993630573 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 34.19856687898089 seconds
+MCMC sample number  31500 checkpoint 315.0 out of 801.0
+averagetimePerSampling 0.0007022222222222222 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 34.128 seconds
+MCMC sample number  31600 checkpoint 316.0 out of 801.0
+averagetimePerSampling 0.0007022151898734177 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 34.05743670886076 seconds
+MCMC sample number  31700 checkpoint 317.0 out of 801.0
+averagetimePerSampling 0.0007022082018927446 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 33.98687697160884 seconds
+MCMC sample number  31800 checkpoint 318.0 out of 801.0
+averagetimePerSampling 0.0007022012578616353 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 33.916320754716985 seconds
+MCMC sample number  31900 checkpoint 319.0 out of 801.0
+averagetimePerSampling 0.0007021943573667712 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 33.84576802507837 seconds
+MCMC sample number  32000 checkpoint 320.0 out of 801.0
+averagetimePerSampling 0.0007021875000000001 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 33.77521875000001 seconds
+MCMC sample number  32100 checkpoint 321.0 out of 801.0
+averagetimePerSampling 0.0007021806853582556 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 33.70467289719627 seconds
+MCMC sample number  32200 checkpoint 322.0 out of 801.0
+averagetimePerSampling 0.0007021739130434783 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 33.63413043478261 seconds
+MCMC sample number  32300 checkpoint 323.0 out of 801.0
+averagetimePerSampling 0.0007021671826625388 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 33.56359133126936 seconds
+MCMC sample number  32400 checkpoint 324.0 out of 801.0
+averagetimePerSampling 0.0007021604938271605 seconds
+timeSinceLastCheckPoint 0.06999999999999673 seconds
+Estimated time remaining 33.49305555555556 seconds
+MCMC sample number  32500 checkpoint 325.0 out of 801.0
+averagetimePerSampling 0.0007021538461538462 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 33.42252307692308 seconds
+MCMC sample number  32600 checkpoint 326.0 out of 801.0
+averagetimePerSampling 0.0007021472392638037 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 33.35199386503068 seconds
+MCMC sample number  32700 checkpoint 327.0 out of 801.0
+averagetimePerSampling 0.0007021406727828746 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 33.28146788990826 seconds
+MCMC sample number  32800 checkpoint 328.0 out of 801.0
+averagetimePerSampling 0.0007021341463414635 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 33.21094512195122 seconds
+MCMC sample number  32900 checkpoint 329.0 out of 801.0
+averagetimePerSampling 0.0007021276595744682 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 33.1404255319149 seconds
+MCMC sample number  33000 checkpoint 330.0 out of 801.0
+averagetimePerSampling 0.0007021212121212122 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 33.06990909090909 seconds
+MCMC sample number  33100 checkpoint 331.0 out of 801.0
+averagetimePerSampling 0.0007021148036253777 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 32.99939577039275 seconds
+MCMC sample number  33200 checkpoint 332.0 out of 801.0
+averagetimePerSampling 0.0007021084337349398 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 32.92888554216868 seconds
+MCMC sample number  33300 checkpoint 333.0 out of 801.0
+averagetimePerSampling 0.0007021021021021022 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 32.85837837837838 seconds
+MCMC sample number  33400 checkpoint 334.0 out of 801.0
+averagetimePerSampling 0.0007020958083832336 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 32.78787425149701 seconds
+MCMC sample number  33500 checkpoint 335.0 out of 801.0
+averagetimePerSampling 0.0007023880597014925 seconds
+timeSinceLastCheckPoint 0.0799999999999983 seconds
+Estimated time remaining 32.73128358208955 seconds
+MCMC sample number  33600 checkpoint 336.0 out of 801.0
+averagetimePerSampling 0.0007023809523809524 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 32.660714285714285 seconds
+MCMC sample number  33700 checkpoint 337.0 out of 801.0
+averagetimePerSampling 0.0007023738872403561 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 32.59014836795252 seconds
+MCMC sample number  33800 checkpoint 338.0 out of 801.0
+averagetimePerSampling 0.0007023668639053255 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 32.51958579881657 seconds
+MCMC sample number  33900 checkpoint 339.0 out of 801.0
+averagetimePerSampling 0.0007023598820058998 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 32.44902654867257 seconds
+MCMC sample number  34000 checkpoint 340.0 out of 801.0
+averagetimePerSampling 0.0007023529411764707 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 32.3784705882353 seconds
+MCMC sample number  34100 checkpoint 341.0 out of 801.0
+averagetimePerSampling 0.0007023460410557186 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 32.307917888563054 seconds
+MCMC sample number  34200 checkpoint 342.0 out of 801.0
+averagetimePerSampling 0.0007023391812865497 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 32.237368421052636 seconds
+MCMC sample number  34300 checkpoint 343.0 out of 801.0
+averagetimePerSampling 0.000702332361516035 seconds
+timeSinceLastCheckPoint 0.06999999999999673 seconds
+Estimated time remaining 32.1668221574344 seconds
+MCMC sample number  34400 checkpoint 344.0 out of 801.0
+averagetimePerSampling 0.0007023255813953488 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 32.09627906976744 seconds
+MCMC sample number  34500 checkpoint 345.0 out of 801.0
+averagetimePerSampling 0.0007023188405797102 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 32.025739130434786 seconds
+MCMC sample number  34600 checkpoint 346.0 out of 801.0
+averagetimePerSampling 0.0007023121387283237 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 31.95520231213873 seconds
+MCMC sample number  34700 checkpoint 347.0 out of 801.0
+averagetimePerSampling 0.0007023054755043228 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 31.884668587896257 seconds
+MCMC sample number  34800 checkpoint 348.0 out of 801.0
+averagetimePerSampling 0.0007022988505747127 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 31.814137931034487 seconds
+MCMC sample number  34900 checkpoint 349.0 out of 801.0
+averagetimePerSampling 0.0007022922636103152 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 31.743610315186245 seconds
+MCMC sample number  35000 checkpoint 350.0 out of 801.0
+averagetimePerSampling 0.0007022857142857143 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 31.673085714285715 seconds
+MCMC sample number  35100 checkpoint 351.0 out of 801.0
+averagetimePerSampling 0.0007022792022792024 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 31.602564102564106 seconds
+MCMC sample number  35200 checkpoint 352.0 out of 801.0
+averagetimePerSampling 0.0007022727272727274 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 31.53204545454546 seconds
+MCMC sample number  35300 checkpoint 353.0 out of 801.0
+averagetimePerSampling 0.0007022662889518414 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 31.461529745042494 seconds
+MCMC sample number  35400 checkpoint 354.0 out of 801.0
+averagetimePerSampling 0.0007022598870056498 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 31.391016949152547 seconds
+MCMC sample number  35500 checkpoint 355.0 out of 801.0
+averagetimePerSampling 0.0007022535211267607 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 31.320507042253528 seconds
+MCMC sample number  35600 checkpoint 356.0 out of 801.0
+averagetimePerSampling 0.0007022471910112359 seconds
+timeSinceLastCheckPoint 0.06999999999999673 seconds
+Estimated time remaining 31.25 seconds
+MCMC sample number  35700 checkpoint 357.0 out of 801.0
+averagetimePerSampling 0.0007022408963585434 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 31.179495798319326 seconds
+MCMC sample number  35800 checkpoint 358.0 out of 801.0
+averagetimePerSampling 0.0007022346368715084 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 31.10899441340782 seconds
+MCMC sample number  35900 checkpoint 359.0 out of 801.0
+averagetimePerSampling 0.0007022284122562675 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 31.03849582172702 seconds
+MCMC sample number  36000 checkpoint 360.0 out of 801.0
+averagetimePerSampling 0.0007022222222222222 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 30.968 seconds
+MCMC sample number  36100 checkpoint 361.0 out of 801.0
+averagetimePerSampling 0.0007022160664819945 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 30.897506925207757 seconds
+MCMC sample number  36200 checkpoint 362.0 out of 801.0
+averagetimePerSampling 0.0007022099447513813 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 30.827016574585638 seconds
+MCMC sample number  36300 checkpoint 363.0 out of 801.0
+averagetimePerSampling 0.0007022038567493113 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 30.756528925619836 seconds
+MCMC sample number  36400 checkpoint 364.0 out of 801.0
+averagetimePerSampling 0.0007021978021978022 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 30.686043956043957 seconds
+MCMC sample number  36500 checkpoint 365.0 out of 801.0
+averagetimePerSampling 0.0007021917808219179 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 30.61556164383562 seconds
+MCMC sample number  36600 checkpoint 366.0 out of 801.0
+averagetimePerSampling 0.0007021857923497269 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 30.545081967213118 seconds
+MCMC sample number  36700 checkpoint 367.0 out of 801.0
+averagetimePerSampling 0.0007021798365122616 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 30.474604904632155 seconds
+MCMC sample number  36800 checkpoint 368.0 out of 801.0
+averagetimePerSampling 0.0007021739130434782 seconds
+timeSinceLastCheckPoint 0.06999999999999673 seconds
+Estimated time remaining 30.40413043478261 seconds
+MCMC sample number  36900 checkpoint 369.0 out of 801.0
+averagetimePerSampling 0.0007021680216802168 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 30.333658536585368 seconds
+MCMC sample number  37000 checkpoint 370.0 out of 801.0
+averagetimePerSampling 0.0007021621621621622 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 30.263189189189188 seconds
+MCMC sample number  37100 checkpoint 371.0 out of 801.0
+averagetimePerSampling 0.000702156334231806 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 30.19272237196766 seconds
+MCMC sample number  37200 checkpoint 372.0 out of 801.0
+averagetimePerSampling 0.0007021505376344086 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 30.122258064516128 seconds
+MCMC sample number  37300 checkpoint 373.0 out of 801.0
+averagetimePerSampling 0.0007021447721179625 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 30.051796246648795 seconds
+MCMC sample number  37400 checkpoint 374.0 out of 801.0
+averagetimePerSampling 0.0007021390374331552 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 29.981336898395725 seconds
+MCMC sample number  37500 checkpoint 375.0 out of 801.0
+averagetimePerSampling 0.0007021333333333333 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 29.91088 seconds
+MCMC sample number  37600 checkpoint 376.0 out of 801.0
+averagetimePerSampling 0.0007021276595744682 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 29.840425531914896 seconds
+MCMC sample number  37700 checkpoint 377.0 out of 801.0
+averagetimePerSampling 0.0007021220159151194 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 29.769973474801063 seconds
+MCMC sample number  37800 checkpoint 378.0 out of 801.0
+averagetimePerSampling 0.0007021164021164022 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 29.69952380952381 seconds
+MCMC sample number  37900 checkpoint 379.0 out of 801.0
+averagetimePerSampling 0.0007021108179419526 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 29.6290765171504 seconds
+MCMC sample number  38000 checkpoint 380.0 out of 801.0
+averagetimePerSampling 0.0007021052631578948 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 29.558631578947374 seconds
+MCMC sample number  38100 checkpoint 381.0 out of 801.0
+averagetimePerSampling 0.0007020997375328083 seconds
+timeSinceLastCheckPoint 0.06999999999999673 seconds
+Estimated time remaining 29.488188976377952 seconds
+MCMC sample number  38200 checkpoint 382.0 out of 801.0
+averagetimePerSampling 0.0007020942408376964 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 29.417748691099476 seconds
+MCMC sample number  38300 checkpoint 383.0 out of 801.0
+averagetimePerSampling 0.000702088772845953 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 29.347310704960837 seconds
+MCMC sample number  38400 checkpoint 384.0 out of 801.0
+averagetimePerSampling 0.0007020833333333333 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 29.276875 seconds
+MCMC sample number  38500 checkpoint 385.0 out of 801.0
+averagetimePerSampling 0.0007020779220779221 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 29.20644155844156 seconds
+MCMC sample number  38600 checkpoint 386.0 out of 801.0
+averagetimePerSampling 0.0007020725388601037 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 29.1360103626943 seconds
+MCMC sample number  38700 checkpoint 387.0 out of 801.0
+averagetimePerSampling 0.0007020671834625324 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 29.06558139534884 seconds
+MCMC sample number  38800 checkpoint 388.0 out of 801.0
+averagetimePerSampling 0.0007020618556701032 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 28.99515463917526 seconds
+MCMC sample number  38900 checkpoint 389.0 out of 801.0
+averagetimePerSampling 0.000702056555269923 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 28.924730077120827 seconds
+MCMC sample number  39000 checkpoint 390.0 out of 801.0
+averagetimePerSampling 0.0007020512820512822 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 28.854307692307696 seconds
+MCMC sample number  39100 checkpoint 391.0 out of 801.0
+averagetimePerSampling 0.0007020460358056267 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 28.783887468030695 seconds
+MCMC sample number  39200 checkpoint 392.0 out of 801.0
+averagetimePerSampling 0.0007020408163265307 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 28.713469387755104 seconds
+MCMC sample number  39300 checkpoint 393.0 out of 801.0
+averagetimePerSampling 0.0007020356234096692 seconds
+timeSinceLastCheckPoint 0.06999999999999673 seconds
+Estimated time remaining 28.643053435114503 seconds
+MCMC sample number  39400 checkpoint 394.0 out of 801.0
+averagetimePerSampling 0.0007020304568527919 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 28.57263959390863 seconds
+MCMC sample number  39500 checkpoint 395.0 out of 801.0
+averagetimePerSampling 0.0007020253164556962 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 28.502227848101263 seconds
+MCMC sample number  39600 checkpoint 396.0 out of 801.0
+averagetimePerSampling 0.0007022727272727274 seconds
+timeSinceLastCheckPoint 0.08000000000000185 seconds
+Estimated time remaining 28.442045454545458 seconds
+MCMC sample number  39700 checkpoint 397.0 out of 801.0
+averagetimePerSampling 0.0007022670025188918 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 28.37158690176323 seconds
+MCMC sample number  39800 checkpoint 398.0 out of 801.0
+averagetimePerSampling 0.0007022613065326634 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 28.301130653266338 seconds
+MCMC sample number  39900 checkpoint 399.0 out of 801.0
+averagetimePerSampling 0.0007022556390977444 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 28.230676691729325 seconds
+MCMC sample number  40000 checkpoint 400.0 out of 801.0
+averagetimePerSampling 0.00070225 seconds
+timeSinceLastCheckPoint 0.06999999999999673 seconds
+Estimated time remaining 28.160224999999997 seconds
+MCMC sample number  40100 checkpoint 401.0 out of 801.0
+averagetimePerSampling 0.0007022443890274315 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 28.08977556109726 seconds
+MCMC sample number  40200 checkpoint 402.0 out of 801.0
+averagetimePerSampling 0.0007022388059701492 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 28.019328358208956 seconds
+MCMC sample number  40300 checkpoint 403.0 out of 801.0
+averagetimePerSampling 0.0007022332506203474 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 27.948883374689828 seconds
+MCMC sample number  40400 checkpoint 404.0 out of 801.0
+averagetimePerSampling 0.0007022277227722773 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 27.87844059405941 seconds
+MCMC sample number  40500 checkpoint 405.0 out of 801.0
+averagetimePerSampling 0.0007022222222222222 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 27.808 seconds
+MCMC sample number  40600 checkpoint 406.0 out of 801.0
+averagetimePerSampling 0.000702216748768473 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 27.737561576354683 seconds
+MCMC sample number  40700 checkpoint 407.0 out of 801.0
+averagetimePerSampling 0.0007022113022113022 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 27.667125307125307 seconds
+MCMC sample number  40800 checkpoint 408.0 out of 801.0
+averagetimePerSampling 0.0007022058823529413 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 27.596691176470593 seconds
+MCMC sample number  40900 checkpoint 409.0 out of 801.0
+averagetimePerSampling 0.0007022004889975551 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 27.526259168704158 seconds
+MCMC sample number  41000 checkpoint 410.0 out of 801.0
+averagetimePerSampling 0.0007021951219512196 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 27.455829268292685 seconds
+MCMC sample number  41100 checkpoint 411.0 out of 801.0
+averagetimePerSampling 0.0007021897810218979 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 27.385401459854016 seconds
+MCMC sample number  41200 checkpoint 412.0 out of 801.0
+averagetimePerSampling 0.0007021844660194175 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 27.314975728155343 seconds
+MCMC sample number  41300 checkpoint 413.0 out of 801.0
+averagetimePerSampling 0.000702179176755448 seconds
+timeSinceLastCheckPoint 0.06999999999999673 seconds
+Estimated time remaining 27.24455205811138 seconds
+MCMC sample number  41400 checkpoint 414.0 out of 801.0
+averagetimePerSampling 0.0007021739130434782 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 27.174130434782608 seconds
+MCMC sample number  41500 checkpoint 415.0 out of 801.0
+averagetimePerSampling 0.0007021686746987952 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 27.103710843373495 seconds
+MCMC sample number  41600 checkpoint 416.0 out of 801.0
+averagetimePerSampling 0.0007021634615384615 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 27.033293269230768 seconds
+MCMC sample number  41700 checkpoint 417.0 out of 801.0
+averagetimePerSampling 0.000702158273381295 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 26.962877697841726 seconds
+MCMC sample number  41800 checkpoint 418.0 out of 801.0
+averagetimePerSampling 0.0007021531100478469 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 26.892464114832535 seconds
+MCMC sample number  41900 checkpoint 419.0 out of 801.0
+averagetimePerSampling 0.0007021479713603819 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 26.822052505966585 seconds
+MCMC sample number  42000 checkpoint 420.0 out of 801.0
+averagetimePerSampling 0.0007021428571428572 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 26.751642857142862 seconds
+MCMC sample number  42100 checkpoint 421.0 out of 801.0
+averagetimePerSampling 0.0007021377672209026 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 26.6812351543943 seconds
+MCMC sample number  42200 checkpoint 422.0 out of 801.0
+averagetimePerSampling 0.000702132701421801 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 26.61082938388626 seconds
+MCMC sample number  42300 checkpoint 423.0 out of 801.0
+averagetimePerSampling 0.0007021276595744682 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 26.540425531914895 seconds
+MCMC sample number  42400 checkpoint 424.0 out of 801.0
+averagetimePerSampling 0.000702122641509434 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 26.47002358490566 seconds
+MCMC sample number  42500 checkpoint 425.0 out of 801.0
+averagetimePerSampling 0.0007021176470588236 seconds
+timeSinceLastCheckPoint 0.06999999999999673 seconds
+Estimated time remaining 26.399623529411766 seconds
+MCMC sample number  42600 checkpoint 426.0 out of 801.0
+averagetimePerSampling 0.000702112676056338 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 26.329225352112676 seconds
+MCMC sample number  42700 checkpoint 427.0 out of 801.0
+averagetimePerSampling 0.0007021077283372365 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 26.258829039812646 seconds
+MCMC sample number  42800 checkpoint 428.0 out of 801.0
+averagetimePerSampling 0.0007021028037383178 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 26.188434579439253 seconds
+MCMC sample number  42900 checkpoint 429.0 out of 801.0
+averagetimePerSampling 0.0007020979020979021 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 26.118041958041957 seconds
+MCMC sample number  43000 checkpoint 430.0 out of 801.0
+averagetimePerSampling 0.0007020930232558139 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 26.047651162790697 seconds
+MCMC sample number  43100 checkpoint 431.0 out of 801.0
+averagetimePerSampling 0.0007020881670533643 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 25.97726218097448 seconds
+MCMC sample number  43200 checkpoint 432.0 out of 801.0
+averagetimePerSampling 0.0007020833333333334 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 25.906875000000003 seconds
+MCMC sample number  43300 checkpoint 433.0 out of 801.0
+averagetimePerSampling 0.0007020785219399539 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 25.836489607390302 seconds
+MCMC sample number  43400 checkpoint 434.0 out of 801.0
+averagetimePerSampling 0.000702073732718894 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 25.766105990783412 seconds
+MCMC sample number  43500 checkpoint 435.0 out of 801.0
+averagetimePerSampling 0.0007020689655172415 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 25.695724137931037 seconds
+MCMC sample number  43600 checkpoint 436.0 out of 801.0
+averagetimePerSampling 0.0007020642201834863 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 25.62534403669725 seconds
+MCMC sample number  43700 checkpoint 437.0 out of 801.0
+averagetimePerSampling 0.0007020594965675058 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 25.554965675057208 seconds
+MCMC sample number  43800 checkpoint 438.0 out of 801.0
+averagetimePerSampling 0.000702054794520548 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 25.484589041095894 seconds
+MCMC sample number  43900 checkpoint 439.0 out of 801.0
+averagetimePerSampling 0.0007020501138952165 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 25.414214123006836 seconds
+MCMC sample number  44000 checkpoint 440.0 out of 801.0
+averagetimePerSampling 0.0007020454545454547 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 25.343840909090915 seconds
+MCMC sample number  44100 checkpoint 441.0 out of 801.0
+averagetimePerSampling 0.0007020408163265307 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 25.273469387755107 seconds
+MCMC sample number  44200 checkpoint 442.0 out of 801.0
+averagetimePerSampling 0.0007020361990950228 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 25.203099547511318 seconds
+MCMC sample number  44300 checkpoint 443.0 out of 801.0
+averagetimePerSampling 0.0007020316027088038 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 25.132731376975173 seconds
+MCMC sample number  44400 checkpoint 444.0 out of 801.0
+averagetimePerSampling 0.000702027027027027 seconds
+timeSinceLastCheckPoint 0.06999999999999318 seconds
+Estimated time remaining 25.062364864864865 seconds
+MCMC sample number  44500 checkpoint 445.0 out of 801.0
+averagetimePerSampling 0.0007020224719101123 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 24.991999999999997 seconds
+MCMC sample number  44600 checkpoint 446.0 out of 801.0
+averagetimePerSampling 0.000702017937219731 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 24.92163677130045 seconds
+MCMC sample number  44700 checkpoint 447.0 out of 801.0
+averagetimePerSampling 0.0007020134228187919 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 24.851275167785236 seconds
+MCMC sample number  44800 checkpoint 448.0 out of 801.0
+averagetimePerSampling 0.0007020089285714286 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 24.78091517857143 seconds
+MCMC sample number  44900 checkpoint 449.0 out of 801.0
+averagetimePerSampling 0.0007020044543429843 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 24.71055679287305 seconds
+MCMC sample number  45000 checkpoint 450.0 out of 801.0
+averagetimePerSampling 0.000702 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 24.6402 seconds
+MCMC sample number  45100 checkpoint 451.0 out of 801.0
+averagetimePerSampling 0.0007019955654101995 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 24.569844789356985 seconds
+MCMC sample number  45200 checkpoint 452.0 out of 801.0
+averagetimePerSampling 0.0007019911504424779 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 24.49949115044248 seconds
+MCMC sample number  45300 checkpoint 453.0 out of 801.0
+averagetimePerSampling 0.0007019867549668874 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 24.429139072847683 seconds
+MCMC sample number  45400 checkpoint 454.0 out of 801.0
+averagetimePerSampling 0.0007019823788546256 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 24.358788546255507 seconds
+MCMC sample number  45500 checkpoint 455.0 out of 801.0
+averagetimePerSampling 0.000701978021978022 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 24.28843956043956 seconds
+MCMC sample number  45600 checkpoint 456.0 out of 801.0
+averagetimePerSampling 0.0007019736842105263 seconds
+timeSinceLastCheckPoint 0.06999999999999673 seconds
+Estimated time remaining 24.218092105263157 seconds
+MCMC sample number  45700 checkpoint 457.0 out of 801.0
+averagetimePerSampling 0.0007019693654266958 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 24.147746170678335 seconds
+MCMC sample number  45800 checkpoint 458.0 out of 801.0
+averagetimePerSampling 0.0007019650655021834 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 24.077401746724888 seconds
+MCMC sample number  45900 checkpoint 459.0 out of 801.0
+averagetimePerSampling 0.0007019607843137255 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 24.007058823529412 seconds
+MCMC sample number  46000 checkpoint 460.0 out of 801.0
+averagetimePerSampling 0.0007019565217391304 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 23.93671739130435 seconds
+MCMC sample number  46100 checkpoint 461.0 out of 801.0
+averagetimePerSampling 0.0007019522776572668 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 23.866377440347073 seconds
+MCMC sample number  46200 checkpoint 462.0 out of 801.0
+averagetimePerSampling 0.000701948051948052 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 23.79603896103896 seconds
+MCMC sample number  46300 checkpoint 463.0 out of 801.0
+averagetimePerSampling 0.0007019438444924406 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 23.72570194384449 seconds
+MCMC sample number  46400 checkpoint 464.0 out of 801.0
+averagetimePerSampling 0.0007019396551724138 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 23.655366379310344 seconds
+MCMC sample number  46500 checkpoint 465.0 out of 801.0
+averagetimePerSampling 0.0007019354838709677 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 23.585032258064516 seconds
+MCMC sample number  46600 checkpoint 466.0 out of 801.0
+averagetimePerSampling 0.0007019313304721031 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 23.514699570815452 seconds
+MCMC sample number  46700 checkpoint 467.0 out of 801.0
+averagetimePerSampling 0.0007019271948608138 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 23.44436830835118 seconds
+MCMC sample number  46800 checkpoint 468.0 out of 801.0
+averagetimePerSampling 0.000701923076923077 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 23.374038461538465 seconds
+MCMC sample number  46900 checkpoint 469.0 out of 801.0
+averagetimePerSampling 0.0007019189765458421 seconds
+timeSinceLastCheckPoint 0.06999999999999318 seconds
+Estimated time remaining 23.303710021321958 seconds
+MCMC sample number  47000 checkpoint 470.0 out of 801.0
+averagetimePerSampling 0.0007019148936170212 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 23.2333829787234 seconds
+MCMC sample number  47100 checkpoint 471.0 out of 801.0
+averagetimePerSampling 0.0007019108280254776 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 23.16305732484076 seconds
+MCMC sample number  47200 checkpoint 472.0 out of 801.0
+averagetimePerSampling 0.0007019067796610168 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 23.092733050847453 seconds
+MCMC sample number  47300 checkpoint 473.0 out of 801.0
+averagetimePerSampling 0.0007019027484143763 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 23.022410147991543 seconds
+MCMC sample number  47400 checkpoint 474.0 out of 801.0
+averagetimePerSampling 0.0007018987341772151 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 22.952088607594934 seconds
+MCMC sample number  47500 checkpoint 475.0 out of 801.0
+averagetimePerSampling 0.0007018947368421052 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 22.88176842105263 seconds
+MCMC sample number  47600 checkpoint 476.0 out of 801.0
+averagetimePerSampling 0.000701890756302521 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 22.811449579831933 seconds
+MCMC sample number  47700 checkpoint 477.0 out of 801.0
+averagetimePerSampling 0.0007018867924528301 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 22.741132075471697 seconds
+MCMC sample number  47800 checkpoint 478.0 out of 801.0
+averagetimePerSampling 0.0007018828451882845 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 22.67081589958159 seconds
+MCMC sample number  47900 checkpoint 479.0 out of 801.0
+averagetimePerSampling 0.0007018789144050103 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 22.600501043841334 seconds
+MCMC sample number  48000 checkpoint 480.0 out of 801.0
+averagetimePerSampling 0.0007018749999999999 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 22.530187499999997 seconds
+MCMC sample number  48100 checkpoint 481.0 out of 801.0
+averagetimePerSampling 0.0007018711018711018 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 22.459875259875258 seconds
+MCMC sample number  48200 checkpoint 482.0 out of 801.0
+averagetimePerSampling 0.0007018672199170125 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 22.389564315352697 seconds
+MCMC sample number  48300 checkpoint 483.0 out of 801.0
+averagetimePerSampling 0.000701863354037267 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 22.31925465838509 seconds
+MCMC sample number  48400 checkpoint 484.0 out of 801.0
+averagetimePerSampling 0.0007018595041322314 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 22.248946280991735 seconds
+MCMC sample number  48500 checkpoint 485.0 out of 801.0
+averagetimePerSampling 0.0007018556701030927 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 22.17863917525773 seconds
+MCMC sample number  48600 checkpoint 486.0 out of 801.0
+averagetimePerSampling 0.0007018518518518518 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 22.108333333333334 seconds
+MCMC sample number  48700 checkpoint 487.0 out of 801.0
+averagetimePerSampling 0.0007018480492813142 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 22.038028747433266 seconds
+MCMC sample number  48800 checkpoint 488.0 out of 801.0
+averagetimePerSampling 0.000701844262295082 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 21.967725409836067 seconds
+MCMC sample number  48900 checkpoint 489.0 out of 801.0
+averagetimePerSampling 0.0007018404907975461 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 21.897423312883436 seconds
+MCMC sample number  49000 checkpoint 490.0 out of 801.0
+averagetimePerSampling 0.0007018367346938775 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 21.82712244897959 seconds
+MCMC sample number  49100 checkpoint 491.0 out of 801.0
+averagetimePerSampling 0.0007018329938900204 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 21.756822810590634 seconds
+MCMC sample number  49200 checkpoint 492.0 out of 801.0
+averagetimePerSampling 0.0007018292682926829 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 21.686524390243903 seconds
+MCMC sample number  49300 checkpoint 493.0 out of 801.0
+averagetimePerSampling 0.0007018255578093306 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 21.616227180527382 seconds
+MCMC sample number  49400 checkpoint 494.0 out of 801.0
+averagetimePerSampling 0.000701821862348178 seconds
+timeSinceLastCheckPoint 0.06999999999999318 seconds
+Estimated time remaining 21.545931174089066 seconds
+MCMC sample number  49500 checkpoint 495.0 out of 801.0
+averagetimePerSampling 0.0007018181818181817 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 21.47563636363636 seconds
+MCMC sample number  49600 checkpoint 496.0 out of 801.0
+averagetimePerSampling 0.0007018145161290321 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 21.40534274193548 seconds
+MCMC sample number  49700 checkpoint 497.0 out of 801.0
+averagetimePerSampling 0.0007018108651911468 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 21.335050301810863 seconds
+MCMC sample number  49800 checkpoint 498.0 out of 801.0
+averagetimePerSampling 0.0007018072289156626 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 21.26475903614458 seconds
+MCMC sample number  49900 checkpoint 499.0 out of 801.0
+averagetimePerSampling 0.0007018036072144288 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 21.194468937875747 seconds
+MCMC sample number  50000 checkpoint 500.0 out of 801.0
+averagetimePerSampling 0.0007017999999999999 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 21.12418 seconds
+MCMC sample number  50100 checkpoint 501.0 out of 801.0
+averagetimePerSampling 0.0007017964071856287 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 21.05389221556886 seconds
+MCMC sample number  50200 checkpoint 502.0 out of 801.0
+averagetimePerSampling 0.0007017928286852589 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 20.98360557768924 seconds
+MCMC sample number  50300 checkpoint 503.0 out of 801.0
+averagetimePerSampling 0.0007017892644135188 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 20.91332007952286 seconds
+MCMC sample number  50400 checkpoint 504.0 out of 801.0
+averagetimePerSampling 0.0007017857142857143 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 20.843035714285712 seconds
+MCMC sample number  50500 checkpoint 505.0 out of 801.0
+averagetimePerSampling 0.0007017821782178218 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 20.772752475247525 seconds
+MCMC sample number  50600 checkpoint 506.0 out of 801.0
+averagetimePerSampling 0.0007017786561264822 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 20.702470355731222 seconds
+MCMC sample number  50700 checkpoint 507.0 out of 801.0
+averagetimePerSampling 0.000701775147928994 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 20.632189349112423 seconds
+MCMC sample number  50800 checkpoint 508.0 out of 801.0
+averagetimePerSampling 0.000701771653543307 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 20.561909448818895 seconds
+MCMC sample number  50900 checkpoint 509.0 out of 801.0
+averagetimePerSampling 0.0007017681728880157 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 20.49163064833006 seconds
+MCMC sample number  51000 checkpoint 510.0 out of 801.0
+averagetimePerSampling 0.0007017647058823529 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 20.42135294117647 seconds
+MCMC sample number  51100 checkpoint 511.0 out of 801.0
+averagetimePerSampling 0.0007017612524461839 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 20.351076320939335 seconds
+MCMC sample number  51200 checkpoint 512.0 out of 801.0
+averagetimePerSampling 0.0007017578125 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 20.28080078125 seconds
+MCMC sample number  51300 checkpoint 513.0 out of 801.0
+averagetimePerSampling 0.0007017543859649122 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 20.210526315789473 seconds
+MCMC sample number  51400 checkpoint 514.0 out of 801.0
+averagetimePerSampling 0.0007017509727626459 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 20.14025291828794 seconds
+MCMC sample number  51500 checkpoint 515.0 out of 801.0
+averagetimePerSampling 0.000701747572815534 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 20.069980582524273 seconds
+MCMC sample number  51600 checkpoint 516.0 out of 801.0
+averagetimePerSampling 0.0007017441860465117 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 19.99970930232558 seconds
+MCMC sample number  51700 checkpoint 517.0 out of 801.0
+averagetimePerSampling 0.0007017408123791102 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 19.92943907156673 seconds
+MCMC sample number  51800 checkpoint 518.0 out of 801.0
+averagetimePerSampling 0.0007017374517374517 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 19.859169884169884 seconds
+MCMC sample number  51900 checkpoint 519.0 out of 801.0
+averagetimePerSampling 0.0007017341040462426 seconds
+timeSinceLastCheckPoint 0.06999999999999318 seconds
+Estimated time remaining 19.78890173410404 seconds
+MCMC sample number  52000 checkpoint 520.0 out of 801.0
+averagetimePerSampling 0.0007017307692307692 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 19.718634615384612 seconds
+MCMC sample number  52100 checkpoint 521.0 out of 801.0
+averagetimePerSampling 0.0007017274472168906 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 19.648368522072936 seconds
+MCMC sample number  52200 checkpoint 522.0 out of 801.0
+averagetimePerSampling 0.0007017241379310344 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 19.578103448275858 seconds
+MCMC sample number  52300 checkpoint 523.0 out of 801.0
+averagetimePerSampling 0.0007017208413001912 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 19.507839388145314 seconds
+MCMC sample number  52400 checkpoint 524.0 out of 801.0
+averagetimePerSampling 0.0007017175572519083 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 19.43757633587786 seconds
+MCMC sample number  52500 checkpoint 525.0 out of 801.0
+averagetimePerSampling 0.0007017142857142857 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 19.367314285714283 seconds
+MCMC sample number  52600 checkpoint 526.0 out of 801.0
+averagetimePerSampling 0.0007017110266159696 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 19.297053231939163 seconds
+MCMC sample number  52700 checkpoint 527.0 out of 801.0
+averagetimePerSampling 0.0007017077798861479 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 19.226793168880455 seconds
+MCMC sample number  52800 checkpoint 528.0 out of 801.0
+averagetimePerSampling 0.0007017045454545454 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 19.15653409090909 seconds
+MCMC sample number  52900 checkpoint 529.0 out of 801.0
+averagetimePerSampling 0.0007017013232514177 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 19.086275992438562 seconds
+MCMC sample number  53000 checkpoint 530.0 out of 801.0
+averagetimePerSampling 0.0007016981132075471 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 19.016018867924526 seconds
+MCMC sample number  53100 checkpoint 531.0 out of 801.0
+averagetimePerSampling 0.0007016949152542373 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 18.945762711864408 seconds
+MCMC sample number  53200 checkpoint 532.0 out of 801.0
+averagetimePerSampling 0.0007016917293233083 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 18.875507518796994 seconds
+MCMC sample number  53300 checkpoint 533.0 out of 801.0
+averagetimePerSampling 0.0007016885553470919 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 18.80525328330206 seconds
+MCMC sample number  53400 checkpoint 534.0 out of 801.0
+averagetimePerSampling 0.000701685393258427 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 18.735 seconds
+MCMC sample number  53500 checkpoint 535.0 out of 801.0
+averagetimePerSampling 0.0007016822429906542 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 18.664747663551402 seconds
+MCMC sample number  53600 checkpoint 536.0 out of 801.0
+averagetimePerSampling 0.000701679104477612 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 18.594496268656716 seconds
+MCMC sample number  53700 checkpoint 537.0 out of 801.0
+averagetimePerSampling 0.0007016759776536312 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 18.524245810055866 seconds
+MCMC sample number  53800 checkpoint 538.0 out of 801.0
+averagetimePerSampling 0.0007016728624535316 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 18.453996282527882 seconds
+MCMC sample number  53900 checkpoint 539.0 out of 801.0
+averagetimePerSampling 0.000701669758812616 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 18.38374768089054 seconds
+MCMC sample number  54000 checkpoint 540.0 out of 801.0
+averagetimePerSampling 0.0007016666666666666 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 18.313499999999998 seconds
+MCMC sample number  54100 checkpoint 541.0 out of 801.0
+averagetimePerSampling 0.0007018484288354898 seconds
+timeSinceLastCheckPoint 0.0799999999999983 seconds
+Estimated time remaining 18.248059149722735 seconds
+MCMC sample number  54200 checkpoint 542.0 out of 801.0
+averagetimePerSampling 0.0007018450184501845 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 18.177785977859777 seconds
+MCMC sample number  54300 checkpoint 543.0 out of 801.0
+averagetimePerSampling 0.000701841620626151 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 18.107513812154696 seconds
+MCMC sample number  54400 checkpoint 544.0 out of 801.0
+averagetimePerSampling 0.0007018382352941176 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 18.03724264705882 seconds
+MCMC sample number  54500 checkpoint 545.0 out of 801.0
+averagetimePerSampling 0.0007018348623853211 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 17.966972477064218 seconds
+MCMC sample number  54600 checkpoint 546.0 out of 801.0
+averagetimePerSampling 0.0007018315018315018 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 17.896703296703297 seconds
+MCMC sample number  54700 checkpoint 547.0 out of 801.0
+averagetimePerSampling 0.0007018281535648994 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 17.826435100548444 seconds
+MCMC sample number  54800 checkpoint 548.0 out of 801.0
+averagetimePerSampling 0.0007018248175182482 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 17.756167883211678 seconds
+MCMC sample number  54900 checkpoint 549.0 out of 801.0
+averagetimePerSampling 0.0007018214936247723 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 17.685901639344262 seconds
+MCMC sample number  55000 checkpoint 550.0 out of 801.0
+averagetimePerSampling 0.0007018181818181818 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 17.615636363636362 seconds
+MCMC sample number  55100 checkpoint 551.0 out of 801.0
+averagetimePerSampling 0.0007018148820326678 seconds
+timeSinceLastCheckPoint 0.06999999999999318 seconds
+Estimated time remaining 17.545372050816695 seconds
+MCMC sample number  55200 checkpoint 552.0 out of 801.0
+averagetimePerSampling 0.0007018115942028985 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 17.47510869565217 seconds
+MCMC sample number  55300 checkpoint 553.0 out of 801.0
+averagetimePerSampling 0.0007018083182640144 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 17.404846292947557 seconds
+MCMC sample number  55400 checkpoint 554.0 out of 801.0
+averagetimePerSampling 0.0007018050541516245 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 17.334584837545126 seconds
+MCMC sample number  55500 checkpoint 555.0 out of 801.0
+averagetimePerSampling 0.0007018018018018018 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 17.264324324324324 seconds
+MCMC sample number  55600 checkpoint 556.0 out of 801.0
+averagetimePerSampling 0.0007017985611510791 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 17.194064748201438 seconds
+MCMC sample number  55700 checkpoint 557.0 out of 801.0
+averagetimePerSampling 0.0007017953321364451 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 17.12380610412926 seconds
+MCMC sample number  55800 checkpoint 558.0 out of 801.0
+averagetimePerSampling 0.0007017921146953405 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 17.053548387096775 seconds
+MCMC sample number  55900 checkpoint 559.0 out of 801.0
+averagetimePerSampling 0.0007017889087656529 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 16.9832915921288 seconds
+MCMC sample number  56000 checkpoint 560.0 out of 801.0
+averagetimePerSampling 0.0007017857142857143 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 16.913035714285712 seconds
+MCMC sample number  56100 checkpoint 561.0 out of 801.0
+averagetimePerSampling 0.0007017825311942959 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 16.842780748663102 seconds
+MCMC sample number  56200 checkpoint 562.0 out of 801.0
+averagetimePerSampling 0.000701779359430605 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 16.77252669039146 seconds
+MCMC sample number  56300 checkpoint 563.0 out of 801.0
+averagetimePerSampling 0.0007017761989342806 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 16.70227353463588 seconds
+MCMC sample number  56400 checkpoint 564.0 out of 801.0
+averagetimePerSampling 0.0007017730496453901 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 16.632021276595744 seconds
+MCMC sample number  56500 checkpoint 565.0 out of 801.0
+averagetimePerSampling 0.0007017699115044248 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 16.561769911504424 seconds
+MCMC sample number  56600 checkpoint 566.0 out of 801.0
+averagetimePerSampling 0.0007017667844522968 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 16.491519434628973 seconds
+MCMC sample number  56700 checkpoint 567.0 out of 801.0
+averagetimePerSampling 0.0007017636684303351 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 16.42126984126984 seconds
+MCMC sample number  56800 checkpoint 568.0 out of 801.0
+averagetimePerSampling 0.0007017605633802817 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 16.351021126760564 seconds
+MCMC sample number  56900 checkpoint 569.0 out of 801.0
+averagetimePerSampling 0.0007017574692442882 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 16.280773286467486 seconds
+MCMC sample number  57000 checkpoint 570.0 out of 801.0
+averagetimePerSampling 0.0007017543859649122 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 16.210526315789473 seconds
+MCMC sample number  57100 checkpoint 571.0 out of 801.0
+averagetimePerSampling 0.0007017513134851139 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 16.14028021015762 seconds
+MCMC sample number  57200 checkpoint 572.0 out of 801.0
+averagetimePerSampling 0.0007017482517482518 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 16.070034965034967 seconds
+MCMC sample number  57300 checkpoint 573.0 out of 801.0
+averagetimePerSampling 0.0007017452006980803 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 15.99979057591623 seconds
+MCMC sample number  57400 checkpoint 574.0 out of 801.0
+averagetimePerSampling 0.0007017421602787457 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 15.929547038327527 seconds
+MCMC sample number  57500 checkpoint 575.0 out of 801.0
+averagetimePerSampling 0.0007017391304347826 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 15.859304347826086 seconds
+MCMC sample number  57600 checkpoint 576.0 out of 801.0
+averagetimePerSampling 0.000701736111111111 seconds
+timeSinceLastCheckPoint 0.06999999999999318 seconds
+Estimated time remaining 15.789062499999996 seconds
+MCMC sample number  57700 checkpoint 577.0 out of 801.0
+averagetimePerSampling 0.0007017331022530328 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 15.718821490467935 seconds
+MCMC sample number  57800 checkpoint 578.0 out of 801.0
+averagetimePerSampling 0.0007017301038062283 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 15.648581314878891 seconds
+MCMC sample number  57900 checkpoint 579.0 out of 801.0
+averagetimePerSampling 0.000701727115716753 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 15.578341968911916 seconds
+MCMC sample number  58000 checkpoint 580.0 out of 801.0
+averagetimePerSampling 0.0007017241379310344 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 15.50810344827586 seconds
+MCMC sample number  58100 checkpoint 581.0 out of 801.0
+averagetimePerSampling 0.0007017211703958692 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 15.437865748709122 seconds
+MCMC sample number  58200 checkpoint 582.0 out of 801.0
+averagetimePerSampling 0.0007017182130584192 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 15.367628865979379 seconds
+MCMC sample number  58300 checkpoint 583.0 out of 801.0
+averagetimePerSampling 0.0007017152658662093 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 15.297392795883361 seconds
+MCMC sample number  58400 checkpoint 584.0 out of 801.0
+averagetimePerSampling 0.0007017123287671233 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 15.227157534246576 seconds
+MCMC sample number  58500 checkpoint 585.0 out of 801.0
+averagetimePerSampling 0.0007017094017094017 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 15.156923076923075 seconds
+MCMC sample number  58600 checkpoint 586.0 out of 801.0
+averagetimePerSampling 0.0007017064846416382 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 15.08668941979522 seconds
+MCMC sample number  58700 checkpoint 587.0 out of 801.0
+averagetimePerSampling 0.0007017035775127768 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 15.016456558773424 seconds
+MCMC sample number  58800 checkpoint 588.0 out of 801.0
+averagetimePerSampling 0.0007017006802721088 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 14.946224489795918 seconds
+MCMC sample number  58900 checkpoint 589.0 out of 801.0
+averagetimePerSampling 0.00070169779286927 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 14.875993208828524 seconds
+MCMC sample number  59000 checkpoint 590.0 out of 801.0
+averagetimePerSampling 0.0007016949152542373 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 14.805762711864407 seconds
+MCMC sample number  59100 checkpoint 591.0 out of 801.0
+averagetimePerSampling 0.0007016920473773265 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 14.735532994923856 seconds
+MCMC sample number  59200 checkpoint 592.0 out of 801.0
+averagetimePerSampling 0.0007016891891891892 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 14.665304054054054 seconds
+MCMC sample number  59300 checkpoint 593.0 out of 801.0
+averagetimePerSampling 0.0007016863406408095 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 14.595075885328837 seconds
+MCMC sample number  59400 checkpoint 594.0 out of 801.0
+averagetimePerSampling 0.0007016835016835016 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 14.524848484848484 seconds
+MCMC sample number  59500 checkpoint 595.0 out of 801.0
+averagetimePerSampling 0.0007016806722689075 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 14.454621848739494 seconds
+MCMC sample number  59600 checkpoint 596.0 out of 801.0
+averagetimePerSampling 0.0007018456375838926 seconds
+timeSinceLastCheckPoint 0.0799999999999983 seconds
+Estimated time remaining 14.387835570469798 seconds
+MCMC sample number  59700 checkpoint 597.0 out of 801.0
+averagetimePerSampling 0.0007018425460636516 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 14.317587939698493 seconds
+MCMC sample number  59800 checkpoint 598.0 out of 801.0
+averagetimePerSampling 0.0007018394648829431 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 14.247341137123746 seconds
+MCMC sample number  59900 checkpoint 599.0 out of 801.0
+averagetimePerSampling 0.0007018363939899833 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 14.177095158597663 seconds
+MCMC sample number  60000 checkpoint 600.0 out of 801.0
+averagetimePerSampling 0.0007018333333333333 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 14.10685 seconds
+MCMC sample number  60100 checkpoint 601.0 out of 801.0
+averagetimePerSampling 0.0007018302828618968 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 14.036605657237937 seconds
+MCMC sample number  60200 checkpoint 602.0 out of 801.0
+averagetimePerSampling 0.000701827242524917 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 13.966362126245848 seconds
+MCMC sample number  60300 checkpoint 603.0 out of 801.0
+averagetimePerSampling 0.0007018242122719734 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 13.896119402985073 seconds
+MCMC sample number  60400 checkpoint 604.0 out of 801.0
+averagetimePerSampling 0.0007018211920529801 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 13.825877483443708 seconds
+MCMC sample number  60500 checkpoint 605.0 out of 801.0
+averagetimePerSampling 0.0007018181818181818 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 13.755636363636363 seconds
+MCMC sample number  60600 checkpoint 606.0 out of 801.0
+averagetimePerSampling 0.0007018151815181518 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 13.68539603960396 seconds
+MCMC sample number  60700 checkpoint 607.0 out of 801.0
+averagetimePerSampling 0.0007018121911037892 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 13.61515650741351 seconds
+MCMC sample number  60800 checkpoint 608.0 out of 801.0
+averagetimePerSampling 0.0007018092105263157 seconds
+timeSinceLastCheckPoint 0.06999999999999318 seconds
+Estimated time remaining 13.544917763157894 seconds
+MCMC sample number  60900 checkpoint 609.0 out of 801.0
+averagetimePerSampling 0.0007018062397372741 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 13.474679802955663 seconds
+MCMC sample number  61000 checkpoint 610.0 out of 801.0
+averagetimePerSampling 0.0007018032786885245 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 13.404442622950818 seconds
+MCMC sample number  61100 checkpoint 611.0 out of 801.0
+averagetimePerSampling 0.0007018003273322422 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 13.334206219312602 seconds
+MCMC sample number  61200 checkpoint 612.0 out of 801.0
+averagetimePerSampling 0.000701797385620915 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 13.263970588235292 seconds
+MCMC sample number  61300 checkpoint 613.0 out of 801.0
+averagetimePerSampling 0.0007017944535073409 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 13.193735725938009 seconds
+MCMC sample number  61400 checkpoint 614.0 out of 801.0
+averagetimePerSampling 0.0007017915309446254 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 13.123501628664496 seconds
+MCMC sample number  61500 checkpoint 615.0 out of 801.0
+averagetimePerSampling 0.0007017886178861788 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 13.053268292682926 seconds
+MCMC sample number  61600 checkpoint 616.0 out of 801.0
+averagetimePerSampling 0.0007017857142857143 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 12.983035714285714 seconds
+MCMC sample number  61700 checkpoint 617.0 out of 801.0
+averagetimePerSampling 0.0007017828200972446 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 12.912803889789302 seconds
+MCMC sample number  61800 checkpoint 618.0 out of 801.0
+averagetimePerSampling 0.0007017799352750808 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 12.842572815533979 seconds
+MCMC sample number  61900 checkpoint 619.0 out of 801.0
+averagetimePerSampling 0.0007017770597738287 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 12.772342487883682 seconds
+MCMC sample number  62000 checkpoint 620.0 out of 801.0
+averagetimePerSampling 0.000701774193548387 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 12.702112903225805 seconds
+MCMC sample number  62100 checkpoint 621.0 out of 801.0
+averagetimePerSampling 0.0007017713365539452 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 12.631884057971014 seconds
+MCMC sample number  62200 checkpoint 622.0 out of 801.0
+averagetimePerSampling 0.0007017684887459807 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 12.561655948553055 seconds
+MCMC sample number  62300 checkpoint 623.0 out of 801.0
+averagetimePerSampling 0.0007017656500802568 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 12.491428571428571 seconds
+MCMC sample number  62400 checkpoint 624.0 out of 801.0
+averagetimePerSampling 0.0007017628205128205 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 12.421201923076923 seconds
+MCMC sample number  62500 checkpoint 625.0 out of 801.0
+averagetimePerSampling 0.00070176 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 12.350976 seconds
+MCMC sample number  62600 checkpoint 626.0 out of 801.0
+averagetimePerSampling 0.0007017571884984026 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 12.280750798722044 seconds
+MCMC sample number  62700 checkpoint 627.0 out of 801.0
+averagetimePerSampling 0.0007017543859649122 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 12.210526315789473 seconds
+MCMC sample number  62800 checkpoint 628.0 out of 801.0
+averagetimePerSampling 0.0007017515923566879 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 12.140302547770702 seconds
+MCMC sample number  62900 checkpoint 629.0 out of 801.0
+averagetimePerSampling 0.0007017488076311606 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 12.070079491255962 seconds
+MCMC sample number  63000 checkpoint 630.0 out of 801.0
+averagetimePerSampling 0.0007017460317460317 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 11.999857142857143 seconds
+MCMC sample number  63100 checkpoint 631.0 out of 801.0
+averagetimePerSampling 0.0007017432646592711 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 11.929635499207608 seconds
+MCMC sample number  63200 checkpoint 632.0 out of 801.0
+averagetimePerSampling 0.0007017405063291139 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 11.859414556962024 seconds
+MCMC sample number  63300 checkpoint 633.0 out of 801.0
+averagetimePerSampling 0.0007017377567140599 seconds
+timeSinceLastCheckPoint 0.06999999999999318 seconds
+Estimated time remaining 11.789194312796207 seconds
+MCMC sample number  63400 checkpoint 634.0 out of 801.0
+averagetimePerSampling 0.0007017350157728706 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 11.718974763406939 seconds
+MCMC sample number  63500 checkpoint 635.0 out of 801.0
+averagetimePerSampling 0.0007017322834645669 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 11.64875590551181 seconds
+MCMC sample number  63600 checkpoint 636.0 out of 801.0
+averagetimePerSampling 0.0007017295597484276 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 11.578537735849055 seconds
+MCMC sample number  63700 checkpoint 637.0 out of 801.0
+averagetimePerSampling 0.0007017268445839873 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 11.508320251177393 seconds
+MCMC sample number  63800 checkpoint 638.0 out of 801.0
+averagetimePerSampling 0.0007017241379310345 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 11.438103448275863 seconds
+MCMC sample number  63900 checkpoint 639.0 out of 801.0
+averagetimePerSampling 0.0007017214397496087 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 11.36788732394366 seconds
+MCMC sample number  64000 checkpoint 640.0 out of 801.0
+averagetimePerSampling 0.00070171875 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 11.297671874999999 seconds
+MCMC sample number  64100 checkpoint 641.0 out of 801.0
+averagetimePerSampling 0.0007017160686427457 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 11.227457098283931 seconds
+MCMC sample number  64200 checkpoint 642.0 out of 801.0
+averagetimePerSampling 0.0007017133956386292 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 11.157242990654206 seconds
+MCMC sample number  64300 checkpoint 643.0 out of 801.0
+averagetimePerSampling 0.000701710730948678 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 11.087029548989113 seconds
+MCMC sample number  64400 checkpoint 644.0 out of 801.0
+averagetimePerSampling 0.0007017080745341615 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 11.016816770186336 seconds
+MCMC sample number  64500 checkpoint 645.0 out of 801.0
+averagetimePerSampling 0.0007017054263565891 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 10.94660465116279 seconds
+MCMC sample number  64600 checkpoint 646.0 out of 801.0
+averagetimePerSampling 0.000701702786377709 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 10.876393188854488 seconds
+MCMC sample number  64700 checkpoint 647.0 out of 801.0
+averagetimePerSampling 0.0007017001545595054 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 10.806182380216383 seconds
+MCMC sample number  64800 checkpoint 648.0 out of 801.0
+averagetimePerSampling 0.0007016975308641975 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 10.735972222222221 seconds
+MCMC sample number  64900 checkpoint 649.0 out of 801.0
+averagetimePerSampling 0.0007016949152542373 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 10.665762711864406 seconds
+MCMC sample number  65000 checkpoint 650.0 out of 801.0
+averagetimePerSampling 0.0007016923076923077 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 10.595553846153846 seconds
+MCMC sample number  65100 checkpoint 651.0 out of 801.0
+averagetimePerSampling 0.000701689708141321 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 10.525345622119815 seconds
+MCMC sample number  65200 checkpoint 652.0 out of 801.0
+averagetimePerSampling 0.0007016871165644172 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 10.455138036809815 seconds
+MCMC sample number  65300 checkpoint 653.0 out of 801.0
+averagetimePerSampling 0.0007016845329249617 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 10.384931087289432 seconds
+MCMC sample number  65400 checkpoint 654.0 out of 801.0
+averagetimePerSampling 0.0007016819571865443 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 10.314724770642203 seconds
+MCMC sample number  65500 checkpoint 655.0 out of 801.0
+averagetimePerSampling 0.0007016793893129771 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 10.244519083969466 seconds
+MCMC sample number  65600 checkpoint 656.0 out of 801.0
+averagetimePerSampling 0.0007016768292682927 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 10.174314024390245 seconds
+MCMC sample number  65700 checkpoint 657.0 out of 801.0
+averagetimePerSampling 0.0007016742770167428 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 10.104109589041096 seconds
+MCMC sample number  65800 checkpoint 658.0 out of 801.0
+averagetimePerSampling 0.0007016717325227963 seconds
+timeSinceLastCheckPoint 0.06999999999999318 seconds
+Estimated time remaining 10.033905775075986 seconds
+MCMC sample number  65900 checkpoint 659.0 out of 801.0
+averagetimePerSampling 0.000701669195751138 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 9.96370257966616 seconds
+MCMC sample number  66000 checkpoint 660.0 out of 801.0
+averagetimePerSampling 0.0007016666666666666 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 9.8935 seconds
+MCMC sample number  66100 checkpoint 661.0 out of 801.0
+averagetimePerSampling 0.0007016641452344931 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 9.823298033282903 seconds
+MCMC sample number  66200 checkpoint 662.0 out of 801.0
+averagetimePerSampling 0.0007016616314199395 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 9.753096676737158 seconds
+MCMC sample number  66300 checkpoint 663.0 out of 801.0
+averagetimePerSampling 0.0007016591251885369 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 9.682895927601809 seconds
+MCMC sample number  66400 checkpoint 664.0 out of 801.0
+averagetimePerSampling 0.0007016566265060241 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 9.61269578313253 seconds
+MCMC sample number  66500 checkpoint 665.0 out of 801.0
+averagetimePerSampling 0.0007016541353383458 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 9.542496240601503 seconds
+MCMC sample number  66600 checkpoint 666.0 out of 801.0
+averagetimePerSampling 0.0007016516516516516 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 9.472297297297295 seconds
+MCMC sample number  66700 checkpoint 667.0 out of 801.0
+averagetimePerSampling 0.0007016491754122938 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 9.402098950524737 seconds
+MCMC sample number  66800 checkpoint 668.0 out of 801.0
+averagetimePerSampling 0.0007016467065868263 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 9.33190119760479 seconds
+MCMC sample number  66900 checkpoint 669.0 out of 801.0
+averagetimePerSampling 0.0007016442451420029 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 9.261704035874438 seconds
+MCMC sample number  67000 checkpoint 670.0 out of 801.0
+averagetimePerSampling 0.000701641791044776 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 9.191507462686566 seconds
+MCMC sample number  67100 checkpoint 671.0 out of 801.0
+averagetimePerSampling 0.0007016393442622951 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 9.121311475409836 seconds
+MCMC sample number  67200 checkpoint 672.0 out of 801.0
+averagetimePerSampling 0.0007016369047619048 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 9.051116071428572 seconds
+MCMC sample number  67300 checkpoint 673.0 out of 801.0
+averagetimePerSampling 0.0007016344725111441 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 8.980921248142645 seconds
+MCMC sample number  67400 checkpoint 674.0 out of 801.0
+averagetimePerSampling 0.0007016320474777448 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 8.91072700296736 seconds
+MCMC sample number  67500 checkpoint 675.0 out of 801.0
+averagetimePerSampling 0.0007016296296296296 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 8.840533333333333 seconds
+MCMC sample number  67600 checkpoint 676.0 out of 801.0
+averagetimePerSampling 0.0007016272189349112 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 8.77034023668639 seconds
+MCMC sample number  67700 checkpoint 677.0 out of 801.0
+averagetimePerSampling 0.0007016248153618907 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 8.700147710487444 seconds
+MCMC sample number  67800 checkpoint 678.0 out of 801.0
+averagetimePerSampling 0.0007016224188790561 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 8.629955752212389 seconds
+MCMC sample number  67900 checkpoint 679.0 out of 801.0
+averagetimePerSampling 0.000701620029455081 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 8.559764359351988 seconds
+MCMC sample number  68000 checkpoint 680.0 out of 801.0
+averagetimePerSampling 0.0007016176470588235 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 8.489573529411764 seconds
+MCMC sample number  68100 checkpoint 681.0 out of 801.0
+averagetimePerSampling 0.0007016152716593245 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 8.419383259911895 seconds
+MCMC sample number  68200 checkpoint 682.0 out of 801.0
+averagetimePerSampling 0.0007016129032258064 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 8.349193548387097 seconds
+MCMC sample number  68300 checkpoint 683.0 out of 801.0
+averagetimePerSampling 0.0007016105417276719 seconds
+timeSinceLastCheckPoint 0.06999999999999318 seconds
+Estimated time remaining 8.279004392386529 seconds
+MCMC sample number  68400 checkpoint 684.0 out of 801.0
+averagetimePerSampling 0.0007016081871345028 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 8.208815789473682 seconds
+MCMC sample number  68500 checkpoint 685.0 out of 801.0
+averagetimePerSampling 0.0007016058394160584 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 8.138627737226278 seconds
+MCMC sample number  68600 checkpoint 686.0 out of 801.0
+averagetimePerSampling 0.000701603498542274 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 8.068440233236151 seconds
+MCMC sample number  68700 checkpoint 687.0 out of 801.0
+averagetimePerSampling 0.0007016011644832605 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 7.998253275109169 seconds
+MCMC sample number  68800 checkpoint 688.0 out of 801.0
+averagetimePerSampling 0.0007015988372093023 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 7.928066860465116 seconds
+MCMC sample number  68900 checkpoint 689.0 out of 801.0
+averagetimePerSampling 0.0007015965166908563 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 7.857880986937591 seconds
+MCMC sample number  69000 checkpoint 690.0 out of 801.0
+averagetimePerSampling 0.0007015942028985507 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 7.7876956521739125 seconds
+MCMC sample number  69100 checkpoint 691.0 out of 801.0
+averagetimePerSampling 0.0007015918958031838 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 7.717510853835022 seconds
+MCMC sample number  69200 checkpoint 692.0 out of 801.0
+averagetimePerSampling 0.0007015895953757225 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 7.647326589595376 seconds
+MCMC sample number  69300 checkpoint 693.0 out of 801.0
+averagetimePerSampling 0.0007015873015873015 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 7.5771428571428565 seconds
+MCMC sample number  69400 checkpoint 694.0 out of 801.0
+averagetimePerSampling 0.0007015850144092219 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 7.506959654178674 seconds
+MCMC sample number  69500 checkpoint 695.0 out of 801.0
+averagetimePerSampling 0.0007015827338129496 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 7.4367769784172655 seconds
+MCMC sample number  69600 checkpoint 696.0 out of 801.0
+averagetimePerSampling 0.0007015804597701149 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 7.366594827586207 seconds
+MCMC sample number  69700 checkpoint 697.0 out of 801.0
+averagetimePerSampling 0.0007015781922525107 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 7.296413199426111 seconds
+MCMC sample number  69800 checkpoint 698.0 out of 801.0
+averagetimePerSampling 0.0007015759312320917 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 7.2262320916905445 seconds
+MCMC sample number  69900 checkpoint 699.0 out of 801.0
+averagetimePerSampling 0.0007015736766809728 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 7.156051502145923 seconds
+MCMC sample number  70000 checkpoint 700.0 out of 801.0
+averagetimePerSampling 0.0007015714285714286 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 7.085871428571428 seconds
+MCMC sample number  70100 checkpoint 701.0 out of 801.0
+averagetimePerSampling 0.0007017118402282453 seconds
+timeSinceLastCheckPoint 0.0799999999999983 seconds
+Estimated time remaining 7.0171184022824535 seconds
+MCMC sample number  70200 checkpoint 702.0 out of 801.0
+averagetimePerSampling 0.0007017094017094017 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 6.946923076923077 seconds
+MCMC sample number  70300 checkpoint 703.0 out of 801.0
+averagetimePerSampling 0.0007017069701280227 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 6.876728307254623 seconds
+MCMC sample number  70400 checkpoint 704.0 out of 801.0
+averagetimePerSampling 0.0007017045454545454 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 6.80653409090909 seconds
+MCMC sample number  70500 checkpoint 705.0 out of 801.0
+averagetimePerSampling 0.0007017021276595744 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 6.736340425531915 seconds
+MCMC sample number  70600 checkpoint 706.0 out of 801.0
+averagetimePerSampling 0.000701699716713881 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 6.66614730878187 seconds
+MCMC sample number  70700 checkpoint 707.0 out of 801.0
+averagetimePerSampling 0.0007016973125884017 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 6.595954738330976 seconds
+MCMC sample number  70800 checkpoint 708.0 out of 801.0
+averagetimePerSampling 0.0007016949152542373 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 6.525762711864407 seconds
+MCMC sample number  70900 checkpoint 709.0 out of 801.0
+averagetimePerSampling 0.0007016925246826517 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 6.455571227080395 seconds
+MCMC sample number  71000 checkpoint 710.0 out of 801.0
+averagetimePerSampling 0.0007016901408450705 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 6.385380281690141 seconds
+MCMC sample number  71100 checkpoint 711.0 out of 801.0
+averagetimePerSampling 0.0007016877637130802 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 6.315189873417721 seconds
+MCMC sample number  71200 checkpoint 712.0 out of 801.0
+averagetimePerSampling 0.000701685393258427 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 6.245 seconds
+MCMC sample number  71300 checkpoint 713.0 out of 801.0
+averagetimePerSampling 0.0007016830294530155 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 6.174810659186536 seconds
+MCMC sample number  71400 checkpoint 714.0 out of 801.0
+averagetimePerSampling 0.0007016806722689076 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 6.104621848739496 seconds
+MCMC sample number  71500 checkpoint 715.0 out of 801.0
+averagetimePerSampling 0.0007016783216783216 seconds
+timeSinceLastCheckPoint 0.06999999999999318 seconds
+Estimated time remaining 6.034433566433566 seconds
+MCMC sample number  71600 checkpoint 716.0 out of 801.0
+averagetimePerSampling 0.0007016759776536312 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 5.964245810055866 seconds
+MCMC sample number  71700 checkpoint 717.0 out of 801.0
+averagetimePerSampling 0.000701673640167364 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 5.894058577405858 seconds
+MCMC sample number  71800 checkpoint 718.0 out of 801.0
+averagetimePerSampling 0.0007016713091922004 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 5.8238718662952635 seconds
+MCMC sample number  71900 checkpoint 719.0 out of 801.0
+averagetimePerSampling 0.0007016689847009736 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 5.753685674547983 seconds
+MCMC sample number  72000 checkpoint 720.0 out of 801.0
+averagetimePerSampling 0.0007016666666666666 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 5.6834999999999996 seconds
+MCMC sample number  72100 checkpoint 721.0 out of 801.0
+averagetimePerSampling 0.0007016643550624132 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 5.613314840499306 seconds
+MCMC sample number  72200 checkpoint 722.0 out of 801.0
+averagetimePerSampling 0.0007016620498614958 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 5.543130193905817 seconds
+MCMC sample number  72300 checkpoint 723.0 out of 801.0
+averagetimePerSampling 0.0007016597510373444 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 5.472946058091286 seconds
+MCMC sample number  72400 checkpoint 724.0 out of 801.0
+averagetimePerSampling 0.0007016574585635358 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 5.402762430939226 seconds
+MCMC sample number  72500 checkpoint 725.0 out of 801.0
+averagetimePerSampling 0.000701655172413793 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 5.332579310344827 seconds
+MCMC sample number  72600 checkpoint 726.0 out of 801.0
+averagetimePerSampling 0.0007016528925619834 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 5.262396694214876 seconds
+MCMC sample number  72700 checkpoint 727.0 out of 801.0
+averagetimePerSampling 0.0007016506189821182 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 5.192214580467675 seconds
+MCMC sample number  72800 checkpoint 728.0 out of 801.0
+averagetimePerSampling 0.0007016483516483516 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 5.1220329670329665 seconds
+MCMC sample number  72900 checkpoint 729.0 out of 801.0
+averagetimePerSampling 0.0007016460905349794 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 5.051851851851851 seconds
+MCMC sample number  73000 checkpoint 730.0 out of 801.0
+averagetimePerSampling 0.0007016438356164383 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 4.981671232876712 seconds
+MCMC sample number  73100 checkpoint 731.0 out of 801.0
+averagetimePerSampling 0.000701641586867305 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 4.911491108071135 seconds
+MCMC sample number  73200 checkpoint 732.0 out of 801.0
+averagetimePerSampling 0.0007016393442622951 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 4.841311475409836 seconds
+MCMC sample number  73300 checkpoint 733.0 out of 801.0
+averagetimePerSampling 0.0007016371077762619 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 4.771132332878581 seconds
+MCMC sample number  73400 checkpoint 734.0 out of 801.0
+averagetimePerSampling 0.0007016348773841961 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 4.700953678474114 seconds
+MCMC sample number  73500 checkpoint 735.0 out of 801.0
+averagetimePerSampling 0.0007016326530612244 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 4.6307755102040815 seconds
+MCMC sample number  73600 checkpoint 736.0 out of 801.0
+averagetimePerSampling 0.0007016304347826087 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 4.560597826086957 seconds
+MCMC sample number  73700 checkpoint 737.0 out of 801.0
+averagetimePerSampling 0.0007016282225237449 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 4.490420624151968 seconds
+MCMC sample number  73800 checkpoint 738.0 out of 801.0
+averagetimePerSampling 0.0007016260162601626 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 4.420243902439024 seconds
+MCMC sample number  73900 checkpoint 739.0 out of 801.0
+averagetimePerSampling 0.0007016238159675237 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 4.350067658998647 seconds
+MCMC sample number  74000 checkpoint 740.0 out of 801.0
+averagetimePerSampling 0.0007016216216216215 seconds
+timeSinceLastCheckPoint 0.06999999999999318 seconds
+Estimated time remaining 4.279891891891891 seconds
+MCMC sample number  74100 checkpoint 741.0 out of 801.0
+averagetimePerSampling 0.0007016194331983805 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 4.209716599190283 seconds
+MCMC sample number  74200 checkpoint 742.0 out of 801.0
+averagetimePerSampling 0.0007016172506738544 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 4.139541778975741 seconds
+MCMC sample number  74300 checkpoint 743.0 out of 801.0
+averagetimePerSampling 0.000701615074024226 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 4.069367429340511 seconds
+MCMC sample number  74400 checkpoint 744.0 out of 801.0
+averagetimePerSampling 0.0007016129032258064 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 3.9991935483870966 seconds
+MCMC sample number  74500 checkpoint 745.0 out of 801.0
+averagetimePerSampling 0.0007016107382550335 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 3.9290201342281876 seconds
+MCMC sample number  74600 checkpoint 746.0 out of 801.0
+averagetimePerSampling 0.0007016085790884718 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 3.858847184986595 seconds
+MCMC sample number  74700 checkpoint 747.0 out of 801.0
+averagetimePerSampling 0.0007016064257028112 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 3.7886746987951807 seconds
+MCMC sample number  74800 checkpoint 748.0 out of 801.0
+averagetimePerSampling 0.0007016042780748663 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 3.7185026737967912 seconds
+MCMC sample number  74900 checkpoint 749.0 out of 801.0
+averagetimePerSampling 0.0007016021361815754 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 3.648331108144192 seconds
+MCMC sample number  75000 checkpoint 750.0 out of 801.0
+averagetimePerSampling 0.0007015999999999999 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 3.5781599999999996 seconds
+MCMC sample number  75100 checkpoint 751.0 out of 801.0
+averagetimePerSampling 0.0007015978695073235 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 3.507989347536618 seconds
+MCMC sample number  75200 checkpoint 752.0 out of 801.0
+averagetimePerSampling 0.000701595744680851 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 3.43781914893617 seconds
+MCMC sample number  75300 checkpoint 753.0 out of 801.0
+averagetimePerSampling 0.0007015936254980079 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 3.367649402390438 seconds
+MCMC sample number  75400 checkpoint 754.0 out of 801.0
+averagetimePerSampling 0.0007015915119363395 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 3.2974801061007954 seconds
+MCMC sample number  75500 checkpoint 755.0 out of 801.0
+averagetimePerSampling 0.0007015894039735099 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 3.2273112582781454 seconds
+MCMC sample number  75600 checkpoint 756.0 out of 801.0
+averagetimePerSampling 0.0007015873015873016 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 3.1571428571428575 seconds
+MCMC sample number  75700 checkpoint 757.0 out of 801.0
+averagetimePerSampling 0.0007015852047556143 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 3.086974900924703 seconds
+MCMC sample number  75800 checkpoint 758.0 out of 801.0
+averagetimePerSampling 0.0007015831134564644 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 3.0168073878627966 seconds
+MCMC sample number  75900 checkpoint 759.0 out of 801.0
+averagetimePerSampling 0.0007015810276679842 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 2.9466403162055337 seconds
+MCMC sample number  76000 checkpoint 760.0 out of 801.0
+averagetimePerSampling 0.000701578947368421 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 2.8764736842105263 seconds
+MCMC sample number  76100 checkpoint 761.0 out of 801.0
+averagetimePerSampling 0.0007015768725361366 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 2.8063074901445466 seconds
+MCMC sample number  76200 checkpoint 762.0 out of 801.0
+averagetimePerSampling 0.0007015748031496063 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 2.736141732283465 seconds
+MCMC sample number  76300 checkpoint 763.0 out of 801.0
+averagetimePerSampling 0.0007015727391874181 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 2.6659764089121887 seconds
+MCMC sample number  76400 checkpoint 764.0 out of 801.0
+averagetimePerSampling 0.0007015706806282723 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 2.5958115183246075 seconds
+MCMC sample number  76500 checkpoint 765.0 out of 801.0
+averagetimePerSampling 0.0007015686274509803 seconds
+timeSinceLastCheckPoint 0.06999999999999318 seconds
+Estimated time remaining 2.5256470588235294 seconds
+MCMC sample number  76600 checkpoint 766.0 out of 801.0
+averagetimePerSampling 0.0007015665796344647 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 2.4554830287206264 seconds
+MCMC sample number  76700 checkpoint 767.0 out of 801.0
+averagetimePerSampling 0.0007015645371577574 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 2.385319426336375 seconds
+MCMC sample number  76800 checkpoint 768.0 out of 801.0
+averagetimePerSampling 0.0007015624999999999 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 2.31515625 seconds
+MCMC sample number  76900 checkpoint 769.0 out of 801.0
+averagetimePerSampling 0.000701560468140442 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 2.2449934980494146 seconds
+MCMC sample number  77000 checkpoint 770.0 out of 801.0
+averagetimePerSampling 0.0007015584415584415 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 2.174831168831169 seconds
+MCMC sample number  77100 checkpoint 771.0 out of 801.0
+averagetimePerSampling 0.000701556420233463 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 2.104669260700389 seconds
+MCMC sample number  77200 checkpoint 772.0 out of 801.0
+averagetimePerSampling 0.0007015544041450777 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 2.034507772020725 seconds
+MCMC sample number  77300 checkpoint 773.0 out of 801.0
+averagetimePerSampling 0.0007015523932729624 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 1.9643467011642948 seconds
+MCMC sample number  77400 checkpoint 774.0 out of 801.0
+averagetimePerSampling 0.0007015503875968992 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 1.894186046511628 seconds
+MCMC sample number  77500 checkpoint 775.0 out of 801.0
+averagetimePerSampling 0.0007015483870967742 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 1.8240258064516128 seconds
+MCMC sample number  77600 checkpoint 776.0 out of 801.0
+averagetimePerSampling 0.0007015463917525773 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 1.753865979381443 seconds
+MCMC sample number  77700 checkpoint 777.0 out of 801.0
+averagetimePerSampling 0.0007015444015444015 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 1.6837065637065636 seconds
+MCMC sample number  77800 checkpoint 778.0 out of 801.0
+averagetimePerSampling 0.0007015424164524422 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 1.613547557840617 seconds
+MCMC sample number  77900 checkpoint 779.0 out of 801.0
+averagetimePerSampling 0.0007015404364569962 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 1.5433889602053916 seconds
+MCMC sample number  78000 checkpoint 780.0 out of 801.0
+averagetimePerSampling 0.0007015384615384616 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 1.4732307692307693 seconds
+MCMC sample number  78100 checkpoint 781.0 out of 801.0
+averagetimePerSampling 0.0007015364916773368 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 1.4030729833546736 seconds
+MCMC sample number  78200 checkpoint 782.0 out of 801.0
+averagetimePerSampling 0.0007015345268542199 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 1.3329156010230179 seconds
+MCMC sample number  78300 checkpoint 783.0 out of 801.0
+averagetimePerSampling 0.0007015325670498084 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 1.262758620689655 seconds
+MCMC sample number  78400 checkpoint 784.0 out of 801.0
+averagetimePerSampling 0.0007015306122448979 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 1.1926020408163265 seconds
+MCMC sample number  78500 checkpoint 785.0 out of 801.0
+averagetimePerSampling 0.0007015286624203822 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 1.1224458598726115 seconds
+MCMC sample number  78600 checkpoint 786.0 out of 801.0
+averagetimePerSampling 0.000701526717557252 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 1.052290076335878 seconds
+MCMC sample number  78700 checkpoint 787.0 out of 801.0
+averagetimePerSampling 0.0007015247776365947 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 0.9821346886912325 seconds
+MCMC sample number  78800 checkpoint 788.0 out of 801.0
+averagetimePerSampling 0.000701522842639594 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 0.9119796954314722 seconds
+MCMC sample number  78900 checkpoint 789.0 out of 801.0
+averagetimePerSampling 0.0007015209125475285 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 0.8418250950570342 seconds
+MCMC sample number  79000 checkpoint 790.0 out of 801.0
+averagetimePerSampling 0.0007015189873417721 seconds
+timeSinceLastCheckPoint 0.06999999999999318 seconds
+Estimated time remaining 0.7716708860759492 seconds
+MCMC sample number  79100 checkpoint 791.0 out of 801.0
+averagetimePerSampling 0.0007015170670037926 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 0.7015170670037926 seconds
+MCMC sample number  79200 checkpoint 792.0 out of 801.0
+averagetimePerSampling 0.0007015151515151514 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 0.6313636363636363 seconds
+MCMC sample number  79300 checkpoint 793.0 out of 801.0
+averagetimePerSampling 0.0007015132408575031 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 0.5612105926860025 seconds
+MCMC sample number  79400 checkpoint 794.0 out of 801.0
+averagetimePerSampling 0.0007015113350125944 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 0.4910579345088161 seconds
+MCMC sample number  79500 checkpoint 795.0 out of 801.0
+averagetimePerSampling 0.0007015094339622641 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 0.4209056603773585 seconds
+MCMC sample number  79600 checkpoint 796.0 out of 801.0
+averagetimePerSampling 0.0007015075376884421 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 0.35075376884422105 seconds
+MCMC sample number  79700 checkpoint 797.0 out of 801.0
+averagetimePerSampling 0.0007015056461731492 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 0.2806022584692597 seconds
+MCMC sample number  79800 checkpoint 798.0 out of 801.0
+averagetimePerSampling 0.0007016290726817042 seconds
+timeSinceLastCheckPoint 0.0799999999999983 seconds
+Estimated time remaining 0.21048872180451128 seconds
+MCMC sample number  79900 checkpoint 799.0 out of 801.0
+averagetimePerSampling 0.0007016270337922402 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 0.14032540675844804 seconds
+MCMC sample number  80000 checkpoint 800.0 out of 801.0
+averagetimePerSampling 0.000701625 seconds
+timeSinceLastCheckPoint 0.07000000000000028 seconds
+Estimated time remaining 0.0701625 seconds
+Warning: The MAP parameter set and mu_AP parameter set differ by more than 10% of prior variance in at least one parameter. This may mean that you need to increase your mcmc_length, increase or decrease your mcmc_relative_step_length, or change what is used for the model response.  There is no general method for knowing the right  value for mcmc_relative_step_length since it depends on the sharpness and smoothness of the response. See for example https://www.sciencedirect.com/science/article/pii/S0039602816300632  
