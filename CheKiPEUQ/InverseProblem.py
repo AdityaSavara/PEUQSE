@@ -45,15 +45,15 @@ class parameter_estimation:
         #                          [0., 0., 0., 0., 0., 0.1]])
 
         self.UserInput.mu_prior = np.array(UserInput.model['InputParameterPriorValues']) 
-        #Making things at least 2d.
-        UserInput.responses['responses_abscissa'] = np.atleast_2d(UserInput.responses['responses_abscissa'])
-        UserInput.responses['responses_observed'] = np.atleast_2d(UserInput.responses['responses_observed'])
-        UserInput.responses['responses_observed_uncertainties'] = np.atleast_2d(UserInput.responses['responses_observed_uncertainties'])
+        #Making things at least 2d.  Also changing it to a purely internal variable because that way we don't edit the user input dictionary going forward.
+        UserInput.responses_abscissa = np.atleast_2d(UserInput.responses['responses_abscissa'])
+        UserInput.responses_observed = np.atleast_2d(UserInput.responses['responses_observed'])
+        UserInput.responses_observed_uncertainties = np.atleast_2d(UserInput.responses['responses_observed_uncertainties'])
 
         #TODO: This currently only works if the uncertainties are uncorrelated. Also, we need to figure out what do when they are not gaussian/symmetric.
-        UserInput.responses['responses_observed_transformed'], UserInput.responses['responses_observed_transformed_uncertainties']  = self.transform_responses(UserInput.responses['responses_observed'], UserInput.responses['responses_observed_uncertainties']) #This creates transforms for any data that we might need it. The same transforms will also be applied during parameter estimation.
+        UserInput.responses_observed_transformed, UserInput.responses_observed_transformed_uncertainties  = self.transform_responses(UserInput.responses_observed, UserInput.responses_observed_uncertainties) #This creates transforms for any data that we might need it. The same transforms will also be applied during parameter estimation.
              
-        self.UserInput.num_data_points = len(UserInput.responses['responses_observed'].flatten()) #FIXME: This is only true for transient data.
+        self.UserInput.num_data_points = len(UserInput.responses_observed.flatten()) #FIXME: This is only true for transient data.
         #Now scale things as needed:
         if UserInput.parameter_estimation_settings['scaling_uncertainties_type'] == "std":
             self.UserInput.scaling_uncertainties = UserInput.std_prior #Could also be by mu_prior.  The reason a separate variable is made is because this will be used in the getPrior function as well, and having a separate variable makes it easier to trace. This scaling helps prevent numerical errors in returning the pdf.
@@ -68,15 +68,15 @@ class parameter_estimation:
             UserInput.covmat_prior_scaled[:,parameterIndex] = UserInput.covmat_prior[:,parameterIndex]/parameterValue           
 
         #To find the *observed* responses covariance matrix, meaning based on the uncertainties reported by the users, we take the uncertainties from the points. This is needed for the likelihood. However, it will be transformed again at that time.
-        self.UserInput.num_response_dimensions = np.shape(UserInput.responses['responses_abscissa'])[0] #The first index of shape is the num of responses, but has to be after at_least2d is performed.
+        self.UserInput.num_response_dimensions = np.shape(UserInput.responses_abscissa)[0] #The first index of shape is the num of responses, but has to be after at_least2d is performed.
         if self.UserInput.num_response_dimensions == 1:
-            observed_responses_covmat = np.array(self.UserInput.responses['responses_observed_transformed_uncertainties']) #Filling variable.
+            observed_responses_covmat = np.array(self.UserInput.responses_observed_transformed_uncertainties) #Filling variable.
             if np.shape(observed_responses_covmat)[0] == (1): #This means it's just a list of standard deviations and needs to be squared to become variances.
                 observed_responses_covmat = np.square(observed_responses_covmat)
             else:
                 observed_responses_covmat = observed_responses_covmat
         elif self.UserInput.num_response_dimensions > 1:  #if the dimensionality of responses is greater than 1, we only support providing standard deviations. Will flatten and square.
-            observed_responses_covmat = np.array(self.UserInput.responses['responses_observed_transformed_uncertainties']) #Filling variable.
+            observed_responses_covmat = np.array(self.UserInput.responses_observed_transformed_uncertainties) #Filling variable.
             observed_responses_covmat = observed_responses_covmat.flatten() 
             observed_responses_covmat = np.square(observed_responses_covmat)
         self.observed_responses_covmat = observed_responses_covmat            
@@ -104,8 +104,6 @@ class parameter_estimation:
             print("Important: the UserInput.model['reducedResponseSpace'] is not blank. That means the only responses examined will be the ones in the indices inside 'reducedReponseSpace'.   The values of all others will be discarded during each simulation.")
             self.reduceResponseSpace()
             
-    
-    
     
     def reduceResponseSpace(self):
         #This function has no explicit arguments, but takes everything in self.UserInput as an implied argument.
@@ -138,20 +136,15 @@ class parameter_estimation:
     
         #Now we get our second "implied return" by reducing the response_abscissa, transformed response values, and their uncertainties.
         #TODO: consider making a different variable so that the dictionary does not need to get overwritten.
-        self.UserInput.responses['responses_abscissa'] = returnReducedIterable(self.UserInput.responses['responses_abscissa'], self.UserInput.responses['reducedResponseSpace'])
-        self.UserInput.responses['responses_observed_transformed'] = returnReducedIterable(self.UserInput.responses['responses_observed_transformed'], self.UserInput.responses['reducedResponseSpace'])
-        self.UserInput.responses['responses_observed_transformed_uncertainties'] = returnReducedIterable(self.UserInput.responses['responses_observed_transformed'], self.UserInput.responses['reducedResponseSpace'])
-        self.UserInput.num_response_dimensions = np.shape(UserInput.responses['responses_abscissa'])[0]
+        self.UserInput.responses_abscissa = returnReducedIterable(self.UserInput.responses_abscissa, self.UserInput.responses['reducedResponseSpace'])
+        self.UserInput.responses_observed_transformed = returnReducedIterable(self.UserInput.responses_observed_transformed, self.UserInput.responses['reducedResponseSpace'])
+        self.UserInput.responses_observed_transformed_uncertainties = returnReducedIterable(self.UserInput.responses_observed_transformed, self.UserInput.responses['reducedResponseSpace'])
+        self.UserInput.num_response_dimensions = np.shape(UserInput.responses_abscissa)[0]
     
         #Now we get our third "implied return" by reducing the response_covmat.
         self.observed_responses_covmat = returnReducedIterable(self.observed_responses_covmat, self.UserInput.responses['reducedResponseSpace'])
         return
 
-
-        
-        
-                    
-        
     
     #This function reduces the parameter space. The only parameters allowed to change will be the ones in the indices inside 'reducedParameterSpace'.   All others will be held constant.  The values inside  'InputParameterInitialGuess will be used', and 'InputParameterPriorValues' if an initial guess was not provided.")    
     #These lines of code started in __init__ was moved outside of initializing the class so that someday people can call it later on after making the class object, if desired.
@@ -217,7 +210,7 @@ class parameter_estimation:
         
         simulatedResponses = np.atleast_2d(simulatedResponses)
         #This is not needed:
-        #observedResponses = np.atleast_2d(self.UserInput.responses['responses_observed'])
+        #observedResponses = np.atleast_2d(self.UserInput.responses_observed)
         return simulatedResponses
     
     def transform_responses(self, nestedAllResponsesArray, nestedAllResponsesUncertainties = []):
@@ -227,32 +220,32 @@ class parameter_estimation:
         
         #TODO: Make little function for interpolation in case it's necessary (see below).
 #        def littleInterpolator():
-#            abscissaRange = UserInput.responses['responses_abscissa'][responseIndex][-1] - UserInput.responses['responses_abscissa'][responseIndex][0] #Last value minus first value.
-#            UserInput.responses['responses_observed'] = np.atleast_2d(UserInput.responses['responses_observed'])
-#            UserInput.responses['responses_observed_uncertainties'] = np.atleast_2d(UserInput.responses['responses_observed_uncertainties'])
+#            abscissaRange = UserInput.responses_abscissa[responseIndex][-1] - UserInput.responses_abscissa[responseIndex][0] #Last value minus first value.
+#            UserInput.responses_observed = np.atleast_2d(UserInput.responses_observed)
+#            UserInput.responses_observed_uncertainties = np.atleast_2d(UserInput.responses_observed_uncertainties)
         if 'kinetics_type' not in UserInput.model:  #To make backwards compatibility.
             UserInput.model['kinetics_type'] = ''
         if UserInput.model['kinetics_type'] == 'transient': #This assumes that the abscissa is always time.
-            for responseIndex, response in enumerate(UserInput.responses['responses_observed']):
+            for responseIndex, response in enumerate(UserInput.responses_observed):
                 #We will need the abscissa also, so need to check if there are independent abscissa or not:
-                if len(UserInput.responses['responses_abscissa']) == 1: #This means there is only one abscissa.
+                if len(UserInput.responses_abscissa) == 1: #This means there is only one abscissa.
                     abscissaIndex = 0
                 else:
                     abscissaIndex = responseIndex
                 #Now to do the transforms.
                 if UserInput.responses['response_types'][responseIndex] == 'I':	 #For intermediate
                     if UserInput.responses['response_data_type'][responseIndex] == 'c':
-                        t_values, nestedAllResponsesArray_transformed[responseIndex], dydt_values = littleEulerGivenArray(0, UserInput.responses['responses_abscissa'][abscissaIndex], nestedAllResponsesArray[responseIndex])
+                        t_values, nestedAllResponsesArray_transformed[responseIndex], dydt_values = littleEulerGivenArray(0, UserInput.responses_abscissa[abscissaIndex], nestedAllResponsesArray[responseIndex])
                         if len(nestedAllResponsesUncertainties) > 0:
-                            nestedAllResponsesUncertainties_transformed[responseIndex] = littleEulerUncertaintyPropagation(nestedAllResponsesUncertainties[responseIndex], UserInput.responses['responses_abscissa'][abscissaIndex], np.mean(nestedAllResponsesUncertainties[responseIndex])/10) 
+                            nestedAllResponsesUncertainties_transformed[responseIndex] = littleEulerUncertaintyPropagation(nestedAllResponsesUncertainties[responseIndex], UserInput.responses_abscissa[abscissaIndex], np.mean(nestedAllResponsesUncertainties[responseIndex])/10) 
                     if UserInput.responses['response_data_type'][responseIndex] == 'r':
                         #Perform the littleEuler twice.
-                        t_values, nestedAllResponsesArray_transformed[responseIndex], dydt_values = littleEulerGivenArray(0, UserInput.responses['responses_abscissa'][abscissaIndex], nestedAllResponsesArray[responseIndex])
+                        t_values, nestedAllResponsesArray_transformed[responseIndex], dydt_values = littleEulerGivenArray(0, UserInput.responses_abscissa[abscissaIndex], nestedAllResponsesArray[responseIndex])
                         if len(nestedAllResponsesUncertainties) > 0:
-                            nestedAllResponsesUncertainties_transformed[responseIndex] = littleEulerUncertaintyPropagation(nestedAllResponsesUncertainties[responseIndex], UserInput.responses['responses_abscissa'][abscissaIndex], np.mean(nestedAllResponsesUncertainties[responseIndex])/10) 
-                        t_values, nestedAllResponsesArray_transformed[responseIndex], dydt_values = littleEulerGivenArray(0, UserInput.responses['responses_abscissa'][abscissaIndex], nestedAllResponsesArray_transformed[responseIndex])
+                            nestedAllResponsesUncertainties_transformed[responseIndex] = littleEulerUncertaintyPropagation(nestedAllResponsesUncertainties[responseIndex], UserInput.responses_abscissa[abscissaIndex], np.mean(nestedAllResponsesUncertainties[responseIndex])/10) 
+                        t_values, nestedAllResponsesArray_transformed[responseIndex], dydt_values = littleEulerGivenArray(0, UserInput.responses_abscissa[abscissaIndex], nestedAllResponsesArray_transformed[responseIndex])
                         if len(nestedAllResponsesUncertainties) > 0:
-                            nestedAllResponsesUncertainties_transformed[responseIndex] = littleEulerUncertaintyPropagation(nestedAllResponsesUncertainties_transformed[responseIndex], UserInput.responses['responses_abscissa'][abscissaIndex], np.mean(nestedAllResponsesUncertainties[responseIndex])/10) 
+                            nestedAllResponsesUncertainties_transformed[responseIndex] = littleEulerUncertaintyPropagation(nestedAllResponsesUncertainties_transformed[responseIndex], UserInput.responses_abscissa[abscissaIndex], np.mean(nestedAllResponsesUncertainties[responseIndex])/10) 
                 if UserInput.responses['response_types'][responseIndex] == 'R':	#For reactant
                     if UserInput.responses['response_data_type'][responseIndex] == 'c':
                         pass
@@ -263,9 +256,9 @@ class parameter_estimation:
                         pass
                     if UserInput.responses['response_data_type'][responseIndex] == 'r':
                         #TODO: use responses['points_if_transformed'] variable to interpolate the right number of points. This is for data that's not already evenly spaced.
-                        t_values, nestedAllResponsesArray_transformed[responseIndex], dydt_values = littleEulerGivenArray(0, UserInput.responses['responses_abscissa'][abscissaIndex], nestedAllResponsesArray[responseIndex])
+                        t_values, nestedAllResponsesArray_transformed[responseIndex], dydt_values = littleEulerGivenArray(0, UserInput.responses_abscissa[abscissaIndex], nestedAllResponsesArray[responseIndex])
                         if len(nestedAllResponsesUncertainties) > 0:
-                            nestedAllResponsesUncertainties_transformed[responseIndex] = littleEulerUncertaintyPropagation(nestedAllResponsesUncertainties[responseIndex], UserInput.responses['responses_abscissa'][abscissaIndex], np.mean(nestedAllResponsesUncertainties[responseIndex])/10) 
+                            nestedAllResponsesUncertainties_transformed[responseIndex] = littleEulerUncertaintyPropagation(nestedAllResponsesUncertainties[responseIndex], UserInput.responses_abscissa[abscissaIndex], np.mean(nestedAllResponsesUncertainties[responseIndex])/10) 
                 if UserInput.responses['response_types'][responseIndex] == 'o':
                     if UserInput.responses['response_data_type'][responseIndex] == 'o':
                         pass
@@ -274,7 +267,7 @@ class parameter_estimation:
                     if UserInput.responses['response_data_type'][responseIndex] == 'r':
                         LittleEulerTwice
         if UserInput.model['kinetics_type'] == 'steady_state': #TODO: so far, this does not do anything. It assumes that the abscissa is never time.
-            for responseIndex, response in enumerate(UserInput.responses['responses_observed']):
+            for responseIndex, response in enumerate(UserInput.responses_observed):
                 if UserInput.responses['response_types'][responseIndex] == 'T':	 #For abscissa of temperature dependence. Will probably do a log transform.
                     if UserInput.responses['response_data_type'][responseIndex] == 'c':
                         pass
@@ -563,7 +556,7 @@ class parameter_estimation:
             simulatedResponses = simulationOutputProcessingFunction(simulationOutput) 
         simulatedResponses = np.atleast_2d(simulatedResponses)
         simulatedResponses_transformed, blank_list = self.transform_responses(simulatedResponses) #This creates transforms for any data that we might need it. The same transforms were also applied to the observed responses.
-        observedResponses_transformed = self.UserInput.responses['responses_observed_transformed']
+        observedResponses_transformed = self.UserInput.responses_observed_transformed
         simulatedResponses_transformed_flattened = np.array(simulatedResponses_transformed).flatten()
         observedResponses_transformed_flattened = np.array(observedResponses_transformed).flatten()
         
@@ -622,8 +615,8 @@ class parameter_estimation:
         
     def createSimulatedResponsesPlots(self, allResponses_x_values=[], allResponsesListsOfYArrays =[], plot_settings={},allResponsesListsOfYUncertainties=[] ): 
         #allResponsesListsOfYArrays  is to have 3 layers of lists: Response > Responses Observed, mu_guess Simulated Responses, map_Simulated Responses, (mu_AP_simulatedResponses) > Values
-        if allResponses_x_values == []: allResponses_x_values = self.UserInput.responses['responses_abscissa']       
-        if allResponsesListsOfYUncertainties == []: allResponsesListsOfYUncertainties = self.UserInput.responses['responses_observed_uncertainties']
+        if allResponses_x_values == []: allResponses_x_values = self.UserInput.responses_abscissa       
+        if allResponsesListsOfYUncertainties == []: allResponsesListsOfYUncertainties = self.UserInput.responses_observed_uncertainties
         if allResponsesListsOfYArrays  ==[]:
             
             simulationFunction = self.UserInput.simulationFunction #Do NOT use self.UserInput.model['simulateByInputParametersOnlyFunction']  because that won't work with reduced parameter space requests.
@@ -651,11 +644,11 @@ class parameter_estimation:
                 if type(simulationOutputProcessingFunction) != type(None):
                     self.mu_AP_SimulatedResponses =  np.atleast_2d(     simulationOutputProcessingFunction(self.mu_AP_SimulatedOutput)      )
                 for responseDimIndex in range(self.UserInput.num_response_dimensions):
-                    listOfYArrays = [self.UserInput.responses['responses_observed'][responseDimIndex], self.mu_guess_SimulatedResponses[responseDimIndex], self.map_SimulatedResponses[responseDimIndex], self.mu_AP_SimulatedResponses[responseDimIndex]]        
+                    listOfYArrays = [self.UserInput.responses_observed[responseDimIndex], self.mu_guess_SimulatedResponses[responseDimIndex], self.map_SimulatedResponses[responseDimIndex], self.mu_AP_SimulatedResponses[responseDimIndex]]        
                     allResponsesListsOfYArrays.append(listOfYArrays)
             else: #Else there is no mu_AP.
                 for responseDimIndex in range(self.UserInput.num_response_dimensions):
-                    listOfYArrays = [self.UserInput.responses['responses_observed'][responseDimIndex], self.mu_guess_SimulatedResponses[responseDimIndex], self.map_SimulatedResponses[responseDimIndex]]        
+                    listOfYArrays = [self.UserInput.responses_observed[responseDimIndex], self.mu_guess_SimulatedResponses[responseDimIndex], self.map_SimulatedResponses[responseDimIndex]]        
                     allResponsesListsOfYArrays.append(listOfYArrays)
         if plot_settings == {}: 
             plot_settings = self.UserInput.simulated_response_plot_settings
