@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+#This was modified from https://github.com/navdeep-G/setup.py/blob/master/setup.py
+#Which is part of the repository https://github.com/navdeep-G/setup.py
+
 # Note: To use the 'upload' functionality of this file, you must:
 #   $ pipenv install twine --dev
 
