@@ -821,14 +821,15 @@ def littleEulerGivenArray(y_initial, t_values, dydtArray):
     return simulated_t_values, simulated_y_values, dydt_values
 
 #The initial_y_uncertainty is a scalar, the dydt_uncertainties is an array. t_values is an arrray, so the npoints don't need to be evenly spaced.
-def littleEulerUncertaintyPropagation(dydt_uncertainties, t_values, initial_y_uncertainty=0):
+def littleEulerUncertaintyPropagation(dydt_uncertainties, t_values, initial_y_uncertainty=0, forceNonzeroInitialUncertainty=True):
     y_uncertainties = dydt_uncertainties*0.0
-    y_uncertainties[0] = initial_y_uncertainty #We have no way to make an uncertainty for point 0, so we just use the same formula.
+    y_uncertainties[0] = initial_y_uncertainty #We have no way to make an uncertainty for point 0.
     for index in range(len(dydt_uncertainties)-1): #The uncertainty for each next point is propagated through the uncertainty of the current value and the delta_t*(dy/dt uncertainty), since we are adding two values.
         deltat_resolution = t_values[index+1]-t_values[index]
         y_uncertainties[index+1] = ((y_uncertainties[index])**2+(dydt_uncertainties[index]*deltat_resolution)**2)**0.5
-    if initial_y_uncertainty == 0: #Errors are caused if initial_y_uncertainty is left as zero, so we take the average uncertainty as an assumption for a reasonable base estimate of the first uncertainty.
-        y_uncertainties[0] = np.mean(y_uncertainties)    
+    forceNonzeroInitialUncertainty==True:
+        if initial_y_uncertainty == 0: #Errors are caused if initial_y_uncertainty is left as zero, so we take the next uncertainty as an assumption for a reasonable base estimate of the initial point uncertainty.
+            y_uncertainties[0] = y_uncertainties[1]   
     return y_uncertainties
 
 #for calculating y at time t from dy/dt.  
