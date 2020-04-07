@@ -23,6 +23,7 @@ LICENSE = 'MIT'
 
 # What packages are required for this module to be executed?
 REQUIRED = [
+    'numpy',
     # 'requests', 'maya', 'records', #numpy...
 ]
 
