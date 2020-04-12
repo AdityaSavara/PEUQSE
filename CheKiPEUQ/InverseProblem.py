@@ -559,7 +559,7 @@ class parameter_estimation:
         observedResponses_transformed = self.UserInput.responses_observed_transformed
         simulatedResponses_transformed_flattened = np.array(simulatedResponses_transformed).flatten()
         observedResponses_transformed_flattened = np.array(observedResponses_transformed).flatten()
-        
+
         #If our likelihood is  “probability of Response given Theta”…  we have a continuous probability distribution for both the response and theta. That means the pdf  must use binning on both variables. Eric notes that the pdf returns a probability density, not a probability mass. So the pdf function here divides by the width of whatever small bin is being used and then returns the density accordingly. Because of this, our what we are calling likelihood is not actually probability (it’s not the actual likelihood) but is proportional to the likelihood.
         #Thus we call it a probability_metric and not a probability. #TODO: consider changing likelihood and get likelihood to "likelihoodMetric" and "getLikelihoodMetric"
         #Now we need to make the simulated_responses_covmat.
@@ -574,11 +574,10 @@ class parameter_estimation:
         #And that covmat_regression will be on by default.  We will need to have an additional argument for people to specify whether magnitude weighting and independent variable values should both be considered, or just one.
         simulated_responses_covmat = copy.deepcopy(observed_responses_covmat)
         simulated_responses_covmat_shape = copy.deepcopy(observed_responses_covmat_shape) #no need to take the shape of the actual simulated_responses_covmat since they must be same. This is probably slightly less computation.
-                                                           
         if len(simulated_responses_covmat_shape) == 1: #Matrix is square because has only one value.
             log_probability_metric = multivariate_normal.logpdf(mean=simulatedResponses_transformed_flattened,x=observedResponses_transformed_flattened,cov=simulated_responses_covmat)
         elif simulated_responses_covmat_shape[0] == simulated_responses_covmat_shape[1]:  #Else it is 2D, check if it's square.
-            probability_metric = multivariate_normal.logpdf(mean=simulatedResponses_transformed_flattened,x=observedResponses_transformed_flattened,cov=simulated_responses_covmat)
+            log_probability_metric = multivariate_normal.logpdf(mean=simulatedResponses_transformed_flattened,x=observedResponses_transformed_flattened,cov=simulated_responses_covmat)
             #TODO: Put in near-diagonal solution described in github: https://github.com/AdityaSavara/CheKiPEUQ/issues/3
         else:  #If it is not square, it's a list of variances so we need to take the 1D vector version.
             try:
@@ -741,8 +740,10 @@ class parameter_estimation:
         except:
             pass
 
-        self.createSimulatedResponsesPlots()
-
+        try:
+            self.createSimulatedResponsesPlots()
+        except:
+            pass
 
 class verbose_optimization_wrapper: #Modified slightly From https://stackoverflow.com/questions/16739065/how-to-display-progress-of-scipy-optimize-function
     def __init__(self, function):
@@ -827,7 +828,7 @@ def littleEulerUncertaintyPropagation(dydt_uncertainties, t_values, initial_y_un
     for index in range(len(dydt_uncertainties)-1): #The uncertainty for each next point is propagated through the uncertainty of the current value and the delta_t*(dy/dt uncertainty), since we are adding two values.
         deltat_resolution = t_values[index+1]-t_values[index]
         y_uncertainties[index+1] = ((y_uncertainties[index])**2+(dydt_uncertainties[index]*deltat_resolution)**2)**0.5
-    if forceNonzeroInitialUncertainty==True:
+    #forceNonzeroInitialUncertainty==True:
         if initial_y_uncertainty == 0: #Errors are caused if initial_y_uncertainty is left as zero, so we take the next uncertainty as an assumption for a reasonable base estimate of the initial point uncertainty.
             y_uncertainties[0] = y_uncertainties[1]   
     return y_uncertainties

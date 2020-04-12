@@ -10,7 +10,7 @@ if __name__ == "__main__":
     
     import processing_function_chem_rxn as fun
 
-    UserInput.responses['responses_observed'] = -3.912
+    #UserInput.responses['responses_observed'] = -3.912
     UserInput.responses['responses_observed_uncertainties'] = 1.0
     
     UserInput.simulated_response_plot_settings['x_label'] = r'$Temperature (K)$'
@@ -43,25 +43,32 @@ if __name__ == "__main__":
     UserInput.contour_settings_custom['figure_name'] = 'Mumpce_contour_plot_chem_rxn'
     #After making the UserInput, now we make a 'parameter_estimation' object from it.
     global T
-    T = 298.15
-    PE_object = CKPQ.parameter_estimation(UserInput)
-    
-    #Now we do parameter estimation.
-    #PE_object.doGridSearch('getLogP', verbose = False)
-    PE_object.doMetropolisHastings()
-    #PE_object.doOptimizeNegLogP(method="BFGS", printOptimum=True, verbose=True)
-    #[map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, samples_simulatedOutputs, logP] = PE_object.doMetropolisHastings()
-    
-    PE_object.createAllPlots() #This function calls each of the below functions.
-#    PE_object.makeHistogramsForEachParameter()    
-#    PE_object.makeSamplingScatterMatrixPlot()
-#    PE_object.createSimulatedResponsesPlot()
-    #TODO: call the mum_pce plotting objects, which will be PE_object.createContourGraphs() or something like that.
-    fig, ax = plt.subplots()
+    list_of_T = [298.15,398.15,498.15,598.15,698.15]
+    kB = 8.61733035E-5 #eV/K\n
+    experiments = np.log(1/(1+(np.exp(-(-0.1)/(kB*np.linspace(298.15,698.15,5))))))
+    PE_object = []
     prior = np.random.normal(-0.15,0.1,80000)
-    (density0,bins0,pathces0)=ax.hist([prior,PE_object.post_burn_in_samples.flatten()],bins=100,label=['prior','posterior'],density=True)
-    ax.legend()
-    ax.set_xlabel(r'$\Delta G (eV)$')
-    ax.set_ylabel('Probability density')
-    ax.set_title('Prior and Posterior Density Plot at T= 298 K')
-    fig.savefig('prior_and_posterior_G_histogram.png', dpi=300)
+
+    for i in range(len(list_of_T)):
+        fun.T = list_of_T[i]
+        UserInput.responses['responses_observed'] = experiments[i]
+        PE_object.append(CKPQ.parameter_estimation(UserInput))
+    
+        #Now we do parameter estimation.
+        #PE_object.doGridSearch('getLogP', verbose = False)
+        PE_object[i].doMetropolisHastings()
+        #PE_object.doOptimizeNegLogP(method="BFGS", printOptimum=True, verbose=True)
+        #[map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, samples_simulatedOutputs, logP] = PE_object.doMetropolisHastings()
+    
+        PE_object[i].createAllPlots() #This function calls each of the below functions.
+   #    PE_object.makeHistogramsForEachParameter()    
+   #    PE_object.makeSamplingScatterMatrixPlot()
+   #    PE_object.createSimulatedResponsesPlot()
+   #TODO: call the mum_pce plotting objects, which will be PE_object.createContourGraphs() or something like that.
+        fig, ax = plt.subplots()
+        (density0,bins0,pathces0)=ax.hist([prior,PE_object[i].post_burn_in_samples.flatten()],bins=100,label=['prior','posterior'],density=True)
+        ax.legend()
+        ax.set_xlabel(r'$\Delta G (eV)$')
+        ax.set_ylabel('Probability density')
+        ax.set_title('Prior and Posterior Density Plot at T = {} (K)'.format(str(list_of_T[i])))
+        fig.savefig('prior_and_posterior_G_histogram_{:.2f}.png'.format(np.rint(list_of_T[i])), dpi=300)
