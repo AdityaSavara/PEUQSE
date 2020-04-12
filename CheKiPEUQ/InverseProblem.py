@@ -827,7 +827,7 @@ def littleEulerUncertaintyPropagation(dydt_uncertainties, t_values, initial_y_un
     for index in range(len(dydt_uncertainties)-1): #The uncertainty for each next point is propagated through the uncertainty of the current value and the delta_t*(dy/dt uncertainty), since we are adding two values.
         deltat_resolution = t_values[index+1]-t_values[index]
         y_uncertainties[index+1] = ((y_uncertainties[index])**2+(dydt_uncertainties[index]*deltat_resolution)**2)**0.5
-    forceNonzeroInitialUncertainty==True:
+    if forceNonzeroInitialUncertainty==True:
         if initial_y_uncertainty == 0: #Errors are caused if initial_y_uncertainty is left as zero, so we take the next uncertainty as an assumption for a reasonable base estimate of the initial point uncertainty.
             y_uncertainties[0] = y_uncertainties[1]   
     return y_uncertainties
