@@ -63,10 +63,11 @@ class parameter_estimation:
         #TODO: Consider changing how self.UserInput.scaling_uncertainties is done to accommodate greater than 1D vector. Right now we use np.shape(self.UserInput.scaling_uncertainties)[0]==1, but we could use np.shape(self.UserInput.scaling_uncertainties)==np.shape(UserInput.mu_prior)
         if np.shape(np.atleast_2d(self.UserInput.scaling_uncertainties))[0]==1:  #In this case, the uncertainties is not a covariance matrix.
             pass
-        elif np.shape(self.UserInput.scaling_uncertainties)[0]==2: #In his case, the uncertainties are a covariance matrix so we take the diagonal (which are variances) and the square root of them.
+        elif np.shape(np.atleast_2d(self.UserInput.scaling_uncertainties))[0]==np.shape(np.atleast_2d(self.UserInput.scaling_uncertainties))[1]: #In his case, the uncertainties are a covariance matrix so we take the diagonal (which are variances) and the square root of them.
             self.UserInput.scaling_uncertainties = (np.diagonal(self.UserInput.scaling_uncertainties))**0.5 #Take the diagonal which is variances, and            
         else:
             print("There is an unsupported shape somewhere in the prior.  The prior is currently expected to be 1 dimensional.")
+            print(np.shape(self.UserInput.scaling_uncertainties))
             sys.exit()
         self.UserInput.mu_prior_scaled = np.array(UserInput.mu_prior/UserInput.scaling_uncertainties)
         self.UserInput.var_prior_scaled = np.array(UserInput.var_prior/(UserInput.scaling_uncertainties*UserInput.scaling_uncertainties))

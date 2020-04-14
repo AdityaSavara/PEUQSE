@@ -90,7 +90,7 @@ if __name__ == "__main__":
             UserInput.responses['responses_observed'] = conc_sol_last
             T = t
             volume = v
-            [map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, samples_simulatedOutputs, logP] = PE_object_list[-1].doMetropolisHastings()
+            [map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, logP] = PE_object_list[-1].doMetropolisHastings()
             info_gains.append(info_gain)
 
     fig = plt.figure(figsize=(5,5))
