@@ -541,6 +541,7 @@ class parameter_estimation:
         return [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_logP_un_normed_vec] # EAW 2020/01/08
     def getLogPrior(self,discreteParameterVector):
         discreteParameterVector_scaled = np.array(discreteParameterVector/self.UserInput.scaling_uncertainties)
+        print('discreteParameterVector_scaled',discreteParameterVector_scaled,'\nself.UserInput.mu_prior_scaled', self.UserInput.mu_prior_scaled)
         log_probabilityPrior = multivariate_normal.logpdf(x=discreteParameterVector_scaled,mean=self.UserInput.mu_prior_scaled,cov=self.UserInput.covmat_prior_scaled)
         return log_probabilityPrior
     def getLogLikelihood(self,discreteParameterVector): #The variable discreteParameterVector represents a vector of values for the parameters being sampled. So it represents a single point in the multidimensional parameter space.

@@ -1,5 +1,6 @@
 import matplotlib
 import matplotlib.pyplot as plt
+from matplotlib.ticker import FormatStrFormatter
 import numpy as np
 import scipy
 from scipy.integrate import odeint
@@ -36,7 +37,7 @@ if __name__ == "__main__":
     UserInput.parameter_estimation_settings['mcmc_mode'] = 'unbiased'
     UserInput.parameter_estimation_settings['mcmc_random_seed'] = None #Normally set to None so that mcmc is set to be random. To get the same results repeatedly, such as for testing purposes, set the random seed to 0 or another integer for testing purposes.
     UserInput.parameter_estimation_settings['mcmc_burn_in'] = 100
-    UserInput.parameter_estimation_settings['mcmc_length'] = 50100
+    UserInput.parameter_estimation_settings['mcmc_length'] = 10100
     UserInput.parameter_estimation_settings['mcmc_relative_step_length'] = 0.05
     UserInput.parameter_estimation_settings['mcmc_modulate_accept_probability']  = 0 #Default value of 0. Changing this value sharpens or flattens the posterior. A value greater than 1 flattens the posterior by accepting low values more often. It can be useful when greater sampling is more important than accuracy. One way of using this feature is to try with a value of 0, then with the value equal to the number of priors for comparison, and then to gradually decrease this number as low as is useful (to minimize distortion of the result). A downside of changing changing this variable to greater than 1 is that it slows the the ascent to the maximum of the prior, so there is a balance in using it. In contrast, numbers increasingly less than one (such as 0.90 or 0.10) will speed up the ascent to the maximum of the posterior, but will also result in fewer points being retained.
     
@@ -57,8 +58,6 @@ if __name__ == "__main__":
     F0 = np.array([5, 0])
     temperatures = np.linspace(298.15,698.15,5)
     volumes = np.linspace(100,1100,5)
-    PE_object_list = []
-    prior = np.random.normal(-0.15,0.1,50000)
 
     flow_rates_a=[]
     for v in volumes:
@@ -80,29 +79,32 @@ if __name__ == "__main__":
     fig.colorbar(surf, shrink=0.5, aspect=5)
     fig.savefig('synthetic_observables.png',dpi=220)
 
-'''    
-    for i in range(len(list_of_T)):
-        fun.T = list_of_T[i]
-        UserInput.responses['responses_observed'] = experiments[i]
-        PE_object_list.append(CKPQ.parameter_estimation(UserInput))
-    
-        #Now we do parameter estimation.
-        #PE_object.doGridSearch('getLogP', verbose = False)
-        PE_object_list[i].doMetropolisHastings()
-        #PE_object.doOptimizeNegLogP(method="BFGS", printOptimum=True, verbose=True)
-        #[map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, samples_simulatedOutputs, logP] = PE_object.doMetropolisHastings()
-    
-        PE_object_list[i].createAllPlots() #This function calls each of the below functions.
-   #    PE_object.makeHistogramsForEachParameter()    
-   #    PE_object.makeSamplingScatterMatrixPlot()
-   #    PE_object.createSimulatedResponsesPlot()
-   #TODO: call the mum_pce plotting objects, which will be PE_object.createContourGraphs() or something like that.
-        fig, ax = plt.subplots()
-        (density0,bins0,pathces0)=ax.hist([prior,PE_object_list[i].post_burn_in_samples.flatten()],bins=100,label=['prior','posterior'],density=True)
-        ax.legend()
-        ax.set_xlim([-0.45, 0.15])
-        ax.set_xlabel(r'$\Delta G (eV)$')
-        ax.set_ylabel('Probability density')
-        ax.set_title('Prior and Posterior Density Plot at T = {} (K)'.format(str(list_of_T[i])))
-        fig.savefig('prior_and_posterior_G_histogram_{:.2f}.png'.format(np.rint(list_of_T[i])), dpi=300)
-'''
+    info_gains=[]
+    PE_object_list = []
+
+    for v in volumes:
+        for t in temperatures:
+            PE_object_list.append(CKPQ.parameter_estimation(UserInput))
+            sol = odeint(fun.cmr, F0, np.linspace(0,v,50), args=(1.1*k_1,1.1*k_minus_1,1.1*k_m,t))
+            conc_sol_last=sol[-1,0].T
+            UserInput.responses['responses_observed'] = conc_sol_last
+            T = t
+            volume = v
+            [map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, samples_simulatedOutputs, logP] = PE_object_list[-1].doMetropolisHastings()
+            info_gains.append(info_gain)
+
+    fig = plt.figure(figsize=(5,5))
+    ax = fig.add_subplot(111, projection='3d')
+    T, V = np.meshgrid(temperatures, volumes)
+    info_gains=np.asarray(info_gains)
+    IG = info_gains.reshape(T.shape)
+    surf = ax.plot_surface(T,V,IG,cmap=matplotlib.cm.coolwarm)
+
+    ax.set_xlabel('Temperature')
+    ax.set_ylabel('Volume')
+    ax.set_zlabel('Information Gain')
+    ax.set_xticks(temperatures)
+    ax.xaxis.set_major_formatter(FormatStrFormatter('%.2f'))
+    ax.set_title('Information Gain Surface')
+    fig.colorbar(surf, shrink=0.5, aspect=5) 
+    fig.savefig('info_gain_surface_mem_reactor.png', dpi=220)
