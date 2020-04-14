@@ -60,12 +60,20 @@ class parameter_estimation:
         elif UserInput.parameter_estimation_settings['scaling_uncertainties_type'] == "mu":
             self.UserInput.scaling_uncertainties = UserInput.mu_prior
         #TODO: consider a separate scaling for each variable, taking the greater of either mu_prior or std_prior.
+        #TODO: Consider changing how self.UserInput.scaling_uncertainties is done to accommodate greater than 1D vector. Right now we use np.shape(self.UserInput.scaling_uncertainties)[0]==1, but we could use np.shape(self.UserInput.scaling_uncertainties)==np.shape(UserInput.mu_prior)
+        if np.shape(np.atleast_2d(self.UserInput.scaling_uncertainties))[0]==1:  #In this case, the uncertainties is not a covariance matrix.
+            pass
+        elif np.shape(self.UserInput.scaling_uncertainties)[0]==2: #In his case, the uncertainties are a covariance matrix so we take the diagonal (which are variances) and the square root of them.
+            self.UserInput.scaling_uncertainties = (np.diagonal(self.UserInput.scaling_uncertainties))**0.5 #Take the diagonal which is variances, and            
+        else:
+            print("There is an unsupported shape somewhere in the prior.  The prior is currently expected to be 1 dimensional.")
+            sys.exit()
         self.UserInput.mu_prior_scaled = np.array(UserInput.mu_prior/UserInput.scaling_uncertainties)
         self.UserInput.var_prior_scaled = np.array(UserInput.var_prior/(UserInput.scaling_uncertainties*UserInput.scaling_uncertainties))
         self.UserInput.covmat_prior_scaled = self.UserInput.covmat_prior*1.0 #First initialize, then fill.
         for parameterIndex, parameterValue in enumerate(UserInput.scaling_uncertainties):
             UserInput.covmat_prior_scaled[parameterIndex,:] = UserInput.covmat_prior[parameterIndex,:]/parameterValue
-            UserInput.covmat_prior_scaled[:,parameterIndex] = UserInput.covmat_prior[:,parameterIndex]/parameterValue           
+            UserInput.covmat_prior_scaled[:,parameterIndex] = UserInput.covmat_prior[:,parameterIndex]/parameterValue                   
 
         #To find the *observed* responses covariance matrix, meaning based on the uncertainties reported by the users, we take the uncertainties from the points. This is needed for the likelihood. However, it will be transformed again at that time.
         self.UserInput.num_response_dimensions = np.shape(UserInput.responses_abscissa)[0] #The first index of shape is the num of responses, but has to be after at_least2d is performed.
@@ -540,7 +548,11 @@ class parameter_estimation:
             print("Warning: The MAP parameter set and mu_AP parameter set differ by more than 10% of prior variance in at least one parameter. This may mean that you need to increase your mcmc_length, increase or decrease your mcmc_relative_step_length, or change what is used for the model response.  There is no general method for knowing the right  value for mcmc_relative_step_length since it depends on the sharpness and smoothness of the response. See for example https://www.sciencedirect.com/science/article/pii/S0039602816300632  ")
         return [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_logP_un_normed_vec] # EAW 2020/01/08
     def getLogPrior(self,discreteParameterVector):
-        discreteParameterVector_scaled = np.array(discreteParameterVector/self.UserInput.scaling_uncertainties)
+        if np.shape(np.atleast_2d(self.UserInput.scaling_uncertainties))[0]==1: #In this case, the uncertainties is not a covariance.
+            discreteParameterVector_scaled = np.array(discreteParameterVector/self.UserInput.scaling_uncertainties)
+        else: #TODO: If we're in the else statemnt, then the scaling uncertainties is a covariance matrix, for which we plan to do row and column scaling, which has not yet been implemented. #We could pobably just use the diagonal in the short term.
+            print("WARNING: There is an error in your self.UserInput.scaling_uncertainties. Contact the developers with a bug report.")
+            discreteParameterVector_scaled = discreteParameterVector*1.0
         log_probabilityPrior = multivariate_normal.logpdf(x=discreteParameterVector_scaled,mean=self.UserInput.mu_prior_scaled,cov=self.UserInput.covmat_prior_scaled)
         return log_probabilityPrior
     def getLogLikelihood(self,discreteParameterVector): #The variable discreteParameterVector represents a vector of values for the parameters being sampled. So it represents a single point in the multidimensional parameter space.
@@ -559,7 +571,7 @@ class parameter_estimation:
         observedResponses_transformed = self.UserInput.responses_observed_transformed
         simulatedResponses_transformed_flattened = np.array(simulatedResponses_transformed).flatten()
         observedResponses_transformed_flattened = np.array(observedResponses_transformed).flatten()
-        
+
         #If our likelihood is  “probability of Response given Theta”…  we have a continuous probability distribution for both the response and theta. That means the pdf  must use binning on both variables. Eric notes that the pdf returns a probability density, not a probability mass. So the pdf function here divides by the width of whatever small bin is being used and then returns the density accordingly. Because of this, our what we are calling likelihood is not actually probability (it’s not the actual likelihood) but is proportional to the likelihood.
         #Thus we call it a probability_metric and not a probability. #TODO: consider changing likelihood and get likelihood to "likelihoodMetric" and "getLikelihoodMetric"
         #Now we need to make the simulated_responses_covmat.
@@ -574,11 +586,10 @@ class parameter_estimation:
         #And that covmat_regression will be on by default.  We will need to have an additional argument for people to specify whether magnitude weighting and independent variable values should both be considered, or just one.
         simulated_responses_covmat = copy.deepcopy(observed_responses_covmat)
         simulated_responses_covmat_shape = copy.deepcopy(observed_responses_covmat_shape) #no need to take the shape of the actual simulated_responses_covmat since they must be same. This is probably slightly less computation.
-                                                           
         if len(simulated_responses_covmat_shape) == 1: #Matrix is square because has only one value.
             log_probability_metric = multivariate_normal.logpdf(mean=simulatedResponses_transformed_flattened,x=observedResponses_transformed_flattened,cov=simulated_responses_covmat)
         elif simulated_responses_covmat_shape[0] == simulated_responses_covmat_shape[1]:  #Else it is 2D, check if it's square.
-            probability_metric = multivariate_normal.logpdf(mean=simulatedResponses_transformed_flattened,x=observedResponses_transformed_flattened,cov=simulated_responses_covmat)
+            log_probability_metric = multivariate_normal.logpdf(mean=simulatedResponses_transformed_flattened,x=observedResponses_transformed_flattened,cov=simulated_responses_covmat)
             #TODO: Put in near-diagonal solution described in github: https://github.com/AdityaSavara/CheKiPEUQ/issues/3
         else:  #If it is not square, it's a list of variances so we need to take the 1D vector version.
             try:
@@ -741,8 +752,10 @@ class parameter_estimation:
         except:
             pass
 
-        self.createSimulatedResponsesPlots()
-
+        try:
+            self.createSimulatedResponsesPlots()
+        except:
+            pass
 
 class verbose_optimization_wrapper: #Modified slightly From https://stackoverflow.com/questions/16739065/how-to-display-progress-of-scipy-optimize-function
     def __init__(self, function):
