@@ -217,10 +217,12 @@ class parameter_estimation:
             #we find which index to put things into from #self.UserInput.model['reducedParameterSpace'], which is a list of indices.
             regularParameterIndex = self.UserInput.model['reducedParameterSpace'][reducedParameterIndex]
             discreteParameterVector[regularParameterIndex] = parameterValue
-        try:
+        if type(simulationOutput) == type(None):
+            return 0, None #This is for the case that the simulation fails. User can have simulationOutput return a None type in case of failure. Perhaps should be made better in future.
+        else: #This is the normal case.
             simulationOutput = simulationFunction(discreteParameterVector) 
-        except:
-            return 0, None #This is for the case that the simulation fails. Should be made better in future.
+
+            
         if type(simulationOutputProcessingFunction) == type(None):
             simulatedResponses = simulationOutput #Is this the log of the rate? If so, Why?
         if type(simulationOutputProcessingFunction) != type(None):
@@ -329,7 +331,6 @@ class parameter_estimation:
             if searchType == 'getLogP':
                 thisResult = self.getLogP(combination)
                 self.map_logP = thisResult #The getLogP function does not fill map_logP by itself.
-                print(combination, self.map_logP)
                 self.map_parameter_set = combination
             if searchType == 'doMetropolisHastings':
                 thisResult = self.doMetropolisHastings()
