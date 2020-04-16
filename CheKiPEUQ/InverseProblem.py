@@ -454,6 +454,8 @@ class parameter_estimation:
                   #print(simulationOutput_current_location)
                 samples[i,:] = samples[i-1,:] #the sample is not kept if it is rejected, though we still store it in the samples_drawn.
                 samples_drawn[i,:] = proposal_sample
+                print('log_likelihood_proposal',log_likelihood_proposal)
+                print('log_prior_proposal',log_prior_proposal)
                 log_postereriors_drawn[i] = (log_likelihood_proposal+log_prior_proposal)
                 samples_simulatedOutputs[i,:] = simulationOutput_current_location
 #                print("line 121", simulationOutput_current_location)
@@ -549,20 +551,27 @@ class parameter_estimation:
             print("Warning: The MAP parameter set and mu_AP parameter set differ by more than 10% of prior variance in at least one parameter. This may mean that you need to increase your mcmc_length, increase or decrease your mcmc_relative_step_length, or change what is used for the model response.  There is no general method for knowing the right  value for mcmc_relative_step_length since it depends on the sharpness and smoothness of the response. See for example https://www.sciencedirect.com/science/article/pii/S0039602816300632  ")
         return [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_logP_un_normed_vec] # EAW 2020/01/08
     def getLogPrior(self,discreteParameterVector):
+        print('prior unscaled discreteParameterVector',discreteParameterVector)
         if np.shape(np.atleast_2d(self.UserInput.scaling_uncertainties))[0]==1: #In this case, the uncertainties is not a covariance.
             discreteParameterVector_scaled = np.array(discreteParameterVector/self.UserInput.scaling_uncertainties)
         else: #TODO: If we're in the else statemnt, then the scaling uncertainties is a covariance matrix, for which we plan to do row and column scaling, which has not yet been implemented. #We could pobably just use the diagonal in the short term.
             print("WARNING: There is an error in your self.UserInput.scaling_uncertainties. Contact the developers with a bug report.")
             discreteParameterVector_scaled = discreteParameterVector*1.0
-        log_probabilityPrior = multivariate_normal.logpdf(x=discreteParameterVector_scaled,mean=self.UserInput.mu_prior_scaled,cov=self.UserInput.covmat_prior_scaled)
+        print('prior discrete parameter vector',discreteParameterVector_scaled)
+        print('self.UserInput.mu_prior_scaled',self.UserInput.mu_prior_scaled)
+        print('self.UserInput.covmat_prior_scaled',self.UserInput.covmat_prior_scaled)
+        log_probabilityPrior = multivariate_normal.logpdf(x=discreteParameterVector,mean=self.UserInput.mu_prior_scaled*1000,cov=self.UserInput.covmat_prior_scaled*1000)
+        print('log_probabilityPrior',log_probabilityPrior)
         return log_probabilityPrior
     def getLogLikelihood(self,discreteParameterVector): #The variable discreteParameterVector represents a vector of values for the parameters being sampled. So it represents a single point in the multidimensional parameter space.
         simulationFunction = self.UserInput.simulationFunction #Do NOT use self.UserInput.model['simulateByInputParametersOnlyFunction']  because that won't work with reduced parameter space requests.  
         simulationOutputProcessingFunction = self.UserInput.simulationOutputProcessingFunction #Do NOT use self.UserInput.model['simulationOutputProcessingFunction'] because that won't work with reduced parameter space requests.
-        try:
-            simulationOutput =simulationFunction(discreteParameterVector) 
-        except:
-            return 0, None #This is for the case that the simulation fails. Should be made better in future.
+        print('likelihood discrete parameter vector',discreteParameterVector)
+        #try:
+        simulationOutput =simulationFunction(discreteParameterVector) 
+        print('simulationOutput',simulationOutput)
+        #except:
+        #    return 0, None #This is for the case that the simulation fails. Should be made better in future.
         if type(simulationOutputProcessingFunction) == type(None):
             simulatedResponses = simulationOutput #Is this the log of the rate? If so, Why?
         if type(simulationOutputProcessingFunction) != type(None):
@@ -592,6 +601,9 @@ class parameter_estimation:
         elif simulated_responses_covmat_shape[0] == simulated_responses_covmat_shape[1]:  #Else it is 2D, check if it's square.
             log_probability_metric = multivariate_normal.logpdf(mean=simulatedResponses_transformed_flattened,x=observedResponses_transformed_flattened,cov=simulated_responses_covmat)
             #TODO: Put in near-diagonal solution described in github: https://github.com/AdityaSavara/CheKiPEUQ/issues/3
+            print('simulatedResponses_transformed_flattened',simulatedResponses_transformed_flattened)
+            print('observedResponses_transformed_flattened',observedResponses_transformed_flattened)
+            print('log_probability_metric',log_probability_metric,'\n')
         else:  #If it is not square, it's a list of variances so we need to take the 1D vector version.
             try:
                 log_probability_metric = multivariate_normal.logpdf(mean=simulatedResponses_transformed_flattened,x=observedResponses_transformed_flattened,cov=simulated_responses_covmat[0])                
