@@ -217,10 +217,10 @@ class parameter_estimation:
             #we find which index to put things into from #self.UserInput.model['reducedParameterSpace'], which is a list of indices.
             regularParameterIndex = self.UserInput.model['reducedParameterSpace'][reducedParameterIndex]
             discreteParameterVector[regularParameterIndex] = parameterValue
-        if type(simulationOutput) == type(None):
-            return 0, None #This is for the case that the simulation fails. User can have simulationOutput return a None type in case of failure. Perhaps should be made better in future.
-        else: #This is the normal case.
+        if type(simulationOutput) != type(None):#This is the normal case.
             simulationOutput = simulationFunction(discreteParameterVector) 
+        elif type(simulationOutput) == type(None):
+            return 0, None #This is for the case that the simulation fails. User can have simulationOutput return a None type in case of failure. Perhaps should be made better in future. 
 
             
         if type(simulationOutputProcessingFunction) == type(None):
