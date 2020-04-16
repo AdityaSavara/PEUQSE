@@ -29,7 +29,7 @@ def cmr(theta,V,k_1,k_minus_1,k_B,T0):
 def mem_reactor(sample):
     sol = odeint(cmr, F0, np.linspace(0,volume,2), args=(k_1, k_minus_1, sample, T))
     conc_sol_last=sol[-1,:].T 
-    print('km',sample)
-    print('F_A',conc_sol_last[0])
+    # print('km',sample)
+    # print('F_A',conc_sol_last[0])
     return(conc_sol_last[0])
 
