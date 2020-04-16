@@ -11,7 +11,6 @@ if __name__ == "__main__":
     UserInput.responses['responses_abscissa'] = times
     UserInput.responses['responses_observed'] = responses_observed
     UserInput.responses['responses_observed_uncertainties'] = observedResponses_uncertainties
-    print(observedResponses_uncertainties)
     
     UserInput.simulated_response_plot_settings['x_label'] = 'time (s)'
     UserInput.simulated_response_plot_settings['y_label'] = r'$rate (s^{-1})$'
@@ -29,6 +28,7 @@ if __name__ == "__main__":
     UserInput.model['simulationOutputProcessingFunction'] = None  #Optional: a function to process what comes out of the simulation Function and then return an observable vector.
     UserInput.parameter_estimation_settings['gridsearch'] = True
     
+    UserInput.parameter_estimation_settings['scaling_uncertainties_type'] = "std"
     UserInput.parameter_estimation_settings['verbose'] = False 
     UserInput.parameter_estimation_settings['checkPointFrequency'] = 100
     UserInput.parameter_estimation_settings['mcmc'] = True 
