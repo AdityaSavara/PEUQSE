@@ -522,10 +522,34 @@ class parameter_estimation:
         #So either need to make post_burn_in_posteriors_un_normed_vec again before this step, or need to change below line.
         self.evidence = np.mean(np.exp(self.post_burn_in_log_posteriors_un_normed_vec))/np.linalg.norm(self.post_burn_in_samples)# another variety:*np.sqrt(2*np.pi*np.std(self.post_burn_in_samples)**2)
         post_burn_in_log_posteriors_vec = self.post_burn_in_log_posteriors_un_normed_vec/self.evidence
-        log_ratios = (post_burn_in_log_posteriors_vec-self.post_burn_in_log_priors_vec) #log10(a/b) = log10(a)-log10(b)
-        log_ratios[np.isinf(log_ratios)] = 0
-        log_ratios = np.nan_to_num(log_ratios)
-        self.info_gain = np.mean(log_ratios)
+        if self.UserInput.parameter_estimation_settings['mcmc_info_gain_cutoff'] == 0:        
+            log_ratios = (post_burn_in_log_posteriors_vec-self.post_burn_in_log_priors_vec) #log10(a/b) = log10(a)-log10(b)
+            log_ratios[np.isinf(log_ratios)] = 0
+            log_ratios = np.nan_to_num(log_ratios)
+            self.info_gain = np.mean(log_ratios)
+        elif self.UserInput.parameter_estimation_settings['mcmc_info_gain_cutoff'] != 0:        
+            #First intialize the stacked array.
+            #Surprisingly, the arrays going in haves shapes like 900,1 rather than 1,900 so now transposing them before stacking.
+            stackedLogProbabilities = np.vstack((self.post_burn_in_log_priors_vec.transpose(), post_burn_in_log_posteriors_vec.transpose()))
+            #Now, we are going to make a list of abscissaIndices to remove, recognizing that numpy arrays are "transposed" relative to excel.
+            abscissaIndicesToRemove = [] 
+            for abscissaIndex in range(np.shape(stackedLogProbabilities)[1]):
+                ordinateValues = stackedLogProbabilities[:,abscissaIndex]
+                #We mark anything where there is a 'nan':
+                if np.isnan( ordinateValues ).any(): #A working numpy syntax is to have the any outside of the parenthesis, for this command, even though it's a bit strange.
+                    abscissaIndicesToRemove.append(abscissaIndex)
+                if (ordinateValues < np.log( self.UserInput.parameter_estimation_settings['mcmc_info_gain_cutoff'] ) ).any(): #again, working numpy syntax is to put "any" on the outside. We take the log since we're looking at log of probability. This is a natural log.
+                    abscissaIndicesToRemove.append(abscissaIndex)
+            #Now that this is finshed, we're going to do the truncation using numpy delete.
+            stackedLogProbabilities_truncated = stackedLogProbabilities*1.0 #just initializing.
+            stackedLogProbabilities_truncated = np.delete(stackedLogProbabilities, abscissaIndicesToRemove, axis=1)
+            post_burn_in_log_priors_vec_truncated = stackedLogProbabilities_truncated[0]
+            post_burn_in_log_posteriors_vec_truncated = stackedLogProbabilities_truncated[1]
+            #Now copy the same lines that Eric had used above, only change to using log_ratios_truncated
+            log_ratios_truncated = (post_burn_in_log_posteriors_vec_truncated-post_burn_in_log_priors_vec_truncated)
+            log_ratios_truncated[np.isinf(log_ratios_truncated)] = 0
+            log_ratios_truncated = np.nan_to_num(log_ratios_truncated)
+            self.info_gain = np.mean(log_ratios_truncated)
         map_logP = max(self.post_burn_in_logP_un_normed_vec)
         self.map_logP = map_logP
         self.map_index = list(self.post_burn_in_logP_un_normed_vec).index(map_logP) #This does not have to be a unique answer, just one of them places which gives map_logP.
