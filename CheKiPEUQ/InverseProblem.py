@@ -521,7 +521,7 @@ class parameter_estimation:
         #FIXME: Log was not propagated correctly here. Below line used to be self.evidence = np.mean(self.post_burn_in_posteriors_un_normed_vec)*np.sqrt(2*np.pi*np.std(self.post_burn_in_samples)**2)
         #So either need to make post_burn_in_posteriors_un_normed_vec again before this step, or need to change below line.
         self.evidence = np.mean(np.exp(self.post_burn_in_log_posteriors_un_normed_vec))/np.linalg.norm(self.post_burn_in_samples)# another variety:*np.sqrt(2*np.pi*np.std(self.post_burn_in_samples)**2)
-        post_burn_in_log_posteriors_vec = self.post_burn_in_log_posteriors_un_normed_vec/self.evidence
+        post_burn_in_log_posteriors_vec = np.log  ( np.exp( self.post_burn_in_log_posteriors_un_normed_vec) /self.evidence)
         if self.UserInput.parameter_estimation_settings['mcmc_info_gain_cutoff'] == 0:        
             log_ratios = (post_burn_in_log_posteriors_vec-self.post_burn_in_log_priors_vec) #log10(a/b) = log10(a)-log10(b)
             log_ratios[np.isinf(log_ratios)] = 0
@@ -549,7 +549,8 @@ class parameter_estimation:
             stackedLogProbabilities_truncated = stackedLogProbabilities*1.0 #just initializing.
             stackedLogProbabilities_truncated = np.delete(stackedLogProbabilities, abscissaIndicesToRemove, axis=1)
             post_burn_in_log_priors_vec_truncated = stackedLogProbabilities_truncated[0]
-            post_burn_in_log_posteriors_vec_truncated = stackedLogProbabilities_truncated[1]/self.evidence #We have to truncate with not normalized, so we add the normalization in here.
+            post_burn_in_log_posteriors_un_normed_vec_truncated = stackedLogProbabilities_truncated[1] #We have to truncate with not normalized, so we add the normalization in here.
+            post_burn_in_log_posteriors_vec_truncated = np.log  ( np.exp( post_burn_in_log_posteriors_un_normed_vec_truncated) /self.evidence)
             #Now copy the same lines that Eric had used above, only change to using log_ratios_truncated
             log_ratios_truncated = (post_burn_in_log_posteriors_vec_truncated-post_burn_in_log_priors_vec_truncated)
             log_ratios_truncated[np.isinf(log_ratios_truncated)] = 0
