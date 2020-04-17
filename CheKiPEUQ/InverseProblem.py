@@ -55,27 +55,36 @@ class parameter_estimation:
              
         self.UserInput.num_data_points = len(UserInput.responses_observed.flatten()) #FIXME: This is only true for transient data.
         #Now scale things as needed:
-        if UserInput.parameter_estimation_settings['scaling_uncertainties_type'] == "std":
-            self.UserInput.scaling_uncertainties = UserInput.std_prior #Could also be by mu_prior.  The reason a separate variable is made is because this will be used in the getPrior function as well, and having a separate variable makes it easier to trace. This scaling helps prevent numerical errors in returning the pdf.
-        elif UserInput.parameter_estimation_settings['scaling_uncertainties_type'] == "mu":
-            self.UserInput.scaling_uncertainties = UserInput.mu_prior
-        #TODO: consider a separate scaling for each variable, taking the greater of either mu_prior or std_prior.
-        #TODO: Consider changing how self.UserInput.scaling_uncertainties is done to accommodate greater than 1D vector. Right now we use np.shape(self.UserInput.scaling_uncertainties)[0]==1, but we could use np.shape(self.UserInput.scaling_uncertainties)==np.shape(UserInput.mu_prior)
-        if np.shape(np.atleast_2d(self.UserInput.scaling_uncertainties))[0]==1:  #In this case, the uncertainties is not a covariance matrix.
-            pass
-        elif np.shape(np.atleast_2d(self.UserInput.scaling_uncertainties))[0]==np.shape(np.atleast_2d(self.UserInput.scaling_uncertainties))[1]: #In his case, the uncertainties are a covariance matrix so we take the diagonal (which are variances) and the square root of them.
-            self.UserInput.scaling_uncertainties = (np.diagonal(self.UserInput.scaling_uncertainties))**0.5 #Take the diagonal which is variances, and            
-        else:
-            print("There is an unsupported shape somewhere in the prior.  The prior is currently expected to be 1 dimensional.")
-            print(np.shape(self.UserInput.scaling_uncertainties))
-            sys.exit()
-        self.UserInput.mu_prior_scaled = np.array(UserInput.mu_prior/UserInput.scaling_uncertainties)
-        self.UserInput.var_prior_scaled = np.array(UserInput.var_prior/(UserInput.scaling_uncertainties*UserInput.scaling_uncertainties))
-        self.UserInput.covmat_prior_scaled = self.UserInput.covmat_prior*1.0 #First initialize, then fill.
-        for parameterIndex, parameterValue in enumerate(UserInput.scaling_uncertainties):
-            UserInput.covmat_prior_scaled[parameterIndex,:] = UserInput.covmat_prior[parameterIndex,:]/parameterValue
-            UserInput.covmat_prior_scaled[:,parameterIndex] = UserInput.covmat_prior[:,parameterIndex]/parameterValue                   
-
+        if UserInput.parameter_estimation_settings['scaling_uncertainties_type'] == "off":
+            self.UserInput.mu_prior_scaled = UserInput.mu_prior*1.0
+            self.UserInput.var_prior_scaled = UserInput.var_prior*1.0
+            self.UserInput.covmat_prior_scaled = UserInput.covmat_prior*1.0
+        else:            
+            if UserInput.parameter_estimation_settings['scaling_uncertainties_type'] == "std":
+                self.UserInput.scaling_uncertainties = UserInput.std_prior #Could also be by mu_prior.  The reason a separate variable is made is because this will be used in the getPrior function as well, and having a separate variable makes it easier to trace. This scaling helps prevent numerical errors in returning the pdf.
+            elif UserInput.parameter_estimation_settings['scaling_uncertainties_type'] == "mu":
+                self.UserInput.scaling_uncertainties = UserInput.mu_prior
+            else: #Else we assume that UserInput.parameter_estimation_settings['scaling_uncertainties_type'] has been set to a fixed float or vector. For now, we'll just support float.
+                scaling_factor = float(UserInput.parameter_estimation_settings['scaling_uncertainties_type'])
+                self.UserInput.scaling_uncertainties = (UserInput.mu_prior/UserInput.mu_prior)*scaling_factor #This basically makes a vector of ones times the scaling factor.
+            #TODO: consider a separate scaling for each variable, taking the greater of either mu_prior or std_prior.
+            #TODO: Consider changing how self.UserInput.scaling_uncertainties is done to accommodate greater than 1D vector. Right now we use np.shape(self.UserInput.scaling_uncertainties)[0]==1, but we could use np.shape(self.UserInput.scaling_uncertainties)==np.shape(UserInput.mu_prior)
+            if np.shape(np.atleast_2d(self.UserInput.scaling_uncertainties))[0]==1:  #In this case, the uncertainties is not a covariance matrix.
+                pass
+            elif np.shape(np.atleast_2d(self.UserInput.scaling_uncertainties))[0]==np.shape(np.atleast_2d(self.UserInput.scaling_uncertainties))[1]: #In his case, the uncertainties are a covariance matrix so we take the diagonal (which are variances) and the square root of them.
+                self.UserInput.scaling_uncertainties = (np.diagonal(self.UserInput.scaling_uncertainties))**0.5 #Take the diagonal which is variances, and            
+            else:
+                print("There is an unsupported shape somewhere in the prior.  The prior is currently expected to be 1 dimensional.")
+                print(np.shape(self.UserInput.scaling_uncertainties))
+                sys.exit()
+            self.UserInput.mu_prior_scaled = np.array(UserInput.mu_prior/UserInput.scaling_uncertainties)
+            self.UserInput.var_prior_scaled = np.array(UserInput.var_prior/(UserInput.scaling_uncertainties*UserInput.scaling_uncertainties))
+            self.UserInput.covmat_prior_scaled = self.UserInput.covmat_prior*1.0 #First initialize, then fill.
+            for parameterIndex, parameterValue in enumerate(UserInput.scaling_uncertainties):
+                UserInput.covmat_prior_scaled[parameterIndex,:] = UserInput.covmat_prior[parameterIndex,:]/parameterValue
+                #The next line needs to be on UserInput.covmat_prior_scaled and not UserInput.covmat_prior, since we're stacking the divisions.
+                UserInput.covmat_prior_scaled[:,parameterIndex] = UserInput.covmat_prior_scaled[:,parameterIndex]/parameterValue        
+        
         #To find the *observed* responses covariance matrix, meaning based on the uncertainties reported by the users, we take the uncertainties from the points. This is needed for the likelihood. However, it will be transformed again at that time.
         self.UserInput.num_response_dimensions = np.shape(UserInput.responses_abscissa)[0] #The first index of shape is the num of responses, but has to be after at_least2d is performed.
         if self.UserInput.num_response_dimensions == 1:
@@ -208,10 +217,12 @@ class parameter_estimation:
             #we find which index to put things into from #self.UserInput.model['reducedParameterSpace'], which is a list of indices.
             regularParameterIndex = self.UserInput.model['reducedParameterSpace'][reducedParameterIndex]
             discreteParameterVector[regularParameterIndex] = parameterValue
-        try:
+        if type(simulationOutput) != type(None):#This is the normal case.
             simulationOutput = simulationFunction(discreteParameterVector) 
-        except:
-            return 0, None #This is for the case that the simulation fails. Should be made better in future.
+        elif type(simulationOutput) == type(None):
+            return 0, None #This is for the case that the simulation fails. User can have simulationOutput return a None type in case of failure. Perhaps should be made better in future. 
+
+            
         if type(simulationOutputProcessingFunction) == type(None):
             simulatedResponses = simulationOutput #Is this the log of the rate? If so, Why?
         if type(simulationOutputProcessingFunction) != type(None):
@@ -456,7 +467,6 @@ class parameter_estimation:
                 samples_drawn[i,:] = proposal_sample
                 log_postereriors_drawn[i] = (log_likelihood_proposal+log_prior_proposal)
                 samples_simulatedOutputs[i,:] = simulationOutput_current_location
-#                print("line 121", simulationOutput_current_location)
                 log_posteriors_un_normed_vec[i] = log_likelihood_current_location+log_prior_current_location
                 log_likelihoods_vec[i] = log_likelihood_current_location
                 log_priors_vec[i] = log_prior_current_location
@@ -510,12 +520,43 @@ class parameter_estimation:
         # posterior probabilites are transformed to a standard normal (std=1) for obtaining the evidence:
         #FIXME: Log was not propagated correctly here. Below line used to be self.evidence = np.mean(self.post_burn_in_posteriors_un_normed_vec)*np.sqrt(2*np.pi*np.std(self.post_burn_in_samples)**2)
         #So either need to make post_burn_in_posteriors_un_normed_vec again before this step, or need to change below line.
-        self.evidence = np.mean(np.exp(self.post_burn_in_log_posteriors_un_normed_vec))/np.linalg.norm(self.post_burn_in_samples)# another variety:*np.sqrt(2*np.pi*np.std(self.post_burn_in_samples)**2)
-        post_burn_in_log_posteriors_vec = self.post_burn_in_log_posteriors_un_normed_vec/self.evidence
-        log_ratios = (post_burn_in_log_posteriors_vec-self.post_burn_in_log_priors_vec) #log10(a/b) = log10(a)-log10(b)
-        log_ratios[np.isinf(log_ratios)] = 0
-        log_ratios = np.nan_to_num(log_ratios)
-        self.info_gain = np.mean(log_ratios)
+        self.evidence = np.mean(np.exp(self.post_burn_in_log_posteriors_un_normed_vec))/np.linalg.norm(self.post_burn_in_samples)# another variety:*np.sqrt(2*np.pi*np.std(self.post_burn_in_samples)**2)        
+        if self.UserInput.parameter_estimation_settings['mcmc_info_gain_cutoff'] == 0:        
+            post_burn_in_log_posteriors_vec = np.log  ( np.exp( self.post_burn_in_log_posteriors_un_normed_vec) /self.evidence)
+            log_ratios = (post_burn_in_log_posteriors_vec-self.post_burn_in_log_priors_vec) #log10(a/b) = log10(a)-log10(b)
+            log_ratios[np.isinf(log_ratios)] = 0
+            log_ratios = np.nan_to_num(log_ratios)
+            self.info_gain = np.mean(log_ratios)
+        elif self.UserInput.parameter_estimation_settings['mcmc_info_gain_cutoff'] != 0:        
+            #Need to consider using a truncated evidence array as well, but for now will not worry about that.
+            #First intialize the stacked array.
+            #Surprisingly, the arrays going in haves shapes like 900,1 rather than 1,900 so now transposing them before stacking.
+            stackedLogProbabilities = np.vstack((self.post_burn_in_log_priors_vec.transpose(), self.post_burn_in_log_posteriors_un_normed_vec.transpose()))
+            #Now, we are going to make a list of abscissaIndices to remove, recognizing that numpy arrays are "transposed" relative to excel.
+            abscissaIndicesToRemove = [] 
+            for abscissaIndex in range(np.shape(stackedLogProbabilities)[1]):
+                print("parameter set:", self.post_burn_in_samples[abscissaIndex])
+                ordinateValues = stackedLogProbabilities[:,abscissaIndex]
+                #We mark anything where there is a 'nan':
+                if np.isnan( ordinateValues ).any(): #A working numpy syntax is to have the any outside of the parenthesis, for this command, even though it's a bit strange.
+                    abscissaIndicesToRemove.append(abscissaIndex)
+                    print(abscissaIndex, "removed nan (prior, posterior)", ordinateValues, np.log( self.UserInput.parameter_estimation_settings['mcmc_info_gain_cutoff']))
+                elif (ordinateValues < np.log( self.UserInput.parameter_estimation_settings['mcmc_info_gain_cutoff'] ) ).any(): #again, working numpy syntax is to put "any" on the outside. We take the log since we're looking at log of probability. This is a natural log.
+                    abscissaIndicesToRemove.append(abscissaIndex)
+                    print(abscissaIndex, "removed small (prior, posterior)",  ordinateValues, np.log( self.UserInput.parameter_estimation_settings['mcmc_info_gain_cutoff']))
+                else:
+                    print(abscissaIndex, "kept (prior, posterior)", ordinateValues)
+            #Now that this is finshed, we're going to do the truncation using numpy delete.
+            stackedLogProbabilities_truncated = stackedLogProbabilities*1.0 #just initializing.
+            stackedLogProbabilities_truncated = np.delete(stackedLogProbabilities, abscissaIndicesToRemove, axis=1)
+            post_burn_in_log_priors_vec_truncated = stackedLogProbabilities_truncated[0]
+            post_burn_in_log_posteriors_un_normed_vec_truncated = stackedLogProbabilities_truncated[1] #We have to truncate with not normalized, so we add the normalization in here.
+            post_burn_in_log_posteriors_vec_truncated = np.log  ( np.exp( post_burn_in_log_posteriors_un_normed_vec_truncated) /self.evidence)
+            #Now copy the same lines that Eric had used above, only change to using log_ratios_truncated
+            log_ratios_truncated = (post_burn_in_log_posteriors_vec_truncated-post_burn_in_log_priors_vec_truncated)
+            log_ratios_truncated[np.isinf(log_ratios_truncated)] = 0
+            log_ratios_truncated = np.nan_to_num(log_ratios_truncated)
+            self.info_gain = np.mean(log_ratios_truncated)
         map_logP = max(self.post_burn_in_logP_un_normed_vec)
         self.map_logP = map_logP
         self.map_index = list(self.post_burn_in_logP_un_normed_vec).index(map_logP) #This does not have to be a unique answer, just one of them places which gives map_logP.
@@ -549,12 +590,21 @@ class parameter_estimation:
             print("Warning: The MAP parameter set and mu_AP parameter set differ by more than 10% of prior variance in at least one parameter. This may mean that you need to increase your mcmc_length, increase or decrease your mcmc_relative_step_length, or change what is used for the model response.  There is no general method for knowing the right  value for mcmc_relative_step_length since it depends on the sharpness and smoothness of the response. See for example https://www.sciencedirect.com/science/article/pii/S0039602816300632  ")
         return [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_logP_un_normed_vec] # EAW 2020/01/08
     def getLogPrior(self,discreteParameterVector):
-        if np.shape(np.atleast_2d(self.UserInput.scaling_uncertainties))[0]==1: #In this case, the uncertainties is not a covariance.
-            discreteParameterVector_scaled = np.array(discreteParameterVector/self.UserInput.scaling_uncertainties)
-        else: #TODO: If we're in the else statemnt, then the scaling uncertainties is a covariance matrix, for which we plan to do row and column scaling, which has not yet been implemented. #We could pobably just use the diagonal in the short term.
-            print("WARNING: There is an error in your self.UserInput.scaling_uncertainties. Contact the developers with a bug report.")
-            discreteParameterVector_scaled = discreteParameterVector*1.0
+        if self.UserInput.parameter_estimation_settings['scaling_uncertainties_type'] == "off":
+            discreteParameterVector_scaled = np.array(discreteParameterVector)*1.0
+        elif self.UserInput.parameter_estimation_settings['scaling_uncertainties_type'] != "off":
+            if np.shape(self.UserInput.scaling_uncertainties)==np.shape(discreteParameterVector):
+                discreteParameterVector_scaled = np.array(discreteParameterVector)/self.UserInput.scaling_uncertainties
+            else: #TODO: If we're in the else statemnt, then the scaling uncertainties is a covariance matrix, for which we plan to do row and column scaling, which has not yet been implemented. #We could pobably just use the diagonal in the short term.
+                print("WARNING: There is an error in your self.UserInput.scaling_uncertainties. Contact the developers with a bug report.")
+                discreteParameterVector_scaled = np.array(discreteParameterVector)*1.0
         log_probabilityPrior = multivariate_normal.logpdf(x=discreteParameterVector_scaled,mean=self.UserInput.mu_prior_scaled,cov=self.UserInput.covmat_prior_scaled)
+        if self.UserInput.parameter_estimation_settings['undo_scaling_uncertainties_type'] == True:
+            try:
+                scaling_factor = float(self.UserInput.parameter_estimation_settings['scaling_uncertainties_type'])
+                log_probabilityPrior = log_probabilityPrior - np.log(scaling_factor)
+            except:
+                print("Warning: undo_scaling_uncertainties_type is set to True, but can only be used with a fixed value for scaling_uncertainties_type.  Skipping the undo.")
         return log_probabilityPrior
     def getLogLikelihood(self,discreteParameterVector): #The variable discreteParameterVector represents a vector of values for the parameters being sampled. So it represents a single point in the multidimensional parameter space.
         simulationFunction = self.UserInput.simulationFunction #Do NOT use self.UserInput.model['simulateByInputParametersOnlyFunction']  because that won't work with reduced parameter space requests.  

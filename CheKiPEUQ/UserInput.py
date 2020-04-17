@@ -33,6 +33,7 @@ parameter_estimation_settings['exportLog'] = True
 parameter_estimation_settings['exportAllSimulatedOutputs'] = False
 parameter_estimation_settings['checkPointFrequency'] = None
 parameter_estimation_settings['scaling_uncertainties_type'] = "std" #"std" is for standard deviation. there is also the option of "mu" for using the absolute values of the mean(s) of the prior distribution(s).
+parameter_estimation_settings['undo_scaling_uncertainties_type'] = False
 				  
 ######MCMC settings:#####
 parameter_estimation_settings['mcmc_random_seed'] = None #Normally set to None so that mcmc is set to be random. To get the same results repeatedly, such as for testing purposes, set the random seed to 0 or another integer for testing purposes.
@@ -41,7 +42,7 @@ parameter_estimation_settings['mcmc_length'] = 10000
 parameter_estimation_settings['mcmc_burn_in'] = 500 
 parameter_estimation_settings['mcmc_relative_step_length'] = 0.1 #Default value is of 0.1, but values such as 1 are also quite reasonable. This is the step length relative to the covmat of the prior. So it is relative to the variance, not relative to the standard deviation.
 parameter_estimation_settings['mcmc_modulate_accept_probability']  = 0 #Default value of 0. Changing this value sharpens or flattens the posterior. A value greater than 1 flattens the posterior by accepting low values more often. It can be useful when greater sampling is more important than accuracy. One way of using this feature is to try with a value of 0, then with the value equal to the number of priors for comparison, and then to gradually decrease this number as low as is useful (to minimize distortion of the result). A downside of changing changing this variable to greater than 1 is that it slows the the ascent to the maximum of the prior, so there is a balance in using it. In contrast, numbers increasingly less than one (such as 0.90 or 0.10) will speed up the ascent to the maximum of the posterior, but will also result in fewer points being retained.
-
+parameter_estimation_settings['mcmc_info_gain_cutoff'] = 0  #A typical value is 1E-5. Use 0 to turn this setting off. Allowing values that are too small will cause numerical errors, this serves as a highpass filter.
 ######gridSamplingSettings##### 
 #At present, all gridSampling settings are fed as arguments directly into the doGridSearch function.
 #Perhaps that should be changed in the future so that wrapper functions can pass arguments to doGridSearch.
