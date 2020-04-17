@@ -33,6 +33,7 @@ parameter_estimation_settings['exportLog'] = True
 parameter_estimation_settings['exportAllSimulatedOutputs'] = False
 parameter_estimation_settings['checkPointFrequency'] = None
 parameter_estimation_settings['scaling_uncertainties_type'] = "std" #"std" is for standard deviation. there is also the option of "mu" for using the absolute values of the mean(s) of the prior distribution(s).
+parameter_estimation_settings['undo_scaling_uncertainties_type'] = False
 				  
 ######MCMC settings:#####
 parameter_estimation_settings['mcmc_random_seed'] = None #Normally set to None so that mcmc is set to be random. To get the same results repeatedly, such as for testing purposes, set the random seed to 0 or another integer for testing purposes.

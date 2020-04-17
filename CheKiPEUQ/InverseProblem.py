@@ -534,12 +534,17 @@ class parameter_estimation:
             #Now, we are going to make a list of abscissaIndices to remove, recognizing that numpy arrays are "transposed" relative to excel.
             abscissaIndicesToRemove = [] 
             for abscissaIndex in range(np.shape(stackedLogProbabilities)[1]):
+                print("parameter set:", self.post_burn_in_samples[abscissaIndex])
                 ordinateValues = stackedLogProbabilities[:,abscissaIndex]
                 #We mark anything where there is a 'nan':
                 if np.isnan( ordinateValues ).any(): #A working numpy syntax is to have the any outside of the parenthesis, for this command, even though it's a bit strange.
                     abscissaIndicesToRemove.append(abscissaIndex)
-                if (ordinateValues < np.log( self.UserInput.parameter_estimation_settings['mcmc_info_gain_cutoff'] ) ).any(): #again, working numpy syntax is to put "any" on the outside. We take the log since we're looking at log of probability. This is a natural log.
+                    print(abscissaIndex, "removed nan (prior, posterior)", ordinateValues, np.log( self.UserInput.parameter_estimation_settings['mcmc_info_gain_cutoff']))
+                elif (ordinateValues < np.log( self.UserInput.parameter_estimation_settings['mcmc_info_gain_cutoff'] ) ).any(): #again, working numpy syntax is to put "any" on the outside. We take the log since we're looking at log of probability. This is a natural log.
                     abscissaIndicesToRemove.append(abscissaIndex)
+                    print(abscissaIndex, "removed small (prior, posterior)",  ordinateValues, np.log( self.UserInput.parameter_estimation_settings['mcmc_info_gain_cutoff']))
+                else:
+                    print(abscissaIndex, "kept (prior, posterior)", ordinateValues)
             #Now that this is finshed, we're going to do the truncation using numpy delete.
             stackedLogProbabilities_truncated = stackedLogProbabilities*1.0 #just initializing.
             stackedLogProbabilities_truncated = np.delete(stackedLogProbabilities, abscissaIndicesToRemove, axis=1)
@@ -592,6 +597,12 @@ class parameter_estimation:
                 print("WARNING: There is an error in your self.UserInput.scaling_uncertainties. Contact the developers with a bug report.")
                 discreteParameterVector_scaled = np.array(discreteParameterVector)*1.0
         log_probabilityPrior = multivariate_normal.logpdf(x=discreteParameterVector_scaled,mean=self.UserInput.mu_prior_scaled,cov=self.UserInput.covmat_prior_scaled)
+        if self.UserInput.parameter_estimation_settings['undo_scaling_uncertainties_type'] == True:
+            try:
+                scaling_factor = float(self.UserInput.parameter_estimation_settings['scaling_uncertainties_type'])
+                log_probabilityPrior = log_probabilityPrior - np.log(scaling_factor)
+            except:
+                print("Warning: undo_scaling_uncertainties_type is set to True, but can only be used with a fixed value for scaling_uncertainties_type.  Skipping the undo.")
         return log_probabilityPrior
     def getLogLikelihood(self,discreteParameterVector): #The variable discreteParameterVector represents a vector of values for the parameters being sampled. So it represents a single point in the multidimensional parameter space.
         simulationFunction = self.UserInput.simulationFunction #Do NOT use self.UserInput.model['simulateByInputParametersOnlyFunction']  because that won't work with reduced parameter space requests.  
