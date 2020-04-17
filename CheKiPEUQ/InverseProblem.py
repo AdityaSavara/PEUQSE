@@ -520,14 +520,15 @@ class parameter_estimation:
         # posterior probabilites are transformed to a standard normal (std=1) for obtaining the evidence:
         #FIXME: Log was not propagated correctly here. Below line used to be self.evidence = np.mean(self.post_burn_in_posteriors_un_normed_vec)*np.sqrt(2*np.pi*np.std(self.post_burn_in_samples)**2)
         #So either need to make post_burn_in_posteriors_un_normed_vec again before this step, or need to change below line.
-        self.evidence = np.mean(np.exp(self.post_burn_in_log_posteriors_un_normed_vec))/np.linalg.norm(self.post_burn_in_samples)# another variety:*np.sqrt(2*np.pi*np.std(self.post_burn_in_samples)**2)
-        post_burn_in_log_posteriors_vec = np.log  ( np.exp( self.post_burn_in_log_posteriors_un_normed_vec) /self.evidence)
+        self.evidence = np.mean(np.exp(self.post_burn_in_log_posteriors_un_normed_vec))/np.linalg.norm(self.post_burn_in_samples)# another variety:*np.sqrt(2*np.pi*np.std(self.post_burn_in_samples)**2)        
         if self.UserInput.parameter_estimation_settings['mcmc_info_gain_cutoff'] == 0:        
+            post_burn_in_log_posteriors_vec = np.log  ( np.exp( self.post_burn_in_log_posteriors_un_normed_vec) /self.evidence)
             log_ratios = (post_burn_in_log_posteriors_vec-self.post_burn_in_log_priors_vec) #log10(a/b) = log10(a)-log10(b)
             log_ratios[np.isinf(log_ratios)] = 0
             log_ratios = np.nan_to_num(log_ratios)
             self.info_gain = np.mean(log_ratios)
         elif self.UserInput.parameter_estimation_settings['mcmc_info_gain_cutoff'] != 0:        
+            #Need to consider using a truncated evidence array as well, but for now will not worry about that.
             #First intialize the stacked array.
             #Surprisingly, the arrays going in haves shapes like 900,1 rather than 1,900 so now transposing them before stacking.
             stackedLogProbabilities = np.vstack((self.post_burn_in_log_priors_vec.transpose(), self.post_burn_in_log_posteriors_un_normed_vec.transpose()))
