@@ -530,7 +530,7 @@ class parameter_estimation:
         elif self.UserInput.parameter_estimation_settings['mcmc_info_gain_cutoff'] != 0:        
             #First intialize the stacked array.
             #Surprisingly, the arrays going in haves shapes like 900,1 rather than 1,900 so now transposing them before stacking.
-            stackedLogProbabilities = np.vstack((self.post_burn_in_log_priors_vec.transpose(), post_burn_in_log_posteriors_vec.transpose()))
+            stackedLogProbabilities = np.vstack((self.post_burn_in_log_priors_vec.transpose(), self.post_burn_in_log_posteriors_un_normed_vec.transpose()))
             #Now, we are going to make a list of abscissaIndices to remove, recognizing that numpy arrays are "transposed" relative to excel.
             abscissaIndicesToRemove = [] 
             for abscissaIndex in range(np.shape(stackedLogProbabilities)[1]):
@@ -549,7 +549,7 @@ class parameter_estimation:
             stackedLogProbabilities_truncated = stackedLogProbabilities*1.0 #just initializing.
             stackedLogProbabilities_truncated = np.delete(stackedLogProbabilities, abscissaIndicesToRemove, axis=1)
             post_burn_in_log_priors_vec_truncated = stackedLogProbabilities_truncated[0]
-            post_burn_in_log_posteriors_vec_truncated = stackedLogProbabilities_truncated[1]
+            post_burn_in_log_posteriors_vec_truncated = stackedLogProbabilities_truncated[1]/self.evidence #We have to truncate with not normalized, so we add the normalization in here.
             #Now copy the same lines that Eric had used above, only change to using log_ratios_truncated
             log_ratios_truncated = (post_burn_in_log_posteriors_vec_truncated-post_burn_in_log_priors_vec_truncated)
             log_ratios_truncated[np.isinf(log_ratios_truncated)] = 0
