@@ -518,11 +518,11 @@ class parameter_estimation:
         self.post_burn_in_log_likelihoods_vec = log_likelihoods_vec[self.UserInput.parameter_estimation_settings['mcmc_burn_in']:]
         self.post_burn_in_log_priors_vec = log_priors_vec[self.UserInput.parameter_estimation_settings['mcmc_burn_in']:]
         # posterior probabilites are transformed to a standard normal (std=1) for obtaining the evidence:
-        #FIXME: Log was not propagated correctly here. Below line used to be self.evidence = np.mean(self.post_burn_in_posteriors_un_normed_vec)*np.sqrt(2*np.pi*np.std(self.post_burn_in_samples)**2)
-        #So either need to make post_burn_in_posteriors_un_normed_vec again before this step, or need to change below line.
         self.evidence = np.mean(np.exp(self.post_burn_in_log_posteriors_un_normed_vec))/np.linalg.norm(self.post_burn_in_samples)# another variety:*np.sqrt(2*np.pi*np.std(self.post_burn_in_samples)**2)        
         if self.UserInput.parameter_estimation_settings['mcmc_info_gain_cutoff'] == 0:        
-            post_burn_in_log_posteriors_vec = np.log  ( np.exp( self.post_burn_in_log_posteriors_un_normed_vec) /self.evidence)
+            #we have log A, and we want log(A/B).  #log (e^log(A) / B )  = log(A/B).  
+            #But we could also do...  log(A) - log(B) = log(A/B). So changing to that.
+            post_burn_in_log_posteriors_vec = self.post_burn_in_log_posteriors_un_normed_vec - np.log(self.evidence) 
             log_ratios = (post_burn_in_log_posteriors_vec-self.post_burn_in_log_priors_vec) #log10(a/b) = log10(a)-log10(b)
             log_ratios[np.isinf(log_ratios)] = 0
             log_ratios = np.nan_to_num(log_ratios)
