@@ -29,7 +29,7 @@ if __name__ == "__main__":
     #InputParametersInitialValuesUncertainties = [200, 200, 13, 13, 0.1, 0.1] #If user wants to use a prior with covariance, then this must be a 2D array/ list. To assume no covariance, a 1D array can be used.
     UserInput.model['simulateByInputParametersOnlyFunction'] = fun.Langmuir_compete_ads #This must simulate with *only* the parameters listed above, and no other arguments.
     #UserInput.model['simulationOutputProcessingFunction'] = processing_functions_tpd_odeint.no_log_wrapper_func #Optional: a function to process what comes out of the simulation Function and then return an observable vector.
-    UserInput.parameter_estimation_settings['scaling_uncertainties_type'] = "0.02"
+    UserInput.parameter_estimation_settings['scaling_uncertainties_type'] = "off"
     UserInput.parameter_estimation_settings['undo_scaling_uncertainties_type'] = True
     
     UserInput.parameter_estimation_settings['verbose'] = False 
