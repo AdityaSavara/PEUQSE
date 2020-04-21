@@ -523,7 +523,6 @@ class parameter_estimation:
             #we have log A, and we want log(A/B).  #log (e^log(A) / B )  = log(A/B).  
             #But we could also do...  log(A) - log(B) = log(A/B). So changing to that.
             post_burn_in_log_posteriors_vec = self.post_burn_in_log_posteriors_un_normed_vec - np.log(self.evidence) 
-            print(post_burn_in_log_posteriors_vec)
             log_ratios = (post_burn_in_log_posteriors_vec-self.post_burn_in_log_priors_vec) #log10(a/b) = log10(a)-log10(b)
             log_ratios[np.isinf(log_ratios)] = 0
             log_ratios = np.nan_to_num(log_ratios)
@@ -535,6 +534,7 @@ class parameter_estimation:
             stackedLogProbabilities = np.vstack((self.post_burn_in_log_priors_vec.transpose(), self.post_burn_in_log_posteriors_un_normed_vec.transpose()))
             #Now, we are going to make a list of abscissaIndices to remove, recognizing that numpy arrays are "transposed" relative to excel.
             abscissaIndicesToRemove = [] 
+            #FIXME: Below there are some "if verbose", but those should not be printed, they should be collected and exported to a file at the end.
             for abscissaIndex in range(np.shape(stackedLogProbabilities)[1]):
                 if self.UserInput.parameter_estimation_settings['verbose']:
                     print("parameter set:", self.post_burn_in_samples[abscissaIndex])
@@ -543,14 +543,14 @@ class parameter_estimation:
                 if np.isnan( ordinateValues ).any(): #A working numpy syntax is to have the any outside of the parenthesis, for this command, even though it's a bit strange.
                     abscissaIndicesToRemove.append(abscissaIndex)
                     if self.UserInput.parameter_estimation_settings['verbose']:
-                        print(abscissaIndex, "removed nan (prior, posterior)", ordinateValues, np.log( self.UserInput.parameter_estimation_settings['mcmc_info_gain_cutoff']))
+                        print(abscissaIndex, "removed nan (log_prior, log_posterior)", ordinateValues, np.log( self.UserInput.parameter_estimation_settings['mcmc_info_gain_cutoff']))
                 elif (ordinateValues < np.log( self.UserInput.parameter_estimation_settings['mcmc_info_gain_cutoff'] ) ).any(): #again, working numpy syntax is to put "any" on the outside. We take the log since we're looking at log of probability. This is a natural log.
                     abscissaIndicesToRemove.append(abscissaIndex)
                     if self.UserInput.parameter_estimation_settings['verbose']:
-                        print(abscissaIndex, "removed small (prior, posterior)",  ordinateValues, np.log( self.UserInput.parameter_estimation_settings['mcmc_info_gain_cutoff']))
+                        print(abscissaIndex, "removed small (prior, posterior)",  np.exp(ordinateValues), self.UserInput.parameter_estimation_settings['mcmc_info_gain_cutoff'])
                 else:
                     if self.UserInput.parameter_estimation_settings['verbose']:
-                        print(abscissaIndex, "kept (prior, posterior)", ordinateValues)
+                        print(abscissaIndex, "kept (prior, posterior)",  np.exp(ordinateValues), self.UserInput.parameter_estimation_settings['mcmc_info_gain_cutoff'])
                     pass
             #Now that this is finshed, we're going to do the truncation using numpy delete.
             stackedLogProbabilities_truncated = stackedLogProbabilities*1.0 #just initializing.
@@ -614,7 +614,8 @@ class parameter_estimation:
                 scaling_factor = float(self.UserInput.parameter_estimation_settings['scaling_uncertainties_type'])
                 log_probabilityPrior = log_probabilityPrior - np.log(scaling_factor)
             except:
-                print("Warning: undo_scaling_uncertainties_type is set to True, but can only be used with a fixed value for scaling_uncertainties_type.  Skipping the undo.")
+                if self.UserInput.parameter_estimation_settings['scaling_uncertainties_type'] != "off":
+                    print("Warning: undo_scaling_uncertainties_type is set to True, but can only be used with a fixed value for scaling_uncertainties_type.  Skipping the undo.")
         return log_probabilityPrior
     def getLogLikelihood(self,discreteParameterVector): #The variable discreteParameterVector represents a vector of values for the parameters being sampled. So it represents a single point in the multidimensional parameter space.
         simulationFunction = self.UserInput.simulationFunction #Do NOT use self.UserInput.model['simulateByInputParametersOnlyFunction']  because that won't work with reduced parameter space requests.  
