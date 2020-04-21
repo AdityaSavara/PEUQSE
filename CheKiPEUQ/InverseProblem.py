@@ -523,6 +523,7 @@ class parameter_estimation:
             #we have log A, and we want log(A/B).  #log (e^log(A) / B )  = log(A/B).  
             #But we could also do...  log(A) - log(B) = log(A/B). So changing to that.
             post_burn_in_log_posteriors_vec = self.post_burn_in_log_posteriors_un_normed_vec - np.log(self.evidence) 
+            print(post_burn_in_log_posteriors_vec)
             log_ratios = (post_burn_in_log_posteriors_vec-self.post_burn_in_log_priors_vec) #log10(a/b) = log10(a)-log10(b)
             log_ratios[np.isinf(log_ratios)] = 0
             log_ratios = np.nan_to_num(log_ratios)
@@ -535,17 +536,22 @@ class parameter_estimation:
             #Now, we are going to make a list of abscissaIndices to remove, recognizing that numpy arrays are "transposed" relative to excel.
             abscissaIndicesToRemove = [] 
             for abscissaIndex in range(np.shape(stackedLogProbabilities)[1]):
-                print("parameter set:", self.post_burn_in_samples[abscissaIndex])
+                if self.UserInput.parameter_estimation_settings['verbose']:
+                    print("parameter set:", self.post_burn_in_samples[abscissaIndex])
                 ordinateValues = stackedLogProbabilities[:,abscissaIndex]
                 #We mark anything where there is a 'nan':
                 if np.isnan( ordinateValues ).any(): #A working numpy syntax is to have the any outside of the parenthesis, for this command, even though it's a bit strange.
                     abscissaIndicesToRemove.append(abscissaIndex)
-                    print(abscissaIndex, "removed nan (prior, posterior)", ordinateValues, np.log( self.UserInput.parameter_estimation_settings['mcmc_info_gain_cutoff']))
+                    if self.UserInput.parameter_estimation_settings['verbose']:
+                        print(abscissaIndex, "removed nan (prior, posterior)", ordinateValues, np.log( self.UserInput.parameter_estimation_settings['mcmc_info_gain_cutoff']))
                 elif (ordinateValues < np.log( self.UserInput.parameter_estimation_settings['mcmc_info_gain_cutoff'] ) ).any(): #again, working numpy syntax is to put "any" on the outside. We take the log since we're looking at log of probability. This is a natural log.
                     abscissaIndicesToRemove.append(abscissaIndex)
-                    print(abscissaIndex, "removed small (prior, posterior)",  ordinateValues, np.log( self.UserInput.parameter_estimation_settings['mcmc_info_gain_cutoff']))
+                    if self.UserInput.parameter_estimation_settings['verbose']:
+                        print(abscissaIndex, "removed small (prior, posterior)",  ordinateValues, np.log( self.UserInput.parameter_estimation_settings['mcmc_info_gain_cutoff']))
                 else:
-                    print(abscissaIndex, "kept (prior, posterior)", ordinateValues)
+                    if self.UserInput.parameter_estimation_settings['verbose']:
+                        print(abscissaIndex, "kept (prior, posterior)", ordinateValues)
+                    pass
             #Now that this is finshed, we're going to do the truncation using numpy delete.
             stackedLogProbabilities_truncated = stackedLogProbabilities*1.0 #just initializing.
             stackedLogProbabilities_truncated = np.delete(stackedLogProbabilities, abscissaIndicesToRemove, axis=1)
@@ -557,6 +563,10 @@ class parameter_estimation:
             log_ratios_truncated[np.isinf(log_ratios_truncated)] = 0
             log_ratios_truncated = np.nan_to_num(log_ratios_truncated)
             self.info_gain = np.mean(log_ratios_truncated)
+            #TODO: Export the below things.
+            #post_burn_in_log_posteriors_vec_non_truncated = self.post_burn_in_log_posteriors_un_normed_vec - np.log(self.evidence)
+            #print(post_burn_in_log_posteriors_vec_truncated) #TODO: Export this
+            #print(post_burn_in_log_priors_vec_truncated)  #TODO: Export this
         map_logP = max(self.post_burn_in_logP_un_normed_vec)
         self.map_logP = map_logP
         self.map_index = list(self.post_burn_in_logP_un_normed_vec).index(map_logP) #This does not have to be a unique answer, just one of them places which gives map_logP.
