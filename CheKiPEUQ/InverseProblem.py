@@ -46,6 +46,7 @@ class parameter_estimation:
 
         self.UserInput.mu_prior = np.array(UserInput.model['InputParameterPriorValues']) 
         #Making things at least 2d.  Also changing it to a purely internal variable because that way we don't edit the user input dictionary going forward.
+        self.samples_of_prior = np.random.multivariate_normal(self.UserInput.mu_prior,UserInput.covmat_prior,UserInput.parameter_estimation_settings['mcmc_length'])
         UserInput.responses_abscissa = np.atleast_2d(UserInput.responses['responses_abscissa'])
         UserInput.responses_observed = np.atleast_2d(UserInput.responses['responses_observed'])
         UserInput.responses_observed_uncertainties = np.atleast_2d(UserInput.responses['responses_observed_uncertainties'])
@@ -564,6 +565,11 @@ class parameter_estimation:
         self.mu_AP_parameter_set = np.mean(self.post_burn_in_samples, axis=0) #This is the mean of the posterior, and is the point with the highest expected value of the posterior (for most distributions). For the simplest cases, map and mu_AP will be the same.
         self.stdap_parameter_set = np.std(self.post_burn_in_samples, axis=0) #This is the mean of the posterior, and is the point with the highest expected value of the posterior (for most distributions). For the simplest cases, map and mu_AP will be the same.
         #TODO: should return the variance of each sample in the post_burn_in
+        if self.UserInput.KL_divergence == True:
+            (density0,bins0,pathces0)=plt.hist([self.samples_of_prior,self.post_burn_in_samples.flatten()],bins=100,density=True)
+            KL = density0[1]*np.log(density0[1]/density0[0])
+            KL = KL[np.isfinite(KL)]
+            self.info_gain = np.sum(KL)
         if self.UserInput.parameter_estimation_settings['verbose'] == True:
             print(self.map_parameter_set)
             print(self.mu_AP_parameter_set)
