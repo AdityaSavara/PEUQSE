@@ -37,8 +37,8 @@ if __name__ == "__main__":
     UserInput.parameter_estimation_settings['mcmc_mode'] = 'unbiased'
     UserInput.parameter_estimation_settings['mcmc_random_seed'] = None #Normally set to None so that mcmc is set to be random. To get the same results repeatedly, such as for testing purposes, set the random seed to 0 or another integer for testing purposes.
     UserInput.parameter_estimation_settings['mcmc_burn_in'] = 100
-    UserInput.parameter_estimation_settings['mcmc_length'] = 20100
-    UserInput.parameter_estimation_settings['mcmc_relative_step_length'] = 0.05
+    UserInput.parameter_estimation_settings['mcmc_length'] = 5000
+    UserInput.parameter_estimation_settings['mcmc_relative_step_length'] = 0.3
     UserInput.parameter_estimation_settings['mcmc_modulate_accept_probability']  = 0 #Default value of 0. Changing this value sharpens or flattens the posterior. A value greater than 1 flattens the posterior by accepting low values more often. It can be useful when greater sampling is more important than accuracy. One way of using this feature is to try with a value of 0, then with the value equal to the number of priors for comparison, and then to gradually decrease this number as low as is useful (to minimize distortion of the result). A downside of changing changing this variable to greater than 1 is that it slows the the ascent to the maximum of the prior, so there is a balance in using it. In contrast, numbers increasingly less than one (such as 0.90 or 0.10) will speed up the ascent to the maximum of the posterior, but will also result in fewer points being retained.
     
     UserInput.parameter_pairs_for_contour_plots = [[0, 0]]
@@ -74,8 +74,9 @@ if __name__ == "__main__":
     fig.colorbar(surf, shrink=0.5, aspect=5)
     fig.savefig('synthetic_observables_theta_A.png',dpi=220)
     
-    prior = np.random.normal(-0.2,0.05,20000)
+    prior = np.random.normal(-0.2,0.05,10000)
     info_gains=[]
+    info_gains_KL=[]
     PE_object_list = []
     for p in pressures:
         for t in temperatures:
@@ -88,6 +89,10 @@ if __name__ == "__main__":
             info_gains.append(info_gain)
             fig, ax = plt.subplots()
             (density0,bins0,pathces0)=ax.hist([prior,PE_object_list[-1].post_burn_in_samples.flatten()],bins=100,label=['prior','posterior'],density=True)
+            KL = density0[1]*np.log(density0[1]/density0[0])
+            KL = KL[np.isfinite(KL)]
+            print('KL divergence',np.sum(KL))
+            info_gains_KL.append(np.sum(KL))
             ax.legend()
             ax.set_ylabel('Probability density')
             ax.set_title(r'Prior and Posterior Density Plot at T = {} (K) $p_A$ = {}'.format(str(t),str(p)))
@@ -105,3 +110,18 @@ if __name__ == "__main__":
     ax.set_title('Information Gain Surface')
     fig.colorbar(surf, shrink=0.5, aspect=5) 
     fig.savefig('info_gain_surface_Langmuir_compete_ads.png', dpi=220)
+
+    fig1,ax1 = plt.subplots(figsize=(5,5))
+    #ax = fig.add_subplot(111, projection='3d')
+    info_gains_KL=np.asarray(info_gains_KL)
+    IG_KL = info_gains_KL.reshape(TT.shape)
+    print('info_gains_KL',info_gains_KL)
+    surf = ax1.pcolor(TT,pp,IG_KL,cmap=matplotlib.cm.coolwarm)
+    ax1.set_xlabel('Temperature (K)')
+    ax1.set_ylabel(r'$p_A$')
+    #ax.set_zlabel('Information Gain')
+    ax1.set_xticks(temperatures)
+    ax1.xaxis.set_major_formatter(FormatStrFormatter('%.2f'))
+    ax1.set_title('Information Gain Surface from Kullback Leibler Divergence')
+    fig1.colorbar(surf, shrink=0.5, aspect=5)
+    fig1.savefig('info_gain_surface_Langmuir_compete_ads_Kullback_Leibler.png', dpi=220)
