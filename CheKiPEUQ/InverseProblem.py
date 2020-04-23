@@ -24,7 +24,7 @@ class parameter_estimation:
         UserInput.stringOfParameterNames = str(UserInput.parameterNamesList).replace("'","")[1:-1]
         UserInput.parameterNamesAndMathTypeExpressionsDict = UserInput.model['parameterNamesAndMathTypeExpressionsDict']
         if self.UserInput.parameter_estimation_settings['verbose']: 
-            print("Bayes Model Initialized")
+            print("Paremeter Estimation Object Initialized")
         #Leaving the original dictionary object intact, but making a new object to make covmat_prior.
         UserInput.InputParametersPriorValuesUncertainties = UserInput.model['InputParametersPriorValuesUncertainties']     
         if len(np.shape(UserInput.InputParametersPriorValuesUncertainties)) == 1 and (len(UserInput.InputParametersPriorValuesUncertainties) > 0): #If it's a 1D array/list that is filled, we'll diagonalize it.
@@ -565,11 +565,13 @@ class parameter_estimation:
         self.mu_AP_parameter_set = np.mean(self.post_burn_in_samples, axis=0) #This is the mean of the posterior, and is the point with the highest expected value of the posterior (for most distributions). For the simplest cases, map and mu_AP will be the same.
         self.stdap_parameter_set = np.std(self.post_burn_in_samples, axis=0) #This is the mean of the posterior, and is the point with the highest expected value of the posterior (for most distributions). For the simplest cases, map and mu_AP will be the same.
         #TODO: should return the variance of each sample in the post_burn_in
-        if self.UserInput.KL_divergence == True:
-            (density0,bins0,pathces0)=plt.hist([self.samples_of_prior,self.post_burn_in_samples.flatten()],bins=100,density=True)
-            KL = density0[1]*np.log(density0[1]/density0[0])
-            KL = KL[np.isfinite(KL)]
-            self.info_gain = np.sum(KL)
+        #Below is the KL_divergence info_gain calculation.
+        (density0,bins0,pathces0)=plt.hist([self.samples_of_prior,self.post_burn_in_samples.flatten()],bins=100,density=True)
+        KL = density0[1]*np.log(density0[1]/density0[0])
+        KL = KL[np.isfinite(KL)]
+        self.info_gain_KL = np.sum(KL)
+        if self.UserInput.parameter_estimation_settings['mcmc_info_gain_returned'] == 'KL_divergence':
+            self.info_gain = self.info_gain_KL
         if self.UserInput.parameter_estimation_settings['verbose'] == True:
             print(self.map_parameter_set)
             print(self.mu_AP_parameter_set)
