@@ -5,7 +5,7 @@ if __name__ == "__main__":
     import processing_function_two_response #This will provide the "simulation" function.
     import numpy as np
 
-    UserInput.responses['responses_abscissa'] = np.array([[0], [1]]) # These represent theta_1 and theta_2 abscissay points. Note that this is *nested* it is a multi-dimensional response, and produces two posteriors.
+    UserInput.responses['responses_abscissa'] = np.array([[0], [1]]) # These represent theta_1 and theta_2 abscissa points. Note that this is *nested* it is a multi-dimensional response, and produces posterior distributions for each response.
     UserInput.responses['responses_observed'] = np.array([[2], [3]]) # Note that this is *nested* it is a multi-dimensional response, and produces two posteriors.
     UserInput.responses['responses_observed_uncertainties'] = np.array([[1], [1]])
 

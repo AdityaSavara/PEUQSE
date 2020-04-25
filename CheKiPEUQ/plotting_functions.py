@@ -137,7 +137,7 @@ def createSimulatedResponsesPlot(x_values, listOfYArrays, plot_settings=[], list
     if 'x_label' not in plot_settings: plot_settings['x_label'] = ''
     if 'y_label' not in plot_settings: plot_settings['y_label'] = ''
     if 'legendLabels' not in plot_settings: plot_settings['legendLabels'] = ''
-    print("line 140", plot_settings['legendLabels'])
+    print("line 140", plot_settings['legendLabels'], len(listOfYArrays))
     if 'figure_name' not in plot_settings: plot_settings['figure_name'] = 'simulatedResponsesPlot'
     if 'dpi' not in plot_settings: plot_settings['dpi']=220          
     fig0, ax0 = plt.subplots()
@@ -148,44 +148,56 @@ def createSimulatedResponsesPlot(x_values, listOfYArrays, plot_settings=[], list
         print("line 147", x_values, "\n", listOfYArrays, "\n", listOfYUncertaintiesArrays)
         if len(x_values) > 1: #This means there are enough data to make lines.        
             for seriesIndex in range(len(listOfYArrays)):           
-                if len(listOfYUncertaintiesArrays) == 0: #If length is zero, no uncertainties.
-                    ax0.plot(x_values,listOfYArrays[0],'g')
-                elif len(listOfYUncertaintiesArrays) > 0: #If length is 1, uncertainties only for first data set.
-                    ax0.plot(x_values,listOfYArrays[0],'g') #Need both of these lines to get legend to turn out right.
-                    ax0.errorbar(x_values, listOfYArrays[0], yerr=listOfYUncertaintiesArrays[0], fmt='.', barsabove=False, markersize=0, elinewidth=1, color="gray", ecolor="lightgray") #markersize=0 because we want no marker for experiments data series, just a line.
+                ax0.plot(x_values,listOfYArrays[0],'g')
+                if len(listOfYUncertaintiesArrays) >= 1: #If length is >=1, uncertainties for first data set.
+                    ax0.errorbar(x_values, listOfYArrays[0], yerr=listOfYUncertaintiesArrays[0], fmt='.', barsabove=False, markersize=0, elinewidth=1, color="gray", ecolor="lightgray") #markersize=0 because we want no marker for experiments data series, just a line..
                 ax0.plot(x_values,listOfYArrays[1], '#00A5DF')
+                if len(listOfYUncertaintiesArrays) > 1: #If length is >1, uncertainties for all data sets
+                    ax0.errorbar(x_values, listOfYArrays[1], yerr=listOfYUncertaintiesArrays[1], fmt='.', barsabove=False, markersize=0, elinewidth=1, color="gray", ecolor="lightgray") #markersize=0 because we want no marker for this.
                 ax0.plot(x_values,listOfYArrays[2], 'r') 
+                if len(listOfYUncertaintiesArrays) > 1: #If length is >1, uncertainties for all data sets
+                    ax0.errorbar(x_values, listOfYArrays[2], yerr=listOfYUncertaintiesArrays[2], fmt='.', barsabove=False, markersize=0, elinewidth=1, color="gray", ecolor="lightgray") #markersize=0 because we want no marker for this.
+                    
         if len(x_values) == 1: #This means there are single points, and we need to make symbols, by adding an "o".
             for seriesIndex in range(len(listOfYArrays)):           
-                if len(listOfYUncertaintiesArrays) == 0: #If length is zero, no uncertainties.
-                    ax0.plot(x_values,listOfYArrays[0],'go')
-                elif len(listOfYUncertaintiesArrays) > 0: #If length is >0, uncertainties only for first data set.
-                    ax0.plot(x_values,listOfYArrays[0],'go') #Need both of these lines to get legend to turn out right.
-                    ax0.errorbar(x_values, listOfYArrays[0], yerr=listOfYUncertaintiesArrays, fmt='o', barsabove=False, markersize=0, elinewidth=1, color="gray", ecolor="lightgray") #markersize=0 because we want no marker for experiments data series, just a line.
+                ax0.plot(x_values,listOfYArrays[0],'go')
+                if len(listOfYUncertaintiesArrays) >= 1: #If length is >=1, uncertainties for first data set.
+                    ax0.errorbar(x_values, listOfYArrays[0], yerr=listOfYUncertaintiesArrays[0], fmt='o', barsabove=False, markersize=0, elinewidth=1, color="gray", ecolor="lightgray") #markersize=0 because we want no marker for experiments data series, just a line.
                 ax0.plot(x_values,listOfYArrays[1], 'co')
+                if len(listOfYUncertaintiesArrays) > 1: #If length is >1, uncertainties for all data sets
+                    ax0.errorbar(x_values, listOfYArrays[1], yerr=listOfYUncertaintiesArrays[1], fmt='.', barsabove=False, markersize=0, elinewidth=1, color="gray", ecolor="lightgray") #markersize=0 because we want no marker for this.                    
                 ax0.plot(x_values,listOfYArrays[2], 'ro') 
-
+                if len(listOfYUncertaintiesArrays) > 1: #If length is >1, uncertainties for all data sets
+                    ax0.errorbar(x_values, listOfYArrays[2], yerr=listOfYUncertaintiesArrays[2], fmt='.', barsabove=False, markersize=0, elinewidth=1, color="gray", ecolor="lightgray") #markersize=0 because we want no marker for this.
     elif len(listOfYArrays) == 4: #This generally means observed, mu_guess, map, mu_app
         if len(x_values) > 1: #This means there are enough data to make lines.        
             for seriesIndex in range(len(listOfYArrays)):
-                if len (listOfYUncertaintiesArrays) == 0: #If length is zero, no uncertainties.               
-                    ax0.plot(x_values,listOfYArrays[0],'g')
-                elif len(listOfYUncertaintiesArrays) > 0: #If length is >0, uncertainties only for first data set.
-                    ax0.plot(x_values,listOfYArrays[0],'g') #Need both of these lines to get legend to turn out right.
-                    ax0.errorbar(x_values, listOfYArrays[0], yerr=listOfYUncertaintiesArrays, fmt='.', barsabove=False, markersize=0, elinewidth=1, color="gray", ecolor="lightgray") #markersize=0 because we want no marker for experiments data series, just a line.
+                ax0.plot(x_values,listOfYArrays[0],'g')
+                if len(listOfYUncertaintiesArrays) >= 1: #If length is >=1, uncertainties for first data set.
+                    ax0.errorbar(x_values, listOfYArrays[0], yerr=listOfYUncertaintiesArrays[0], fmt='.', barsabove=False, markersize=0, elinewidth=1, color="gray", ecolor="lightgray") #markersize=0 because we want no marker for experiments data series, just a line.
                 ax0.plot(x_values,listOfYArrays[1], '#00A5DF')
+                if len(listOfYUncertaintiesArrays) > 1: #If length is >1, uncertainties for all data sets
+                    ax0.errorbar(x_values, listOfYArrays[1], yerr=listOfYUncertaintiesArrays[1], fmt='.', barsabove=False, markersize=0, elinewidth=1, color="gray", ecolor="lightgray") #markersize=0 because we want no marker for this.                                             
                 ax0.plot(x_values,listOfYArrays[2], 'r') 
+                if len(listOfYUncertaintiesArrays) > 1: #If length is >1, uncertainties for all data sets
+                    ax0.errorbar(x_values, listOfYArrays[2], yerr=listOfYUncertaintiesArrays[2], fmt='.', barsabove=False, markersize=0, elinewidth=1, color="gray", ecolor="lightgray") #markersize=0 because we want no marker for this.                    
                 ax0.plot(x_values,listOfYArrays[3], 'k')  #k is black.
+                if len(listOfYUncertaintiesArrays) > 1: #If length is >1, uncertainties for all data sets
+                    ax0.errorbar(x_values, listOfYArrays[3], yerr=listOfYUncertaintiesArrays[3], fmt='.', barsabove=False, markersize=0, elinewidth=1, color="gray", ecolor="lightgray") #markersize=0 because we want no marker for this.                    
         if len(x_values) == 1: #This means there are single points, and we need to make symbols, by adding an "o".
-                if len (listOfYUncertaintiesArrays) == 0: #If length is zero, no uncertainties.               
-                    ax0.plot(x_values,listOfYArrays[0],'go')
-                elif len(listOfYUncertaintiesArrays) > 0: #If length is >0, uncertainties only for first data set.
-                    ax0.plot(x_values,listOfYArrays[0],'go') #Need both of these lines to get legend to turn out right.
-                    ax0.errorbar(x_values, listOfYArrays[0], yerr=listOfYUncertaintiesArrays, fmt='.', barsabove=False, markersize=0, elinewidth=1, color="gray", ecolor="lightgray") #markersize=0 because we want no marker for experiments data series, just a line.
+                print("line 182", len(listOfYUncertaintiesArrays), listOfYUncertaintiesArrays)
+                ax0.plot(x_values,listOfYArrays[0],'go')
+                if len(listOfYUncertaintiesArrays) >= 1: #If length is >=1, uncertainties for first data set.
+                    ax0.errorbar(x_values, listOfYArrays[0], yerr=listOfYUncertaintiesArrays[0], fmt='.', barsabove=False, markersize=0, elinewidth=1, color="gray", ecolor="lightgray") #markersize=0 because we want no marker for experiments data series, just a line.
                 ax0.plot(x_values,listOfYArrays[1], 'co')
+                if len(listOfYUncertaintiesArrays) > 1: #If length is >1, uncertainties for all data sets
+                    ax0.errorbar(x_values, listOfYArrays[1], yerr=listOfYUncertaintiesArrays[1], fmt='.', barsabove=False, markersize=0, elinewidth=1, color="gray", ecolor="lightgray") #markersize=0 because we want no marker for this.                    
                 ax0.plot(x_values,listOfYArrays[2], 'ro') 
+                if len(listOfYUncertaintiesArrays) > 1: #If length is >1, uncertainties for all data sets
+                    ax0.errorbar(x_values, listOfYArrays[2], yerr=listOfYUncertaintiesArrays[2], fmt='.', barsabove=False, markersize=0, elinewidth=1, color="gray", ecolor="lightgray") #markersize=0 because we want no marker for this.                    
                 ax0.plot(x_values,listOfYArrays[3], 'ko')  #k is black. https://matplotlib.org/3.1.0/api/_as_gen/matplotlib.pyplot.plot.html#matplotlib.pyplot.plot
-            
+                if len(listOfYUncertaintiesArrays) > 1: #If length is >1, uncertainties for all data sets
+                    ax0.errorbar(x_values, listOfYArrays[2], yerr=listOfYUncertaintiesArrays[3], fmt='.', barsabove=False, markersize=0, elinewidth=1, color="gray", ecolor="lightgray") #markersize=0 because we want no marker for this.                    
     else:
         if len(x_values) > 1: #This means there are enough data to make lines.        
             for seriesIndex in range(len(listOfYArrays)):
