@@ -18,6 +18,7 @@ model['parameterNamesAndMathTypeExpressionsDict'] = {} #This must be provided. I
 model['simulateByInputParametersOnlyFunction'] = None #A function must be provided! This cannot be left as None.
 model['simulationOutputProcessingFunction'] = None
 model['reducedParameterSpace'] = [] #This is to keep parameters as 'constants'. Any parameter index in this list will be allowed to change, the rest will be held as constants.
+model['responses_simulation_uncertainties'] = None #Can be none, a list/vector, or can be a function that returns the uncertainties after each simulation is done. The easiest way would be to have a function that extracts a list that gets updated in another namespace after each simulation.
 
 #####Experimental Data Input Files#####
 responses = {}
