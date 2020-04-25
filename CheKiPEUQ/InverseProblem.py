@@ -712,7 +712,11 @@ class parameter_estimation:
     def createSimulatedResponsesPlots(self, allResponses_x_values=[], allResponsesListsOfYArrays =[], plot_settings={},allResponsesListsOfYUncertainties=[] ): 
         #allResponsesListsOfYArrays  is to have 3 layers of lists: Response > Responses Observed, mu_guess Simulated Responses, map_Simulated Responses, (mu_AP_simulatedResponses) > Values
         if allResponses_x_values == []: allResponses_x_values = self.UserInput.responses_abscissa       
-        if allResponsesListsOfYUncertainties == []: allResponsesListsOfYUncertainties = self.UserInput.responses_observed_uncertainties
+        if allResponsesListsOfYUncertainties == []: 
+            if type(self.UserInput.model['responses_simulation_uncertainties']) == None: #This means there are no simulation uncertainties.
+                allResponsesListsOfYUncertainties = [self.UserInput.responses_observed_uncertainties]
+            else:
+                allResponsesListsOfYUncertainties = [self.UserInput.responses_observed_uncertainties]
         if allResponsesListsOfYArrays  ==[]:
             
             simulationFunction = self.UserInput.simulationFunction #Do NOT use self.UserInput.model['simulateByInputParametersOnlyFunction']  because that won't work with reduced parameter space requests.
@@ -777,10 +781,10 @@ class parameter_estimation:
                     individual_plot_settings['y_label'] = plot_settings['y_label'][responseDimIndex]                
             #TODO, low priority: we can check if x_range and y_range are nested, and thereby allow individual response dimension values for those.                               
             if np.shape(allResponses_x_values)[0] == 1: #This means a single abscissa for all responses.
-                figureObject = plotting_functions.createSimulatedResponsesPlot(allResponses_x_values[0], allResponsesListsOfYArrays[responseDimIndex], individual_plot_settings, listOfYUncertainties=allResponsesListsOfYUncertainties[responseDimIndex])
+                figureObject = plotting_functions.createSimulatedResponsesPlot(allResponses_x_values[0], allResponsesListsOfYArrays[responseDimIndex], individual_plot_settings, listOfYUncertaintiesArrays=allResponsesListsOfYUncertainties[responseDimIndex])
                 np.savetxt(individual_plot_settings['figure_name']+".csv", np.vstack((allResponses_x_values[0], allResponsesListsOfYArrays[responseDimIndex])).transpose(), delimiter=",", header='x_values, observed, sim_initial_guess, sim_MAP, sim_mu_AP', comments='')
             if np.shape(allResponses_x_values)[0] > 1: #This means a separate abscissa for each response.
-                figureObject = plotting_functions.createSimulatedResponsesPlot(allResponses_x_values[responseDimIndex], allResponsesListsOfYArrays[responseDimIndex], individual_plot_settings, listOfYUncertainties=allResponsesListsOfYUncertainties[responseDimIndex])
+                figureObject = plotting_functions.createSimulatedResponsesPlot(allResponses_x_values[responseDimIndex], allResponsesListsOfYArrays[responseDimIndex], individual_plot_settings, listOfYUncertaintiesArrays=allResponsesListsOfYUncertainties[responseDimIndex])
                 np.savetxt(individual_plot_settings['figure_name']+".csv", np.vstack((allResponses_x_values[responseDimIndex], allResponsesListsOfYArrays[responseDimIndex])).transpose(), delimiter=",", header='x_values, observed, sim_initial_guess, sim_MAP, sim_mu_AP', comments='')
             allResponsesFigureObjectsList.append(figureObject)
         return allResponsesFigureObjectsList  #This is a list of matplotlib.pyplot as plt objects.
