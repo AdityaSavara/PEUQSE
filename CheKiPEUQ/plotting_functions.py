@@ -145,7 +145,6 @@ def createSimulatedResponsesPlot(x_values, listOfYArrays, plot_settings=[], list
     ax0.set_ylabel(plot_settings['y_label']) #TODO: THis is not yet generalized (will be a function)
     if 'y_range' in plot_settings: ax0.set_ylim(plot_settings['y_range'] )
     if len(listOfYArrays) == 3: #This generally means observed, mu_guess, map, in that order.
-        print("line 147", x_values, "\n", listOfYArrays, "\n", listOfYUncertaintiesArrays)
         if len(x_values) > 1: #This means there are enough data to make lines.        
             for seriesIndex in range(len(listOfYArrays)):           
                 ax0.plot(x_values,listOfYArrays[0],'g')
