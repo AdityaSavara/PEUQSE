@@ -88,17 +88,7 @@ class parameter_estimation:
         
         #To find the *observed* responses covariance matrix, meaning based on the uncertainties reported by the users, we take the uncertainties from the points. This is needed for the likelihood. However, it will be transformed again at that time.
         self.UserInput.num_response_dimensions = np.shape(UserInput.responses_abscissa)[0] #The first index of shape is the num of responses, but has to be after at_least2d is performed.
-        if self.UserInput.num_response_dimensions == 1:
-            observed_responses_covmat_transformed = np.array(self.UserInput.responses_observed_transformed_uncertainties)**2 #Filling variable. Need to square standard deviations to make them into variances.
-            if np.shape(observed_responses_covmat_transformed)[0] == (1): #This means it's just a list of standard deviations and needs to be squared to become variances.
-                observed_responses_covmat_transformed = np.square(observed_responses_covmat_transformed) 
-            else:
-                observed_responses_covmat_transformed = observed_responses_covmat_transformed
-        elif self.UserInput.num_response_dimensions > 1:  #if the dimensionality of responses is greater than 1, we only support providing standard deviations. Will flatten and square.
-            observed_responses_covmat_transformed = np.array(self.UserInput.responses_observed_transformed_uncertainties)**2 #Filling variable.  Need to square standard deviations to make them into variances.
-            observed_responses_covmat_transformed = observed_responses_covmat_transformed.flatten() 
-            observed_responses_covmat_transformed = np.square(observed_responses_covmat_transformed)
-        self.observed_responses_covmat_transformed = observed_responses_covmat_transformed            
+        self.observed_responses_covmat_transformed = returnShapedResponseCovMat(self.UserInput.num_response_dimensions, self.UserInput.responses_observed_transformed_uncertainties)
                        
         #self.covmat_prior = UserInput.covmat_prior
         self.Q_mu = self.UserInput.mu_prior*0 # Q samples the next step at any point in the chain.  The next step may be accepted or rejected.  Q_mu is centered (0) around the current theta.  
@@ -651,6 +641,7 @@ class parameter_estimation:
             simulatedResponses_transformed, blank_list = self.transform_responses(simulatedResponses) #This creates transforms for any data that we might need it. The same transforms were also applied to the observed responses.
         else:
             simulatedResponses_transformed, responses_simulation_uncertainties_transformed = self.transform_responses(simulatedResponses, responses_simulation_uncertainties) #This creates transforms for any data that we might need it. The same transforms were also applied to the observed responses.
+            simulated_responses_covmat_transformed =  responses_simulation_uncertainties_transformed**2 #assume we got standard deviations back.
         observedResponses_transformed = self.UserInput.responses_observed_transformed
         simulatedResponses_transformed_flattened = np.array(simulatedResponses_transformed).flatten()
         observedResponses_transformed_flattened = np.array(observedResponses_transformed).flatten()
@@ -672,8 +663,10 @@ class parameter_estimation:
 
         #This means an array exists.
         ######WORKING HERE    comprehensive_responses_covmat = observed_responses_covmat_transformed**2 + 
-        
-        comprehensive_responses_covmat = observed_responses_covmat_transformed
+        if responses_simulation_uncertainties == None:
+            comprehensive_responses_covmat = observed_responses_covmat_transformed
+        else: #Else we add the uncertainties, assuming they are orthogonal. Note that these are already covmats so are already variances that can be added directly.
+            comprehensive_responses_covmat = comprehensive_responses_covmat + responses_simulation_uncertainties
         comprehensive_responses_covmat_shape = copy.deepcopy(observed_responses_covmat_transformed_shape) #no need to take the shape of the actual comprehensive_responses_covmat since they must be same. This is probably slightly less computation.
         if len(comprehensive_responses_covmat_shape) == 1: #Matrix is square because has only one value.
             log_probability_metric = multivariate_normal.logpdf(mean=simulatedResponses_transformed_flattened,x=observedResponses_transformed_flattened,cov=comprehensive_responses_covmat)
@@ -995,6 +988,20 @@ def returnReducedIterable(iterableObjectToReduce, reducedIndices):
     if np.shape(reducedIterable) == np.shape(iterableObjectToReduce):
         print("returnReducedIterable received an object type or size that is not supported.")
     return reducedIterable
+
+def returnShapedResponseCovMat(numResponseDimensions, uncertainties):
+    #The uncertainties, whether transformed or not, must be one of the folllowing: a) for a single dimension response can be a 1D array of standard deviations, b) for as ingle dimension response can be a covmat already (so already variances), c) for a multidimensional response we *only* support standard deviations at this time.
+    if numResponseDimensions == 1:
+        shapedUncertainties = np.array(uncertainties) #Initializing variable. 
+        if np.shape(shapedUncertainties)[0] == (1): #This means it's just a list of standard deviations and needs to be squared to become variances.
+            shapedUncertainties = np.square(shapedUncertainties) # Need to square standard deviations to make them into variances.
+        else:
+            shapedUncertainties = shapedUncertainties
+    elif numResponseDimensions > 1:  #if the dimensionality of responses is greater than 1, we only support providing standard deviations. Will flatten and square.
+        shapedUncertainties = np.array(uncertainties) #Filling variable.  
+        shapedUncertainties = shapedUncertainties.flatten() 
+        shapedUncertainties = np.square(shapedUncertainties) #Need to square standard deviations to make them into variances.
+    return shapedUncertainties
         
 if __name__ == "__main__":
     pass
