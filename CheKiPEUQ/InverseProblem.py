@@ -722,10 +722,12 @@ class parameter_estimation:
                 for responseDimIndex in range(self.UserInput.num_response_dimensions):    #this range is same as len(allResponsesListsOfYUncertaintiesArrays)
                     allResponsesListsOfYUncertaintiesArrays.append([self.UserInput.responses_observed_uncertainties[responseDimIndex],self.UserInput.model['responses_simulation_uncertainties'][responseDimIndex],self.UserInput.model['responses_simulation_uncertainties'][responseDimIndex],self.UserInput.model['responses_simulation_uncertainties'][responseDimIndex] ]) #Just creating nesting, we need to give a list for each response dimension.
         print("line 724", allResponsesListsOfYUncertaintiesArrays)
-        if allResponsesListsOfYArrays  ==[]:
+        if allResponsesListsOfYArrays  ==[]: #In this case, we assume allResponsesListsOfYUncertaintiesArrays == [] also.
             
             simulationFunction = self.UserInput.simulationFunction #Do NOT use self.UserInput.model['simulateByInputParametersOnlyFunction']  because that won't work with reduced parameter space requests.
             simulationOutputProcessingFunction = self.UserInput.simulationOutputProcessingFunction #Do NOT use self.UserInput.model['simulationOutputProcessingFunction'] because that won't work with reduced parameter space requests.
+            
+            #We already have self.UserInput.responses_observed, and will use that below. So now we get the simulated responses for the guess, MAP, mu_ap etc.
             
             #Get mu_guess simulated output and responses. 
             self.mu_guess_SimulatedOutput = simulationFunction( self.UserInput.InputParameterInitialGuess) #Do NOT use self.UserInput.model['InputParameterInitialGuess'] because that won't work with reduced parameter space requests.
@@ -748,13 +750,17 @@ class parameter_estimation:
                     self.mu_AP_SimulatedResponses = np.atleast_2d(self.mu_AP_SimulatedOutput)
                 if type(simulationOutputProcessingFunction) != type(None):
                     self.mu_AP_SimulatedResponses =  np.atleast_2d(     simulationOutputProcessingFunction(self.mu_AP_SimulatedOutput)      )
-                for responseDimIndex in range(self.UserInput.num_response_dimensions):
-                    listOfYArrays = [self.UserInput.responses_observed[responseDimIndex], self.mu_guess_SimulatedResponses[responseDimIndex], self.map_SimulatedResponses[responseDimIndex], self.mu_AP_SimulatedResponses[responseDimIndex]]        
-                    allResponsesListsOfYArrays.append(listOfYArrays)
-            else: #Else there is no mu_AP.
-                for responseDimIndex in range(self.UserInput.num_response_dimensions):
+
+            
+            #Now to populate the allResponsesListsOfYArrays and the allResponsesListsOfYUncertaintiesArrays
+            for responseDimIndex in range(self.UserInput.num_response_dimensions):
+                if not hasattr(self, 'mu_AP_parameter_set'): #Check if a mu_AP has been assigned. It is normally only assigned if mcmc was used.                
                     listOfYArrays = [self.UserInput.responses_observed[responseDimIndex], self.mu_guess_SimulatedResponses[responseDimIndex], self.map_SimulatedResponses[responseDimIndex]]        
                     allResponsesListsOfYArrays.append(listOfYArrays)
+                if hasattr(self, 'mu_AP_parameter_set'):
+                    listOfYArrays = [self.UserInput.responses_observed[responseDimIndex], self.mu_guess_SimulatedResponses[responseDimIndex], self.map_SimulatedResponses[responseDimIndex], self.mu_AP_SimulatedResponses[responseDimIndex]]        
+                    allResponsesListsOfYArrays.append(listOfYArrays)
+
         if plot_settings == {}: 
             plot_settings = self.UserInput.simulated_response_plot_settings
             if hasattr(self, 'mu_AP_parameter_set'): 
