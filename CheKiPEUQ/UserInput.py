@@ -19,6 +19,8 @@ model['simulateByInputParametersOnlyFunction'] = None #A function must be provid
 model['simulationOutputProcessingFunction'] = None
 model['reducedParameterSpace'] = [] #This is to keep parameters as 'constants'. Any parameter index in this list will be allowed to change, the rest will be held as constants.
 model['responses_simulation_uncertainties'] = None #Can be none, a list/vector, or can be a function that returns the uncertainties after each simulation is done. The easiest way would be to have a function that extracts a list that gets updated in another namespace after each simulation.
+model['custom_logLikelihood'] = None #This should point to a function that takes the discrete parameter values as an argument and returns "logLikelihood, simulatedResponses". So the function returns a value for the logLikelihood (or proportional to it). The function must *also* return the simulated response output, though technically can just return the number 0 as the ssecond return.  The function can be a simple as accessing a global dictionary. This feature is intended for cases where the likelihood cannot be described by a normal/gaussian distribution.
+model['custom_logPrior'] = None  #This feature has not been implemented yet, but is intended for cases where the prior distribution is not described by a normal distribution. The user will provide a function that takes in the parameters and returns a logPrior (or something proportional to a logPrior).
 
 #####Experimental Data Input Files#####
 responses = {}
@@ -26,6 +28,7 @@ responses['responses_abscissa'] = []
 responses['responses_observed'] = []
 responses['responses_observed_uncertainties'] = []
 responses['reducedResponseSpace'] = []
+
 
 #####Parameter Estimation Inputs#####
 parameter_estimation_settings = {}
