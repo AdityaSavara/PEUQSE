@@ -208,7 +208,7 @@ class parameter_estimation:
             #we find which index to put things into from #self.UserInput.model['reducedParameterSpace'], which is a list of indices.
             regularParameterIndex = self.UserInput.model['reducedParameterSpace'][reducedParameterIndex]
             discreteParameterVector[regularParameterIndex] = parameterValue
-        if type(simulationOutput) != type(None):#This is the normal case.
+        if type(simulationFunction) != type(None):#This is the normal case.
             simulationOutput = simulationFunction(discreteParameterVector) 
         elif type(simulationOutput) == type(None):
             return 0, None #This is for the case that the simulation fails. User can have simulationOutput return a None type in case of failure. Perhaps should be made better in future. 
@@ -643,13 +643,13 @@ class parameter_estimation:
             responses_simulation_uncertainties = self.UserInput.model['responses_simulation_uncertainties'](discreteParameterVector) #This is passing an argument to a function.
         
         #Now need to do transforms. If responses_simulation_uncertainties is "None", then we need to have one less argument passed in and a blank list is returned along with the transformed simulated responses.
-        if responses_simulation_uncertainties == None:
+        if type(responses_simulation_uncertainties) == type(None):
             simulatedResponses_transformed, blank_list = self.transform_responses(simulatedResponses) #This creates transforms for any data that we might need it. The same transforms were also applied to the observed responses.
             responses_simulation_uncertainties_transformed = None
             simulated_responses_covmat_transformed = None
         else:
             simulatedResponses_transformed, responses_simulation_uncertainties_transformed = self.transform_responses(simulatedResponses, responses_simulation_uncertainties) #This creates transforms for any data that we might need it. The same transforms were also applied to the observed responses.
-            simulated_responses_covmat_transformed = returnShapedResponseCovMat(responses_simulation_uncertainties_transformed)  #assume we got standard deviations back.
+            simulated_responses_covmat_transformed = returnShapedResponseCovMat(self.UserInput.num_response_dimensions, responses_simulation_uncertainties_transformed)  #assume we got standard deviations back.
         observedResponses_transformed = self.UserInput.responses_observed_transformed
         simulatedResponses_transformed_flattened = np.array(simulatedResponses_transformed).flatten()
         observedResponses_transformed_flattened = np.array(observedResponses_transformed).flatten()
@@ -666,10 +666,10 @@ class parameter_estimation:
         #in future it will be something like: if self.UserInput.covmat_regression== True: comprehensive_responses_covmat = nonLinearCovmatPrediction(self.UserInput['independent_variable_values'], observed_responses_covmat_transformed)
         #And that covmat_regression will be on by default.  We will need to have an additional argument for people to specify whether magnitude weighting and independent variable values should both be considered, or just one.
 
-        if simulated_responses_covmat_transformed == None:
+        if type(simulated_responses_covmat_transformed) == type(None):
             comprehensive_responses_covmat = observed_responses_covmat_transformed
         else: #Else we add the uncertainties, assuming they are orthogonal. Note that these are already covmats so are already variances that can be added directly.
-            comprehensive_responses_covmat = comprehensive_responses_covmat + simulated_responses_covmat_transformed
+            comprehensive_responses_covmat = observed_responses_covmat_transformed + simulated_responses_covmat_transformed
         comprehensive_responses_covmat_shape = copy.deepcopy(observed_responses_covmat_transformed_shape) #no need to take the shape of the actual comprehensive_responses_covmat since they must be same. This is probably slightly less computation.
         if len(comprehensive_responses_covmat_shape) == 1: #Matrix is square because has only one value.
             log_probability_metric = multivariate_normal.logpdf(mean=simulatedResponses_transformed_flattened,x=observedResponses_transformed_flattened,cov=comprehensive_responses_covmat)
