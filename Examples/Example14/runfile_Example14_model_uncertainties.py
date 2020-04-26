@@ -9,7 +9,7 @@ if __name__ == "__main__":
     UserInput.responses['responses_observed'] = np.array([[400]]) #
     UserInput.responses['responses_observed_uncertainties'] = np.array([[5]])
 
-    UserInput.model['parameterNamesAndMathTypeExpressionsDict'] = {'Ea':r'Ea','logA':r'log10'}#,'Theta0':'Theta0', 'beta_H':'beta_H', 'n':'n'}
+    UserInput.model['parameterNamesAndMathTypeExpressionsDict'] = {'logA':r'log(A/s^-1)','Ea':r'Ea'}#,'Theta0':'Theta0', 'beta_H':'beta_H', 'n':'n'}
     UserInput.model['InputParameterPriorValues'] = [13, 200000] 
     UserInput.model['InputParametersPriorValuesUncertainties'] = np.array([2, 20000]) #If user wants to use a prior with covariance, then this must be a 2D array/ list. To assume no covariance, a 1D
     #UserInput.model['InputParameterInitialGuess'] = [1, 5] #This is where the mcmc chain will start.
