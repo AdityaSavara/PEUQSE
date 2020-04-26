@@ -599,6 +599,7 @@ class parameter_estimation:
                 out_file.write("self.mu_AP_parameter_set:" + str( self.mu_AP_parameter_set) + "\n")
                 out_file.write("self.info_gain:" +  str(self.info_gain) + "\n")
                 out_file.write("evidence:" + str(self.evidence) + "\n")
+                out_file.write("posterior_cov_matrix:" + "\n" + str(np.cov(self.post_burn_in_samples.T)) + "\n")
                 if abs((self.map_parameter_set - self.mu_AP_parameter_set)/self.UserInput.var_prior).any() > 0.10:
                     out_file.write("Warning: The MAP parameter set and mu_AP parameter set differ by more than 10% of prior variance in at least one parameter. This may mean that you need to increase your mcmc_length, increase or decrease your mcmc_relative_step_length, or change what is used for the model response.  There is no general method for knowing the right  value for mcmc_relative_step_length since it depends on the sharpness and smoothness of the response. See for example https://www.sciencedirect.com/science/article/pii/S0039602816300632")
         if abs((self.map_parameter_set - self.mu_AP_parameter_set)/self.UserInput.var_prior).any() > 0.10:  
@@ -631,10 +632,11 @@ class parameter_estimation:
         
         simulationFunction = self.UserInput.simulationFunction #Do NOT use self.UserInput.model['simulateByInputParametersOnlyFunction']  because that won't work with reduced parameter space requests.  
         simulationOutputProcessingFunction = self.UserInput.simulationOutputProcessingFunction #Do NOT use self.UserInput.model['simulationOutputProcessingFunction'] because that won't work with reduced parameter space requests.
-        try:
-            simulationOutput =simulationFunction(discreteParameterVector) 
-        except:
-            return 0, None #This is for the case that the simulation fails. Should be made better in future.
+        simulationOutput =simulationFunction(discreteParameterVector) 
+        if type(simulationOutput)==type(None):
+            return float('-inf'), None #This is intended for the case that the simulation fails. User can return "None" for the simulation output. Perhaps should be made better in future.
+        if np.array(simulationOutput).any()==float('nan'):
+            return float('-inf'), None #This is intended for the case that the simulation fails without returning "None".
         if type(simulationOutputProcessingFunction) == type(None):
             simulatedResponses = simulationOutput #Is this the log of the rate? If so, Why?
         if type(simulationOutputProcessingFunction) != type(None):

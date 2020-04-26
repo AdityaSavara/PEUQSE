@@ -137,7 +137,6 @@ def createSimulatedResponsesPlot(x_values, listOfYArrays, plot_settings=[], list
     if 'x_label' not in plot_settings: plot_settings['x_label'] = ''
     if 'y_label' not in plot_settings: plot_settings['y_label'] = ''
     if 'legendLabels' not in plot_settings: plot_settings['legendLabels'] = ''
-    print("line 140", plot_settings['legendLabels'], len(listOfYArrays))
     if 'figure_name' not in plot_settings: plot_settings['figure_name'] = 'simulatedResponsesPlot'
     if 'dpi' not in plot_settings: plot_settings['dpi']=220          
     fig0, ax0 = plt.subplots()
@@ -184,7 +183,6 @@ def createSimulatedResponsesPlot(x_values, listOfYArrays, plot_settings=[], list
                 if len(listOfYUncertaintiesArrays) > 1: #If length is >1, uncertainties for all data sets
                     ax0.errorbar(x_values, listOfYArrays[3], yerr=listOfYUncertaintiesArrays[3], fmt='.', barsabove=False, markersize=0, elinewidth=1, color="gray", ecolor="lightgray") #markersize=0 because we want no marker for this.                    
         if len(x_values) == 1: #This means there are single points, and we need to make symbols, by adding an "o".
-                print("line 182", len(listOfYUncertaintiesArrays), listOfYUncertaintiesArrays)
                 ax0.plot(x_values,listOfYArrays[0],'go')
                 if len(listOfYUncertaintiesArrays) >= 1: #If length is >=1, uncertainties for first data set.
                     ax0.errorbar(x_values, listOfYArrays[0], yerr=listOfYUncertaintiesArrays[0], fmt='.', barsabove=False, markersize=0, elinewidth=1, color="gray", ecolor="lightgray") #markersize=0 because we want no marker for experiments data series, just a line.
