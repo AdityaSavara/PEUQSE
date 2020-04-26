@@ -631,10 +631,11 @@ class parameter_estimation:
         
         simulationFunction = self.UserInput.simulationFunction #Do NOT use self.UserInput.model['simulateByInputParametersOnlyFunction']  because that won't work with reduced parameter space requests.  
         simulationOutputProcessingFunction = self.UserInput.simulationOutputProcessingFunction #Do NOT use self.UserInput.model['simulationOutputProcessingFunction'] because that won't work with reduced parameter space requests.
-        try:
-            simulationOutput =simulationFunction(discreteParameterVector) 
-        except:
-            return 0, None #This is for the case that the simulation fails. Should be made better in future.
+        simulationOutput =simulationFunction(discreteParameterVector) 
+        if type(simulationOutput)==type(None):
+            return float('-inf'), None #This is intended for the case that the simulation fails. User can return "None" for the simulation output. Perhaps should be made better in future.
+        if np.array(simulationOutput).any()==float('nan'):
+            return float('-inf'), None #This is intended for the case that the simulation fails without returning "None".
         if type(simulationOutputProcessingFunction) == type(None):
             simulatedResponses = simulationOutput #Is this the log of the rate? If so, Why?
         if type(simulationOutputProcessingFunction) != type(None):
