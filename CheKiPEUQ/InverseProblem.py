@@ -313,9 +313,7 @@ class parameter_estimation:
                 numGridPoints=numGridPoints*(2*radius+1)
         if len(gridSamplingIntervalSize) == 0:
             gridSamplingIntervalSize = self.UserInput.std_prior #By default, we use the standard deviations associated with the priors.
-            print("line 316", gridSamplingIntervalSize)
         else: gridSamplingIntervalSize = np.array(gridSamplingIntervalSize, dtype='float')
-        print("line 318", gridSamplingIntervalSize)
         gridCenter = self.UserInput.InputParameterInitialGuess #We take what is in the variable self.UserInput.InputParameterInitialGuess for the center of the grid.
         gridCombinations = CombinationGeneratorModule.combinationGenerator(gridCenter, gridSamplingIntervalSize, gridSamplingRadii, SpreadType="Addition",toFile=False)
         allGridResults = []
