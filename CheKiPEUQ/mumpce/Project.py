@@ -984,10 +984,12 @@ class Project(object):
                     prior_colorbar.update_ticks()
             ax.set_xlabel(params_info[0]['parameter_name'])
             ax.set_ylabel(params_info[1]['parameter_name'])      
-            if type(contour_settings_custom['num_x_ticks']) == type(int(1)): #This is because if the word 'auto' or None type are received then we skip these lines.
+            if str(contour_settings_custom['num_x_ticks']) != 'auto': #This is because if the word 'auto' is received then we skip these lines.
+                contour_settings_custom['num_x_ticks'] = int(contour_settings_custom['num_x_ticks'])
                 from matplotlib.ticker import MaxNLocator
                 ax.xaxis.set_major_locator( MaxNLocator(nbins = contour_settings_custom['num_x_ticks'] ) )
-            if type(contour_settings_custom['num_y_ticks']) == type(int(1)): #This is because if the word 'auto' or None type are received then we skip these lines.
+            if str(contour_settings_custom['num_y_ticks']) != 'auto': #This is because if the word 'auto' is received then we skip these lines.
+                contour_settings_custom['num_y_ticks'] = int(contour_settings_custom['num_y_ticks'])
                 from matplotlib.ticker import MaxNLocator
                 ax.yaxis.set_major_locator( MaxNLocator(nbins = contour_settings_custom['num_y_ticks'] ) )
             if 'x_ticks' in  contour_settings_custom: #This feature is not recommended to be used.
