@@ -26,7 +26,6 @@ def redheadPeakMaximum_find_Ea_or_Tp(find="", k0=1E13, Theta0=1.0, beta_H=2.0, n
     else:
         print("only 1st order and 2nd order are currently supported, since Thetap will need to be solved for other cases.")
         sys.exit()
-
     def caseOfEaNotKnown(Ea): #Now in this little function Ea will be replaced by what's passed in.
         leftHandSide = Ea/(R_constant*Tp)
         rightHandSide = np.log(  (Thetap**(n-1))  *  k0*Tp*n/beta_H)-np.log(leftHandSide) #in numpy, "log" is the natural log.
@@ -40,9 +39,15 @@ def redheadPeakMaximum_find_Ea_or_Tp(find="", k0=1E13, Theta0=1.0, beta_H=2.0, n
 
     import scipy.optimize
     if find=="Ea":
-        solvedValue = scipy.optimize.root(caseOfEaNotKnown, Ea)
+        solvedValue = scipy.optimize.root(caseOfEaNotKnown, Ea, method="lm")
+        if float(solvedValue['x']) == float(Ea):
+            print("WARNING: THE SOLVER FAILED IN redheadPeakMaximum_find_Ea_or_Tp. A bitter initial guess may be required.")
+            return None
     if find=="Tp":
-        solvedValue = scipy.optimize.root(caseOfTpNotKnown, Tp)   
+        solvedValue = scipy.optimize.root(caseOfTpNotKnown, Tp, method="lm")   
+        if float(solvedValue['x']) == float(Tp):
+            print("WARNING: THE SOLVER FAILED IN redheadPeakMaximum_find_Ea_or_Tp. A better initial guess may be required.")
+            return None
     return float(solvedValue['x'])
 
 
