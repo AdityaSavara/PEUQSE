@@ -53,6 +53,7 @@ parameter_estimation_settings['mcmc_info_gain_returned'] = 'log_ratio' #current 
 #At present, all gridSampling settings are fed as arguments directly into the doGridSearch function.
 #Perhaps that should be changed in the future so that wrapper functions can pass arguments to doGridSearch.
 #parameter_estimation_settings['gridSampling'] = False    
+#doGridSearch(self, searchType='doMetropolisHastings', export = True, verbose = False, gridSamplingIntervalSize = [], gridSamplingRadii = [], passThroughArgs = {}):
 
 ######mumpce plots#####
 #model_parameter_info = np.array([{'parameter_number': 0, 'parameter_name': r'$E_{a1}$'},
@@ -64,4 +65,5 @@ parameter_estimation_settings['mcmc_info_gain_returned'] = 'log_ratio' #current 
 active_parameters = [] #Blank by default: gets populated with all parameters (or reduced parameters) if left blank. Warning: trying to set this manually while using the reduced parameters feature is not supported as of April 2020.
 #pairs_of_parameter_indices = [[0, 1], [1, 2],[2, 3],[3, 4],[4, 5]]
 contour_settings_custom = {'figure_name': 'PosteriorContourPlots','fontsize':'auto' ,'num_y_ticks': 'auto','num_x_ticks':'auto','contours_normalized':True,'center_on':'all','colorbars':True} #'colormap_posterior_customized':'Oranges','colormap_prior_customized':'Greens'
+#num_y_ticks and num_x_ticks must be either a string ('auto') or an integer (such as 4, either without string or with integer casting like int('5')).
 parameter_pairs_for_contour_plots = [] #This will accept either strings (for variable names) or integers for positions.

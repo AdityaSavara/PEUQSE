@@ -313,12 +313,14 @@ class parameter_estimation:
                 numGridPoints=numGridPoints*(2*radius+1)
         if len(gridSamplingIntervalSize) == 0:
             gridSamplingIntervalSize = self.UserInput.std_prior #By default, we use the standard deviations associated with the priors.
-        else: gridSamplingIntervalSize = np.array(gridSamplingRadii, dtype='float')
+            print("line 316", gridSamplingIntervalSize)
+        else: gridSamplingIntervalSize = np.array(gridSamplingIntervalSize, dtype='float')
+        print("line 318", gridSamplingIntervalSize)
         gridCenter = self.UserInput.InputParameterInitialGuess #We take what is in the variable self.UserInput.InputParameterInitialGuess for the center of the grid.
         gridCombinations = CombinationGeneratorModule.combinationGenerator(gridCenter, gridSamplingIntervalSize, gridSamplingRadii, SpreadType="Addition",toFile=False)
         allGridResults = []
         #Initialize some things before loop.
-        if type(self.UserInput.parameter_estimation_settings['checkPointFrequency']) != type(None):
+        if (type(self.UserInput.parameter_estimation_settings['checkPointFrequency']) != type(None)) or (verbose == True):
                 import timeit
                 timeAtGridStart = timeit.time.clock()
                 timeAtLastGridPoint = timeAtGridStart #just initializing
@@ -334,7 +336,7 @@ class parameter_estimation:
                 thisResult = self.doMetropolisHastings()
             if searchType == 'doOptimizeNegLogP':
                 thisResult = self.doOptimizeNegLogP(**passThroughArgs)
-            if type(self.UserInput.parameter_estimation_settings['checkPointFrequency']) != type(None):
+            if (type(self.UserInput.parameter_estimation_settings['checkPointFrequency']) != type(None)) or (verbose == True):
                 timeAtThisGridPoint = timeit.time.clock()
                 timeOfThisGridPoint = timeAtThisGridPoint - timeAtLastGridPoint
                 averageTimePerGridPoint = (timeAtThisGridPoint - timeAtGridStart)/(combinationIndex+1)
@@ -366,7 +368,7 @@ class parameter_estimation:
             return bestResultSoFar # [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_logP_un_normed_vec] 
         if searchType == 'doOptimizeNegLogP':            
             return bestResultSoFar# [self.map_parameter_set, self.map_logP]
-        if searchType == 'simplegrid':          
+        if searchType == 'getLogP':          
             return bestResultSoFar# [self.map_parameter_set, self.map_logP]
             
 
@@ -597,6 +599,7 @@ class parameter_estimation:
                 out_file.write("self.map_index:" +  str(self.map_index) + "\n")
                 out_file.write("self.map_parameter_set:" + str( self.map_parameter_set) + "\n")
                 out_file.write("self.mu_AP_parameter_set:" + str( self.mu_AP_parameter_set) + "\n")
+                out_file.write("self.stdap_parameter_set:" + str( self.stdap_parameter_set) + "\n")
                 out_file.write("self.info_gain:" +  str(self.info_gain) + "\n")
                 out_file.write("evidence:" + str(self.evidence) + "\n")
                 out_file.write("posterior_cov_matrix:" + "\n" + str(np.cov(self.post_burn_in_samples.T)) + "\n")
@@ -824,6 +827,7 @@ class parameter_estimation:
         #TODO: the posterior mu_vector and cov_matrix should be calculated elsewhere.
         posterior_mu_vector = np.mean(parameterSamples, axis=0)
         posterior_cov_matrix = np.cov(self.post_burn_in_samples.T)
+        self.posterior_cov_matrix = posterior_cov_matrix
         #TODO: In future, worry about whether there are constants or not, since then we will have to trim down the prior.
         #Make the model_parameter_info object that mumpce Project class needs.
         self.UserInput.model_parameter_info = []#This variable name is for mumpce definition of variable names. Not what we would choose otherwise.
