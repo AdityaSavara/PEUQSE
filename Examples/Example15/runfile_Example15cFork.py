@@ -6,7 +6,7 @@ if __name__ == "__main__":
     observed_data_Filename = 'ExperimentalDataAcetaldehydeTPDCeO2111MullinsTruncatedConstantErrors.csv'
     times, responses_observed, observedResponses_uncertainties = processing_functions_tpd_odeint.import_integrals_settings(observed_data_Filename)
     #experiments_datarame = pd.read_csv(observed_data_Filename)    
-    
+    processing_functions_tpd_odeint.initial_concentrations_array = [1.0, 0.0]
     
     UserInput.responses['responses_abscissa'] = times
     UserInput.responses['responses_observed'] = responses_observed
@@ -14,17 +14,17 @@ if __name__ == "__main__":
 
     
     UserInput.simulated_response_plot_settings['x_label'] = 'time (s)'
-    UserInput.simulated_response_plot_settings['y_label'] = r'$rate (s^{-1})$'
+    UserInput.simulated_response_plot_settings['y_label'] = r'Integrated Desorption (ML)'
     #UserInput.simulated_response_plot_settings['y_range'] = [0.00, 0.025] #optional.
     UserInput.simulated_response_plot_settings['figure_name'] = 'Posterior_Example1' #This creates the filename, also.
 
     UserInput.model['parameterNamesAndMathTypeExpressionsDict'] = {'Ea_1':r'$E_{a1}$','Ea_2':r'$E_{a2}$','log_A1':r'$log(A_{1})$','log_A2':r'$log(A_{2})$','gamma1':r'$\gamma_{1}$','gamma2':r'$\gamma_{2}$'}
     UserInput.model['InputParameterPriorValues'] = [41.5, 41.5, 13.0, 13.0, 0.1, 0.1] # Ea1_mean, Ea2_mean, log_A1_mean, log_A2_mean, gamma_1_mean, gamma_2_mean 
     UserInput.model['InputParametersPriorValuesUncertainties'] = [20, 20, 2, 2, 0.1, 0.1] #If user wants to use a prior with covariance, then this must be a 2D array/ list. To assume no covariance, a 1D
-    UserInput.model['InputParameterInitialGuess'] = [40, 20, 13, 13.0, 0.1, 0.2]#[39.08033543, 25.85946199, 10.02022149, 14.67430303, -0.41925677,  0.62673177] #This is where the mcmc chain will start.
+    #UserInput.model['InputParameterInitialGuess'] = [45,20 ,13, 13.0, 0.1, 0.2]#[39.08033543, 25.85946199, 10.02022149, 14.67430303, -0.41925677,  0.62673177] #This is where the mcmc chain will start.
     #InputParameterInitialValues = [41.5, 41.5, 13.0, 13.0, 0.1, 0.1] # Ea1_mean, Ea2_mean, log_A1_mean, log_A2_mean, gamma_1_mean, gamma_2_mean 
     
-    UserInput.model['reducedParameterSpace']=[0,1,2,3]
+    UserInput.model['reducedParameterSpace']=[0,2,5]
     
     #InputParametersInitialValuesUncertainties = [200, 200, 13, 13, 0.1, 0.1] #If user wants to use a prior with covariance, then this must be a 2D array/ list. To assume no covariance, a 1D array can be used.
     UserInput.model['simulateByInputParametersOnlyFunction'] = processing_functions_tpd_odeint.TPR_integerated_simulationFunctionWrapper #This must simulate with *only* the parameters listed above, and no other arguments.

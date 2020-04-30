@@ -6,14 +6,14 @@ if __name__ == "__main__":
     observed_data_Filename = 'ExperimentalDataAcetaldehydeTPDCeO2111MullinsTruncatedConstantErrors.csv'
     times, responses_observed, observedResponses_uncertainties = processing_functions_tpd_odeint.import_integrals_settings(observed_data_Filename)
     #experiments_datarame = pd.read_csv(observed_data_Filename)    
-    
+    processing_functions_tpd_odeint.initial_concentrations_array = [1.0, 0.0]
     
     UserInput.responses['responses_abscissa'] = times
     UserInput.responses['responses_observed'] = responses_observed
     UserInput.responses['responses_observed_uncertainties'] = observedResponses_uncertainties
     
     UserInput.simulated_response_plot_settings['x_label'] = 'time (s)'
-    UserInput.simulated_response_plot_settings['y_label'] = r'$rate (s^{-1})$'
+    UserInput.simulated_response_plot_settings['y_label'] = r'Integrated Desorption (ML)'
     #UserInput.simulated_response_plot_settings['y_range'] = [0.00, 0.025] #optional.
     UserInput.simulated_response_plot_settings['figure_name'] = 'Posterior_Example3' #This creates the filename, also.
 
