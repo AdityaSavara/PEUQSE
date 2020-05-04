@@ -21,8 +21,8 @@ if __name__ == "__main__":
 
     UserInput.model['parameterNamesAndMathTypeExpressionsDict'] = {'scalingFactor':'scalingFactor', 'backgroundOffset':'backgroundOffset', 'site2Ratio':'site2Ratio','Ea_1':r'$E_{a1}$','Ea_2':r'$E_{a2}$','log_A1':r'$log(A_{1})$','log_A2':r'$log(A_{2})$','gamma1':r'$\gamma_{1}$','gamma2':r'$\gamma_{2}$'}
     UserInput.model['InputParameterPriorValues'] = [ 1.0, 0.0, 0.50, 41.5, 41.5, 13.0, 13.0, 0.1, 0.1] # Ea1_mean, Ea2_mean, log_A1_mean, log_A2_mean, gamma_1_mean, gamma_2_mean 
-    UserInput.model['InputParametersPriorValuesUncertainties'] = [ 0.05, 0.0025, 0.50/3, 20, 20, 2, 2, 0.1, 0.1] #If user wants to use a prior with covariance, then this must be a 2D array/ list. To assume no covariance, a 1D
-    UserInput.model['InputParameterInitialGuess'] = [1.0, 0.0, 0.50,  40, 40, 13, 13.0, 0.1, 0.1] #This is where the mcmc chain will start.
+    UserInput.model['InputParametersPriorValuesUncertainties'] = [ 0.10, 0.005, 0.50/3, 20, 20, 2, 2, 0.1, 0.1] #If user wants to use a prior with covariance, then this must be a 2D array/ list. To assume no covariance, a 1D
+    UserInput.model['InputParameterInitialGuess'] = [1.0, 0.0, 0.50,  30, 20, 17, 11.0, 0.3, 0.1] #This is where the mcmc chain will start.
     UserInput.model['InputParameterPriorValues_upperBounds'] = [ None, None, 1.0, None, None, None, None, None, None]
     UserInput.model['InputParameterPriorValues_lowerBounds'] = [ 0, None, 0, 0, 0, None, None, 0, 0]
     
@@ -33,15 +33,15 @@ if __name__ == "__main__":
     UserInput.model['simulationOutputProcessingFunction'] = None  #Optional: a function to process what comes out of the simulation Function and then return an observable vector.
     UserInput.parameter_estimation_settings['gridsearch'] = True
     
-    UserInput.parameter_estimation_settings['scaling_uncertainties_type'] = "std"
+    UserInput.parameter_estimation_settings['scaling_uncertainties_type'] = "off"
     UserInput.parameter_estimation_settings['verbose'] = False 
     UserInput.parameter_estimation_settings['checkPointFrequency'] = 100
     UserInput.parameter_estimation_settings['mcmc'] = True 
     UserInput.parameter_estimation_settings['mcmc_mode'] = 'unbiased'
     UserInput.parameter_estimation_settings['mcmc_random_seed'] = 20 #Normally set to None so that mcmc is set to be random. To get the same results repeatedly, such as for testing purposes, set the random seed to 0 or another integer for testing purposes.
     UserInput.parameter_estimation_settings['mcmc_burn_in'] = 1000 #Normally use 100 for example 3a
-    UserInput.parameter_estimation_settings['mcmc_length'] = 10000 #Normally use 10000 for example 3a.
-    UserInput.parameter_estimation_settings['mcmc_relative_step_length'] = 0.1
+    UserInput.parameter_estimation_settings['mcmc_length'] = 100000 #Normally use 10000 for example 3a.
+    UserInput.parameter_estimation_settings['mcmc_relative_step_length'] = 1.0
     UserInput.parameter_estimation_settings['mcmc_modulate_accept_probability']  = 0 #Default value of 0. Changing this value sharpens or flattens the posterior. A value greater than 1 flattens the posterior by accepting low values more often. It can be useful when greater sampling is more important than accuracy. One way of using this feature is to try with a value of 0, then with the value equal to the number of priors for comparison, and then to gradually decrease this number as low as is useful (to minimize distortion of the result). A downside of changing changing this variable to greater than 1 is that it slows the the ascent to the maximum of the prior, so there is a balance in using it. In contrast, numbers increasingly less than one (such as 0.90 or 0.10) will speed up the ascent to the maximum of the posterior, but will also result in fewer points being retained.
     UserInput.parameter_estimation_settings['mcmc_info_gain_cutoff'] = 0
     UserInput.contour_settings_custom['contours_normalized'] = True

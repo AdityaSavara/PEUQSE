@@ -330,7 +330,7 @@ class parameter_estimation:
             if searchType == 'getLogP':
                 self.map_logP = self.getLogP(combination) #The getLogP function does not fill map_logP by itself.
                 self.map_parameter_set = combination
-                thisResult = [str(self.map_parameter_set).replace(",","|"), 'None', 'None', 'None', 'None', 'None', 'None']
+                thisResult = [str(self.map_parameter_set).replace(",","|").replace("[","").replace('(','').replace(')',''), 'None', 'None', 'None', 'None', 'None', 'None']
             if searchType == 'doMetropolisHastings':
                 thisResult = self.doMetropolisHastings()
             if searchType == 'doOptimizeNegLogP':

@@ -38,7 +38,7 @@ parameter_estimation_settings['verbose'] = False
 parameter_estimation_settings['exportLog'] = True
 parameter_estimation_settings['exportAllSimulatedOutputs'] = False
 parameter_estimation_settings['checkPointFrequency'] = None
-parameter_estimation_settings['scaling_uncertainties_type'] = "std" #"std" is for standard deviation. there is also the option of "mu" for using the absolute values of the mean(s) of the prior distribution(s).
+parameter_estimation_settings['scaling_uncertainties_type'] = "std" #"std" is for standard deviation. there is also "off" and the option of "mu" for using the absolute values of the mean(s) of the prior distribution(s).
 parameter_estimation_settings['undo_scaling_uncertainties_type'] = False
 				  
 ######MCMC settings:#####
