@@ -2,7 +2,7 @@ import sys; sys.path.append('../../');  import CheKiPEUQ as CKPQ
 import CheKiPEUQ.UserInput as UserInput
 
 if __name__ == "__main__":
-    import processing_functions_tpd_odeint
+    import processing_functions_tpd_odeint_two_site_ratio
     observed_data_Filename = 'ExperimentalDataAcetaldehydeTPDCeO2111MullinsTruncatedConstantErrors.csv'
     times, responses_observed, observedResponses_uncertainties = processing_functions_tpd_odeint.import_integrals_settings(observed_data_Filename)
     #experiments_datarame = pd.read_csv(observed_data_Filename)    

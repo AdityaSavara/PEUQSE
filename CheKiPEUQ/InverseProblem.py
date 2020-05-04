@@ -298,24 +298,25 @@ class parameter_estimation:
                         pass
         return nestedAllResponsesArray_transformed, nestedAllResponsesUncertainties_transformed  
   
-    def doGridSearch(self, searchType='doMetropolisHastings', export = True, verbose = False, gridSamplingIntervalSize = [], gridSamplingRadii = [], passThroughArgs = {}):
-        # gridSamplingRadii is the number of variations to check in units of variance for each parameter. Can be 0 if you don't want to vary a particular parameter in the grid search.
+    def doGridSearch(self, searchType='doMetropolisHastings', export = True, verbose = False, gridSamplingAbsoluteIntervalSize = [], gridSamplingNumOfIntervals = [], passThroughArgs = {}):
+        # gridSamplingNumOfIntervals is the number of variations to check in units of variance for each parameter. Can be 0 if you don't want to vary a particular parameter in the grid search.
         #TODO: the upper part of the gridsearch may not be compatibile with reduced parameter space. Needs to be checked.
         import CheKiPEUQ.CombinationGeneratorModule as CombinationGeneratorModule
         numParameters = len(self.UserInput.parameterNamesList)
-        if len(gridSamplingRadii) == 0:
-            gridSamplingRadii = np.ones(numParameters, dtype='int') #By default, will make ones.
+        if len(gridSamplingNumOfIntervals) == 0:
+            gridSamplingNumOfIntervals = np.ones(numParameters, dtype='int') #By default, will make ones.
             numGridPoints = 3**numParameters
         else: 
-            gridSamplingRadii = np.array(gridSamplingRadii, dtype='int')
+            gridSamplingNumOfIntervals = np.array(gridSamplingNumOfIntervals, dtype='int')
             numGridPoints = 1 #just initializing.
-            for radius in gridSamplingRadii:
+            for radius in gridSamplingNumOfIntervals:
                 numGridPoints=numGridPoints*(2*radius+1)
-        if len(gridSamplingIntervalSize) == 0:
-            gridSamplingIntervalSize = self.UserInput.std_prior #By default, we use the standard deviations associated with the priors.
-        else: gridSamplingIntervalSize = np.array(gridSamplingIntervalSize, dtype='float')
+        print(numGridPoints,gridSamplingNumOfIntervals)
+        if len(gridSamplingAbsoluteIntervalSize) == 0:
+            gridSamplingAbsoluteIntervalSize = self.UserInput.std_prior #By default, we use the standard deviations associated with the priors.
+        else: gridSamplingAbsoluteIntervalSize = np.array(gridSamplingAbsoluteIntervalSize, dtype='float')
         gridCenter = self.UserInput.InputParameterInitialGuess #We take what is in the variable self.UserInput.InputParameterInitialGuess for the center of the grid.
-        gridCombinations = CombinationGeneratorModule.combinationGenerator(gridCenter, gridSamplingIntervalSize, gridSamplingRadii, SpreadType="Addition",toFile=False)
+        gridCombinations = CombinationGeneratorModule.combinationGenerator(gridCenter, gridSamplingAbsoluteIntervalSize, gridSamplingNumOfIntervals, SpreadType="Addition",toFile=False)
         allGridResults = []
         #Initialize some things before loop.
         if (type(self.UserInput.parameter_estimation_settings['checkPointFrequency']) != type(None)) or (verbose == True):

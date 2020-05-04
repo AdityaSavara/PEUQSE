@@ -14,7 +14,7 @@ if __name__ == "__main__":
 
     
     UserInput.simulated_response_plot_settings['x_label'] = 'time (s)'
-    UserInput.simulated_response_plot_settings['y_label'] = r'$rate (s^{-1})$'
+    UserInput.simulated_response_plot_settings['y_label'] = r'Integrated Desorption (ML)'
     #UserInput.simulated_response_plot_settings['y_range'] = [0.00, 0.025] #optional.
     UserInput.simulated_response_plot_settings['figure_name'] = 'Posterior_Example1' #This creates the filename, also.
 
