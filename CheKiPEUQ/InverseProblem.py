@@ -328,9 +328,9 @@ class parameter_estimation:
         for combinationIndex,combination in enumerate(gridCombinations):
             self.UserInput.InputParameterInitialGuess = combination #We need to fill the variable InputParameterInitialGuess with the combination being checked.
             if searchType == 'getLogP':
-                thisResult = self.getLogP(combination)
-                self.map_logP = thisResult #The getLogP function does not fill map_logP by itself.
+                self.map_logP = self.getLogP(combination) #The getLogP function does not fill map_logP by itself.
                 self.map_parameter_set = combination
+                thisResult = [str(self.map_parameter_set).replace(",","|"), 'None', 'None', 'None', 'None', 'None', 'None']
             if searchType == 'doMetropolisHastings':
                 thisResult = self.doMetropolisHastings()
             if searchType == 'doOptimizeNegLogP':
@@ -359,7 +359,7 @@ class parameter_estimation:
         with open("gridsearch_log_file.txt", 'w') as out_file:
             out_file.write("result: " + "self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_logP_un_normed_vec" + "\n")
             for resultIndex, result in enumerate(allGridResults):
-                out_file.write("result:" + str(resultIndex) +  str(result) + "\n")
+                out_file.write("result: " + str(resultIndex) + " " +  str(result) + "\n")
             print("Final map results from gridsearch:", self.map_parameter_set, "final logP:", self.map_logP)
         if searchType == 'doMetropolisHastings':
             #Metropolis hastings has other variables to populate.
@@ -631,6 +631,16 @@ class parameter_estimation:
             simulatedResponses = np.array(simulatedResponses).flatten()
             return logLikelihood, simulatedResponses
         #else pass is implied.
+        
+        #Now we do upper and lower bounds checks, if such bounds have been provided.
+        if len(self.UserInput.model['InputParameterPriorValues_upperBounds']) > 0:
+            upperCheck = boundsCheck(discreteParameterVector, self.UserInput.model['InputParameterPriorValues_upperBounds'], 'upper')
+            if upperCheck == False:
+                return float('-inf'), None #This approximates zero probability.
+        if len(self.UserInput.model['InputParameterPriorValues_lowerBounds']) > 0:
+            lowerCheck = boundsCheck(discreteParameterVector, self.UserInput.model['InputParameterPriorValues_lowerBounds'], 'lower')
+            if lowerCheck == False:
+                return float('-inf'), None #This approximates zero probability.
         
         simulationFunction = self.UserInput.simulationFunction #Do NOT use self.UserInput.model['simulateByInputParametersOnlyFunction']  because that won't work with reduced parameter space requests.  
         simulationOutputProcessingFunction = self.UserInput.simulationOutputProcessingFunction #Do NOT use self.UserInput.model['simulationOutputProcessingFunction'] because that won't work with reduced parameter space requests.
@@ -1038,6 +1048,32 @@ def returnShapedResponseCovMat(numResponseDimensions, uncertainties):
         shapedUncertainties = shapedUncertainties.flatten() 
         shapedUncertainties = np.square(shapedUncertainties) #Need to square standard deviations to make them into variances.
     return shapedUncertainties
+
+def boundsCheck(parameters, parametersBounds, boundsType):
+    #Expects three arguments.
+    #the first two are 1D array like arguments (parameters and a set of *either* upper bounds or lower bounds)
+    #The third argumment is the type of bounds, either 'upper' or 'lower'
+    #In practice, this means the function usually needs to be called twice.
+    #A "None" type is expected for something that is not bounded in that direction. 
+    
+    #We first need to make arrays and remove anything that is None in the bounds.
+    parameters = np.array(parameters).flatten()
+    parametersBounds = np.array(parametersBounds).flatten()
+    #to remove, we use brackets that pull out the indices where the comparison is not None. This is special numpy array syntax.
+    parametersTruncated = parameters[parametersBounds != None]
+    parametersBoundsTruncated = parametersBounds[parametersBounds != None]    
+    if boundsType.lower() == 'upper': #we make the input into lower case before proceeding.
+        upperCheck = parametersTruncated < parametersBoundsTruncated #Check if all are smaller.
+        if False in upperCheck: #If any of them failed, we return False.
+            return False
+        else:
+            return True
+    if boundsType.lower() == 'lower':
+        lowerCheck = parametersTruncated > parametersBoundsTruncated #Check if all are smaller.
+        if False in lowerCheck: #If any of them failed, we return False.
+            return False
+        else:
+            return True
         
 if __name__ == "__main__":
     pass

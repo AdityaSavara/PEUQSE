@@ -11,8 +11,8 @@ simulated_response_plot_settings['figure_name'] = 'Posterior_Simulated' #This is
 
 ####BELOW ARE MODEL PARAMETERS, WE WILL WANT TO COMBINE THESE INTO A LIST OF PARAMETERS###
 model = {} 
-model['InputParameterInitialValues'] =  [] #Should be like: [41.5, 41.5, 13.0, 13.0, 0.1, 0.1] # Ea1_mean, Ea2_mean, log_A1_mean, log_A2_mean, gamma_1_mean, gamma_2_mean 
-model['InputParametersInitialValuesUncertainties'] = []# Should bel ike: [200, 200, 13, 13, 0.1, 0.1] #If user wants to use a prior with covariance, then this must be a 2D array/ list. To assume no covariance, a 1D
+model['InputParameterPriorValues'] =  [] #Should be like: [41.5, 41.5, 13.0, 13.0, 0.1, 0.1] # Ea1_mean, Ea2_mean, log_A1_mean, log_A2_mean, gamma_1_mean, gamma_2_mean 
+model['InputParametersPriorValuesUncertainties'] = []# Should be like: [200, 200, 13, 13, 0.1, 0.1] #If user wants to use a prior with covariance, then this must be a 2D array/ list. To assume no covariance, a 1D
 model['parameterNamesAndMathTypeExpressionsDict'] = {} #This must be provided. It can be as simple as {"Param1":"1"} etc. but it must be a dictionary with strings as keys and as values. The next line is a comment with a more complicated example.
 #Example: model['parameterNamesAndMathTypeExpressionsDict'] = {'Ea_1':r'$E_{a1}$','Ea_2':r'$E_{a2}$','log_A1':r'$log(A_{1})$','log_A2':r'$log(A_{2})$','gamma1':r'$\gamma_{1}$','gamma2':r'$\gamma_{2}$'}
 model['simulateByInputParametersOnlyFunction'] = None #A function must be provided! This cannot be left as None.
@@ -21,6 +21,8 @@ model['reducedParameterSpace'] = [] #This is to keep parameters as 'constants'. 
 model['responses_simulation_uncertainties'] = None #Can be none, a list/vector, or can be a function that returns the uncertainties after each simulation is done. The easiest way would be to have a function that extracts a list that gets updated in another namespace after each simulation.
 model['custom_logLikelihood'] = None #This should point to a function that takes the discrete parameter values as an argument and returns "logLikelihood, simulatedResponses". So the function returns a value for the logLikelihood (or proportional to it). The function must *also* return the simulated response output, though technically can just return the number 0 as the ssecond return.  The function can be a simple as accessing a global dictionary. This feature is intended for cases where the likelihood cannot be described by a normal/gaussian distribution.
 model['custom_logPrior'] = None  #This feature has not been implemented yet, but is intended for cases where the prior distribution is not described by a normal distribution. The user will provide a function that takes in the parameters and returns a logPrior (or something proportional to a logPrior).
+model['InputParameterPriorValues_upperBounds'] = [] #This should be a list/array of the same shape as InputParameterPriorValues. Use a value of "None" for any parameter that should not be bounded in this direction.  The code then truncates any distribution to have a probability of ~0 when any of the parameters go outside of their bounds.
+model['InputParameterPriorValues_lowerBounds'] = []#This should be a list/array of the same shape as InputParameterPriorValues. Use a value of "None" for any parameter that should not be bounded in this direction.  The code then truncates any distribution to have a probability of ~0 when any of the parameters go outside of their bounds.
 
 #####Experimental Data Input Files#####
 responses = {}

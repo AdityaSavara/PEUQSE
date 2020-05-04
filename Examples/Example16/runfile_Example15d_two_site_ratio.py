@@ -49,7 +49,7 @@ if __name__ == "__main__":
     #[map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, samples_simulatedOutputs, logP] = PE_object.doMetropolisHastings()
     import numpy as np
     #PE_object.doGridSearch('doMetropolisHastings')
-    PE_object.doGridSearch('getLogP', gridSamplingAbsoluteIntervalSize=np.array(UserInput.model['InputParametersPriorValuesUncertainties']), gridSamplingNumOfIntervals=[3,3,3,3,3,2,2], verbose = True)
+    PE_object.doGridSearch('getLogP', gridSamplingAbsoluteIntervalSize=[0.50/3, 10, 10, 1,1, 0.1, 0.1], gridSamplingNumOfIntervals=[3,5,5,5,5,2,2], verbose = True)
     
     PE_object.createAllPlots() #This function calls each of the below functions.
 #    PE_object.makeHistogramsForEachParameter()    
