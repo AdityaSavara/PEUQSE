@@ -241,9 +241,9 @@ class parameter_estimation:
 #            abscissaRange = UserInput.responses_abscissa[responseIndex][-1] - UserInput.responses_abscissa[responseIndex][0] #Last value minus first value.
 #            UserInput.responses_observed = np.atleast_2d(UserInput.responses_observed)
 #            UserInput.responses_observed_uncertainties = np.atleast_2d(UserInput.responses_observed_uncertainties)
-        if 'kinetics_type' not in UserInput.model:  #To make backwards compatibility.
-            UserInput.model['kinetics_type'] = ''
-        if UserInput.model['kinetics_type'] == 'transient': #This assumes that the abscissa is always time.
+        if 'data_overcategory' not in UserInput.responses:  #To make backwards compatibility.
+            UserInput.responses['data_overcategory'] = ''
+        if UserInput.responses['data_overcategory'] == 'transient_kinetics': #This assumes that the abscissa is always time.
             for responseIndex, response in enumerate(UserInput.responses_observed):
                 #We will need the abscissa also, so need to check if there are independent abscissa or not:
                 if len(UserInput.responses_abscissa) == 1: #This means there is only one abscissa.
@@ -284,7 +284,7 @@ class parameter_estimation:
                         LittleEuler
                     if UserInput.responses['response_data_type'][responseIndex] == 'r':
                         LittleEulerTwice
-        if UserInput.model['kinetics_type'] == 'steady_state': #TODO: so far, this does not do anything. It assumes that the abscissa is never time.
+        if UserInput.responses['data_overcategory'] == 'steady_state_kinetics': #TODO: so far, this does not do anything. It assumes that the abscissa is never time.
             for responseIndex, response in enumerate(UserInput.responses_observed):
                 if UserInput.responses['response_types'][responseIndex] == 'T':	 #For abscissa of temperature dependence. Will probably do a log transform.
                     if UserInput.responses['response_data_type'][responseIndex] == 'c':
