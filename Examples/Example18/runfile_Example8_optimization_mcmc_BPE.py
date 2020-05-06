@@ -66,8 +66,8 @@ if __name__ == "__main__":
     
 #    #Now we do parameter estimation.
 #    PE_object.doMetropolisHastings()
-    PE_object.doSinglePoint()
-    PE_object.createAllPlots() #This function calls each of the below functions.
+   # PE_object.doSinglePoint()
+    #PE_object.createAllPlots() #This function calls each of the below functions.
     
     PE_object.doOptimizeNegLogP(method="Nelder-Mead", printOptimum=True, verbose=True)
 

@@ -3,7 +3,7 @@ import numpy as np
 import scipy
 from scipy.integrate import odeint
 import pandas as pd
-from tprmodel import tprequation, tprequationPiecewise
+from tprmodel import tprequation, tprequationPiecewise, tprequationPiecewiseWithOffset
 
 #Need to define beta directly, or define dt and dT.
 dT = 0.77 #Set this to 0 for an isothermal experiment.
@@ -26,6 +26,7 @@ def observedResponsesFunc():
     return values
 
 
+#This function is for using python to do the piecewise simulation (not Cantera)
 def TPR_internalPiecewiseSimulationFunctionWrapper(discreteParameterVector): 
     global times
     discreteParameterVectorList = list(discreteParameterVector) #converting to list so can use list expansion in arguments. 
@@ -35,6 +36,19 @@ def TPR_internalPiecewiseSimulationFunctionWrapper(discreteParameterVector):
     tpr_theta = odeint(*tpr_theta_Arguments) # [0.5, 0.5] are the initial theta's. 
     simulationInputArguments = [tpr_theta, times, *regularParams, beta_dTdt,T_0, *Ea_modParams] 
     simulationOutput = tprequationPiecewise(*simulationInputArguments)
+    return simulationOutput
+
+#This function is for using the base function above and to add in scaling and vertical offset / constant rate.
+def TPR_internalPiecewiseSimulationFunctionWrapperScaledAndOffset(discreteParameterVector): 
+    global times
+    discreteParameterVectorList = list(discreteParameterVector) #converting to list so can use list expansion in arguments. 
+    scalingFactor = discreteParameterVector[0]
+    regularParams = discreteParameterVector[1:5] #This is Ea1, A1, gamma1
+    Ea_modParams = discreteParameterVector[5:] #This is Ea_mod1, Ea_mod2, etc. from 3rd index to end.
+    tpr_theta_Arguments = [tprequationPiecewise, initial_concentrations_array, times, (*regularParams,beta_dTdt,T_0,*Ea_modParams) ] 
+    tpr_theta = odeint(*tpr_theta_Arguments) # [0.5, 0.5] are the initial theta's. 
+    simulationInputArguments = [tpr_theta, times, *regularParams, beta_dTdt,T_0, *Ea_modParams] 
+    simulationOutput = scalingFactor*np.array(tprequationPiecewise(*simulationInputArguments))
     return simulationOutput
 
 def TPR_simulationFunctionWrapper(discreteParameterVector): 

@@ -1,9 +1,8 @@
-import CheKiPEUQ as CKPQ
-import processing_functions_tpd_odeint
-import pandas as pd
+import sys; sys.path.append('../../');  import CheKiPEUQ as CKPQ
+import CheKiPEUQ.UserInput as UserInput
 
 if __name__ == "__main__":
-    import UserInput_CKPQ_Example1 as UserInput
+    import processing_functions_tpd_odeint
     observed_data_Filename = 'ExperimentalDataAcetaldehydeTPDCeO2111MullinsTruncatedConstantErrors.csv'
     times, responses_observed, observedResponses_uncertainties = processing_functions_tpd_odeint.import_experimental_settings_single(observed_data_Filename)
     #experiments_datarame = pd.read_csv(observed_data_Filename)    
@@ -12,6 +11,11 @@ if __name__ == "__main__":
     UserInput.responses['responses_abscissa'] = times
     UserInput.responses['responses_observed'] = responses_observed
     UserInput.responses['responses_observed_uncertainties'] = observedResponses_uncertainties*0.5
+    
+    #We are going to use the built in transform to improve the optimization.
+    UserInput.responses['data_overcategory'] = 'transient_kinetics'
+    UserInput.responses['response_types']=['P'] #need a categorization for each response dimension.
+    UserInput.responses['response_data_type']=['r'] #need a categorization for each response dimension.    
 
     
     UserInput.simulated_response_plot_settings['x_label'] = 'time (s)'
@@ -19,13 +23,14 @@ if __name__ == "__main__":
     #UserInput.simulated_response_plot_settings['y_range'] = [0.00, 0.025] #optional.
     UserInput.simulated_response_plot_settings['figure_name'] = 'Posterior_Example1' #This creates the filename, also.
 
-    UserInput.model['parameterNamesAndMathTypeExpressionsDict'] = {'Ea_1':r'$E_{a1}$','log_A1':r'$log(A_{1})$','gamma1':r'$\gamma_{1}$',  'verticalOffset':'verticalOffset', 'modEa1':'modEa1', 'modEa2':'modEa2', 'modEa3':'modEa3', 'modEa4':'modEa4' }#, 'modEa5':'modEa5', 'modEa6':'modEa6', 'modEa7':'modEa7', 'modEa8':'modEa8', 'modEa9':'modEa9', 'modEa10':'modEa10'}
-    UserInput.model['InputParameterPriorValues'] = [40.0, 13.0, 0.4, 0.000,
+    UserInput.model['parameterNamesAndMathTypeExpressionsDict'] = {'scalingFactor':'scalingFactor', 'Ea_1':r'$E_{a1}$','log_A1':r'$log(A_{1})$','gamma1':r'$\gamma_{1}$',  'verticalOffset':'verticalOffset', 'modEa1':'modEa1', 'modEa2':'modEa2', 'modEa3':'modEa3', 'modEa4':'modEa4' }#, 'modEa5':'modEa5', 'modEa6':'modEa6', 'modEa7':'modEa7', 'modEa8':'modEa8', 'modEa9':'modEa9', 'modEa10':'modEa10'}
+    UserInput.model['InputParameterPriorValues'] = [1.0, 40.0, 13.0, 0.4, 0.000,
                    -0.1, -0.1,   -0.1, -0.1] #,   0.0, 0.0,   0.0, 0.0,   0.0, 0.0] # Ea1_mean, Ea2_mean, log_A1_mean, log_A2_mean, gamma_1_mean, gamma_2_mean 
-    UserInput.model['InputParametersPriorValuesUncertainties'] = [20, 2, 0.1, 0.005,
+    UserInput.model['InputParametersPriorValuesUncertainties'] = [1.0, 20, 2, 0.1, 0.005,
                    0.3, 0.3,      0.3, 0.3] #,        10, 10,      10, 10,          10, 10] #If user wants to use a prior with covariance, then this must be a 2D array/ list. To assume no covariance, a 1D
-    UserInput.model['InputParameterInitialGuess'] = [1.36045865e+01 , 6.06146078e+00 , 3.58737468e-01, -5.19744408e-03,
--1.00044291e-01 ,-7.14705894e-02, -7.88690967e-02, -1.52108961e-01]
+    UserInput.model['InputParameterInitialGuess'] = [ 1.0, 2.97559832e+01 , 1.48572197e+01,  4.23662452e-01 , 9.83828110e-04,
+  5.17753350e-01, -5.75283577e-01 ,-1.29020976e-01, -1.52824893e-01]
+
 
 
 
@@ -39,13 +44,8 @@ if __name__ == "__main__":
 #    print(simulationOutput)
 #    sys.exit()
     
-    UserInput.model['simulateByInputParametersOnlyFunction'] = processing_functions_tpd_odeint.TPR_internalPiecewiseSimulationFunctionWrapper #This must simulate with *only* the parameters listed above, and no other arguments.
+    UserInput.model['simulateByInputParametersOnlyFunction'] = processing_functions_tpd_odeint.TPR_internalPiecewiseSimulationFunctionWrapperScaledAndOffset #This must simulate with *only* the parameters listed above, and no other arguments.
     UserInput.model['simulationOutputProcessingFunction'] = processing_functions_tpd_odeint.no_log_wrapper_func  #Optional: a function to process what comes out of the simulation Function and then return an observable vector.
-
-
-    UserInput.model['kinetics_type'] = 'transient' #This transforms to the integral and back.
-    UserInput.responses['response_types']=['P'] 
-    UserInput.responses['response_data_type']=['r']
     UserInput.parameter_pairs_for_contour_plots=[[0,1],[0,1]]
         
     UserInput.parameter_estimation_settings['verbose'] = False 
@@ -66,8 +66,12 @@ if __name__ == "__main__":
     
 #    #Now we do parameter estimation.
 #    PE_object.doMetropolisHastings()
-#    PE_object.doOptimizeNegLogP(method="BFGS", printOptimum=True, verbose=True)
-    PE_object.doGridSearch('getLogP', verbose = True)
+    PE_object.doSinglePoint()
+    PE_object.createAllPlots() #This function calls each of the below functions.
+    
+    #PE_object.doOptimizeNegLogP(method="Nelder-Mead", printOptimum=True, verbose=True)
+
+    #PE_object.doGridSearch('getLogP')
     #PE_object.doGridSearch('doMetropolisHastings')
 #    PE_object.doGridSearch('doOptimizeNegLogP', verbose = True,gridSamplingRadii = [], passThroughArgs={'method':'BFGS'})
     print(PE_object.map_parameter_set, PE_object.map_logP)
