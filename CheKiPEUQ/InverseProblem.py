@@ -436,8 +436,11 @@ class parameter_estimation:
             timeOfFirstCheckpoint = timeit.time.clock()
             timeCheckpoint = timeit.time.clock() - timeOfFirstCheckpoint #First checkpoint at time 0.
             numCheckPoints = self.UserInput.parameter_estimation_settings['mcmc_length']/self.UserInput.parameter_estimation_settings['checkPointFrequency']
+        #Before sampling should fill in the first entry for the posterior vector we have created. #FIXME: It would probably be better to start with i of 0 in below sampling loop. I believe that right now the "burn in" and "samples" arrays are actually off by an index of 1. But trying to change that alters their length relative to other arrays and causes problems. Since we always do many samples and this only affects the initial point being averaged in twice, it is not a major problem. It's also avoided if people use a burn in of at least 1.
+        log_posteriors_un_normed_vec[0]= self.getLogP(self.UserInput.InputParameterInitialGuess)
         for i in range(1, self.UserInput.parameter_estimation_settings['mcmc_length']): #FIXME: Don't we need to start with i of 0?
-            if self.UserInput.parameter_estimation_settings['verbose']: print("MCMC sample number", i)                  
+            sampleNumber = i #This is so that later we can change it to i+1 if the loop starts from i of 0 in the future.
+            if self.UserInput.parameter_estimation_settings['verbose']: print("MCMC sample number", sampleNumber)                  
             if self.UserInput.parameter_estimation_settings['mcmc_mode'] == 'unbiased':
                 proposal_sample = samples[i-1,:] + np.random.multivariate_normal(self.Q_mu,self.Q_covmat*self.UserInput.parameter_estimation_settings['mcmc_relative_step_length'])
             if self.UserInput.parameter_estimation_settings['mcmc_mode'] == 'MAP_finding':
@@ -447,7 +450,7 @@ class parameter_estimation:
                 proposal_sample = samples[i-1,:] + np.random.multivariate_normal(self.Q_mu,self.Q_covmat*mcmc_step_dynamic_coefficient*mcmc_step_modulation_coefficient*self.UserInput.parameter_estimation_settings['mcmc_relative_step_length'])
             log_prior_proposal = self.getLogPrior(proposal_sample)
             [log_likelihood_proposal, simulationOutput_proposal] = self.getLogLikelihood(proposal_sample)
-            log_prior_current_location = self.getLogPrior(samples[i-1,:]) 
+            log_prior_current_location = self.getLogPrior(samples[i-1,:]) #"current" location is the most recent accepted location, because we haven't decided yet if we're going to move.
             [log_likelihood_current_location, simulationOutput_current_location] = self.getLogLikelihood(samples[i-1,:]) #FIXME: the previous likelihood should be stored so that it doesn't need to be calculated again.
             log_accept_probability = (log_likelihood_proposal + log_prior_proposal) - (log_likelihood_current_location + log_prior_current_location) 
             #accept_probability = np.power(10, log_accept_probability) Don't use this!
@@ -486,19 +489,19 @@ class parameter_estimation:
                 log_likelihoods_vec[i] = log_likelihood_current_location
                 log_priors_vec[i] = log_prior_current_location
             if type(self.UserInput.parameter_estimation_settings['checkPointFrequency']) != type(None):
-                if i%self.UserInput.parameter_estimation_settings['checkPointFrequency'] == 0: #The % is a modulus function.
+                if sampleNumber%self.UserInput.parameter_estimation_settings['checkPointFrequency'] == 0: #The % is a modulus function.
                     timeSinceLastCheckPoint = (timeit.time.clock() - timeOfFirstCheckpoint) -  timeCheckpoint
                     timeCheckpoint = timeit.time.clock() - timeOfFirstCheckpoint
-                    checkPointNumber = i/self.UserInput.parameter_estimation_settings['checkPointFrequency']
-                    averagetimePerSampling = timeCheckpoint/(i)
-                    print("MCMC sample number ", i, "checkpoint", checkPointNumber, "out of", numCheckPoints) 
+                    checkPointNumber = sampleNumber/self.UserInput.parameter_estimation_settings['checkPointFrequency']
+                    averagetimePerSampling = timeCheckpoint/(sampleNumber)
+                    print("MCMC sample number ", sampleNumber, "checkpoint", checkPointNumber, "out of", numCheckPoints) 
                     print("averagetimePerSampling", averagetimePerSampling, "seconds")
                     print("timeSinceLastCheckPoint", timeSinceLastCheckPoint, "seconds")
-                    print("Estimated time remaining", averagetimePerSampling*(self.UserInput.parameter_estimation_settings['mcmc_length']-i), "seconds")
+                    print("Estimated time remaining", averagetimePerSampling*(self.UserInput.parameter_estimation_settings['mcmc_length']-sampleNumber), "seconds")
                     if self.UserInput.parameter_estimation_settings['mcmc_mode'] != 'unbiased':
                         print("Most recent mcmc_step_dynamic_coefficient:", mcmc_step_dynamic_coefficient)
             if self.UserInput.parameter_estimation_settings['mcmc_mode'] != 'unbiased':
-                if i%100== 0: #The % is a modulus function to change the modulation coefficient every n steps.
+                if sampleNumber%100== 0: #The % is a modulus function to change the modulation coefficient every n steps.
                     if self.UserInput.parameter_estimation_settings['mcmc_mode'] == 'MAP_finding':
                         recent_log_postereriors_drawn=log_postereriors_drawn[i-100:i] 
                         recent_mcmc_step_modulation_history=mcmc_step_modulation_history[i-100:i]
@@ -524,8 +527,8 @@ class parameter_estimation:
                             if mcmc_step_dynamic_coefficient > 0.1:
                                 mcmc_step_dynamic_coefficient = mcmc_step_dynamic_coefficient*0.95
             ########################################
-        self.burn_in_samples = samples[:self.UserInput.parameter_estimation_settings['mcmc_burn_in']]
-        self.post_burn_in_samples = samples[self.UserInput.parameter_estimation_settings['mcmc_burn_in']:]
+        self.burn_in_samples = samples[0:self.UserInput.parameter_estimation_settings['mcmc_burn_in']] #FIXME: this line will have to change with i indexing changed.
+        self.post_burn_in_samples = samples[self.UserInput.parameter_estimation_settings['mcmc_burn_in']:] #FIXME: this line will have to change with i indexing changed.
         if self.UserInput.parameter_estimation_settings['exportAllSimulatedOutputs'] == True:
             self.post_burn_in_samples_simulatedOutputs = samples_simulatedOutputs[self.UserInput.parameter_estimation_settings['mcmc_burn_in']:]
         self.post_burn_in_log_posteriors_un_normed_vec = log_posteriors_un_normed_vec[self.UserInput.parameter_estimation_settings['mcmc_burn_in']:]

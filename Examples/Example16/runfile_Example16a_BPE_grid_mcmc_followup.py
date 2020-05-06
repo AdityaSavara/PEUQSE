@@ -64,7 +64,7 @@ if __name__ == "__main__":
     
     #PE_object.doGridSearch('doMetropolisHastings')
     
-    #PE_object.createAllPlots() #This function calls each of the below functions.
+    PE_object.createAllPlots() #This function calls each of the below functions.
 #    PE_object.makeHistogramsForEachParameter()    
 #    PE_object.makeSamplingScatterMatrixPlot()
 #    PE_object.createSimulatedResponsesPlot()
