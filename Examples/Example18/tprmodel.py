@@ -96,7 +96,7 @@ def tprequationPiecewiseWithOffset(tpr_theta,t,Ea_1, log_A1, gamma1, verticalOff
     return ratesList 
         
 # The below function must return a vector of rates. 
-def tprequationPiecewise(tpr_theta,t,Ea_1, log_A1, gamma1, verticalOffset, beta_dTdt,start_T, *Gamma_offsets): #beta_dTdT is the heating rate. 
+def tprequationPiecewise(tpr_theta,t,Ea_1, log_A1, gamma1, beta_dTdt,start_T, *Gamma_offsets): #beta_dTdT is the heating rate. 
     if tpr_theta.ndim == 1:  #for consistency, making tpr_theta a 2D array if it does not start as 2D. 
         tpr_theta2D = np.atleast_2d(tpr_theta)  
     if tpr_theta.ndim == 2: 
@@ -136,7 +136,7 @@ def tprequationPiecewise(tpr_theta,t,Ea_1, log_A1, gamma1, verticalOffset, beta_
                     this_T = T
                 
                 #print("line 83", np.shape(thisTheta), np.shape(Ea_modified), np.shape(this_T), np.shape(log_A_array[rateIndex]), np.shape()
-                rate = -thisTheta*np.exp(-(Ea_modified-kB*this_T*log_A_array[rateIndex])/(kB*this_T))  - verticalOffset
+                rate = -thisTheta*np.exp(-(Ea_modified-kB*this_T*log_A_array[rateIndex])/(kB*this_T)) 
                 thisThetAndEa = [thisTheta,Ea_modified, this_gamma]
                 ThetAndEaForEachTime.append(thisThetAndEa)
                 ratesAtEachTime.append(np.array(rate))

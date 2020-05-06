@@ -23,20 +23,20 @@ if __name__ == "__main__":
     #UserInput.simulated_response_plot_settings['y_range'] = [0.00, 0.025] #optional.
     UserInput.simulated_response_plot_settings['figure_name'] = 'Posterior_Example1' #This creates the filename, also.
 
-    UserInput.model['parameterNamesAndMathTypeExpressionsDict'] = {'scalingFactor':'scalingFactor', 'Ea_1':r'$E_{a1}$','log_A1':r'$log(A_{1})$','gamma1':r'$\gamma_{1}$',  'verticalOffset':'verticalOffset', 'modEa1':'modEa1', 'modEa2':'modEa2', 'modEa3':'modEa3', 'modEa4':'modEa4' }#, 'modEa5':'modEa5', 'modEa6':'modEa6', 'modEa7':'modEa7', 'modEa8':'modEa8', 'modEa9':'modEa9', 'modEa10':'modEa10'}
-    UserInput.model['InputParameterPriorValues'] = [1.0, 40.0, 13.0, 0.4, 0.000,
-                   -0.1, -0.1,   -0.1, -0.1] #,   0.0, 0.0,   0.0, 0.0,   0.0, 0.0] # Ea1_mean, Ea2_mean, log_A1_mean, log_A2_mean, gamma_1_mean, gamma_2_mean 
-    UserInput.model['InputParametersPriorValuesUncertainties'] = [1.0, 20, 2, 0.1, 0.005,
+    UserInput.model['parameterNamesAndMathTypeExpressionsDict'] = {'scalingFactor':'scalingFactor', 'verticalOffset':'verticalOffset', 'Ea_1':r'$E_{a1}$','log_A1':r'$log(A_{1})$','gamma1':r'$\gamma_{1}$',  'modEa1':'modEa1', 'modEa2':'modEa2', 'modEa3':'modEa3', 'modEa4':'modEa4' }#, 'modEa5':'modEa5', 'modEa6':'modEa6', 'modEa7':'modEa7', 'modEa8':'modEa8', 'modEa9':'modEa9', 'modEa10':'modEa10'}
+    UserInput.model['InputParameterPriorValues'] = [1.0, 0.0, 40.0, 13.0, 0.4, 
+                   0.0, 0.0,   0.0, 0.0] #,   0.0, 0.0,   0.0, 0.0,   0.0, 0.0] # Ea1_mean, Ea2_mean, log_A1_mean, log_A2_mean, gamma_1_mean, gamma_2_mean 
+    UserInput.model['InputParametersPriorValuesUncertainties'] = [.1, 0.005, 20, 2, 0.1, 
                    0.3, 0.3,      0.3, 0.3] #,        10, 10,      10, 10,          10, 10] #If user wants to use a prior with covariance, then this must be a 2D array/ list. To assume no covariance, a 1D
-    UserInput.model['InputParameterInitialGuess'] = [ 1.0, 2.97559832e+01 , 1.48572197e+01,  4.23662452e-01 , 9.83828110e-04,
-  5.17753350e-01, -5.75283577e-01 ,-1.29020976e-01, -1.52824893e-01]
+#    UserInput.model['InputParameterInitialGuess'] = [ 1.0, 0.03, 2.97559832e+01 , 1.48572197e+01,  4.23662452e-01 , 
+#  5.17753350e-01, -5.75283577e-01 ,-1.29020976e-01, -1.52824893e-01]
 
 
 
 
 #,   0.0, 0.0,   0.0, 0.0,   0.0, 0.0] # Ea1_mean, Ea2_mean, log_A1_mean, log_A2_mean, gamma_1_mean, gamma_2_mean 
     
-    UserInput.model['reducedParameterSpace']=[0]
+   # UserInput.model['reducedParameterSpace']=[0]
     #InputParametersInitialValuesUncertainties = [200, 200, 13, 13, 0.1, 0.1] #If user wants to use a prior with covariance, then this must be a 2D array/ list. To assume no covariance, a 1D array can be used.
     
 #    Trial simulation:
@@ -66,10 +66,10 @@ if __name__ == "__main__":
     
 #    #Now we do parameter estimation.
 #    PE_object.doMetropolisHastings()
-    PE_object.doSinglePoint()
+   # PE_object.doSinglePoint()
     PE_object.createAllPlots() #This function calls each of the below functions.
     
-    #PE_object.doOptimizeNegLogP(method="Nelder-Mead", printOptimum=True, verbose=True)
+    PE_object.doOptimizeNegLogP(method="Nelder-Mead", printOptimum=True, verbose=True)
 
     #PE_object.doGridSearch('getLogP')
     #PE_object.doGridSearch('doMetropolisHastings')

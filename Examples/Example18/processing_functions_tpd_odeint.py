@@ -32,10 +32,10 @@ def TPR_internalPiecewiseSimulationFunctionWrapper(discreteParameterVector):
     discreteParameterVectorList = list(discreteParameterVector) #converting to list so can use list expansion in arguments. 
     regularParams = discreteParameterVector[0:4] #This is Ea1, A1, gamma1
     Ea_modParams = discreteParameterVector[4:] #This is Ea_mod1, Ea_mod2, etc. from 3rd index to end.
-    tpr_theta_Arguments = [tprequationPiecewise, initial_concentrations_array, times, (*regularParams,beta_dTdt,T_0,*Ea_modParams) ] 
+    tpr_theta_Arguments = [tprequationPiecewiseWithOffset, initial_concentrations_array, times, (*regularParams,beta_dTdt,T_0,*Ea_modParams) ] 
     tpr_theta = odeint(*tpr_theta_Arguments) # [0.5, 0.5] are the initial theta's. 
     simulationInputArguments = [tpr_theta, times, *regularParams, beta_dTdt,T_0, *Ea_modParams] 
-    simulationOutput = tprequationPiecewise(*simulationInputArguments)
+    simulationOutput = tprequationPiecewiseWithOffset(*simulationInputArguments)
     return simulationOutput
 
 #This function is for using the base function above and to add in scaling and vertical offset / constant rate.
@@ -43,12 +43,13 @@ def TPR_internalPiecewiseSimulationFunctionWrapperScaledAndOffset(discreteParame
     global times
     discreteParameterVectorList = list(discreteParameterVector) #converting to list so can use list expansion in arguments. 
     scalingFactor = discreteParameterVector[0]
-    regularParams = discreteParameterVector[1:5] #This is Ea1, A1, gamma1
+    verticalOffset = discreteParameterVector[1]
+    regularParams = discreteParameterVector[2:5] #This is Ea1, A1, gamma1. 2,3,4. 5 is not included due to array indexing.
     Ea_modParams = discreteParameterVector[5:] #This is Ea_mod1, Ea_mod2, etc. from 3rd index to end.
     tpr_theta_Arguments = [tprequationPiecewise, initial_concentrations_array, times, (*regularParams,beta_dTdt,T_0,*Ea_modParams) ] 
     tpr_theta = odeint(*tpr_theta_Arguments) # [0.5, 0.5] are the initial theta's. 
     simulationInputArguments = [tpr_theta, times, *regularParams, beta_dTdt,T_0, *Ea_modParams] 
-    simulationOutput = scalingFactor*np.array(tprequationPiecewise(*simulationInputArguments))
+    simulationOutput = scalingFactor*np.array(tprequationPiecewise(*simulationInputArguments)) + verticalOffset
     return simulationOutput
 
 def TPR_simulationFunctionWrapper(discreteParameterVector): 

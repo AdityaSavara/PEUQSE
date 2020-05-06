@@ -270,6 +270,7 @@ class parameter_estimation:
                     if UserInput.responses['response_data_type'][responseIndex] == 'r':
                         LittleEuler
                 if UserInput.responses['response_types'][responseIndex] == 'P':	 #For product
+                    
                     if UserInput.responses['response_data_type'][responseIndex] == 'c':
                         pass
                     if UserInput.responses['response_data_type'][responseIndex] == 'r':
