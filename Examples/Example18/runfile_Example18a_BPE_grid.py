@@ -64,7 +64,7 @@ if __name__ == "__main__":
     
 #    PE_object.doOptimizeNegLogP(method="Nelder-Mead", printOptimum=True, verbose=True)
 
-    PE_object.doGridSearch('getLogP')
+#    PE_object.doGridSearch('getLogP')
     #PE_object.doGridSearch('doMetropolisHastings')
 #    PE_object.doGridSearch('doOptimizeNegLogP', verbose = True,gridSamplingRadii = [], passThroughArgs={'method':'BFGS'})
     

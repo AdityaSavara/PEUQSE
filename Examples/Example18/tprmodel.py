@@ -35,7 +35,7 @@ def tprequation(tpr_theta,t,Ea_1, Ea_2, log_A1, log_A2, gamma1, gamma2,beta_dTdt
     
     
 # The below function must return a vector of rates. 
-def tprequationPiecewiseWithOffset(tpr_theta,t,Ea_1, log_A1, gamma1, verticalOffset, beta_dTdt,start_T, *Gamma_offsets): #beta_dTdT is the heating rate. 
+def tprequationPiecewiseWithOffset(tpr_theta,t,Ea_1, log_A1, gamma1, verticalOffset, beta_dTdt,start_T, *Gamma_offsets, exportThetaVsEa=False): #beta_dTdT is the heating rate. 
     if tpr_theta.ndim == 1:  #for consistency, making tpr_theta a 2D array if it does not start as 2D. 
         tpr_theta2D = np.atleast_2d(tpr_theta)  
     if tpr_theta.ndim == 2: 
@@ -90,13 +90,14 @@ def tprequationPiecewiseWithOffset(tpr_theta,t,Ea_1, log_A1, gamma1, verticalOff
           
             #The above expression is the general form of this: rate_2 = -theta_2*np.exp(-(Ea_2-kB*T*log_A2-gamma2*theta_2)/(kB*T))       
         ratesList.append(ratesAtEachTime) #This is appending once for each species..
-        np.savetxt("ThetaVersusEaCurve.csv", ThetAndEaForEachTime, delimiter=",")
+        if exportThetaVsEa==True:
+            np.savetxt("ThetaVersusEaCurve.csv", ThetAndEaForEachTime, delimiter=",")
     if tpr_theta.ndim == 1: 
         ratesList = list(np.array(ratesList).flatten()) #for some reason, needs to be flattened for the MCMC. 
     return ratesList 
         
 # The below function must return a vector of rates. 
-def tprequationPiecewise(tpr_theta,t,Ea_1, log_A1, gamma1, beta_dTdt,start_T, *Gamma_offsets): #beta_dTdT is the heating rate. 
+def tprequationPiecewise(tpr_theta,t,Ea_1, log_A1, gamma1, beta_dTdt,start_T, *Gamma_offsets, exportThetaVsEa=False): #beta_dTdT is the heating rate. 
     if tpr_theta.ndim == 1:  #for consistency, making tpr_theta a 2D array if it does not start as 2D. 
         tpr_theta2D = np.atleast_2d(tpr_theta)  
     if tpr_theta.ndim == 2: 
@@ -150,7 +151,8 @@ def tprequationPiecewise(tpr_theta,t,Ea_1, log_A1, gamma1, beta_dTdt,start_T, *G
           
             #The above expression is the general form of this: rate_2 = -theta_2*np.exp(-(Ea_2-kB*T*log_A2-gamma2*theta_2)/(kB*T))       
         ratesList.append(ratesAtEachTime) #This is appending once for each species..
-        np.savetxt("ThetaVersusEaCurve.csv", ThetAndEaForEachTime, delimiter=",")
+        if exportThetaVsEa==True:
+            np.savetxt("ThetaVersusEaCurve.csv", ThetAndEaForEachTime, delimiter=",")
     if tpr_theta.ndim == 1: 
         ratesList = list(np.array(ratesList).flatten()) #for some reason, needs to be flattened for the MCMC. 
     return ratesList 
