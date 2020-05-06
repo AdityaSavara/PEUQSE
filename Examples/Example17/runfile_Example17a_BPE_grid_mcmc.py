@@ -23,7 +23,7 @@ if __name__ == "__main__":
     UserInput.simulated_response_plot_settings['x_label'] = 'time (s)'
     UserInput.simulated_response_plot_settings['y_label'] = r'Rate of Desorption (ML/s)'
     #UserInput.simulated_response_plot_settings['y_range'] = [0.00, 0.025] #optional.
-    UserInput.simulated_response_plot_settings['figure_name'] = 'Posterior_Example16a' #This creates the filename, also.
+    UserInput.simulated_response_plot_settings['figure_name'] = 'Posterior_Example17a' #This creates the filename, also.
 
     UserInput.model['parameterNamesAndMathTypeExpressionsDict'] = {'scalingFactor':'scalingFactor', 'backgroundOffset':'backgroundOffset', 'site2Ratio':'site2Ratio','Ea_1':r'$E_{a1}$','Ea_2':r'$E_{a2}$','log_A1':r'$log(A_{1})$','log_A2':r'$log(A_{2})$','gamma1':r'$\gamma_{1}$','gamma2':r'$\gamma_{2}$'}
     UserInput.model['InputParameterPriorValues'] = [ 1.0, 0.0, 0.50, 41.5, 41.5, 13.0, 13.0, 0.1, 0.1] # Ea1_mean, Ea2_mean, log_A1_mean, log_A2_mean, gamma_1_mean, gamma_2_mean 
@@ -41,6 +41,7 @@ if __name__ == "__main__":
     
     UserInput.parameter_estimation_settings['scaling_uncertainties_type'] = "std"
     UserInput.parameter_estimation_settings['verbose'] = False 
+    UserInput.parameter_estimation_settings['exportLog'] = False
     UserInput.parameter_estimation_settings['checkPointFrequency'] = 100
     UserInput.parameter_estimation_settings['mcmc'] = True 
     UserInput.parameter_estimation_settings['mcmc_mode'] = 'unbiased'

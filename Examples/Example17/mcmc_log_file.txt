@@ -1,17 +1,42 @@
-MAP_logP:[-6096.35446632]
-self.map_index:0
-self.map_parameter_set:[ 1.    0.    0.32 36.   28.   23.   15.    0.3   0.14]
-self.mu_AP_parameter_set:[ 1.    0.    0.32 36.   28.   23.   15.    0.3   0.14]
-self.stdap_parameter_set:[0. 0. 0. 0. 0. 0. 0. 0. 0.]
+MAP_logP:[-5720.15464742]
+self.map_index:967
+self.map_parameter_set:[ 1.02602723e+00 -4.44876514e-03  6.18709559e-01  7.88391741e+01
+  2.57482184e+01  1.70148933e+01  1.46959865e+01  2.35682332e-01
+  2.51894675e-01]
+self.mu_AP_parameter_set:[ 1.03741297e+00 -6.79644416e-03  4.32984252e-01  8.27135019e+01
+  2.54684769e+01  1.68268811e+01  1.42717512e+01  2.42250158e-01
+  2.34986304e-01]
+self.stdap_parameter_set:[2.48417356e-02 1.57816469e-03 1.02515357e-01 4.11012611e+00
+ 1.37274563e+00 7.27610304e-01 6.98449212e-01 3.71007019e-02
+ 2.03340943e-02]
 self.info_gain:0.0
 evidence:0.0
 posterior_cov_matrix:
-[[nan nan nan nan nan nan nan nan nan]
- [nan nan nan nan nan nan nan nan nan]
- [nan nan nan nan nan nan nan nan nan]
- [nan nan nan nan nan nan nan nan nan]
- [nan nan nan nan nan nan nan nan nan]
- [nan nan nan nan nan nan nan nan nan]
- [nan nan nan nan nan nan nan nan nan]
- [nan nan nan nan nan nan nan nan nan]
- [nan nan nan nan nan nan nan nan nan]]
+[[ 6.17729556e-04 -4.06753048e-06  7.77326377e-04  4.51107048e-02
+   1.93497959e-02  8.62330368e-03  1.45500193e-02  6.68427424e-04
+   3.07951532e-04]
+ [-4.06753048e-06  2.49309688e-06  1.22773230e-04 -8.02850335e-04
+  -5.26334495e-04  7.64067580e-04 -4.01842751e-04 -1.59406820e-05
+   5.15896561e-06]
+ [ 7.77326377e-04  1.22773230e-04  1.05199184e-02  1.08057724e-01
+  -1.85401992e-02  6.44859001e-02 -1.82919970e-03  3.27468883e-04
+   1.27093791e-03]
+ [ 4.51107048e-02 -8.02850335e-04  1.08057724e-01  1.69100467e+01
+   5.14141877e-01  7.63530218e-01  7.66832936e-01  4.91372468e-02
+   4.70529287e-02]
+ [ 1.93497959e-02 -5.26334495e-04 -1.85401992e-02  5.14141877e-01
+   1.88631687e+00 -9.22735799e-02  6.33907232e-01  2.55604753e-02
+   2.21462902e-03]
+ [ 8.62330368e-03  7.64067580e-04  6.44859001e-02  7.63530218e-01
+  -9.22735799e-02  5.29946702e-01  8.27717610e-02  7.27088184e-03
+   8.85602751e-03]
+ [ 1.45500193e-02 -4.01842751e-04 -1.82919970e-03  7.66832936e-01
+   6.33907232e-01  8.27717610e-02  4.88319621e-01  2.11661367e-02
+   6.57757710e-03]
+ [ 6.68427424e-04 -1.59406820e-05  3.27468883e-04  4.91372468e-02
+   2.55604753e-02  7.27088184e-03  2.11661367e-02  1.37783992e-03
+   4.42571422e-04]
+ [ 3.07951532e-04  5.15896561e-06  1.27093791e-03  4.70529287e-02
+   2.21462902e-03  8.85602751e-03  6.57757710e-03  4.42571422e-04
+   4.13889281e-04]]
+Warning: The MAP parameter set and mu_AP parameter set differ by more than 10% of prior variance in at least one parameter. This may mean that you need to increase your mcmc_length, increase or decrease your mcmc_relative_step_length, or change what is used for the model response.  There is no general method for knowing the right  value for mcmc_relative_step_length since it depends on the sharpness and smoothness of the response. See for example https://www.sciencedirect.com/science/article/pii/S0039602816300632

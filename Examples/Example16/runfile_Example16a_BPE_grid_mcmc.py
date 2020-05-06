@@ -41,6 +41,7 @@ if __name__ == "__main__":
     
     UserInput.parameter_estimation_settings['scaling_uncertainties_type'] = "std"
     UserInput.parameter_estimation_settings['verbose'] = False 
+    UserInput.parameter_estimation_settings['exportLog'] = False
     UserInput.parameter_estimation_settings['checkPointFrequency'] = 100
     UserInput.parameter_estimation_settings['mcmc'] = True 
     UserInput.parameter_estimation_settings['mcmc_mode'] = 'unbiased'
