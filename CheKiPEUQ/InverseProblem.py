@@ -304,7 +304,7 @@ class parameter_estimation:
         #TODO: the upper part of the gridsearch may not be compatibile with reduced parameter space. Needs to be checked.
         import CheKiPEUQ.CombinationGeneratorModule as CombinationGeneratorModule
         verbose = self.UserInput.parameter_estimation_settings['verbose']
-        numParameters = len(self.UserInput.parameterNamesList)
+        numParameters = len(self.UserInput.InputParameterInitialGuess)
         if len(gridSamplingNumOfIntervals) == 0:
             gridSamplingNumOfIntervals = np.ones(numParameters, dtype='int') #By default, will make ones.
             numGridPoints = 3**numParameters

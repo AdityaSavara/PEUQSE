@@ -23,7 +23,7 @@ if __name__ == "__main__":
     #UserInput.simulated_response_plot_settings['y_range'] = [0.00, 0.025] #optional.
     UserInput.simulated_response_plot_settings['figure_name'] = 'Posterior_Example1' #This creates the filename, also.
 
-    UserInput.model['parameterNamesAndMathTypeExpressionsDict'] = {'scalingFactor':'scalingFactor', 'verticalOffset':'verticalOffset', 'Ea_1':r'$E_{a1}$','log_A1':r'$log(A_{1})$','gamma1':r'$\gamma_{1}$',  'modEa1':'modEa1', 'modEa2':'modEa2', 'modEa3':'modEa3', 'modEa4':'modEa4' }#, 'modEa5':'modEa5', 'modEa6':'modEa6', 'modEa7':'modEa7', 'modEa8':'modEa8', 'modEa9':'modEa9', 'modEa10':'modEa10'}
+    UserInput.model['parameterNamesAndMathTypeExpressionsDict'] = {'scalingFactor':'scalingFactor', 'verticalOffset':'verticalOffset', 'Ea_1':r'$E_{a1}$','log_A1':r'$log(A_{1})$','gamma1':r'$\gamma_{1}$',  'modEa1':'modEa1', 'modEa2':'modEa2', 'modEa3':'modEa3', 'modEa4':'modEa4', 'modEa5':'modEa5', 'modEa6':'modEa6' }#, 'modEa5':'modEa5', 'modEa6':'modEa6', 'modEa7':'modEa7', 'modEa8':'modEa8', 'modEa9':'modEa9', 'modEa10':'modEa10'}
     UserInput.model['InputParameterPriorValues'] = [1.0, 0.0, 40.0, 13.0, 0.1, 
                    0.0, 0.0,   0.0, 0.0, 0.0, 0.0] 
     UserInput.model['InputParametersPriorValuesUncertainties'] = [.1, 0.005, 20, 2, 0.3, 
@@ -54,7 +54,7 @@ if __name__ == "__main__":
     UserInput.parameter_estimation_settings['mcmc_mode'] = 'unbiased'
     UserInput.parameter_estimation_settings['mcmc_random_seed'] = 0 #Normally set to None so that mcmc is set to be random. To get the same results repeatedly, such as for testing purposes, set the random seed to 0 or another integer for testing purposes.
     UserInput.parameter_estimation_settings['mcmc_burn_in'] = 0
-    UserInput.parameter_estimation_settings['mcmc_length'] = 1
+    UserInput.parameter_estimation_settings['mcmc_length'] = 1000
     UserInput.parameter_estimation_settings['mcmc_relative_step_length'] = 0.5
     UserInput.parameter_estimation_settings['mcmc_modulate_accept_probability']  = 1000 #Default value of 0. Changing this value sharpens or flattens the posterior. A value greater than 1 flattens the posterior by accepting low values more often. It can be useful when greater sampling is more important than accuracy. One way of using this feature is to try with a value of 0, then with the value equal to the number of priors for comparison, and then to gradually decrease this number as low as is useful (to minimize distortion of the result). A downside of changing changing this variable to greater than 1 is that it slows the the ascent to the maximum of the prior, so there is a balance in using it. In contrast, numbers increasingly less than one (such as 0.90 or 0.10) will speed up the ascent to the maximum of the posterior, but will also result in fewer points being retained.
 
@@ -71,10 +71,10 @@ if __name__ == "__main__":
     
    # PE_object.doOptimizeNegLogP(method="Nelder-Mead", printOptimum=True, verbose=True)
 
-    #PE_object.doGridSearch('getLogP')
+    PE_object.doGridSearch('getLogP')
     #PE_object.doGridSearch('doMetropolisHastings')
 #    PE_object.doGridSearch('doOptimizeNegLogP', verbose = True,gridSamplingRadii = [], passThroughArgs={'method':'BFGS'})
-    print(PE_object.map_parameter_set, PE_object.map_logP)
+    #print(PE_object.map_parameter_set, PE_object.map_logP)
     
     PE_object.createAllPlots() #This function calls each of the below functions.
 #    PE_object.makeHistogramsForEachParameter()    
