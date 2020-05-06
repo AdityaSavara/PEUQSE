@@ -586,7 +586,6 @@ class parameter_estimation:
             #print(post_burn_in_log_posteriors_vec_truncated) #TODO: Export this
             #print(post_burn_in_log_priors_vec_truncated)  #TODO: Export this
         map_logP = max(self.post_burn_in_logP_un_normed_vec)
-        print("line 586", map_logP)
         self.map_logP = map_logP
         self.map_index = list(self.post_burn_in_logP_un_normed_vec).index(map_logP) #This does not have to be a unique answer, just one of them places which gives map_logP.
         self.map_parameter_set = self.post_burn_in_samples[self.map_index] #This  is the point with the highest probability in the posterior.
