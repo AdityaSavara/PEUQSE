@@ -415,6 +415,15 @@ class parameter_estimation:
             print("Final results from doOptimizeNegLogP:", self.map_parameter_set, "final logP:", self.map_logP)
         return [self.map_parameter_set, self.map_logP]
     
+    #This function is meant to be called from the runfile when testing a new function etc. It allows a simulation plot to be created.
+    #This is *not* recommended for use in other functions, where it is recommended that getLogP be called directly.
+    def doSinglePoint(self, discreteParameterVector=None):
+        if type(discreteParameterVector)==type(None): #If somebody did not feed a specific vector, we take the initial guess.
+            discreteParameterVector = self.UserInput.InputParameterInitialGuess
+        self.map_parameter_set = discreteParameterVector
+        self.map_logP = self.getLogP(self.map_parameter_set)
+        return [self.map_parameter_set, self.map_logP]
+    
     #main function to get samples #TODO: Maybe Should return map_log_P and mu_AP_log_P?
     def doMetropolisHastings(self):
         if 'mcmc_random_seed' in self.UserInput.parameter_estimation_settings:

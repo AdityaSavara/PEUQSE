@@ -1,0 +1,17 @@
+MAP_logP:[-6096.35446632]
+self.map_index:0
+self.map_parameter_set:[ 1.    0.    0.32 36.   28.   23.   15.    0.3   0.14]
+self.mu_AP_parameter_set:[ 1.    0.    0.32 36.   28.   23.   15.    0.3   0.14]
+self.stdap_parameter_set:[0. 0. 0. 0. 0. 0. 0. 0. 0.]
+self.info_gain:0.0
+evidence:0.0
+posterior_cov_matrix:
+[[nan nan nan nan nan nan nan nan nan]
+ [nan nan nan nan nan nan nan nan nan]
+ [nan nan nan nan nan nan nan nan nan]
+ [nan nan nan nan nan nan nan nan nan]
+ [nan nan nan nan nan nan nan nan nan]
+ [nan nan nan nan nan nan nan nan nan]
+ [nan nan nan nan nan nan nan nan nan]
+ [nan nan nan nan nan nan nan nan nan]
+ [nan nan nan nan nan nan nan nan nan]]
