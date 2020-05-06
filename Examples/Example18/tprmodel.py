@@ -106,7 +106,6 @@ def tprequationPiecewise(tpr_theta,t,Ea_1, log_A1, gamma1, beta_dTdt,start_T, *G
     numTimes = len(tpr_theta2D)
     coverageIntervals = np.linspace(0,1,num=len(Gamma_offsets), endpoint=True) #This will be used below.
     cumulative_gamma_offsets = np.cumsum(Gamma_offsets)
-#    print(coverageIntervals)
 #    print(Eaoffsets)
 #    print(len(coverageIntervals))
 #    print(len(Eaoffsets)) 
@@ -125,7 +124,7 @@ def tprequationPiecewise(tpr_theta,t,Ea_1, log_A1, gamma1, beta_dTdt,start_T, *G
             for timeIndex in range(numTimes):
                 thisTheta = tpr_theta2D[timeIndex][rateIndex]
                 baseEaForThisTheta = Ea_Array[rateIndex]
-                gamma_dependance = gamma_array[rateIndex] + cumulative_gamma_offsets  
+                gamma_dependance = gamma_array[rateIndex] + cumulative_gamma_offsets  #In future, this might become cumulative_gamma_offsets[rateIndex] but right now it is designed for a single case.  In essence, 
                 this_gamma = np.interp(thisTheta, coverageIntervals, gamma_dependance)
                 Ea_modified = baseEaForThisTheta-this_gamma*thisTheta*baseEaForThisTheta #+ Ea_1_Offest_for_this_theta
                 #For the Temperature, either we have one temperature or many. Check if it is iterable.
