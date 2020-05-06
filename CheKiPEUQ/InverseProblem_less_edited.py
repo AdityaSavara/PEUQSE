@@ -490,7 +490,7 @@ class parameter_estimation:
                     timeSinceLastCheckPoint = (timeit.time.clock() - timeOfFirstCheckpoint) -  timeCheckpoint
                     timeCheckpoint = timeit.time.clock() - timeOfFirstCheckpoint
                     checkPointNumber = i/self.UserInput.parameter_estimation_settings['checkPointFrequency']
-                    averagetimePerSampling = timeCheckpoint/(i)
+                    averagetimePerSampling = timeCheckpoint/(i+1)
                     print("MCMC sample number ", i, "checkpoint", checkPointNumber, "out of", numCheckPoints) 
                     print("averagetimePerSampling", averagetimePerSampling, "seconds")
                     print("timeSinceLastCheckPoint", timeSinceLastCheckPoint, "seconds")

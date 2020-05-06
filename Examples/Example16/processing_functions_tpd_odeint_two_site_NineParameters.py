@@ -54,6 +54,22 @@ def TPR_simulationFunctionWrapperPiecewise(discreteParameterVector):
     simulationOutput = tprequation(*simulationInputArguments)
     return simulationOutput 
 
+
+#below is just a wrapper around the "Base" case above using nine parameters.
+#The parameters are going to go like this: scaling factor, offset, ratio, Ea1, Ea2, logA2, logA2, gamma1, gamma2
+def TPR_simulationFunctionWrapperNineParameters(nineParametersDiscreteParameterVector): #We will remove the first two parameters for use within this fucntion.
+    discreteParameterVectorListRatioFirst = list(nineParametersDiscreteParameterVector) #making the list, then will pop it until RatioFirst.
+    scalingFactor = discreteParameterVectorListRatioFirst.pop(0) #This removes first item.
+    backgroundOffset = discreteParameterVectorListRatioFirst.pop(0) #This removes first item.
+    simulationOutput = TPR_simulationFunctionWrapperRatioFirst(discreteParameterVectorListRatioFirst)
+    #print("line 64", simulationOutput)
+    negRate = neg_sum_of_all_rates(simulationOutput)
+    #print("line 66", negRate)
+    negRate = negRate - (backgroundOffset) #we've already gone to negative rate, so subtract the background without a negative 1.
+    #print("line 67", negRate)
+    negRate = scalingFactor*negRate
+    return negRate
+
 #below converts the simulation into an integral, so it is just a wrapper around the "Base" case above.
 #The parameters are going to go like this: scaling factor, offset, ratio, Ea1, Ea2, logA2, logA2, gamma1, gamma2
 def TPR_integerated_simulationFunctionWrapperNineParameters(nineParametersDiscreteParameterVector): #We will remove the first two parameters for use within this fucntion.

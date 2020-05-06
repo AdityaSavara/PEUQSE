@@ -5,8 +5,8 @@ if __name__ == "__main__":
     #####This file is like the other Example 15 runfiles, and has the two_site_ratio as giving the percent of sites that is site 2 (as a decimal) and this is the first parameter in the parameter vector.
     
     import processing_functions_tpd_odeint_two_site_NineParameters
-    observed_data_Filename = 'ExperimentalDataAcetaldehydeTPDCeO2111MullinsTruncatedConstantErrors005.csv'
-    times, responses_observed, observedResponses_uncertainties = processing_functions_tpd_odeint_two_site_NineParameters.import_integrals_settings(observed_data_Filename)
+    observed_data_Filename = 'ExperimentalDataAcetaldehydeTPDCeO2111MullinsTruncatedConstantErrors.csv'
+    times, responses_observed, observedResponses_uncertainties = processing_functions_tpd_odeint_two_site_NineParameters.import_experimental_settings_single(observed_data_Filename)
     #experiments_datarame = pd.read_csv(observed_data_Filename)    
     
     
@@ -14,22 +14,28 @@ if __name__ == "__main__":
     UserInput.responses['responses_observed'] = responses_observed
     UserInput.responses['responses_observed_uncertainties'] = observedResponses_uncertainties
     
+    #We are going to use the built in transform to improve the optimization.
+    UserInput.responses['data_overcategory'] = 'transient_kinetics'
+    UserInput.responses['response_types']=['P'] #need a categorization for each response dimension.
+    UserInput.responses['response_data_type']=['r'] #need a categorization for each response dimension.
+    
+    
     UserInput.simulated_response_plot_settings['x_label'] = 'time (s)'
     UserInput.simulated_response_plot_settings['y_label'] = r'Integrated Desorption (ML)'
     #UserInput.simulated_response_plot_settings['y_range'] = [0.00, 0.025] #optional.
-    UserInput.simulated_response_plot_settings['figure_name'] = 'Posterior_Example3' #This creates the filename, also.
+    UserInput.simulated_response_plot_settings['figure_name'] = 'Posterior_Example16b' #This creates the filename, also.
 
     UserInput.model['parameterNamesAndMathTypeExpressionsDict'] = {'scalingFactor':'scalingFactor', 'backgroundOffset':'backgroundOffset', 'site2Ratio':'site2Ratio','Ea_1':r'$E_{a1}$','Ea_2':r'$E_{a2}$','log_A1':r'$log(A_{1})$','log_A2':r'$log(A_{2})$','gamma1':r'$\gamma_{1}$','gamma2':r'$\gamma_{2}$'}
     UserInput.model['InputParameterPriorValues'] = [ 1.0, 0.0, 0.50, 41.5, 41.5, 13.0, 13.0, 0.1, 0.1] # Ea1_mean, Ea2_mean, log_A1_mean, log_A2_mean, gamma_1_mean, gamma_2_mean 
     UserInput.model['InputParametersPriorValuesUncertainties'] = [ 0.10, 0.005, 0.50/3, 20, 20, 2, 2, 0.1, 0.1] #If user wants to use a prior with covariance, then this must be a 2D array/ list. To assume no covariance, a 1D
-    UserInput.model['InputParameterInitialGuess'] = [1.0, 0.0, 0.32,  36, 28, 23, 15.0, 0.3, 0.14] #This is where the mcmc chain will start.
+    UserInput.model['InputParameterInitialGuess'] = [1.0, 0.0, 0.36,  31.5, 25.5, 23, 15.0, 0.2, 0.1] #This is where the mcmc chain will start.
     UserInput.model['InputParameterPriorValues_upperBounds'] = [ None, None, 1.0, None, None, None, None, None, None]
     UserInput.model['InputParameterPriorValues_lowerBounds'] = [ 0, None, 0, 0, 0, None, None, 0, 0]
     
     #InputParameterInitialValues = [41.5, 41.5, 13.0, 13.0, 0.1, 0.1] # Ea1_mean, Ea2_mean, log_A1_mean, log_A2_mean, gamma_1_mean, gamma_2_mean 
     
     #InputParametersInitialValuesUncertainties = [200, 200, 13, 13, 0.1, 0.1] #If user wants to use a prior with covariance, then this must be a 2D array/ list. To assume no covariance, a 1D array can be used.
-    UserInput.model['simulateByInputParametersOnlyFunction'] = processing_functions_tpd_odeint_two_site_NineParameters.TPR_integerated_simulationFunctionWrapperNineParameters #This must simulate with *only* the parameters listed above, and no other arguments.
+    UserInput.model['simulateByInputParametersOnlyFunction'] = processing_functions_tpd_odeint_two_site_NineParameters.TPR_simulationFunctionWrapperNineParameters #This must simulate with *only* the parameters listed above, and no other arguments.
     UserInput.model['simulationOutputProcessingFunction'] = None  #Optional: a function to process what comes out of the simulation Function and then return an observable vector.
     UserInput.parameter_estimation_settings['gridsearch'] = True
     
@@ -51,7 +57,8 @@ if __name__ == "__main__":
     
     #Now we do parameter estimation.
 #    PE_object.doMetropolisHastings()
-    PE_object.doOptimizeNegLogP(method="Nelder-Mead", printOptimum=True, verbose=True)
+    PE_object.doOptimizeNegLogP(method="Nelder-Mead", printOptimum=True, verbose=True, maxiter=5000 )
+    #PE_object.doGridSearch('getLogP', gridSamplingAbsoluteIntervalSize=[0.03, 0.0025, 0.50/3, 10, 10, 1,1, 0.1, 0.1], gridSamplingNumOfIntervals=[0,0,4,4,4,4,4,1,1], verbose = True)
     print(PE_object.map_parameter_set, PE_object.map_logP)    
     #[map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, samples_simulatedOutputs, logP] = PE_object.doMetropolisHastings()
     
