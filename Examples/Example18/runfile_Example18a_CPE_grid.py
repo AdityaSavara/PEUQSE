@@ -33,13 +33,17 @@ if __name__ == "__main__":
     
     UserInput.model['InputParameterPriorValues_upperBounds'] = [ None, None,  None, None, None,     None, None, None, None, None, None]
     UserInput.model['InputParameterPriorValues_lowerBounds'] = [ 0, None, 0, 0, None,     None, None, None, None, None, None]
-    
+
+    #We'll make a custom log prior that always returns 1.
+    def alwaysReturn1(input):
+        return 1
+    UserInput.model['custom_logPrior']=alwaysReturn1    
     
     UserInput.model['simulateByInputParametersOnlyFunction'] = processing_functions_tpd_odeint.TPR_internalPiecewiseSimulationFunctionWrapperScaledAndOffset #This must simulate with *only* the parameters listed above, and no other arguments.
     UserInput.model['simulationOutputProcessingFunction'] = processing_functions_tpd_odeint.no_log_wrapper_func  #Optional: a function to process what comes out of the simulation Function and then return an observable vector.
     UserInput.parameter_pairs_for_contour_plots=[[2,3],[2,4]]
-        
-    UserInput.parameter_estimation_settings['scaling_uncertainties_type'] = "off"                                                                                                 
+
+    UserInput.parameter_estimation_settings['scaling_uncertainties_type'] = "off"        
     UserInput.parameter_estimation_settings['verbose'] = False 
     UserInput.parameter_estimation_settings['exportLog'] = False
     UserInput.parameter_estimation_settings['checkPointFrequency'] = 100
