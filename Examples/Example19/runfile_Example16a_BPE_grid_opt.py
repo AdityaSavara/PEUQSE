@@ -58,7 +58,7 @@ if __name__ == "__main__":
     #Now we do parameter estimation.
 #    PE_object.doMetropolisHastings()
     #PE_object.doOptimizeNegLogP(method="Nelder-Mead", printOptimum=True, verbose=True)
-    PE_object.doGridSearch('doOptimizeNegLogP', gridSamplingAbsoluteIntervalSize=[ 0.10, 0.005, 0.50/3, 20, 20, 2, 2, 0.1, 0.1], gridSamplingNumOfIntervals=[0,0,1,1,1,1,1,0,0], passThroughArgs={"method":"Nelder-Mead", "maxiter":5000, "verbose":False})#, "maxiter":1000, "verbose":False})
+    PE_object.doGridSearch('doOptimizeNegLogP', gridSamplingAbsoluteIntervalSize=[ 0.10, 0.005, 0.50/3, 20, 20, 2, 2, 0.1, 0.1], gridSamplingNumOfIntervals=[0,0,1,1,1,1,1,0,0], passThroughArgs={"method":"Nelder-Mead", "maxiter":5000, "verbose":False}, exportLog=False)# "maxiter":1000, "verbose":False})
     print(PE_object.map_parameter_set, PE_object.map_logP)    
     #[map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, samples_simulatedOutputs, logP] = PE_object.doMetropolisHastings()
     

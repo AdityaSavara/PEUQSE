@@ -299,7 +299,7 @@ class parameter_estimation:
                         pass
         return nestedAllResponsesArray_transformed, nestedAllResponsesUncertainties_transformed  
   
-    def doGridSearch(self, searchType='getLogP', export = True, gridSamplingAbsoluteIntervalSize = [], gridSamplingNumOfIntervals = [], passThroughArgs = {}):
+    def doGridSearch(self, searchType='getLogP', exportLog = True, gridSamplingAbsoluteIntervalSize = [], gridSamplingNumOfIntervals = [], passThroughArgs = {}):
         # gridSamplingNumOfIntervals is the number of variations to check in units of variance for each parameter. Can be 0 if you don't want to vary a particular parameter in the grid search.
         #TODO: the upper part of the gridsearch may not be compatibile with reduced parameter space. Needs to be checked.
         import CheKiPEUQ.CombinationGeneratorModule as CombinationGeneratorModule
@@ -366,11 +366,12 @@ class parameter_estimation:
         #Now populate the map etc. with those of the best result.
         self.map_logP = highest_logP 
         self.map_parameter_set = highest_logP_parameter_set 
-        with open("gridsearch_log_file.txt", 'w') as out_file:
-            out_file.write("result: " + "self.map_logP, self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_logP_un_normed_vec" + "\n")
-            for resultIndex, result in enumerate(allGridResults):
-                out_file.write("result: " + str(resultIndex) + " " +  str(result) + "\n")
-            print("Final map results from gridsearch:", self.map_parameter_set, "final logP:", self.map_logP)
+        if exportLog == True:
+            with open("gridsearch_log_file.txt", 'w') as out_file:
+                out_file.write("result: " + "self.map_logP, self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_logP_un_normed_vec" + "\n")
+                for resultIndex, result in enumerate(allGridResults):
+                    out_file.write("result: " + str(resultIndex) + " " +  str(result) + "\n")
+                print("Final map results from gridsearch:", self.map_parameter_set, "final logP:", self.map_logP)
         if searchType == 'doMetropolisHastings':
             #Metropolis hastings has other variables to populate.
             #[self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_logP_un_normed_vec] =
