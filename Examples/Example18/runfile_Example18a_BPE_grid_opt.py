@@ -68,7 +68,7 @@ if __name__ == "__main__":
     #PE_object.doGridSearch('doMetropolisHastings')
 #    PE_object.doGridSearch('doOptimizeNegLogP', verbose = True,gridSamplingRadii = [], passThroughArgs={'method':'BFGS'})
     
-    PE_object.doGridSearch('doOptimizeNegLogP', gridSamplingAbsoluteIntervalSize=UserInput.model['InputParametersPriorValuesUncertainties'], gridSamplingNumOfIntervals=[0,0,1,1,0, 1,0,1,0,1,0], passThroughArgs={"method":"Nelder-Mead", "maxiter":5000, "verbose":False})#, "maxiter":1000, "verbose":False})
+    PE_object.doGridSearch('doOptimizeNegLogP', gridSamplingAbsoluteIntervalSize=UserInput.model['InputParametersPriorValuesUncertainties'], gridSamplingNumOfIntervals=[0,0,1,1,0, 1,0,1,0,1,0], passThroughArgs={"method":"Nelder-Mead", "maxiter":100, "verbose":False})#, "maxiter":1000, "verbose":False})
     print(PE_object.map_parameter_set, PE_object.map_logP)
     
     PE_object.createAllPlots() #This function calls each of the below functions.
