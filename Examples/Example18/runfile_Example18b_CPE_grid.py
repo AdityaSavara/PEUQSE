@@ -10,7 +10,7 @@ if __name__ == "__main__":
     
     UserInput.responses['responses_abscissa'] = times
     UserInput.responses['responses_observed'] = responses_observed
-    UserInput.responses['responses_observed_uncertainties'] = observedResponses_uncertainties*0.5
+    UserInput.responses['responses_observed_uncertainties'] = observedResponses_uncertainties
     
     #We are going to use the built in transform to improve the optimization.
     UserInput.responses['data_overcategory'] = 'transient_kinetics'

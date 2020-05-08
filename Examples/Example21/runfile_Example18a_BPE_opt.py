@@ -24,12 +24,12 @@ if __name__ == "__main__":
     UserInput.simulated_response_plot_settings['figure_name'] = 'Posterior_Example' #This creates the filename, also.
 
     UserInput.model['parameterNamesAndMathTypeExpressionsDict'] = {'scalingFactor':'scalingFactor', 'verticalOffset':'verticalOffset', 'Ea_1':r'$E_{a1}$','log_A1':r'$log(A_{1})$','gamma1':r'$\gamma_{1}$',  'modEa1':'modEa1', 'modEa2':'modEa2', 'modEa3':'modEa3', 'modEa4':'modEa4', 'modEa5':'modEa5', 'modEa6':'modEa6' }#, 'modEa5':'modEa5', 'modEa6':'modEa6', 'modEa7':'modEa7', 'modEa8':'modEa8', 'modEa9':'modEa9', 'modEa10':'modEa10'}
-    UserInput.model['InputParameterPriorValues'] = [1.0, 0.0, 40.0, 13.0, 0.1, 
+    UserInput.model['InputParameterPriorValues'] = [1.0, 0.0, 41.5, 13.0, 0.1, 
                    0.0, 0.0,   0.0, 0.0, 0.0, 0.0]  #0, 0.2, 0.4, 0.6, 0.8, 1.0
     UserInput.model['InputParametersPriorValuesUncertainties'] = [.1, 0.005, 20, 2, 0.3, 
                    0.1, 0.1,      0.1, 0.1, 0.1, 0.1] #,        10, 10,      10, 10,          10, 10] #If user wants to use a prior with covariance, then this must be a 2D array/ list. To assume no covariance, a 1D
-    UserInput.model['InputParameterInitialGuess'] =[1.0, 0.0, 40.0, 13.0, 0.0, 
-                   0.0, 0.0,   0.0, 0.0, 0.0, 0.0] 
+    # UserInput.model['InputParameterInitialGuess'] =[1.0, 0.0, 40.0, 13.0, 0.0, 
+                   # 0.0, 0.0,   0.0, 0.0, 0.0, 0.0] 
     
     UserInput.model['InputParameterPriorValues_upperBounds'] = [ None, None,  None, None, None,     None, None, None, None, None, None]
     UserInput.model['InputParameterPriorValues_lowerBounds'] = [ 0, None, 0, 0, None,     None, None, None, None, None, None]
