@@ -28,7 +28,7 @@ if __name__ == "__main__":
                    0.0, 0.0,   0.0, 0.0, 0.0, 0.0]  #0, 0.2, 0.4, 0.6, 0.8, 1.0
     UserInput.model['InputParametersPriorValuesUncertainties'] = [.1, 0.005, 20, 2, 0.3, 
                    0.1, 0.1,      0.1, 0.1, 0.1, 0.1] #,        10, 10,      10, 10,          10, 10] #If user wants to use a prior with covariance, then this must be a 2D array/ list. To assume no covariance, a 1D
-    UserInput.model['InputParameterInitialGuess'] =[1.09118167e+00,5.06351739e-04,1.82224641e+01,9.09312805e+00,-2.73876168e-01,3.92896709e-01,-5.89138698e-02,1.57091955e-02,5.75251210e-02,-8.98549984e-02,-1.02258301e-01]
+    UserInput.model['InputParameterInitialGuess'] =[1.01568835e+00,1.13324397e-04,3.04885721e+01,1.60555690e+01,2.06581107e-02,5.27458167e-01,-1.45987528e-01,-1.76722128e-01,1.45870300e-02,-1.07755894e-01,-6.42334953e-02]
     
     UserInput.model['InputParameterPriorValues_upperBounds'] = [ None, None,  None, None, None,     None, None, None, None, None, None]
     UserInput.model['InputParameterPriorValues_lowerBounds'] = [ 0, None, 0, 0, None,     None, None, None, None, None, None]

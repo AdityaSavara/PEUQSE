@@ -10,7 +10,7 @@ if __name__ == "__main__":
     
     UserInput.responses['responses_abscissa'] = times
     UserInput.responses['responses_observed'] = responses_observed
-    UserInput.responses['responses_observed_uncertainties'] = observedResponses_uncertainties*0.5
+    UserInput.responses['responses_observed_uncertainties'] = observedResponses_uncertainties
     
     #We are going to use the built in transform to improve the optimization.
     UserInput.responses['data_overcategory'] = 'transient_kinetics'
@@ -28,7 +28,7 @@ if __name__ == "__main__":
                    0.0, 0.0,   0.0, 0.0, 0.0, 0.0]  #0, 0.2, 0.4, 0.6, 0.8, 1.0
     UserInput.model['InputParametersPriorValuesUncertainties'] = [.1, 0.005, 20, 2, 0.3, 
                    0.1, 0.1,      0.1, 0.1, 0.1, 0.1] #,        10, 10,      10, 10,          10, 10] #If user wants to use a prior with covariance, then this must be a 2D array/ list. To assume no covariance, a 1D
-    UserInput.model['InputParameterInitialGuess'] =[9.72403839e-01,2.45807149e-04,2.16720262e+01,1.17139968e+01,-2.39634576e-05,2.00249952e-01,6.62735737e-05,-1.06494051e-01,2.17505358e-05,-1.00161392e-01,1.44611048e-04]
+    UserInput.model['InputParameterInitialGuess'] =[9.93009342e-01,1.29766120e-04,2.26806868e+01,1.24669034e+01,9.76401954e-02,-1.03490036e-01,2.65703192e-05,9.85685434e-02,3.98592895e-05,-1.02576953e-01,5.80915528e-05]
     
     UserInput.model['InputParameterPriorValues_upperBounds'] = [ None, None,  None, None, None,     None, None, None, None, None, None]
     UserInput.model['InputParameterPriorValues_lowerBounds'] = [ 0, None, 0, 0, None,     None, None, None, None, None, None]
