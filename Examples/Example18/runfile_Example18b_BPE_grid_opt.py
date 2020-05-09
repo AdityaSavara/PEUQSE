@@ -39,7 +39,7 @@ if __name__ == "__main__":
     UserInput.parameter_pairs_for_contour_plots=[[2,3],[2,4]]
         
     UserInput.parameter_estimation_settings['scaling_uncertainties_type'] = "off"                                                                                                 
-    UserInput.parameter_estimation_settings['verbose'] = False 
+    UserInput.parameter_estimation_settings['verbose'] = True 
     UserInput.parameter_estimation_settings['exportLog'] = False
     UserInput.parameter_estimation_settings['checkPointFrequency'] = 1
     UserInput.parameter_estimation_settings['mcmc'] = True 
@@ -66,7 +66,7 @@ if __name__ == "__main__":
 #    PE_object.doGridSearch('getLogP')
     #PE_object.doGridSearch('doMetropolisHastings')
 #    PE_object.doGridSearch('doOptimizeNegLogP', verbose = True,gridSamplingRadii = [], passThroughArgs={'method':'BFGS'})
-    PE_object.doOptimizeNegLogP(method="Nelder-Mead", printOptimum=True, verbose=False, maxiter=5000)
+    PE_object.doOptimizeNegLogP(method="Nelder-Mead", printOptimum=True, verbose=True, maxiter=5000)
     #PE_object.doGridSearch('doOptimizeNegLogP', gridSamplingAbsoluteIntervalSize=UserInput.model['InputParametersPriorValuesUncertainties'], gridSamplingNumOfIntervals=[0,0,1,1,0, 1,0,1,0,1,0], passThroughArgs={"method":"Nelder-Mead", "maxiter":100, "verbose":False})#, "maxiter":1000, "verbose":False})
     print(PE_object.map_parameter_set, PE_object.map_logP)
     
