@@ -28,7 +28,7 @@ if __name__ == "__main__":
     UserInput.model['parameterNamesAndMathTypeExpressionsDict'] = {'scalingFactor':'scalingFactor', 'backgroundOffset':'backgroundOffset', 'site2Ratio':'site2Ratio','Ea_1':r'$E_{a1}$','Ea_2':r'$E_{a2}$','log_A1':r'$log(A_{1})$','log_A2':r'$log(A_{2})$','gamma1':r'$\gamma_{1}$','gamma2':r'$\gamma_{2}$'}
     UserInput.model['InputParameterPriorValues'] = [ 1.0, 0.0, 0.50, 41.5, 41.5, 13.0, 13.0, 0.1, 0.1] # Ea1_mean, Ea2_mean, log_A1_mean, log_A2_mean, gamma_1_mean, gamma_2_mean 
     UserInput.model['InputParametersPriorValuesUncertainties'] = [ 0.10, 0.005, 0.50/3, 20, 20, 2, 2, 0.1, 0.1] #If user wants to use a prior with covariance, then this must be a 2D array/ list. To assume no covariance, a 1D
-    UserInput.model['InputParameterInitialGuess'] = [1.31850027e+00,2.39650171e-03,5.76140992e-01,5.48880289e+01,1.94775168e+01,3.63448101e+01,9.70069391e+00,4.86434241e-01,8.92942906e-04]
+    UserInput.model['InputParameterInitialGuess'] = [1.25384964e+00,2.04001014e-03,5.45932317e-01,5.46374259e+01,2.26561529e+01,3.61464156e+01,1.18133568e+01,5.02161431e-01,3.14296393e-01]
     UserInput.model['InputParameterPriorValues_upperBounds'] = [ None, None, 1.0, None, None, None, None, None, None]
     UserInput.model['InputParameterPriorValues_lowerBounds'] = [ 0, None, 0, 0, 0, None, None, 0, 0]
     
