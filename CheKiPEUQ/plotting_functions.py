@@ -138,10 +138,18 @@ def createSimulatedResponsesPlot(x_values, listOfYArrays, plot_settings=[], list
     if 'y_label' not in plot_settings: plot_settings['y_label'] = ''
     if 'legendLabels' not in plot_settings: plot_settings['legendLabels'] = ''
     if 'figure_name' not in plot_settings: plot_settings['figure_name'] = 'simulatedResponsesPlot'
-    if 'dpi' not in plot_settings: plot_settings['dpi']=220          
+    if 'dpi' not in plot_settings: plot_settings['dpi']=220
     fig0, ax0 = plt.subplots()
-    ax0.set_xlabel(plot_settings['x_label'])
-    ax0.set_ylabel(plot_settings['y_label']) #TODO: THis is not yet generalized (will be a function)
+    if 'fontdict' in plot_settings: 
+        #There are various things that could be added to this fontdict. #https://www.tutorialexample.com/understand-matplotlib-fontdict-a-beginner-guide-matplotlib-tutorial/
+        fontdict = plot_settings['fontdict']
+        if 'size' in fontdict:
+            ax0.tick_params(axis='x', labelsize=fontdict['size'])
+            ax0.tick_params(axis='y', labelsize=fontdict['size'])
+    else:
+        fontdict = None #initializing with the matplotlib default
+    ax0.set_xlabel(plot_settings['x_label'], fontdict=fontdict)
+    ax0.set_ylabel(plot_settings['y_label'], fontdict=fontdict) #TODO: THis is not yet generalized (will be a function)
     if 'y_range' in plot_settings: ax0.set_ylim(plot_settings['y_range'] )
     if len(listOfYArrays) == 3: #This generally means observed, mu_guess, map, in that order.
         if len(x_values) > 1: #This means there are enough data to make lines.        
@@ -202,7 +210,8 @@ def createSimulatedResponsesPlot(x_values, listOfYArrays, plot_settings=[], list
         if len(x_values) == 1: #This means there are single points, and we need to make symbols.
             for seriesIndex in range(len(listOfYArrays)):
                 ax0.plot(x_values[0],listOfYArrays[seriesIndex], 'o')            
-    ax0.legend(plot_settings['legendLabels']) #legends must be after plots are made.
+    if plot_settings['legend'] == True:
+        ax0.legend(plot_settings['legendLabels']) #legends must be after plots are made.
     fig0.tight_layout()
     fig0.savefig(plot_settings['figure_name'] + '.png', dpi=plot_settings['dpi'])
     return fig0

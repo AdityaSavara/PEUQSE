@@ -8,6 +8,9 @@ simulated_response_plot_settings['x_label'] = ''
 simulated_response_plot_settings['y_label'] = ''
 #simulated_response_plot_settings['y_range'] = [0.00, 0.025] #optional.
 simulated_response_plot_settings['figure_name'] = 'Posterior_Simulated' #This is the default name for simulated response plots.
+simulated_response_plot_settings['legend'] = True #Can be changed to false to turn off the legend.
+#simulated_response_plot_settings['legendLabels'] = ['experiment', 'mu_guess', 'MAP'] here is an example of how to change the legend labels.
+#simulated_response_plot_settings['fontdict']= {'size':20} A font dictionary can be passed in, this will be used for the axes and axes labels.
 
 ####BELOW ARE MODEL PARAMETERS, WE WILL WANT TO COMBINE THESE INTO A LIST OF PARAMETERS###
 model = {} 
@@ -50,6 +53,11 @@ parameter_estimation_settings['mcmc_relative_step_length'] = 0.1 #Default value 
 parameter_estimation_settings['mcmc_modulate_accept_probability']  = 0 #Default value of 0. Changing this value sharpens or flattens the posterior. A value greater than 1 flattens the posterior by accepting low values more often. It can be useful when greater sampling is more important than accuracy. One way of using this feature is to try with a value of 0, then with the value equal to the number of priors for comparison, and then to gradually decrease this number as low as is useful (to minimize distortion of the result). A downside of changing changing this variable to greater than 1 is that it slows the the ascent to the maximum of the prior, so there is a balance in using it. In contrast, numbers increasingly less than one (such as 0.90 or 0.10) will speed up the ascent to the maximum of the posterior, but will also result in fewer points being retained.
 parameter_estimation_settings['mcmc_info_gain_cutoff'] = 0  #A typical value is 1E-5. Use 0 to turn this setting off. Allowing values that are too small will cause numerical errors, this serves as a highpass filter.
 parameter_estimation_settings['mcmc_info_gain_returned'] = 'log_ratio' #current options are 'log_ratio' and 'KL' where 'KL' is the 
+
+
+#####Plot Settings#####
+#possible dictionary fields include: dpi, figure_name, fontsize, x_label, y_label, figure_name, x_range, y_range
+samplingScatterMatrixPlotsSettings ={}
 
 ######gridSamplingSettings##### 
 #At present, all gridSampling settings are fed as arguments directly into the doGridSearch function.

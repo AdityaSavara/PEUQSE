@@ -822,10 +822,11 @@ class parameter_estimation:
 
         if plot_settings == {}: 
             plot_settings = self.UserInput.simulated_response_plot_settings
-            if hasattr(self, 'mu_AP_parameter_set'): 
-                plot_settings['legendLabels'] = ['experiments',  'mu_guess', 'MAP','mu_AP']
-            else: #Else there is no mu_AP.
-                plot_settings['legendLabels'] = ['experiments',  'mu_guess', 'MAP']
+            if 'legendLabels' not in plot_settings: #The normal case:
+                if hasattr(self, 'mu_AP_parameter_set'): 
+                    plot_settings['legendLabels'] = ['observed',  'mu_guess', 'MAP','mu_AP']
+                else: #Else there is no mu_AP.
+                    plot_settings['legendLabels'] = ['observed',  'mu_guess', 'MAP']
             #Other allowed settings are like this, but will be fed in as simulated_response_plot_settings keys rather than plot_settings keys.
             #plot_settings['x_label'] = 'T (K)'
             #plot_settings['y_label'] = r'$rate (s^{-1})$'
