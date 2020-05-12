@@ -918,7 +918,7 @@ class parameter_estimation:
         except:
             pass
 
-class verbose_optimization_wrapper: #Modified slightly From https://stackoverflow.com/questions/16739065/how-to-display-progress-of-scipy-optimize-function
+class verbose_optimization_wrapper: #Learned how to use callback from Henri's post https://stackoverflow.com/questions/16739065/how-to-display-progress-of-scipy-optimize-function
     def __init__(self, simulationFunction):
         self.simulationFunction = simulationFunction
         self.FirstCall = True # Just intializing.
