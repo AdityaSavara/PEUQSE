@@ -1,5 +1,6 @@
-
 import numpy as np
+global exportThetaVsEaGlobal
+exportThetaVsEaGlobal = False
 
 # The below function must return a vector of rates. 
 def tprequation(tpr_theta,t,Ea_1, Ea_2, log_A1, log_A2, gamma1, gamma2,beta_dTdt,start_T): #beta_dTdT is the heating rate. 
@@ -36,6 +37,9 @@ def tprequation(tpr_theta,t,Ea_1, Ea_2, log_A1, log_A2, gamma1, gamma2,beta_dTdt
     
 # The below function must return a vector of rates. 
 def tprequationPiecewiseWithOffset(tpr_theta,t,Ea_1, log_A1, gamma1, verticalOffset, beta_dTdt,start_T, *Gamma_offsets, exportThetaVsEa=False): #beta_dTdT is the heating rate. 
+    global exportThetaVsEaGlobal #This was added later than the original writing, in order to provide a convenient way to export exportThetaVsEa
+    if exportThetaVsEaGlobal == True:
+        exportThetaVsEa = True
     if tpr_theta.ndim == 1:  #for consistency, making tpr_theta a 2D array if it does not start as 2D. 
         tpr_theta2D = np.atleast_2d(tpr_theta)  
     if tpr_theta.ndim == 2: 
@@ -98,6 +102,9 @@ def tprequationPiecewiseWithOffset(tpr_theta,t,Ea_1, log_A1, gamma1, verticalOff
         
 # The below function must return a vector of rates. 
 def tprequationPiecewise(tpr_theta,t,Ea_1, log_A1, gamma1, beta_dTdt,start_T, *Gamma_offsets, exportThetaVsEa=False): #beta_dTdT is the heating rate. 
+    global exportThetaVsEaGlobal #This was added later than the original writing, in order to provide a convenient way to export exportThetaVsEa
+    if exportThetaVsEaGlobal == True:
+        exportThetaVsEa = True
     if tpr_theta.ndim == 1:  #for consistency, making tpr_theta a 2D array if it does not start as 2D. 
         tpr_theta2D = np.atleast_2d(tpr_theta)  
     if tpr_theta.ndim == 2: 
