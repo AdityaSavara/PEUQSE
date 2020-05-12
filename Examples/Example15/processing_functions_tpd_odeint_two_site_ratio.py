@@ -31,9 +31,12 @@ def TPR_internalPiecewiseSimulationFunctionWrapper(discreteParameterVector):
 
 
 #this is what CheKiPEUQ considers the "Basic" simulation function. It takes the discrete parameter vector, and then simulates.
-def TPR_simulationFunctionWrapper(discreteParameterVector): 
+def TPR_simulationFunctionWrapperRatioFirst(discreteParameterVectorRatioFirst): 
     global times
-    discreteParameterVectorList = list(discreteParameterVector) #converting to list so can use list expansion in arguments.        
+    discreteParameterVectorList = list(discreteParameterVectorRatioFirst) #converting to list so can use pop and also list expansion in arguments.  
+    initial_concentrations_array[0] = 1-discreteParameterVectorRatioFirst[0]
+    initial_concentrations_array[1] = discreteParameterVectorRatioFirst[0]
+    discreteParameterVectorList.pop(0)
     tpr_theta_Arguments = [tprequation, initial_concentrations_array, times, (*discreteParameterVectorList,beta_dTdt,T_0) ] 
     tpr_theta = odeint(*tpr_theta_Arguments) # [0.5, 0.5] are the initial theta's. 
     simulationInputArguments = [tpr_theta, times, *discreteParameterVectorList, beta_dTdt,T_0] 
@@ -51,8 +54,8 @@ def TPR_simulationFunctionWrapperPiecewise(discreteParameterVector):
     return simulationOutput 
 
 #below converts the simulation into an integral, so it is just a wrapper around the "Base" case above.
-def TPR_integerated_simulationFunctionWrapper(discreteParameterVector): 
-    simulationOutput = TPR_simulationFunctionWrapper(discreteParameterVector)
+def TPR_integerated_simulationFunctionWrapperRatioFirst(discreteParameterVectorRatioFirst): 
+    simulationOutput = TPR_simulationFunctionWrapperRatioFirst(discreteParameterVectorRatioFirst)
     rate = neg_sum_of_all_rates(simulationOutput)
     global times
     from CheKiPEUQ import littleEulerGivenArray
