@@ -22,7 +22,7 @@ if __name__ == "__main__":
 
     UserInput.model['parameterNamesAndMathTypeExpressionsDict'] = {'Ea_1':r'$E_{a1}$','Ea_2':r'$E_{a2}$','log_A1':r'$log(A_{1})$','log_A2':r'$log(A_{2})$','gamma1':r'$\gamma_{1}$','gamma2':r'$\gamma_{2}$'}
     UserInput.model['InputParameterPriorValues'] = [41.5, 41.5, 13.0, 13.0, 0.1, 0.1] # Ea1_mean, Ea2_mean, log_A1_mean, log_A2_mean, gamma_1_mean, gamma_2_mean 
-    UserInput.model['InputParametersPriorValuesUncertainties'] = [20, 20, 13, 13, 0.1, 0.1] #If user wants to use a prior with covariance, then this must be a 2D array/ list. To assume no covariance, a 1D
+    UserInput.model['InputParametersPriorValuesUncertainties'] = [20, 20, 2, 2, 0.1, 0.1] #If user wants to use a prior with covariance, then this must be a 2D array/ list. To assume no covariance, a 1D
     UserInput.model['InputParameterInitialGuess'] = [47.5, 33.5, 12.0, 20.0, 0.09, 0.14] #This is where the mcmc chain will start.
     #InputParameterInitialValues = [41.5, 41.5, 13.0, 13.0, 0.1, 0.1] # Ea1_mean, Ea2_mean, log_A1_mean, log_A2_mean, gamma_1_mean, gamma_2_mean 
     
@@ -30,7 +30,7 @@ if __name__ == "__main__":
     UserInput.model['simulateByInputParametersOnlyFunction'] = processing_functions_tpd_odeint.TPR_simulationFunctionWrapper #This must simulate with *only* the parameters listed above, and no other arguments.
     UserInput.model['simulationOutputProcessingFunction'] = processing_functions_tpd_odeint.no_log_wrapper_func #Optional: a function to process what comes out of the simulation Function and then return an observable vector.
     
-    UserInput.parameter_estimation_settings['scaling_uncertainties_type'] == "std"
+    UserInput.parameter_estimation_settings['scaling_uncertainties_type'] ="std"
     UserInput.parameter_estimation_settings['verbose'] = False 
     UserInput.parameter_estimation_settings['checkPointFrequency'] = 100
     UserInput.parameter_estimation_settings['mcmc'] = True 
