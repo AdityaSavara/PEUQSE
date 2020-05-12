@@ -6,4 +6,6 @@ As of April 2020, the software can be downloaded and used directly, or used by "
 
 The file structure is such that the file `./CheKiPEUQ/__init__.py` is where the modules functions are loaded from. The main functionalities are inside `InverseProblem.py` , and various dependencies can be traced from those two files.
 
+At present, the Examples directory contains various examples and a file named  ExamplesAndTutorialAndGettingStarted which provides some explanation.
+
 In the relatively near future, the Examples may be separated into a complementary repository, and/or may be tucked away into the installation directory.
