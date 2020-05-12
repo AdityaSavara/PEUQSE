@@ -4,6 +4,7 @@ from matplotlib.ticker import FormatStrFormatter
 import numpy as np
 import scipy
 from scipy.integrate import odeint
+#import dill
 import sys; sys.path.append('../../');  import CheKiPEUQ as CKPQ
 import CheKiPEUQ.UserInput as UserInput
 
@@ -21,9 +22,10 @@ if __name__ == "__main__":
     UserInput.simulated_response_plot_settings['figure_name'] = 'Posterior_Example12' #This creates the filename, also.
 
     UserInput.model['parameterNamesAndMathTypeExpressionsDict'] = {'delta_G':r'$\deltaG (eV)$'}
-    UserInput.model['InputParameterPriorValues'] = [-0.587] # eV
+    UserInput.model['offset'] = 0.1
+    UserInput.model['InputParameterPriorValues'] = [-0.687 + UserInput.model['offset']] # eV
     UserInput.model['InputParametersPriorValuesUncertainties'] = [0.05] #If user wants to use a prior with covariance, then this must be a 2D array/ list. To assume no covariance, a 1D  This is a standard deviation!
-    UserInput.model['InputParameterInitialGuess'] = [-0.587] #This is where the mcmc chain will start.
+    UserInput.model['InputParameterInitialGuess'] = [-0.687 + UserInput.model['offset']] #This is where the mcmc chain will start.
     #InputParameterInitialValues = [41.5, 41.5, 13.0, 13.0, 0.1, 0.1] # Ea1_mean, Ea2_mean, log_A1_mean, log_A2_mean, gamma_1_mean, gamma_2_mean 
     #InputParametersInitialValuesUncertainties = [200, 200, 13, 13, 0.1, 0.1] #If user wants to use a prior with covariance, then this must be a 2D array/ list. To assume no covariance, a 1D array can be used.
     UserInput.model['simulateByInputParametersOnlyFunction'] = fun.Langmuir_compete_ads #This must simulate with *only* the parameters listed above, and no other arguments.
@@ -48,6 +50,10 @@ if __name__ == "__main__":
     global T
     global pA
     global pB
+    global S_CO
+    global G_H2O
+    S_CO = 0.00150
+    G_H2O = -1.32
     kB = 8.61733035E-5 #eV/K\n
     delta_G_1 = -0.687
     temperatures = np.linspace(398.15,598.15,5)
@@ -74,7 +80,7 @@ if __name__ == "__main__":
     fig.colorbar(surf, shrink=0.5, aspect=5)
     fig.savefig('synthetic_observables_theta_A.png',dpi=220)
     
-    prior = np.random.normal(-0.587,0.05,10000)
+    prior = np.random.normal(-0.687 + + UserInput.model['offset'],0.05,10000)
     info_gains=[]
     PE_object_list = []
     for p in pressures:
