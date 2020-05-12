@@ -1,6 +1,6 @@
 # CheKiPEUQ
 
-CheKiPEUQ stands for "Chemical Kinetics Parameter Estimation and Uncertainty Quantification".  The fun name can be pronounced "Check-ee-pook", "Check-ee-peeoo" or "Check-ee-poo".
+CheKiPEUQ stands for "Chemical Kinetics Parameter Estimation and Uncertainty Quantification".  The fun name can be pronounced in various ways such as "Check-ee-pook" or "Check-ee-peeoo" or "Check-ee-poo".
 
 As of April 2020, the software can be downloaded and used directly, or used by "python setup.py install" (the setup.py way will install the package appropriately to allow the module to be accessed by python regardless of directory).
 
