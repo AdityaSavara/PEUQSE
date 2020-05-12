@@ -18,7 +18,7 @@ if __name__ == "__main__":
     UserInput.responses['responses_observed'] = responses_observed
     UserInput.responses['responses_observed_uncertainties'] = observedResponses_uncertainties*1.0
 
-    UserInput.model['kinetics_type'] = 'transient'
+    UserInput.responses['data_overcategory'] = 'transient_kinetics'
     UserInput.responses['response_types']=['P'] 
     UserInput.responses['response_data_type']=['r']
 
@@ -31,8 +31,8 @@ if __name__ == "__main__":
     UserInput.model['parameterNamesAndMathTypeExpressionsDict'] = {'Ea_1':r'$E_{a1}$','Ea_2':r'$E_{a2}$','log_A1':r'$log(A_{1})$','log_A2':r'$log(A_{2})$','gamma1':r'$\gamma_{1}$','gamma2':r'$\gamma_{2}$'}
     UserInput.model['InputParameterPriorValues'] = [41.5, 41.5, 13.0, 13.0, 0.1, 0.1] # Ea1_mean, Ea2_mean, log_A1_mean, log_A2_mean, gamma_1_mean, gamma_2_mean 
     UserInput.model['InputParametersPriorValuesUncertainties'] = [20, 20, 2, 2, 0.1, 0.1] #If user wants to use a prior with covariance, then this must be a 2D array/ list. To assume no covariance, a 1D
-    UserInput.model['InputParameterInitialGuess'] = [40, 25, 13, 13.0, 0.1, 0.2]#[39.08033543, 25.85946199, 10.02022149, 14.67430303, -0.41925677,  0.62673177] #This is where the mcmc chain will start.
-    #InputParameterInitialValues = [41.5, 41.5, 13.0, 13.0, 0.1, 0.1] # Ea1_mean, Ea2_mean, log_A1_mean, log_A2_mean, gamma_1_mean, gamma_2_mean 
+    UserInput.model['InputParameterInitialGuess'] = [47.5, 33.5, 12.0, 20.0, 0.09, 0.14]#[39.08033543, 25.85946199, 10.02022149, 14.67430303, -0.41925677,  0.62673177] #This is where the mcmc chain will start.
+    #InputParameterInitialGuess = [41.5, 41.5, 13.0, 13.0, 0.1, 0.1] # Ea1_mean, Ea2_mean, log_A1_mean, log_A2_mean, gamma_1_mean, gamma_2_mean 
     
     #InputParametersInitialValuesUncertainties = [200, 200, 13, 13, 0.1, 0.1] #If user wants to use a prior with covariance, then this must be a 2D array/ list. To assume no covariance, a 1D array can be used.
     UserInput.model['simulateByInputParametersOnlyFunction'] = processing_functions_tpd_odeint.TPR_simulationFunctionWrapper #This must simulate with *only* the parameters listed above, and no other arguments.
@@ -61,8 +61,8 @@ if __name__ == "__main__":
     #PE_object.doGridSearch('doOptimizeNegLogP', verbose = True,gridSamplingRadii = [1,1,1,1,0,0], passThroughArgs={'method':'BFGS'})
     #PE_object.doGridSearch('getLogP', verbose = True)
     
-#    PE_object.createAllPlots() #This function calls each of the below functions.
+    PE_object.createAllPlots() #This function calls each of the below functions.
 #    PE_object.makeHistogramsForEachParameter()    
 #    PE_object.makeSamplingScatterMatrixPlot()
-    PE_object.createSimulatedResponsesPlots()
+#    PE_object.createSimulatedResponsesPlots()
     #TODO: call the mum_pce plotting objects, which will be PE_object.createContourGraphs() or something like that.

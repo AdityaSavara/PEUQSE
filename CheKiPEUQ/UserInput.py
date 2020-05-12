@@ -8,11 +8,14 @@ simulated_response_plot_settings['x_label'] = ''
 simulated_response_plot_settings['y_label'] = ''
 #simulated_response_plot_settings['y_range'] = [0.00, 0.025] #optional.
 simulated_response_plot_settings['figure_name'] = 'Posterior_Simulated' #This is the default name for simulated response plots.
+simulated_response_plot_settings['legend'] = True #Can be changed to false to turn off the legend.
+#simulated_response_plot_settings['legendLabels'] = ['experiment', 'mu_guess', 'MAP'] here is an example of how to change the legend labels.
+#simulated_response_plot_settings['fontdict']= {'size':20} A font dictionary can be passed in, this will be used for the axes and axes labels.
 
 ####BELOW ARE MODEL PARAMETERS, WE WILL WANT TO COMBINE THESE INTO A LIST OF PARAMETERS###
 model = {} 
-model['InputParameterInitialValues'] =  [] #Should be like: [41.5, 41.5, 13.0, 13.0, 0.1, 0.1] # Ea1_mean, Ea2_mean, log_A1_mean, log_A2_mean, gamma_1_mean, gamma_2_mean 
-model['InputParametersInitialValuesUncertainties'] = []# Should bel ike: [200, 200, 13, 13, 0.1, 0.1] #If user wants to use a prior with covariance, then this must be a 2D array/ list. To assume no covariance, a 1D
+model['InputParameterPriorValues'] =  [] #Should be like: [41.5, 41.5, 13.0, 13.0, 0.1, 0.1] # Ea1_mean, Ea2_mean, log_A1_mean, log_A2_mean, gamma_1_mean, gamma_2_mean 
+model['InputParametersPriorValuesUncertainties'] = []# Should be like: [200, 200, 13, 13, 0.1, 0.1] #If user wants to use a prior with covariance, then this must be a 2D array/ list. To assume no covariance, a 1D
 model['parameterNamesAndMathTypeExpressionsDict'] = {} #This must be provided. It can be as simple as {"Param1":"1"} etc. but it must be a dictionary with strings as keys and as values. The next line is a comment with a more complicated example.
 #Example: model['parameterNamesAndMathTypeExpressionsDict'] = {'Ea_1':r'$E_{a1}$','Ea_2':r'$E_{a2}$','log_A1':r'$log(A_{1})$','log_A2':r'$log(A_{2})$','gamma1':r'$\gamma_{1}$','gamma2':r'$\gamma_{2}$'}
 model['simulateByInputParametersOnlyFunction'] = None #A function must be provided! This cannot be left as None.
@@ -21,6 +24,8 @@ model['reducedParameterSpace'] = [] #This is to keep parameters as 'constants'. 
 model['responses_simulation_uncertainties'] = None #Can be none, a list/vector, or can be a function that returns the uncertainties after each simulation is done. The easiest way would be to have a function that extracts a list that gets updated in another namespace after each simulation.
 model['custom_logLikelihood'] = None #This should point to a function that takes the discrete parameter values as an argument and returns "logLikelihood, simulatedResponses". So the function returns a value for the logLikelihood (or proportional to it). The function must *also* return the simulated response output, though technically can just return the number 0 as the ssecond return.  The function can be a simple as accessing a global dictionary. This feature is intended for cases where the likelihood cannot be described by a normal/gaussian distribution.
 model['custom_logPrior'] = None  #This feature has not been implemented yet, but is intended for cases where the prior distribution is not described by a normal distribution. The user will provide a function that takes in the parameters and returns a logPrior (or something proportional to a logPrior).
+model['InputParameterPriorValues_upperBounds'] = [] #This should be a list/array of the same shape as InputParameterPriorValues. Use a value of "None" for any parameter that should not be bounded in this direction.  The code then truncates any distribution to have a probability of ~0 when any of the parameters go outside of their bounds. ##As of May 4th 2020, this only has been checked for scaling_uncertainties_type = 'off'
+model['InputParameterPriorValues_lowerBounds'] = []#This should be a list/array of the same shape as InputParameterPriorValues. Use a value of "None" for any parameter that should not be bounded in this direction.  The code then truncates any distribution to have a probability of ~0 when any of the parameters go outside of their bounds. ##As of May 4th 2020, this only has been checked for scaling_uncertainties_type = 'off'
 
 #####Experimental Data Input Files#####
 responses = {}
@@ -36,8 +41,8 @@ parameter_estimation_settings['verbose'] = False
 parameter_estimation_settings['exportLog'] = True
 parameter_estimation_settings['exportAllSimulatedOutputs'] = False
 parameter_estimation_settings['checkPointFrequency'] = None
-parameter_estimation_settings['scaling_uncertainties_type'] = "std" #"std" is for standard deviation. there is also the option of "mu" for using the absolute values of the mean(s) of the prior distribution(s).
-parameter_estimation_settings['undo_scaling_uncertainties_type'] = False
+parameter_estimation_settings['scaling_uncertainties_type'] = "std" #"std" is for standard deviation. there is also "off" and the option of "mu" for using the absolute values of the mean(s) of the prior distribution(s). If a scalar is entered (a float) then that fixed value will be used for all scalings.
+parameter_estimation_settings['undo_scaling_uncertainties_type'] = False #This undoing can be set to True but presently only works for the case of fixed scaling (a single scalar).
 				  
 ######MCMC settings:#####
 parameter_estimation_settings['mcmc_random_seed'] = None #Normally set to None so that mcmc is set to be random. To get the same results repeatedly, such as for testing purposes, set the random seed to 0 or another integer for testing purposes.
@@ -49,10 +54,16 @@ parameter_estimation_settings['mcmc_modulate_accept_probability']  = 0 #Default 
 parameter_estimation_settings['mcmc_info_gain_cutoff'] = 0  #A typical value is 1E-5. Use 0 to turn this setting off. Allowing values that are too small will cause numerical errors, this serves as a highpass filter.
 parameter_estimation_settings['mcmc_info_gain_returned'] = 'log_ratio' #current options are 'log_ratio' and 'KL' where 'KL' is the 
 
+
+#####Plot Settings#####
+#possible dictionary fields include: dpi, figure_name, fontsize, x_label, y_label, figure_name, x_range, y_range
+samplingScatterMatrixPlotsSettings ={}
+
 ######gridSamplingSettings##### 
 #At present, all gridSampling settings are fed as arguments directly into the doGridSearch function.
 #Perhaps that should be changed in the future so that wrapper functions can pass arguments to doGridSearch.
 #parameter_estimation_settings['gridSampling'] = False    
+#doGridSearch(self, searchType='doMetropolisHastings', export = True, verbose = False, gridSamplingIntervalSize = [], gridSamplingRadii = [], passThroughArgs = {}):
 
 ######mumpce plots#####
 #model_parameter_info = np.array([{'parameter_number': 0, 'parameter_name': r'$E_{a1}$'},
@@ -62,6 +73,7 @@ parameter_estimation_settings['mcmc_info_gain_returned'] = 'log_ratio' #current 
 #{'parameter_number': 4, 'parameter_name': r'$\gamma_{1}$'},
 #{'parameter_number': 5, 'parameter_name': r'$\gamma_{2}$'}])
 active_parameters = [] #Blank by default: gets populated with all parameters (or reduced parameters) if left blank. Warning: trying to set this manually while using the reduced parameters feature is not supported as of April 2020.
-#pairs_of_parameter_indices = [[0, 1], [1, 2],[2, 3],[3, 4],[4, 5]]
+#pairs_of_parameter_indices = [[0, 1], [1, 2],[2, 3],[3, 4],[4, 5]] #This sets which parameters to plot contours for. By default, all pairs are plotted.
 contour_settings_custom = {'figure_name': 'PosteriorContourPlots','fontsize':'auto' ,'num_y_ticks': 'auto','num_x_ticks':'auto','contours_normalized':True,'center_on':'all','colorbars':True} #'colormap_posterior_customized':'Oranges','colormap_prior_customized':'Greens'
+#num_y_ticks and num_x_ticks must be either a string ('auto') or an integer (such as 4, either without string or with integer casting like int('5')).
 parameter_pairs_for_contour_plots = [] #This will accept either strings (for variable names) or integers for positions.

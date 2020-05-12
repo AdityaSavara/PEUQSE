@@ -241,9 +241,9 @@ class parameter_estimation:
 #            abscissaRange = UserInput.responses_abscissa[responseIndex][-1] - UserInput.responses_abscissa[responseIndex][0] #Last value minus first value.
 #            UserInput.responses_observed = np.atleast_2d(UserInput.responses_observed)
 #            UserInput.responses_observed_uncertainties = np.atleast_2d(UserInput.responses_observed_uncertainties)
-        if 'kinetics_type' not in UserInput.model:  #To make backwards compatibility.
-            UserInput.model['kinetics_type'] = ''
-        if UserInput.model['kinetics_type'] == 'transient': #This assumes that the abscissa is always time.
+        if 'data_overcategory' not in UserInput.responses:  #To make backwards compatibility.
+            UserInput.responses['data_overcategory'] = ''
+        if UserInput.responses['data_overcategory'] == 'transient_kinetics': #This assumes that the abscissa is always time.
             for responseIndex, response in enumerate(UserInput.responses_observed):
                 #We will need the abscissa also, so need to check if there are independent abscissa or not:
                 if len(UserInput.responses_abscissa) == 1: #This means there is only one abscissa.
@@ -270,6 +270,7 @@ class parameter_estimation:
                     if UserInput.responses['response_data_type'][responseIndex] == 'r':
                         LittleEuler
                 if UserInput.responses['response_types'][responseIndex] == 'P':	 #For product
+                    
                     if UserInput.responses['response_data_type'][responseIndex] == 'c':
                         pass
                     if UserInput.responses['response_data_type'][responseIndex] == 'r':
@@ -277,14 +278,14 @@ class parameter_estimation:
                         t_values, nestedAllResponsesArray_transformed[responseIndex], dydt_values = littleEulerGivenArray(0, UserInput.responses_abscissa[abscissaIndex], nestedAllResponsesArray[responseIndex])
                         if len(nestedAllResponsesUncertainties) > 0:
                             nestedAllResponsesUncertainties_transformed[responseIndex] = littleEulerUncertaintyPropagation(nestedAllResponsesUncertainties[responseIndex], UserInput.responses_abscissa[abscissaIndex], np.mean(nestedAllResponsesUncertainties[responseIndex])/10) 
-                if UserInput.responses['response_types'][responseIndex] == 'o':
+                if UserInput.responses['response_types'][responseIndex] == 'O':
                     if UserInput.responses['response_data_type'][responseIndex] == 'o':
                         pass
                     if UserInput.responses['response_data_type'][responseIndex] == 'c':
                         LittleEuler
                     if UserInput.responses['response_data_type'][responseIndex] == 'r':
                         LittleEulerTwice
-        if UserInput.model['kinetics_type'] == 'steady_state': #TODO: so far, this does not do anything. It assumes that the abscissa is never time.
+        if UserInput.responses['data_overcategory'] == 'steady_state_kinetics': #TODO: so far, this does not do anything. It assumes that the abscissa is never time.
             for responseIndex, response in enumerate(UserInput.responses_observed):
                 if UserInput.responses['response_types'][responseIndex] == 'T':	 #For abscissa of temperature dependence. Will probably do a log transform.
                     if UserInput.responses['response_data_type'][responseIndex] == 'c':
@@ -298,27 +299,28 @@ class parameter_estimation:
                         pass
         return nestedAllResponsesArray_transformed, nestedAllResponsesUncertainties_transformed  
   
-    def doGridSearch(self, searchType='doMetropolisHastings', export = True, verbose = False, gridSamplingIntervalSize = [], gridSamplingRadii = [], passThroughArgs = {}):
-        # gridSamplingRadii is the number of variations to check in units of variance for each parameter. Can be 0 if you don't want to vary a particular parameter in the grid search.
+    def doGridSearch(self, searchType='getLogP', exportLog = True, gridSamplingAbsoluteIntervalSize = [], gridSamplingNumOfIntervals = [], passThroughArgs = {}):
+        # gridSamplingNumOfIntervals is the number of variations to check in units of variance for each parameter. Can be 0 if you don't want to vary a particular parameter in the grid search.
         #TODO: the upper part of the gridsearch may not be compatibile with reduced parameter space. Needs to be checked.
         import CheKiPEUQ.CombinationGeneratorModule as CombinationGeneratorModule
-        numParameters = len(self.UserInput.parameterNamesList)
-        if len(gridSamplingRadii) == 0:
-            gridSamplingRadii = np.ones(numParameters, dtype='int') #By default, will make ones.
+        verbose = self.UserInput.parameter_estimation_settings['verbose']
+        numParameters = len(self.UserInput.InputParameterInitialGuess)
+        if len(gridSamplingNumOfIntervals) == 0:
+            gridSamplingNumOfIntervals = np.ones(numParameters, dtype='int') #By default, will make ones.
             numGridPoints = 3**numParameters
         else: 
-            gridSamplingRadii = np.array(gridSamplingRadii, dtype='int')
+            gridSamplingNumOfIntervals = np.array(gridSamplingNumOfIntervals, dtype='int')
             numGridPoints = 1 #just initializing.
-            for radius in gridSamplingRadii:
+            for radius in gridSamplingNumOfIntervals:
                 numGridPoints=numGridPoints*(2*radius+1)
-        if len(gridSamplingIntervalSize) == 0:
-            gridSamplingIntervalSize = self.UserInput.std_prior #By default, we use the standard deviations associated with the priors.
-        else: gridSamplingIntervalSize = np.array(gridSamplingRadii, dtype='float')
+        if len(gridSamplingAbsoluteIntervalSize) == 0:
+            gridSamplingAbsoluteIntervalSize = self.UserInput.std_prior #By default, we use the standard deviations associated with the priors.
+        else: gridSamplingAbsoluteIntervalSize = np.array(gridSamplingAbsoluteIntervalSize, dtype='float')
         gridCenter = self.UserInput.InputParameterInitialGuess #We take what is in the variable self.UserInput.InputParameterInitialGuess for the center of the grid.
-        gridCombinations = CombinationGeneratorModule.combinationGenerator(gridCenter, gridSamplingIntervalSize, gridSamplingRadii, SpreadType="Addition",toFile=False)
+        gridCombinations = CombinationGeneratorModule.combinationGenerator(gridCenter, gridSamplingAbsoluteIntervalSize, gridSamplingNumOfIntervals, SpreadType="Addition",toFile=False)
         allGridResults = []
         #Initialize some things before loop.
-        if type(self.UserInput.parameter_estimation_settings['checkPointFrequency']) != type(None):
+        if (type(self.UserInput.parameter_estimation_settings['checkPointFrequency']) != type(None)) or (verbose == True):
                 import timeit
                 timeAtGridStart = timeit.time.clock()
                 timeAtLastGridPoint = timeAtGridStart #just initializing
@@ -327,14 +329,17 @@ class parameter_estimation:
         for combinationIndex,combination in enumerate(gridCombinations):
             self.UserInput.InputParameterInitialGuess = combination #We need to fill the variable InputParameterInitialGuess with the combination being checked.
             if searchType == 'getLogP':
-                thisResult = self.getLogP(combination)
-                self.map_logP = thisResult #The getLogP function does not fill map_logP by itself.
+                self.map_logP = self.getLogP(combination) #The getLogP function does not fill map_logP by itself.
                 self.map_parameter_set = combination
+                thisResult = [self.map_logP, str(self.map_parameter_set).replace(",","|").replace("[","").replace('(','').replace(')',''), 'None', 'None', 'None', 'None', 'None', 'None']
             if searchType == 'doMetropolisHastings':
                 thisResult = self.doMetropolisHastings()
+                #self.map_logP gets done by itself in Metrpolos hastings.                
             if searchType == 'doOptimizeNegLogP':
                 thisResult = self.doOptimizeNegLogP(**passThroughArgs)
-            if type(self.UserInput.parameter_estimation_settings['checkPointFrequency']) != type(None):
+                #FIXME: the column headings of "thisResult" are wrong for the case of doOptimizeNegLogP.
+                #What we really need to do is have the log file's column headings generated based on the searchType.
+            if (type(self.UserInput.parameter_estimation_settings['checkPointFrequency']) != type(None)) or (verbose == True):
                 timeAtThisGridPoint = timeit.time.clock()
                 timeOfThisGridPoint = timeAtThisGridPoint - timeAtLastGridPoint
                 averageTimePerGridPoint = (timeAtThisGridPoint - timeAtGridStart)/(combinationIndex+1)
@@ -346,27 +351,34 @@ class parameter_estimation:
                 highest_logP_parameter_set = self.map_parameter_set
             allGridResults.append(thisResult)
             if verbose == True:
-                print("GridPoint", combination, "number", combinationIndex, "out of", numGridPoints, "timeOfThisGridPoint", timeOfThisGridPoint)
-                print("GridPoint", combinationIndex, "averageTimePerGridPoint", "%.2f" % round(averageTimePerGridPoint,2), "estimated time remaining", "%.2f" % round( numRemainingGridPoints*averageTimePerGridPoint,2), "s" )
-                print("GridPoint", combinationIndex, "current logP", self.map_logP, "highest logP", highest_logP)
+                print("GridPoint", combination, "number", combinationIndex+1, "out of", numGridPoints, "timeOfThisGridPoint", timeOfThisGridPoint)
+                print("GridPoint", combinationIndex+1, "averageTimePerGridPoint", "%.2f" % round(averageTimePerGridPoint,2), "estimated time remaining", "%.2f" % round( numRemainingGridPoints*averageTimePerGridPoint,2), "s" )
+                print("GridPoint", combinationIndex+1, "current logP", self.map_logP, "highest logP", highest_logP)
+            elif type(self.UserInput.parameter_estimation_settings['checkPointFrequency']) != type(None): #If verbose off but checkpoint frequency is on.
+                if (combinationIndex/self.UserInput.parameter_estimation_settings['checkPointFrequency']).is_integer():
+                    print("GridPoint", combination, "number", combinationIndex+1, "out of", numGridPoints, "timeOfThisGridPoint", timeOfThisGridPoint)
+                    print("GridPoint", combinationIndex+1, "averageTimePerGridPoint", "%.2f" % round(averageTimePerGridPoint,2), "estimated time remaining", "%.2f" % round( numRemainingGridPoints*averageTimePerGridPoint,2), "s" )
+                    print("GridPoint", combinationIndex+1, "current logP", self.map_logP, "highest logP", highest_logP)
+            
         #TODO: export the allGridResults to file at end of search in a nicer format.        
         #First set the initial guess back to the center of the grid.
         self.UserInput.InputParameterInitialGuess = gridCenter
         #Now populate the map etc. with those of the best result.
         self.map_logP = highest_logP 
         self.map_parameter_set = highest_logP_parameter_set 
-        with open("gridsearch_log_file.txt", 'w') as out_file:
-            out_file.write("result: " + "self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_logP_un_normed_vec" + "\n")
-            for resultIndex, result in enumerate(allGridResults):
-                out_file.write("result:" + str(resultIndex) +  str(result) + "\n")
-            print("Final map results from gridsearch:", self.map_parameter_set, "final logP:", self.map_logP)
+        if exportLog == True:
+            with open("gridsearch_log_file.txt", 'w') as out_file:
+                out_file.write("result: " + "self.map_logP, self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_logP_un_normed_vec" + "\n")
+                for resultIndex, result in enumerate(allGridResults):
+                    out_file.write("result: " + str(resultIndex) + " " +  str(result) + "\n")
+        print("Final map results from gridsearch:", self.map_parameter_set, "final logP:", self.map_logP)
         if searchType == 'doMetropolisHastings':
             #Metropolis hastings has other variables to populate.
             #[self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_logP_un_normed_vec] =
             return bestResultSoFar # [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_logP_un_normed_vec] 
         if searchType == 'doOptimizeNegLogP':            
             return bestResultSoFar# [self.map_parameter_set, self.map_logP]
-        if searchType == 'simplegrid':          
+        if searchType == 'getLogP':          
             return bestResultSoFar# [self.map_parameter_set, self.map_logP]
             
 
@@ -380,22 +392,38 @@ class parameter_estimation:
         neg_log_postererior = -1*self.getLogP(proposal_sample)
         return neg_log_postererior
 
-    def doOptimizeNegLogP(self, simulationFunctionAdditionalArgs = (), method = None, optimizationAdditionalArgs = {}, printOptimum = True, verbose=True):
+    def doOptimizeNegLogP(self, simulationFunctionAdditionalArgs = (), method = None, optimizationAdditionalArgs = {}, printOptimum = True, verbose=True, maxiter=0):
         #THe intention of the optional arguments is to pass them into the scipy.optimize.minimize function.
         # the 'method' argument is for Nelder-Mead, BFGS, SLSQP etc. https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html#scipy.optimize.minimize
+        #Note that "maxiter=0" just means to use the default.
         initialGuess = self.UserInput.InputParameterInitialGuess
         import scipy.optimize
         if verbose == False:
-            optimizeResult = scipy.optimize.minimize(self.getNegLogP, initialGuess, method = method)
+            if maxiter == 0:
+                optimizeResult = scipy.optimize.minimize(self.getNegLogP, initialGuess, method = method)
+            if maxiter != 0:    
+                optimizeResult = scipy.optimize.minimize(self.getNegLogP, initialGuess, method = method, options={"maxiter": maxiter})
         if verbose == True:
             verbose_simulator = verbose_optimization_wrapper(self.getNegLogP)
-            optimizeResult = scipy.optimize.minimize(verbose_simulator.simulate, initialGuess, method=method, callback=verbose_simulator.callback, options={"disp": True})
+            if maxiter == 0:
+                optimizeResult = scipy.optimize.minimize(verbose_simulator.simulate, initialGuess, method=method, callback=verbose_simulator.callback, options={"disp": True})
+            if maxiter != 0:    
+                optimizeResult = scipy.optimize.minimize(verbose_simulator.simulate, initialGuess, method=method, callback=verbose_simulator.callback, options={"maxiter": maxiter})
             #print(f"Number of calls to Simulator instance {verbose_simulator.num_calls}") <-- this is the same as the "Function evaluations" field that gets printed.
             
         self.map_parameter_set = optimizeResult.x #This is the map location.
         self.map_logP = -1.0*optimizeResult.fun #This is the map logP
         if printOptimum == True:
             print("Final results from doOptimizeNegLogP:", self.map_parameter_set, "final logP:", self.map_logP)
+        return [self.map_parameter_set, self.map_logP]
+    
+    #This function is meant to be called from the runfile when testing a new function etc. It allows a simulation plot to be created.
+    #This is *not* recommended for use in other functions, where it is recommended that getLogP be called directly.
+    def doSinglePoint(self, discreteParameterVector=None):
+        if type(discreteParameterVector)==type(None): #If somebody did not feed a specific vector, we take the initial guess.
+            discreteParameterVector = self.UserInput.InputParameterInitialGuess
+        self.map_parameter_set = discreteParameterVector
+        self.map_logP = self.getLogP(self.map_parameter_set)
         return [self.map_parameter_set, self.map_logP]
     
     #main function to get samples #TODO: Maybe Should return map_log_P and mu_AP_log_P?
@@ -419,8 +447,11 @@ class parameter_estimation:
             timeOfFirstCheckpoint = timeit.time.clock()
             timeCheckpoint = timeit.time.clock() - timeOfFirstCheckpoint #First checkpoint at time 0.
             numCheckPoints = self.UserInput.parameter_estimation_settings['mcmc_length']/self.UserInput.parameter_estimation_settings['checkPointFrequency']
-        for i in range(1,self.UserInput.parameter_estimation_settings['mcmc_length']): #FIXME: Don't we need to start with i of 0?
-            if self.UserInput.parameter_estimation_settings['verbose']: print("MCMC sample number", i)                  
+        #Before sampling should fill in the first entry for the posterior vector we have created. #FIXME: It would probably be better to start with i of 0 in below sampling loop. I believe that right now the "burn in" and "samples" arrays are actually off by an index of 1. But trying to change that alters their length relative to other arrays and causes problems. Since we always do many samples and this only affects the initial point being averaged in twice, it is not a major problem. It's also avoided if people use a burn in of at least 1.
+        log_posteriors_un_normed_vec[0]= self.getLogP(self.UserInput.InputParameterInitialGuess)
+        for i in range(1, self.UserInput.parameter_estimation_settings['mcmc_length']): #FIXME: Don't we need to start with i of 0?
+            sampleNumber = i #This is so that later we can change it to i+1 if the loop starts from i of 0 in the future.
+            if self.UserInput.parameter_estimation_settings['verbose']: print("MCMC sample number", sampleNumber)                  
             if self.UserInput.parameter_estimation_settings['mcmc_mode'] == 'unbiased':
                 proposal_sample = samples[i-1,:] + np.random.multivariate_normal(self.Q_mu,self.Q_covmat*self.UserInput.parameter_estimation_settings['mcmc_relative_step_length'])
             if self.UserInput.parameter_estimation_settings['mcmc_mode'] == 'MAP_finding':
@@ -430,10 +461,9 @@ class parameter_estimation:
                 proposal_sample = samples[i-1,:] + np.random.multivariate_normal(self.Q_mu,self.Q_covmat*mcmc_step_dynamic_coefficient*mcmc_step_modulation_coefficient*self.UserInput.parameter_estimation_settings['mcmc_relative_step_length'])
             log_prior_proposal = self.getLogPrior(proposal_sample)
             [log_likelihood_proposal, simulationOutput_proposal] = self.getLogLikelihood(proposal_sample)
-            log_prior_current_location = self.getLogPrior(samples[i-1,:]) 
+            log_prior_current_location = self.getLogPrior(samples[i-1,:]) #"current" location is the most recent accepted location, because we haven't decided yet if we're going to move.
             [log_likelihood_current_location, simulationOutput_current_location] = self.getLogLikelihood(samples[i-1,:]) #FIXME: the previous likelihood should be stored so that it doesn't need to be calculated again.
             log_accept_probability = (log_likelihood_proposal + log_prior_proposal) - (log_likelihood_current_location + log_prior_current_location) 
-            #accept_probability = np.power(10, log_accept_probability) Don't use this!
             if self.UserInput.parameter_estimation_settings['verbose']: print('Current log_likelihood',log_likelihood_current_location, 'Proposed log_likelihood', log_likelihood_proposal, '\nLog of Accept_probability (gauranteed if above 0)', log_accept_probability)
             if self.UserInput.parameter_estimation_settings['verbose']: print('Current posterior',log_likelihood_current_location+log_prior_current_location, 'Proposed Posterior', log_likelihood_proposal+log_prior_proposal)
             if self.UserInput.parameter_estimation_settings['mcmc_modulate_accept_probability'] != 0: #This flattens the posterior by accepting low values more often. It can be useful when greater sampling is more important than accuracy.
@@ -469,19 +499,19 @@ class parameter_estimation:
                 log_likelihoods_vec[i] = log_likelihood_current_location
                 log_priors_vec[i] = log_prior_current_location
             if type(self.UserInput.parameter_estimation_settings['checkPointFrequency']) != type(None):
-                if i%self.UserInput.parameter_estimation_settings['checkPointFrequency'] == 0: #The % is a modulus function.
+                if sampleNumber%self.UserInput.parameter_estimation_settings['checkPointFrequency'] == 0: #The % is a modulus function.
                     timeSinceLastCheckPoint = (timeit.time.clock() - timeOfFirstCheckpoint) -  timeCheckpoint
                     timeCheckpoint = timeit.time.clock() - timeOfFirstCheckpoint
-                    checkPointNumber = i/self.UserInput.parameter_estimation_settings['checkPointFrequency']
-                    averagetimePerSampling = timeCheckpoint/i
-                    print("MCMC sample number ", i, "checkpoint", checkPointNumber, "out of", numCheckPoints) 
+                    checkPointNumber = sampleNumber/self.UserInput.parameter_estimation_settings['checkPointFrequency']
+                    averagetimePerSampling = timeCheckpoint/(sampleNumber)
+                    print("MCMC sample number ", sampleNumber, "checkpoint", checkPointNumber, "out of", numCheckPoints) 
                     print("averagetimePerSampling", averagetimePerSampling, "seconds")
                     print("timeSinceLastCheckPoint", timeSinceLastCheckPoint, "seconds")
-                    print("Estimated time remaining", averagetimePerSampling*(self.UserInput.parameter_estimation_settings['mcmc_length']-i), "seconds")
+                    print("Estimated time remaining", averagetimePerSampling*(self.UserInput.parameter_estimation_settings['mcmc_length']-sampleNumber), "seconds")
                     if self.UserInput.parameter_estimation_settings['mcmc_mode'] != 'unbiased':
                         print("Most recent mcmc_step_dynamic_coefficient:", mcmc_step_dynamic_coefficient)
             if self.UserInput.parameter_estimation_settings['mcmc_mode'] != 'unbiased':
-                if i%100== 0: #The % is a modulus function to change the modulation coefficient every n steps.
+                if sampleNumber%100== 0: #The % is a modulus function to change the modulation coefficient every n steps.
                     if self.UserInput.parameter_estimation_settings['mcmc_mode'] == 'MAP_finding':
                         recent_log_postereriors_drawn=log_postereriors_drawn[i-100:i] 
                         recent_mcmc_step_modulation_history=mcmc_step_modulation_history[i-100:i]
@@ -507,8 +537,8 @@ class parameter_estimation:
                             if mcmc_step_dynamic_coefficient > 0.1:
                                 mcmc_step_dynamic_coefficient = mcmc_step_dynamic_coefficient*0.95
             ########################################
-        self.burn_in_samples = samples[:self.UserInput.parameter_estimation_settings['mcmc_burn_in']]
-        self.post_burn_in_samples = samples[self.UserInput.parameter_estimation_settings['mcmc_burn_in']:]
+        self.burn_in_samples = samples[0:self.UserInput.parameter_estimation_settings['mcmc_burn_in']] #FIXME: this line will have to change with i indexing changed.
+        self.post_burn_in_samples = samples[self.UserInput.parameter_estimation_settings['mcmc_burn_in']:] #FIXME: this line will have to change with i indexing changed.
         if self.UserInput.parameter_estimation_settings['exportAllSimulatedOutputs'] == True:
             self.post_burn_in_samples_simulatedOutputs = samples_simulatedOutputs[self.UserInput.parameter_estimation_settings['mcmc_burn_in']:]
         self.post_burn_in_log_posteriors_un_normed_vec = log_posteriors_un_normed_vec[self.UserInput.parameter_estimation_settings['mcmc_burn_in']:]
@@ -597,6 +627,7 @@ class parameter_estimation:
                 out_file.write("self.map_index:" +  str(self.map_index) + "\n")
                 out_file.write("self.map_parameter_set:" + str( self.map_parameter_set) + "\n")
                 out_file.write("self.mu_AP_parameter_set:" + str( self.mu_AP_parameter_set) + "\n")
+                out_file.write("self.stdap_parameter_set:" + str( self.stdap_parameter_set) + "\n")
                 out_file.write("self.info_gain:" +  str(self.info_gain) + "\n")
                 out_file.write("evidence:" + str(self.evidence) + "\n")
                 out_file.write("posterior_cov_matrix:" + "\n" + str(np.cov(self.post_burn_in_samples.T)) + "\n")
@@ -606,6 +637,9 @@ class parameter_estimation:
             print("Warning: The MAP parameter set and mu_AP parameter set differ by more than 10% of prior variance in at least one parameter. This may mean that you need to increase your mcmc_length, increase or decrease your mcmc_relative_step_length, or change what is used for the model response.  There is no general method for knowing the right  value for mcmc_relative_step_length since it depends on the sharpness and smoothness of the response. See for example https://www.sciencedirect.com/science/article/pii/S0039602816300632  ")
         return [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_logP_un_normed_vec] # EAW 2020/01/08
     def getLogPrior(self,discreteParameterVector):
+        if type(self.UserInput.model['custom_logPrior']) != type(None):
+            logPrior = self.UserInput.model['custom_logPrior'](discreteParameterVector)
+            return logPrior
         if self.UserInput.parameter_estimation_settings['scaling_uncertainties_type'] == "off":
             discreteParameterVector_scaled = np.array(discreteParameterVector)*1.0
         elif self.UserInput.parameter_estimation_settings['scaling_uncertainties_type'] != "off":
@@ -614,21 +648,31 @@ class parameter_estimation:
             else: #TODO: If we're in the else statemnt, then the scaling uncertainties is a covariance matrix, for which we plan to do row and column scaling, which has not yet been implemented. #We could pobably just use the diagonal in the short term.
                 print("WARNING: There is an error in your self.UserInput.scaling_uncertainties. Contact the developers with a bug report.")
                 discreteParameterVector_scaled = np.array(discreteParameterVector)*1.0
-        log_probabilityPrior = multivariate_normal.logpdf(x=discreteParameterVector_scaled,mean=self.UserInput.mu_prior_scaled,cov=self.UserInput.covmat_prior_scaled)
+        logPrior = multivariate_normal.logpdf(x=discreteParameterVector_scaled,mean=self.UserInput.mu_prior_scaled,cov=self.UserInput.covmat_prior_scaled)
         if self.UserInput.parameter_estimation_settings['undo_scaling_uncertainties_type'] == True:
             try:
                 scaling_factor = float(self.UserInput.parameter_estimation_settings['scaling_uncertainties_type'])
-                log_probabilityPrior = log_probabilityPrior - np.log(scaling_factor)
+                logPrior = logPrior - np.log(scaling_factor)
             except:
                 if self.UserInput.parameter_estimation_settings['scaling_uncertainties_type'] != "off":
                     print("Warning: undo_scaling_uncertainties_type is set to True, but can only be used with a fixed value for scaling_uncertainties_type.  Skipping the undo.")
-        return log_probabilityPrior
+        return logPrior
     def getLogLikelihood(self,discreteParameterVector): #The variable discreteParameterVector represents a vector of values for the parameters being sampled. So it represents a single point in the multidimensional parameter space.
         if type(self.UserInput.model['custom_logLikelihood']) != type(None):
             logLikelihood, simulatedResponses = self.UserInput.model['custom_logLikelihood'](discreteParameterVector)
             simulatedResponses = np.array(simulatedResponses).flatten()
             return logLikelihood, simulatedResponses
         #else pass is implied.
+        
+        #Now we do upper and lower bounds checks, if such bounds have been provided.
+        if len(self.UserInput.model['InputParameterPriorValues_upperBounds']) > 0:
+            upperCheck = boundsCheck(discreteParameterVector, self.UserInput.model['InputParameterPriorValues_upperBounds'], 'upper')
+            if upperCheck == False:
+                return float('-inf'), None #This approximates zero probability.
+        if len(self.UserInput.model['InputParameterPriorValues_lowerBounds']) > 0:
+            lowerCheck = boundsCheck(discreteParameterVector, self.UserInput.model['InputParameterPriorValues_lowerBounds'], 'lower')
+            if lowerCheck == False:
+                return float('-inf'), None #This approximates zero probability.
         
         simulationFunction = self.UserInput.simulationFunction #Do NOT use self.UserInput.model['simulateByInputParametersOnlyFunction']  because that won't work with reduced parameter space requests.  
         simulationOutputProcessingFunction = self.UserInput.simulationOutputProcessingFunction #Do NOT use self.UserInput.model['simulationOutputProcessingFunction'] because that won't work with reduced parameter space requests.
@@ -778,10 +822,11 @@ class parameter_estimation:
 
         if plot_settings == {}: 
             plot_settings = self.UserInput.simulated_response_plot_settings
-            if hasattr(self, 'mu_AP_parameter_set'): 
-                plot_settings['legendLabels'] = ['experiments',  'mu_guess', 'MAP','mu_AP']
-            else: #Else there is no mu_AP.
-                plot_settings['legendLabels'] = ['experiments',  'mu_guess', 'MAP']
+            if 'legendLabels' not in plot_settings: #The normal case:
+                if hasattr(self, 'mu_AP_parameter_set'): 
+                    plot_settings['legendLabels'] = ['observed',  'mu_guess', 'MAP','mu_AP']
+                else: #Else there is no mu_AP.
+                    plot_settings['legendLabels'] = ['observed',  'mu_guess', 'MAP']
             #Other allowed settings are like this, but will be fed in as simulated_response_plot_settings keys rather than plot_settings keys.
             #plot_settings['x_label'] = 'T (K)'
             #plot_settings['y_label'] = r'$rate (s^{-1})$'
@@ -824,6 +869,7 @@ class parameter_estimation:
         #TODO: the posterior mu_vector and cov_matrix should be calculated elsewhere.
         posterior_mu_vector = np.mean(parameterSamples, axis=0)
         posterior_cov_matrix = np.cov(self.post_burn_in_samples.T)
+        self.posterior_cov_matrix = posterior_cov_matrix
         #TODO: In future, worry about whether there are constants or not, since then we will have to trim down the prior.
         #Make the model_parameter_info object that mumpce Project class needs.
         self.UserInput.model_parameter_info = []#This variable name is for mumpce definition of variable names. Not what we would choose otherwise.
@@ -1035,6 +1081,32 @@ def returnShapedResponseCovMat(numResponseDimensions, uncertainties):
         shapedUncertainties = shapedUncertainties.flatten() 
         shapedUncertainties = np.square(shapedUncertainties) #Need to square standard deviations to make them into variances.
     return shapedUncertainties
+
+def boundsCheck(parameters, parametersBounds, boundsType):
+    #Expects three arguments.
+    #the first two are 1D array like arguments (parameters and a set of *either* upper bounds or lower bounds)
+    #The third argumment is the type of bounds, either 'upper' or 'lower'
+    #In practice, this means the function usually needs to be called twice.
+    #A "None" type is expected for something that is not bounded in that direction. 
+    
+    #We first need to make arrays and remove anything that is None in the bounds.
+    parameters = np.array(parameters).flatten()
+    parametersBounds = np.array(parametersBounds).flatten()
+    #to remove, we use brackets that pull out the indices where the comparison is not None. This is special numpy array syntax.
+    parametersTruncated = parameters[parametersBounds != None]
+    parametersBoundsTruncated = parametersBounds[parametersBounds != None]    
+    if boundsType.lower() == 'upper': #we make the input into lower case before proceeding.
+        upperCheck = parametersTruncated < parametersBoundsTruncated #Check if all are smaller.
+        if False in upperCheck: #If any of them failed, we return False.
+            return False
+        else:
+            return True
+    if boundsType.lower() == 'lower':
+        lowerCheck = parametersTruncated > parametersBoundsTruncated #Check if all are smaller.
+        if False in lowerCheck: #If any of them failed, we return False.
+            return False
+        else:
+            return True
         
 if __name__ == "__main__":
     pass

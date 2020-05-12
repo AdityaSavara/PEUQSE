@@ -1,0 +1,4 @@
+result: self.map_logP, self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_logP_un_normed_vec
+result: 0 [-84258.84826310178, ' 1.   0.   0.5 41.5 41.5 13.  13.   0.1  0.1]', 'None', 'None', 'None', 'None', 'None', 'None']
+result: 1 [-inf, '1.0| 0.0| 0.5| 41.5| 41.5| 13.0| 13.0| 0.1| 0.0', 'None', 'None', 'None', 'None', 'None', 'None']
+result: 2 [-84258.75440055421, '1.0| 0.0| 0.5| 41.5| 41.5| 13.0| 13.0| 0.1| 0.2', 'None', 'None', 'None', 'None', 'None', 'None']
