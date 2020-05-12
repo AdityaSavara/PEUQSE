@@ -406,9 +406,9 @@ class parameter_estimation:
         if verbose == True:
             verbose_simulator = verbose_optimization_wrapper(self.getNegLogP)
             if maxiter == 0:
-                optimizeResult = scipy.optimize.minimize(verbose_simulator.simulate, initialGuess, method=method, callback=verbose_simulator.callback, options={"disp": True})
+                optimizeResult = scipy.optimize.minimize(verbose_simulator.simulateAndStoreObjectiveFunction, initialGuess, method=method, callback=verbose_simulator.callback, options={"disp": True})
             if maxiter != 0:    
-                optimizeResult = scipy.optimize.minimize(verbose_simulator.simulate, initialGuess, method=method, callback=verbose_simulator.callback, options={"maxiter": maxiter})
+                optimizeResult = scipy.optimize.minimize(verbose_simulator.simulateAndStoreObjectiveFunction, initialGuess, method=method, callback=verbose_simulator.callback, options={"maxiter": maxiter})
             #print(f"Number of calls to Simulator instance {verbose_simulator.num_calls}") <-- this is the same as the "Function evaluations" field that gets printed.
             
         self.map_parameter_set = optimizeResult.x #This is the map location.
@@ -919,64 +919,40 @@ class parameter_estimation:
             pass
 
 class verbose_optimization_wrapper: #Modified slightly From https://stackoverflow.com/questions/16739065/how-to-display-progress-of-scipy-optimize-function
-    def __init__(self, function):
-        self.f = function # actual objective function
-        self.num_calls = 0 # how many times f has been called
-        self.callback_count = 0 # number of times callback has been called, also measures iteration count
-        self.list_calls_inp = [] # input of all calls
-        self.list_calls_res = [] # result of all calls
-        self.decreasing_list_calls_inp = [] # input of calls that resulted in decrease
-        self.decreasing_list_calls_res = [] # result of calls that resulted in decrease
-        self.list_callback_inp = [] # only appends inputs on callback, as such they correspond to the iterations
-        self.list_callback_res = [] # only appends results on callback, as such they correspond to the iterations
+    def __init__(self, simulationFunction):
+        self.simulationFunction = simulationFunction
+        self.FirstCall = True # Just intializing.
+        self.iterationNumber = 0 # Just intializing.
     
-    def simulate(self, x):
-        """Executes the actual simulation and returns the result, while
-        updating the lists too. Pass to optimizer without arguments or
-        parentheses."""
-        result = self.f(x) # the actual evaluation of the function
-        if not self.num_calls: # first call is stored in all lists
-            self.decreasing_list_calls_inp.append(x)
-            self.decreasing_list_calls_res.append(result)
-            self.list_callback_inp.append(x)
-            self.list_callback_res.append(result)
-        elif result < self.decreasing_list_calls_res[-1]:
-            self.decreasing_list_calls_inp.append(x)
-            self.decreasing_list_calls_res.append(result)
-        self.list_calls_inp.append(x)
-        self.list_calls_res.append(result)
-        self.num_calls += 1
-        return result
+    def simulateAndStoreObjectiveFunction(self, discreteParameterVector):
+        #This class function is what we feed to the optimizer. It mainly keeps track of what has been tried so far.
+        simulationOutput = self.simulationFunction(discreteParameterVector) # the actual evaluation of the function
+        self.lastTrialDiscreteParameterVector = discreteParameterVector
+        self.lastTrialObjectiveFunction = simulationOutput
+        return simulationOutput
     
-    def callback(self, xk, *_):
-        """Callback function that can be used by optimizers of scipy.optimize.
-        The third argument "*_" makes sure that it still works when the
-        optimizer calls the callback function with more than one argument. Pass
-        to optimizer without arguments or parentheses."""
+    def callback(self, discreteParameterVector, *extraArgs):
+        #This class function has to be passed in as the callback function argument to the optimizer.
+        #basically, it gets 'called' between iterations of the optimizer.
+        #Some optimizers give back extra args, so there is a *extraArgs argument above.
+        if self.FirstCall == True:
+            parameterNamesString = ""
+            for parameterIndex in range(len(discreteParameterVector)):
+                parmeterName = f"Par-{parameterIndex+1}"
+                parameterNamesString += f"{parmeterName:10s}\t"
+            headerString = "Iter  " + parameterNamesString + "ObjectiveF"
+            print(headerString)
+            self.FirstCall = False
         
-        s1 = "{0:4d}  ".format(self.callback_count)
-        xk = np.atleast_1d(xk)
-        # search backwards in input list for input corresponding to xk
-        for i, x in reversed(list(enumerate(self.list_calls_inp))):
-            x = np.atleast_1d(x)
-            if np.allclose(x, xk):
-                break
-    
-        for comp in xk:
-            s1 += f"{comp:10.5e}\t"
-        s1 += f"{self.list_calls_res[i]:10.5e}"
-        self.list_callback_inp.append(xk)
-        self.list_callback_res.append(self.list_calls_res[i])
-    
-        if not self.callback_count:
-            s0 = "Iter  "
-            for j, _ in enumerate(xk):
-                tmp = f"Par-{j+1}"
-                s0 += f"{tmp:10s}\t"
-            s0 += "ObjectiveF"
-            print(s0)
-        print(s1)
-        self.callback_count += 1
+        iterationNumberString = "{0:4d}  ".format(self.iterationNumber)
+        discreteParameterVector = self.lastTrialDiscreteParameterVector #We take the stored one rather than the one provided to make sure that we're getting the same one as the stored objective function.
+        parameterValuesString = ""
+        for paramaterValue in discreteParameterVector:
+            parameterValuesString += f"{paramaterValue:10.5e}\t"
+        currentObjectiveFunctionValue = f"{self.lastTrialObjectiveFunction:10.5e}"
+        iterationOutputString = iterationNumberString + parameterValuesString + currentObjectiveFunctionValue
+        print(iterationOutputString)
+        self.iterationNumber += 1 #In principle, could be done inside the simulateAndStoreObjectiveFunction, but this way it is after the itration number has been printed.
 
 '''Below are a bunch of functions for Euler's Method.'''
 #This takes an array of dydt values. #Note this is a local dydtArray, it is NOT a local deltaYArray.
