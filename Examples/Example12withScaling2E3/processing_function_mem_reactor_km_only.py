@@ -22,7 +22,7 @@ def cmr(theta,V,k_1,k_minus_1,k_B,T0):
     C_A = C_T0 * F_A / F_T
     C_B = C_T0 * F_B / F_T
     r_A = k_1*C_A - k_minus_1*C_B
-    R_B = k_B*C_B
+    R_B = np.array(k_B)*np.array(C_B)
     dFdV = [-r_A, r_A - R_B]
     return dFdV
 
