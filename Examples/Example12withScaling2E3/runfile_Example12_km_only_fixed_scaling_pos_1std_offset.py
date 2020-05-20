@@ -23,7 +23,7 @@ if __name__ == "__main__":
     UserInput.model['parameterNamesAndMathTypeExpressionsDict'] = {'delta_G':r'$\deltaG (eV)$'}
     UserInput.model['InputParameterPriorValues'] = [2e3] # eV
     UserInput.model['InputParametersPriorValuesUncertainties'] = [1e3] #If user wants to use a prior with covariance, then this must be a 2D array/ list. To assume no covariance, a 1D  This is a standard deviation!
-    UserInput.model['InputParameterInitialGuess'] = [3e3] #This is where the mcmc chain will start.
+    UserInput.model['InputParameterInitialGuess'] = [2e3] #This is where the mcmc chain will start.
     #InputParameterInitialValues = [41.5, 41.5, 13.0, 13.0, 0.1, 0.1] # Ea1_mean, Ea2_mean, log_A1_mean, log_A2_mean, gamma_1_mean, gamma_2_mean 
     
     #InputParametersInitialValuesUncertainties = [200, 200, 13, 13, 0.1, 0.1] #If user wants to use a prior with covariance, then this must be a 2D array/ list. To assume no covariance, a 1D array can be used.

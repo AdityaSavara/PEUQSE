@@ -12,7 +12,7 @@
 ##SBATCH --constraint=IB
 #SBATCH --mem=128000
 ##SBATCH --mem=23000
-#SBATCH --job-name=CheKiPEUQ_example_12
+#SBATCH --job-name=ex12neg1std_scaling2E3
 #SBATCH --output=job.out
 #SBATCH --mail-user=ericwalk@buffalo.edu
 #SBATCH --mail-type=ALL
