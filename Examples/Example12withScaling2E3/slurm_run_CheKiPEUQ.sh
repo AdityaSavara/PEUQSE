@@ -21,4 +21,4 @@ module load python/py37-anaconda-2019.10
 ############
 module list
 
-python runfile_Example12_km_only_fixed_scaling.py
+python runfile_Example12_km_only_fixed_scaling_neg_1std_offset.py
