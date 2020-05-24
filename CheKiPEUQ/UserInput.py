@@ -33,7 +33,8 @@ responses['responses_abscissa'] = []
 responses['responses_observed'] = []
 responses['responses_observed_uncertainties'] = []
 responses['reducedResponseSpace'] = []
-responses['independent_variables'] = {}
+responses['independent_variables_values'] = []
+responses['independent_variables_names'] = []
 
 #####Parameter Estimation Inputs#####
 parameter_estimation_settings = {}
@@ -80,8 +81,12 @@ parameter_pairs_for_contour_plots = [] #This will accept either strings (for var
 
 ####Design Of Experiments####
 doe_settings = {}
-doe_settings['independent_variable_grid_interval_size'] = [] #These can be a single number or a 1D array/list with length of number of independent variables.  
-doe_settings['independent_variable_grid_num_intervals'] = [] #These can be a single number or a 1D array/list with length of number of independent variables.
+doe_settings['independent_variable_grid_center'] = [] #This must be a 1D array/list with length of number of independent variables.  
+doe_settings['independent_variable_grid_interval_size'] = [] #This must be a 1D array/list with length of number of independent variables.  
+doe_settings['independent_variable_grid_num_intervals'] = [] #This must be a 1D array/list with length of number of independent variables.
 
-doe_settings['parameter_grid_interval_size'] = [] #These can be a single number or a 1D array/list with length of number of independent variables.  These are all relative to the standard deviation of the prior of that variable. 
-doe_settings['parameter_grid_num_intervals'] = [] #These can be a single number or a 1D array/list with length of number of independent variables.
+doe_settings['on_the_fly_conditions_grids'] = True #This makes the independent variable grid each time. This costs more processing but less memory. As of April 2020 the other option has not been implemented but would just require making the combinations into a list the first time and then operating on a copy of that list.
+
+#doe_settings['parameter_modulation_grid_center'] #We do NOT create such a variable. The initial guess variable is used, which is the center of the prior if not filled by the user.
+doe_settings['parameter_modulation_grid_interval_size'] = [] #This must be 1D array/list with length of number of parameters.  These are all relative to the standard deviation of the prior of that parmaeter. 
+doe_settings['parameter_modulation_grid_num_intervals'] = [] #This must be a 1D array/list with length of number of paramaeters.

@@ -301,6 +301,7 @@ class parameter_estimation:
   
     #This helper function has been made so that gridSearch and design of experiments can call it.
     #Although at first glance it may seem like it should be in the gridCombinations module, that is a misconception. This is just a wrapper setting defaults for calling that module, such as using the prior for the grid interval when none is provided.
+    #note that a blank list is okay for gridSamplingAbsoluteIntervalSize if doing a parameter grid, but not for other types of grids.
     def getGridCombinations(self, gridCenterVector, gridSamplingAbsoluteIntervalSize, gridSamplingNumOfIntervals, SpreadType="Addition",toFile=False):
         import CheKiPEUQ.CombinationGeneratorModule as CombinationGeneratorModule
         numParameters = len(gridCenterVector)
@@ -388,6 +389,62 @@ class parameter_estimation:
         if searchType == 'getLogP':          
             return bestResultSoFar# [self.map_parameter_set, self.map_logP]
             
+    def designOfExperiments(self):
+        import CheKiPEUQ.CombinationGeneratorModule as CombinationGeneratorModule
+        doe_settings = self.UserInput.doe_settings 
+        #For the parameters, we are able to use a default one standard deviation grid if gridSamplingAbsoluteIntervalSize is a blank list.
+        #doe_settings['parameter_modulation_grid_center'] #We do NOT create such a variable in user input. The initial guess variable is used, which is the center of the prior if no guess has been provided.
+        parModulationGridCenterVector = self.UserInput.InputParameterInitialGuess
+        parModulationGridCombinations = self.getGridCombinations(parModulationGridCenterVector, doe_settings['parameter_modulation_grid_interval_size'], doe_settings['parameter_modulation_grid_num_intervals'])
+        
+        #We will get a separate info gain matrix for each parModulationCombination, we'll store that in this variable.
+        info_gains_matrices_list = []
+        for parModulationCombinationIndex,parModulationCombination in enumerate(parModulationGridCombinations):    
+            #For each paramaeter Modulation Combination we are going to obtain a matrix of info_gains that is based on a grid of the independent_variables.
+            #First we need to make some synthetic data using parModulationCombination for the discreteParameterVector
+            discreteParameterVector = parModulationCombination
+            simulationFunction = self.UserInput.simulationFunction #Do NOT use self.UserInput.model['simulateByInputParametersOnlyFunction']  because that won't work with reduced parameter space requests.  
+            simulationOutputProcessingFunction = self.UserInput.simulationOutputProcessingFunction #Do NOT use self.UserInput.model['simulationOutputProcessingFunction'] because that won't work with reduced parameter space requests.
+            simulationOutput =simulationFunction(discreteParameterVector) 
+            if type(simulationOutput)==type(None):
+                return float('-inf'), None #This is intended for the case that the simulation fails. User can return "None" for the simulation output. Perhaps should be made better in future.
+            if np.array(simulationOutput).any()==float('nan'):
+                return float('-inf'), None #This is intended for the case that the simulation fails without returning "None".
+            if type(simulationOutputProcessingFunction) == type(None):
+                simulatedResponses = simulationOutput #Is this the log of the rate? If so, Why?
+            if type(simulationOutputProcessingFunction) != type(None):
+                simulatedResponses = simulationOutputProcessingFunction(simulationOutput) 
+            simulatedResponses = np.atleast_2d(simulatedResponses)
+            #need to check if there are any 'responses_simulation_uncertainties'. #TODO: This isn't really implemented yet.
+            if type(self.UserInput.model['responses_simulation_uncertainties']) == type(None): #if it's a None type, we keep it as a None type
+                responses_simulation_uncertainties = None
+            else:  #Else we get it based on the the discreteParameterVector
+                responses_simulation_uncertainties = self.get_responses_simulation_uncertainties(discreteParameterVector)
+            
+            synthetic_data  = simulatedResponses
+            synthetic_data_uncertainties = responses_simulation_uncertainties
+            #We need to populate the "observed" responses in userinput with the synthetic data.
+            self.UserInput.responses['responses_observed'] = simulatedResponses
+            self.UserInput.responses['responses_observed_uncertainties'] = simulatedResponses
+            #Now need to do something unusual: Need to call the __init__ function again so that the arrays get reshaped as needed etc.
+            self.__init__(self.UserInput)
+            
+            #We will get separate info gain matrix for each parameter modulation combination.
+            info_gain_matrix = []
+            #For the IndependentVariables the grid info must be defined ahead of time. On the fly conditions grid means it's generated again fresh for each parameter combination. (We are doing it this way out of convenience during the first programming of this feature).
+            if doe_settings['on_the_fly_conditions_grids'] == True:
+                conditionsGridCombinations = self.getGridCombinations(doe_settings['independent_variable_grid_center'], doe_settings['independent_variable_grid_interval_size'], doe_settings['independent_variable_grid_num_intervals'])
+            for conditionsCombinationIndex,conditionsCombination in enumerate(conditionsGridCombinations):    
+                #It is absolutely critical that we *do not* use syntax like self.UserInput.responses['independent_variables_values'] = xxxx
+                #Because that would move where the pointer is going to. We need to instead populate the individual values by index.
+                for independentVariableIndex,independentVariableValue in enumerate(conditionsCombination):
+                    self.UserInput.responses['independent_variables_values'][independentVariableIndex] = independentVariableValue
+                [map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, logP] = self.doMetropolisHastings()
+                conditionsCombination = np.array(conditionsCombination) #we're going to make this an array before adding to the info_gain matrix.
+                conditionsCombinationAndInfoGain = np.hstack((conditionsCombination, info_gain))
+                info_gain_matrix.append(conditionsCombinationAndInfoGain)
+            info_gains_matrices_list.append(np.array(info_gain_matrix))
+        self.info_gains_matrices_array=np.array(info_gains_matrices_list)
 
     def getLogP(self, proposal_sample): #The proposal sample is specific parameter vector.
         [log_likelihood_proposal, simulationOutput_proposal] = self.getLogLikelihood(proposal_sample)
@@ -610,11 +667,11 @@ class parameter_estimation:
         self.stdap_parameter_set = np.std(self.post_burn_in_samples, axis=0) #This is the mean of the posterior, and is the point with the highest expected value of the posterior (for most distributions). For the simplest cases, map and mu_AP will be the same.
         #TODO: should return the variance of each sample in the post_burn_in
         #Below is the KL_divergence info_gain calculation.
-        (density0,bins0,pathces0)=plt.hist([self.samples_of_prior,self.post_burn_in_samples.flatten()],bins=100,density=True)
-        KL = density0[1]*np.log(density0[1]/density0[0])
-        KL = KL[np.isfinite(KL)]
-        self.info_gain_KL = np.sum(KL)
         if self.UserInput.parameter_estimation_settings['mcmc_info_gain_returned'] == 'KL_divergence':
+            (density0,bins0,pathces0)=plt.hist([self.samples_of_prior,self.post_burn_in_samples.flatten()],bins=100,density=True)
+            KL = density0[1]*np.log(density0[1]/density0[0])
+            KL = KL[np.isfinite(KL)]
+            self.info_gain_KL = np.sum(KL)            
             self.info_gain = self.info_gain_KL
         if self.UserInput.parameter_estimation_settings['verbose'] == True:
             print(self.map_parameter_set)
@@ -670,7 +727,6 @@ class parameter_estimation:
             simulatedResponses = np.array(simulatedResponses).flatten()
             return logLikelihood, simulatedResponses
         #else pass is implied.
-        
         #Now we do upper and lower bounds checks, if such bounds have been provided.
         if len(self.UserInput.model['InputParameterPriorValues_upperBounds']) > 0:
             upperCheck = boundsCheck(discreteParameterVector, self.UserInput.model['InputParameterPriorValues_upperBounds'], 'upper')
@@ -723,7 +779,6 @@ class parameter_estimation:
         #TODO: use Ashi's nonlinear regression code (which  he used in this paper https://www.sciencedirect.com/science/article/abs/pii/S0920586118310344).  Put in the response magnitudes and the independent variables.
         #in future it will be something like: if self.UserInput.covmat_regression== True: comprehensive_responses_covmat = nonLinearCovmatPrediction(self.UserInput['independent_variable_values'], observed_responses_covmat_transformed)
         #And that covmat_regression will be on by default.  We will need to have an additional argument for people to specify whether magnitude weighting and independent variable values should both be considered, or just one.
-
         if type(simulated_responses_covmat_transformed) == type(None):
             comprehensive_responses_covmat = observed_responses_covmat_transformed
         else: #Else we add the uncertainties, assuming they are orthogonal. Note that these are already covmats so are already variances that can be added directly.
