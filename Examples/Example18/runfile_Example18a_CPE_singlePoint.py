@@ -70,7 +70,7 @@ if __name__ == "__main__":
 
 #    PE_object.doGridSearch('getLogP')
     #PE_object.doGridSearch('doMetropolisHastings')
-#    PE_object.doGridSearch('doOptimizeNegLogP', verbose = True,gridSamplingRadii = [], passThroughArgs={'method':'BFGS'})
+#    PE_object.doGridSearch('doOptimizeNegLogP', verbose = True,gridSamplingNumOfIntervals = [], passThroughArgs={'method':'BFGS'})
     
     #PE_object.doGridSearch('getLogP', gridSamplingAbsoluteIntervalSize=[0,0,2000,1.0,0.50, 0,0,0,0,0,0], gridSamplingNumOfIntervals=[0,0,10,0,0, 0,0,0,0,0,0], passThroughArgs={"method":"Nelder-Mead", "maxiter":5000, "verbose":False})#, "maxiter":1000, "verbose":False})
     print(PE_object.map_parameter_set, PE_object.map_logP)

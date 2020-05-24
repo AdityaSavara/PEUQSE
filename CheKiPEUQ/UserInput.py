@@ -33,7 +33,7 @@ responses['responses_abscissa'] = []
 responses['responses_observed'] = []
 responses['responses_observed_uncertainties'] = []
 responses['reducedResponseSpace'] = []
-
+responses['independent_variables'] = {}
 
 #####Parameter Estimation Inputs#####
 parameter_estimation_settings = {}
@@ -77,3 +77,11 @@ active_parameters = [] #Blank by default: gets populated with all parameters (or
 contour_settings_custom = {'figure_name': 'PosteriorContourPlots','fontsize':'auto' ,'num_y_ticks': 'auto','num_x_ticks':'auto','contours_normalized':True,'center_on':'all','colorbars':True} #'colormap_posterior_customized':'Oranges','colormap_prior_customized':'Greens'
 #num_y_ticks and num_x_ticks must be either a string ('auto') or an integer (such as 4, either without string or with integer casting like int('5')).
 parameter_pairs_for_contour_plots = [] #This will accept either strings (for variable names) or integers for positions.
+
+####Design Of Experiments####
+doe_settings = {}
+doe_settings['independent_variable_grid_interval_size'] = [] #These can be a single number or a 1D array/list with length of number of independent variables.  
+doe_settings['independent_variable_grid_num_intervals'] = [] #These can be a single number or a 1D array/list with length of number of independent variables.
+
+doe_settings['parameter_grid_interval_size'] = [] #These can be a single number or a 1D array/list with length of number of independent variables.  These are all relative to the standard deviation of the prior of that variable. 
+doe_settings['parameter_grid_num_intervals'] = [] #These can be a single number or a 1D array/list with length of number of independent variables.

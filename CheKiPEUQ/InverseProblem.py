@@ -299,6 +299,24 @@ class parameter_estimation:
                         pass
         return nestedAllResponsesArray_transformed, nestedAllResponsesUncertainties_transformed  
   
+    #This helper function has been made so that gridSearch and design of experiments can call it.
+    #Although at first glance it may seem like it should be in the gridCombinations module, that is a misconception. This is just a wrapper setting defaults for calling that module, such as using the prior for the grid interval when none is provided.
+    def getGridCombinations(gridCenterVector, gridSamplingAbsoluteIntervalSize, gridSamplingNumOfIntervals, SpreadType="Addition",toFile=False):
+        numParameters = len(gridCenterVector)
+        if len(gridSamplingNumOfIntervals) == 0:
+            gridSamplingNumOfIntervals = np.ones(numParameters, dtype='int') #By default, will make ones.
+            numGridPoints = 3**numParameters
+        else: 
+            gridSamplingNumOfIntervals = np.array(gridSamplingNumOfIntervals, dtype='int')
+            numGridPoints = 1 #just initializing.
+            for radius in gridSamplingNumOfIntervals:
+                numGridPoints=numGridPoints*(2*radius+1)
+        if len(gridSamplingAbsoluteIntervalSize) == 0:
+            gridSamplingAbsoluteIntervalSize = self.UserInput.std_prior #By default, we use the standard deviations associated with the priors.
+        else: gridSamplingAbsoluteIntervalSize = np.array(gridSamplingAbsoluteIntervalSize, dtype='float')
+        gridCombinations = CombinationGeneratorModule.combinationGenerator(gridCenterVector, gridSamplingAbsoluteIntervalSize, gridSamplingNumOfIntervals, SpreadType=SpreadType,toFile=toFile)
+        return gridCombinations  
+  
     def doGridSearch(self, searchType='getLogP', exportLog = True, gridSamplingAbsoluteIntervalSize = [], gridSamplingNumOfIntervals = [], passThroughArgs = {}):
         # gridSamplingNumOfIntervals is the number of variations to check in units of variance for each parameter. Can be 0 if you don't want to vary a particular parameter in the grid search.
         #TODO: the upper part of the gridsearch may not be compatibile with reduced parameter space. Needs to be checked.
