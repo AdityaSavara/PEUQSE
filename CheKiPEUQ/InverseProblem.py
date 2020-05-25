@@ -512,7 +512,7 @@ class parameter_estimation:
             timeCheckpoint = timeit.time.clock() - timeOfFirstCheckpoint #First checkpoint at time 0.
             numCheckPoints = self.UserInput.parameter_estimation_settings['mcmc_length']/self.UserInput.parameter_estimation_settings['checkPointFrequency']
         #Before sampling should fill in the first entry for the posterior vector we have created. #FIXME: It would probably be better to start with i of 0 in below sampling loop. I believe that right now the "burn in" and "samples" arrays are actually off by an index of 1. But trying to change that alters their length relative to other arrays and causes problems. Since we always do many samples and this only affects the initial point being averaged in twice, it is not a major problem. It's also avoided if people use a burn in of at least 1.
-        log_posteriors_un_normed_vec[0]= self.getLogP(self.UserInput.InputParameterInitialGuess)
+        log_posteriors_un_normed_vec[0]= self.getLogP(samples[0])
         for i in range(1, self.UserInput.parameter_estimation_settings['mcmc_length']): #FIXME: Don't we need to start with i of 0?
             sampleNumber = i #This is so that later we can change it to i+1 if the loop starts from i of 0 in the future.
             if self.UserInput.parameter_estimation_settings['verbose']: print("MCMC sample number", sampleNumber)                  
