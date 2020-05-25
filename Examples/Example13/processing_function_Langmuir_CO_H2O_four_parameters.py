@@ -105,3 +105,28 @@ def Langmuir_replacement_three_temperatures_deltaH_plus1(sample): # sample conta
     theta_A = (K_rxn*pA)/(1+K_rxn*pA)
     theta_list.append(theta_A)
     return theta_list
+    
+def Langmuir_replacement_three_temperatures_log(sample): # sample contains [DeltaH_rxn, DeltaS_rxn]
+    kB = 8.61733035E-5 #eV/K
+    sample = np.array(sample) #Make sure it's an array and not a tuple.
+    #
+    theta_list = []
+    
+    #Temperature Middle:
+    delta_G_rxn = sample[0] - T*sample[1] # DeltaH-T*DeltaS
+    K_rxn = np.exp(-delta_G_rxn/(kB*T))
+    theta_A = (K_rxn*pA)/(1+K_rxn*pA)
+    theta_list.append(theta_A)
+
+    #Temperature Low:
+    delta_G_rxn = sample[0] - (T-T_spread)*sample[1] # DeltaH-T*DeltaS
+    K_rxn = np.exp(-delta_G_rxn/(kB*(T-T_spread)))
+    theta_A = (K_rxn*pA)/(1+K_rxn*pA)
+    theta_list.append(theta_A)
+    
+    #Temperature Low:
+    delta_G_rxn = sample[0] - (T+T_spread)*sample[1] # DeltaH-T*DeltaS
+    K_rxn = np.exp(-delta_G_rxn/(kB*(T+T_spread)))
+    theta_A = (K_rxn*pA)/(1+K_rxn*pA)
+    theta_list.append(theta_A)
+    return np.log10(theta_list)
