@@ -40,7 +40,7 @@ contour_settings_custom['num_y_ticks'] #adusts number of y ticks (actually sets 
 contour_settings_custom['num_x_ticks'] #adjusts number of x ticks (actually sets a maximum number of them). #num_y_ticks and num_x_ticks must be either a string ('auto') or an integer (such as 4, either without string or with integer casting like int('5')).This feature is recommended. #Note that this is a *request* When it's not fulfilled exactly, the user can play with the number.
 contour_settings_custom['x_ticks'] #feed in an array of directly. Not recommended.
 contour_settings_custom['y_ticks'] #feed in an array of directly. Not recommended.
-
+contour_settings_custom['axis_limits'] #Feed in list of [x_min, x_max, y_min, y_max]. This is recommended for use.
 
 '''
 

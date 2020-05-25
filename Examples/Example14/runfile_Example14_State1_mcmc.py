@@ -83,3 +83,7 @@ if __name__ == "__main__":
     lowerRateTp=(simulationFunctionExample14Tp.getTpFromKineticParametersAndInitialCoverageWrapper(PE_object.mu_AP_parameter_set)+lowerRateAddition)
     uncertaintyForTp = (((upperRateTp-lowerRateTp)/2)**2+25**2)**0.5
     print(uncertaintyForTp)
+    
+    UserInput.contour_settings_custom['axis_limits'] = [7,20,0,140000]
+    UserInput.contour_settings_custom['num_y_ticks']=4
+    PE_object.createMumpcePlots()
