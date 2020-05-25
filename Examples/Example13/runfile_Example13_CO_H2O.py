@@ -74,27 +74,28 @@ if __name__ == "__main__":
     TA = theta_A_array.reshape(TT.shape)
     surf = ax.plot_surface(TT,pp,TA,cmap=matplotlib.cm.coolwarm)
     ax.set_xlabel('Temperature (K)')
-    ax.set_ylabel(r'$p_A$')
+    ax.set_ylabel(r'$p_{CO}$')
     ax.set_zlabel(r'$\theta_A$')
     ax.set_title(r'Surface Plot of $\theta_A$')
     fig.colorbar(surf, shrink=0.5, aspect=5)
     fig.savefig('synthetic_observables_theta_A.png',dpi=220)
     
-    prior = np.random.normal(-0.687 + + UserInput.model['offset'],0.05,10000)
     info_gains=[]
     PE_object_list = []
     for p in pressures:
         for t in temperatures:
             fun.pA = p
             fun.T = t
+            prior = np.random.normal(-0.687 - t*S_CO + UserInput.model['offset'],0.05,10000)
             theta_A_obs = fun.Langmuir_compete_ads(delta_G_1) # Remember delta_G_1 is offset: -0.15 instead of the prior -0.2.
             UserInput.responses['responses_observed'] = theta_A_obs
             PE_object_list.append(CKPQ.parameter_estimation(UserInput))
             [map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, logP] = PE_object_list[-1].doMetropolisHastings()
             info_gains.append(info_gain)
             fig, ax = plt.subplots()
-            (density0,bins0,pathces0)=ax.hist([prior,PE_object_list[-1].post_burn_in_samples.flatten()],bins=100,label=['prior','posterior'],density=True)
+            (density0,bins0,pathces0)=ax.hist([prior,PE_object_list[-1].post_burn_in_samples.flatten() - t*S_CO],bins=100,label=['prior','posterior'],density=True)
             ax.legend()
+            ax.set_xlabel(r'$\Delta G (eV)$')
             ax.set_ylabel('Probability density')
             ax.set_title(r'Prior and Posterior Density Plot at T = {} (K) $p_A$ = {}'.format(str(t),str(p)))
             fig.tight_layout()
@@ -105,7 +106,7 @@ if __name__ == "__main__":
     IG = info_gains.reshape(TT.shape)
     surf = ax.pcolor(TT,pp,IG,cmap=matplotlib.cm.coolwarm)
     ax.set_xlabel('Temperature (K)')
-    ax.set_ylabel(r'$p_A$')
+    ax.set_ylabel(r'$p_{CO}$')
     #ax.set_zlabel('Information Gain')
     ax.set_xticks(temperatures)
     ax.xaxis.set_major_formatter(FormatStrFormatter('%.2f'))
