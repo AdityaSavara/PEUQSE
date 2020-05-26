@@ -1,56 +1,56 @@
-result: self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_logP_un_normed_vec
-result:0-6.175754132818691
-result:1-12.175754132818689
-result:2-8.17575413281869
-result:3-26.17575413281869
-result:4-18.17575413281869
-result:5-48.17575413281869
-result:6-36.17575413281869
-result:7-78.1757541328187
-result:8-62.175754132818696
-result:9-116.1757541328187
-result:10-96.1757541328187
-result:11-5.175754132818691
-result:12-9.17575413281869
-result:13-6.175754132818691
-result:14-14.175754132818689
-result:15-11.17575413281869
-result:16-15.175754132818689
-result:17-12.17575413281869
-result:18-20.17575413281869
-result:19-7.175754132818691
-result:20-11.17575413281869
-result:21-8.17575413281869
-result:22-16.17575413281869
-result:23-25.17575413281869
-result:24-29.17575413281869
-result:25-26.17575413281869
-result:26-34.17575413281869
-result:27-17.17575413281869
-result:28-21.17575413281869
-result:29-18.17575413281869
-result:30-26.17575413281869
-result:31-47.17575413281869
-result:32-51.17575413281869
-result:33-48.17575413281869
-result:34-56.175754132818696
-result:35-35.17575413281869
-result:36-39.17575413281869
-result:37-36.17575413281869
-result:38-44.17575413281869
-result:39-77.1757541328187
-result:40-81.1757541328187
-result:41-78.1757541328187
-result:42-86.1757541328187
-result:43-61.175754132818696
-result:44-65.1757541328187
-result:45-62.175754132818696
-result:46-70.1757541328187
-result:47-115.1757541328187
-result:48-119.1757541328187
-result:49-116.1757541328187
-result:50-124.1757541328187
-result:51-95.1757541328187
-result:52-99.1757541328187
-result:53-96.1757541328187
-result:54-104.1757541328187
+result: self.map_logP, self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_logP_un_normed_vec
+result: 0 [-6.175754132818691, '1| 5]', 'None', 'None', 'None', 'None', 'None', 'None']
+result: 1 [-12.175754132818689, '-1.0| 5', 'None', 'None', 'None', 'None', 'None', 'None']
+result: 2 [-8.17575413281869, '3.0| 5', 'None', 'None', 'None', 'None', 'None', 'None']
+result: 3 [-26.17575413281869, '-3.0| 5', 'None', 'None', 'None', 'None', 'None', 'None']
+result: 4 [-18.17575413281869, '5.0| 5', 'None', 'None', 'None', 'None', 'None', 'None']
+result: 5 [-48.17575413281869, '-5.0| 5', 'None', 'None', 'None', 'None', 'None', 'None']
+result: 6 [-36.17575413281869, '7.0| 5', 'None', 'None', 'None', 'None', 'None', 'None']
+result: 7 [-78.1757541328187, '-7.0| 5', 'None', 'None', 'None', 'None', 'None', 'None']
+result: 8 [-62.175754132818696, '9.0| 5', 'None', 'None', 'None', 'None', 'None', 'None']
+result: 9 [-116.1757541328187, '-9.0| 5', 'None', 'None', 'None', 'None', 'None', 'None']
+result: 10 [-96.1757541328187, '11.0| 5', 'None', 'None', 'None', 'None', 'None', 'None']
+result: 11 [-5.175754132818691, '1| 4.0', 'None', 'None', 'None', 'None', 'None', 'None']
+result: 12 [-9.17575413281869, '1| 6.0', 'None', 'None', 'None', 'None', 'None', 'None']
+result: 13 [-6.175754132818691, '1| 3.0', 'None', 'None', 'None', 'None', 'None', 'None']
+result: 14 [-14.175754132818689, '1| 7.0', 'None', 'None', 'None', 'None', 'None', 'None']
+result: 15 [-11.17575413281869, '-1.0| 4.0', 'None', 'None', 'None', 'None', 'None', 'None']
+result: 16 [-15.175754132818689, '-1.0| 6.0', 'None', 'None', 'None', 'None', 'None', 'None']
+result: 17 [-12.17575413281869, '-1.0| 3.0', 'None', 'None', 'None', 'None', 'None', 'None']
+result: 18 [-20.17575413281869, '-1.0| 7.0', 'None', 'None', 'None', 'None', 'None', 'None']
+result: 19 [-7.175754132818691, '3.0| 4.0', 'None', 'None', 'None', 'None', 'None', 'None']
+result: 20 [-11.17575413281869, '3.0| 6.0', 'None', 'None', 'None', 'None', 'None', 'None']
+result: 21 [-8.17575413281869, '3.0| 3.0', 'None', 'None', 'None', 'None', 'None', 'None']
+result: 22 [-16.17575413281869, '3.0| 7.0', 'None', 'None', 'None', 'None', 'None', 'None']
+result: 23 [-25.17575413281869, '-3.0| 4.0', 'None', 'None', 'None', 'None', 'None', 'None']
+result: 24 [-29.17575413281869, '-3.0| 6.0', 'None', 'None', 'None', 'None', 'None', 'None']
+result: 25 [-26.17575413281869, '-3.0| 3.0', 'None', 'None', 'None', 'None', 'None', 'None']
+result: 26 [-34.17575413281869, '-3.0| 7.0', 'None', 'None', 'None', 'None', 'None', 'None']
+result: 27 [-17.17575413281869, '5.0| 4.0', 'None', 'None', 'None', 'None', 'None', 'None']
+result: 28 [-21.17575413281869, '5.0| 6.0', 'None', 'None', 'None', 'None', 'None', 'None']
+result: 29 [-18.17575413281869, '5.0| 3.0', 'None', 'None', 'None', 'None', 'None', 'None']
+result: 30 [-26.17575413281869, '5.0| 7.0', 'None', 'None', 'None', 'None', 'None', 'None']
+result: 31 [-47.17575413281869, '-5.0| 4.0', 'None', 'None', 'None', 'None', 'None', 'None']
+result: 32 [-51.17575413281869, '-5.0| 6.0', 'None', 'None', 'None', 'None', 'None', 'None']
+result: 33 [-48.17575413281869, '-5.0| 3.0', 'None', 'None', 'None', 'None', 'None', 'None']
+result: 34 [-56.175754132818696, '-5.0| 7.0', 'None', 'None', 'None', 'None', 'None', 'None']
+result: 35 [-35.17575413281869, '7.0| 4.0', 'None', 'None', 'None', 'None', 'None', 'None']
+result: 36 [-39.17575413281869, '7.0| 6.0', 'None', 'None', 'None', 'None', 'None', 'None']
+result: 37 [-36.17575413281869, '7.0| 3.0', 'None', 'None', 'None', 'None', 'None', 'None']
+result: 38 [-44.17575413281869, '7.0| 7.0', 'None', 'None', 'None', 'None', 'None', 'None']
+result: 39 [-77.1757541328187, '-7.0| 4.0', 'None', 'None', 'None', 'None', 'None', 'None']
+result: 40 [-81.1757541328187, '-7.0| 6.0', 'None', 'None', 'None', 'None', 'None', 'None']
+result: 41 [-78.1757541328187, '-7.0| 3.0', 'None', 'None', 'None', 'None', 'None', 'None']
+result: 42 [-86.1757541328187, '-7.0| 7.0', 'None', 'None', 'None', 'None', 'None', 'None']
+result: 43 [-61.175754132818696, '9.0| 4.0', 'None', 'None', 'None', 'None', 'None', 'None']
+result: 44 [-65.1757541328187, '9.0| 6.0', 'None', 'None', 'None', 'None', 'None', 'None']
+result: 45 [-62.175754132818696, '9.0| 3.0', 'None', 'None', 'None', 'None', 'None', 'None']
+result: 46 [-70.1757541328187, '9.0| 7.0', 'None', 'None', 'None', 'None', 'None', 'None']
+result: 47 [-115.1757541328187, '-9.0| 4.0', 'None', 'None', 'None', 'None', 'None', 'None']
+result: 48 [-119.1757541328187, '-9.0| 6.0', 'None', 'None', 'None', 'None', 'None', 'None']
+result: 49 [-116.1757541328187, '-9.0| 3.0', 'None', 'None', 'None', 'None', 'None', 'None']
+result: 50 [-124.1757541328187, '-9.0| 7.0', 'None', 'None', 'None', 'None', 'None', 'None']
+result: 51 [-95.1757541328187, '11.0| 4.0', 'None', 'None', 'None', 'None', 'None', 'None']
+result: 52 [-99.1757541328187, '11.0| 6.0', 'None', 'None', 'None', 'None', 'None', 'None']
+result: 53 [-96.1757541328187, '11.0| 3.0', 'None', 'None', 'None', 'None', 'None', 'None']
+result: 54 [-104.1757541328187, '11.0| 7.0', 'None', 'None', 'None', 'None', 'None', 'None']

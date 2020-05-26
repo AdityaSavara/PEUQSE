@@ -39,7 +39,7 @@ if __name__ == "__main__":
     PE_object = CKPQ.parameter_estimation(UserInput)
     
     #Now we do parameter estimation.
-    PE_object.doGridSearch('getLogP', gridSamplingIntervalSize=[2,1], gridSamplingRadii=[5,2], verbose = True)
+    PE_object.doGridSearch('getLogP', gridSamplingAbsoluteIntervalSize=[2,1], gridSamplingNumOfIntervals=[5,2])
     #[map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, samples_simulatedOutputs, logP] = PE_object.doMetropolisHastings()
     
     PE_object.createAllPlots() #This function calls each of the below functions.

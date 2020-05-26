@@ -72,7 +72,7 @@ if __name__ == "__main__":
 
 #    PE_object.doGridSearch('getLogP')
     #PE_object.doGridSearch('doMetropolisHastings')
-#    PE_object.doGridSearch('doOptimizeNegLogP', verbose = True,gridSamplingRadii = [], passThroughArgs={'method':'BFGS'})
+#    PE_object.doGridSearch('doOptimizeNegLogP', verbose = True,gridSamplingNumOfIntervals = [], passThroughArgs={'method':'BFGS'})
     #PE_object.doOptimizeNegLogP(method="Nelder-Mead", printOptimum=True, verbose=False, maxiter=5000)
     PE_object.doSinglePoint()
     #PE_object.doGridSearch('doOptimizeNegLogP', gridSamplingAbsoluteIntervalSize=UserInput.model['InputParametersPriorValuesUncertainties'], gridSamplingNumOfIntervals=[0,0,1,1,0, 1,0,1,0,1,0], passThroughArgs={"method":"Nelder-Mead", "maxiter":100, "verbose":False})#, "maxiter":1000, "verbose":False})

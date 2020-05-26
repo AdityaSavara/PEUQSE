@@ -33,7 +33,8 @@ responses['responses_abscissa'] = []
 responses['responses_observed'] = []
 responses['responses_observed_uncertainties'] = []
 responses['reducedResponseSpace'] = []
-
+responses['independent_variables_values'] = []
+responses['independent_variables_names'] = []
 
 #####Parameter Estimation Inputs#####
 parameter_estimation_settings = {}
@@ -52,7 +53,7 @@ parameter_estimation_settings['mcmc_burn_in'] = 500
 parameter_estimation_settings['mcmc_relative_step_length'] = 0.1 #Default value is of 0.1, but values such as 1 are also quite reasonable. This is the step length relative to the covmat of the prior. So it is relative to the variance, not relative to the standard deviation.
 parameter_estimation_settings['mcmc_modulate_accept_probability']  = 0 #Default value of 0. Changing this value sharpens or flattens the posterior. A value greater than 1 flattens the posterior by accepting low values more often. It can be useful when greater sampling is more important than accuracy. One way of using this feature is to try with a value of 0, then with the value equal to the number of priors for comparison, and then to gradually decrease this number as low as is useful (to minimize distortion of the result). A downside of changing changing this variable to greater than 1 is that it slows the the ascent to the maximum of the prior, so there is a balance in using it. In contrast, numbers increasingly less than one (such as 0.90 or 0.10) will speed up the ascent to the maximum of the posterior, but will also result in fewer points being retained.
 parameter_estimation_settings['mcmc_info_gain_cutoff'] = 0  #A typical value is 1E-5. Use 0 to turn this setting off. Allowing values that are too small will cause numerical errors, this serves as a highpass filter.
-parameter_estimation_settings['mcmc_info_gain_returned'] = 'log_ratio' #current options are 'log_ratio' and 'KL' where 'KL' is the 
+parameter_estimation_settings['mcmc_info_gain_returned'] = 'KL_divergence' # #current options are 'log_ratio' and 'KL_divergence' where 'KL' stands for Kullback-Leibler
 
 
 #####Plot Settings#####
@@ -77,3 +78,16 @@ active_parameters = [] #Blank by default: gets populated with all parameters (or
 contour_settings_custom = {'figure_name': 'PosteriorContourPlots','fontsize':'auto' ,'num_y_ticks': 'auto','num_x_ticks':'auto','contours_normalized':True,'center_on':'all','colorbars':True} #'colormap_posterior_customized':'Oranges','colormap_prior_customized':'Greens'
 #num_y_ticks and num_x_ticks must be either a string ('auto') or an integer (such as 4, either without string or with integer casting like int('5')).
 parameter_pairs_for_contour_plots = [] #This will accept either strings (for variable names) or integers for positions.
+
+####Design Of Experiments####
+doe_settings = {} #To use this automated design of experiments the independent variables feature **must** be used.
+doe_settings['info_gains_matrices_array_format'] = 'xyz' #options are 'xyz' and 'meshgrid'.  Images are only ouput when scanning two independent variables. If using more than two, it is probably better to use the 'xyz' format and inspect the final info_gains_matrices_array directly. Note that this setting must be set *before* running the doe command. You cannot change the format of the info_gains_matrices_array afterwards because the way the sampling is conducted will change based on this setting.
+doe_settings['independent_variable_grid_center'] = [] #This must be a 1D array/list with length of number of independent variables.  
+doe_settings['independent_variable_grid_interval_size'] = [] #This must be a 1D array/list with length of number of independent variables.  
+doe_settings['independent_variable_grid_num_intervals'] = [] #This must be a 1D array/list with length of number of independent variables.
+
+doe_settings['on_the_fly_conditions_grids'] = True #This makes the independent variable grid each time. This costs more processing but less memory. As of April 2020 the other option has not been implemented but would just require making the combinations into a list the first time and then operating on a copy of that list.
+
+#doe_settings['parameter_modulation_grid_center'] #We do NOT create such a variable. The initial guess variable is used, which is the center of the prior if not filled by the user.
+doe_settings['parameter_modulation_grid_interval_size'] = [] #This must be 1D array/list with length of number of parameters.  These are all relative to the standard deviation of the prior of that parmaeter. 
+doe_settings['parameter_modulation_grid_num_intervals'] = [] #This must be a 1D array/list with length of number of paramaeters.

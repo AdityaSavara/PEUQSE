@@ -132,7 +132,7 @@ def makeHistogramsForEachParameter(parameterSamples,parameterNamesAndMathTypeExp
         parameterName = key
         sampledParameterHistogramMaker(parameterSamples, parameterName,parameterNamesAndMathTypeExpressionsDict, sampledParameterFiguresDictionary, sampledParameterAxesDictionary)        
 
-def createSimulatedResponsesPlot(x_values, listOfYArrays, plot_settings=[], listOfYUncertaintiesArrays=[]):
+def createSimulatedResponsesPlot(x_values, listOfYArrays, plot_settings={}, listOfYUncertaintiesArrays=[]):
     #First put some defaults in if not already defined.
     if 'x_label' not in plot_settings: plot_settings['x_label'] = ''
     if 'y_label' not in plot_settings: plot_settings['y_label'] = ''
@@ -215,3 +215,28 @@ def createSimulatedResponsesPlot(x_values, listOfYArrays, plot_settings=[], list
     fig0.tight_layout()
     fig0.savefig(plot_settings['figure_name'] + '.png', dpi=plot_settings['dpi'])
     return fig0
+
+def makeTrisurfacePlot(xValues, yValues, zValues, exportFigure = True, figure_name="TrisurfacePlot"):
+    fig1, ax1 =  plt.subplots(1)
+    ax1 = plt.axes(projection ='3d')
+    image = ax1.plot_trisurf(xValues,yValues, zValues)
+    if exportFigure == True:
+        fig1.savefig(figure_name + '.png')
+    return fig1, ax1, image
+
+def makeMeshGridSurfacePlot(XX, YY, ZZ,  plot_settings = {}, exportFigure = True, figure_name="MeshGridSurfacePlot"):
+    #TODO: plot_settings should be used for axis labels etc, like above.
+    #TODO: create a UserInput variable named info_gain_plot_settings (like what the other cases have).
+    fig1,ax1 = plt.subplots(figsize=(5,5))
+    #ax = fig.add_subplot(111, projection='3d')
+    surf = ax1.pcolor(XX,YY,ZZ,cmap=matplotlib.cm.coolwarm)
+    # ax1.set_xlabel('Temperature (K)')
+    # ax1.set_ylabel(r'$p_A$')
+    #ax.set_zlabel('Information Gain')
+    #ax1.set_xticks(temperatures)
+    #ax1.xaxis.set_major_formatter(FormatStrFormatter('%.2f'))
+    ax1.set_title('Information Gain Surface')
+    fig1.colorbar(surf, shrink=0.5, aspect=5)
+    fig1.savefig(figure_name + '.png')
+    return fig1, ax1#, image
+    

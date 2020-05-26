@@ -58,7 +58,7 @@ if __name__ == "__main__":
     PE_object.doOptimizeNegLogP(method="BFGS", printOptimum=True, verbose=True)
     print(PE_object.map_parameter_set, PE_object.map_logP)
     #PE_object.doGridSearch('doMetropolisHastings')
-    #PE_object.doGridSearch('doOptimizeNegLogP', verbose = True,gridSamplingRadii = [1,1,1,1,0,0], passThroughArgs={'method':'BFGS'})
+    #PE_object.doGridSearch('doOptimizeNegLogP', verbose = True,gridSamplingNumOfIntervals = [1,1,1,1,0,0], passThroughArgs={'method':'BFGS'})
     #PE_object.doGridSearch('getLogP', verbose = True)
     
     PE_object.createAllPlots() #This function calls each of the below functions.
