@@ -45,7 +45,7 @@ if __name__ == "__main__":
     global T
     list_of_T = np.linspace(698.15,298.15,5)#[298.15,398.15,498.15,598.15,698.15]
     kB = 8.61733035E-5 #eV/K\n
-    experiments = np.log(1/(1+(np.exp(-(-0.1)/(kB*np.linspace(698.15,298.15,5))))))
+    experiments = np.log(1/(1+(np.exp(-(-0.25)/(kB*np.linspace(698.15,298.15,5))))))
     PE_object_list = []
     prior = np.random.normal(-0.15,0.1,50000)
 

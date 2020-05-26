@@ -136,7 +136,7 @@ if __name__ == "__main__":
     print('info_gains_KL',info_gains_KL)
     surf = ax1.pcolor(T,V,IG_KL,cmap=matplotlib.cm.coolwarm)
     ax1.set_xlabel(r'$temperature (K)$')
-    ax1.set_ylabel(r'$volume cm^3$')
+    ax1.set_ylabel(r'$volume  cm^3$')
     #ax.set_zlabel('Information Gain')
     ax1.set_xticks(temperatures)
     ax1.xaxis.set_major_formatter(FormatStrFormatter('%.2f'))
