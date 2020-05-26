@@ -75,19 +75,30 @@ samplingScatterMatrixPlotsSettings ={}
 #{'parameter_number': 5, 'parameter_name': r'$\gamma_{2}$'}])
 active_parameters = [] #Blank by default: gets populated with all parameters (or reduced parameters) if left blank. Warning: trying to set this manually while using the reduced parameters feature is not supported as of April 2020.
 #pairs_of_parameter_indices = [[0, 1], [1, 2],[2, 3],[3, 4],[4, 5]] #This sets which parameters to plot contours for. By default, all pairs are plotted.
-contour_settings_custom = {'figure_name': 'PosteriorContourPlots','fontsize':'auto' ,'num_y_ticks': 'auto','num_x_ticks':'auto','contours_normalized':True,'center_on':'all','colorbars':True} #'colormap_posterior_customized':'Oranges','colormap_prior_customized':'Greens'
+contour_settings_custom = {'figure_name': 'PosteriorContourPlots','fontsize':'auto' ,'num_y_ticks': 'auto','num_x_ticks':'auto','contours_normalized':True,'center_on':'all','colorbars':True} 
+#See the file mumpce_custom_plotting_example.py for the full set of arguments that can be provided inside contour_settings_custom.
+#'colormap_posterior_customized':'Oranges','colormap_prior_customized':'Greens'
 #num_y_ticks and num_x_ticks must be either a string ('auto') or an integer (such as 4, either without string or with integer casting like int('5')).
 parameter_pairs_for_contour_plots = [] #This will accept either strings (for variable names) or integers for positions.
 
 ####Design Of Experiments####
+#The design of experiments feature, used like PE_object.designOfExperiments() will modulate the parameters to see how much info gain there would be in different parts of condition space (using synthetic data).
+
 doe_settings = {} #To use this automated design of experiments the independent variables feature **must** be used.
+
 doe_settings['info_gains_matrices_array_format'] = 'xyz' #options are 'xyz' and 'meshgrid'.  Images are only ouput when scanning two independent variables. If using more than two, it is probably better to use the 'xyz' format and inspect the final info_gains_matrices_array directly. Note that this setting must be set *before* running the doe command. You cannot change the format of the info_gains_matrices_array afterwards because the way the sampling is conducted will change based on this setting.
-doe_settings['independent_variable_grid_center'] = [] #This must be a 1D array/list with length of number of independent variables.  
-doe_settings['independent_variable_grid_interval_size'] = [] #This must be a 1D array/list with length of number of independent variables.  
-doe_settings['independent_variable_grid_num_intervals'] = [] #This must be a 1D array/list with length of number of independent variables.
 
-doe_settings['on_the_fly_conditions_grids'] = True #This makes the independent variable grid each time. This costs more processing but less memory. As of April 2020 the other option has not been implemented but would just require making the combinations into a list the first time and then operating on a copy of that list.
+#Now we will define how big of a modulation / offset we want to apply to each parameter.
+#doe_settings['parameter_modulation_grid_center'] #We do NOT create such a variable. The initial guess variable is used, which i=s the center of the prior if not filled by the user.
+doe_settings['parameter_modulation_grid_interval_size'] = [] #This must be 1D array/list with length of number of parameters.  These are all relative to the standard deviation of the prior of that parmaeter.  Such as [1,1]
+doe_settings['parameter_modulation_grid_num_intervals'] = [] #This must be a 1D array/list with length of number of paramaeters. #Such as [1,1].  #This is the number of steps in each direction outward from center. So a 2 here gives 5 evaluations. A zero means we don't allow the parameter to vary.
 
-#doe_settings['parameter_modulation_grid_center'] #We do NOT create such a variable. The initial guess variable is used, which is the center of the prior if not filled by the user.
-doe_settings['parameter_modulation_grid_interval_size'] = [] #This must be 1D array/list with length of number of parameters.  These are all relative to the standard deviation of the prior of that parmaeter. 
-doe_settings['parameter_modulation_grid_num_intervals'] = [] #This must be a 1D array/list with length of number of paramaeters.
+
+#Now we will define the *conditions space* to explore (to find the highest info gain), which will be done for *each* modulation.
+#Note that this means that responses['independent_variables_values'] must be used, AND it must be fed into the model simulation file as a connected variables array. (See  Example13doeFunctionExample directory runfiles).
+doe_settings['independent_variable_grid_center'] = [] #This must be a 1D array/list with length of number of independent variables.  It's a central condition a grid will be made around.
+doe_settings['independent_variable_grid_interval_size'] = [] #This must be a 1D array/list with length of number of independent variables.  this how big of each step will be in each direction/dimension (it is the grid spacing).Like [100,0.2]
+doe_settings['independent_variable_grid_num_intervals'] = [] #This must be a 1D array/list with length of number of independent variables. #This is the number of steps in each direction outward from center. So a 2 here gives 5 evaluations. A zero means we don't allow the condition to vary.
+
+doe_settings['on_the_fly_conditions_grids'] = True #Normally should not change. Values are True or False. This makes the independent variable grid each time. This costs more processing but less memory. As of April 2020 the other option has not been implemented but would just require making the combinations into a list the first time and then operating on a copy of that list.
+
