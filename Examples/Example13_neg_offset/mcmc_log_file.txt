@@ -1,0 +1,13 @@
+MAP_logP:[20.34593879]
+self.map_index:27
+self.map_parameter_set:[-0.69704168  0.00151913 -0.83318179  0.00149204]
+self.mu_AP_parameter_set:[-0.69301443  0.00153322 -0.84673845  0.00147821]
+self.stdap_parameter_set:[0.04512153 0.0001934  0.12027084 0.00017047]
+self.info_gain:1.4015148744104395
+evidence:921110.8411284602
+posterior_cov_matrix:
+[[ 2.03603387e-03 -4.06503650e-07  4.97109332e-04 -2.97074555e-06]
+ [-4.06503650e-07  3.74060005e-08 -1.58472541e-05  1.16588744e-08]
+ [ 4.97109332e-04 -1.58472541e-05  1.44656555e-02  7.44673366e-06]
+ [-2.97074555e-06  1.16588744e-08  7.44673366e-06  2.90597338e-08]]
+Warning: The MAP parameter set and mu_AP parameter set differ by more than 10% of prior variance in at least one parameter. This may mean that you need to increase your mcmc_length, increase or decrease your mcmc_relative_step_length, or change what is used for the model response.  There is no general method for knowing the right  value for mcmc_relative_step_length since it depends on the sharpness and smoothness of the response. See for example https://www.sciencedirect.com/science/article/pii/S0039602816300632
