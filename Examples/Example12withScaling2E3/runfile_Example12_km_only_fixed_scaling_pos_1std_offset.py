@@ -104,6 +104,7 @@ if __name__ == "__main__":
             ax.set_ylabel('Probability density')
             ax.set_xlabel(r'$k_m$')
             ax.set_title('Prior and Posterior Density Plot at T = {} (K) volume = {} cm^3'.format(str(t),str(v)))
+            fig.tight_layout()
             fig.savefig('km_only_figures/prior_and_posterior_histogram_T_{}_V_{}.png'.format(str(t),str(v)), dpi=300)
     fig,ax = plt.subplots(figsize=(5,5))
     #ax = fig.add_subplot(111, projection='3d')

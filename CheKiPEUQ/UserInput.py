@@ -33,7 +33,8 @@ responses['responses_abscissa'] = []
 responses['responses_observed'] = []
 responses['responses_observed_uncertainties'] = []
 responses['reducedResponseSpace'] = []
-
+responses['independent_variables_values'] = []
+responses['independent_variables_names'] = []
 
 #####Parameter Estimation Inputs#####
 parameter_estimation_settings = {}
@@ -79,3 +80,16 @@ contour_settings_custom = {'figure_name': 'PosteriorContourPlots','fontsize':'au
 #'colormap_posterior_customized':'Oranges','colormap_prior_customized':'Greens'
 #num_y_ticks and num_x_ticks must be either a string ('auto') or an integer (such as 4, either without string or with integer casting like int('5')).
 parameter_pairs_for_contour_plots = [] #This will accept either strings (for variable names) or integers for positions.
+
+####Design Of Experiments####
+doe_settings = {} #To use this automated design of experiments the independent variables feature **must** be used.
+doe_settings['info_gains_matrices_array_format'] = 'xyz' #options are 'xyz' and 'meshgrid'.  Images are only ouput when scanning two independent variables. If using more than two, it is probably better to use the 'xyz' format and inspect the final info_gains_matrices_array directly. Note that this setting must be set *before* running the doe command. You cannot change the format of the info_gains_matrices_array afterwards because the way the sampling is conducted will change based on this setting.
+doe_settings['independent_variable_grid_center'] = [] #This must be a 1D array/list with length of number of independent variables.  
+doe_settings['independent_variable_grid_interval_size'] = [] #This must be a 1D array/list with length of number of independent variables.  
+doe_settings['independent_variable_grid_num_intervals'] = [] #This must be a 1D array/list with length of number of independent variables.
+
+doe_settings['on_the_fly_conditions_grids'] = True #This makes the independent variable grid each time. This costs more processing but less memory. As of April 2020 the other option has not been implemented but would just require making the combinations into a list the first time and then operating on a copy of that list.
+
+#doe_settings['parameter_modulation_grid_center'] #We do NOT create such a variable. The initial guess variable is used, which is the center of the prior if not filled by the user.
+doe_settings['parameter_modulation_grid_interval_size'] = [] #This must be 1D array/list with length of number of parameters.  These are all relative to the standard deviation of the prior of that parmaeter. 
+doe_settings['parameter_modulation_grid_num_intervals'] = [] #This must be a 1D array/list with length of number of paramaeters.
