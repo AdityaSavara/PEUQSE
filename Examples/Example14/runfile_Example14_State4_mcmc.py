@@ -27,9 +27,9 @@ if __name__ == "__main__":
     UserInput.parameter_estimation_settings['exportLog'] = True
     UserInput.parameter_estimation_settings['mcmc'] = True 
     UserInput.parameter_estimation_settings['mcmc_mode'] = 'unbiased'
-    UserInput.parameter_estimation_settings['mcmc_random_seed'] = 0 #Normally set to None so that mcmc is set to be random. To get the same results repeatedly, such as for testing purposes, set the random seed to 0 or another integer for testing purposes.
-    UserInput.parameter_estimation_settings['mcmc_burn_in'] = 1000
-    UserInput.parameter_estimation_settings['mcmc_length'] = 20000
+    UserInput.parameter_estimation_settings['mcmc_random_seed'] = 10 #Normally set to None so that mcmc is set to be random. To get the same results repeatedly, such as for testing purposes, set the random seed to 0 or another integer for testing purposes.
+    UserInput.parameter_estimation_settings['mcmc_burn_in'] = 2000
+    UserInput.parameter_estimation_settings['mcmc_length'] = 22000
     UserInput.parameter_estimation_settings['mcmc_relative_step_length'] = 1.0
     UserInput.parameter_estimation_settings['mcmc_modulate_accept_probability']  = 0 #Default value of 0. Changing this value sharpens or flattens the posterior. A value greater than 1 flattens the posterior by accepting low values more often. It can be useful when greater sampling is more important than accuracy. One way of using this feature is to try with a value of 0, then with the value equal to the number of priors for comparison, and then to gradually decrease this number as low as is useful (to minimize distortion of the result). A downside of changing changing this variable to greater than 1 is that it slows the the ascent to the maximum of the prior, so there is a balance in using it. In contrast, numbers increasingly less than one (such as 0.90 or 0.10) will speed up the ascent to the maximum of the posterior, but will also result in fewer points being retained.
     UserInput.parameter_estimation_settings['scaling_uncertainties_type'] = "off"
@@ -80,3 +80,7 @@ if __name__ == "__main__":
     lowerRateTp=(simulationFunctionExample14Tp.getTpFromKineticParametersAndInitialCoverageWrapper(PE_object.mu_AP_parameter_set)+lowerRateAddition)
     uncertaintyForTp = (((upperRateTp-lowerRateTp)/2)**2+25**2)**0.5
     print(uncertaintyForTp)
+    
+    UserInput.contour_settings_custom['axis_limits'] = [7,20,0,140000]
+    UserInput.contour_settings_custom['num_y_ticks']=4
+    PE_object.createMumpcePlots()
