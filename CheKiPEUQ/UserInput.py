@@ -80,7 +80,8 @@ contour_settings_custom = {'figure_name': 'PosteriorContourPlots','fontsize':'au
 parameter_pairs_for_contour_plots = [] #This will accept either strings (for variable names) or integers for positions.
 
 ####Design Of Experiments####
-doe_settings = {}
+doe_settings = {} #To use this automated design of experiments the independent variables feature **must** be used.
+doe_settings['info_gains_matrices_array_format'] = 'xyz' #options are 'xyz' and 'meshgrid'.  Images are only ouput when scanning two independent variables. If using more than two, it is probably better to use the 'xyz' format and inspect the final info_gains_matrices_array directly. Note that this setting must be set *before* running the doe command. You cannot change the format of the info_gains_matrices_array afterwards because the way the sampling is conducted will change based on this setting.
 doe_settings['independent_variable_grid_center'] = [] #This must be a 1D array/list with length of number of independent variables.  
 doe_settings['independent_variable_grid_interval_size'] = [] #This must be a 1D array/list with length of number of independent variables.  
 doe_settings['independent_variable_grid_num_intervals'] = [] #This must be a 1D array/list with length of number of independent variables.

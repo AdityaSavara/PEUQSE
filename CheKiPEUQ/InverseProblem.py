@@ -395,7 +395,8 @@ class parameter_estimation:
         #For the parameters, we are able to use a default one standard deviation grid if gridSamplingAbsoluteIntervalSize is a blank list.
         #doe_settings['parameter_modulation_grid_center'] #We do NOT create such a variable in user input. The initial guess variable is used, which is the center of the prior if no guess has been provided.
         parModulationGridCenterVector = self.UserInput.InputParameterInitialGuess
-        parModulationGridCombinations = self.getGridCombinations(parModulationGridCenterVector, doe_settings['parameter_modulation_grid_interval_size'], doe_settings['parameter_modulation_grid_num_intervals'])
+        parModulationGridIntervalSizeAbsolute = doe_settings['parameter_modulation_grid_interval_size']*self.UserInput.std_prior
+        parModulationGridCombinations = self.getGridCombinations(parModulationGridCenterVector,parModulationGridIntervalSizeAbsolute, doe_settings['parameter_modulation_grid_num_intervals'])
         
         #We will get a separate info gain matrix for each parModulationCombination, we'll store that in this variable.
         info_gains_matrices_list = []
@@ -431,21 +432,83 @@ class parameter_estimation:
             
             #We will get separate info gain matrix for each parameter modulation combination.
             info_gain_matrix = []
-            #For the IndependentVariables the grid info must be defined ahead of time. On the fly conditions grid means it's generated again fresh for each parameter combination. (We are doing it this way out of convenience during the first programming of this feature).
-            if doe_settings['on_the_fly_conditions_grids'] == True:
-                conditionsGridCombinations = self.getGridCombinations(doe_settings['independent_variable_grid_center'], doe_settings['independent_variable_grid_interval_size'], doe_settings['independent_variable_grid_num_intervals'])
-            for conditionsCombinationIndex,conditionsCombination in enumerate(conditionsGridCombinations):    
-                #It is absolutely critical that we *do not* use syntax like self.UserInput.responses['independent_variables_values'] = xxxx
-                #Because that would move where the pointer is going to. We need to instead populate the individual values by index.
-                for independentVariableIndex,independentVariableValue in enumerate(conditionsCombination):
-                    self.UserInput.responses['independent_variables_values'][independentVariableIndex] = independentVariableValue
-                [map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, logP] = self.doMetropolisHastings()
-                conditionsCombination = np.array(conditionsCombination) #we're going to make this an array before adding to the info_gain matrix.
-                conditionsCombinationAndInfoGain = np.hstack((conditionsCombination, info_gain))
-                info_gain_matrix.append(conditionsCombinationAndInfoGain)
-            info_gains_matrices_list.append(np.array(info_gain_matrix))
-        self.info_gains_matrices_array=np.array(info_gains_matrices_list)
-
+            
+            if self.UserInput.doe_settings['info_gains_matrices_array_format'] == 'xyz':
+                self.info_gains_matrices_array_format = 'xyz'            
+                #For the IndependentVariables the grid info must be defined ahead of time. On the fly conditions grid means it's generated again fresh for each parameter combination. (We are doing it this way out of convenience during the first programming of this feature).
+                if doe_settings['on_the_fly_conditions_grids'] == True:
+                    conditionsGridCombinations = self.getGridCombinations(doe_settings['independent_variable_grid_center'], doe_settings['independent_variable_grid_interval_size'], doe_settings['independent_variable_grid_num_intervals'])
+                #Here is the loop across conditions.
+                for conditionsCombinationIndex,conditionsCombination in enumerate(conditionsGridCombinations):    
+                    #It is absolutely critical that we *do not* use syntax like self.UserInput.responses['independent_variables_values'] = xxxx
+                    #Because that would move where the pointer is going to. We need to instead populate the individual values by index.
+                    for independentVariableIndex,independentVariableValue in enumerate(conditionsCombination):
+                        self.UserInput.responses['independent_variables_values'][independentVariableIndex] = independentVariableValue
+                    [map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, logP] = self.doMetropolisHastings()
+                    conditionsCombination = np.array(conditionsCombination) #we're going to make this an array before adding to the info_gain matrix.
+                    conditionsCombinationAndInfoGain = np.hstack((conditionsCombination, info_gain))
+                    info_gain_matrix.append(conditionsCombinationAndInfoGain)
+                #Append the info gain matrix after the loop across conditions.
+                info_gains_matrices_list.append(np.array(info_gain_matrix))
+            if self.UserInput.doe_settings['info_gains_matrices_array_format'] == 'meshgrid':
+                self.info_gains_matrices_array_format = 'meshgrid'  
+                if len(doe_settings['independent_variable_grid_center']) !=2:
+                    print("CURRENTLY THE INFOGAIN MESHGRID OPTION IS ONLY SUPPORTED FOR TWO INDEPENDENT VARIABLES. Use doe_settings['independent_variable_grid_center'] = 'xyz' and run again.")
+                    sys.exit()
+                #TODO: Here is where Eric will need to make STEP 1 of his meshgrid code. I will put the first couple of lines to help.
+                #STEP 1 is just to append each info_gain matrix to info_gain_matrix, and step 2 is 
+                #For loop to generate info_gains_matrix.
+                
+                #For the IndependentVariables the grid info must be defined ahead of time. On the fly conditions grid means it's generated again fresh for each parameter combination. (We are doing it this way out of convenience during the first programming of this feature).
+                if doe_settings['on_the_fly_conditions_grids'] == True:
+                    independentVariable1CentralValue = doe_settings['independent_variable_grid_center'][0]
+                    independentVariable2CentralValue = doe_settings['independent_variable_grid_center'][1]
+                    independentVariable1UpperValue = independentVariable1CentralValue + doe_settings['independent_variable_grid_interval_size'][0]*doe_settings['independent_variable_grid_num_intervals'][0]
+                    independentVariable1LowerValue = independentVariable1CentralValue - doe_settings['independent_variable_grid_interval_size'][0]*doe_settings['independent_variable_grid_num_intervals'][0]
+                    independentVariable2UpperValue =  independentVariable2CentralValue + doe_settings['independent_variable_grid_interval_size'][1]*doe_settings['independent_variable_grid_num_intervals'][1]
+                    independentVariable2LowerValue =  independentVariable2CentralValue - doe_settings['independent_variable_grid_interval_size'][1]*doe_settings['independent_variable_grid_num_intervals'][1]
+                    independentVariable1ValuesArray = np.linspace(independentVariable1LowerValue,independentVariable1UpperValue,doe_settings['independent_variable_grid_num_intervals'][0]*2+1)
+                    independentVariable2ValuesArray = np.linspace(independentVariable2LowerValue,independentVariable2UpperValue,doe_settings['independent_variable_grid_num_intervals'][1]*2+1)
+                    self.meshGrid_independentVariable1ValuesArray = independentVariable2ValuesArray #This is sortof an implied return.
+                    self.meshGrid_independentVariable2ValuesArray = independentVariable2ValuesArray #This is sortof an implied return.
+                    #Here is the loop across conditions.
+                    for indValue2 in independentVariable2ValuesArray: #We know from experience that the outer loop should be over the YY variable.
+                        for indValue1 in independentVariable1ValuesArray: #We know from experience that the inner loop should be over the XX variable.
+                            #It is absolutely critical that we *do not* use syntax like self.UserInput.responses['independent_variables_values'] = xxxx
+                            #Because that would move where the pointer is going to. We need to instead populate the individual values by index.
+                            self.UserInput.responses['independent_variables_values'][0] = indValue1
+                            self.UserInput.responses['independent_variables_values'][1] = indValue2
+                            [map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, logP] = self.doMetropolisHastings()
+                            conditionsCombination = np.array([indValue1,indValue2])
+                            conditionsCombinationAndInfoGain = np.hstack((conditionsCombination, info_gain))
+                            info_gain_matrix.append(conditionsCombinationAndInfoGain) #NOTE that the structure *includes* the combinations.
+                    #Append the info gain matrix after the loop across conditions.
+                    info_gains_matrices_list.append(np.array(info_gain_matrix))
+        self.info_gains_matrices_array=np.array(info_gains_matrices_list) #This is an implied return, but we will also return it.
+        #TODO: write the self.info_gains_matrices_array individual elements to file.
+        #for modulationIndex in range(len(self.info_gains_matrices_array)):
+            #self.info_gains_matrices_array[modulationIndex]  #Write this to file. This is 'xyz' format regardless of whether self.info_gains_matrices_array_format == 'xyz'  or =='meshgrid' is used.
+        return self.info_gains_matrices_array
+    
+    def createInfoGainPlots(self): #TODO: add 'xyz' type and 'meshgrid' type.
+        import CheKiPEUQ.plotting_functions as plotting_functions
+        if len(self.UserInput.doe_settings['independent_variable_grid_center']) == 2:
+            if self.info_gains_matrices_array_format == 'xyz':                
+                for modulationIndex in range(len(self.info_gains_matrices_array)):
+                    xValues = self.info_gains_matrices_array[modulationIndex][:,0]
+                    yValues = self.info_gains_matrices_array[modulationIndex][:,1]
+                    zValues = self.info_gains_matrices_array[modulationIndex][:,2]
+                    plotting_functions.makeTrisurfacePlot(xValues, yValues, zValues, figure_name = "Info_gain_TrisurfacePlot_modulation_"+str(modulationIndex))
+            if self.info_gains_matrices_array_format == 'meshgrid':        
+                for modulationIndex in range(len(self.info_gains_matrices_array)):
+                    #Now need to get things prepared for the meshgrid.
+                    #NOTE: we do not pull XX and YY from self.info_gains_matrices_array because that is 1D and these are 2D arrays made a different way.
+                    #xValues = self.info_gains_matrices_array[modulationIndex][:,0] #Still correct, but not being used.
+                    #yValues = self.info_gains_matrices_array[modulationIndex][:,1] #Still correct, but not being used.
+                    XX, YY = np.meshgrid(self.meshGrid_independentVariable1ValuesArray, self.meshGrid_independentVariable2ValuesArray)
+                    zValues = self.info_gains_matrices_array[modulationIndex][:,2]
+                    ZZ = zValues.reshape(XX.shape) #We know from experience to reshape this way.
+                    plotting_functions.makeMeshGridSurfacePlot(XX, YY, ZZ, figure_name = "Info_gain_Meshgrid_modulation_"+str(modulationIndex))
     def getLogP(self, proposal_sample): #The proposal sample is specific parameter vector.
         [log_likelihood_proposal, simulationOutput_proposal] = self.getLogLikelihood(proposal_sample)
         log_prior_proposal = self.getLogPrior(proposal_sample)
@@ -767,7 +830,6 @@ class parameter_estimation:
         observedResponses_transformed = self.UserInput.responses_observed_transformed
         simulatedResponses_transformed_flattened = np.array(simulatedResponses_transformed).flatten()
         observedResponses_transformed_flattened = np.array(observedResponses_transformed).flatten()
-
         #If our likelihood is  “probability of Response given Theta”…  we have a continuous probability distribution for both the response and theta. That means the pdf  must use binning on both variables. Eric notes that the pdf returns a probability density, not a probability mass. So the pdf function here divides by the width of whatever small bin is being used and then returns the density accordingly. Because of this, our what we are calling likelihood is not actually probability (it’s not the actual likelihood) but is proportional to the likelihood.
         #Thus we call it a probability_metric and not a probability. #TODO: consider changing names of likelihood and get likelihood to "likelihoodMetric" and "getLikelihoodMetric"
         #Now we need to make the comprehensive_responses_covmat.
@@ -797,7 +859,10 @@ class parameter_estimation:
             if log_probability_metric == 1:
                 log_probability_metric = -1E100 #Just initializing, then will add each probability separately.
                 for responseValueIndex in range(len(simulatedResponses_transformed_flattened)):
-                    current_log_probability_metric = multivariate_normal.logpdf(mean=simulatedResponses_transformed_flattened[responseValueIndex],x=observedResponses_transformed_flattened[responseValueIndex],cov=comprehensive_responses_covmat[0][responseValueIndex])    
+                    try:
+                        current_log_probability_metric = multivariate_normal.logpdf(mean=simulatedResponses_transformed_flattened[responseValueIndex],x=observedResponses_transformed_flattened[responseValueIndex],cov=comprehensive_responses_covmat[0][responseValueIndex])    
+                    except: #The above is to catch cases when the multivariate_normal fails.
+                        current_log_probability_metric = float('-inf')
                     log_probability_metric = current_log_probability_metric + log_probability_metric
                     if float(current_log_probability_metric) == float('-inf'):
                         print("Warning: There are posterior points that have zero probability. If there are too many points like this, the MAP and mu_AP returned will not be meaningful.")
@@ -806,7 +871,7 @@ class parameter_estimation:
         return log_probability_metric, simulatedResponses.flatten()
 
     def makeHistogramsForEachParameter(self):
-        import CheKiPEUQ.plotting_functions as plotting_functions #This is going to become import CheKiPEUQ.plotting_functions as plotting_functions
+        import CheKiPEUQ.plotting_functions as plotting_functions 
         parameterSamples = self.post_burn_in_samples
         parameterNamesAndMathTypeExpressionsDict = self.UserInput.parameterNamesAndMathTypeExpressionsDict
         plotting_functions.makeHistogramsForEachParameter(parameterSamples,parameterNamesAndMathTypeExpressionsDict)
