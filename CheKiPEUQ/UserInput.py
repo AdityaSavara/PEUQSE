@@ -18,6 +18,7 @@ model['InputParameterPriorValues'] =  [] #Should be like: [41.5, 41.5, 13.0, 13.
 model['InputParametersPriorValuesUncertainties'] = []# Should be like: [200, 200, 13, 13, 0.1, 0.1] #If user wants to use a prior with covariance, then this must be a 2D array/ list. To assume no covariance, a 1D
 model['parameterNamesAndMathTypeExpressionsDict'] = {} #This must be provided. It can be as simple as {"Param1":"1"} etc. but it must be a dictionary with strings as keys and as values. The next line is a comment with a more complicated example.
 #Example: model['parameterNamesAndMathTypeExpressionsDict'] = {'Ea_1':r'$E_{a1}$','Ea_2':r'$E_{a2}$','log_A1':r'$log(A_{1})$','log_A2':r'$log(A_{2})$','gamma1':r'$\gamma_{1}$','gamma2':r'$\gamma_{2}$'}
+model['populateIndependentVariablesFunction'] = None
 model['simulateByInputParametersOnlyFunction'] = None #A function must be provided! This cannot be left as None.
 model['simulationOutputProcessingFunction'] = None
 model['reducedParameterSpace'] = [] #This is to keep parameters as 'constants'. Any parameter index in this list will be allowed to change, the rest will be held as constants.
@@ -108,3 +109,4 @@ doe_settings['independent_variable_grid_num_intervals'] = [] #This must be a 1D 
 
 doe_settings['on_the_fly_conditions_grids'] = True #Normally should not change. Values are True or False. This makes the independent variable grid each time. This costs more processing but less memory. As of April 2020 the other option has not been implemented but would just require making the combinations into a list the first time and then operating on a copy of that list.
 
+doe_settings['middle_of_doe_flag'] = False #this is for internal use only and is related to doeParameterModulationCombinationsScanner etc.  We may remove this later if we find a better way of doing things.

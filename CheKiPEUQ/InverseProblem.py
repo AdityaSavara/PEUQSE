@@ -53,7 +53,14 @@ class parameter_estimation:
 
         #TODO: This currently only is programmed for if the uncertainties are uncorrelated standard deviaions (so is not compatible with a directly fed cov_mat). Also, we need to figure out what do when they are not gaussian/symmetric.
         UserInput.responses_observed_transformed, UserInput.responses_observed_transformed_uncertainties  = self.transform_responses(UserInput.responses_observed, UserInput.responses_observed_uncertainties) #This creates transforms for any data that we might need it. The same transforms will also be applied during parameter estimation.
-             
+            
+        #NOTE: Currently we have this workaround that the code modifies a variable **inside** the UserInput namespace, which is unusual. This is because during doeParameterModulationCombinationsScanner, populate synthetic data calls init again.
+        #We either need to fill this variable independent_variables_values before populate synthetic data  (which we intentionally don't want to do, since that is changing a user input dictionary variable).  Or.... do something more creative, which is what I have done here.
+        #In the long-run, using __new__ and __init__ might solve the the problem.
+        if UserInput.doe_settings['middle_of_doe_flag'] == False:
+            if UserInput.model['populateIndependentVariablesFunction'] != None:
+                UserInput.model['populateIndependentVariablesFunction'](UserInput.responses['independent_variables_values']) 
+        
         self.UserInput.num_data_points = len(UserInput.responses_observed.flatten()) #FIXME: This is only true for transient data.
         #Now scale things as needed:
         if UserInput.parameter_estimation_settings['scaling_uncertainties_type'] == "off":
@@ -424,6 +431,7 @@ class parameter_estimation:
     def doeGetInfoGainMatrix(self, parameterCombination):#Note: There is an implied argument of info_gains_matrices_array_format being 'xyz' or 'meshgrid'
         #At present, we *must* provide a parameterCombination because right now the only way to get an InfoGainMatrix is with synthetic data assuming a particular parameterCombination as the "real" or "actual" parameterCombination.
         doe_settings = self.UserInput.doe_settings
+        doe_settings['middle_of_doe_flag'] = True  #This is a work around that is needed because right now the synthetic data creation has an __init__ call which is going to try to modify the independent variables back to their original values if we don't do this.
         info_gain_matrix = [] #TODO:  Right now each item in here is a single value. Later it is going to become a 1D array for each one, where the arrayindexing corresponds to the parameter index. However, THIS function will not have to change, only createInfoGainPlots will have to change the indexing that it expects since there will be more nesting.
         if self.UserInput.doe_settings['info_gains_matrices_array_format'] == 'xyz':
             self.info_gains_matrices_array_format = 'xyz'            
@@ -433,10 +441,9 @@ class parameter_estimation:
             #Here is the loop across conditions.                
             for conditionsCombinationIndex,conditionsCombination in enumerate(conditionsGridCombinations):    
                 #It is absolutely critical that we *do not* use syntax like self.UserInput.responses['independent_variables_values'] = xxxx
-                #Because that would move where the pointer is going to. We need to instead populate the individual values by index.
-                for independentVariableIndex,independentVariableValue in enumerate(conditionsCombination):
-                    self.UserInput.responses['independent_variables_values'][independentVariableIndex] = independentVariableValue
-                #Note: this population Must occur here. It has to be after the indpendent variables have changed and before the MCMC is performed.
+                #Because that would move where the pointer is going to. We need to instead populate the individual values in the simulation module's namespace.
+                #This population Must occur here. It has to be after the indpendent variables have changed, before synthetic data is made, and before the MCMC is performed.
+                self.UserInput.model['populateIndependentVariablesFunction'](conditionsCombination)
                 self.populateResponsesWithSyntheticData(parameterCombination)
                 [map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, logP] = self.doMetropolisHastings()
                 conditionsCombination = np.array(conditionsCombination) #we're going to make this an array before adding to the info_gain matrix.
@@ -468,10 +475,9 @@ class parameter_estimation:
                 for indValue2 in independentVariable2ValuesArray: #We know from experience that the outer loop should be over the YY variable.
                     for indValue1 in independentVariable1ValuesArray: #We know from experience that the inner loop should be over the XX variable.
                         #It is absolutely critical that we *do not* use syntax like self.UserInput.responses['independent_variables_values'] = xxxx
-                        #Because that would move where the pointer is going to. We need to instead populate the individual values by index.
-                        self.UserInput.responses['independent_variables_values'][0] = indValue1
-                        self.UserInput.responses['independent_variables_values'][1] = indValue2
-                        #Note: this population Must occur here. It has to be after the indpendent variables have changed and before the MCMC is performed.
+                        #Because that would move where the pointer is going to. We need to instead populate the individual values in the simulation module's namespace.
+                        #This population Must occur here. It has to be after the indpendent variables have changed, before synthetic data is made, and before the MCMC is performed.
+                        self.UserInput.model['populateIndependentVariablesFunction']([indValue1,indValue2])
                         self.populateResponsesWithSyntheticData(parameterCombination)
                         [map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, logP] = self.doMetropolisHastings()
                         conditionsCombination = np.array([indValue1,indValue2])
@@ -491,7 +497,7 @@ class parameter_estimation:
         parModulationGridCombinations = self.getGridCombinations(parModulationGridCenterVector,parModulationGridIntervalSizeAbsolute, doe_settings['parameter_modulation_grid_num_intervals'])
         
         parModulationGridCombinations= np.array(parModulationGridCombinations)
-        np.savetxt("Info_gain_parModulationGridCombinations.csv", parModulationGridCombinations, delimiter=",", encoding =None)
+        np.savetxt("Info_gain__parModulationGridCombinations.csv", parModulationGridCombinations, delimiter=",", encoding =None)
         
         #We will get a separate info gain matrix for each parModulationCombination, we'll store that in this variable.
         info_gains_matrices_list = []
