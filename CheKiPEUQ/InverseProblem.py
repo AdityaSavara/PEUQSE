@@ -54,12 +54,12 @@ class parameter_estimation:
         #TODO: This currently only is programmed for if the uncertainties are uncorrelated standard deviaions (so is not compatible with a directly fed cov_mat). Also, we need to figure out what do when they are not gaussian/symmetric.
         UserInput.responses_observed_transformed, UserInput.responses_observed_transformed_uncertainties  = self.transform_responses(UserInput.responses_observed, UserInput.responses_observed_uncertainties) #This creates transforms for any data that we might need it. The same transforms will also be applied during parameter estimation.
             
-        #NOTE: Currently we have this workaround that the code modifies a variable **inside** the UserInput namespace, which is unusual. This is because during doeParameterModulationCombinationsScanner, populate synthetic data calls init again.
-        #We either need to fill this variable independent_variables_values before populate synthetic data  (which we intentionally don't want to do, since that is changing a user input dictionary variable).  Or.... do something more creative, which is what I have done here.
-        #In the long-run, using __new__ and __init__ might solve the the problem.
-        if UserInput.doe_settings['middle_of_doe_flag'] == False:
-            if UserInput.model['populateIndependentVariablesFunction'] != None:
-                UserInput.model['populateIndependentVariablesFunction'](UserInput.responses['independent_variables_values']) 
+        #The below unusual code is because during doeParameterModulationCombinationsScanner, populate synthetic data calls init again.
+        #So we will only call populateIndependentVariablesFunction if we're not in the middle of design of experiments.
+        if hasattr(self, 'middle_of_doe_flag'): #We check of the middle_of_doe_flag exists. If it's not there, no problem.
+            if self.middle_of_doe_flag == False: #If it is there, we only proceed to call the function if the flag is set to false.
+                if UserInput.model['populateIndependentVariablesFunction'] != None:
+                    UserInput.model['populateIndependentVariablesFunction'](UserInput.responses['independent_variables_values']) 
         
         self.UserInput.num_data_points = len(UserInput.responses_observed.flatten()) #FIXME: This is only true for transient data.
         #Now scale things as needed:
@@ -431,7 +431,7 @@ class parameter_estimation:
     def doeGetInfoGainMatrix(self, parameterCombination):#Note: There is an implied argument of info_gains_matrices_array_format being 'xyz' or 'meshgrid'
         #At present, we *must* provide a parameterCombination because right now the only way to get an InfoGainMatrix is with synthetic data assuming a particular parameterCombination as the "real" or "actual" parameterCombination.
         doe_settings = self.UserInput.doe_settings
-        doe_settings['middle_of_doe_flag'] = True  #This is a work around that is needed because right now the synthetic data creation has an __init__ call which is going to try to modify the independent variables back to their original values if we don't do this.
+        self.middle_of_doe_flag = True  #This is a work around that is needed because right now the synthetic data creation has an __init__ call which is going to try to modify the independent variables back to their original values if we don't do this.
         info_gain_matrix = [] #TODO:  Right now each item in here is a single value. Later it is going to become a 1D array for each one, where the arrayindexing corresponds to the parameter index. However, THIS function will not have to change, only createInfoGainPlots will have to change the indexing that it expects since there will be more nesting.
         if self.UserInput.doe_settings['info_gains_matrices_array_format'] == 'xyz':
             self.info_gains_matrices_array_format = 'xyz'            
@@ -450,7 +450,7 @@ class parameter_estimation:
                 conditionsCombinationAndInfoGain = np.hstack((conditionsCombination, info_gain))
                 info_gain_matrix.append(conditionsCombinationAndInfoGain)
             self.info_gain_matrix = np.array(info_gain_matrix) #this is an implied return in addition to the real return.
-            doe_settings['middle_of_doe_flag'] = False #Set this back to false once info gain matrix is ready.
+            self.middle_of_doe_flag = False #Set this back to false once info gain matrix is ready.
             return np.array(info_gain_matrix)            
         if self.UserInput.doe_settings['info_gains_matrices_array_format'] == 'meshgrid':
             self.info_gains_matrices_array_format = 'meshgrid'  
@@ -485,7 +485,7 @@ class parameter_estimation:
                         conditionsCombinationAndInfoGain = np.hstack((conditionsCombination, info_gain))
                         info_gain_matrix.append(conditionsCombinationAndInfoGain) #NOTE that the structure *includes* the combinations.
                 self.info_gain_matrix = np.array(info_gain_matrix) #this is an implied return in addition to the real return.
-                doe_settings['middle_of_doe_flag'] = False #Set this back to false once info gain matrix is ready.
+                self.middle_of_doe_flag = False #Set this back to false once info gain matrix is ready.
                 return np.array(info_gain_matrix)
     
     #This function requires population of the UserInput doe_settingsdictionary. It automatically scans many parameter modulation combinations.

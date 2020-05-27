@@ -108,5 +108,3 @@ doe_settings['independent_variable_grid_interval_size'] = [] #This must be a 1D 
 doe_settings['independent_variable_grid_num_intervals'] = [] #This must be a 1D array/list with length of number of independent variables. #This is the number of steps in each direction outward from center. So a 2 here gives 5 evaluations. A zero means we don't allow the condition to vary.
 
 doe_settings['on_the_fly_conditions_grids'] = True #Normally should not change. Values are True or False. This makes the independent variable grid each time. This costs more processing but less memory. As of April 2020 the other option has not been implemented but would just require making the combinations into a list the first time and then operating on a copy of that list.
-
-doe_settings['middle_of_doe_flag'] = False #this is for internal use only and is related to doeParameterModulationCombinationsScanner etc.  We may remove this later if we find a better way of doing things.
