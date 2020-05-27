@@ -424,7 +424,7 @@ class parameter_estimation:
     def doeGetInfoGainMatrix(self, parameterCombination):#Note: There is an implied argument of info_gains_matrices_array_format being 'xyz' or 'meshgrid'
         #At present, we *must* provide a parameterCombination because right now the only way to get an InfoGainMatrix is with synthetic data assuming a particular parameterCombination as the "real" or "actual" parameterCombination.
         doe_settings = self.UserInput.doe_settings
-        info_gain_matrix = []
+        info_gain_matrix = [] #TODO:  Right now each item in here is a single value. Later it is going to become a 1D array for each one, where the arrayindexing corresponds to the parameter index. However, THIS function will not have to change, only createInfoGainPlots will have to change the indexing that it expects since there will be more nesting.
         if self.UserInput.doe_settings['info_gains_matrices_array_format'] == 'xyz':
             self.info_gains_matrices_array_format = 'xyz'            
             #For the IndependentVariables the grid info must be defined ahead of time. On the fly conditions grid means it's generated again fresh for each parameter combination. (We are doing it this way out of convenience during the first programming of this feature).
@@ -506,7 +506,11 @@ class parameter_estimation:
             #self.info_gains_matrices_array[modulationIndex]  #Write this to file. This is 'xyz' format regardless of whether self.info_gains_matrices_array_format == 'xyz'  or =='meshgrid' is used.
         return self.info_gains_matrices_array
     
-    def createInfoGainPlots(self, plot_suffix = ''): 
+    def createInfoGainPlots(self, parameterInfoGainIndex=0, plot_suffix = ''): 
+        #TODO: The variable "parameterInfoGainIndex" is made with the presumption that later we'll have to add another index when we have info_gains for each parameter. In that case it will become like this:
+        #xValues = self.info_gains_matrices_array[modulationIndex][:,0] will become xValues = self.info_gains_matrices_array[modulationIndex][parameterInfoGainIndex][:,0]
+        #self.meshGrid_independentVariable1ValuesArray will remain unchanged.       
+        
         #Normally, the info gain plots should be stored in self.info_gains_matrices_array.
         #However, in case it does not exist or there are none in there, then we assume the person is trying to make just one. So we take the most recent info gain matrix.
         try:
