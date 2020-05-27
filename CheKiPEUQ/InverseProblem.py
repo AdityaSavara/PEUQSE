@@ -56,8 +56,11 @@ class parameter_estimation:
             
         #The below unusual code is because during doeParameterModulationCombinationsScanner, populate synthetic data calls init again.
         #So we will only call populateIndependentVariablesFunction if we're not in the middle of design of experiments.
-        if hasattr(self, 'middle_of_doe_flag'): #We check of the middle_of_doe_flag exists. If it's not there, no problem.
-            if self.middle_of_doe_flag == False: #If it is there, we only proceed to call the function if the flag is set to false.
+        if not hasattr(self, 'middle_of_doe_flag'): #We check of the middle_of_doe_flag exists. #If the flag is not there and the populate function exists, we call it.
+            if UserInput.model['populateIndependentVariablesFunction'] != None:
+                UserInput.model['populateIndependentVariablesFunction'](UserInput.responses['independent_variables_values']) 
+        if hasattr(self, 'middle_of_doe_flag'): #We check of the middle_of_doe_flag exists. If it's there, no problem.
+            if self.middle_of_doe_flag == False: #If the flag is there, we only proceed to call the function if the flag is set to false.
                 if UserInput.model['populateIndependentVariablesFunction'] != None:
                     UserInput.model['populateIndependentVariablesFunction'](UserInput.responses['independent_variables_values']) 
         
