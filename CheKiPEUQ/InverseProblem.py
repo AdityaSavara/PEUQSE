@@ -450,6 +450,7 @@ class parameter_estimation:
                 conditionsCombinationAndInfoGain = np.hstack((conditionsCombination, info_gain))
                 info_gain_matrix.append(conditionsCombinationAndInfoGain)
             self.info_gain_matrix = np.array(info_gain_matrix) #this is an implied return in addition to the real return.
+            doe_settings['middle_of_doe_flag'] = False #Set this back to false once info gain matrix is ready.
             return np.array(info_gain_matrix)            
         if self.UserInput.doe_settings['info_gains_matrices_array_format'] == 'meshgrid':
             self.info_gains_matrices_array_format = 'meshgrid'  
@@ -484,6 +485,7 @@ class parameter_estimation:
                         conditionsCombinationAndInfoGain = np.hstack((conditionsCombination, info_gain))
                         info_gain_matrix.append(conditionsCombinationAndInfoGain) #NOTE that the structure *includes* the combinations.
                 self.info_gain_matrix = np.array(info_gain_matrix) #this is an implied return in addition to the real return.
+                doe_settings['middle_of_doe_flag'] = False #Set this back to false once info gain matrix is ready.
                 return np.array(info_gain_matrix)
     
     #This function requires population of the UserInput doe_settingsdictionary. It automatically scans many parameter modulation combinations.
