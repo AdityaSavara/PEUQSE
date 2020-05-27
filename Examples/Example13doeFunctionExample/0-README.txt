@@ -10,7 +10,7 @@ They each use the design of experiments function which is a class function for t
 
 
 
-Below explains the variables etc.
+Below explains the variables etc. Check the UserInput file and other documentation as this might be out of date.
     
     UserInput.doe_settings['info_gains_matrices_array_format'] = 'meshgrid'  #<-- this can be 'meshgrid' or 'xyz'. It *must* be defined before calling the doe function.
     UserInput.doe_settings['independent_variable_grid_center'] = [500, 0.5]  #<-- this is the center of the conditions space.
@@ -24,7 +24,11 @@ Below explains the variables etc.
     PE_object = CKPQ.parameter_estimation(UserInput)
     
     #Call the design of experiments function, which will either do 'xyz' or 'meshgrid'.
-    PE_object.designOfExperiments()
+    PE_object.doeParameterModulationCombinationsScanner()
 
     #The below larger object is returned.  the first index is the first combination of parameter modulations.
     PE_object.info_gains_matrices_array[0]
+
+
+    #To get a single info gain plot, you can use the below, but you still have to fill out the doe_settings for the independent_variable_grid.
+    PE_object.doeGetInfoGainMatrix()  

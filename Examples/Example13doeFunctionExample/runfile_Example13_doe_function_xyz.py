@@ -29,7 +29,6 @@ if __name__ == "__main__":
     UserInput.simulated_response_plot_settings['figure_name'] = 'Posterior_Example12' #This creates the filename, also.
 
     UserInput.model['parameterNamesAndMathTypeExpressionsDict'] = {'delta_H_rxn':'delta_H_rxn', 'delta_S_rxn':'delta_S_rxn'}
-    UserInput.model['InputParameterPriorValues'] = [-0.687, 1.50e-3, -0.858, 1.50e-3] # [H_CO, S_CO, H_H2O, S_H2O] eV
     #Below uses numbers that Eric converted for eV units.
     delta_H_rxn = -0.687 - (-0.858)
     delta_S_rxn = -1.50e-3 - (-1.45E-3)
@@ -43,7 +42,7 @@ if __name__ == "__main__":
     UserInput.model['simulateByInputParametersOnlyFunction'] = fun.Langmuir_replacement_three_temperatures_log #This must simulate with *only* the parameters listed above, and no other arguments.
     #UserInput.model['simulationOutputProcessingFunction'] = processing_functions_tpd_odeint.no_log_wrapper_func #Optional: a function to process what comes out of the simulation Function and then return an observable vector.
     UserInput.parameter_estimation_settings['scaling_uncertainties_type'] = "std"
-    
+    UserInput.parameter_estimation_settings['exportLog'] = False
     UserInput.parameter_estimation_settings['verbose'] = False 
     UserInput.parameter_estimation_settings['checkPointFrequency'] = 100
     UserInput.parameter_estimation_settings['mcmc'] = True 
@@ -75,8 +74,21 @@ if __name__ == "__main__":
     
     
     PE_object = CKPQ.parameter_estimation(UserInput)
-    PE_object.designOfExperiments()
+    
+    PE_object.doeParameterModulationCombinationsScanner()
     print(PE_object.info_gains_matrices_array[0])
     PE_object.createInfoGainPlots()
 
   
+    #To obtain a single info gain matrix, for a single set of indepependet variables, we use the following syntax:
+    del PE_object
+    UserInput.doe_settings['info_gains_matrices_array_format'] = 'xyz'
+    #We *still* have to define an independent variable grid.
+    UserInput.doe_settings['independent_variable_grid_center'] = [500, 0.5]
+    UserInput.doe_settings['independent_variable_grid_interval_size'] = [100, 0.1]
+    UserInput.doe_settings['independent_variable_grid_num_intervals'] = [2,2] #This is the number in each direction outward from center. So a 2 here gives 5 evaluations. A zero means we don't allow the parameter to vary.
+    #Note that we *no longer* define intervals for the parametric space.
+    fun.connected_variables_values = UserInput.responses['independent_variables_values'] #It is important to push the list *into* the other module.
+    PE_object2 = CKPQ.parameter_estimation(UserInput)    
+    PE_object2.doeGetInfoGainMatrix(UserInput.model['InputParameterPriorValues']+UserInput.model['InputParametersPriorValuesUncertainties']) #This is an example with a +1SD perturbation.
+    PE_object2.createInfoGainPlots(plot_suffix="_manual") #note: this corresponds to having a single modulation and will overwrite the "modulation 0" file.
