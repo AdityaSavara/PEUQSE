@@ -83,6 +83,12 @@ parameter_pairs_for_contour_plots = [] #This will accept either strings (for var
 
 ####Design Of Experiments####
 #The design of experiments feature, used like PE_object.designOfExperiments() will modulate the parameters to see how much info gain there would be in different parts of condition space (using synthetic data).
+#The normal usage as of May 26 2020 is to first use the indpendent variables feature, which must be used, then fill the doe_settings below.
+#Then call PE_object.doeParameterModulationCombinationsScanner()
+#If a single parameter modulation grid is going to be used, one can instead define the independent variable grid and call like this: PE_object.createInfoGainPlots(plot_suffix="manual")
+#For a real usage, see Example14doeFunctionExample
+#Note: after calling either of these functions, the variables populated are PE_object.info_gains_matrices_array and PE_object.info_gain_matrix.  So if somebody wants to export these after using the functions, one can cycle across each info gains matrix inside PE_object.info_gains_matrices_array and export to csv.
+#A key is printed out inside of Info_gain_parModulationGridCombinations.csv
 
 doe_settings = {} #To use this automated design of experiments the independent variables feature **must** be used.
 
