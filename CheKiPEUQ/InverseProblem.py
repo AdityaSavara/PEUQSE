@@ -327,7 +327,7 @@ class parameter_estimation:
             gridSamplingAbsoluteIntervalSize = self.UserInput.std_prior #By default, we use the standard deviations associated with the priors.
         else: gridSamplingAbsoluteIntervalSize = np.array(gridSamplingAbsoluteIntervalSize, dtype='float')
         gridCombinations = CombinationGeneratorModule.combinationGenerator(gridCenterVector, gridSamplingAbsoluteIntervalSize, gridSamplingNumOfIntervals, SpreadType=SpreadType,toFile=toFile)
-        return gridCombinations  
+        return gridCombinations, numGridPoints  
   
     def doGridSearch(self, searchType='getLogP', exportLog = True, gridSamplingAbsoluteIntervalSize = [], gridSamplingNumOfIntervals = [], passThroughArgs = {}):
         # gridSamplingNumOfIntervals is the number of variations to check in units of variance for each parameter. Can be 0 if you don't want to vary a particular parameter in the grid search.
@@ -335,7 +335,7 @@ class parameter_estimation:
         verbose = self.UserInput.parameter_estimation_settings['verbose']
 
         gridCenter = self.UserInput.InputParameterInitialGuess #We take what is in the variable self.UserInput.InputParameterInitialGuess for the center of the grid.    
-        gridCombinations = self.getGridCombinations(gridCenter, gridSamplingAbsoluteIntervalSize, gridSamplingNumOfIntervals)
+        gridCombinations, numGridPoints = self.getGridCombinations(gridCenter, gridSamplingAbsoluteIntervalSize, gridSamplingNumOfIntervals)
         allGridResults = []
         #Initialize some things before loop.
         if (type(self.UserInput.parameter_estimation_settings['checkPointFrequency']) != type(None)) or (verbose == True):
@@ -357,6 +357,8 @@ class parameter_estimation:
                 thisResult = self.doOptimizeNegLogP(**passThroughArgs)
                 #FIXME: the column headings of "thisResult" are wrong for the case of doOptimizeNegLogP.
                 #What we really need to do is have the log file's column headings generated based on the searchType.
+            if searchType == 'doOptimizeSSR':
+                thisResult = self.doOptimizeSSR(**passThroughArgs)
             if (type(self.UserInput.parameter_estimation_settings['checkPointFrequency']) != type(None)) or (verbose == True):
                 timeAtThisGridPoint = timeit.time.clock()
                 timeOfThisGridPoint = timeAtThisGridPoint - timeAtLastGridPoint
@@ -584,15 +586,68 @@ class parameter_estimation:
         if printOptimum == True:
             print("Final results from doOptimizeNegLogP:", self.map_parameter_set, "final logP:", self.map_logP)
         return [self.map_parameter_set, self.map_logP]
+
+
+    def getSSR(self, discreteParameterVector): #The proposal sample is specific parameter vector. 
+        #First do a parameter bounds check. We'll return an inf if it fails.
+        passedBoundsCheck = self.doInputParameterBoundsChecks(discreteParameterVector)
+        if passedBoundsCheck == False:
+            return float('inf')
+        
+        #If within bounds, proceed to get the simulated responses.
+        simulatedResponses = self.getSimulatedResponses(discreteParameterVector)
+        if type(simulatedResponses) == type(None):
+            return float('inf') #This is intended for the case that the simulation fails, indicated by receiving an 'nan' or None type from user's simulation function.
+        
+        #now calculate the SSR if nothing has failed.
+        Residuals = np.array(simulatedResponses) - np.array(self.UserInput.responses_observed)
+        SSR = np.sum(Residuals**2)
+        return SSR
+
+    def doOptimizeSSR(self, simulationFunctionAdditionalArgs = (), method = None, optimizationAdditionalArgs = {}, printOptimum = True, verbose=True, maxiter=0):
+        #THe intention of the optional arguments is to pass them into the scipy.optimize.minimize function.
+        # the 'method' argument is for Nelder-Mead, BFGS, SLSQP etc. https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html#scipy.optimize.minimize
+        #Note that "maxiter=0" just means to use the default.
+        initialGuess = self.UserInput.InputParameterInitialGuess
+        import scipy.optimize
+        if verbose == False:
+            if maxiter == 0:
+                optimizeResult = scipy.optimize.minimize(self.getSSR, initialGuess, method = method)
+            if maxiter != 0:    
+                optimizeResult = scipy.optimize.minimize(self.getSSR, initialGuess, method = method, options={"maxiter": maxiter})
+        if verbose == True:
+            verbose_simulator = verbose_optimization_wrapper(self.getSSR)
+            if maxiter == 0:
+                optimizeResult = scipy.optimize.minimize(verbose_simulator.simulateAndStoreObjectiveFunction, initialGuess, method=method, callback=verbose_simulator.callback, options={"disp": True})
+            if maxiter != 0:    
+                optimizeResult = scipy.optimize.minimize(verbose_simulator.simulateAndStoreObjectiveFunction, initialGuess, method=method, callback=verbose_simulator.callback, options={"maxiter": maxiter})
+            #print(f"Number of calls to Simulator instance {verbose_simulator.num_calls}") <-- this is the same as the "Function evaluations" field that gets printed.
+            
+        self.opt_parameter_set = optimizeResult.x #This is the best fit parameter set.
+        self.opt_SSR = optimizeResult.fun #This is the best fit SSR.
+        if printOptimum == True:
+            print("Final results from doOptimizeSSR:", self.opt_parameter_set, "final SSR:", self.opt_SSR)
+        #FIXME: Right now, the createAllPlots command will not work unless we populate the map parmaeter set, so that is what we are doing. But a better longterm solution needs to be made. In which the graph says "opt" rather than "MAP" and uses the appropriate variables.
+        #TODO: Also need to add things like WSSR based on magnitude and variance weightings.
+        self.map_parameter_set = self.opt_parameter_set
+        return [self.opt_parameter_set, self.opt_SSR]
+
     
     #This function is meant to be called from the runfile when testing a new function etc. It allows a simulation plot to be created.
     #This is *not* recommended for use in other functions, where it is recommended that getLogP be called directly.
-    def doSinglePoint(self, discreteParameterVector=None):
+    def doSinglePoint(self, discreteParameterVector=None, objectiveFunction='logP'):
+        #objectiveFunction can be 'logP' or 'SSR'
         if type(discreteParameterVector)==type(None): #If somebody did not feed a specific vector, we take the initial guess.
             discreteParameterVector = self.UserInput.InputParameterInitialGuess
-        self.map_parameter_set = discreteParameterVector
-        self.map_logP = self.getLogP(self.map_parameter_set)
-        return [self.map_parameter_set, self.map_logP]
+        if objectiveFunction=='logP':
+            self.map_parameter_set = discreteParameterVector
+            self.map_logP = self.getLogP(discreteParameterVector)
+            objectiveFunctionValue = self.map_logP
+        if objectiveFunction=='SSR':
+            self.opt_parameter_set = discreteParameterVector
+            self.opt_SSR = self.getSSR(discreteParameterVector)
+            objectiveFunctionValue = self.opt_SSR
+        return [discreteParameterVector, objectiveFunctionValue]
     
     #main function to get samples #TODO: Maybe Should return map_log_P and mu_AP_log_P?
     def doMetropolisHastings(self):
@@ -835,34 +890,53 @@ class parameter_estimation:
                 if self.UserInput.parameter_estimation_settings['scaling_uncertainties_type'] != "off":
                     print("Warning: undo_scaling_uncertainties_type is set to True, but can only be used with a fixed value for scaling_uncertainties_type.  Skipping the undo.")
         return logPrior
+        
+    def doInputParameterBoundsChecks(self, discreteParameterVector): #Bounds are considered part of the prior, so are set in InputParameterPriorValues_upperBounds & InputParameterPriorValues_lowerBounds
+        if len(self.UserInput.model['InputParameterPriorValues_upperBounds']) > 0:
+            upperCheck = boundsCheck(discreteParameterVector, self.UserInput.model['InputParameterPriorValues_upperBounds'], 'upper')
+            if upperCheck == False:
+                return False
+        elif len(self.UserInput.model['InputParameterPriorValues_lowerBounds']) > 0:
+            lowerCheck = boundsCheck(discreteParameterVector, self.UserInput.model['InputParameterPriorValues_lowerBounds'], 'lower')
+            if lowerCheck == False:
+                return False
+        else:
+            return True
+
+    #This helper function must be used because it allows for the output processing function etc. It has been separated from getLogLikelihood so that it can be used by doOptimizeSSR etc.
+    def getSimulatedResponses(self, discreteParameterVector): 
+        simulationFunction = self.UserInput.simulationFunction #Do NOT use self.UserInput.model['simulateByInputParametersOnlyFunction']  because that won't work with reduced parameter space requests.  
+        simulationOutputProcessingFunction = self.UserInput.simulationOutputProcessingFunction #Do NOT use self.UserInput.model['simulationOutputProcessingFunction'] because that won't work with reduced parameter space requests.
+        simulationOutput =simulationFunction(discreteParameterVector) 
+        if type(simulationOutput)==type(None):
+            return None #This is intended for the case that the simulation fails. User can return "None" for the simulation output.
+        if np.array(simulationOutput).any()==float('nan'):
+            print("WARNING: Your simulation output returned a 'nan' for parameter values " +str(discreteParameterVector) + ". 'nan' values cannot be processed by the CheKiPEUQ software and this set of Parameter Values is being assigned a probability of 0.")
+            return None #This is intended for the case that the simulation fails in some way without returning "None". 
+        if type(simulationOutputProcessingFunction) == type(None):
+            simulatedResponses = simulationOutput 
+        elif type(simulationOutputProcessingFunction) != type(None):
+            simulatedResponses = simulationOutputProcessingFunction(simulationOutput) 
+        simulatedResponses = np.atleast_2d(simulatedResponses)
+        return simulatedResponses
+    
     def getLogLikelihood(self,discreteParameterVector): #The variable discreteParameterVector represents a vector of values for the parameters being sampled. So it represents a single point in the multidimensional parameter space.
+        #First do upper and lower bounds checks, if such bounds have been provided.
+        boundsChecksPassed = self.doInputParameterBoundsChecks(discreteParameterVector)
+        if boundsChecksPassed == False: #If false, return a 'zero probability' type result. Else, continue getting log likelihood.
+            return float('-inf'), None #This approximates zero probability.
+
+        #Check if user has provided a custom log likelihood function.
         if type(self.UserInput.model['custom_logLikelihood']) != type(None):
             logLikelihood, simulatedResponses = self.UserInput.model['custom_logLikelihood'](discreteParameterVector)
             simulatedResponses = np.array(simulatedResponses).flatten()
             return logLikelihood, simulatedResponses
         #else pass is implied.
-        #Now we do upper and lower bounds checks, if such bounds have been provided.
-        if len(self.UserInput.model['InputParameterPriorValues_upperBounds']) > 0:
-            upperCheck = boundsCheck(discreteParameterVector, self.UserInput.model['InputParameterPriorValues_upperBounds'], 'upper')
-            if upperCheck == False:
-                return float('-inf'), None #This approximates zero probability.
-        if len(self.UserInput.model['InputParameterPriorValues_lowerBounds']) > 0:
-            lowerCheck = boundsCheck(discreteParameterVector, self.UserInput.model['InputParameterPriorValues_lowerBounds'], 'lower')
-            if lowerCheck == False:
-                return float('-inf'), None #This approximates zero probability.
         
-        simulationFunction = self.UserInput.simulationFunction #Do NOT use self.UserInput.model['simulateByInputParametersOnlyFunction']  because that won't work with reduced parameter space requests.  
-        simulationOutputProcessingFunction = self.UserInput.simulationOutputProcessingFunction #Do NOT use self.UserInput.model['simulationOutputProcessingFunction'] because that won't work with reduced parameter space requests.
-        simulationOutput =simulationFunction(discreteParameterVector) 
-        if type(simulationOutput)==type(None):
-            return float('-inf'), None #This is intended for the case that the simulation fails. User can return "None" for the simulation output. Perhaps should be made better in future.
-        if np.array(simulationOutput).any()==float('nan'):
-            return float('-inf'), None #This is intended for the case that the simulation fails without returning "None".
-        if type(simulationOutputProcessingFunction) == type(None):
-            simulatedResponses = simulationOutput #Is this the log of the rate? If so, Why?
-        if type(simulationOutputProcessingFunction) != type(None):
-            simulatedResponses = simulationOutputProcessingFunction(simulationOutput) 
-        simulatedResponses = np.atleast_2d(simulatedResponses)
+        #Now get the simulated responses.
+        simulatedResponses = self.getSimulatedResponses(discreteParameterVector)
+        if type(simulatedResponses) == type(None):
+            return float('-inf'), None #This is intended for the case that the simulation fails, indicated by receiving an 'nan' or None type from user's simulation function.
         
         #need to check if there are any 'responses_simulation_uncertainties'.
         if type(self.UserInput.model['responses_simulation_uncertainties']) == type(None): #if it's a None type, we keep it as a None type
