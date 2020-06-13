@@ -726,6 +726,7 @@ class parameter_estimation:
                 log_ratios = (post_burn_in_log_posteriors_vec-self.post_burn_in_log_priors_vec) #log10(a/b) = log10(a)-log10(b)
                 log_ratios[np.isinf(log_ratios)] = 0
                 log_ratios = np.nan_to_num(log_ratios)
+                self.info_gain_log_ratio_each_parameter = None #TODO: create a list or array of arrays such that the index is the parameter number.
                 self.info_gain_log_ratio = np.mean(log_ratios) #NOTE: The log_ratio info_gain is *always* calculated, at this line or below.
             elif self.UserInput.parameter_estimation_settings['mcmc_info_gain_cutoff'] != 0:        
                 #Need to consider using a truncated evidence array as well, but for now will not worry about that.
@@ -762,6 +763,7 @@ class parameter_estimation:
                 log_ratios_truncated = (post_burn_in_log_posteriors_vec_truncated-post_burn_in_log_priors_vec_truncated)
                 log_ratios_truncated[np.isinf(log_ratios_truncated)] = 0
                 log_ratios_truncated = np.nan_to_num(log_ratios_truncated)
+                self.info_gain_log_ratio_each_parameter = None #TODO: create a list or array of arrays such that the index is the parameter number.
                 self.info_gain_log_ratio = np.mean(log_ratios_truncated) #NOTE: The log_ratio info_gain is *always* calculated, at this line or earlier. 
                 #TODO: Export the below things.
                 #post_burn_in_log_posteriors_vec_non_truncated = self.post_burn_in_log_posteriors_un_normed_vec - np.log(self.evidence)
@@ -774,6 +776,7 @@ class parameter_estimation:
             (density0,bins0,pathces0)=plt.hist([self.samples_of_prior,self.post_burn_in_samples.flatten()],bins=100,density=True)
             KL = density0[1]*np.log(density0[1]/density0[0])
             KL = KL[np.isfinite(KL)]
+            self.info_gain_KL_each_parameter = None #TODO: create a list or array of arrays such that the index is the parameter number.
             self.info_gain_KL = np.sum(KL)
             self.info_gain = self.info_gain_KL
         
