@@ -460,7 +460,6 @@ class parameter_estimation:
             if len(doe_settings['independent_variable_grid_center']) !=2:
                 print("CURRENTLY THE INFOGAIN MESHGRID OPTION IS ONLY SUPPORTED FOR TWO INDEPENDENT VARIABLES. Use doe_settings['independent_variable_grid_center'] = 'xyz' and run again.")
                 sys.exit()
-            #TODO: Here is where Eric will need to make STEP 1 of his meshgrid code. I will put the first couple of lines to help.
             #STEP 1 is just to append each info_gain matrix to info_gain_matrix, and step 2 is 
             #For loop to generate info_gains_matrix.
             #For the IndependentVariables the grid info must be defined ahead of time. On the fly conditions grid means it's generated again fresh for each parameter combination. (We are doing it this way out of convenience during the first programming of this feature).
