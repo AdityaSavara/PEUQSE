@@ -18,7 +18,7 @@ if __name__ == "__main__":
     #UserInput.simulated_response_plot_settings['y_range'] = [0.00, 0.025] #optional.
     UserInput.simulated_response_plot_settings['figure_name'] = 'Posterior_Example11' #This creates the filename, also.
 
-    UserInput.model['parameterNamesAndMathTypeExpressionsDict'] = {'delta_G':r'$\deltaG (eV)$'}
+    UserInput.model['parameterNamesAndMathTypeExpressionsDict'] = {'delta_G':r'$\Delta G (eV)$'}
     UserInput.model['InputParameterPriorValues'] = [-0.15] # eV
     UserInput.model['InputParametersPriorValuesUncertainties'] = [0.1] #If user wants to use a prior with covariance, then this must be a 2D array/ list. To assume no covariance, a 1D  This is a standard deviation!
     UserInput.model['InputParameterInitialGuess'] = [-0.15] #This is where the mcmc chain will start.
