@@ -357,6 +357,8 @@ class parameter_estimation:
                 thisResult = self.doOptimizeNegLogP(**passThroughArgs)
                 #FIXME: the column headings of "thisResult" are wrong for the case of doOptimizeNegLogP.
                 #What we really need to do is have the log file's column headings generated based on the searchType.
+            if searchType == 'doOptimizeSSR':
+                thisResult = self.doOptimizeSSR(**passThroughArgs)
             if (type(self.UserInput.parameter_estimation_settings['checkPointFrequency']) != type(None)) or (verbose == True):
                 timeAtThisGridPoint = timeit.time.clock()
                 timeOfThisGridPoint = timeAtThisGridPoint - timeAtLastGridPoint
@@ -584,15 +586,68 @@ class parameter_estimation:
         if printOptimum == True:
             print("Final results from doOptimizeNegLogP:", self.map_parameter_set, "final logP:", self.map_logP)
         return [self.map_parameter_set, self.map_logP]
+
+
+    def getSSR(self, discreteParameterVector): #The proposal sample is specific parameter vector. 
+        #First do a parameter bounds check. We'll return an inf if it fails.
+        passedBoundsCheck = self.doInputParameterBoundsChecks(discreteParameterVector)
+        if passedBoundsCheck == False:
+            return float('inf')
+        
+        #If within bounds, proceed to get the simulated responses.
+        simulatedResponses = self.getSimulatedResponses(discreteParameterVector)
+        if type(simulatedResponses) == type(None):
+            return float('inf') #This is intended for the case that the simulation fails, indicated by receiving an 'nan' or None type from user's simulation function.
+        
+        #now calculate the SSR if nothing has failed.
+        Residuals = np.array(simulatedResponses) - np.array(self.UserInput.responses_observed)
+        SSR = np.sum(Residuals**2)
+        return SSR
+
+    def doOptimizeSSR(self, simulationFunctionAdditionalArgs = (), method = None, optimizationAdditionalArgs = {}, printOptimum = True, verbose=True, maxiter=0):
+        #THe intention of the optional arguments is to pass them into the scipy.optimize.minimize function.
+        # the 'method' argument is for Nelder-Mead, BFGS, SLSQP etc. https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html#scipy.optimize.minimize
+        #Note that "maxiter=0" just means to use the default.
+        initialGuess = self.UserInput.InputParameterInitialGuess
+        import scipy.optimize
+        if verbose == False:
+            if maxiter == 0:
+                optimizeResult = scipy.optimize.minimize(self.getSSR, initialGuess, method = method)
+            if maxiter != 0:    
+                optimizeResult = scipy.optimize.minimize(self.getSSR, initialGuess, method = method, options={"maxiter": maxiter})
+        if verbose == True:
+            verbose_simulator = verbose_optimization_wrapper(self.getSSR)
+            if maxiter == 0:
+                optimizeResult = scipy.optimize.minimize(verbose_simulator.simulateAndStoreObjectiveFunction, initialGuess, method=method, callback=verbose_simulator.callback, options={"disp": True})
+            if maxiter != 0:    
+                optimizeResult = scipy.optimize.minimize(verbose_simulator.simulateAndStoreObjectiveFunction, initialGuess, method=method, callback=verbose_simulator.callback, options={"maxiter": maxiter})
+            #print(f"Number of calls to Simulator instance {verbose_simulator.num_calls}") <-- this is the same as the "Function evaluations" field that gets printed.
+            
+        self.opt_parameter_set = optimizeResult.x #This is the best fit parameter set.
+        self.opt_SSR = optimizeResult.fun #This is the best fit SSR.
+        if printOptimum == True:
+            print("Final results from doOptimizeSSR:", self.opt_parameter_set, "final SSR:", self.opt_SSR)
+        #FIXME: Right now, the createAllPlots command will not work unless we populate the map parmaeter set, so that is what we are doing. But a better longterm solution needs to be made. In which the graph says "opt" rather than "MAP" and uses the appropriate variables.
+        #TODO: Also need to add things like WSSR based on magnitude and variance weightings.
+        self.map_parameter_set = self.opt_parameter_set
+        return [self.opt_parameter_set, self.opt_SSR]
+
     
     #This function is meant to be called from the runfile when testing a new function etc. It allows a simulation plot to be created.
     #This is *not* recommended for use in other functions, where it is recommended that getLogP be called directly.
-    def doSinglePoint(self, discreteParameterVector=None):
+    def doSinglePoint(self, discreteParameterVector=None, objectiveFunction='logP'):
+        #objectiveFunction can be 'logP' or 'SSR'
         if type(discreteParameterVector)==type(None): #If somebody did not feed a specific vector, we take the initial guess.
             discreteParameterVector = self.UserInput.InputParameterInitialGuess
-        self.map_parameter_set = discreteParameterVector
-        self.map_logP = self.getLogP(self.map_parameter_set)
-        return [self.map_parameter_set, self.map_logP]
+        if objectiveFunction=='logP':
+            self.map_parameter_set = discreteParameterVector
+            self.map_logP = self.getLogP(discreteParameterVector)
+            objectiveFunctionValue = self.map_logP
+        if objectiveFunction=='SSR':
+            self.opt_parameter_set = discreteParameterVector
+            self.opt_SSR = self.getSSR(discreteParameterVector)
+            objectiveFunctionValue = self.opt_SSR
+        return [discreteParameterVector, objectiveFunctionValue]
     
     #main function to get samples #TODO: Maybe Should return map_log_P and mu_AP_log_P?
     def doMetropolisHastings(self):
