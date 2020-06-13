@@ -327,7 +327,7 @@ class parameter_estimation:
             gridSamplingAbsoluteIntervalSize = self.UserInput.std_prior #By default, we use the standard deviations associated with the priors.
         else: gridSamplingAbsoluteIntervalSize = np.array(gridSamplingAbsoluteIntervalSize, dtype='float')
         gridCombinations = CombinationGeneratorModule.combinationGenerator(gridCenterVector, gridSamplingAbsoluteIntervalSize, gridSamplingNumOfIntervals, SpreadType=SpreadType,toFile=toFile)
-        return gridCombinations  
+        return gridCombinations, numGridPoints  
   
     def doGridSearch(self, searchType='getLogP', exportLog = True, gridSamplingAbsoluteIntervalSize = [], gridSamplingNumOfIntervals = [], passThroughArgs = {}):
         # gridSamplingNumOfIntervals is the number of variations to check in units of variance for each parameter. Can be 0 if you don't want to vary a particular parameter in the grid search.
@@ -335,7 +335,7 @@ class parameter_estimation:
         verbose = self.UserInput.parameter_estimation_settings['verbose']
 
         gridCenter = self.UserInput.InputParameterInitialGuess #We take what is in the variable self.UserInput.InputParameterInitialGuess for the center of the grid.    
-        gridCombinations = self.getGridCombinations(gridCenter, gridSamplingAbsoluteIntervalSize, gridSamplingNumOfIntervals)
+        gridCombinations, numGridPoints = self.getGridCombinations(gridCenter, gridSamplingAbsoluteIntervalSize, gridSamplingNumOfIntervals)
         allGridResults = []
         #Initialize some things before loop.
         if (type(self.UserInput.parameter_estimation_settings['checkPointFrequency']) != type(None)) or (verbose == True):
@@ -835,34 +835,53 @@ class parameter_estimation:
                 if self.UserInput.parameter_estimation_settings['scaling_uncertainties_type'] != "off":
                     print("Warning: undo_scaling_uncertainties_type is set to True, but can only be used with a fixed value for scaling_uncertainties_type.  Skipping the undo.")
         return logPrior
+        
+    def doInputParameterBoundsChecks(self, discreteParameterVector): #Bounds are considered part of the prior, so are set in InputParameterPriorValues_upperBounds & InputParameterPriorValues_lowerBounds
+        if len(self.UserInput.model['InputParameterPriorValues_upperBounds']) > 0:
+            upperCheck = boundsCheck(discreteParameterVector, self.UserInput.model['InputParameterPriorValues_upperBounds'], 'upper')
+            if upperCheck == False:
+                return False
+        elif len(self.UserInput.model['InputParameterPriorValues_lowerBounds']) > 0:
+            lowerCheck = boundsCheck(discreteParameterVector, self.UserInput.model['InputParameterPriorValues_lowerBounds'], 'lower')
+            if lowerCheck == False:
+                return False
+        else:
+            return True
+
+    #This helper function must be used because it allows for the output processing function etc. It has been separated from getLogLikelihood so that it can be used by doOptimizeSSR etc.
+    def getSimulatedResponses(self, discreteParameterVector): 
+        simulationFunction = self.UserInput.simulationFunction #Do NOT use self.UserInput.model['simulateByInputParametersOnlyFunction']  because that won't work with reduced parameter space requests.  
+        simulationOutputProcessingFunction = self.UserInput.simulationOutputProcessingFunction #Do NOT use self.UserInput.model['simulationOutputProcessingFunction'] because that won't work with reduced parameter space requests.
+        simulationOutput =simulationFunction(discreteParameterVector) 
+        if type(simulationOutput)==type(None):
+            return None #This is intended for the case that the simulation fails. User can return "None" for the simulation output.
+        if np.array(simulationOutput).any()==float('nan'):
+            print("WARNING: Your simulation output returned a 'nan' for parameter values " +str(discreteParameterVector) + ". 'nan' values cannot be processed by the CheKiPEUQ software and this set of Parameter Values is being assigned a probability of 0.")
+            return None #This is intended for the case that the simulation fails in some way without returning "None". 
+        if type(simulationOutputProcessingFunction) == type(None):
+            simulatedResponses = simulationOutput 
+        elif type(simulationOutputProcessingFunction) != type(None):
+            simulatedResponses = simulationOutputProcessingFunction(simulationOutput) 
+        simulatedResponses = np.atleast_2d(simulatedResponses)
+        return simulatedResponses
+    
     def getLogLikelihood(self,discreteParameterVector): #The variable discreteParameterVector represents a vector of values for the parameters being sampled. So it represents a single point in the multidimensional parameter space.
+        #First do upper and lower bounds checks, if such bounds have been provided.
+        boundsChecksPassed = self.doInputParameterBoundsChecks(discreteParameterVector)
+        if boundsChecksPassed == False: #If false, return a 'zero probability' type result. Else, continue getting log likelihood.
+            return float('-inf'), None #This approximates zero probability.
+
+        #Check if user has provided a custom log likelihood function.
         if type(self.UserInput.model['custom_logLikelihood']) != type(None):
             logLikelihood, simulatedResponses = self.UserInput.model['custom_logLikelihood'](discreteParameterVector)
             simulatedResponses = np.array(simulatedResponses).flatten()
             return logLikelihood, simulatedResponses
         #else pass is implied.
-        #Now we do upper and lower bounds checks, if such bounds have been provided.
-        if len(self.UserInput.model['InputParameterPriorValues_upperBounds']) > 0:
-            upperCheck = boundsCheck(discreteParameterVector, self.UserInput.model['InputParameterPriorValues_upperBounds'], 'upper')
-            if upperCheck == False:
-                return float('-inf'), None #This approximates zero probability.
-        if len(self.UserInput.model['InputParameterPriorValues_lowerBounds']) > 0:
-            lowerCheck = boundsCheck(discreteParameterVector, self.UserInput.model['InputParameterPriorValues_lowerBounds'], 'lower')
-            if lowerCheck == False:
-                return float('-inf'), None #This approximates zero probability.
         
-        simulationFunction = self.UserInput.simulationFunction #Do NOT use self.UserInput.model['simulateByInputParametersOnlyFunction']  because that won't work with reduced parameter space requests.  
-        simulationOutputProcessingFunction = self.UserInput.simulationOutputProcessingFunction #Do NOT use self.UserInput.model['simulationOutputProcessingFunction'] because that won't work with reduced parameter space requests.
-        simulationOutput =simulationFunction(discreteParameterVector) 
-        if type(simulationOutput)==type(None):
-            return float('-inf'), None #This is intended for the case that the simulation fails. User can return "None" for the simulation output. Perhaps should be made better in future.
-        if np.array(simulationOutput).any()==float('nan'):
-            return float('-inf'), None #This is intended for the case that the simulation fails without returning "None".
-        if type(simulationOutputProcessingFunction) == type(None):
-            simulatedResponses = simulationOutput #Is this the log of the rate? If so, Why?
-        if type(simulationOutputProcessingFunction) != type(None):
-            simulatedResponses = simulationOutputProcessingFunction(simulationOutput) 
-        simulatedResponses = np.atleast_2d(simulatedResponses)
+        #Now get the simulated responses.
+        simulatedResponses = self.getSimulatedResponses(discreteParameterVector)
+        if type(simulatedResponses) == type(None):
+            return float('-inf'), None #This is intended for the case that the simulation fails, indicated by receiving an 'nan' or None type from user's simulation function.
         
         #need to check if there are any 'responses_simulation_uncertainties'.
         if type(self.UserInput.model['responses_simulation_uncertainties']) == type(None): #if it's a None type, we keep it as a None type
