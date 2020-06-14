@@ -16,7 +16,7 @@ from setuptools import find_packages, setup, Command
 
 # Package meta-data.
 NAME = 'CheKiPEUQ'
-DESCRIPTION = 'This is the CheKiPEUQ package which stands for Chemical Kinetics Parameter Estimation and Uncertainty Quantification.'
+DESCRIPTION = 'This is the CheKiPEUQ package which stands for Chemical Kinetics Parameter Estimation and Uncertainty Quantification. See https://github.com/AdityaSavara/CheKiPEUQ for more information.'
 URL = 'https://github.com/AdityaSavara/CheKiPEUQ'
 EMAIL = 'AditySavara2008@u.northwestern.edu'  #Eric A. Walker is a co-author and can be reached at WALKER, ERIC <walke299@email.sc.edu>
 AUTHOR = 'Aditya Savara'
