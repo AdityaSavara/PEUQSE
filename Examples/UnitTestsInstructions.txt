@@ -1,0 +1,11 @@
+The unit tests have a dependency on UnitTesterSG which can be installed by pip UnitTesterSG or by downloading from https://github.com/AdityaSavara/UnitTesterSG and then running the setup file.
+
+The unit tests all have file names of test_N.py where N is an integer, as this is requied by UnitTesterSG.
+Each directory should normally start with its own test_1 and work up in numbers from there.
+
+To run the unit tests, run either runPytestDriver.py or runUnitTesterSG.py. If runUnitTesterSG.py says that any strings don't match, this can be ignored.
+
+The first unit test that has been made is in Example07 with test_1.py for that directory. The tolerances are set rather high to avoid needing to do much sampling. This test file structure is based on the 12th example from UnitTesterSG.
+
+For other unit tests, we may have the test file increasing the amount of mcmc sampling (or changing other variables) to ensure that the tolerance or other desired property is achieved. For some other unit tests, we may base them on the 13th example of UnitTesterSG (where the result is saved and pickled from running on a working machine rather than being "known").
+
