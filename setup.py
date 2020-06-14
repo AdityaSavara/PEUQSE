@@ -26,13 +26,13 @@ LICENSE = 'MIT'
 
 # What packages are required for this module to be executed?
 REQUIRED = [
-    'numpy',
+    'numpy', 'timeit', 'copy'
     # 'requests', 'maya', 'records', #numpy...
 ]
 
 # What packages are optional?
 EXTRAS = {
-    # 'uncertainties': ['uncertainties'], #pymc...
+    'matplotlib', 'scipy', 'pandas'# 'uncertainties': ['uncertainties'], #pymc...
 }
 
 # The rest you shouldn't have to touch too much :)
