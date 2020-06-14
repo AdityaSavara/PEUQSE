@@ -32,8 +32,13 @@ REQUIRED = [
 
 # What packages are optional?
 EXTRAS = {
-    'COMPLETE': ['matplotlib', 'scipy', 'pandas']# 'uncertainties': ['uncertainties'], #pymc...
+    'COMPLETE': ['matplotlib', 'scipy', 'pandas', 'UnitTesterSG']# 'uncertainties': ['uncertainties'], #pymc...
 }
+
+#To make sure the license etc. is included, I added the DATA_FILES object based on https://stackoverflow.com/questions/9977889/how-to-include-license-file-in-setup-py-script
+DATA_FILES = [
+       ("", ["./"+NAME+"/LICENSE.txt", "./"+NAME+"/MANUAL.txt"]),
+       ]
 
 # The rest you shouldn't have to touch too much :)
 # ------------------------------------------------
@@ -108,6 +113,7 @@ setup(
     author_email=EMAIL,
     python_requires=REQUIRES_PYTHON,
     url=URL,
+    data_files = DATA_FILES,
     packages=find_packages(exclude=["tests", "*.tests", "*.tests.*", "tests.*"]),
     # If your package is a single module, use this instead of 'packages':
     # py_modules=['mypackage'],
