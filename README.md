@@ -2,8 +2,8 @@
 
 CheKiPEUQ stands for "Chemical Kinetics Parameter Estimation and Uncertainty Quantification".  The fun name can be pronounced in various ways such as "Check-ee-pook" or "Check-ee-peeoo" or "Check-ee-poo".
 
-The recommended installation is to get Anaconda, then open an anaconda prompt and type `pip install CheKiPEUQ[COMPLETE]` (includes all dependencies). Leave out the '[COMPLETE]' if you want the minimal version.
-The software can also be downloaded and used directly, or used by "python setup.py install" (the setup.py way will do basically the same thing as pip and will install the package appropriately to allow the module to be accessed by python regardless of directory).
+The recommended installation is to get Anaconda, then open an anaconda prompt and type `pip install CheKiPEUQ[COMPLETE]` (includes all optional dependencies). Leave out the '[COMPLETE]' if you want the minimal version.
+The software can also be downloaded and used directly, or used by "python setup.py install" (the setup.py way will do basically the same thing as pip and will install the package appropriately to allow the module to be accessed by python regardless of directory, but this will not install the optional dependencies).
 
 The file structure is such that the file `./CheKiPEUQ/__init__.py` is where the modules functions are loaded from. The main functionalities are inside `InverseProblem.py` , and various dependencies can be traced from those two files.
 
