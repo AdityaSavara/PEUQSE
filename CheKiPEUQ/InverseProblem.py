@@ -827,11 +827,17 @@ class parameter_estimation:
             self.info_gain = self.info_gain_log_ratio
         if self.UserInput.parameter_estimation_settings['mcmc_info_gain_returned'] == 'KL_divergence':
             #Below is the KL_divergence info_gain calculation.
-            (density0,bins0,pathces0)=plt.hist([self.samples_of_prior,self.post_burn_in_samples.flatten()],bins=100,density=True)
-            KL = density0[1]*np.log(density0[1]/density0[0])
-            KL = KL[np.isfinite(KL)]
-            self.info_gain_KL_each_parameter = None #TODO: create a list or array of arrays such that the index is the parameter number.
-            self.info_gain_KL = np.sum(KL)
+            length, width = self.post_burn_in_samples.shape
+            self.info_gain_KL = 0
+            self.info_gain_KL_each_parameter  = []
+            for param in range(width):
+                (density0,bins0,pathces0)=plt.hist([self.samples_of_prior,self.post_burn_in_samples[:,param].flatten()],bins=100,density=True)
+                KL = density0[1]*np.log(density0[1]/density0[0])
+                KL = KL[np.isfinite(KL)]
+                self.info_gain_KL_each_parameter.append(KL)
+                self.info_gain_KL = self.info_gain_KL + np.sum(KL)
+            #self.info_gain_KL_each_parameter = None #TODO: create a list or array of arrays such that the index is the parameter number.
+            #self.info_gain_KL = np.sum(KL)
             self.info_gain = self.info_gain_KL
         
         #BELOW calculate MAP and mu_AP related quantities.
