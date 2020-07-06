@@ -408,7 +408,7 @@ class parameter_estimation:
         discreteParameterVector = parModulationCombination
         simulationFunction = self.UserInput.simulationFunction #Do NOT use self.UserInput.model['simulateByInputParametersOnlyFunction']  because that won't work with reduced parameter space requests.  
         simulationOutputProcessingFunction = self.UserInput.simulationOutputProcessingFunction #Do NOT use self.UserInput.model['simulationOutputProcessingFunction'] because that won't work with reduced parameter space requests.
-        simulationOutput =simulationFunction(discreteParameterVector) 
+        simulationOutput =simulationFunction(discreteParameterVector)
         if type(simulationOutput)==type(None):
             return float('-inf'), None #This is intended for the case that the simulation fails. User can return "None" for the simulation output. Perhaps should be made better in future.
         if np.array(simulationOutput).any()==float('nan'):
@@ -442,7 +442,7 @@ class parameter_estimation:
             self.info_gains_matrices_array_format = 'xyz'            
             #For the IndependentVariables the grid info must be defined ahead of time. On the fly conditions grid means it's generated again fresh for each parameter combination. (We are doing it this way out of convenience during the first programming of this feature).
             if doe_settings['on_the_fly_conditions_grids'] == True:
-                conditionsGridCombinations = self.getGridCombinations(doe_settings['independent_variable_grid_center'], doe_settings['independent_variable_grid_interval_size'], doe_settings['independent_variable_grid_num_intervals'])
+                conditionsGridCombinations, numGridPoints = self.getGridCombinations(doe_settings['independent_variable_grid_center'], doe_settings['independent_variable_grid_interval_size'], doe_settings['independent_variable_grid_num_intervals'])
             #Here is the loop across conditions.                
             for conditionsCombinationIndex,conditionsCombination in enumerate(conditionsGridCombinations):    
                 #It is absolutely critical that we *do not* use syntax like self.UserInput.responses['independent_variables_values'] = xxxx

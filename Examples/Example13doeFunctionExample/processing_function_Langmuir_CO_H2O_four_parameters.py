@@ -33,7 +33,6 @@ def Langmuir_replacement_three_temperatures_log(sample): # sample contains [Delt
     sample = np.array(sample) #Make sure it's an array and not a tuple.
     #
     theta_list = []
-    
     #Temperature Middle:
     delta_G_rxn = sample[0] - T*sample[1] # DeltaH-T*DeltaS
     K_rxn = np.exp(-delta_G_rxn/(kB*T))

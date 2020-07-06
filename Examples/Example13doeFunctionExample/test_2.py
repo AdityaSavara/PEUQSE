@@ -45,11 +45,11 @@ In this template, we ***will not*** use the "set_expected_result" command. So we
 #Calculate our function outputs (actual results). We can use functions from another module in this section.
 """
 import numpy as np
-import runfile_for_unit_test_meshgrid #This will run the file, given how it's structured.
+import runfile_for_unit_test_xyz #This will run the file, given how it's structured.
 
 input = None
 #outputs with the function being tested using the input
-actualResult = runfile_for_unit_test_meshgrid.PE_object2.info_gains_matrices_array
+actualResult = runfile_for_unit_test_xyz.PE_object2.info_gains_matrices_array
 
 """We put our actual result into the resultObj variable."""
 #put this in the resultObject
@@ -71,4 +71,4 @@ def test_pytest(): #note that it cannot have any required arguments for pytest t
 """#For any individual test, after finishing getting it working, set allowOverwrite to False in the line below calling doTest if you want to skip UnitTesterSG from stopping to notify user when results match but result strings don't. """        
 if __name__ == "__main__":
    #This is the normal way of using the UnitTesterSG module, and will be run by UnitTesterSG or by running this test file by itself.
-   ut.doTest(resultObj, resultStr, prefix=prefix,suffix=suffix, allowOverwrite = False, relativeTolerance=relativeTolerance, absoluteTolerance=absoluteTolerance)
+   ut.doTest(resultObj, resultStr, prefix=prefix,suffix=suffix, allowOverwrite = True, relativeTolerance=relativeTolerance, absoluteTolerance=absoluteTolerance)
