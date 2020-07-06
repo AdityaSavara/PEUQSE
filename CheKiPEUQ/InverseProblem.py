@@ -437,7 +437,14 @@ class parameter_estimation:
         #At present, we *must* provide a parameterCombination because right now the only way to get an InfoGainMatrix is with synthetic data assuming a particular parameterCombination as the "real" or "actual" parameterCombination.
         doe_settings = self.UserInput.doe_settings
         self.middle_of_doe_flag = True  #This is a work around that is needed because right now the synthetic data creation has an __init__ call which is going to try to modify the independent variables back to their original values if we don't do this.
-        info_gain_matrix = [] #TODO:  Right now each item in here is a single value. Later it is going to become a 1D array for each one, where the arrayindexing corresponds to the parameter index. However, THIS function will not have to change, only createInfoGainPlots will have to change the indexing that it expects since there will be more nesting.
+        info_gain_matrix = [] #Right now, if using KL_divergence, each item in here is a single array. It is a sum across all parameters. 
+        if self.UserInput.doe_settings['info_gains_matrices_multiple_parameters'] == 'each':
+            info_gain_matrices_each_parameter = [] #make a matrix ready to copy info_gain_matrix. 
+            #need to make a list of lists (or similar) to fill it with the individual matrices necessary.
+            numParameters = len(self.UserInput.InputParametersPriorValuesUncertainties)
+            for parameterIndex in range(0,numParameters):#looping across number of parameters...
+                info_gain_matrices_each_parameter.append([]) #These are empty lists create to indices and initialize each parameter's info_gain_matrix. They will be appended to later.
+            self.info_gain_matrices_each_parameter = info_gain_matrices_each_parameter #Need to initialize this since it's nested so can't be initialized in a loop later.
         if self.UserInput.doe_settings['info_gains_matrices_array_format'] == 'xyz':
             self.info_gains_matrices_array_format = 'xyz'            
             #For the IndependentVariables the grid info must be defined ahead of time. On the fly conditions grid means it's generated again fresh for each parameter combination. (We are doing it this way out of convenience during the first programming of this feature).
@@ -454,7 +461,15 @@ class parameter_estimation:
                 conditionsCombination = np.array(conditionsCombination) #we're going to make this an array before adding to the info_gain matrix.
                 conditionsCombinationAndInfoGain = np.hstack((conditionsCombination, info_gain))
                 info_gain_matrix.append(conditionsCombinationAndInfoGain)
+                if self.UserInput.doe_settings['info_gains_matrices_multiple_parameters'] == 'each': #copy the above lines for the sum.
+                    for parameterIndex in range(0,numParameters):#looping across number of parameters...
+                        conditionsCombinationAndInfoGain = np.hstack((conditionsCombination, self.info_gain_each_parameter[parameterIndex])) #Need to pull the info gain matrix from the nested objected named info_gain_each_parameter
+                        #Below mimics the line above which reads info_gain_matrix.append(conditionsCombinationAndInfoGain)
+                        info_gain_matrices_each_parameter[parameterIndex].append(conditionsCombinationAndInfoGain)
             self.info_gain_matrix = np.array(info_gain_matrix) #this is an implied return in addition to the real return.
+            if self.UserInput.doe_settings['info_gains_matrices_multiple_parameters'] == 'each': #copy the above line for the sum.
+                for parameterIndex in range(0,numParameters):#looping across number of parameters...
+                    self.info_gain_matrices_each_parameter[parameterIndex]= np.array(info_gain_matrices_each_parameter)
             self.middle_of_doe_flag = False #Set this back to false once info gain matrix is ready.
             return np.array(info_gain_matrix)            
         if self.UserInput.doe_settings['info_gains_matrices_array_format'] == 'meshgrid':
@@ -488,7 +503,16 @@ class parameter_estimation:
                         conditionsCombination = np.array([indValue1,indValue2])
                         conditionsCombinationAndInfoGain = np.hstack((conditionsCombination, info_gain))
                         info_gain_matrix.append(conditionsCombinationAndInfoGain) #NOTE that the structure *includes* the combinations.
+                        if self.UserInput.doe_settings['info_gains_matrices_multiple_parameters'] == 'each': #copy the above lines for the sum.
+                            for parameterIndex in range(0,numParameters):#looping across number of parameters...
+                                conditionsCombinationAndInfoGain = np.hstack((conditionsCombination, self.info_gain_each_parameter[parameterIndex])) #Need to pull the info gain matrix from the nested objected named info_gain_each_parameter
+                                #Below mimics the line above which reads info_gain_matrix.append(conditionsCombinationAndInfoGain)
+                                info_gain_matrices_each_parameter[parameterIndex].append(conditionsCombinationAndInfoGain)
+                        
                 self.info_gain_matrix = np.array(info_gain_matrix) #this is an implied return in addition to the real return.
+                if self.UserInput.doe_settings['info_gains_matrices_multiple_parameters'] == 'each': #copy the above line for the sum.
+                    for parameterIndex in range(0,numParameters):#looping across number of parameters...
+                        self.info_gain_matrices_each_parameter[parameterIndex]= np.array(info_gain_matrices_each_parameter[parameterIndex])
                 self.middle_of_doe_flag = False #Set this back to false once info gain matrix is ready.
                 return np.array(info_gain_matrix)
     
@@ -499,6 +523,7 @@ class parameter_estimation:
         #For the parameters, we are able to use a default one standard deviation grid if gridSamplingAbsoluteIntervalSize is a blank list.
         #doe_settings['parameter_modulation_grid_center'] #We do NOT create such a variable in user input. The initial guess variable is used, which is the center of the prior if no guess has been provided.
         parModulationGridCenterVector = self.UserInput.InputParameterInitialGuess
+        numParameters = len(parModulationGridCenterVector)
         parModulationGridIntervalSizeAbsolute = doe_settings['parameter_modulation_grid_interval_size']*self.UserInput.std_prior
         parModulationGridCombinations, numGridPoints = self.getGridCombinations(parModulationGridCenterVector,parModulationGridIntervalSizeAbsolute, doe_settings['parameter_modulation_grid_num_intervals'])
         
@@ -511,47 +536,96 @@ class parameter_estimation:
         
         #We will get a separate info gain matrix for each parModulationCombination, we'll store that in this variable.
         info_gains_matrices_list = []
+        if self.UserInput.doe_settings['info_gains_matrices_multiple_parameters'] == 'each': #just making analogous structure which exists for sum.
+            info_gains_matrices_lists_one_for_each_parameter = [] #make a matrix ready to copy info_gains_matrices_list. 
+            #need to make a list of lists (or similar) to fill it with the individual matrices necessary.
+            numParameters = len(self.UserInput.InputParametersPriorValuesUncertainties)
+            for parameterIndex in range(0,numParameters):#looping across number of parameters...
+                info_gains_matrices_lists_one_for_each_parameter.append([]) #These are empty lists create to indices and initialize each parameter's info_gain_matrix. They will be appended to later.
         for parModulationCombinationIndex,parModulationCombination in enumerate(parModulationGridCombinations):                
             #We will get separate info gain matrix for each parameter modulation combination.
             info_gain_matrix = self.doeGetInfoGainMatrix(parModulationCombination)
             #Append the info gain matrix obtainend.
             info_gains_matrices_list.append(np.array(info_gain_matrix))
+            if self.UserInput.doe_settings['info_gains_matrices_multiple_parameters'] == 'each': #copy the above lines which were for the sum.
+                    for parameterIndex in range(0,numParameters):#looping across number of parameters...
+                        info_gains_matrices_lists_one_for_each_parameter[parameterIndex].append(np.array(self.info_gain_matrices_each_parameter[parameterIndex]))
         self.info_gains_matrices_array=np.array(info_gains_matrices_list) #This is an implied return, but we will also return it.
+        if self.UserInput.doe_settings['info_gains_matrices_multiple_parameters'] == 'each': #copy the above line for the sum.
+            self.info_gains_matrices_arrays_one_for_each_parameter = list(self.UserInput.InputParametersPriorValuesUncertainties) #initializing it with right length, then will fill it.
+            for parameterIndex in range(0,numParameters):#looping across number of parameters...
+                self.info_gains_matrices_arrays_one_for_each_parameter[parameterIndex]= np.array(info_gains_matrices_lists_one_for_each_parameter[parameterIndex]) #make each an array like above.
+                print("line 558 of the file!!!!")
         #TODO: write the self.info_gains_matrices_array individual elements to file.
         #for modulationIndex in range(len(self.info_gains_matrices_array)):
             #self.info_gains_matrices_array[modulationIndex]  #Write this to file. This is 'xyz' format regardless of whether self.info_gains_matrices_array_format == 'xyz'  or =='meshgrid' is used.
         return self.info_gains_matrices_array
     
-    def createInfoGainPlots(self, parameterInfoGainIndex=0, plot_suffix = ''): 
+    def createInfoGainPlots(self, parameterIndices=[], plot_suffix = ''):
+        #parameterIndices should be a list of parameters if the user only wants as subset of parameters. The default, a blank list, will do all if the setting for doing each is on.
+        
+        #first make the modulation plots for the Sum.
+        self.createInfoGainModulationPlots(parameterIndex=None, plot_suffix = plot_suffix)
+        #now, by default, loop through and make plots fore each parameterIndex if the setting for that is on.
+        if self.UserInput.doe_settings['info_gains_matrices_multiple_parameters'] == 'each':
+            if len(parameterIndices) > 0: #if the user has provided a list of parameters, we will only make the plots for those parameters.
+               for parameterIndex in parameterIndices:
+                    plotSuffixString = "_par_" + str(parameterIndex) + "_" + plot_suffix
+                    self.createInfoGainModulationPlots(parameterIndex=parameterIndex, plot_suffix = plotSuffixString)
+            if len(parameterIndices) == 0: #This is the default case, and we'll make plots for each parameter.
+                numParameters = len(self.UserInput.InputParametersPriorValuesUncertainties)
+                for parameterIndex in range(0,numParameters):
+                    plotSuffixString = "_par_" + str(parameterIndex) + "_" + plot_suffix
+                    self.createInfoGainModulationPlots(parameterIndex=parameterIndex, plot_suffix = plotSuffixString)
+    
+    def createInfoGainModulationPlots(self, parameterIndex=None, plot_suffix = ''): 
+        #Right now, when using KL_divergence and design of experiments there is an option of UserInput.doe_settings['info_gains_matrices_multiple_parameters'] = 'each' or 'sum'
+        #the default is sum. But when it is 'each', then it is possible to plot separate info_gains for each parameter.
         #TODO: The variable "parameterInfoGainIndex" is made with the presumption that later we'll have to add another index when we have info_gains for each parameter. In that case it will become like this:
         #xValues = self.info_gains_matrices_array[modulationIndex][:,0] will become xValues = self.info_gains_matrices_array[modulationIndex][parameterInfoGainIndex][:,0]
         #self.meshGrid_independentVariable1ValuesArray will remain unchanged.       
-        
-        #Normally, the info gain plots should be stored in self.info_gains_matrices_array.
-        #However, in case it does not exist or there are none in there, then we assume the person is trying to make just one. So we take the most recent info gain matrix.
-        try:
-            if len(self.info_gains_matrices_array) == 0:
-                self.info_gains_matrices_array = np.array([self.info_gain_matrix])
-        except:
-                self.info_gains_matrices_array = np.array([self.info_gain_matrix])
         import CheKiPEUQ.plotting_functions as plotting_functions
+        
+        #assess whether the function is called for the overall info_gain matrices or for a particular parameter.
+        if parameterIndex==None:  #this means we're using the regular info gain, not the parameter specific case.
+            #Normally, the info gain plots should be stored in self.info_gains_matrices_array.
+            #However, in case it does not exist or there are none in there, then we assume the person is trying to make just one. So we take the most recent info gain matrix.
+            try:
+                if len(self.info_gains_matrices_array) >= 0: #normally, it should exist and be populated.
+                    pass
+                if len(self.info_gains_matrices_array) == 0:#in case it exists but is not populated, we'll populated.
+                    self.info_gains_matrices_array = np.array([self.info_gain_matrix])
+            except: #if it does not yet exist, we create it and populate it.
+                    self.info_gains_matrices_array = np.array([self.info_gain_matrix])
+                    print("line 598", np.shape(self.info_gains_matrices_array), len(self.info_gains_matrices_array))
+            local_info_gains_matrices_array = self.info_gains_matrices_array #We have to switch to a local variable since that way below we can use the local variable whether we're doing the 'global' info_gains_matrices array or a parameter specific one.
+        if parameterIndex!=None:
+            if hasattr(self, 'info_gains_matrices_arrays_one_for_each_parameter'):
+                local_info_gains_matrices_array = self.info_gains_matrices_arrays_one_for_each_parameter[parameterIndex]
+            else: #if a modulation has not been run, and simply doeGetInfoGainMatrix was done, then the larger structure might not exist and we have to do the same thing as for regular info gain, to create a nested object.
+                print("line 604", parameterIndex, len(self.info_gain_matrices_each_parameter), len(self.info_gain_matrices_each_parameter)[parameterIndex])
+                local_info_gains_matrices_array = np.array( [ self.info_gain_matrices_each_parameter[parameterIndex] ])
+        
+        #At present, plots are only made if the number of independent variables is 2.
         if len(self.UserInput.doe_settings['independent_variable_grid_center']) == 2:
             if self.info_gains_matrices_array_format == 'xyz':                
-                for modulationIndex in range(len(self.info_gains_matrices_array)):
-                    xValues = self.info_gains_matrices_array[modulationIndex][:,0]
-                    yValues = self.info_gains_matrices_array[modulationIndex][:,1]
-                    zValues = self.info_gains_matrices_array[modulationIndex][:,2]
+                for modulationIndex in range(len(local_info_gains_matrices_array)):
+                    xValues = local_info_gains_matrices_array[modulationIndex][:,0]
+                    yValues = local_info_gains_matrices_array[modulationIndex][:,1]
+                    zValues = local_info_gains_matrices_array[modulationIndex][:,2]
                     plotting_functions.makeTrisurfacePlot(xValues, yValues, zValues, figure_name = "Info_gain_TrisurfacePlot_modulation_"+str(modulationIndex)+plot_suffix)
             if self.info_gains_matrices_array_format == 'meshgrid':        
-                for modulationIndex in range(len(self.info_gains_matrices_array)):
+                for modulationIndex in range(len(local_info_gains_matrices_array)):
                     #Now need to get things prepared for the meshgrid.
-                    #NOTE: we do not pull XX and YY from self.info_gains_matrices_array because that is 1D and these are 2D arrays made a different way.
-                    #xValues = self.info_gains_matrices_array[modulationIndex][:,0] #Still correct, but not being used.
-                    #yValues = self.info_gains_matrices_array[modulationIndex][:,1] #Still correct, but not being used.
+                    #NOTE: we do not pull XX and YY from local_info_gains_matrices_array because that is 1D and these are 2D arrays made a different way.
+                    #xValues = local_info_gains_matrices_array[modulationIndex][:,0] #Still correct, but not being used.
+                    #yValues = local_info_gains_matrices_array[modulationIndex][:,1] #Still correct, but not being used.
                     XX, YY = np.meshgrid(self.meshGrid_independentVariable1ValuesArray, self.meshGrid_independentVariable2ValuesArray)
-                    zValues = self.info_gains_matrices_array[modulationIndex][:,2]
+                    zValues = local_info_gains_matrices_array[modulationIndex][:,2]
                     ZZ = zValues.reshape(XX.shape) #We know from experience to reshape this way.
                     plotting_functions.makeMeshGridSurfacePlot(XX, YY, ZZ, figure_name = "Info_gain_Meshgrid_modulation_"+str(modulationIndex)+plot_suffix)
+        else:
+            print("At present, createInfoGainPlots and createInfoGainModulationPlots only create plots when the length of  independent_variable_grid_center is 2. We don't currently support creation of other dimensional plots.")
     def getLogP(self, proposal_sample): #The proposal sample is specific parameter vector.
         [log_likelihood_proposal, simulationOutput_proposal] = self.getLogLikelihood(proposal_sample)
         log_prior_proposal = self.getLogPrior(proposal_sample)
@@ -832,12 +906,11 @@ class parameter_estimation:
             self.info_gain_KL_each_parameter  = []
             for param in range(width):
                 (density0,bins0,pathces0)=plt.hist([self.samples_of_prior,self.post_burn_in_samples[:,param].flatten()],bins=100,density=True)
-                KL = density0[1]*np.log(density0[1]/density0[0])
-                KL = KL[np.isfinite(KL)]
-                self.info_gain_KL_each_parameter.append(KL)
-                self.info_gain_KL = self.info_gain_KL + np.sum(KL)
-            #self.info_gain_KL_each_parameter = None #TODO: create a list or array of arrays such that the index is the parameter number.
-            #self.info_gain_KL = np.sum(KL)
+                current_info_gain_KL = density0[1]*np.log(density0[1]/density0[0])
+                current_info_gain_KL = current_info_gain_KL[np.isfinite(current_info_gain_KL)]
+                self.info_gain_KL_each_parameter.append(np.array(current_info_gain_KL)) #could make this optional, but normally shouldn't take much memory.
+                self.info_gain_KL = self.info_gain_KL + np.sum(current_info_gain_KL)
+            self.info_gain_each_parameter = self.info_gain_KL_each_parameter #could make this optional, but normally shouldn't take much memory.
             self.info_gain = self.info_gain_KL
         
         #BELOW calculate MAP and mu_AP related quantities.
