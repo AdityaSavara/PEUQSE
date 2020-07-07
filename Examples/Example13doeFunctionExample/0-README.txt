@@ -1,10 +1,10 @@
-In this example, two files are provided.
+In this example, a few example files are provided, including:
 
-runfile_Example13_doe_function_meshgrid.py
+runfile_Example13_doe_function_meshgrid_1.py
 
 and
 
-runfile_Example13_doe_function_xyz.py
+runfile_Example13_doe_function_xyz_1.py
 
 They each use the design of experiments function which is a class function for the parameter estimation (PE_object) class.
 

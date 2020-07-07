@@ -60,9 +60,36 @@ if __name__ == "__main__":
     UserInput.contour_settings_custom['figure_name'] = 'Mumpce_contour_plot_Langmuir_compete_ads'
     #After making the UserInput, now we make a 'parameter_estimation' object from it.
     
-    '''Below here is the doe code. We are not going to do a full scan because that's not necessary to test this feature.'''
+    
+    #It's good to run a test before doing a design of experiments.
+#    PE_object = CKPQ.parameter_estimation(UserInput)
+#    PE_object.doMetropolisHastings()
+    #PE_object.createAllPlots()
+    
+    
     UserInput.doe_settings['info_gains_matrices_array_format'] = 'meshgrid'
     UserInput.doe_settings['info_gains_matrices_multiple_parameters'] = 'sum'
+    UserInput.doe_settings['independent_variable_grid_center'] = [500, 0.5]
+    UserInput.doe_settings['independent_variable_grid_interval_size'] = [100, 0.1]
+    UserInput.doe_settings['independent_variable_grid_num_intervals'] = [2,2] #This is the number in each direction outward from center. So a 2 here gives 5 evaluations. A zero means we don't allow the parameter to vary.
+    
+    UserInput.doe_settings['parameter_modulation_grid_interval_size'] = [1,1] #use a non-zero value even for parameters that you will not vary.
+    UserInput.doe_settings['parameter_modulation_grid_num_intervals'] = [1,1] #make the number of intervals zero for a parameter that you don't want to vary.
+    
+    
+    PE_object = CKPQ.parameter_estimation(UserInput)
+    
+    
+    
+    
+    PE_object.doeParameterModulationCombinationsScanner()
+    #print(PE_object.info_gains_matrices_array[0])
+    PE_object.createInfoGainPlots()
+    
+    
+    #To obtain a single info gain matrix, for a single set of indepependet variables, we use the following syntax:
+    del PE_object
+    UserInput.doe_settings['info_gains_matrices_array_format'] = 'meshgrid'
     #We *still* have to define an independent variable grid.
     UserInput.doe_settings['independent_variable_grid_center'] = [500, 0.5]
     UserInput.doe_settings['independent_variable_grid_interval_size'] = [100, 0.1]
@@ -71,4 +98,4 @@ if __name__ == "__main__":
     fun.connected_variables_values = UserInput.responses['independent_variables_values'] #It is important to push the list *into* the other module.
     PE_object2 = CKPQ.parameter_estimation(UserInput)    
     PE_object2.doeGetInfoGainMatrix(UserInput.model['InputParameterPriorValues']+UserInput.model['InputParametersPriorValuesUncertainties']) #This is an example with a +1SD perturbation.
-    PE_object2.createInfoGainPlots(plot_suffix="_manual")
+    PE_object2.createInfoGainPlots(plot_suffix="manual")
