@@ -62,7 +62,7 @@ if __name__ == "__main__":
     
     '''Below here is the doe code. We are not going to do a full scan because that's not necessary to test this feature.'''
     UserInput.doe_settings['info_gains_matrices_array_format'] = 'meshgrid'
-    UserInput.doe_settings['info_gains_matrices_multiple_parameters'] = 'sum'
+    UserInput.doe_settings['info_gains_matrices_multiple_parameters'] = 'each'
     #We *still* have to define an independent variable grid.
     UserInput.doe_settings['independent_variable_grid_center'] = [500, 0.5]
     UserInput.doe_settings['independent_variable_grid_interval_size'] = [100, 0.1]
