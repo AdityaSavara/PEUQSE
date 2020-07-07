@@ -463,13 +463,13 @@ class parameter_estimation:
                 info_gain_matrix.append(conditionsCombinationAndInfoGain)
                 if self.UserInput.doe_settings['info_gains_matrices_multiple_parameters'] == 'each': #copy the above lines for the sum.
                     for parameterIndex in range(0,numParameters):#looping across number of parameters...
-                        conditionsCombinationAndInfoGain = np.hstack((conditionsCombination, self.info_gain_each_parameter[parameterIndex])) #Need to pull the info gain matrix from the nested objected named info_gain_each_parameter
+                        conditionsCombinationAndInfoGain = np.hstack((conditionsCombination, np.array(self.info_gain_each_parameter[parameterIndex]))) #Need to pull the info gain matrix from the nested objected named info_gain_each_parameter
                         #Below mimics the line above which reads info_gain_matrix.append(conditionsCombinationAndInfoGain)
                         info_gain_matrices_each_parameter[parameterIndex].append(conditionsCombinationAndInfoGain)
             self.info_gain_matrix = np.array(info_gain_matrix) #this is an implied return in addition to the real return.
             if self.UserInput.doe_settings['info_gains_matrices_multiple_parameters'] == 'each': #copy the above line for the sum.
                 for parameterIndex in range(0,numParameters):#looping across number of parameters...
-                    self.info_gain_matrices_each_parameter[parameterIndex]= np.array(info_gain_matrices_each_parameter)
+                    self.info_gain_matrices_each_parameter[parameterIndex]= np.array(info_gain_matrices_each_parameter[parameterIndex])
             self.middle_of_doe_flag = False #Set this back to false once info gain matrix is ready.
             return np.array(info_gain_matrix)            
         if self.UserInput.doe_settings['info_gains_matrices_array_format'] == 'meshgrid':
