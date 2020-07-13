@@ -1,9 +1,12 @@
 import sys; sys.path.append('../../');  import CheKiPEUQ as CKPQ
 import CheKiPEUQ.UserInput as UserInput
 
-if __name__ == "__main__":    
+global PE_object
+
+def main():
     import simulationFunctionTPRandTp #This will provide the "simulation" function.
     import numpy as np
+    global PE_object
 
     UserInput.responses['responses_abscissa'] = np.array([1]) # arbitrary since there is only one response value.
     UserInput.responses['responses_observed'] = np.array([[555]]) #
@@ -82,3 +85,7 @@ if __name__ == "__main__":
     
     # #UserInput.contour_settings_custom['axis_limits'] = [7,20,0,120000]
     # PE_object.createMumpcePlots()
+
+if __name__ == "__main__":    
+    main()
+    
