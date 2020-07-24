@@ -20,19 +20,19 @@ DESCRIPTION = 'This is the CheKiPEUQ package which stands for Chemical Kinetics 
 URL = 'https://github.com/AdityaSavara/CheKiPEUQ'
 EMAIL = 'AditySavara2008@u.northwestern.edu'  #Eric A. Walker is a co-author and can be reached at WALKER, ERIC <walke299@email.sc.edu>
 AUTHOR = 'Aditya Savara'
-REQUIRES_PYTHON = '>=3.0.0'
-VERSION = '1.0.0'
+REQUIRES_PYTHON = '>=3.5.0'
+VERSION = '0.0.1'
 LICENSE = 'BSD-3-Clause'
 
 # What packages are required for this module to be executed?
 REQUIRED = [
-    'numpy', 'timeit', 'copy'
+    #'numpy', 'timeit', 'copy'
     # 'requests', 'maya', 'records', #numpy...
 ]
 
 # What packages are optional?
 EXTRAS = {
-    'COMPLETE': ['matplotlib', 'scipy', 'pandas', 'UnitTesterSG']# 'uncertainties': ['uncertainties'], #pymc...
+    'COMPLETE': ['UnitTesterSG', 'timeit', 'copy', 'matplotlib', 'scipy', 'pandas']# 'uncertainties': ['uncertainties'], #pymc...
 }
 
 #To make sure the license etc. is included, I added the DATA_FILES object based on https://stackoverflow.com/questions/9977889/how-to-include-license-file-in-setup-py-script
