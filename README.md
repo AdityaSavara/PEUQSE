@@ -1,7 +1,7 @@
 # CheKiPEUQ
 
 The LICENSE and MANUAL are in the CheKiPEUQ directory, and at https://github.com/AdityaSavara/CheKiPEUQ/tree/master/CheKiPEUQ
-
+The LICENSE is a BSD-3-Clause LICENSE.
 
 CheKiPEUQ stands for "Chemical Kinetics Parameter Estimation and Uncertainty Quantification".  The fun name can be pronounced in various ways such as "Check-ee-pook" or "Check-ee-peeoo" or "Check-ee-poo".
 
