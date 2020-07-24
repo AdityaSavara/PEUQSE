@@ -20,7 +20,7 @@ DESCRIPTION = 'This is the CheKiPEUQ package which stands for Chemical Kinetics 
 URL = 'https://github.com/AdityaSavara/CheKiPEUQ'
 EMAIL = 'AditySavara2008@u.northwestern.edu'  #Eric A. Walker is a co-author and can be reached at WALKER, ERIC <walke299@email.sc.edu>
 AUTHOR = 'Aditya Savara'
-REQUIRES_PYTHON = '>=3.5.0'
+REQUIRES_PYTHON = '>=3.0.0'
 VERSION = '1.0.0'
 LICENSE = 'BSD-3-Clause'
 
