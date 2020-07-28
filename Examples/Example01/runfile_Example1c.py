@@ -48,7 +48,7 @@ if __name__ == "__main__":
     PE_object = CKPQ.parameter_estimation(UserInput)
     
     #Now we do parameter estimation.
-    PE_object.doGridSearch('getLogP', verbose = False)
+    PE_object.doGridSearch('getLogP')
     #PE_object.doMetropolisHastings()
     #PE_object.doOptimizeNegLogP(method="BFGS", printOptimum=True, verbose=True)
     #[map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, samples_simulatedOutputs, logP] = PE_object.doMetropolisHastings()
