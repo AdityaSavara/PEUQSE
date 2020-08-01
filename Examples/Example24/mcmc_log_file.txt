@@ -3,7 +3,7 @@ self.map_index:1175
 self.map_parameter_set:[1.15763372e+01 1.31694180e+05]
 self.mu_AP_parameter_set:[1.16042481e+01 1.31646291e+05]
 self.stdap_parameter_set:[9.11484052e-01 1.00766352e+04]
-self.info_gain:1.7157813446368657
+self.info_gain:1.4825573634364662
 evidence:3.0665615155128266e-15
 posterior_cov_matrix:
 [[8.30895499e-01 7.44773417e+03]
