@@ -25,33 +25,8 @@ class parameter_estimation:
         UserInput.parameterNamesAndMathTypeExpressionsDict = UserInput.model['parameterNamesAndMathTypeExpressionsDict']
         if self.UserInput.parameter_estimation_settings['verbose']: 
             print("Paremeter Estimation Object Initialized")
-        
-        #Setting this object so that we can make changes to it below without changing userinput dictionaries.
-        self.UserInput.mu_prior = np.array(UserInput.model['InputParameterPriorValues']) 
-        
-        #Below code is mainly for allowing uniform distributions in priors.
-        UserInput.InputParametersPriorValuesUncertainties = np.array(UserInput.model['InputParametersPriorValuesUncertainties'],dtype='float32') #Doing this so that the -1.0 check below should work.
-        if -1.0 in UserInput.InputParametersPriorValuesUncertainties: #This means that at least one of the uncertainties has been set to "-1" which means a uniform distribution. 
-            UserInput.InputParametersPriorValuesUniformDistributionsIndices = [] #intializing.
-            if len(np.shape(UserInput.InputParametersPriorValuesUncertainties)) != 1:
-                print("A value of '-1' in the uncertainties signifies a uniform distribution for CheKiPEUQ. As of July 1st 2020, the uniform distribution feature is only compatible with a 1D of array for uncertainties and not compatible with providing a full covariance matrix. If you need such a feature, contact the developers because it could be implemented. Eventually, a more sophisiticated back end may be used which would allow such a feature.")
-            # If there is a uniform distribution, that means two actions need to be taken:
-             #First, we will populate InputParametersPriorValuesUncertainties with the standard deviation of a uniform distribution. This is so that the MCMC steps can be taken of the right size.
-             #Second, that we will need to make a custom calculation when calculating the prior probability that effectively excludes this variable.  So we'll create an array of indices to help us with that.        
-            #We will do both in a loop.
-            UserInput.InputParametersPriorValuesUniformDistributionsKey  = UserInput.InputParametersPriorValuesUncertainties *1.0 #Just initalizing
-            for parameterIndex, uncertaintyValue in enumerate(UserInput.InputParametersPriorValuesUncertainties):
-                if uncertaintyValue == -1.0:
-                    UserInput.InputParametersPriorValuesUniformDistributionsKey[parameterIndex] = 1.0 #This is setting the parameter as "True" for having a uniform distribution. 
-                    UserInput.InputParametersPriorValuesUniformDistributionsIndices.append(parameterIndex)
-                    #In the case of a uniform distribution, the standard deviation and variance are given by sigma = (b−a)/ √12 :   
-                    #See for example  https://www.quora.com/What-is-the-standard-deviation-of-a-uniform-distribution-How-is-this-formula-determined
-                    std_prior_single_parameter = (UserInput.model['InputParameterPriorValues_upperBounds'][parameterIndex] - UserInput.model['InputParameterPriorValues_lowerBounds'][parameterIndex])/(12**0.5)
-                    UserInput.InputParametersPriorValuesUncertainties[parameterIndex] = std_prior_single_parameter #Note that going forward the array InputParametersPriorValuesUncertainties cannot be checked to see if the parameter is from a uniform distribution. Instead, InputParametersPriorValuesUniformDistributionsKey must be checked. 
-                    #We will also fill the model['InputParameterPriorValues'] to have the mean of the two bounds. This can matter for some of the scaling that occurs later.
-                    self.UserInput.mu_prior[parameterIndex] = (UserInput.model['InputParameterPriorValues_upperBounds'][parameterIndex] + UserInput.model['InputParameterPriorValues_lowerBounds'][parameterIndex])/2
-        
-        #Now to make covmat. Leaving the original dictionary object intact, but making a new object to make covmat_prior.
+        #Leaving the original dictionary object intact, but making a new object to make covmat_prior.
+        UserInput.InputParametersPriorValuesUncertainties = UserInput.model['InputParametersPriorValuesUncertainties']     
         if len(np.shape(UserInput.InputParametersPriorValuesUncertainties)) == 1 and (len(UserInput.InputParametersPriorValuesUncertainties) > 0): #If it's a 1D array/list that is filled, we'll diagonalize it.
             UserInput.std_prior = np.array(UserInput.InputParametersPriorValuesUncertainties, dtype='float32') #using 32 since not everyone has 64.
             UserInput.var_prior = np.power(UserInput.InputParametersPriorValuesUncertainties,2)
@@ -69,7 +44,7 @@ class parameter_estimation:
         #                          [0., 0., 0., 0., 0.1, 0.],
         #                          [0., 0., 0., 0., 0., 0.1]])
 
-
+        self.UserInput.mu_prior = np.array(UserInput.model['InputParameterPriorValues']) 
         #Making things at least 2d.  Also changing it to a purely internal variable because that way we don't edit the user input dictionary going forward.
         self.samples_of_prior = np.random.multivariate_normal(self.UserInput.mu_prior,UserInput.covmat_prior,UserInput.parameter_estimation_settings['mcmc_length'])
         UserInput.responses_abscissa = np.atleast_2d(UserInput.responses['responses_abscissa'])
@@ -428,7 +403,7 @@ class parameter_estimation:
 
     #The below function is a helper function that is used during doeInfoGainMatrix. However, it can certainly be used for other purposes.
     def populateResponsesWithSyntheticData(self, parModulationCombination):
-        #For each parameter Modulation Combination we are going to obtain a matrix of info_gains that is based on a grid of the independent_variables.
+        #For each paramaeter Modulation Combination we are going to obtain a matrix of info_gains that is based on a grid of the independent_variables.
         #First we need to make some synthetic data using parModulationCombination for the discreteParameterVector
         discreteParameterVector = parModulationCombination
         simulationFunction = self.UserInput.simulationFunction #Do NOT use self.UserInput.model['simulateByInputParametersOnlyFunction']  because that won't work with reduced parameter space requests.  
@@ -724,7 +699,7 @@ class parameter_estimation:
         self.opt_SSR = optimizeResult.fun #This is the best fit SSR.
         if printOptimum == True:
             print("Final results from doOptimizeSSR:", self.opt_parameter_set, "final SSR:", self.opt_SSR)
-        #FIXME: Right now, the createAllPlots command will not work unless we populate the map parameter set, so that is what we are doing. But a better longterm solution needs to be made. In which the graph says "opt" rather than "MAP" and uses the appropriate variables.
+        #FIXME: Right now, the createAllPlots command will not work unless we populate the map parmaeter set, so that is what we are doing. But a better longterm solution needs to be made. In which the graph says "opt" rather than "MAP" and uses the appropriate variables.
         #TODO: Also need to add things like WSSR based on magnitude and variance weightings.
         self.map_parameter_set = self.opt_parameter_set
         return [self.opt_parameter_set, self.opt_SSR]
@@ -976,9 +951,6 @@ class parameter_estimation:
         if type(self.UserInput.model['custom_logPrior']) != type(None):
             logPrior = self.UserInput.model['custom_logPrior'](discreteParameterVector)
             return logPrior
-        boundsChecksPassed = self.doInputParameterBoundsChecks(discreteParameterVector)
-        if boundsChecksPassed == False: #If false, return a 'zero probability' type result. Else, continue getting log of prior..
-            return float('-inf') #This approximates zero probability.        
         if self.UserInput.parameter_estimation_settings['scaling_uncertainties_type'] == "off":
             discreteParameterVector_scaled = np.array(discreteParameterVector)*1.0
         elif self.UserInput.parameter_estimation_settings['scaling_uncertainties_type'] != "off":
@@ -987,19 +959,7 @@ class parameter_estimation:
             else: #TODO: If we're in the else statemnt, then the scaling uncertainties is a covariance matrix, for which we plan to do row and column scaling, which has not yet been implemented. #We could pobably just use the diagonal in the short term.
                 print("WARNING: There is an error in your self.UserInput.scaling_uncertainties. Contact the developers with a bug report.")
                 discreteParameterVector_scaled = np.array(discreteParameterVector)*1.0
-
-        if hasattr(self.UserInput, 'InputParametersPriorValuesUniformDistributionsIndices') == False: #this is the normal case, no uniform distributionns.
-            logPrior = multivariate_normal.logpdf(x=discreteParameterVector_scaled,mean=self.UserInput.mu_prior_scaled,cov=self.UserInput.covmat_prior_scaled)
-        elif hasattr(self.UserInput, 'InputParametersPriorValuesUniformDistributionsIndices') == True: #This means that at least one variable has a uniform prior distribution. So we need to remove that  parameter before doing the multivariate_normal.logpdf.
-            #Note that this if-statement is intentionally after the scaling uncertainties because that feature can be compatible with the uniform distribution.
-            discreteParameterVector_scaled_truncated = np.delete(discreteParameterVector_scaled, self.UserInput.InputParametersPriorValuesUniformDistributionsIndices) #delete does not change original array.
-            mu_prior_scaled_truncated = np.delete(self.UserInput.mu_prior_scaled, self.UserInput.InputParametersPriorValuesUniformDistributionsIndices) #delete does not change original array.
-            var_prior_scaled_truncated = np.delete(self.UserInput.var_prior_scaled, self.UserInput.InputParametersPriorValuesUniformDistributionsIndices) #delete does not change original array.
-            #Presently, we don't have full covmat support with uniform distributions. In principle, it would be better to use covmat_prior_scaled and delete the rows and columns since then we might have covmat support.
-            #For now, we just make the truncated covmat from the var_prior. We currently don't have full covmat support for the case of uniform distributions.
-            covmat_prior_scaled_truncated = np.diagflat(var_prior_scaled_truncated) 
-            logPrior = multivariate_normal.logpdf(x=discreteParameterVector_scaled_truncated,mean=mu_prior_scaled_truncated,cov=covmat_prior_scaled_truncated)
-        #Note: Below code should be okay regardless of whether there are uniform distributions since it only adjusts logPrior by a scalar.
+        logPrior = multivariate_normal.logpdf(x=discreteParameterVector_scaled,mean=self.UserInput.mu_prior_scaled,cov=self.UserInput.covmat_prior_scaled)
         if self.UserInput.parameter_estimation_settings['undo_scaling_uncertainties_type'] == True:
             try:
                 scaling_factor = float(self.UserInput.parameter_estimation_settings['scaling_uncertainties_type'])
@@ -1014,11 +974,12 @@ class parameter_estimation:
             upperCheck = boundsCheck(discreteParameterVector, self.UserInput.model['InputParameterPriorValues_upperBounds'], 'upper')
             if upperCheck == False:
                 return False
-        if len(self.UserInput.model['InputParameterPriorValues_lowerBounds']) > 0:
+        elif len(self.UserInput.model['InputParameterPriorValues_lowerBounds']) > 0:
             lowerCheck = boundsCheck(discreteParameterVector, self.UserInput.model['InputParameterPriorValues_lowerBounds'], 'lower')
             if lowerCheck == False:
                 return False
-        return True #If the test has gotten here without failing any of the tests, we return true.
+        else:
+            return True
 
     #This helper function must be used because it allows for the output processing function etc. It has been separated from getLogLikelihood so that it can be used by doOptimizeSSR etc.
     def getSimulatedResponses(self, discreteParameterVector): 
@@ -1307,8 +1268,8 @@ class verbose_optimization_wrapper: #Learned how to use callback from Henri's po
         if self.FirstCall == True:
             parameterNamesString = ""
             for parameterIndex in range(len(discreteParameterVector)):
-                parameterName = f"Par-{parameterIndex+1}"
-                parameterNamesString += f"{parameterName:10s}\t"
+                parmeterName = f"Par-{parameterIndex+1}"
+                parameterNamesString += f"{parmeterName:10s}\t"
             headerString = "Iter  " + parameterNamesString + "ObjectiveF"
             print(headerString)
             self.FirstCall = False
@@ -1316,8 +1277,8 @@ class verbose_optimization_wrapper: #Learned how to use callback from Henri's po
         iterationNumberString = "{0:4d}  ".format(self.iterationNumber)
         discreteParameterVector = self.lastTrialDiscreteParameterVector #We take the stored one rather than the one provided to make sure that we're getting the same one as the stored objective function.
         parameterValuesString = ""
-        for parameterValue in discreteParameterVector:
-            parameterValuesString += f"{parameterValue:10.5e}\t"
+        for paramaterValue in discreteParameterVector:
+            parameterValuesString += f"{paramaterValue:10.5e}\t"
         currentObjectiveFunctionValue = f"{self.lastTrialObjectiveFunction:10.5e}"
         iterationOutputString = iterationNumberString + parameterValuesString + currentObjectiveFunctionValue
         print(iterationOutputString)
@@ -1445,14 +1406,13 @@ def boundsCheck(parameters, parametersBounds, boundsType):
         if False in upperCheck: #If any of them failed, we return False.
             return False
         else:
-            pass #else we do the lower bounds check next.
+            return True
     if boundsType.lower() == 'lower':
         lowerCheck = parametersTruncated > parametersBoundsTruncated #Check if all are smaller.
         if False in lowerCheck: #If any of them failed, we return False.
             return False
         else:
-            pass
-    return True #If we have gotten down to here without returning False, both checks have passed and we return true.
+            return True
         
 if __name__ == "__main__":
     pass
