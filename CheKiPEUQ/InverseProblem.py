@@ -25,10 +25,14 @@ class parameter_estimation:
         UserInput.parameterNamesAndMathTypeExpressionsDict = UserInput.model['parameterNamesAndMathTypeExpressionsDict']
         if self.UserInput.parameter_estimation_settings['verbose']: 
             print("Paremeter Estimation Object Initialized")
-        #Leaving the original dictionary object intact, but making a new object to make covmat_prior.
-        UserInput.InputParametersPriorValuesUncertainties = np.array(UserInput.model['InputParametersPriorValuesUncertainties'],dtype='float32')
-        UserInput.InputParametersPriorValuesUniformDistributionsIndices = [] #intializing.
-        if -1.0 in InputParametersPriorValuesUncertainties: #This means that at least one of the uncertainties has been set to "-1" which means a uniform distribution. 
+        
+        #Setting this object so that we can make changes to it below without changing userinput dictionaries.
+        self.UserInput.mu_prior = np.array(UserInput.model['InputParameterPriorValues']) 
+        
+        #Below code is mainly for allowing uniform distributions in priors.
+        UserInput.InputParametersPriorValuesUncertainties = np.array(UserInput.model['InputParametersPriorValuesUncertainties'],dtype='float32') #Doing this so that the -1.0 check below should work.
+        if -1.0 in UserInput.InputParametersPriorValuesUncertainties: #This means that at least one of the uncertainties has been set to "-1" which means a uniform distribution. 
+            UserInput.InputParametersPriorValuesUniformDistributionsIndices = [] #intializing.
             if len(np.shape(UserInput.InputParametersPriorValuesUncertainties)) != 1:
                 print("A value of '-1' in the uncertainties signifies a uniform distribution for CheKiPEUQ. As of July 1st 2020, the uniform distribution feature is only compatible with a 1D of array for uncertainties and not compatible with providing a full covariance matrix. If you need such a feature, contact the developers because it could be implemented. Eventually, a more sophisiticated back end may be used which would allow such a feature.")
             # If there is a uniform distribution, that means two actions need to be taken:
@@ -36,7 +40,7 @@ class parameter_estimation:
              #Second, that we will need to make a custom calculation when calculating the prior probability that effectively excludes this variable.  So we'll create an array of indices to help us with that.        
             #We will do both in a loop.
             UserInput.InputParametersPriorValuesUniformDistributionsKey  = UserInput.InputParametersPriorValuesUncertainties *1.0 #Just initalizing
-            for parameterIndex, uncertaintyValue in enumerate(UserInput.InputParametersPriorValuesUncertainties ):
+            for parameterIndex, uncertaintyValue in enumerate(UserInput.InputParametersPriorValuesUncertainties):
                 if uncertaintyValue == -1.0:
                     UserInput.InputParametersPriorValuesUniformDistributionsKey[parameterIndex] = 1.0 #This is setting the parameter as "True" for having a uniform distribution. 
                     UserInput.InputParametersPriorValuesUniformDistributionsIndices.append(parameterIndex)
@@ -44,8 +48,10 @@ class parameter_estimation:
                     #See for example  https://www.quora.com/What-is-the-standard-deviation-of-a-uniform-distribution-How-is-this-formula-determined
                     std_prior_single_parameter = (UserInput.model['InputParameterPriorValues_upperBounds'][parameterIndex] - UserInput.model['InputParameterPriorValues_lowerBounds'][parameterIndex])/(12**0.5)
                     UserInput.InputParametersPriorValuesUncertainties[parameterIndex] = std_prior_single_parameter #Note that going forward the array InputParametersPriorValuesUncertainties cannot be checked to see if the parameter is from a uniform distribution. Instead, InputParametersPriorValuesUniformDistributionsKey must be checked. 
-                    print("line 45", parameterIndex, UserInput.InputParametersPriorValuesUncertainties)
-                 
+                    #We will also fill the model['InputParameterPriorValues'] to have the mean of the two bounds. This can matter for some of the scaling that occurs later.
+                    self.UserInput.mu_prior[parameterIndex] = (UserInput.model['InputParameterPriorValues_upperBounds'][parameterIndex] + UserInput.model['InputParameterPriorValues_lowerBounds'][parameterIndex])/2
+        
+        #Now to make covmat. Leaving the original dictionary object intact, but making a new object to make covmat_prior.
         if len(np.shape(UserInput.InputParametersPriorValuesUncertainties)) == 1 and (len(UserInput.InputParametersPriorValuesUncertainties) > 0): #If it's a 1D array/list that is filled, we'll diagonalize it.
             UserInput.std_prior = np.array(UserInput.InputParametersPriorValuesUncertainties, dtype='float32') #using 32 since not everyone has 64.
             UserInput.var_prior = np.power(UserInput.InputParametersPriorValuesUncertainties,2)
@@ -63,7 +69,7 @@ class parameter_estimation:
         #                          [0., 0., 0., 0., 0.1, 0.],
         #                          [0., 0., 0., 0., 0., 0.1]])
 
-        self.UserInput.mu_prior = np.array(UserInput.model['InputParameterPriorValues']) 
+
         #Making things at least 2d.  Also changing it to a purely internal variable because that way we don't edit the user input dictionary going forward.
         self.samples_of_prior = np.random.multivariate_normal(self.UserInput.mu_prior,UserInput.covmat_prior,UserInput.parameter_estimation_settings['mcmc_length'])
         UserInput.responses_abscissa = np.atleast_2d(UserInput.responses['responses_abscissa'])
@@ -986,9 +992,9 @@ class parameter_estimation:
             logPrior = multivariate_normal.logpdf(x=discreteParameterVector_scaled,mean=self.UserInput.mu_prior_scaled,cov=self.UserInput.covmat_prior_scaled)
         elif hasattr(self.UserInput, 'InputParametersPriorValuesUniformDistributionsIndices') == True: #This means that at least one variable has a uniform prior distribution. So we need to remove that  parameter before doing the multivariate_normal.logpdf.
             #Note that this if-statement is intentionally after the scaling uncertainties because that feature can be compatible with the uniform distribution.
-            discreteParameterVector_scaled_truncated = np.delete(discreteParameterVector_scaled, UserInput.InputParametersPriorValuesUniformDistributionsIndices) #delete does not change original array.
-            mu_prior_scaled_truncated = np.delete(self.UserInput.mu_prior_scaled, UserInput.InputParametersPriorValuesUniformDistributionsIndices) #delete does not change original array.
-            var_prior_scaled_truncated = np.delete(self.UserInput.var_prior_scaled, UserInput.InputParametersPriorValuesUniformDistributionsIndices) #delete does not change original array.
+            discreteParameterVector_scaled_truncated = np.delete(discreteParameterVector_scaled, self.UserInput.InputParametersPriorValuesUniformDistributionsIndices) #delete does not change original array.
+            mu_prior_scaled_truncated = np.delete(self.UserInput.mu_prior_scaled, self.UserInput.InputParametersPriorValuesUniformDistributionsIndices) #delete does not change original array.
+            var_prior_scaled_truncated = np.delete(self.UserInput.var_prior_scaled, self.UserInput.InputParametersPriorValuesUniformDistributionsIndices) #delete does not change original array.
             #Presently, we don't have full covmat support with uniform distributions. In principle, it would be better to use covmat_prior_scaled and delete the rows and columns since then we might have covmat support.
             #For now, we just make the truncated covmat from the var_prior. We currently don't have full covmat support for the case of uniform distributions.
             covmat_prior_scaled_truncated = np.diagflat(var_prior_scaled_truncated) 
@@ -1008,12 +1014,11 @@ class parameter_estimation:
             upperCheck = boundsCheck(discreteParameterVector, self.UserInput.model['InputParameterPriorValues_upperBounds'], 'upper')
             if upperCheck == False:
                 return False
-        elif len(self.UserInput.model['InputParameterPriorValues_lowerBounds']) > 0:
+        if len(self.UserInput.model['InputParameterPriorValues_lowerBounds']) > 0:
             lowerCheck = boundsCheck(discreteParameterVector, self.UserInput.model['InputParameterPriorValues_lowerBounds'], 'lower')
             if lowerCheck == False:
                 return False
-        else:
-            return True
+        return True #If the test has gotten here without failing any of the tests, we return true.
 
     #This helper function must be used because it allows for the output processing function etc. It has been separated from getLogLikelihood so that it can be used by doOptimizeSSR etc.
     def getSimulatedResponses(self, discreteParameterVector): 
@@ -1440,13 +1445,14 @@ def boundsCheck(parameters, parametersBounds, boundsType):
         if False in upperCheck: #If any of them failed, we return False.
             return False
         else:
-            return True
+            pass #else we do the lower bounds check next.
     if boundsType.lower() == 'lower':
         lowerCheck = parametersTruncated > parametersBoundsTruncated #Check if all are smaller.
         if False in lowerCheck: #If any of them failed, we return False.
             return False
         else:
-            return True
+            pass
+    return True #If we have gotten down to here without returning False, both checks have passed and we return true.
         
 if __name__ == "__main__":
     pass
