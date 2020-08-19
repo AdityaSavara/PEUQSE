@@ -1196,6 +1196,9 @@ class parameter_estimation:
                     plot_settings['legendLabels'] = ['observed',  'mu_guess', 'MAP','mu_AP']
                 else: #Else there is no mu_AP.
                     plot_settings['legendLabels'] = ['observed',  'mu_guess', 'MAP']
+                if hasattr(self, "opt_SSR"): #This means we are actually doing an optimization, and self.opt_SSR exists.
+                    plot_settings['legendLabels'] = ['observed',  'mu_guess', 'CPE']
+                    print("line 1201 got here!!!")
             #Other allowed settings are like this, but will be fed in as simulated_response_plot_settings keys rather than plot_settings keys.
             #plot_settings['x_label'] = 'T (K)'
             #plot_settings['y_label'] = r'$rate (s^{-1})$'
