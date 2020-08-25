@@ -437,6 +437,7 @@ class parameter_estimation:
                     out_file.write("result: " + str(resultIndex) + " " +  str(result) + "\n")
         print("Final map results from gridsearch:", self.map_parameter_set, "final logP:", self.map_logP)
         CiteSoft.compile_checkpoints_log()
+        CiteSoft.compile_consolidated_log()
         if searchType == 'doMetropolisHastings':
             #Metropolis hastings has other variables to populate.
             #[self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_logP_un_normed_vec] =
@@ -522,6 +523,7 @@ class parameter_estimation:
                     self.info_gain_matrices_each_parameter[parameterIndex]= np.array(info_gain_matrices_each_parameter[parameterIndex])
             self.middle_of_doe_flag = False #Set this back to false once info gain matrix is ready.
             CiteSoft.compile_checkpoints_log()
+            CiteSoft.compile_consolidated_log()
             return np.array(info_gain_matrix)            
         if self.UserInput.doe_settings['info_gains_matrices_array_format'] == 'meshgrid':
             self.info_gains_matrices_array_format = 'meshgrid'  
@@ -565,6 +567,7 @@ class parameter_estimation:
                         self.info_gain_matrices_each_parameter[parameterIndex]= np.array(info_gain_matrices_each_parameter[parameterIndex])
                 self.middle_of_doe_flag = False #Set this back to false once info gain matrix is ready.
                 CiteSoft.compile_checkpoints_log()
+                CiteSoft.compile_consolidated_log()
                 return np.array(info_gain_matrix)
     
     #This function requires population of the UserInput doe_settings dictionary. It automatically scans many parameter modulation combinations.
@@ -999,6 +1002,7 @@ class parameter_estimation:
         if abs((self.map_parameter_set - self.mu_AP_parameter_set)/self.UserInput.var_prior).any() > 0.10:  
             print("Warning: The MAP parameter set and mu_AP parameter set differ by more than 10% of prior variance in at least one parameter. This may mean that you need to increase your mcmc_length, increase or decrease your mcmc_relative_step_length, or change what is used for the model response.  There is no general method for knowing the right  value for mcmc_relative_step_length since it depends on the sharpness and smoothness of the response. See for example https://www.sciencedirect.com/science/article/pii/S0039602816300632  ")
         CiteSoft.compile_checkpoints_log()
+        CiteSoft.compile_consolidated_log()
         return [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_logP_un_normed_vec] # EAW 2020/01/08
     def getLogPrior(self,discreteParameterVector):
         if type(self.UserInput.model['custom_logPrior']) != type(None):
@@ -1303,6 +1307,7 @@ class parameter_estimation:
 
     def createAllPlots(self):
         CiteSoft.compile_checkpoints_log()
+        CiteSoft.compile_consolidated_log()
         try:
             self.makeHistogramsForEachParameter()    
             self.makeSamplingScatterMatrixPlot()
