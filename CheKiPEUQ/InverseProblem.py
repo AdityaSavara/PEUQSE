@@ -11,12 +11,31 @@ import timeit
 import copy
 #import mumce_py.Project as mumce_pyProject #FIXME: Eric to fix plotting/graphing issue described in issue 9 -- https://github.com/AdityaSavara/ODE-KIN-BAYES-SG-EW/issues/9
 #import mumce_py.solution mumce_pySolution
+try:
+    import CiteSoft
+    from CiteSoft import module_call_cite
+except:
+    import os #The below lines are to allow CiteSoftLocal to be called regardless of user's working directory.
+    lenOfFileName = len(os.path.basename(__file__)) #This is the name of **this** file.
+    absPathWithoutFileName = os.path.abspath(__file__)[0:-1*lenOfFileName]
+    sys.path.append(absPathWithoutFileName)
+    import CiteSoftLocal as CiteSoft
+    from CiteSoftLocal import module_call_cite
+
+
 
 class parameter_estimation:
     #Inside this class, a UserInput namespace is provided. This has dictionaries of UserInput choices.
     #However, the code initally parses those choices and then puts processed versions in the SAME name space, but no longer in the dictionaries.
     #So functions in this class should (when possible) call the namespace variables that are not in dictionaries, unless the original userinput is desired.
     #'inverse problem'. Initialize chain with initial guess (prior if not provided) as starting point, chain burn-in length and total length, and Q (for proposal samples).  Initialize experimental data.  Theta is initialized as the starting point of the chain.  
+    
+    
+    software_name = "CheKiPEUQ Parameter Estimation"
+    software_version = "1.0.0"
+    software_unique_id = "https://github.com/AdityaSavara/CheKiPEUQ"
+    software_kwargs = {"version": software_version, "author": ["Aditya Savara", "Eric A. Walker"], "doi": "https://doi.org/10.1002/cctc.202000953", "cite": "Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953"} 
+    @module_call_cite(unique_id=software_unique_id, software_name=software_name, **software_kwargs)
     def __init__(self, UserInput = None):
         self.UserInput = UserInput #Note that this is a pointer, so the later lines are within this object.
         #Now will automatically populate some variables from UserInput
@@ -417,6 +436,7 @@ class parameter_estimation:
                 for resultIndex, result in enumerate(allGridResults):
                     out_file.write("result: " + str(resultIndex) + " " +  str(result) + "\n")
         print("Final map results from gridsearch:", self.map_parameter_set, "final logP:", self.map_logP)
+        CiteSoft.compile_checkpoints_log()
         if searchType == 'doMetropolisHastings':
             #Metropolis hastings has other variables to populate.
             #[self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_logP_un_normed_vec] =
@@ -458,6 +478,11 @@ class parameter_estimation:
         self.__init__(self.UserInput)
     
     #This function requires first populating the doe_settings dictionary in UserInput in order to know which conditions to explore.
+    software_name = "CheKiPEUQ Design of Experiments"
+    software_version = "1.0.2"
+    software_unique_id = "https://doi.org/10.1002/cctc.202000976"
+    software_kwargs = {"version": software_version, "author": ["Eric A. Walker", "Kishore Ravisankar", "Aditya Savara"], "doi": "https://doi.org/10.1002/cctc.202000976", "cite": "Eric Alan Walker, Kishore Ravisankar, Aditya Savara. CheKiPEUQ Intro 2: Harnessing Uncertainties from Data Sets, Bayesian Design of Experiments in Chemical Kinetics. ChemCatChem. Accepted. doi:10.1002/cctc.202000976"} 
+    @module_call_cite(unique_id=software_unique_id, software_name=software_name, **software_kwargs)
     def doeGetInfoGainMatrix(self, parameterCombination):#Note: There is an implied argument of info_gains_matrices_array_format being 'xyz' or 'meshgrid'
         #At present, we *must* provide a parameterCombination because right now the only way to get an InfoGainMatrix is with synthetic data assuming a particular parameterCombination as the "real" or "actual" parameterCombination.
         doe_settings = self.UserInput.doe_settings
@@ -496,6 +521,7 @@ class parameter_estimation:
                 for parameterIndex in range(0,numParameters):#looping across number of parameters...
                     self.info_gain_matrices_each_parameter[parameterIndex]= np.array(info_gain_matrices_each_parameter[parameterIndex])
             self.middle_of_doe_flag = False #Set this back to false once info gain matrix is ready.
+            CiteSoft.compile_checkpoints_log()
             return np.array(info_gain_matrix)            
         if self.UserInput.doe_settings['info_gains_matrices_array_format'] == 'meshgrid':
             self.info_gains_matrices_array_format = 'meshgrid'  
@@ -538,9 +564,10 @@ class parameter_estimation:
                     for parameterIndex in range(0,numParameters):#looping across number of parameters...
                         self.info_gain_matrices_each_parameter[parameterIndex]= np.array(info_gain_matrices_each_parameter[parameterIndex])
                 self.middle_of_doe_flag = False #Set this back to false once info gain matrix is ready.
+                CiteSoft.compile_checkpoints_log()
                 return np.array(info_gain_matrix)
     
-    #This function requires population of the UserInput doe_settingsdictionary. It automatically scans many parameter modulation combinations.
+    #This function requires population of the UserInput doe_settings dictionary. It automatically scans many parameter modulation combinations.
     def doeParameterModulationCombinationsScanner(self):
         import CheKiPEUQ.CombinationGeneratorModule as CombinationGeneratorModule
         doe_settings = self.UserInput.doe_settings 
@@ -971,6 +998,7 @@ class parameter_estimation:
                     out_file.write("Warning: The MAP parameter set and mu_AP parameter set differ by more than 10% of prior variance in at least one parameter. This may mean that you need to increase your mcmc_length, increase or decrease your mcmc_relative_step_length, or change what is used for the model response.  There is no general method for knowing the right  value for mcmc_relative_step_length since it depends on the sharpness and smoothness of the response. See for example https://www.sciencedirect.com/science/article/pii/S0039602816300632")
         if abs((self.map_parameter_set - self.mu_AP_parameter_set)/self.UserInput.var_prior).any() > 0.10:  
             print("Warning: The MAP parameter set and mu_AP parameter set differ by more than 10% of prior variance in at least one parameter. This may mean that you need to increase your mcmc_length, increase or decrease your mcmc_relative_step_length, or change what is used for the model response.  There is no general method for knowing the right  value for mcmc_relative_step_length since it depends on the sharpness and smoothness of the response. See for example https://www.sciencedirect.com/science/article/pii/S0039602816300632  ")
+        CiteSoft.compile_checkpoints_log()
         return [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_logP_un_normed_vec] # EAW 2020/01/08
     def getLogPrior(self,discreteParameterVector):
         if type(self.UserInput.model['custom_logPrior']) != type(None):
@@ -1274,6 +1302,7 @@ class parameter_estimation:
         return figureObject_beta
 
     def createAllPlots(self):
+        CiteSoft.compile_checkpoints_log()
         try:
             self.makeHistogramsForEachParameter()    
             self.makeSamplingScatterMatrixPlot()
@@ -1328,6 +1357,11 @@ class verbose_optimization_wrapper: #Learned how to use callback from Henri's po
 
 '''Below are a bunch of functions for Euler's Method.'''
 #This takes an array of dydt values. #Note this is a local dydtArray, it is NOT a local deltaYArray.
+software_name = "Integrated Production (Objective Function)"
+software_version = "1.0.0"
+software_unique_id = "https://doi.org/10.1016/j.susc.2016.07.001"
+software_kwargs = {"version": software_version, "author": ["Aditya Savara"], "doi": "https://doi.org/10.1016/j.susc.2016.07.001", "cite": "Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180."} 
+@module_call_cite(unique_id=software_unique_id, software_name=software_name, **software_kwargs)
 def littleEulerGivenArray(y_initial, t_values, dydtArray): 
     #numPoints = len(t_values)
     simulated_t_values = t_values #we'll simulate at the t_values given.

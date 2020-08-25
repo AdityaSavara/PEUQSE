@@ -133,6 +133,7 @@ def makeHistogramsForEachParameter(parameterSamples,parameterNamesAndMathTypeExp
         sampledParameterHistogramMaker(parameterSamples, parameterName,parameterNamesAndMathTypeExpressionsDict, sampledParameterFiguresDictionary, sampledParameterAxesDictionary)        
 
 def createSimulatedResponsesPlot(x_values, listOfYArrays, plot_settings={}, listOfYUncertaintiesArrays=[], showFigure=True):
+    exportFigure = True #This variable should be moved to an argument or something in plot_settings.
     #First put some defaults in if not already defined.
     if 'x_label' not in plot_settings: plot_settings['x_label'] = ''
     if 'y_label' not in plot_settings: plot_settings['y_label'] = ''
