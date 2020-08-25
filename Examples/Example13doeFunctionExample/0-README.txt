@@ -8,6 +8,7 @@ runfile_Example13_doe_function_xyz_1.py
 
 They each use the design of experiments function which is a class function for the parameter estimation (PE_object) class.
 
+The file runfile_Example13_doe_function_meshgrid_1.py takes a few minutes.
 
 
 Below explains the variables etc. Check the UserInput file and other documentation as this might be out of date.
