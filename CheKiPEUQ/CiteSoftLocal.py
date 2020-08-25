@@ -56,7 +56,7 @@ def compile_checkpoints_log(file_path="", empty_checkpoints=True):
     if empty_checkpoints==True:
         citations_dict.clear()
 
-def compile_consolidated_log(file_path="", compile_checkpoints=True)):
+def compile_consolidated_log(file_path="", compile_checkpoints=True):
     if compile_checkpoints == True:
         compile_checkpoints_log()
     print("Warning: CiteSoftLocal cannot make a consolidated log. Citations have been exported to CiteSoftwareCheckpointsLog.txt")
