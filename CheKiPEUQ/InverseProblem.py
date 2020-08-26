@@ -379,7 +379,6 @@ class parameter_estimation:
         return gridCombinations, numGridPoints  
   
     @after_call_compile_consolidated_log() #This is from the CiteSoft module.
-    @after_call_compile_checkpoints_log() #This is from the CiteSoft module.
     def doGridSearch(self, searchType='getLogP', exportLog = True, gridSamplingAbsoluteIntervalSize = [], gridSamplingNumOfIntervals = [], passThroughArgs = {}):
         # gridSamplingNumOfIntervals is the number of variations to check in units of variance for each parameter. Can be 0 if you don't want to vary a particular parameter in the grid search.
         #TODO: the upper part of the gridsearch may not be compatibile with reduced parameter space. Needs to be checked.
@@ -490,7 +489,6 @@ class parameter_estimation:
     software_kwargs = {"version": software_version, "author": ["Eric A. Walker", "Kishore Ravisankar", "Aditya Savara"], "doi": "https://doi.org/10.1002/cctc.202000976", "cite": "Eric Alan Walker, Kishore Ravisankar, Aditya Savara. CheKiPEUQ Intro 2: Harnessing Uncertainties from Data Sets, Bayesian Design of Experiments in Chemical Kinetics. ChemCatChem. Accepted. doi:10.1002/cctc.202000976"} 
 
     @after_call_compile_consolidated_log() #This is from the CiteSoft module.
-    @after_call_compile_checkpoints_log() #This is from the CiteSoft module.
     @module_call_cite(unique_id=software_unique_id, software_name=software_name, **software_kwargs)
     def doeGetInfoGainMatrix(self, parameterCombination):#Note: There is an implied argument of info_gains_matrices_array_format being 'xyz' or 'meshgrid'
         #At present, we *must* provide a parameterCombination because right now the only way to get an InfoGainMatrix is with synthetic data assuming a particular parameterCombination as the "real" or "actual" parameterCombination.
@@ -782,7 +780,6 @@ class parameter_estimation:
     
     #main function to get samples #TODO: Maybe Should return map_log_P and mu_AP_log_P?
     @after_call_compile_consolidated_log() #This is from the CiteSoft module.
-    @after_call_compile_checkpoints_log() #This is from the CiteSoft module.
     def doMetropolisHastings(self):
         if 'mcmc_random_seed' in self.UserInput.parameter_estimation_settings:
             if type(self.UserInput.parameter_estimation_settings['mcmc_random_seed']) == type(1): #if it's an integer, then it's not a "None" type or string, and we will use it.
@@ -1312,7 +1309,6 @@ class parameter_estimation:
         return figureObject_beta
 
     @after_call_compile_consolidated_log() #This is from the CiteSoft module.
-    @after_call_compile_checkpoints_log() #This is from the CiteSoft module.
     def createAllPlots(self):
         try:
             self.makeHistogramsForEachParameter()    
