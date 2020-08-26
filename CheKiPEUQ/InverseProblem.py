@@ -14,6 +14,9 @@ import copy
 try:
     import CiteSoft
     from CiteSoft import module_call_cite
+    from CiteSoft import module_call_cite
+    from CiteSoft import after_call_compile_checkpoints_log
+    from CiteSoft import after_call_compile_consolidated_log
 except:
     import os #The below lines are to allow CiteSoftLocal to be called regardless of user's working directory.
     lenOfFileName = len(os.path.basename(__file__)) #This is the name of **this** file.
@@ -21,6 +24,8 @@ except:
     sys.path.append(absPathWithoutFileName)
     import CiteSoftLocal as CiteSoft
     from CiteSoftLocal import module_call_cite
+    from CiteSoftLocal import after_call_compile_checkpoints_log
+    from CiteSoftLocal import after_call_compile_consolidated_log
 
 
 
@@ -373,6 +378,8 @@ class parameter_estimation:
         gridCombinations = CombinationGeneratorModule.combinationGenerator(gridCenterVector, gridSamplingAbsoluteIntervalSize, gridSamplingNumOfIntervals, SpreadType=SpreadType,toFile=toFile)
         return gridCombinations, numGridPoints  
   
+    @after_call_compile_consolidated_log() #This is from the CiteSoft module.
+    @after_call_compile_checkpoints_log() #This is from the CiteSoft module.
     def doGridSearch(self, searchType='getLogP', exportLog = True, gridSamplingAbsoluteIntervalSize = [], gridSamplingNumOfIntervals = [], passThroughArgs = {}):
         # gridSamplingNumOfIntervals is the number of variations to check in units of variance for each parameter. Can be 0 if you don't want to vary a particular parameter in the grid search.
         #TODO: the upper part of the gridsearch may not be compatibile with reduced parameter space. Needs to be checked.
@@ -436,8 +443,6 @@ class parameter_estimation:
                 for resultIndex, result in enumerate(allGridResults):
                     out_file.write("result: " + str(resultIndex) + " " +  str(result) + "\n")
         print("Final map results from gridsearch:", self.map_parameter_set, "final logP:", self.map_logP)
-        CiteSoft.compile_checkpoints_log()
-        CiteSoft.compile_consolidated_log()
         if searchType == 'doMetropolisHastings':
             #Metropolis hastings has other variables to populate.
             #[self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_logP_un_normed_vec] =
@@ -483,6 +488,9 @@ class parameter_estimation:
     software_version = "1.0.2"
     software_unique_id = "https://doi.org/10.1002/cctc.202000976"
     software_kwargs = {"version": software_version, "author": ["Eric A. Walker", "Kishore Ravisankar", "Aditya Savara"], "doi": "https://doi.org/10.1002/cctc.202000976", "cite": "Eric Alan Walker, Kishore Ravisankar, Aditya Savara. CheKiPEUQ Intro 2: Harnessing Uncertainties from Data Sets, Bayesian Design of Experiments in Chemical Kinetics. ChemCatChem. Accepted. doi:10.1002/cctc.202000976"} 
+
+    @after_call_compile_consolidated_log() #This is from the CiteSoft module.
+    @after_call_compile_checkpoints_log() #This is from the CiteSoft module.
     @module_call_cite(unique_id=software_unique_id, software_name=software_name, **software_kwargs)
     def doeGetInfoGainMatrix(self, parameterCombination):#Note: There is an implied argument of info_gains_matrices_array_format being 'xyz' or 'meshgrid'
         #At present, we *must* provide a parameterCombination because right now the only way to get an InfoGainMatrix is with synthetic data assuming a particular parameterCombination as the "real" or "actual" parameterCombination.
@@ -522,8 +530,6 @@ class parameter_estimation:
                 for parameterIndex in range(0,numParameters):#looping across number of parameters...
                     self.info_gain_matrices_each_parameter[parameterIndex]= np.array(info_gain_matrices_each_parameter[parameterIndex])
             self.middle_of_doe_flag = False #Set this back to false once info gain matrix is ready.
-            CiteSoft.compile_checkpoints_log()
-            CiteSoft.compile_consolidated_log()
             return np.array(info_gain_matrix)            
         if self.UserInput.doe_settings['info_gains_matrices_array_format'] == 'meshgrid':
             self.info_gains_matrices_array_format = 'meshgrid'  
@@ -566,8 +572,6 @@ class parameter_estimation:
                     for parameterIndex in range(0,numParameters):#looping across number of parameters...
                         self.info_gain_matrices_each_parameter[parameterIndex]= np.array(info_gain_matrices_each_parameter[parameterIndex])
                 self.middle_of_doe_flag = False #Set this back to false once info gain matrix is ready.
-                CiteSoft.compile_checkpoints_log()
-                CiteSoft.compile_consolidated_log()
                 return np.array(info_gain_matrix)
     
     #This function requires population of the UserInput doe_settings dictionary. It automatically scans many parameter modulation combinations.
@@ -777,6 +781,8 @@ class parameter_estimation:
         return [discreteParameterVector, objectiveFunctionValue]
     
     #main function to get samples #TODO: Maybe Should return map_log_P and mu_AP_log_P?
+    @after_call_compile_consolidated_log() #This is from the CiteSoft module.
+    @after_call_compile_checkpoints_log() #This is from the CiteSoft module.
     def doMetropolisHastings(self):
         if 'mcmc_random_seed' in self.UserInput.parameter_estimation_settings:
             if type(self.UserInput.parameter_estimation_settings['mcmc_random_seed']) == type(1): #if it's an integer, then it's not a "None" type or string, and we will use it.
@@ -1003,8 +1009,6 @@ class parameter_estimation:
         if abs((self.map_parameter_set - self.mu_AP_parameter_set)/self.UserInput.var_prior).any() > 0.10:  
             pass #Disabling below warning until if statement it is fixed.
             #print("Warning: The MAP parameter set and mu_AP parameter set differ by more than 10% of prior variance in at least one parameter. This may mean that you need to increase your mcmc_length, increase or decrease your mcmc_relative_step_length, or change what is used for the model response.  There is no general method for knowing the right  value for mcmc_relative_step_length since it depends on the sharpness and smoothness of the response. See for example https://www.sciencedirect.com/science/article/pii/S0039602816300632  ")
-        CiteSoft.compile_checkpoints_log()
-        CiteSoft.compile_consolidated_log()
         return [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_logP_un_normed_vec] # EAW 2020/01/08
     def getLogPrior(self,discreteParameterVector):
         if type(self.UserInput.model['custom_logPrior']) != type(None):
@@ -1307,9 +1311,9 @@ class parameter_estimation:
         figureObject_beta.mumpce_plots(model_parameter_info = self.UserInput.model_parameter_info, active_parameters = active_parameters, pairs_of_parameter_indices = pairs_of_parameter_indices, posterior_mu_vector = posterior_mu_vector, posterior_cov_matrix = posterior_cov_matrix, prior_mu_vector = np.array(self.UserInput.mu_prior), prior_cov_matrix = self.UserInput.covmat_prior, contour_settings_custom = self.UserInput.contour_settings_custom)
         return figureObject_beta
 
+    @after_call_compile_consolidated_log() #This is from the CiteSoft module.
+    @after_call_compile_checkpoints_log() #This is from the CiteSoft module.
     def createAllPlots(self):
-        CiteSoft.compile_checkpoints_log()
-        CiteSoft.compile_consolidated_log()
         try:
             self.makeHistogramsForEachParameter()    
             self.makeSamplingScatterMatrixPlot()

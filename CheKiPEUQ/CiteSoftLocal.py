@@ -17,18 +17,46 @@ valid_optional_fields = ["version", "cite", "author", "doi", "url", "encoding", 
 valid_required_fields = ['timestamp', 'unique_id', 'software_name']
 
 #The module_call_cite function is intended to be used as a decorator.
+#It is similar to the example "decorator_maker_with_arguments" at https://www.datacamp.com/community/tutorials/decorators-python
+#To find the example, search for "decorator_maker_with_arguments" at the above link.
+#function "inner" below is named 'decorator' in the above link and 'wrapper' below is named 'wrapper' in the above link.
 def module_call_cite(unique_id, software_name, write_immediately=False, **add_args):
     #the unique_id and the software_name are the only truly required args.
     #Optional args are: ["version", "cite", "author", "doi", "url", "encoding", "misc"]
     #Every arg must be a string.
     def inner(func):
-        def call(*args, **kwargs):
+        def wrapper(*args, **kwargs):
             add_citation(unique_id, software_name, write_immediately, **add_args)
             result = func(*args, **kwargs)
             return result
-        return call
+        return wrapper
     return inner
 
+#The after_call_compile_checkpoints_log function is intended to be used as a decorator.
+#It is similar to the example "decorator_maker_with_arguments" at https://www.datacamp.com/community/tutorials/decorators-python
+#To find the example, search for "decorator_maker_with_arguments" at the above link.
+#function "inner" below is named 'decorator' in the above link and 'wrapper' below is named 'wrapper' in the above link.
+def after_call_compile_checkpoints_log(file_path="", empty_checkpoints=True):
+    def inner(func):
+        def wrapper(*args, **kwargs):
+            result = func(*args, **kwargs)
+            compile_checkpoints_log(file_path=file_path, empty_checkpoints=empty_checkpoints)
+            return result
+        return wrapper
+    return inner
+
+#The after_call_compile_consolidated_log function is intended to be used as a decorator.
+#It is similar to the example "decorator_maker_with_arguments" at https://www.datacamp.com/community/tutorials/decorators-python
+#To find the example, search for "decorator_maker_with_arguments" at the above link.
+#function "inner" below is named 'decorator' in the above link and 'wrapper' below is named 'wrapper' in the above link.
+def after_call_compile_consolidated_log(file_path="", compile_checkpoints=True):
+    def inner(func):
+        def wrapper(*args, **kwargs):
+            result = func(*args, **kwargs)
+            compile_consolidated_log(file_path=file_path, compile_checkpoints=compile_checkpoints)
+            return result
+        return wrapper
+    return inner
 #The import_cite function is intended to be used at the top of a sofware module.
 def import_cite(unique_id, software_name, write_immediately=False, **kwargs):
     add_citation(unique_id, software_name, write_immediately, **kwargs)
