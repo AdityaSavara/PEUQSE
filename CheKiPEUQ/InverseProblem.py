@@ -13,21 +13,12 @@ import copy
 #import mumce_py.solution mumce_pySolution
 try:
     import CiteSoft
-    from CiteSoft import module_call_cite
-    from CiteSoft import module_call_cite
-    from CiteSoft import after_call_compile_checkpoints_log
-    from CiteSoft import after_call_compile_consolidated_log
 except:
     import os #The below lines are to allow CiteSoftLocal to be called regardless of user's working directory.
     lenOfFileName = len(os.path.basename(__file__)) #This is the name of **this** file.
     absPathWithoutFileName = os.path.abspath(__file__)[0:-1*lenOfFileName]
     sys.path.append(absPathWithoutFileName)
     import CiteSoftLocal as CiteSoft
-    from CiteSoftLocal import module_call_cite
-    from CiteSoftLocal import after_call_compile_checkpoints_log
-    from CiteSoftLocal import after_call_compile_consolidated_log
-
-
 
 class parameter_estimation:
     #Inside this class, a UserInput namespace is provided. This has dictionaries of UserInput choices.
@@ -40,7 +31,7 @@ class parameter_estimation:
     software_version = "1.0.0"
     software_unique_id = "https://github.com/AdityaSavara/CheKiPEUQ"
     software_kwargs = {"version": software_version, "author": ["Aditya Savara", "Eric A. Walker"], "doi": "https://doi.org/10.1002/cctc.202000953", "cite": "Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953"} 
-    @module_call_cite(unique_id=software_unique_id, software_name=software_name, **software_kwargs)
+    @CiteSoft.module_call_cite(unique_id=software_unique_id, software_name=software_name, **software_kwargs)
     def __init__(self, UserInput = None):
         self.UserInput = UserInput #Note that this is a pointer, so the later lines are within this object.
         #Now will automatically populate some variables from UserInput
@@ -378,7 +369,7 @@ class parameter_estimation:
         gridCombinations = CombinationGeneratorModule.combinationGenerator(gridCenterVector, gridSamplingAbsoluteIntervalSize, gridSamplingNumOfIntervals, SpreadType=SpreadType,toFile=toFile)
         return gridCombinations, numGridPoints  
   
-    @after_call_compile_consolidated_log() #This is from the CiteSoft module.
+    @CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
     def doGridSearch(self, searchType='getLogP', exportLog = True, gridSamplingAbsoluteIntervalSize = [], gridSamplingNumOfIntervals = [], passThroughArgs = {}):
         # gridSamplingNumOfIntervals is the number of variations to check in units of variance for each parameter. Can be 0 if you don't want to vary a particular parameter in the grid search.
         #TODO: the upper part of the gridsearch may not be compatibile with reduced parameter space. Needs to be checked.
@@ -488,8 +479,8 @@ class parameter_estimation:
     software_unique_id = "https://doi.org/10.1002/cctc.202000976"
     software_kwargs = {"version": software_version, "author": ["Eric A. Walker", "Kishore Ravisankar", "Aditya Savara"], "doi": "https://doi.org/10.1002/cctc.202000976", "cite": "Eric Alan Walker, Kishore Ravisankar, Aditya Savara. CheKiPEUQ Intro 2: Harnessing Uncertainties from Data Sets, Bayesian Design of Experiments in Chemical Kinetics. ChemCatChem. Accepted. doi:10.1002/cctc.202000976"} 
 
-    @after_call_compile_consolidated_log() #This is from the CiteSoft module.
-    @module_call_cite(unique_id=software_unique_id, software_name=software_name, **software_kwargs)
+    @CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
+    @CiteSoft.module_call_cite(unique_id=software_unique_id, software_name=software_name, **software_kwargs)
     def doeGetInfoGainMatrix(self, parameterCombination):#Note: There is an implied argument of info_gains_matrices_array_format being 'xyz' or 'meshgrid'
         #At present, we *must* provide a parameterCombination because right now the only way to get an InfoGainMatrix is with synthetic data assuming a particular parameterCombination as the "real" or "actual" parameterCombination.
         doe_settings = self.UserInput.doe_settings
@@ -779,7 +770,7 @@ class parameter_estimation:
         return [discreteParameterVector, objectiveFunctionValue]
     
     #main function to get samples #TODO: Maybe Should return map_log_P and mu_AP_log_P?
-    @after_call_compile_consolidated_log() #This is from the CiteSoft module.
+    @CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
     def doMetropolisHastings(self):
         if 'mcmc_random_seed' in self.UserInput.parameter_estimation_settings:
             if type(self.UserInput.parameter_estimation_settings['mcmc_random_seed']) == type(1): #if it's an integer, then it's not a "None" type or string, and we will use it.
@@ -1308,7 +1299,7 @@ class parameter_estimation:
         figureObject_beta.mumpce_plots(model_parameter_info = self.UserInput.model_parameter_info, active_parameters = active_parameters, pairs_of_parameter_indices = pairs_of_parameter_indices, posterior_mu_vector = posterior_mu_vector, posterior_cov_matrix = posterior_cov_matrix, prior_mu_vector = np.array(self.UserInput.mu_prior), prior_cov_matrix = self.UserInput.covmat_prior, contour_settings_custom = self.UserInput.contour_settings_custom)
         return figureObject_beta
 
-    @after_call_compile_consolidated_log() #This is from the CiteSoft module.
+    @CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
     def createAllPlots(self):
         try:
             self.makeHistogramsForEachParameter()    
@@ -1368,7 +1359,7 @@ software_name = "Integrated Production (Objective Function)"
 software_version = "1.0.0"
 software_unique_id = "https://doi.org/10.1016/j.susc.2016.07.001"
 software_kwargs = {"version": software_version, "author": ["Aditya Savara"], "doi": "https://doi.org/10.1016/j.susc.2016.07.001", "cite": "Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180."} 
-@module_call_cite(unique_id=software_unique_id, software_name=software_name, **software_kwargs)
+@CiteSoft.module_call_cite(unique_id=software_unique_id, software_name=software_name, **software_kwargs)
 def littleEulerGivenArray(y_initial, t_values, dydtArray): 
     #numPoints = len(t_values)
     simulated_t_values = t_values #we'll simulate at the t_values given.
