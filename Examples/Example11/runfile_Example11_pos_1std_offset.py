@@ -48,6 +48,7 @@ if __name__ == "__main__":
     experiments = np.log(1/(1+(np.exp(-(-0.05)/(kB*np.linspace(698.15,298.15,5))))))
     PE_object_list = []
     prior = np.random.normal(-0.15,0.1,50000)
+    KL_divergence_list = []
 
     for i in range(len(list_of_T)):
         fun.T = list_of_T[i]
@@ -56,10 +57,10 @@ if __name__ == "__main__":
     
         #Now we do parameter estimation.
         #PE_object.doGridSearch('getLogP', verbose = False)
-        PE_object_list[i].doMetropolisHastings()
+        [map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, logP]=PE_object_list[i].doMetropolisHastings()
         #PE_object.doOptimizeNegLogP(method="BFGS", printOptimum=True, verbose=True)
         #[map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, samples_simulatedOutputs, logP] = PE_object.doMetropolisHastings()
-    
+        KL_divergence_list.append(info_gain)
         PE_object_list[i].createAllPlots() #This function calls each of the below functions.
    #    PE_object.makeHistogramsForEachParameter()    
    #    PE_object.makeSamplingScatterMatrixPlot()
@@ -73,3 +74,9 @@ if __name__ == "__main__":
         ax.set_ylabel('Probability density')
         ax.set_title('Prior and Posterior Density Plot at T = {} (K)'.format(str(list_of_T[i])))
         fig.savefig('prior_and_posterior_G_histogram_{:.2f}.png'.format(np.rint(list_of_T[i])), dpi=300)
+print(KL_divergence_list)
+fig1, ax1 = plt.subplots()
+ax1.plot(list_of_T,KL_divergence_list)
+ax1.set_xlabel(r'$T (K)$')
+ax1.set_ylabel(r'$information gain$')
+fig1.savefig('info_gain_vs_temp.png',dpi=300)
