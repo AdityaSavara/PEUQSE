@@ -57,6 +57,7 @@ def after_call_compile_consolidated_log(file_path="", compile_checkpoints=True):
             return result
         return wrapper
     return inner
+
 #The import_cite function is intended to be used at the top of a sofware module.
 def import_cite(unique_id, software_name, write_immediately=False, **kwargs):
     add_citation(unique_id, software_name, write_immediately, **kwargs)
