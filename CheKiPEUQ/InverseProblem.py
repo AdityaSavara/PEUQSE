@@ -478,7 +478,6 @@ class parameter_estimation:
     software_version = "1.0.2"
     software_unique_id = "https://doi.org/10.1002/cctc.202000976"
     software_kwargs = {"version": software_version, "author": ["Eric A. Walker", "Kishore Ravisankar", "Aditya Savara"], "doi": "https://doi.org/10.1002/cctc.202000976", "cite": "Eric Alan Walker, Kishore Ravisankar, Aditya Savara. CheKiPEUQ Intro 2: Harnessing Uncertainties from Data Sets, Bayesian Design of Experiments in Chemical Kinetics. ChemCatChem. Accepted. doi:10.1002/cctc.202000976"} 
-
     @CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
     @CiteSoft.module_call_cite(unique_id=software_unique_id, software_name=software_name, **software_kwargs)
     def doeGetInfoGainMatrix(self, parameterCombination):#Note: There is an implied argument of info_gains_matrices_array_format being 'xyz' or 'meshgrid'
