@@ -1,9 +1,11 @@
 # CheKiPEUQ
 
-The LICENSE and MANUAL are in the CheKiPEUQ directory, and at https://github.com/AdityaSavara/CheKiPEUQ/tree/master/CheKiPEUQ
+Parameter estimation for complex physical problems often suffers from finding ‘solutions’ that are not physically realistic. The CheKiPEUQ software provides tools for finding physically realistic parameter estimates, graphs of the parameter estimate positions within parameter space, and plots of the final simulation results.
+
+The LICENSE and MANUAL are in the CheKiPEUQ directory and at https://github.com/AdityaSavara/CheKiPEUQ/tree/master/CheKiPEUQ
 The LICENSE is a BSD-3-Clause LICENSE.
 
-CheKiPEUQ stands for "Chemical Kinetics Parameter Estimation and Uncertainty Quantification".  The fun name can be pronounced in various ways such as "Check-ee-pook" or "Check-ee-peeoo" or "Check-ee-poo".
+CheKiPEUQ stands for "Chemical Kinetics Parameter Estimation and Uncertainty Quantification", though the code is built to be general (not just for Chemical Kinetics).  The fun name can be pronounced in various ways such as "Check-ee-pook" or "Check-ee-peeoo" or "Check-ee-poo".
 
 The recommended installation is to get Anaconda, then open an anaconda prompt and type `pip install CheKiPEUQ[COMPLETE]` (includes all optional dependencies). Leave out the '[COMPLETE]' if you want the minimal version.
 The software can also be downloaded and used directly, or used by "python setup.py install" (the setup.py way will do basically the same thing as pip and will install the package appropriately to allow the module to be accessed by python regardless of directory, but this will not install the optional dependencies).
