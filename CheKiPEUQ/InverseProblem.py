@@ -1450,13 +1450,13 @@ def returnReducedIterable(iterableObjectToReduce, reducedIndices):
 def returnShapedResponseCovMat(numResponseDimensions, uncertainties):
     #The uncertainties, whether transformed or not, must be one of the folllowing: a) for a single dimension response can be a 1D array of standard deviations, b) for as ingle dimension response can be a covmat already (so already variances), c) for a multidimensional response we *only* support standard deviations at this time.
     if numResponseDimensions == 1:
-        shapedUncertainties = np.array(uncertainties) #Initializing variable. 
+        shapedUncertainties = np.array(uncertainties, dtype="float") #Initializing variable. 
         if np.shape(shapedUncertainties)[0] == (1): #This means it's just a list of standard deviations and needs to be squared to become variances.
             shapedUncertainties = np.square(shapedUncertainties) # Need to square standard deviations to make them into variances.
         else:
             shapedUncertainties = shapedUncertainties
     elif numResponseDimensions > 1:  #if the dimensionality of responses is greater than 1, we only support providing standard deviations. Will flatten and square.
-        shapedUncertainties = np.array(uncertainties) #Filling variable.  
+        shapedUncertainties = np.array(uncertainties, dtype="float") #Filling variable.  
         shapedUncertainties = shapedUncertainties.flatten() 
         shapedUncertainties = np.square(shapedUncertainties) #Need to square standard deviations to make them into variances.
     return shapedUncertainties
