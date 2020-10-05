@@ -27,7 +27,7 @@ Their values, including uncertainties, are:<br>
 1440500 +/- 200000 <br>
 
 Consider it given that this situation is known to be described the following equation:<br>
-y=(x-a)^2 + b
+<b>  y=(x-a)^2 + b  </b>
 
 Assume we know that the physically realistic values of "a" and "b" are: <br>
 a is expected to be 200 +/- 100   (this is the 1 sigma confidence interval) <br>
