@@ -85,7 +85,7 @@ We can see that in this example the position and uncertainty in "a" narrowed mor
 
 2) Then download the zipfile which has the Examples directory: https://github.com/AdityaSavara/CheKiPEUQ/archive/master.zip
 
-3) Open the examples directory, open the file ExamplesAndTutorialAndGettingStarted.rtf
+3) Open the examples directory, open the file ExamplesAndTutorialAndGettingStarted.rtf  (any program like Word can open this)
 
 4) Start running the examples' run files (it is recommended to run them in the program called spyder, if you are not an advanced user. You can open it by typing "spyder" in the anaconda terminal).
 
