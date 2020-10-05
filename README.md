@@ -13,23 +13,23 @@ Consider a situation where we have three observed experimental data points with 
 
 <img width=321 height=212 src="./CheKiPEUQ/readmeImages/image001.png">
 
-Their values, including uncertainties, are:
-160500 +/- 200000
-810500 +/- 300000
-1440500 +/- 200000
+Their values, including uncertainties, are:<br>
+160500 +/- 200000 <br>
+810500 +/- 300000 <br>
+1440500 +/- 200000 <br>
 
 Consider that this situation is known to be described the following equation:
 y=(x-a)^2 + b
 
-Where we know that the physically realistic values of "a" and "b" are:
-a is expected to be 200 +/- 100   (this is the 1 sigma confidence interval)
-b is expected to be 500 +/- 200   (this is the 1 sigma confidence interval)
+Where we know that the physically realistic values of "a" and "b" are: <br>
+a is expected to be 200 +/- 100   (this is the 1 sigma confidence interval) <br>
+b is expected to be 500 +/- 200   (this is the 1 sigma confidence interval) <br>
 
 If one tries to do a sum of squares fitting (conventional parameter estimation, CPE), we will not get realistic values for "a" and "b"  We get a = 255, b = 139153.  The value for "a" is fine, but the value for "b" is not realistic.
 
 However, if we do a Bayesian Parameter Estimation (BPE), what CheKiPEUQ is designed for, then we get the following answers: a = 166 +/- 57, b= 509 +/- 198.  Where these errors are the 1 sigma credible intervals. Notice that now both of the parameters have physically realistic values.  We even have error bars that took into account the uncertainty! The covariance matrix for the parameters is also provided, so that the correlated uncertainties of estimated parameters is not lost.
 
-How good is the match in this example?
+How good is the match in this example? <br>
 The fitting (CPE) gives the red line below: 
 
 <img width=321 height=212 src="./CheKiPEUQ/readmeImages/image003.png">
@@ -41,6 +41,7 @@ We see that for this example, the CPE result from fitting and the BPE results do
 
 Here is the code that was required after making the model equation:
 
+'''
 import CheKiPEUQ as CKPQ
 import CheKiPEUQ.UserInput as UserInput
 UserInput.model['InputParameterPriorValues'] = [200, 500] #prior expected values for a and b
@@ -49,6 +50,7 @@ UserInput.model['simulateByInputParametersOnlyFunction'] = simulation_model_00.s
 PE_object = CKPQ.parameter_estimation(UserInput)
 PE_object.doMetropolisHastings()
 PE_object.createAllPlots()
+'''
 
 There is a logfile generated called mcmc_log_file.txt (along with other files in the directory).
 You will also get the following plots, some of which can be further customized, such as removing the bars from the contour plots. 
