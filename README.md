@@ -89,7 +89,7 @@ We can see that in this example the position and uncertainty in "a" narrowed mor
 
 4) Start running the examples' run files (it is recommended to run them in the program called spyder, if you are not an advanced user. You can open it by typing "spyder" in the anaconda terminal).
 
-
+5) Join the Google Group to ask for further help: https://groups.google.com/g/chekipeuq and add to existing issues discussions github https://github.com/AdityaSavara/CheKiPEUQ/issues
 
 * * *
 # More info about the File Structure
