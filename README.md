@@ -60,7 +60,7 @@ You will also get the following plots, some of which can be further customized, 
 <img width=321 height=212 src="./CheKiPEUQ/readmeImages/image007.png">
 <img width=321 height=212 src="./CheKiPEUQ/readmeImages/image009.png">
 <img src="./CheKiPEUQ/readmeImages/image011.png">
-<img width=400 height=325 src="./CheKiPEUQ/readmeImages/image013.png">
+<img src="./CheKiPEUQ/readmeImages/image013.png">
 
 
 
