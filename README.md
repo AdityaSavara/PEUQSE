@@ -46,9 +46,9 @@ The Bayesian Parameter Estimation gives the black line below (and the red, not e
 
 <img width=321 height=212 src="./CheKiPEUQ/readmeImages/image005.png">
 
-We see that for this example, the CPE result from fitting and the BPE results do not look very different from each other. Both parameter estimation methods manage to stay in the error bars, yet the BPE result has a far more physically realistic pair of parameters!  This is the main purpose using CheKiPEUQ BPE: it will tend to give more realistic parameter estimates, and can even give a type of uncertainty (called credible intervals) on the final estimates.
+We see that for this example, the CPE result from fitting and the BPE results do not look very different from each other. Both parameter estimation methods manage to stay in the error bars, yet the BPE result has a far more physically realistic pair of parameters!  This is the main purpose using CheKiPEUQ in order to do BPE: it will tend to give more realistic parameter estimates, and can even give a type of uncertainty (called credible intervals) on the final estimates. More info can be found in the CheKiPEUQ paper: https://doi.org/10.1002/cctc.202000953
 
-Here is the code that was required after making the model equation:
+Here is the short and simple code that was required after making the model equation:
 
 ```python
 import CheKiPEUQ as CKPQ
