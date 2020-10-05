@@ -10,7 +10,8 @@ simulated_response_plot_settings['y_label'] = ''
 simulated_response_plot_settings['figure_name'] = 'Posterior_Simulated' #This is the default name for simulated response plots.
 simulated_response_plot_settings['legend'] = True #Can be changed to false to turn off the legend.
 #simulated_response_plot_settings['legendLabels'] = ['experiment', 'mu_guess', 'MAP'] here is an example of how to change the legend labels.
-#simulated_response_plot_settings['fontdict']= {'size':20} A font dictionary can be passed in, this will be used for the axes and axes labels.
+simulated_response_plot_settings['error_linewidth'] = 1 #TODO: Change this to "auto" or "None" to use setting of "4" when number of points is <10.
+simulated_response_plot_settings['fontdict']= {'size':16} #A font dictionary can be passed in, this will be used for the axes and axes labels.
 
 ####BELOW ARE MODEL PARAMETERS, WE WILL WANT TO COMBINE THESE INTO A LIST OF PARAMETERS###
 model = {} 
@@ -68,7 +69,7 @@ samplingScatterMatrixPlotsSettings ={}
 #parameter_estimation_settings['gridSampling'] = False    
 #doGridSearch(self, searchType='doMetropolisHastings', export = True, verbose = False, gridSamplingIntervalSize = [], gridSamplingRadii = [], passThroughArgs = {}):
 
-######mumpce plots#####
+######mumpce plots##### #####contour plots####
 #model_parameter_info = np.array([{'parameter_number': 0, 'parameter_name': r'$E_{a1}$'},
 #{'parameter_number': 1, 'parameter_name': r'$E_{a2}$'},
 #{'parameter_number': 2, 'parameter_name': r'$log(A_{1})$'},
@@ -77,7 +78,7 @@ samplingScatterMatrixPlotsSettings ={}
 #{'parameter_number': 5, 'parameter_name': r'$\gamma_{2}$'}])
 active_parameters = [] #Blank by default: gets populated with all parameters (or reduced parameters) if left blank. Warning: trying to set this manually while using the reduced parameters feature is not supported as of April 2020.
 #pairs_of_parameter_indices = [[0, 1], [1, 2],[2, 3],[3, 4],[4, 5]] #This sets which parameters to plot contours for. By default, all pairs are plotted.
-contour_settings_custom = {'figure_name': 'PosteriorContourPlots','fontsize':'auto' ,'num_y_ticks': 'auto','num_x_ticks':'auto','contours_normalized':True,'center_on':'all','colorbars':True} 
+contour_settings_custom = {'figure_name': 'PosteriorContourPlots','fontsize':16 ,'num_y_ticks': 'auto','num_x_ticks':'auto','contours_normalized':True,'center_on':'all','colorbars':True}  #Fontsize can also be set to "auto"
 #See the file mumpce_custom_plotting_example.py for the full set of arguments that can be provided inside contour_settings_custom.
 #'colormap_posterior_customized':'Oranges','colormap_prior_customized':'Greens'
 #num_y_ticks and num_x_ticks must be either a string ('auto') or an integer (such as 4, either without string or with integer casting like int('5')).

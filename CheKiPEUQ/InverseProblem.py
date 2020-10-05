@@ -1023,7 +1023,10 @@ class parameter_estimation:
             #Presently, we don't have full covmat support with uniform distributions. In principle, it would be better to use covmat_prior_scaled and delete the rows and columns since then we might have covmat support.
             #For now, we just make the truncated covmat from the var_prior. We currently don't have full covmat support for the case of uniform distributions.
             covmat_prior_scaled_truncated = np.diagflat(var_prior_scaled_truncated) 
-            logPrior = multivariate_normal.logpdf(x=discreteParameterVector_scaled_truncated,mean=mu_prior_scaled_truncated,cov=covmat_prior_scaled_truncated)
+            if len(covmat_prior_scaled_truncated) == 0: #if all variables are uniform, then need to return log(1) which is 0.
+                logPrior = 0
+            else:
+                logPrior = multivariate_normal.logpdf(x=discreteParameterVector_scaled_truncated,mean=mu_prior_scaled_truncated,cov=covmat_prior_scaled_truncated)
         #Note: Below code should be okay regardless of whether there are uniform distributions since it only adjusts logPrior by a scalar.
         if self.UserInput.parameter_estimation_settings['undo_scaling_uncertainties_type'] == True:
             try:
