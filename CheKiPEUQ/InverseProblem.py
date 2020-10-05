@@ -767,7 +767,115 @@ class parameter_estimation:
             self.opt_SSR = self.getSSR(discreteParameterVector)
             objectiveFunctionValue = self.opt_SSR
         return [discreteParameterVector, objectiveFunctionValue]
-    
+
+    def calculateInfoGain(self):
+        #BELOW CALCULATE INFOGAIN RELATED QUANTITIES.
+        if self.UserInput.parameter_estimation_settings['mcmc_info_gain_returned'] == 'log_ratio':
+            if self.UserInput.parameter_estimation_settings['mcmc_info_gain_cutoff'] == 0:        
+                #we have log A, and we want log(A/B).  #log (e^log(A) / B )  = log(A/B).  
+                #But we could also do...  log(A) - log(B) = log(A/B). So changing to that.
+                post_burn_in_log_posteriors_vec = self.post_burn_in_log_posteriors_un_normed_vec - np.log(self.evidence) 
+                log_ratios = (post_burn_in_log_posteriors_vec-self.post_burn_in_log_priors_vec) #log10(a/b) = log10(a)-log10(b)
+                log_ratios[np.isinf(log_ratios)] = 0
+                log_ratios = np.nan_to_num(log_ratios)
+                self.info_gain_log_ratio_each_parameter = None #TODO: create a list or array of arrays such that the index is the parameter number.
+                self.info_gain_log_ratio = np.mean(log_ratios) #NOTE: The log_ratio info_gain is *always* calculated, at this line or below.
+            elif self.UserInput.parameter_estimation_settings['mcmc_info_gain_cutoff'] != 0:        
+                #Need to consider using a truncated evidence array as well, but for now will not worry about that.
+                #First intialize the stacked array.
+                #Surprisingly, the arrays going in haves shapes like 900,1 rather than 1,900 so now transposing them before stacking.
+                stackedLogProbabilities = np.vstack((self.post_burn_in_log_priors_vec.transpose(), self.post_burn_in_log_posteriors_un_normed_vec.transpose()))
+                #Now, we are going to make a list of abscissaIndices to remove, recognizing that numpy arrays are "transposed" relative to excel.
+                abscissaIndicesToRemove = [] 
+                #FIXME: Below there are some "if verbose", but those should not be printed, they should be collected and exported to a file at the end.
+                for abscissaIndex in range(np.shape(stackedLogProbabilities)[1]):
+                    if self.UserInput.parameter_estimation_settings['verbose']:
+                        print("parameter set:", self.post_burn_in_samples[abscissaIndex])
+                    ordinateValues = stackedLogProbabilities[:,abscissaIndex]
+                    #We mark anything where there is a 'nan':
+                    if np.isnan( ordinateValues ).any(): #A working numpy syntax is to have the any outside of the parenthesis, for this command, even though it's a bit strange.
+                        abscissaIndicesToRemove.append(abscissaIndex)
+                        if self.UserInput.parameter_estimation_settings['verbose']:
+                            print(abscissaIndex, "removed nan (log_prior, log_posterior)", ordinateValues, np.log( self.UserInput.parameter_estimation_settings['mcmc_info_gain_cutoff']))
+                    elif (ordinateValues < np.log( self.UserInput.parameter_estimation_settings['mcmc_info_gain_cutoff'] ) ).any(): #again, working numpy syntax is to put "any" on the outside. We take the log since we're looking at log of probability. This is a natural log.
+                        abscissaIndicesToRemove.append(abscissaIndex)
+                        if self.UserInput.parameter_estimation_settings['verbose']:
+                            print(abscissaIndex, "removed small (prior, posterior)",  np.exp(ordinateValues), self.UserInput.parameter_estimation_settings['mcmc_info_gain_cutoff'])
+                    else:
+                        if self.UserInput.parameter_estimation_settings['verbose']:
+                            print(abscissaIndex, "kept (prior, posterior)",  np.exp(ordinateValues), self.UserInput.parameter_estimation_settings['mcmc_info_gain_cutoff'])
+                        pass
+                #Now that this is finshed, we're going to do the truncation using numpy delete.
+                stackedLogProbabilities_truncated = stackedLogProbabilities*1.0 #just initializing.
+                stackedLogProbabilities_truncated = np.delete(stackedLogProbabilities, abscissaIndicesToRemove, axis=1)
+                post_burn_in_log_priors_vec_truncated = stackedLogProbabilities_truncated[0]
+                post_burn_in_log_posteriors_un_normed_vec_truncated = stackedLogProbabilities_truncated[1] #We have to truncate with not normalized, so we add the normalization in here.
+                post_burn_in_log_posteriors_vec_truncated = np.log  ( np.exp( post_burn_in_log_posteriors_un_normed_vec_truncated) /self.evidence)
+                #Now copy the same lines that Eric had used above, only change to using log_ratios_truncated
+                log_ratios_truncated = (post_burn_in_log_posteriors_vec_truncated-post_burn_in_log_priors_vec_truncated)
+                log_ratios_truncated[np.isinf(log_ratios_truncated)] = 0
+                log_ratios_truncated = np.nan_to_num(log_ratios_truncated)
+                self.info_gain_log_ratio_each_parameter = None #TODO: create a list or array of arrays such that the index is the parameter number.
+                self.info_gain_log_ratio = np.mean(log_ratios_truncated) #NOTE: The log_ratio info_gain is *always* calculated, at this line or earlier. 
+                #TODO: Export the below things.
+                #post_burn_in_log_posteriors_vec_non_truncated = self.post_burn_in_log_posteriors_un_normed_vec - np.log(self.evidence)
+                #print(post_burn_in_log_posteriors_vec_truncated) #TODO: Export this
+                #print(post_burn_in_log_priors_vec_truncated)  #TODO: Export this
+        if self.UserInput.parameter_estimation_settings['mcmc_info_gain_returned'] == 'log_ratio':
+            self.info_gain = self.info_gain_log_ratio
+        if self.UserInput.parameter_estimation_settings['mcmc_info_gain_returned'] == 'KL_divergence':
+            #Below is the KL_divergence info_gain calculation.
+            length, width = self.post_burn_in_samples.shape
+            self.info_gain_KL = 0
+            self.info_gain_KL_each_parameter  = []
+            for param in range(width):
+                (density0,bins0,pathces0)=plt.hist([self.samples_of_prior[:,param].flatten(),self.post_burn_in_samples[:,param].flatten()],bins=100,density=True)
+                current_info_gain_KL = density0[1]*np.log(density0[1]/density0[0])
+                current_info_gain_KL = current_info_gain_KL[np.isfinite(current_info_gain_KL)]
+                current_info_gain_KL = np.sum(current_info_gain_KL)
+                self.info_gain_KL_each_parameter.append(current_info_gain_KL) #could make this optional, but normally shouldn't take much memory.
+                self.info_gain_KL = self.info_gain_KL + current_info_gain_KL
+            self.info_gain_each_parameter = self.info_gain_KL_each_parameter #could make this optional, but normally shouldn't take much memory.
+            self.info_gain = self.info_gain_KL
+        return self.info_gain    
+
+    def calculatePostBurnInStatistics(self):       
+        #BELOW calculate MAP and mu_AP related quantities.
+        map_logP = max(self.post_burn_in_logP_un_normed_vec)
+        self.map_logP = map_logP
+        self.map_index = list(self.post_burn_in_logP_un_normed_vec).index(map_logP) #This does not have to be a unique answer, just one of them places which gives map_logP.
+        self.map_parameter_set = self.post_burn_in_samples[self.map_index] #This  is the point with the highest probability in the posterior.
+        self.mu_AP_parameter_set = np.mean(self.post_burn_in_samples, axis=0) #This is the mean of the posterior, and is the point with the highest expected value of the posterior (for most distributions). For the simplest cases, map and mu_AP will be the same.
+        self.stdap_parameter_set = np.std(self.post_burn_in_samples, axis=0) #This is the mean of the posterior, and is the point with the highest expected value of the posterior (for most distributions). For the simplest cases, map and mu_AP will be the same.
+        #TODO: Probably should return the variance of each sample in the post_burn_in
+        if self.UserInput.parameter_estimation_settings['verbose'] == True:
+            print(self.map_parameter_set)
+            print(self.mu_AP_parameter_set)
+            print(self.stdap_parameter_set)
+        if self.UserInput.parameter_estimation_settings['exportLog'] == True:
+            #The self.post_burn_in_samples_simulatedOutputs has length of ALL sampling including burn_in
+            #The self.post_burn_in_samples is only AFTER burn in.
+            #The self.post_burn_in_log_posteriors_un_normed_vec is AFTER burn in.           
+            #TODO: Make header for mcmc_output
+            mcmc_output = np.hstack((self.post_burn_in_logP_un_normed_vec,self.post_burn_in_samples))
+            np.savetxt('mcmc_logP_and_parameter_samples.csv',mcmc_output, delimiter=",")             
+            if self.UserInput.parameter_estimation_settings['exportAllSimulatedOutputs'] == True: #By default, we should not keep this, it's a little too large with large sampling.
+                np.savetxt('mcmc_all_simulated_outputs.csv',self.post_burn_in_samples_simulatedOutputs, delimiter=",")             
+            with open("mcmc_log_file.txt", 'w') as out_file:
+                out_file.write("MAP_logP:" +  str(map_logP) + "\n")
+                out_file.write("self.map_index:" +  str(self.map_index) + "\n")
+                out_file.write("self.map_parameter_set:" + str( self.map_parameter_set) + "\n")
+                out_file.write("self.mu_AP_parameter_set:" + str( self.mu_AP_parameter_set) + "\n")
+                out_file.write("self.stdap_parameter_set:" + str( self.stdap_parameter_set) + "\n")
+                out_file.write("self.info_gain:" +  str(self.info_gain) + "\n")
+                out_file.write("evidence:" + str(self.evidence) + "\n")
+                out_file.write("posterior_cov_matrix:" + "\n" + str(np.cov(self.post_burn_in_samples.T)) + "\n")
+                if abs((self.map_parameter_set - self.mu_AP_parameter_set)/self.UserInput.var_prior).any() > 0.10:
+                    pass #Disabling below warning until if statement is fixed.
+                    #out_file.write("Warning: The MAP parameter set and mu_AP parameter set differ by more than 10% of prior variance in at least one parameter. This may mean that you need to increase your mcmc_length, increase or decrease your mcmc_relative_step_length, or change what is used for the model response.  There is no general method for knowing the right  value for mcmc_relative_step_length since it depends on the sharpness and smoothness of the response. See for example https://www.sciencedirect.com/science/article/pii/S0039602816300632")
+        if abs((self.map_parameter_set - self.mu_AP_parameter_set)/self.UserInput.var_prior).any() > 0.10:  
+            pass #Disabling below warning until if statement it is fixed.
+            #print("Warning: The MAP parameter set and mu_AP parameter set differ by more than 10% of prior variance in at least one parameter. This may mean that you need to increase your mcmc_length, increase or decrease your mcmc_relative_step_length, or change what is used for the model response.  There is no general method for knowing the right  value for mcmc_relative_step_length since it depends on the sharpness and smoothness of the response. See for example https://www.sciencedirect.com/science/article/pii/S0039602816300632  ")
     #main function to get samples #TODO: Maybe Should return map_log_P and mu_AP_log_P?
     @CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
     def doMetropolisHastings(self):
@@ -888,115 +996,12 @@ class parameter_estimation:
         self.post_burn_in_logP_un_normed_vec = (self.post_burn_in_log_posteriors_un_normed_vec)
         self.post_burn_in_log_likelihoods_vec = log_likelihoods_vec[self.UserInput.parameter_estimation_settings['mcmc_burn_in']:]
         self.post_burn_in_log_priors_vec = log_priors_vec[self.UserInput.parameter_estimation_settings['mcmc_burn_in']:]
-        
-        #BELOW CALCULATE INFOGAIN RELATED QUANTITIES.
         # posterior probabilites are transformed to a standard normal (std=1) for obtaining the evidence:
         self.evidence = np.mean(np.exp(self.post_burn_in_log_posteriors_un_normed_vec))/np.linalg.norm(self.post_burn_in_samples)# another variety:*np.sqrt(2*np.pi*np.std(self.post_burn_in_samples)**2)                    
-        if self.UserInput.parameter_estimation_settings['mcmc_info_gain_returned'] == 'log_ratio':
-            if self.UserInput.parameter_estimation_settings['mcmc_info_gain_cutoff'] == 0:        
-                #we have log A, and we want log(A/B).  #log (e^log(A) / B )  = log(A/B).  
-                #But we could also do...  log(A) - log(B) = log(A/B). So changing to that.
-                post_burn_in_log_posteriors_vec = self.post_burn_in_log_posteriors_un_normed_vec - np.log(self.evidence) 
-                log_ratios = (post_burn_in_log_posteriors_vec-self.post_burn_in_log_priors_vec) #log10(a/b) = log10(a)-log10(b)
-                log_ratios[np.isinf(log_ratios)] = 0
-                log_ratios = np.nan_to_num(log_ratios)
-                self.info_gain_log_ratio_each_parameter = None #TODO: create a list or array of arrays such that the index is the parameter number.
-                self.info_gain_log_ratio = np.mean(log_ratios) #NOTE: The log_ratio info_gain is *always* calculated, at this line or below.
-            elif self.UserInput.parameter_estimation_settings['mcmc_info_gain_cutoff'] != 0:        
-                #Need to consider using a truncated evidence array as well, but for now will not worry about that.
-                #First intialize the stacked array.
-                #Surprisingly, the arrays going in haves shapes like 900,1 rather than 1,900 so now transposing them before stacking.
-                stackedLogProbabilities = np.vstack((self.post_burn_in_log_priors_vec.transpose(), self.post_burn_in_log_posteriors_un_normed_vec.transpose()))
-                #Now, we are going to make a list of abscissaIndices to remove, recognizing that numpy arrays are "transposed" relative to excel.
-                abscissaIndicesToRemove = [] 
-                #FIXME: Below there are some "if verbose", but those should not be printed, they should be collected and exported to a file at the end.
-                for abscissaIndex in range(np.shape(stackedLogProbabilities)[1]):
-                    if self.UserInput.parameter_estimation_settings['verbose']:
-                        print("parameter set:", self.post_burn_in_samples[abscissaIndex])
-                    ordinateValues = stackedLogProbabilities[:,abscissaIndex]
-                    #We mark anything where there is a 'nan':
-                    if np.isnan( ordinateValues ).any(): #A working numpy syntax is to have the any outside of the parenthesis, for this command, even though it's a bit strange.
-                        abscissaIndicesToRemove.append(abscissaIndex)
-                        if self.UserInput.parameter_estimation_settings['verbose']:
-                            print(abscissaIndex, "removed nan (log_prior, log_posterior)", ordinateValues, np.log( self.UserInput.parameter_estimation_settings['mcmc_info_gain_cutoff']))
-                    elif (ordinateValues < np.log( self.UserInput.parameter_estimation_settings['mcmc_info_gain_cutoff'] ) ).any(): #again, working numpy syntax is to put "any" on the outside. We take the log since we're looking at log of probability. This is a natural log.
-                        abscissaIndicesToRemove.append(abscissaIndex)
-                        if self.UserInput.parameter_estimation_settings['verbose']:
-                            print(abscissaIndex, "removed small (prior, posterior)",  np.exp(ordinateValues), self.UserInput.parameter_estimation_settings['mcmc_info_gain_cutoff'])
-                    else:
-                        if self.UserInput.parameter_estimation_settings['verbose']:
-                            print(abscissaIndex, "kept (prior, posterior)",  np.exp(ordinateValues), self.UserInput.parameter_estimation_settings['mcmc_info_gain_cutoff'])
-                        pass
-                #Now that this is finshed, we're going to do the truncation using numpy delete.
-                stackedLogProbabilities_truncated = stackedLogProbabilities*1.0 #just initializing.
-                stackedLogProbabilities_truncated = np.delete(stackedLogProbabilities, abscissaIndicesToRemove, axis=1)
-                post_burn_in_log_priors_vec_truncated = stackedLogProbabilities_truncated[0]
-                post_burn_in_log_posteriors_un_normed_vec_truncated = stackedLogProbabilities_truncated[1] #We have to truncate with not normalized, so we add the normalization in here.
-                post_burn_in_log_posteriors_vec_truncated = np.log  ( np.exp( post_burn_in_log_posteriors_un_normed_vec_truncated) /self.evidence)
-                #Now copy the same lines that Eric had used above, only change to using log_ratios_truncated
-                log_ratios_truncated = (post_burn_in_log_posteriors_vec_truncated-post_burn_in_log_priors_vec_truncated)
-                log_ratios_truncated[np.isinf(log_ratios_truncated)] = 0
-                log_ratios_truncated = np.nan_to_num(log_ratios_truncated)
-                self.info_gain_log_ratio_each_parameter = None #TODO: create a list or array of arrays such that the index is the parameter number.
-                self.info_gain_log_ratio = np.mean(log_ratios_truncated) #NOTE: The log_ratio info_gain is *always* calculated, at this line or earlier. 
-                #TODO: Export the below things.
-                #post_burn_in_log_posteriors_vec_non_truncated = self.post_burn_in_log_posteriors_un_normed_vec - np.log(self.evidence)
-                #print(post_burn_in_log_posteriors_vec_truncated) #TODO: Export this
-                #print(post_burn_in_log_priors_vec_truncated)  #TODO: Export this
-        if self.UserInput.parameter_estimation_settings['mcmc_info_gain_returned'] == 'log_ratio':
-            self.info_gain = self.info_gain_log_ratio
-        if self.UserInput.parameter_estimation_settings['mcmc_info_gain_returned'] == 'KL_divergence':
-            #Below is the KL_divergence info_gain calculation.
-            length, width = self.post_burn_in_samples.shape
-            self.info_gain_KL = 0
-            self.info_gain_KL_each_parameter  = []
-            for param in range(width):
-                (density0,bins0,pathces0)=plt.hist([self.samples_of_prior[:,param].flatten(),self.post_burn_in_samples[:,param].flatten()],bins=100,density=True)
-                current_info_gain_KL = density0[1]*np.log(density0[1]/density0[0])
-                current_info_gain_KL = current_info_gain_KL[np.isfinite(current_info_gain_KL)]
-                current_info_gain_KL = np.sum(current_info_gain_KL)
-                self.info_gain_KL_each_parameter.append(current_info_gain_KL) #could make this optional, but normally shouldn't take much memory.
-                self.info_gain_KL = self.info_gain_KL + current_info_gain_KL
-            self.info_gain_each_parameter = self.info_gain_KL_each_parameter #could make this optional, but normally shouldn't take much memory.
-            self.info_gain = self.info_gain_KL
-        
-        #BELOW calculate MAP and mu_AP related quantities.
-        map_logP = max(self.post_burn_in_logP_un_normed_vec)
-        self.map_logP = map_logP
-        self.map_index = list(self.post_burn_in_logP_un_normed_vec).index(map_logP) #This does not have to be a unique answer, just one of them places which gives map_logP.
-        self.map_parameter_set = self.post_burn_in_samples[self.map_index] #This  is the point with the highest probability in the posterior.
-        self.mu_AP_parameter_set = np.mean(self.post_burn_in_samples, axis=0) #This is the mean of the posterior, and is the point with the highest expected value of the posterior (for most distributions). For the simplest cases, map and mu_AP will be the same.
-        self.stdap_parameter_set = np.std(self.post_burn_in_samples, axis=0) #This is the mean of the posterior, and is the point with the highest expected value of the posterior (for most distributions). For the simplest cases, map and mu_AP will be the same.
-        #TODO: Probably should return the variance of each sample in the post_burn_in
-        if self.UserInput.parameter_estimation_settings['verbose'] == True:
-            print(self.map_parameter_set)
-            print(self.mu_AP_parameter_set)
-            print(self.stdap_parameter_set)
-        if self.UserInput.parameter_estimation_settings['exportLog'] == True:
-            #The self.post_burn_in_samples_simulatedOutputs has length of ALL sampling including burn_in
-            #The self.post_burn_in_samples is only AFTER burn in.
-            #The self.post_burn_in_log_posteriors_un_normed_vec is AFTER burn in.           
-            #TODO: Make header for mcmc_output
-            mcmc_output = np.hstack((self.post_burn_in_logP_un_normed_vec,self.post_burn_in_samples))
-            np.savetxt('mcmc_logP_and_parameter_samples.csv',mcmc_output, delimiter=",")             
-            if self.UserInput.parameter_estimation_settings['exportAllSimulatedOutputs'] == True: #By default, we should not keep this, it's a little too large with large sampling.
-                np.savetxt('mcmc_all_simulated_outputs.csv',self.post_burn_in_samples_simulatedOutputs, delimiter=",")             
-            with open("mcmc_log_file.txt", 'w') as out_file:
-                out_file.write("MAP_logP:" +  str(map_logP) + "\n")
-                out_file.write("self.map_index:" +  str(self.map_index) + "\n")
-                out_file.write("self.map_parameter_set:" + str( self.map_parameter_set) + "\n")
-                out_file.write("self.mu_AP_parameter_set:" + str( self.mu_AP_parameter_set) + "\n")
-                out_file.write("self.stdap_parameter_set:" + str( self.stdap_parameter_set) + "\n")
-                out_file.write("self.info_gain:" +  str(self.info_gain) + "\n")
-                out_file.write("evidence:" + str(self.evidence) + "\n")
-                out_file.write("posterior_cov_matrix:" + "\n" + str(np.cov(self.post_burn_in_samples.T)) + "\n")
-                if abs((self.map_parameter_set - self.mu_AP_parameter_set)/self.UserInput.var_prior).any() > 0.10:
-                    pass #Disabling below warning until if statement is fixed.
-                    #out_file.write("Warning: The MAP parameter set and mu_AP parameter set differ by more than 10% of prior variance in at least one parameter. This may mean that you need to increase your mcmc_length, increase or decrease your mcmc_relative_step_length, or change what is used for the model response.  There is no general method for knowing the right  value for mcmc_relative_step_length since it depends on the sharpness and smoothness of the response. See for example https://www.sciencedirect.com/science/article/pii/S0039602816300632")
-        if abs((self.map_parameter_set - self.mu_AP_parameter_set)/self.UserInput.var_prior).any() > 0.10:  
-            pass #Disabling below warning until if statement it is fixed.
-            #print("Warning: The MAP parameter set and mu_AP parameter set differ by more than 10% of prior variance in at least one parameter. This may mean that you need to increase your mcmc_length, increase or decrease your mcmc_relative_step_length, or change what is used for the model response.  There is no general method for knowing the right  value for mcmc_relative_step_length since it depends on the sharpness and smoothness of the response. See for example https://www.sciencedirect.com/science/article/pii/S0039602816300632  ")
+        self.info_gain = self.calculateInfoGain()
+        self.calculatePostBurnInStatistics()
         return [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_logP_un_normed_vec] # EAW 2020/01/08
+        
     def getLogPrior(self,discreteParameterVector):
         if type(self.UserInput.model['custom_logPrior']) != type(None):
             logPrior = self.UserInput.model['custom_logPrior'](discreteParameterVector)
