@@ -41,7 +41,7 @@ We see that for this example, the CPE result from fitting and the BPE results do
 
 Here is the code that was required after making the model equation:
 
-'''
+<quote>
 import CheKiPEUQ as CKPQ
 import CheKiPEUQ.UserInput as UserInput
 UserInput.model['InputParameterPriorValues'] = [200, 500] #prior expected values for a and b
@@ -50,7 +50,7 @@ UserInput.model['simulateByInputParametersOnlyFunction'] = simulation_model_00.s
 PE_object = CKPQ.parameter_estimation(UserInput)
 PE_object.doMetropolisHastings()
 PE_object.createAllPlots()
-'''
+</quote>
 
 There is a logfile generated called mcmc_log_file.txt (along with other files in the directory).
 You will also get the following plots, some of which can be further customized, such as removing the bars from the contour plots. 
