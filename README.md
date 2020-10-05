@@ -41,7 +41,7 @@ We see that for this example, the CPE result from fitting and the BPE results do
 
 Here is the code that was required after making the model equation:
 
-```
+```python
 import CheKiPEUQ as CKPQ
 import CheKiPEUQ.UserInput as UserInput
 UserInput.model['InputParameterPriorValues'] = [200, 500] #prior expected values for a and b
