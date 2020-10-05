@@ -81,13 +81,13 @@ We can see that in this example the position and uncertainty in "a" narrowed mor
 
 # How To Get Started
 
-1) First get anaconda. Then open anaconda terminal and type `pip install CheKiPEUQ[COMPLETE]`
+1) First get anaconda (https://www.anaconda.com/products/individual). Then open an anaconda terminal (type "Anaconda Prompt" after installing anaconda). Inside the anaconda terminal, type `pip install CheKiPEUQ[COMPLETE]`
 
 2) Then download the zipfile which has the Examples directory: https://github.com/AdityaSavara/CheKiPEUQ/archive/master.zip
 
 3) Open the examples directory, open the file ExamplesAndTutorialAndGettingStarted.rtf
 
-4) Start running the examples' run files (it is recommended to run them in the program called spyder, if you are not an advanced user).
+4) Start running the examples' run files (it is recommended to run them in the program called spyder, if you are not an advanced user. You can open it by typing "spyder" in the anaconda terminal).
 
 
 
