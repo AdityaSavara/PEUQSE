@@ -1010,7 +1010,7 @@ class parameter_estimation:
             if np.shape(self.UserInput.scaling_uncertainties)==np.shape(discreteParameterVector):
                 discreteParameterVector_scaled = np.array(discreteParameterVector)/self.UserInput.scaling_uncertainties
             else: #TODO: If we're in the else statemnt, then the scaling uncertainties is a covariance matrix, for which we plan to do row and column scaling, which has not yet been implemented. #We could pobably just use the diagonal in the short term.
-                print("WARNING: There is an error in your self.UserInput.scaling_uncertainties. Contact the developers with a bug report.")
+                print("WARNING: There is an error in your self.UserInput.scaling_uncertainties. This probably means that your uncertainties array does not have a size matching the number of parameters expected by your simulation function. If this is not the situation, contact the developers with a bug report. Send your input file and simulation function file.")
                 discreteParameterVector_scaled = np.array(discreteParameterVector)*1.0
 
         if hasattr(self.UserInput, 'InputParametersPriorValuesUniformDistributionsIndices') == False: #this is the normal case, no uniform distributionns.
