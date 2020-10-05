@@ -2,6 +2,14 @@
 
 Parameter estimation for complex physical problems often suffers from finding ‘solutions’ that are not physically realistic. The CheKiPEUQ software provides tools for finding physically realistic parameter estimates, graphs of the parameter estimate positions within parameter space, and plots of the final simulation results.
 
+The LICENSE and MANUAL are in the CheKiPEUQ directory and at https://github.com/AdityaSavara/CheKiPEUQ/tree/master/CheKiPEUQ
+The LICENSE is a BSD-3-Clause LICENSE.
+
+CheKiPEUQ stands for "Chemical Kinetics Parameter Estimation and Uncertainty Quantification", though the code is built to be general (not just for Chemical Kinetics).  The fun name can be pronounced in various ways such as "Check-ee-pook" or "Check-ee-peeoo" or "Check-ee-poo".
+
+The recommended installation is to get Anaconda, then open an anaconda prompt and type `pip install CheKiPEUQ[COMPLETE]` (includes all optional dependencies). Leave out the '[COMPLETE]' if you want the minimal version.
+The software can also be downloaded and used directly, or used by "python setup.py install" (the setup.py way will do basically the same thing as pip and will install the package appropriately to allow the module to be accessed by python regardless of directory, but this will not install the optional dependencies).
+
 
 # A Quick Introduction
 
@@ -18,10 +26,10 @@ Their values, including uncertainties, are:<br>
 810500 +/- 300000 <br>
 1440500 +/- 200000 <br>
 
-Consider that this situation is known to be described the following equation:
+Consider it given that this situation is known to be described the following equation:<br>
 y=(x-a)^2 + b
 
-Where we know that the physically realistic values of "a" and "b" are: <br>
+Assume we know that the physically realistic values of "a" and "b" are: <br>
 a is expected to be 200 +/- 100   (this is the 1 sigma confidence interval) <br>
 b is expected to be 500 +/- 200   (this is the 1 sigma confidence interval) <br>
 
@@ -73,15 +81,7 @@ We can see that in this example the position and uncertainty in "a" narrowed mor
 
 
 * * *
-
-
-The LICENSE and MANUAL are in the CheKiPEUQ directory and at https://github.com/AdityaSavara/CheKiPEUQ/tree/master/CheKiPEUQ
-The LICENSE is a BSD-3-Clause LICENSE.
-
-CheKiPEUQ stands for "Chemical Kinetics Parameter Estimation and Uncertainty Quantification", though the code is built to be general (not just for Chemical Kinetics).  The fun name can be pronounced in various ways such as "Check-ee-pook" or "Check-ee-peeoo" or "Check-ee-poo".
-
-The recommended installation is to get Anaconda, then open an anaconda prompt and type `pip install CheKiPEUQ[COMPLETE]` (includes all optional dependencies). Leave out the '[COMPLETE]' if you want the minimal version.
-The software can also be downloaded and used directly, or used by "python setup.py install" (the setup.py way will do basically the same thing as pip and will install the package appropriately to allow the module to be accessed by python regardless of directory, but this will not install the optional dependencies).
+# More info about the File Structure
 
 The file structure is such that the file `./CheKiPEUQ/__init__.py` is where the modules functions are loaded from. The main functionalities are inside `InverseProblem.py` , and various dependencies can be traced from those two files.
 
