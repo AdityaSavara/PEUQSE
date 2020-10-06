@@ -926,6 +926,8 @@ class parameter_estimation:
     @CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
     @CiteSoft.module_call_cite(unique_id=software_unique_id, software_name=software_name, **software_kwargs)
     def doEnsembleSliceSampling(self):
+        if str(self.UserInput.parameter_estimation_settings['mcmc_burn_in']).lower() == 'auto': self.mcmc_burn_in_length = int(self.UserInput.parameter_estimation_settings['mcmc_length']*0.1)
+        else: self.mcmc_burn_in_length = self.UserInput.parameter_estimation_settings['mcmc_burn_in']
         import zeus
         '''these variables need to be made part of userinput'''
         numParameters = len(self.UserInput.InputParametersPriorValuesUncertainties) #This is the number of parameters.
@@ -972,8 +974,8 @@ class parameter_estimation:
                     print(str(exceptionObject))
                     sys.exit()
         #Now to keep the results:
-        self.post_burn_in_samples = zeus_sampler.samples.flatten(discard = self.UserInput.parameter_estimation_settings['mcmc_burn_in'] )
-        self.post_burn_in_logP_un_normed_vec = np.atleast_2d(zeus_sampler.samples.flatten_logprob(discard=self.UserInput.parameter_estimation_settings['mcmc_burn_in'])).transpose() #Needed to make it 2D and transpose.
+        self.post_burn_in_samples = zeus_sampler.samples.flatten(discard = self.mcmc_burn_in_length )
+        self.post_burn_in_logP_un_normed_vec = np.atleast_2d(zeus_sampler.samples.flatten_logprob(discard=self.mcmc_burn_in_length)).transpose() #Needed to make it 2D and transpose.
         self.post_burn_in_log_posteriors_un_normed_vec = self.post_burn_in_logP_un_normed_vec #TODO: This variable is just a repeat and should be removed.
         self.calculatePostBurnInStatistics()
         self.info_gain = self.calculateInfoGain()
@@ -985,6 +987,8 @@ class parameter_estimation:
     #main function to get samples #TODO: Maybe Should return map_log_P and mu_AP_log_P?
     @CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
     def doMetropolisHastings(self):
+        if str(self.UserInput.parameter_estimation_settings['mcmc_burn_in']).lower() == 'auto': self.mcmc_burn_in_length = int(self.UserInput.parameter_estimation_settings['mcmc_length']*0.1)
+        else: self.mcmc_burn_in_length = self.UserInput.parameter_estimation_settings['mcmc_burn_in']
         if 'mcmc_random_seed' in self.UserInput.parameter_estimation_settings:
             if type(self.UserInput.parameter_estimation_settings['mcmc_random_seed']) == type(1): #if it's an integer, then it's not a "None" type or string, and we will use it.
                 np.random.seed(self.UserInput.parameter_estimation_settings['mcmc_random_seed'])
@@ -1094,14 +1098,14 @@ class parameter_estimation:
                             if mcmc_step_dynamic_coefficient > 0.1:
                                 mcmc_step_dynamic_coefficient = mcmc_step_dynamic_coefficient*0.95
             ########################################
-        self.burn_in_samples = samples[0:self.UserInput.parameter_estimation_settings['mcmc_burn_in']] #FIXME: this line will have to change with i indexing changed.
-        self.post_burn_in_samples = samples[self.UserInput.parameter_estimation_settings['mcmc_burn_in']:] #FIXME: this line will have to change with i indexing changed.
+        self.burn_in_samples = samples[0:self.mcmc_burn_in_length] #FIXME: this line will have to change with i indexing changed.
+        self.post_burn_in_samples = samples[self.mcmc_burn_in_length:] #FIXME: this line will have to change with i indexing changed.
         if self.UserInput.parameter_estimation_settings['exportAllSimulatedOutputs'] == True:
-            self.post_burn_in_samples_simulatedOutputs = samples_simulatedOutputs[self.UserInput.parameter_estimation_settings['mcmc_burn_in']:]
-        self.post_burn_in_log_posteriors_un_normed_vec = log_posteriors_un_normed_vec[self.UserInput.parameter_estimation_settings['mcmc_burn_in']:]
+            self.post_burn_in_samples_simulatedOutputs = samples_simulatedOutputs[self.mcmc_burn_in_length:]
+        self.post_burn_in_log_posteriors_un_normed_vec = log_posteriors_un_normed_vec[self.mcmc_burn_in_length:]
         self.post_burn_in_logP_un_normed_vec = (self.post_burn_in_log_posteriors_un_normed_vec)
-        self.post_burn_in_log_likelihoods_vec = log_likelihoods_vec[self.UserInput.parameter_estimation_settings['mcmc_burn_in']:]
-        self.post_burn_in_log_priors_vec = log_priors_vec[self.UserInput.parameter_estimation_settings['mcmc_burn_in']:]
+        self.post_burn_in_log_likelihoods_vec = log_likelihoods_vec[self.mcmc_burn_in_length:]
+        self.post_burn_in_log_priors_vec = log_priors_vec[self.mcmc_burn_in_length:]
         self.calculatePostBurnInStatistics() #This function call will also filter the lowest probability samples out, when using default settings.
         self.info_gain = self.calculateInfoGain()
         self.exportPostBurnInStatistics()
