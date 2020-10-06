@@ -393,7 +393,10 @@ class parameter_estimation:
                 thisResult = [self.map_logP, str(self.map_parameter_set).replace(",","|").replace("[","").replace('(','').replace(')',''), 'None', 'None', 'None', 'None', 'None', 'None']
             if searchType == 'doMetropolisHastings':
                 thisResult = self.doMetropolisHastings()
-                #self.map_logP gets done by itself in Metrpolos hastings.                
+                #self.map_logP gets done by itself in doMetropolisHastings
+            if searchType == 'doEnsembleSliceSampling':
+                thisResult = self.doEnsembleSliceSampling()
+                #self.map_logP gets done by itself in doEnsembleSliceSampling
             if searchType == 'doOptimizeNegLogP':
                 thisResult = self.doOptimizeNegLogP(**passThroughArgs)
                 #FIXME: the column headings of "thisResult" are wrong for the case of doOptimizeNegLogP.
@@ -433,7 +436,7 @@ class parameter_estimation:
                 for resultIndex, result in enumerate(allGridResults):
                     out_file.write("result: " + str(resultIndex) + " " +  str(result) + "\n")
         print("Final map results from gridsearch:", self.map_parameter_set, "final logP:", self.map_logP)
-        if searchType == 'doMetropolisHastings':
+        if searchType == 'doMetropolisHastings' or 'doEnsembleSliceSampling':
             #Metropolis hastings has other variables to populate.
             #[self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_logP_un_normed_vec] =
             return bestResultSoFar # [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_logP_un_normed_vec] 
