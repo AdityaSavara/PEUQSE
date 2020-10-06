@@ -972,8 +972,8 @@ class parameter_estimation:
                     print(str(exceptionObject))
                     sys.exit()
         #Now to keep the results:
-        self.post_burn_in_samples = zeus_sampler.samples.flatten()
-        self.post_burn_in_logP_un_normed_vec = np.atleast_2d(zeus_sampler.samples.flatten_logprob()).transpose() #Needed to make it 2D and transpose.
+        self.post_burn_in_samples = zeus_sampler.samples.flatten(discard = self.UserInput.parameter_estimation_settings['mcmc_burn_in'] )
+        self.post_burn_in_logP_un_normed_vec = np.atleast_2d(zeus_sampler.samples.flatten_logprob(discard=self.UserInput.parameter_estimation_settings['mcmc_burn_in'])).transpose() #Needed to make it 2D and transpose.
         self.post_burn_in_log_posteriors_un_normed_vec = self.post_burn_in_logP_un_normed_vec #TODO: This variable is just a repeat and should be removed.
         self.calculatePostBurnInStatistics()
         self.info_gain = self.calculateInfoGain()
