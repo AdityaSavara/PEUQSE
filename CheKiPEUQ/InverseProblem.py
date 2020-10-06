@@ -841,18 +841,19 @@ class parameter_estimation:
 
     #This function will calculate MAP and mu_AP, evidence, and related quantities.
     def calculatePostBurnInStatistics(self):       
+        #First need to create priors if not already there, because ESS does not store priors during the run (MH does).
+        if not hasattr(self, 'post_burn_in_log_priors_vec'): #Below line following a line from https://github.com/threeML/threeML/blob/master/threeML/bayesian/zeus_sampler.py
+                self.post_burn_in_log_priors_vec = np.array([self.getLogPrior(parameterCombination) for parameterCombination in self.post_burn_in_samples])
+                self.post_burn_in_log_priors_vec = np.atleast_2d(self.post_burn_in_log_priors_vec).transpose()
+        #Next need to apply filtering before getting statistics.
         filterSamples = bool(self.UserInput.parameter_estimation_settings['mcmc_threshold_filter_samples'])
         filterCoeffient = self.UserInput.parameter_estimation_settings['mcmc_threshold_filter_coefficient']
         if type(filterCoeffient) == type("string"):
             if filterCoeffient.lower() == "auto":
                 filterCoeffient = 2.0
             else: filterCoeffient = float(filterCoeffient)
-        
         if filterSamples == True:   
             originalLength = np.shape(self.post_burn_in_logP_un_normed_vec)[0] 
-            if not hasattr(self, 'post_burn_in_log_priors_vec'): #Below line following a line from https://github.com/threeML/threeML/blob/master/threeML/bayesian/zeus_sampler.py
-                self.post_burn_in_log_priors_vec = np.array([self.getLogPrior(parameterCombination) for parameterCombination in self.post_burn_in_samples])
-                self.post_burn_in_log_priors_vec = np.atleast_2d(self.post_burn_in_log_priors_vec).transpose()
             mergedArray = np.hstack( (self.post_burn_in_logP_un_normed_vec, self.post_burn_in_log_priors_vec, self.post_burn_in_samples) )
             #Now need to find cases where the probability is too low and filter them out.
             #Filtering Step 1: Find average and Stdev of log(-logP)
