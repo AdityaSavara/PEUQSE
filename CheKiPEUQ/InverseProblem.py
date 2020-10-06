@@ -839,15 +839,55 @@ class parameter_estimation:
             self.info_gain = self.info_gain_KL
         return self.info_gain    
 
+    #This function will calculate MAP and mu_AP, evidence, and related quantities.
     def calculatePostBurnInStatistics(self):       
-        #BELOW calculate MAP and mu_AP related quantities.
+        filterSamples = bool(self.UserInput.parameter_estimation_settings['mcmc_threshold_filter_samples'])
+        filterCoeffient = self.UserInput.parameter_estimation_settings['mcmc_threshold_filter_coefficient']
+        if type(filterCoeffient) == type("string"):
+            if filterCoeffient.lower() == "auto":
+                filterCoeffient = 2.0
+            else: filterCoeffient = float(filterCoeffient)
+        
+        if filterSamples == True:   
+            originalLength = np.shape(self.post_burn_in_logP_un_normed_vec)[0] 
+            mergedArray = np.hstack( (self.post_burn_in_logP_un_normed_vec, self.post_burn_in_samples) )
+            #Now need to find cases where the probability is too low and filter them out.
+            #Filtering Step 1: Find average and Stdev of log(-logP)
+            logNegLogP = np.log(-1*self.post_burn_in_logP_un_normed_vec)
+            meanLogNegLogP = np.mean(logNegLogP)
+            stdLogNegLogP = np.std(logNegLogP)
+            filteringThreshold = meanLogNegLogP+filterCoeffient*stdLogNegLogP #Threshold.
+            #Now some masking type things to delete the rows above a certain value... #TODO: separate this into some kind of support function.
+            filteringFailures = np.zeros(np.shape(logNegLogP))
+            filteringFailures[logNegLogP>filteringThreshold] = 1 #False and True, where True is beyond the filter
+            filteringFailuresStacked = filteringFailures*1.0 #initializing this, it is going to become a mask type shape we need.
+            for dataVector in range(1, np.shape(mergedArray)[1]): #This "shape()[1]" gives us the number of dataVectors we need to make the masked array.
+                filteringFailuresStacked = np.hstack((filteringFailuresStacked, filteringFailures))
+            mergedArrayThresholdMarked = mergedArray*1.0 #making a copy
+            mergedArrayThresholdMarked[filteringFailuresStacked==True] = float('nan') #setting any rows with large values to nan. The array filteringFailuresStacked has "True" across each of those rows.
+            #Now need to remove what is masked. We need to actually remove it since we'll be doing more than mean and std after this.
+            #https://stackoverflow.com/questions/22032668/numpy-drop-rows-with-all-nan-or-0-values
+            #The first step is apply a "mask = np.all(..., axis=1)" line.
+            mask = np.all(np.isnan(mergedArrayThresholdMarked), axis=1) #This tells us which rows are all nan.
+            truncatedMergedArray = mergedArrayThresholdMarked[~mask] #This does the truncation.
+            self.post_burn_in_logP_un_normed_vec = np.atleast_2d(truncatedMergedArray[:,0]).transpose()
+            self.post_burn_in_log_posteriors_un_normed_vec = self.post_burn_in_logP_un_normed_vec #FIXME: Change it so there is only one variable name.
+            self.post_burn_in_samples = truncatedMergedArray[:,1:]
+        #Map calculation etc. is intentionally placed below the filtering so that the map_index is assigned correctly per the final values.
+        self.mu_AP_parameter_set = np.mean(self.post_burn_in_samples, axis=0) #This is the mean of the posterior, and is the point with the highest expected value of the posterior (for most distributions). For the simplest cases, map and mu_AP will be the same.
+        self.stdap_parameter_set = np.std(self.post_burn_in_samples, axis=0) #This is the mean of the posterior, and is the point with the highest expected value of the posterior (for most distributions). For the simplest cases, map and mu_AP will be the same.            
         map_logP = max(self.post_burn_in_logP_un_normed_vec)
         self.map_logP = map_logP
         self.map_index = list(self.post_burn_in_logP_un_normed_vec).index(map_logP) #This does not have to be a unique answer, just one of them places which gives map_logP.
-        self.map_parameter_set = self.post_burn_in_samples[self.map_index] #This  is the point with the highest probability in the posterior.
-        self.mu_AP_parameter_set = np.mean(self.post_burn_in_samples, axis=0) #This is the mean of the posterior, and is the point with the highest expected value of the posterior (for most distributions). For the simplest cases, map and mu_AP will be the same.
-        self.stdap_parameter_set = np.std(self.post_burn_in_samples, axis=0) #This is the mean of the posterior, and is the point with the highest expected value of the posterior (for most distributions). For the simplest cases, map and mu_AP will be the same.
+        self.map_parameter_set = self.post_burn_in_samples[self.map_index] #This  is the point with the highest probability in the posterior.            
         #TODO: Probably should return the variance of each sample in the post_burn_in
+        #posterior probabilites are transformed to a standard normal (std=1) for obtaining the evidence:
+        self.evidence = np.mean(np.exp(self.post_burn_in_log_posteriors_un_normed_vec))/np.linalg.norm(self.post_burn_in_samples)    
+        if abs((self.map_parameter_set - self.mu_AP_parameter_set)/self.UserInput.var_prior).any() > 0.10:  
+            pass #Disabling below warning until if statement it is fixed.
+            #print("Warning: The MAP parameter set and mu_AP parameter set differ by more than 10% of prior variance in at least one parameter. This may mean that you need to increase your mcmc_length, increase or decrease your mcmc_relative_step_length, or change what is used for the model response.  There is no general method for knowing the right  value for mcmc_relative_step_length since it depends on the sharpness and smoothness of the response. See for example https://www.sciencedirect.com/science/article/pii/S0039602816300632  ")
+
+    def exportPostBurnInStatistics(self):
         if self.UserInput.parameter_estimation_settings['verbose'] == True:
             print(self.map_parameter_set)
             print(self.mu_AP_parameter_set)
@@ -862,7 +902,7 @@ class parameter_estimation:
             if self.UserInput.parameter_estimation_settings['exportAllSimulatedOutputs'] == True: #By default, we should not keep this, it's a little too large with large sampling.
                 np.savetxt('mcmc_all_simulated_outputs.csv',self.post_burn_in_samples_simulatedOutputs, delimiter=",")             
             with open("mcmc_log_file.txt", 'w') as out_file:
-                out_file.write("MAP_logP:" +  str(map_logP) + "\n")
+                out_file.write("MAP_logP:" +  str(self.map_logP) + "\n")
                 out_file.write("self.map_index:" +  str(self.map_index) + "\n")
                 out_file.write("self.map_parameter_set:" + str( self.map_parameter_set) + "\n")
                 out_file.write("self.mu_AP_parameter_set:" + str( self.mu_AP_parameter_set) + "\n")
@@ -873,10 +913,6 @@ class parameter_estimation:
                 if abs((self.map_parameter_set - self.mu_AP_parameter_set)/self.UserInput.var_prior).any() > 0.10:
                     pass #Disabling below warning until if statement is fixed.
                     #out_file.write("Warning: The MAP parameter set and mu_AP parameter set differ by more than 10% of prior variance in at least one parameter. This may mean that you need to increase your mcmc_length, increase or decrease your mcmc_relative_step_length, or change what is used for the model response.  There is no general method for knowing the right  value for mcmc_relative_step_length since it depends on the sharpness and smoothness of the response. See for example https://www.sciencedirect.com/science/article/pii/S0039602816300632")
-        if abs((self.map_parameter_set - self.mu_AP_parameter_set)/self.UserInput.var_prior).any() > 0.10:  
-            pass #Disabling below warning until if statement it is fixed.
-            #print("Warning: The MAP parameter set and mu_AP parameter set differ by more than 10% of prior variance in at least one parameter. This may mean that you need to increase your mcmc_length, increase or decrease your mcmc_relative_step_length, or change what is used for the model response.  There is no general method for knowing the right  value for mcmc_relative_step_length since it depends on the sharpness and smoothness of the response. See for example https://www.sciencedirect.com/science/article/pii/S0039602816300632  ")
-
     
     #Our EnsembleSliceSampling is done by the Zeus back end. (pip install zeus-mcmc)
     def doEnsembleSliceSampling(self):
@@ -905,13 +941,13 @@ class parameter_estimation:
             walkerStartPoints = walkerStartsFirstTerm*self.UserInput.std_prior + self.UserInput.model['InputParameterInitialGuess']
             return walkerStartPoints
 
-        if 'mcmc_maxiter' not in self.UserInput.parameter_estimation_settings: mcmc_maxiter = 1E3 #The default from zeus is 1E4, but I have found that is not always sufficient.
+        if 'mcmc_maxiter' not in self.UserInput.parameter_estimation_settings: mcmc_maxiter = 1E6 #The default from zeus is 1E4, but I have found that is not always sufficient.
         else: maxiter = self.UserInput.parameter_estimation_settings['mcmc_maxiter']
         '''end of user input variables'''
         #now to do the mcmc
         walkerStartPoints = generateWalkerStartPoints() #making the first set of starting points.
         zeus_sampler = zeus.sampler(nwalkers, numParameters, logprob_fn=self.getLogP, maxiter=mcmc_maxiter) #maxiter=1E4 is the typical number, but we may want to increase it based on some userInput variable.        
-        for trialN in range(0,1000):#Todo: This number of 10 is hardcoded but should be allowed to change.
+        for trialN in range(0,1000):#Todo: This number of this range is hardcoded but should probably be a user selection.
             try:
                 zeus_sampler.run_mcmc(walkerStartPoints, nEnsembleSteps)
                 break
@@ -929,12 +965,9 @@ class parameter_estimation:
         self.post_burn_in_samples = zeus_sampler.samples.flatten()
         self.post_burn_in_logP_un_normed_vec = np.atleast_2d(zeus_sampler.samples.flatten_logprob()).transpose() #Needed to make it 2D and transpose.
         self.post_burn_in_log_posteriors_un_normed_vec = self.post_burn_in_logP_un_normed_vec #TODO: This variable is just a repeat and should be removed.
-        self.info_gain = 0
-        self.evidence = np.mean(np.exp(self.post_burn_in_log_posteriors_un_normed_vec))/np.linalg.norm(self.post_burn_in_samples)
-              
-        self.info_gain = self.calculateInfoGain()
         self.calculatePostBurnInStatistics()
-        
+        self.info_gain = self.calculateInfoGain()
+        self.exportPostBurnInStatistics()
         return [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_logP_un_normed_vec] # EAW 2020/01/08
         
     
@@ -1059,10 +1092,9 @@ class parameter_estimation:
         self.post_burn_in_logP_un_normed_vec = (self.post_burn_in_log_posteriors_un_normed_vec)
         self.post_burn_in_log_likelihoods_vec = log_likelihoods_vec[self.UserInput.parameter_estimation_settings['mcmc_burn_in']:]
         self.post_burn_in_log_priors_vec = log_priors_vec[self.UserInput.parameter_estimation_settings['mcmc_burn_in']:]
-        # posterior probabilites are transformed to a standard normal (std=1) for obtaining the evidence:
-        self.evidence = np.mean(np.exp(self.post_burn_in_log_posteriors_un_normed_vec))/np.linalg.norm(self.post_burn_in_samples)# another variety:*np.sqrt(2*np.pi*np.std(self.post_burn_in_samples)**2)                    
+        self.calculatePostBurnInStatistics() #This function call will also filter the lowest probability samples out, when using default settings.
         self.info_gain = self.calculateInfoGain()
-        self.calculatePostBurnInStatistics()
+        self.exportPostBurnInStatistics()
         return [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_logP_un_normed_vec] # EAW 2020/01/08
         
     def getLogPrior(self,discreteParameterVector):

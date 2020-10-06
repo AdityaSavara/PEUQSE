@@ -57,7 +57,11 @@ parameter_estimation_settings['mcmc_relative_step_length'] = 0.1 #Default value 
 parameter_estimation_settings['mcmc_modulate_accept_probability']  = 0 #Default value of 0. Changing this value sharpens or flattens the posterior. A value greater than 1 flattens the posterior by accepting low values more often. It can be useful when greater sampling is more important than accuracy. One way of using this feature is to try with a value of 0, then with the value equal to the number of priors for comparison, and then to gradually decrease this number as low as is useful (to minimize distortion of the result). A downside of changing changing this variable to greater than 1 is that it slows the the ascent to the maximum of the prior, so there is a balance in using it. In contrast, numbers increasingly less than one (such as 0.90 or 0.10) will speed up the ascent to the maximum of the posterior, but will also result in fewer points being retained.
 parameter_estimation_settings['mcmc_info_gain_cutoff'] = 0  #A typical value is 1E-5. Use 0 to turn this setting off. Allowing values that are too small will cause numerical errors, this serves as a highpass filter.
 parameter_estimation_settings['mcmc_info_gain_returned'] = 'KL_divergence' # #current options are 'log_ratio' and 'KL_divergence' where 'KL' stands for Kullback-Leibler
-
+parameter_estimation_settings['mcmc_threshold_filter_samples'] = True #This feature removes low probability tails from the posterior. This can be important for getting mu_AP, especially when using ESS.
+parameter_estimation_settings['mcmc_threshold_filter_coefficient'] = 'auto' #This can be a float or the string 'auto'. Currently, the default value is 2.0.  Smaller values filter more aggressively.
+#The below settings are for ESS and/or parallel sampling#
+parameter_estimation_settings['mcmc_nwalkers'] = 'auto'  #The number of walkers to use.  By default, if doing ESS, this is 4*numParameters
+parameter_estimation_settings['mcmc_maxiter'] = 1E6 #This is related to the expansions and contractions in ESS. It has a role similar to limiting the number of iterations in conventional regression. The ESS backend has a default value of 1E4, but in initial testing that was violated too often so 1E6 has been used now.
 
 #####Plot Settings#####
 #possible dictionary fields include: dpi, figure_name, fontsize, x_label, y_label, figure_name, x_range, y_range
