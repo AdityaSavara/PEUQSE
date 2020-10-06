@@ -12,7 +12,7 @@ if __name__ == "__main__":
     
     UserInput.simulated_response_plot_settings['x_label'] = 'distance (m)'
     UserInput.simulated_response_plot_settings['y_label'] = r'$time (s)$'
-    UserInput.simulated_response_plot_settings['error_linewidth'] = 4
+    
 
     UserInput.model['parameterNamesAndMathTypeExpressionsDict'] = {'a':'a','b':'b'}
     UserInput.model['InputParameterPriorValues'] = [200, 500] #prior expected values for a and b

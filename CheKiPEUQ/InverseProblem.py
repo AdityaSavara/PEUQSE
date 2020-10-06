@@ -860,19 +860,8 @@ class parameter_estimation:
             meanLogNegLogP = np.mean(logNegLogP)
             stdLogNegLogP = np.std(logNegLogP)
             filteringThreshold = meanLogNegLogP+filterCoeffient*stdLogNegLogP #Threshold.
-            #Now some masking type things to delete the rows above a certain value... #TODO: separate this into some kind of support function.
-            filteringFailures = np.zeros(np.shape(logNegLogP))
-            filteringFailures[logNegLogP>filteringThreshold] = 1 #False and True, where True is beyond the filter
-            filteringFailuresStacked = filteringFailures*1.0 #initializing this, it is going to become a mask type shape we need.
-            for dataVector in range(1, np.shape(mergedArray)[1]): #This "shape()[1]" gives us the number of dataVectors we need to make the masked array.
-                filteringFailuresStacked = np.hstack((filteringFailuresStacked, filteringFailures))
-            mergedArrayThresholdMarked = mergedArray*1.0 #making a copy
-            mergedArrayThresholdMarked[filteringFailuresStacked==True] = float('nan') #setting any rows with large values to nan. The array filteringFailuresStacked has "True" across each of those rows.
-            #Now need to remove what is masked. We need to actually remove it since we'll be doing more than mean and std after this.
-            #https://stackoverflow.com/questions/22032668/numpy-drop-rows-with-all-nan-or-0-values
-            #The first step is apply a "mask = np.all(..., axis=1)" line.
-            mask = np.all(np.isnan(mergedArrayThresholdMarked), axis=1) #This tells us which rows are all nan.
-            truncatedMergedArray = mergedArrayThresholdMarked[~mask] #This does the truncation.
+            #Now, call the function I have made for filtering by deleting the rows above/below a certain value
+            truncatedMergedArray = arrayThresholdFilter(mergedArray, filterKey=logNegLogP, thresholdValue=filteringThreshold, removeValues = 'above', transpose=False)
             self.post_burn_in_logP_un_normed_vec = np.atleast_2d(truncatedMergedArray[:,0]).transpose()
             self.post_burn_in_log_posteriors_un_normed_vec = self.post_burn_in_logP_un_normed_vec #FIXME: Change it so there is only one variable name.
             self.post_burn_in_log_priors_vec = np.atleast_2d(truncatedMergedArray[:,1]).transpose()
@@ -1604,6 +1593,36 @@ def boundsCheck(parameters, parametersBounds, boundsType):
         else:
             pass
     return True #If we have gotten down to here without returning False, both checks have passed and we return true.
+
+def arrayThresholdFilter(inputArray, filterKey=[], thresholdValue=0, removeValues = 'below', transpose=False):
+    #The thesholdFilter function takes an array and removes rows according to a filter key and thresholdValue.
+    #The filterKey should be a 1D array and will be taken as the first column of the array if not provided.
+    #The function finds where the filterKey is above or below the thresholdValue and then removes those rows from the original array.
+    #removeValues can be "above" or "below".  
+    if transpose == True: #This is meant for 2D arrays.
+        inputArray = np.array(inputArray).transpose()
+    if len(np.shape(inputArray)) == 1:
+        inputArray2D = np.atleast_2d(inputArray).transpose()
+    if len(filterKey) == 0:
+        filterKey == inputArray[0]
+    #Now some masking type things to delete the rows above a certain value.
+    filteringFailures = np.zeros(np.shape(filterKey))
+    if removeValues.lower() == 'above':
+        filteringFailures[filterKey>thresholdValue] = 1 #False and True, where True is beyond the filter
+    if removeValues.lower() == 'below':
+        filteringFailures[filterKey<thresholdValue] = 1 #False and True, where True is beyond the filter
+    filteringFailuresStacked = filteringFailures*1.0 #initializing this, it is going to become a mask type shape we need.
+    for dataVector in range(1, np.shape(inputArray)[1]): #This "shape()[1]" gives us the number of dataVectors we need to make the masked array.
+        filteringFailuresStacked = np.hstack((filteringFailuresStacked, filteringFailures))
+    inputArrayThresholdMarked = inputArray*1.0 #making a copy
+    inputArrayThresholdMarked[filteringFailuresStacked==True] = float('nan') #setting any rows with large values to nan. The array filteringFailuresStacked has "True" across each of those rows.
+    #Now need to remove what is masked. We need to actually remove it since we'll be doing more than mean and std after this.
+    #https://stackoverflow.com/questions/22032668/numpy-drop-rows-with-all-nan-or-0-values
+    #The first step is apply a "mask = np.all(..., axis=1)" line.
+    mask = np.all(np.isnan(inputArrayThresholdMarked), axis=1) #This tells us which rows are all nan.
+    filteredArray = inputArrayThresholdMarked[~mask] #This does the filtering where rows are deleted.
+    return filteredArray
+
         
 if __name__ == "__main__":
     pass

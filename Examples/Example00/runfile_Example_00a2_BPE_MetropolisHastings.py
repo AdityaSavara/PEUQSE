@@ -13,7 +13,7 @@ if __name__ == "__main__":
     UserInput.simulated_response_plot_settings['x_label'] = 'distance (m)'
     UserInput.simulated_response_plot_settings['y_label'] = r'$time (s)$'
     UserInput.simulated_response_plot_settings['fontdict'] = {'size':16}
-    UserInput.simulated_response_plot_settings['error_linewidth'] = 4
+    
     
     UserInput.model['parameterNamesAndMathTypeExpressionsDict'] = {'a':'a','b':'b'}
     UserInput.model['InputParameterPriorValues'] = [200, 500] #prior expected values for a and b
@@ -23,8 +23,10 @@ if __name__ == "__main__":
     
     UserInput.model['simulateByInputParametersOnlyFunction'] = simulation_model_00.simulation_function_wrapper #This must simulate with *only* the parameters listed above, and no other arguments.
     simulation_model_00.x_values_for_data = UserInput.responses['responses_abscissa']  #Setting the x_values_for_data inthe simulation module.
+    
+    UserInput.parameter_estimation_settings['mcmc_threshold_filter_samples'] = True
 
-
+    UserInput.parameter_estimation_settings['mcmc_random_seed'] = 0
     #After making the UserInput, now we make a 'parameter_estimation' object from it.
     PE_object = CKPQ.parameter_estimation(UserInput)
     PE_object.doMetropolisHastings()
