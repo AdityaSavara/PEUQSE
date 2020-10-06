@@ -10,7 +10,7 @@ simulated_response_plot_settings['y_label'] = ''
 simulated_response_plot_settings['figure_name'] = 'Posterior_Simulated' #This is the default name for simulated response plots.
 simulated_response_plot_settings['legend'] = True #Can be changed to false to turn off the legend.
 #simulated_response_plot_settings['legendLabels'] = ['experiment', 'mu_guess', 'MAP'] here is an example of how to change the legend labels.
-simulated_response_plot_settings['error_linewidth'] = 1 #TODO: Change this to "auto" or "None" to use setting of "4" when number of points is <10.
+simulated_response_plot_settings['error_linewidth'] = 'auto' #Integer. Using "auto" or "None" sets to "20" when there is only 1 point, 1 when number of points is > 10, and "4" when number of points is between 1 and 10 and. Using '0' or 'none' will hide the error bars.
 simulated_response_plot_settings['fontdict']= {'size':16} #A font dictionary can be passed in, this will be used for the axes and axes labels.
 
 ####BELOW ARE MODEL PARAMETERS, WE WILL WANT TO COMBINE THESE INTO A LIST OF PARAMETERS###

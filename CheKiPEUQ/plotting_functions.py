@@ -158,7 +158,16 @@ def createSimulatedResponsesPlot(x_values, listOfYArrays, plot_settings={}, list
         fontdict = None #initializing with the matplotlib default
     ax0.set_xlabel(plot_settings['x_label'], fontdict=fontdict)
     ax0.set_ylabel(plot_settings['y_label'], fontdict=fontdict) #TODO: THis is not yet generalized (will be a function)
+    #The error linewidth is going to be set to a thick value if we have a small number of points.
     if 'error_linewidth' in plot_settings: error_linewidth = plot_settings['error_linewidth'] # making a convenient local variable.
+    if str(error_linewidth).lower() == 'auto':
+        if len(x_values) == 1:
+            error_linewidth = 20
+        elif len(x_values) > 10:
+            error_linewidth = 1
+        elif len(x_values) <= 10:
+            error_linewidth = 4
+    if str(error_linewidth).lower() == 'none': error_linewidth = 0 #This will hide the rror bars if they are not desired.
     if 'y_range' in plot_settings: ax0.set_ylim(plot_settings['y_range'] )
     if len(listOfYArrays) == 3: #This generally means observed, mu_guess, map, in that order.
         if len(x_values) > 1: #This means there are enough data to make lines.        
