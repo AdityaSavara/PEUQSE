@@ -61,8 +61,8 @@ resultStr = str(resultObj)
 
 
 """We set our tolerances. There can be some rounding when the tolerances get checked, so they are not exact."""
-relativeTolerance = 1.0E-5
-absoluteTolerance = 1.0E-8
+relativeTolerance = 5.0E-2
+absoluteTolerance = 5.0E-2
 
 
 #this is so that pytest can do UnitTesterSG tests.
