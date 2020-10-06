@@ -939,7 +939,8 @@ class parameter_estimation:
             #The variable UserInput.std_prior has been populated with 1 sigma values, even for cases with uniform distributions.
             #The random generation at the front of the below expression is from the zeus example https://zeus-mcmc.readthedocs.io/en/latest/
             #The multiplication is based on the randn function using a sigma of one (which we then scale up) and then advising to add mu after: https://docs.scipy.org/doc/numpy-1.15.1/reference/generated/numpy.random.randn.html
-            walkerStartsFirstTerm = np.random.randn(nwalkers, numParameters)
+            #walkerStartsFirstTerm = np.random.randn(nwalkers, numParameters) #<--- this was from the zeus example.
+            walkerStartsFirstTerm = 4*(np.random.rand(nwalkers, numParameters)-0.5) #<-- this is from me, trying to remove bias. This way we get sampling from a uniform distribution from -2 standard deviations to +2 standard deviations.
             walkerStartPoints = walkerStartsFirstTerm*self.UserInput.std_prior + self.UserInput.model['InputParameterInitialGuess']
             return walkerStartPoints
 
