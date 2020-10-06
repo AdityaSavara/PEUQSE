@@ -49,6 +49,7 @@ import runfile_for_unit_test_meshgrid #This will run the file, given how it's st
 
 input = None
 #outputs with the function being tested using the input
+runfile_for_unit_test_meshgrid.UserInput.parameter_estimation_settings['mcmc_threshold_filter_samples'] = False
 actualResult = runfile_for_unit_test_meshgrid.PE_object2.info_gains_matrices_array
 
 """We put our actual result into the resultObj variable."""

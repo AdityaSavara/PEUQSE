@@ -32,7 +32,6 @@ ut.set_expected_result(expectedResult,expected_result_str=str(expectedResult), p
 #Calculate your actual outputs. 
 """
 import runfile_Example07a
-
 outputFirstPart = runfile_Example07a.PE_object.map_parameter_set
 outputSecondPart = runfile_Example07a.PE_object.mu_AP_parameter_set
 actualResult = (outputFirstPart, outputSecondPart)

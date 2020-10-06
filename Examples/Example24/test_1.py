@@ -21,8 +21,8 @@ prefix = ''
 """
 #For this test, we ***know*** what result to expect.
 """
-expectedFirstPart = [1.15763372e+01,1.31694180e+05]  #This is the mu_AP
-expectedSecondPart = [9.11484052e-01,1.00766352e+04]  #this is the stdap
+expectedFirstPart = [1.15915966e+01, 1.31522493e+05]  #This is the mu_AP
+expectedSecondPart = [8.26751149e-01, 9.25040879e+03] #this is the stdap
 expectedResult = (expectedFirstPart,expectedSecondPart) #We are using a tuple, but it this could have been a list.
 
 ut.set_expected_result(expectedResult,expected_result_str=str(expectedResult), prefix=prefix,suffix=suffix) #This is the typical syntax if you want to force an analytical result for your test.
@@ -33,6 +33,7 @@ ut.set_expected_result(expectedResult,expected_result_str=str(expectedResult), p
 """
 import runfile_Example24_Disproportionation_mcmc
 
+#runfile_Example24_Disproportionation_mcmc.UserInput.parameter_estimation_settings['mcmc_threshold_filter_samples'] = True
 runfile_Example24_Disproportionation_mcmc.main()
 
 outputFirstPart = runfile_Example24_Disproportionation_mcmc.PE_object.mu_AP_parameter_set

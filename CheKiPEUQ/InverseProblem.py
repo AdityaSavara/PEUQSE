@@ -850,7 +850,7 @@ class parameter_estimation:
         
         if filterSamples == True:   
             originalLength = np.shape(self.post_burn_in_logP_un_normed_vec)[0] 
-            mergedArray = np.hstack( (self.post_burn_in_logP_un_normed_vec, self.post_burn_in_samples) )
+            mergedArray = np.hstack( (self.post_burn_in_logP_un_normed_vec, self.post_burn_in_log_priors_vec, self.post_burn_in_samples) )
             #Now need to find cases where the probability is too low and filter them out.
             #Filtering Step 1: Find average and Stdev of log(-logP)
             logNegLogP = np.log(-1*self.post_burn_in_logP_un_normed_vec)
@@ -872,7 +872,8 @@ class parameter_estimation:
             truncatedMergedArray = mergedArrayThresholdMarked[~mask] #This does the truncation.
             self.post_burn_in_logP_un_normed_vec = np.atleast_2d(truncatedMergedArray[:,0]).transpose()
             self.post_burn_in_log_posteriors_un_normed_vec = self.post_burn_in_logP_un_normed_vec #FIXME: Change it so there is only one variable name.
-            self.post_burn_in_samples = truncatedMergedArray[:,1:]
+            self.post_burn_in_log_priors_vec = np.atleast_2d(truncatedMergedArray[:,1]).transpose()
+            self.post_burn_in_samples = truncatedMergedArray[:,2:]
         #Map calculation etc. is intentionally placed below the filtering so that the map_index is assigned correctly per the final values.
         self.mu_AP_parameter_set = np.mean(self.post_burn_in_samples, axis=0) #This is the mean of the posterior, and is the point with the highest expected value of the posterior (for most distributions). For the simplest cases, map and mu_AP will be the same.
         self.stdap_parameter_set = np.std(self.post_burn_in_samples, axis=0) #This is the mean of the posterior, and is the point with the highest expected value of the posterior (for most distributions). For the simplest cases, map and mu_AP will be the same.            

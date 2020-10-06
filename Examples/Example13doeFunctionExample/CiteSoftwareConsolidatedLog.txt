@@ -2,7 +2,7 @@
 ---
 -
     timestamp: >-
-        2020-10-04T23:36:58
+        2020-10-06T02:20:47
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -23,7 +23,7 @@
             Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
 -
     timestamp: >-
-        2020-10-04T23:36:51
+        2020-10-06T02:20:37
     unique_id: >-
         https://doi.org/10.1002/cctc.202000976
     software_name: >-
