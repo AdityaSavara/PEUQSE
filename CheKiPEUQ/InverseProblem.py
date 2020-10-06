@@ -895,25 +895,36 @@ class parameter_estimation:
             nwalkers = nwalkers + 1
         requested_mcmc_steps = self.UserInput.parameter_estimation_settings['mcmc_length']
         nEnsembleSteps = int(requested_mcmc_steps/nwalkers) #We calculate the calculate number of the Ensemble Steps from the total sampling steps requested divided by nwalkers.
-        #The initial points will be generated from a distribution based on the number of walkers and the distributions of the parameters.
-        #The variable UserInput.std_prior has been populated with 1 sigma values, even for cases with uniform distributions.
-        #The random generation at the front of the below expression is from the zeus example https://zeus-mcmc.readthedocs.io/en/latest/
-        #The multiplication is based on the randn function using a sigma of one (which we then scale up) and then advising to add mu after: https://docs.scipy.org/doc/numpy-1.15.1/reference/generated/numpy.random.randn.html
-        walkerStartsFirstTerm = np.random.randn(nwalkers, numParameters)
-        walkerStartPoints = walkerStartsFirstTerm*self.UserInput.std_prior + self.UserInput.model['InputParameterInitialGuess']
-        if 'mcmc_maxiter' not in self.UserInput.parameter_estimation_settings: mcmc_maxiter = 1E6 #The default from zeus is 1E4, but I have found that is not always sufficient.
+        
+        def generateWalkerStartPoints():
+            #The initial points will be generated from a distribution based on the number of walkers and the distributions of the parameters.
+            #The variable UserInput.std_prior has been populated with 1 sigma values, even for cases with uniform distributions.
+            #The random generation at the front of the below expression is from the zeus example https://zeus-mcmc.readthedocs.io/en/latest/
+            #The multiplication is based on the randn function using a sigma of one (which we then scale up) and then advising to add mu after: https://docs.scipy.org/doc/numpy-1.15.1/reference/generated/numpy.random.randn.html
+            walkerStartsFirstTerm = np.random.randn(nwalkers, numParameters)
+            walkerStartPoints = walkerStartsFirstTerm*self.UserInput.std_prior + self.UserInput.model['InputParameterInitialGuess']
+            return walkerStartPoints
+
+        if 'mcmc_maxiter' not in self.UserInput.parameter_estimation_settings: mcmc_maxiter = 1E3 #The default from zeus is 1E4, but I have found that is not always sufficient.
         else: maxiter = self.UserInput.parameter_estimation_settings['mcmc_maxiter']
         '''end of user input variables'''
-        zeus_sampler = zeus.sampler(nwalkers, numParameters, logprob_fn=self.getLogP, maxiter=mcmc_maxiter) #maxiter=1E4 is the typical number, but we may want to increase it based on some userInput variable.
         #now to do the mcmc
-        try:
-            zeus_sampler.run_mcmc(walkerStartPoints, nEnsembleSteps)
-        except Exception as exceptionObject:
-            if "maxiter" in str(exceptionObject):
-                print("WARNING: One or more of the Ensemble Slice Sampling walkers encountered an error. The value of mcmc_maxiter is currently", mcmc_maxiter, "you should increase it, perhaps by a factor of 1E2.")
-            else:
-                print(Exception)
-                sys.exit()
+        walkerStartPoints = generateWalkerStartPoints() #making the first set of starting points.
+        zeus_sampler = zeus.sampler(nwalkers, numParameters, logprob_fn=self.getLogP, maxiter=mcmc_maxiter) #maxiter=1E4 is the typical number, but we may want to increase it based on some userInput variable.        
+        for trialN in range(0,1000):#Todo: This number of 10 is hardcoded but should be allowed to change.
+            try:
+                zeus_sampler.run_mcmc(walkerStartPoints, nEnsembleSteps)
+                break
+            except Exception as exceptionObject:
+                if "finite" in str(exceptionObject): #This means there is an error message from zeus saying " Invalid walker initial positions!  Initialise walkers from positions of finite log probability."
+                    print("One of the starting points has a non-finite probability. Picking new starting points.")
+                    walkerStartPoints = generateWalkerStartPoints() #Need to make the sampler again, in this case, to throw away anything that has happened so far.
+                    zeus_sampler = zeus.sampler(nwalkers, numParameters, logprob_fn=self.getLogP, maxiter=mcmc_maxiter) #maxiter=1E4 is the typical number, but we may want to increase it based on some userInput variable.        
+                elif "maxiter" in str(exceptionObject): #This means there is an error message from zeus that the max iterations have been reached.
+                    print("WARNING: One or more of the Ensemble Slice Sampling walkers encountered an error. The value of mcmc_maxiter is currently", mcmc_maxiter, "you should increase it, perhaps by a factor of 1E2.")
+                else:
+                    print(str(exceptionObject))
+                    sys.exit()
         #Now to keep the results:
         self.post_burn_in_samples = zeus_sampler.samples.flatten()
         self.post_burn_in_logP_un_normed_vec = np.atleast_2d(zeus_sampler.samples.flatten_logprob()).transpose() #Needed to make it 2D and transpose.
