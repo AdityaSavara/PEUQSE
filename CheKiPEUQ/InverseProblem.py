@@ -137,7 +137,7 @@ class parameter_estimation:
                 UserInput.covmat_prior_scaled[:,parameterIndex] = UserInput.covmat_prior_scaled[:,parameterIndex]/parameterValue        
         
         #To find the *observed* responses covariance matrix, meaning based on the uncertainties reported by the users, we take the uncertainties from the points. This is needed for the likelihood. However, it will be transformed again at that time.
-        self.UserInput.num_response_dimensions = np.shape(UserInput.responses_abscissa)[0] #The first index of shape is the num of responses, but has to be after at_least2d is performed.
+        self.UserInput.num_response_dimensions = np.shape(UserInput.responses_abscissa)[0] #The first index of shape is the num of responses, but has to be after atleast_2d is performed.
         self.observed_responses_covmat_transformed = returnShapedResponseCovMat(self.UserInput.num_response_dimensions, self.UserInput.responses_observed_transformed_uncertainties)
                        
         #self.covmat_prior = UserInput.covmat_prior
@@ -850,6 +850,9 @@ class parameter_estimation:
         
         if filterSamples == True:   
             originalLength = np.shape(self.post_burn_in_logP_un_normed_vec)[0] 
+            if not hasattr(self, 'post_burn_in_log_priors_vec'): #Below line following a line from https://github.com/threeML/threeML/blob/master/threeML/bayesian/zeus_sampler.py
+                self.post_burn_in_log_priors_vec = np.array([self.getLogPrior(parameterCombination) for parameterCombination in self.post_burn_in_samples])
+                self.post_burn_in_log_priors_vec = np.atleast_2d(self.post_burn_in_log_priors_vec).transpose()
             mergedArray = np.hstack( (self.post_burn_in_logP_un_normed_vec, self.post_burn_in_log_priors_vec, self.post_burn_in_samples) )
             #Now need to find cases where the probability is too low and filter them out.
             #Filtering Step 1: Find average and Stdev of log(-logP)
@@ -916,6 +919,12 @@ class parameter_estimation:
                     #out_file.write("Warning: The MAP parameter set and mu_AP parameter set differ by more than 10% of prior variance in at least one parameter. This may mean that you need to increase your mcmc_length, increase or decrease your mcmc_relative_step_length, or change what is used for the model response.  There is no general method for knowing the right  value for mcmc_relative_step_length since it depends on the sharpness and smoothness of the response. See for example https://www.sciencedirect.com/science/article/pii/S0039602816300632")
     
     #Our EnsembleSliceSampling is done by the Zeus back end. (pip install zeus-mcmc)
+    software_name = "zeus"
+    software_version = "2.0.0"
+    software_unique_id = "https://github.com/minaskar/zeus"
+    software_kwargs = {"version": software_version, "author": ["Minas Karamanis", "Florian Beutler"], "cite": ["Minas Karamanis and Florian Beutler. zeus: A Python Implementation of the Ensemble Slice Sampling method. 2020. https://arxiv.org/abs/2002.06212", "@article{ess,  title={Ensemble Slice Sampling}, author={Minas Karamanis and Florian Beutler}, year={2020}, eprint={2002.06212}, archivePrefix={arXiv}, primaryClass={stat.ML} }"] }
+    @CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
+    @CiteSoft.module_call_cite(unique_id=software_unique_id, software_name=software_name, **software_kwargs)
     def doEnsembleSliceSampling(self):
         import zeus
         '''these variables need to be made part of userinput'''
@@ -943,7 +952,7 @@ class parameter_estimation:
             return walkerStartPoints
 
         if 'mcmc_maxiter' not in self.UserInput.parameter_estimation_settings: mcmc_maxiter = 1E6 #The default from zeus is 1E4, but I have found that is not always sufficient.
-        else: maxiter = self.UserInput.parameter_estimation_settings['mcmc_maxiter']
+        else: mcmc_maxiter = self.UserInput.parameter_estimation_settings['mcmc_maxiter']
         '''end of user input variables'''
         #now to do the mcmc
         walkerStartPoints = generateWalkerStartPoints() #making the first set of starting points.
