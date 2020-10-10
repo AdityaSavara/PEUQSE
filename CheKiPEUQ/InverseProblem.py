@@ -467,7 +467,8 @@ class parameter_estimation:
             if calculatePostBurnInStatistics == True:
                 self.post_burn_in_samples = bestResultSoFar[5] #Setting the global variable will allow calculating the info gain and priors also.
                 self.post_burn_in_log_posteriors_un_normed_vec = bestResultSoFar[6]
-                self.calculatePostBurnInStatistics(calculate_post_burn_in_log_priors_vec = True, exportLog = exportLog)
+                self.calculatePostBurnInStatistics(calculate_post_burn_in_log_priors_vec = True)
+                self.exportPostBurnInStatistics()
             #One could call calculatePostBurnInStatistics() if one wanted the cumulative from all results. But we don't actually want that.
             #Below should not be used. These commented out lines are biased towards the center of the grid.
             #self.post_burn_in_samples = cumulative_post_burn_in_samples
