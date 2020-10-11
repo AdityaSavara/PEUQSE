@@ -42,6 +42,10 @@ class parameter_estimation:
         if self.UserInput.parameter_estimation_settings['verbose']: 
             print("Paremeter Estimation Object Initialized")
         
+        if UserInput.parameter_estimation_settings['checkPointFrequency'] != None: #This is for backwards compatibility.
+            UserInput.parameter_estimation_settings['mcmc_checkPointFrequency'] = UserInput.parameter_estimation_settings['checkPointFrequency']
+            UserInput.parameter_estimation_settings['gridsearch_checkPointFrequency'] = UserInput.parameter_estimation_settings['checkPointFrequency']
+        
         #Setting this object so that we can make changes to it below without changing userinput dictionaries.
         self.UserInput.mu_prior = np.array(UserInput.model['InputParameterPriorValues']) 
         
@@ -147,7 +151,7 @@ class parameter_estimation:
         #Getting initial guess of parameters and populating the internal variable for it.
         if 'InputParameterInitialGuess' not in self.UserInput.model: #if an initial guess is not provided, we use the prior.
             self.UserInput.model['InputParameterInitialGuess'] = np.array(self.UserInput.mu_prior, dtype='float')
-        #From now, we switch to self.UserInput.InputParameterInitialGuess because this is needed in case we're going to do reducedParameterSpace.
+        #From now, we switch to self.UserInput.InputParameterInitialGuess because this is needed in case we're going to do reducedParameterSpace or grid sampling.
         self.UserInput.InputParameterInitialGuess = np.array(self.UserInput.model['InputParameterInitialGuess'], dtype='float')
         #Now populate the simulation Functions. #NOTE: These will be changed if a reduced parameter space is used.
         self.UserInput.simulationFunction = self.UserInput.model['simulateByInputParametersOnlyFunction']
@@ -371,27 +375,35 @@ class parameter_estimation:
         return gridCombinations, numGridPoints  
   
     @CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
-    def doGridSearch(self, searchType='getLogP', exportLog = True, gridSamplingAbsoluteIntervalSize = [], gridSamplingNumOfIntervals = [], passThroughArgs = {}, calculatePostBurnInStatistics=True,  keep_cumulative_post_burn_in_data = False):
+    def doGridSearch(self, searchType='getLogP', exportLog = True, gridSamplingAbsoluteIntervalSize = [], gridSamplingNumOfIntervals = [], passThroughArgs = {}, calculatePostBurnInStatistics=True,  keep_cumulative_post_burn_in_data = False, walkerInitialDistribution='UserChoice'):
         # gridSamplingNumOfIntervals is the number of variations to check in units of variance for each parameter. Can be 0 if you don't want to vary a particular parameter in the grid search.
         #calculatePostBurnInStatistics will store all the individual runs in memory and will then provide the samples of the best one.
         #TODO: the upper part of the gridsearch may not be compatibile with reduced parameter space. Needs to be checked.
         verbose = self.UserInput.parameter_estimation_settings['verbose']
 
-        gridCenter = self.UserInput.InputParameterInitialGuess #We take what is in the variable self.UserInput.InputParameterInitialGuess for the center of the grid.    
+
+        gridCenter = self.UserInput.InputParameterInitialGuess #This may be a reduced parameter space.
+        
         gridCombinations, numGridPoints = self.getGridCombinations(gridCenter, gridSamplingAbsoluteIntervalSize, gridSamplingNumOfIntervals)
         allGridResults = []
         #Initialize some things before loop.
-        if (type(self.UserInput.parameter_estimation_settings['checkPointFrequency']) != type(None)) or (verbose == True):
+        if (type(self.UserInput.parameter_estimation_settings['gridsearch_checkPointFrequency']) != type(None)) or (verbose == True):
                 import timeit
                 timeAtGridStart = timeit.time.clock()
                 timeAtLastGridPoint = timeAtGridStart #just initializing
         highest_logP = float('-inf') #Just initializing.
         if searchType == 'doEnsembleSliceSampling':
             if str(self.UserInput.parameter_estimation_settings['mcmc_nwalkers']).lower() == 'auto':
-                gridsearch_mcmc_nwalkers = 2*len(self.UserInput.InputParameterInitialGuess) #Lowest possible is 2 times num parameters for ESS.
+                gridsearch_mcmc_nwalkers = 2*len(gridCenter) #Lowest possible is 2 times num parameters for ESS.
             else:
                 gridsearch_mcmc_nwalkers = int(self.UserInput.parameter_estimation_settings['mcmc_nwalkers'])
         #Start grid search loop.
+        if searchType == ('doEnsembleSliceSampling' or 'doMetropolisHastings'): #Choose the walker distribution type.
+                if walkerInitialDistribution == 'UserChoice': #UserChoice comes from UserInput. It can still be auto.
+                    walkerInitialDistribution = self.UserInput.parameter_estimation_settings['mcmc_walkerInitialDistribution']
+                #The identical distribution is used by default because otherwise the walkers may be spread out too far and it could defeat the purpose of a gridsearch.
+                if walkerInitialDistribution.lower() == 'auto':
+                    walkerInitialDistribution = 'uniform'
         for combinationIndex,combination in enumerate(gridCombinations):
             self.UserInput.InputParameterInitialGuess = combination #We need to fill the variable InputParameterInitialGuess with the combination being checked.
             if searchType == 'getLogP':
@@ -411,7 +423,7 @@ class parameter_estimation:
                         self.cumulative_post_burn_in_log_priors_vec = np.vstack((cumulative_post_burn_in_log_priors_vec, self.post_burn_in_log_priors_vec))
                         self.cumulative_post_burn_in_log_posteriors_un_normed_vec = np.vstack((cumulative_post_burn_in_log_posteriors_un_normed_vec, self.post_burn_in_log_posteriors_un_normed_vec))
             if searchType == 'doEnsembleSliceSampling':
-                thisResult = self.doEnsembleSliceSampling(mcmc_nwalkers_direct_input=gridsearch_mcmc_nwalkers, calculatePostBurnInStatistics=calculatePostBurnInStatistics, exportLog=False)
+                thisResult = self.doEnsembleSliceSampling(mcmc_nwalkers_direct_input=gridsearch_mcmc_nwalkers, calculatePostBurnInStatistics=calculatePostBurnInStatistics, exportLog=False, walkerInitialDistribution=walkerInitialDistribution) 
                 #self.map_logP gets done by itself in doEnsembleSliceSampling
                 if keep_cumulative_post_burn_in_data == True:
                     if combinationIndex == 0:
@@ -428,7 +440,7 @@ class parameter_estimation:
                 #What we really need to do is have the log file's column headings generated based on the searchType.
             if searchType == 'doOptimizeSSR':
                 thisResult = self.doOptimizeSSR(**passThroughArgs)
-            if (type(self.UserInput.parameter_estimation_settings['checkPointFrequency']) != type(None)) or (verbose == True):
+            if (type(self.UserInput.parameter_estimation_settings['gridsearch_checkPointFrequency']) != type(None)) or (verbose == True):
                 timeAtThisGridPoint = timeit.time.clock()
                 timeOfThisGridPoint = timeAtThisGridPoint - timeAtLastGridPoint
                 averageTimePerGridPoint = (timeAtThisGridPoint - timeAtGridStart)/(combinationIndex+1)
@@ -443,8 +455,8 @@ class parameter_estimation:
                 print("GridPoint", combination, "number", combinationIndex+1, "out of", numGridPoints, "timeOfThisGridPoint", timeOfThisGridPoint)
                 print("GridPoint", combinationIndex+1, "averageTimePerGridPoint", "%.2f" % round(averageTimePerGridPoint,2), "estimated time remaining", "%.2f" % round( numRemainingGridPoints*averageTimePerGridPoint,2), "s" )
                 print("GridPoint", combinationIndex+1, "current logP", self.map_logP, "highest logP", highest_logP)
-            elif type(self.UserInput.parameter_estimation_settings['checkPointFrequency']) != type(None): #If verbose off but checkpoint frequency is on.
-                if (combinationIndex/self.UserInput.parameter_estimation_settings['checkPointFrequency']).is_integer():
+            elif type(self.UserInput.parameter_estimation_settings['gridsearch_checkPointFrequency']) != type(None): #If verbose off but checkpoint frequency is on.
+                if (combinationIndex ==0 or ((combinationIndex+1)/self.UserInput.parameter_estimation_settings['gridsearch_checkPointFrequency']).is_integer()):
                     print("GridPoint", combination, "number", combinationIndex+1, "out of", numGridPoints, "timeOfThisGridPoint", timeOfThisGridPoint)
                     print("GridPoint", combinationIndex+1, "averageTimePerGridPoint", "%.2f" % round(averageTimePerGridPoint,2), "estimated time remaining", "%.2f" % round( numRemainingGridPoints*averageTimePerGridPoint,2), "s" )
                     print("GridPoint", combinationIndex+1, "current logP", self.map_logP, "highest logP", highest_logP)
@@ -458,7 +470,6 @@ class parameter_estimation:
         if exportLog == True:
             with open("gridsearch_log_file.txt", 'w') as out_file:
                 out_file.write("result: " + "self.map_logP, self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec" + "\n")
-                print("line 460", np.shape(allGridResults))
                 for resultIndex, result in enumerate(allGridResults):
                     out_file.write("result: " + str(resultIndex) + " " +  str(result) + "\n")
         print("Final map results from gridsearch:", self.map_parameter_set, "final logP:", self.map_logP)
@@ -518,7 +529,7 @@ class parameter_estimation:
     software_kwargs = {"version": software_version, "author": ["Eric A. Walker", "Kishore Ravisankar", "Aditya Savara"], "doi": "https://doi.org/10.1002/cctc.202000976", "cite": "Eric Alan Walker, Kishore Ravisankar, Aditya Savara. CheKiPEUQ Intro 2: Harnessing Uncertainties from Data Sets, Bayesian Design of Experiments in Chemical Kinetics. ChemCatChem. Accepted. doi:10.1002/cctc.202000976"} 
     #@CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
     @CiteSoft.module_call_cite(unique_id=software_unique_id, software_name=software_name, **software_kwargs)
-    def doeGetInfoGainMatrix(self, parameterCombination):#Note: There is an implied argument of info_gains_matrices_array_format being 'xyz' or 'meshgrid'
+    def doeGetInfoGainMatrix(self, parameterCombination, searchType='doMetropolisHastings'):#Note: There is an implied argument of info_gains_matrices_array_format being 'xyz' or 'meshgrid'
         #At present, we *must* provide a parameterCombination because right now the only way to get an InfoGainMatrix is with synthetic data assuming a particular parameterCombination as the "real" or "actual" parameterCombination.
         doe_settings = self.UserInput.doe_settings
         self.middle_of_doe_flag = True  #This is a work around that is needed because right now the synthetic data creation has an __init__ call which is going to try to modify the independent variables back to their original values if we don't do this.
@@ -542,7 +553,10 @@ class parameter_estimation:
                 #This population Must occur here. It has to be after the indpendent variables have changed, before synthetic data is made, and before the MCMC is performed.
                 self.UserInput.model['populateIndependentVariablesFunction'](conditionsCombination)
                 self.populateResponsesWithSyntheticData(parameterCombination)
-                [map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, logP] = self.doMetropolisHastings()
+                if searchType=='doMetropolisHastings':
+                    [map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, logP] = self.doMetropolisHastings()
+                if searchType=='doEnsembleSliceSampling':
+                    [map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, logP] = self.doEnsembleSliceSampling()
                 conditionsCombination = np.array(conditionsCombination) #we're going to make this an array before adding to the info_gain matrix.
                 conditionsCombinationAndInfoGain = np.hstack((conditionsCombination, info_gain))
                 info_gain_matrix.append(conditionsCombinationAndInfoGain)
@@ -584,7 +598,10 @@ class parameter_estimation:
                         #This population Must occur here. It has to be after the indpendent variables have changed, before synthetic data is made, and before the MCMC is performed.
                         self.UserInput.model['populateIndependentVariablesFunction']([indValue1,indValue2])
                         self.populateResponsesWithSyntheticData(parameterCombination)
-                        [map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, logP] = self.doMetropolisHastings()
+                        if searchType=='doMetropolisHastings':
+                            [map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, logP] = self.doMetropolisHastings()
+                        if searchType=='doEnsembleSliceSampling':
+                            [map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, logP] = self.doEnsembleSliceSampling()
                         conditionsCombination = np.array([indValue1,indValue2])
                         conditionsCombinationAndInfoGain = np.hstack((conditionsCombination, info_gain))
                         info_gain_matrix.append(conditionsCombinationAndInfoGain) #NOTE that the structure *includes* the combinations.
@@ -601,7 +618,7 @@ class parameter_estimation:
                 return np.array(info_gain_matrix)
     
     #This function requires population of the UserInput doe_settings dictionary. It automatically scans many parameter modulation combinations.
-    def doeParameterModulationCombinationsScanner(self):
+    def doeParameterModulationCombinationsScanner(self, searchType='doMetropolisHastings'):
         import CheKiPEUQ.CombinationGeneratorModule as CombinationGeneratorModule
         doe_settings = self.UserInput.doe_settings 
         #For the parameters, we are able to use a default one standard deviation grid if gridSamplingAbsoluteIntervalSize is a blank list.
@@ -628,7 +645,7 @@ class parameter_estimation:
                 info_gains_matrices_lists_one_for_each_parameter.append([]) #These are empty lists create to indices and initialize each parameter's info_gain_matrix. They will be appended to later.
         for parModulationCombinationIndex,parModulationCombination in enumerate(parModulationGridCombinations):                
             #We will get separate info gain matrix for each parameter modulation combination.
-            info_gain_matrix = self.doeGetInfoGainMatrix(parModulationCombination)
+            info_gain_matrix = self.doeGetInfoGainMatrix(parModulationCombination, searchType=searchType)
             #Append the info gain matrix obtainend.
             info_gains_matrices_list.append(np.array(info_gain_matrix))
             if self.UserInput.doe_settings['info_gains_matrices_multiple_parameters'] == 'each': #copy the above lines which were for the sum.
@@ -990,11 +1007,15 @@ class parameter_estimation:
             #The multiplication is based on the randn function using a sigma of one (which we then scale up) and then advising to add mu after: https://docs.scipy.org/doc/numpy-1.15.1/reference/generated/numpy.random.randn.html
             if mcmc_nwalkers == 0:
                 mcmc_nwalkers = self.mcmc_nwalkers
-            if walkerInitialDistribution=='gaussian':
-                walkerStartsFirstTerm = np.random.randn(mcmc_nwalkers, numParameters) #<--- this was from the zeus example.
             if walkerInitialDistribution=='uniform':
                 walkerStartsFirstTerm = 4*(np.random.rand(mcmc_nwalkers, numParameters)-0.5) #<-- this is from me, trying to remove bias. This way we get sampling from a uniform distribution from -2 standard deviations to +2 standard deviations.
-            walkerStartPoints = walkerStartsFirstTerm*self.UserInput.std_prior + self.UserInput.model['InputParameterInitialGuess']
+            elif walkerInitialDistribution == 'identical':
+                walkerStartsFirstTerm = np.zeros((mcmc_nwalkers, numParameters)) #Make the first term all zeros.
+            elif walkerInitialDistribution=='gaussian':
+                walkerStartsFirstTerm = np.random.randn(mcmc_nwalkers, numParameters) #<--- this was from the zeus example.
+            #Now we add to self.UserInput.InputParameterInitialGuess. We don't use the UserInput initial guess directly because gridsearch and other things can change it -- so we need to use this one.
+            walkerStartPoints = walkerStartsFirstTerm*self.UserInput.std_prior + self.UserInput.InputParameterInitialGuess 
+
             return walkerStartPoints
 
         if 'mcmc_maxiter' not in self.UserInput.parameter_estimation_settings: mcmc_maxiter = 1E6 #The default from zeus is 1E4, but I have found that is not always sufficient.
@@ -1052,12 +1073,12 @@ class parameter_estimation:
         log_postereriors_drawn = np.zeros((self.UserInput.parameter_estimation_settings['mcmc_length'])) #TODO: make this optional for efficiency. We don't want this to be 2D, so we don't copy log_posteriors_un_normed_vec.
         log_priors_vec = np.zeros((self.UserInput.parameter_estimation_settings['mcmc_length'],1))
         #Code to initialize checkpoints.
-        if type(self.UserInput.parameter_estimation_settings['checkPointFrequency']) != type(None):
+        if type(self.UserInput.parameter_estimation_settings['mcmc_checkPointFrequency']) != type(None):
             print("Starting MCMC sampling.")
             import timeit
             timeOfFirstCheckpoint = timeit.time.clock()
             timeCheckpoint = timeit.time.clock() - timeOfFirstCheckpoint #First checkpoint at time 0.
-            numCheckPoints = self.UserInput.parameter_estimation_settings['mcmc_length']/self.UserInput.parameter_estimation_settings['checkPointFrequency']
+            numCheckPoints = self.UserInput.parameter_estimation_settings['mcmc_length']/self.UserInput.parameter_estimation_settings['mcmc_checkPointFrequency']
         #Before sampling should fill in the first entry for the posterior vector we have created. #FIXME: It would probably be better to start with i of 0 in below sampling loop. I believe that right now the "burn in" and "samples" arrays are actually off by an index of 1. But trying to change that alters their length relative to other arrays and causes problems. Since we always do many samples and this only affects the initial point being averaged in twice, it is not a major problem. It's also avoided if people use a burn in of at least 1.
         log_posteriors_un_normed_vec[0]= self.getLogP(samples[0])
         for i in range(1, self.UserInput.parameter_estimation_settings['mcmc_length']): #FIXME: Don't we need to start with i of 0?
@@ -1109,11 +1130,11 @@ class parameter_estimation:
                 log_posteriors_un_normed_vec[i] = log_likelihood_current_location+log_prior_current_location
                 log_likelihoods_vec[i] = log_likelihood_current_location
                 log_priors_vec[i] = log_prior_current_location
-            if type(self.UserInput.parameter_estimation_settings['checkPointFrequency']) != type(None):
-                if sampleNumber%self.UserInput.parameter_estimation_settings['checkPointFrequency'] == 0: #The % is a modulus function.
+            if type(self.UserInput.parameter_estimation_settings['mcmc_checkPointFrequency']) != type(None):
+                if sampleNumber%self.UserInput.parameter_estimation_settings['mcmc_checkPointFrequency'] == 0: #The % is a modulus function.
                     timeSinceLastCheckPoint = (timeit.time.clock() - timeOfFirstCheckpoint) -  timeCheckpoint
                     timeCheckpoint = timeit.time.clock() - timeOfFirstCheckpoint
-                    checkPointNumber = sampleNumber/self.UserInput.parameter_estimation_settings['checkPointFrequency']
+                    checkPointNumber = sampleNumber/self.UserInput.parameter_estimation_settings['mcmc_checkPointFrequency']
                     averagetimePerSampling = timeCheckpoint/(sampleNumber)
                     print("MCMC sample number ", sampleNumber, "checkpoint", checkPointNumber, "out of", numCheckPoints) 
                     print("averagetimePerSampling", averagetimePerSampling, "seconds")
@@ -1398,7 +1419,6 @@ class parameter_estimation:
                     plot_settings['legendLabels'] = ['observed',  'mu_guess', 'MAP']
                 if hasattr(self, "opt_SSR"): #This means we are actually doing an optimization, and self.opt_SSR exists.
                     plot_settings['legendLabels'] = ['observed',  'mu_guess', 'CPE']
-                    print("line 1201 got here!!!")
             #Other allowed settings are like this, but will be fed in as simulated_response_plot_settings keys rather than plot_settings keys.
             #plot_settings['x_label'] = 'T (K)'
             #plot_settings['y_label'] = r'$rate (s^{-1})$'
