@@ -974,9 +974,10 @@ class parameter_estimation:
     software_kwargs = {"version": software_version, "author": ["Minas Karamanis", "Florian Beutler"], "cite": ["Minas Karamanis and Florian Beutler. zeus: A Python Implementation of the Ensemble Slice Sampling method. 2020. ","https://arxiv.org/abs/2002.06212", "@article{ess,  title={Ensemble Slice Sampling}, author={Minas Karamanis and Florian Beutler}, year={2020}, eprint={2002.06212}, archivePrefix={arXiv}, primaryClass={stat.ML} }"] }
     #@CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
     @CiteSoft.module_call_cite(unique_id=software_unique_id, software_name=software_name, **software_kwargs)
-    def doEnsembleSliceSampling(self, mcmc_nwalkers_direct_input = None, walkerInitialDistribution='uniform', calculatePostBurnInStatistics=True, exportLog ='UserChoice'):
+    def doEnsembleSliceSampling(self, mcmc_nwalkers_direct_input = None, walkerInitialDistribution='uniform', walkerInitialDistributionSpread=1.0 calculatePostBurnInStatistics=True, exportLog ='UserChoice'):
         #The distribution of walkers intial points can be uniform or gaussian. As of OCt 2020, default is uniform spread around the intial guess.
         #The mcmc_nwalkers_direct_input is really meant for gridsearch to override the other settings, though of course people could also use it directly.  
+        #The walkerInitialDistributionSpread is in relative units (relative to standard deviations). In the case of a uniform inital distribution the default level of spread is actually across two standard deviations, so the walkerInitialDistributionSpread is relative to that (that is, a value of 2 would give 2*2 = 4 for the full spread in each direction from the initial guess).
         import zeus
         '''these variables need to be made part of userinput'''
         numParameters = len(self.UserInput.InputParametersPriorValuesUncertainties) #This is the number of parameters.
@@ -1013,7 +1014,7 @@ class parameter_estimation:
             elif walkerInitialDistribution=='gaussian':
                 walkerStartsFirstTerm = np.random.randn(mcmc_nwalkers, numParameters) #<--- this was from the zeus example.
             #Now we add to self.UserInput.InputParameterInitialGuess. We don't use the UserInput initial guess directly because gridsearch and other things can change it -- so we need to use this one.
-            walkerStartPoints = walkerStartsFirstTerm*self.UserInput.std_prior + self.UserInput.InputParameterInitialGuess 
+            walkerStartPoints = walkerStartsFirstTerm*self.UserInput.std_prior*walkerInitialDistributionSpread + self.UserInput.InputParameterInitialGuess 
 
             return walkerStartPoints
 
