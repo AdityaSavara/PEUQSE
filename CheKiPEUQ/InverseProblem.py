@@ -454,7 +454,7 @@ class parameter_estimation:
             if verbose == True:
                 print("GridPoint", combination, "number", combinationIndex+1, "out of", numGridPoints, "timeOfThisGridPoint", timeOfThisGridPoint)
                 print("GridPoint", combinationIndex+1, "averageTimePerGridPoint", "%.2f" % round(averageTimePerGridPoint,2), "estimated time remaining", "%.2f" % round( numRemainingGridPoints*averageTimePerGridPoint,2), "s" )
-                print("GridPoint", combinationIndex+1, "current logP", self.map_logP, "highest logP", highest_logP)
+                print("GridPoint", combinationIndex+1, "current logP", self.map_logP, "highest logP", highest_logP, "highest logP Parameter Set", highest_logP_parameter_set)
             elif type(self.UserInput.parameter_estimation_settings['gridsearch_checkPointFrequency']) != type(None): #If verbose off but checkpoint frequency is on.
                 if (combinationIndex ==0 or ((combinationIndex+1)/self.UserInput.parameter_estimation_settings['gridsearch_checkPointFrequency']).is_integer()):
                     print("GridPoint", combination, "number", combinationIndex+1, "out of", numGridPoints, "timeOfThisGridPoint", timeOfThisGridPoint)
@@ -472,7 +472,7 @@ class parameter_estimation:
                 out_file.write("result: " + "self.map_logP, self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec" + "\n")
                 for resultIndex, result in enumerate(allGridResults):
                     out_file.write("result: " + str(resultIndex) + " " +  str(result) + "\n")
-        print("Final map results from gridsearch:", self.map_parameter_set, "final logP:", self.map_logP)
+        print("Final map results from gridsearch:", self.map_parameter_set, "Final map logP:", self.map_logP)
         if searchType == ('doMetropolisHastings' or 'doEnsembleSliceSampling'):
             #For MCMC, we can now calculate the post_burn_in statistics for the best sampling from the full samplings done. We don't want to lump all together because that would not be unbiased.
             if calculatePostBurnInStatistics == True:
@@ -909,7 +909,6 @@ class parameter_estimation:
         if type(filterCoeffient) == type("string"):
             if filterCoeffient.lower() == "auto":
                 filterCoeffient = 2.0
-            else: filterCoeffient = float(filterCoeffient)
         if filterSamples == True:   
             originalLength = np.shape(self.post_burn_in_log_posteriors_un_normed_vec)[0] 
             try:
@@ -944,9 +943,9 @@ class parameter_estimation:
             #print("Warning: The MAP parameter set and mu_AP parameter set differ by more than 10% of prior variance in at least one parameter. This may mean that you need to increase your mcmc_length, increase or decrease your mcmc_relative_step_length, or change what is used for the model response.  There is no general method for knowing the right  value for mcmc_relative_step_length since it depends on the sharpness and smoothness of the response. See for example https://www.sciencedirect.com/science/article/pii/S0039602816300632  ")
         self.info_gain = self.calculateInfoGain()
         if self.UserInput.parameter_estimation_settings['verbose'] == True:
-            print(self.map_parameter_set)
-            print(self.mu_AP_parameter_set)
-            print(self.stdap_parameter_set)
+            print("map_parameter_set ", self.map_parameter_set)
+            print("mu_AP_parameter_set ", self.mu_AP_parameter_set)
+            print("stdap_parameter_set ",self.stdap_parameter_set)
         return [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec]
 
     def exportPostBurnInStatistics(self):

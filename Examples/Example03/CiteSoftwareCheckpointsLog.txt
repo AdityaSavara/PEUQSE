@@ -3166,3 +3166,693 @@
     cite:
         - >-
             Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-11T15:31:16
+    unique_id: >-
+        https://github.com/minaskar/zeus
+    software_name: >-
+        zeus
+    version:
+        - >-
+            2.0.0
+    author:
+        - >-
+            Minas Karamanis
+        - >-
+            Florian Beutler
+    cite:
+        - >-
+            Minas Karamanis and Florian Beutler. zeus: A Python Implementation of the Ensemble Slice Sampling method. 2020. 
+        - >-
+            https://arxiv.org/abs/2002.06212
+        - >-
+            @article{ess,  title={Ensemble Slice Sampling}, author={Minas Karamanis and Florian Beutler}, year={2020}, eprint={2002.06212}, archivePrefix={arXiv}, primaryClass={stat.ML} }
+-
+    timestamp: >-
+        2020-10-11T15:55:14
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+---
+-
+    timestamp: >-
+        2020-10-11T16:00:01
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+-
+    timestamp: >-
+        2020-10-11T16:00:01
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-11T17:24:25
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+---
+-
+    timestamp: >-
+        2020-10-11T17:25:06
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+---
+-
+    timestamp: >-
+        2020-10-11T17:32:24
+    unique_id: >-
+        https://github.com/minaskar/zeus
+    software_name: >-
+        zeus
+    version:
+        - >-
+            2.0.0
+    author:
+        - >-
+            Minas Karamanis
+        - >-
+            Florian Beutler
+    cite:
+        - >-
+            Minas Karamanis and Florian Beutler. zeus: A Python Implementation of the Ensemble Slice Sampling method. 2020. 
+        - >-
+            https://arxiv.org/abs/2002.06212
+        - >-
+            @article{ess,  title={Ensemble Slice Sampling}, author={Minas Karamanis and Florian Beutler}, year={2020}, eprint={2002.06212}, archivePrefix={arXiv}, primaryClass={stat.ML} }
+-
+    timestamp: >-
+        2020-10-11T17:33:46
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+---
+-
+    timestamp: >-
+        2020-10-11T17:34:03
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+---
+-
+    timestamp: >-
+        2020-10-11T17:42:00
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+-
+    timestamp: >-
+        2020-10-11T17:42:00
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-11T17:48:42
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+-
+    timestamp: >-
+        2020-10-11T17:48:42
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-11T16:00:02
+    unique_id: >-
+        https://github.com/minaskar/zeus
+    software_name: >-
+        zeus
+    version:
+        - >-
+            2.0.0
+    author:
+        - >-
+            Minas Karamanis
+        - >-
+            Florian Beutler
+    cite:
+        - >-
+            Minas Karamanis and Florian Beutler. zeus: A Python Implementation of the Ensemble Slice Sampling method. 2020. 
+        - >-
+            https://arxiv.org/abs/2002.06212
+        - >-
+            @article{ess,  title={Ensemble Slice Sampling}, author={Minas Karamanis and Florian Beutler}, year={2020}, eprint={2002.06212}, archivePrefix={arXiv}, primaryClass={stat.ML} }
+-
+    timestamp: >-
+        2020-10-11T17:50:21
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+---
+-
+    timestamp: >-
+        2020-10-11T17:54:34
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+---
+---
+-
+    timestamp: >-
+        2020-10-11T18:02:09
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+-
+    timestamp: >-
+        2020-10-11T18:02:09
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-11T18:02:59
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+-
+    timestamp: >-
+        2020-10-11T18:02:59
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-11T18:02:59
+    unique_id: >-
+        https://github.com/minaskar/zeus
+    software_name: >-
+        zeus
+    version:
+        - >-
+            2.0.0
+    author:
+        - >-
+            Minas Karamanis
+        - >-
+            Florian Beutler
+    cite:
+        - >-
+            Minas Karamanis and Florian Beutler. zeus: A Python Implementation of the Ensemble Slice Sampling method. 2020. 
+        - >-
+            https://arxiv.org/abs/2002.06212
+        - >-
+            @article{ess,  title={Ensemble Slice Sampling}, author={Minas Karamanis and Florian Beutler}, year={2020}, eprint={2002.06212}, archivePrefix={arXiv}, primaryClass={stat.ML} }
+-
+    timestamp: >-
+        2020-10-11T18:23:39
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+---
+---
+---
+---
+---
+---
+---
+---
+---
+---
+-
+    timestamp: >-
+        2020-10-11T18:56:01
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+-
+    timestamp: >-
+        2020-10-11T18:56:01
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-11T19:42:05
+    unique_id: >-
+        https://github.com/minaskar/zeus
+    software_name: >-
+        zeus
+    version:
+        - >-
+            2.0.0
+    author:
+        - >-
+            Minas Karamanis
+        - >-
+            Florian Beutler
+    cite:
+        - >-
+            Minas Karamanis and Florian Beutler. zeus: A Python Implementation of the Ensemble Slice Sampling method. 2020. 
+        - >-
+            https://arxiv.org/abs/2002.06212
+        - >-
+            @article{ess,  title={Ensemble Slice Sampling}, author={Minas Karamanis and Florian Beutler}, year={2020}, eprint={2002.06212}, archivePrefix={arXiv}, primaryClass={stat.ML} }
+-
+    timestamp: >-
+        2020-10-11T19:47:11
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+---
+-
+    timestamp: >-
+        2020-10-11T19:47:21
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+---
+-
+    timestamp: >-
+        2020-10-12T04:10:43
+    unique_id: >-
+        https://github.com/minaskar/zeus
+    software_name: >-
+        zeus
+    version:
+        - >-
+            2.0.0
+    author:
+        - >-
+            Minas Karamanis
+        - >-
+            Florian Beutler
+    cite:
+        - >-
+            Minas Karamanis and Florian Beutler. zeus: A Python Implementation of the Ensemble Slice Sampling method. 2020. 
+        - >-
+            https://arxiv.org/abs/2002.06212
+        - >-
+            @article{ess,  title={Ensemble Slice Sampling}, author={Minas Karamanis and Florian Beutler}, year={2020}, eprint={2002.06212}, archivePrefix={arXiv}, primaryClass={stat.ML} }
+-
+    timestamp: >-
+        2020-10-12T04:10:45
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+---
+-
+    timestamp: >-
+        2020-10-12T04:11:06
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+---
+-
+    timestamp: >-
+        2020-10-12T17:00:56
+    unique_id: >-
+        https://github.com/minaskar/zeus
+    software_name: >-
+        zeus
+    version:
+        - >-
+            2.0.0
+    author:
+        - >-
+            Minas Karamanis
+        - >-
+            Florian Beutler
+    cite:
+        - >-
+            Minas Karamanis and Florian Beutler. zeus: A Python Implementation of the Ensemble Slice Sampling method. 2020. 
+        - >-
+            https://arxiv.org/abs/2002.06212
+        - >-
+            @article{ess,  title={Ensemble Slice Sampling}, author={Minas Karamanis and Florian Beutler}, year={2020}, eprint={2002.06212}, archivePrefix={arXiv}, primaryClass={stat.ML} }
+-
+    timestamp: >-
+        2020-10-12T17:01:04
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+---
+-
+    timestamp: >-
+        2020-10-12T17:01:27
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.

@@ -44,7 +44,7 @@ parameter_estimation_settings = {}
 parameter_estimation_settings['verbose'] = False
 parameter_estimation_settings['exportLog'] = True
 parameter_estimation_settings['exportAllSimulatedOutputs'] = False
-parameter_estimation_settings['checkPointFrequency'] = None #use of this variable is now discouraged. See similar variables below.
+parameter_estimation_settings['checkPointFrequency'] = None #Deprecated. It will override all other checkpoint choices if it is changed from None. The user should use the similar variables below.
 parameter_estimation_settings['scaling_uncertainties_type'] = "std" #"std" is for standard deviation. there is also "off" and the option of "mu" for using the absolute values of the mean(s) of the prior distribution(s). If a scalar is entered (a float) then that fixed value will be used for all scalings.
 parameter_estimation_settings['undo_scaling_uncertainties_type'] = False #This undoing can be set to True but presently only works for the case of fixed scaling (a single scalar).
 				  

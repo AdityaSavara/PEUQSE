@@ -47,10 +47,23 @@ if __name__ == "__main__":
     PE_object.doEnsembleSliceSampling()
     #[map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, samples_simulatedOutputs, logP] = PE_object.doMetropolisHastings()
     
-    #PE_object.doGridSearch('doMetropolisHastings')
+    #PE_object.doddSearch('doMetropolisHastings')
     
     PE_object.createAllPlots() #This function calls each of the below functions.
 #    PE_object.makeHistogramsForEachParameter()    
 #    PE_object.makeSamplingScatterMatrixPlot()
 #    PE_object.createSimulatedResponsesPlot()
     #TODO: call the mum_pce plotting objects, which will be PE_object.createContourGraphs() or something like that.
+    UserInput.parameter_estimation_settings['mcmc_threshold_filter_coefficient']= 1.0
+    PE_object.calculatePostBurnInStatistics()
+    PE_object.createAllPlots()
+    
+    
+    UserInput.parameter_estimation_settings['mcmc_threshold_filter_coefficient']= 0.50
+    PE_object.calculatePostBurnInStatistics()
+    PE_object.createAllPlots()
+    
+    
+    UserInput.parameter_estimation_settings['mcmc_threshold_filter_coefficient']= 0.10
+    PE_object.calculatePostBurnInStatistics()
+    PE_object.createAllPlots()
