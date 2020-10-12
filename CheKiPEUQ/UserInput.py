@@ -44,7 +44,7 @@ parameter_estimation_settings = {}
 parameter_estimation_settings['verbose'] = False
 parameter_estimation_settings['exportLog'] = True
 parameter_estimation_settings['exportAllSimulatedOutputs'] = False
-parameter_estimation_settings['checkPointFrequency'] = None
+parameter_estimation_settings['checkPointFrequency'] = None #Deprecated. It will override all other checkpoint choices if it is changed from None. The user should use the similar variables below.
 parameter_estimation_settings['scaling_uncertainties_type'] = "std" #"std" is for standard deviation. there is also "off" and the option of "mu" for using the absolute values of the mean(s) of the prior distribution(s). If a scalar is entered (a float) then that fixed value will be used for all scalings.
 parameter_estimation_settings['undo_scaling_uncertainties_type'] = False #This undoing can be set to True but presently only works for the case of fixed scaling (a single scalar).
 				  
@@ -62,6 +62,11 @@ parameter_estimation_settings['mcmc_threshold_filter_coefficient'] = 'auto' #Thi
 #The below settings are for ESS and/or parallel sampling#
 parameter_estimation_settings['mcmc_nwalkers'] = 'auto'  #The number of walkers to use.  By default, if doing ESS, this is 4*numParameters. As of Oct 2020, this has no effect for MetropolisHastings.
 parameter_estimation_settings['mcmc_maxiter'] = 1E6 #This is related to the expansions and contractions in ESS. It has a role similar to limiting the number of iterations in conventional regression. The ESS backend has a default value of 1E4, but in initial testing that was violated too often so 1E6 has been used now.
+parameter_estimation_settings['mcmc_maxiter'] = 1E6 
+parameter_estimation_settings['mcmc_walkerInitialDistribution'] = 'auto' #Can be 'uniform', 'gaussian', or 'identical'.  Auto will use 'uniform' during gridsearch and 'uniform' for most other cases.
+parameter_estimation_settings['mcmc_checkPointFrequency'] = None #This is only for MH, not ESS. (as of Oct 2020)
+parameter_estimation_settings['gridsearch_checkPointFrequency'] = None #Note: this does not work perfectly with ESS.
+
 
 #####Plot Settings#####
 #possible dictionary fields include: dpi, figure_name, fontsize, x_label, y_label, figure_name, x_range, y_range

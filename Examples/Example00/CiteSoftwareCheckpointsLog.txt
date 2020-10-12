@@ -617,3 +617,528 @@
         - >-
             @article{ess,  title={Ensemble Slice Sampling}, author={Minas Karamanis and Florian Beutler}, year={2020}, eprint={2002.06212}, archivePrefix={arXiv}, primaryClass={stat.ML} }
 ---
+---
+-
+    timestamp: >-
+        2020-10-10T12:45:14
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+-
+    timestamp: >-
+        2020-10-10T12:45:14
+    unique_id: >-
+        https://github.com/minaskar/zeus
+    software_name: >-
+        zeus
+    version:
+        - >-
+            2.0.0
+    author:
+        - >-
+            Minas Karamanis
+        - >-
+            Florian Beutler
+    cite:
+        - >-
+            Minas Karamanis and Florian Beutler. zeus: A Python Implementation of the Ensemble Slice Sampling method. 2020. 
+        - >-
+            https://arxiv.org/abs/2002.06212
+        - >-
+            @article{ess,  title={Ensemble Slice Sampling}, author={Minas Karamanis and Florian Beutler}, year={2020}, eprint={2002.06212}, archivePrefix={arXiv}, primaryClass={stat.ML} }
+---
+---
+-
+    timestamp: >-
+        2020-10-10T13:36:31
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-10T13:36:31
+    unique_id: >-
+        https://github.com/minaskar/zeus
+    software_name: >-
+        zeus
+    version:
+        - >-
+            2.0.0
+    author:
+        - >-
+            Minas Karamanis
+        - >-
+            Florian Beutler
+    cite:
+        - >-
+            Minas Karamanis and Florian Beutler. zeus: A Python Implementation of the Ensemble Slice Sampling method. 2020. 
+        - >-
+            https://arxiv.org/abs/2002.06212
+        - >-
+            @article{ess,  title={Ensemble Slice Sampling}, author={Minas Karamanis and Florian Beutler}, year={2020}, eprint={2002.06212}, archivePrefix={arXiv}, primaryClass={stat.ML} }
+---
+-
+    timestamp: >-
+        2020-10-10T17:18:03
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-10T17:18:15
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-10T17:18:29
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+---
+-
+    timestamp: >-
+        2020-10-10T17:18:55
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-10T17:20:12
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+---
+---
+-
+    timestamp: >-
+        2020-10-11T19:07:23
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-11T19:07:24
+    unique_id: >-
+        https://github.com/minaskar/zeus
+    software_name: >-
+        zeus
+    version:
+        - >-
+            2.0.0
+    author:
+        - >-
+            Minas Karamanis
+        - >-
+            Florian Beutler
+    cite:
+        - >-
+            Minas Karamanis and Florian Beutler. zeus: A Python Implementation of the Ensemble Slice Sampling method. 2020. 
+        - >-
+            https://arxiv.org/abs/2002.06212
+        - >-
+            @article{ess,  title={Ensemble Slice Sampling}, author={Minas Karamanis and Florian Beutler}, year={2020}, eprint={2002.06212}, archivePrefix={arXiv}, primaryClass={stat.ML} }
+---
+-
+    timestamp: >-
+        2020-10-11T19:08:52
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-11T19:08:52
+    unique_id: >-
+        https://github.com/minaskar/zeus
+    software_name: >-
+        zeus
+    version:
+        - >-
+            2.0.0
+    author:
+        - >-
+            Minas Karamanis
+        - >-
+            Florian Beutler
+    cite:
+        - >-
+            Minas Karamanis and Florian Beutler. zeus: A Python Implementation of the Ensemble Slice Sampling method. 2020. 
+        - >-
+            https://arxiv.org/abs/2002.06212
+        - >-
+            @article{ess,  title={Ensemble Slice Sampling}, author={Minas Karamanis and Florian Beutler}, year={2020}, eprint={2002.06212}, archivePrefix={arXiv}, primaryClass={stat.ML} }
+---
+-
+    timestamp: >-
+        2020-10-11T19:09:16
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-11T19:09:16
+    unique_id: >-
+        https://github.com/minaskar/zeus
+    software_name: >-
+        zeus
+    version:
+        - >-
+            2.0.0
+    author:
+        - >-
+            Minas Karamanis
+        - >-
+            Florian Beutler
+    cite:
+        - >-
+            Minas Karamanis and Florian Beutler. zeus: A Python Implementation of the Ensemble Slice Sampling method. 2020. 
+        - >-
+            https://arxiv.org/abs/2002.06212
+        - >-
+            @article{ess,  title={Ensemble Slice Sampling}, author={Minas Karamanis and Florian Beutler}, year={2020}, eprint={2002.06212}, archivePrefix={arXiv}, primaryClass={stat.ML} }
+---
+-
+    timestamp: >-
+        2020-10-11T19:09:36
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-11T19:09:36
+    unique_id: >-
+        https://github.com/minaskar/zeus
+    software_name: >-
+        zeus
+    version:
+        - >-
+            2.0.0
+    author:
+        - >-
+            Minas Karamanis
+        - >-
+            Florian Beutler
+    cite:
+        - >-
+            Minas Karamanis and Florian Beutler. zeus: A Python Implementation of the Ensemble Slice Sampling method. 2020. 
+        - >-
+            https://arxiv.org/abs/2002.06212
+        - >-
+            @article{ess,  title={Ensemble Slice Sampling}, author={Minas Karamanis and Florian Beutler}, year={2020}, eprint={2002.06212}, archivePrefix={arXiv}, primaryClass={stat.ML} }
+---
+---
+-
+    timestamp: >-
+        2020-10-11T19:15:11
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-11T19:15:11
+    unique_id: >-
+        https://github.com/minaskar/zeus
+    software_name: >-
+        zeus
+    version:
+        - >-
+            2.0.0
+    author:
+        - >-
+            Minas Karamanis
+        - >-
+            Florian Beutler
+    cite:
+        - >-
+            Minas Karamanis and Florian Beutler. zeus: A Python Implementation of the Ensemble Slice Sampling method. 2020. 
+        - >-
+            https://arxiv.org/abs/2002.06212
+        - >-
+            @article{ess,  title={Ensemble Slice Sampling}, author={Minas Karamanis and Florian Beutler}, year={2020}, eprint={2002.06212}, archivePrefix={arXiv}, primaryClass={stat.ML} }
+---
+-
+    timestamp: >-
+        2020-10-11T19:18:02
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-11T19:18:03
+    unique_id: >-
+        https://github.com/minaskar/zeus
+    software_name: >-
+        zeus
+    version:
+        - >-
+            2.0.0
+    author:
+        - >-
+            Minas Karamanis
+        - >-
+            Florian Beutler
+    cite:
+        - >-
+            Minas Karamanis and Florian Beutler. zeus: A Python Implementation of the Ensemble Slice Sampling method. 2020. 
+        - >-
+            https://arxiv.org/abs/2002.06212
+        - >-
+            @article{ess,  title={Ensemble Slice Sampling}, author={Minas Karamanis and Florian Beutler}, year={2020}, eprint={2002.06212}, archivePrefix={arXiv}, primaryClass={stat.ML} }
+---
+---
+---
+---
+-
+    timestamp: >-
+        2020-10-11T19:22:15
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-11T19:22:16
+    unique_id: >-
+        https://github.com/minaskar/zeus
+    software_name: >-
+        zeus
+    version:
+        - >-
+            2.0.0
+    author:
+        - >-
+            Minas Karamanis
+        - >-
+            Florian Beutler
+    cite:
+        - >-
+            Minas Karamanis and Florian Beutler. zeus: A Python Implementation of the Ensemble Slice Sampling method. 2020. 
+        - >-
+            https://arxiv.org/abs/2002.06212
+        - >-
+            @article{ess,  title={Ensemble Slice Sampling}, author={Minas Karamanis and Florian Beutler}, year={2020}, eprint={2002.06212}, archivePrefix={arXiv}, primaryClass={stat.ML} }
+---
+---
+---

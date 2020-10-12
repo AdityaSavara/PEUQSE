@@ -50,7 +50,7 @@ if __name__ == "__main__":
     #Now we do parameter estimation.
     PE_object.doGridSearch('getLogP')
     #PE_object.doMetropolisHastings()
-    #PE_object.doOptimizeNegLogP(method="BFGS", printOptimum=True, verbose=True)
+    #PE_object.doOptimizeNegLogP(method="BFGS", printOptimum=True)
     #[map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, samples_simulatedOutputs, logP] = PE_object.doMetropolisHastings()
     
     PE_object.createAllPlots() #This function calls each of the below functions.

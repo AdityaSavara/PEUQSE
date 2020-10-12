@@ -31,6 +31,7 @@ class parameter_estimation:
     software_version = "1.0.0"
     software_unique_id = "https://doi.org/10.1002/cctc.202000953"
     software_kwargs = {"version": software_version, "author": ["Aditya Savara", "Eric A. Walker"], "doi": "https://doi.org/10.1002/cctc.202000953", "cite": "Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953"} 
+    @CiteSoft.after_call_compile_consolidated_log()
     @CiteSoft.module_call_cite(unique_id=software_unique_id, software_name=software_name, **software_kwargs)
     def __init__(self, UserInput = None):
         self.UserInput = UserInput #Note that this is a pointer, so the later lines are within this object.
@@ -40,6 +41,10 @@ class parameter_estimation:
         UserInput.parameterNamesAndMathTypeExpressionsDict = UserInput.model['parameterNamesAndMathTypeExpressionsDict']
         if self.UserInput.parameter_estimation_settings['verbose']: 
             print("Paremeter Estimation Object Initialized")
+        
+        if UserInput.parameter_estimation_settings['checkPointFrequency'] != None: #This is for backwards compatibility.
+            UserInput.parameter_estimation_settings['mcmc_checkPointFrequency'] = UserInput.parameter_estimation_settings['checkPointFrequency']
+            UserInput.parameter_estimation_settings['gridsearch_checkPointFrequency'] = UserInput.parameter_estimation_settings['checkPointFrequency']
         
         #Setting this object so that we can make changes to it below without changing userinput dictionaries.
         self.UserInput.mu_prior = np.array(UserInput.model['InputParameterPriorValues']) 
@@ -145,9 +150,9 @@ class parameter_estimation:
         self.Q_covmat = self.UserInput.covmat_prior # Take small steps. 
         #Getting initial guess of parameters and populating the internal variable for it.
         if 'InputParameterInitialGuess' not in self.UserInput.model: #if an initial guess is not provided, we use the prior.
-            self.UserInput.model['InputParameterInitialGuess'] = self.UserInput.mu_prior
-        #From now, we switch to self.UserInput.InputParameterInitialGuess because this is needed in case we're going to do reducedParameterSpace.
-        self.UserInput.InputParameterInitialGuess = self.UserInput.model['InputParameterInitialGuess']
+            self.UserInput.model['InputParameterInitialGuess'] = np.array(self.UserInput.mu_prior, dtype='float')
+        #From now, we switch to self.UserInput.InputParameterInitialGuess because this is needed in case we're going to do reducedParameterSpace or grid sampling.
+        self.UserInput.InputParameterInitialGuess = np.array(self.UserInput.model['InputParameterInitialGuess'], dtype='float')
         #Now populate the simulation Functions. #NOTE: These will be changed if a reduced parameter space is used.
         self.UserInput.simulationFunction = self.UserInput.model['simulateByInputParametersOnlyFunction']
         self.UserInput.simulationOutputProcessingFunction = self.UserInput.model['simulationOutputProcessingFunction']
@@ -370,21 +375,35 @@ class parameter_estimation:
         return gridCombinations, numGridPoints  
   
     @CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
-    def doGridSearch(self, searchType='getLogP', exportLog = True, gridSamplingAbsoluteIntervalSize = [], gridSamplingNumOfIntervals = [], passThroughArgs = {}):
+    def doGridSearch(self, searchType='getLogP', exportLog = True, gridSamplingAbsoluteIntervalSize = [], gridSamplingNumOfIntervals = [], passThroughArgs = {}, calculatePostBurnInStatistics=True,  keep_cumulative_post_burn_in_data = False, walkerInitialDistribution='UserChoice'):
         # gridSamplingNumOfIntervals is the number of variations to check in units of variance for each parameter. Can be 0 if you don't want to vary a particular parameter in the grid search.
+        #calculatePostBurnInStatistics will store all the individual runs in memory and will then provide the samples of the best one.
         #TODO: the upper part of the gridsearch may not be compatibile with reduced parameter space. Needs to be checked.
         verbose = self.UserInput.parameter_estimation_settings['verbose']
 
-        gridCenter = self.UserInput.InputParameterInitialGuess #We take what is in the variable self.UserInput.InputParameterInitialGuess for the center of the grid.    
+
+        gridCenter = self.UserInput.InputParameterInitialGuess #This may be a reduced parameter space.
+        
         gridCombinations, numGridPoints = self.getGridCombinations(gridCenter, gridSamplingAbsoluteIntervalSize, gridSamplingNumOfIntervals)
         allGridResults = []
         #Initialize some things before loop.
-        if (type(self.UserInput.parameter_estimation_settings['checkPointFrequency']) != type(None)) or (verbose == True):
+        if (type(self.UserInput.parameter_estimation_settings['gridsearch_checkPointFrequency']) != type(None)) or (verbose == True):
                 import timeit
                 timeAtGridStart = timeit.time.clock()
                 timeAtLastGridPoint = timeAtGridStart #just initializing
         highest_logP = float('-inf') #Just initializing.
+        if searchType == 'doEnsembleSliceSampling':
+            if str(self.UserInput.parameter_estimation_settings['mcmc_nwalkers']).lower() == 'auto':
+                gridsearch_mcmc_nwalkers = 2*len(gridCenter) #Lowest possible is 2 times num parameters for ESS.
+            else:
+                gridsearch_mcmc_nwalkers = int(self.UserInput.parameter_estimation_settings['mcmc_nwalkers'])
         #Start grid search loop.
+        if searchType == ('doEnsembleSliceSampling' or 'doMetropolisHastings'): #Choose the walker distribution type.
+                if walkerInitialDistribution == 'UserChoice': #UserChoice comes from UserInput. It can still be auto.
+                    walkerInitialDistribution = self.UserInput.parameter_estimation_settings['mcmc_walkerInitialDistribution']
+                #The identical distribution is used by default because otherwise the walkers may be spread out too far and it could defeat the purpose of a gridsearch.
+                if walkerInitialDistribution.lower() == 'auto':
+                    walkerInitialDistribution = 'uniform'
         for combinationIndex,combination in enumerate(gridCombinations):
             self.UserInput.InputParameterInitialGuess = combination #We need to fill the variable InputParameterInitialGuess with the combination being checked.
             if searchType == 'getLogP':
@@ -392,18 +411,36 @@ class parameter_estimation:
                 self.map_parameter_set = combination
                 thisResult = [self.map_logP, str(self.map_parameter_set).replace(",","|").replace("[","").replace('(','').replace(')',''), 'None', 'None', 'None', 'None', 'None', 'None']
             if searchType == 'doMetropolisHastings':
-                thisResult = self.doMetropolisHastings()
+                thisResult = self.doMetropolisHastings(calculatePostBurnInStatistics=calculatePostBurnInStatistics, exportLog=False)
                 #self.map_logP gets done by itself in doMetropolisHastings
+                if keep_cumulative_post_burn_in_data == True:
+                    if combinationIndex == 0:
+                        self.cumulative_post_burn_in_samples = self.post_burn_in_samples
+                        self.cumulative_post_burn_in_log_priors_vec = self.post_burn_in_log_priors_vec
+                        self.cumulative_post_burn_in_log_posteriors_un_normed_vec = self.post_burn_in_log_posteriors_un_normed_vec
+                    else: #This is basically elseif combinationIndex > 0:
+                        self.cumulative_post_burn_in_samples = np.vstack((cumulative_post_burn_in_samples, self.post_burn_in_samples))
+                        self.cumulative_post_burn_in_log_priors_vec = np.vstack((cumulative_post_burn_in_log_priors_vec, self.post_burn_in_log_priors_vec))
+                        self.cumulative_post_burn_in_log_posteriors_un_normed_vec = np.vstack((cumulative_post_burn_in_log_posteriors_un_normed_vec, self.post_burn_in_log_posteriors_un_normed_vec))
             if searchType == 'doEnsembleSliceSampling':
-                thisResult = self.doEnsembleSliceSampling()
+                thisResult = self.doEnsembleSliceSampling(mcmc_nwalkers_direct_input=gridsearch_mcmc_nwalkers, calculatePostBurnInStatistics=calculatePostBurnInStatistics, exportLog=False, walkerInitialDistribution=walkerInitialDistribution) 
                 #self.map_logP gets done by itself in doEnsembleSliceSampling
+                if keep_cumulative_post_burn_in_data == True:
+                    if combinationIndex == 0:
+                        self.cumulative_post_burn_in_samples = self.post_burn_in_samples
+                        self.cumulative_post_burn_in_log_priors_vec = self.post_burn_in_log_priors_vec
+                        self.cumulative_post_burn_in_log_posteriors_un_normed_vec = self.post_burn_in_log_posteriors_un_normed_vec
+                    else: #This is basically elseif combinationIndex > 0:
+                        self.cumulative_post_burn_in_samples = np.vstack((cumulative_post_burn_in_samples, self.post_burn_in_samples))
+                        self.cumulative_post_burn_in_log_priors_vec = np.vstack((cumulative_post_burn_in_log_priors_vec, self.post_burn_in_log_priors_vec))
+                        self.cumulative_post_burn_in_log_posteriors_un_normed_vec = np.vstack((cumulative_post_burn_in_log_posteriors_un_normed_vec, self.post_burn_in_log_posteriors_un_normed_vec))
             if searchType == 'doOptimizeNegLogP':
                 thisResult = self.doOptimizeNegLogP(**passThroughArgs)
                 #FIXME: the column headings of "thisResult" are wrong for the case of doOptimizeNegLogP.
                 #What we really need to do is have the log file's column headings generated based on the searchType.
             if searchType == 'doOptimizeSSR':
                 thisResult = self.doOptimizeSSR(**passThroughArgs)
-            if (type(self.UserInput.parameter_estimation_settings['checkPointFrequency']) != type(None)) or (verbose == True):
+            if (type(self.UserInput.parameter_estimation_settings['gridsearch_checkPointFrequency']) != type(None)) or (verbose == True):
                 timeAtThisGridPoint = timeit.time.clock()
                 timeOfThisGridPoint = timeAtThisGridPoint - timeAtLastGridPoint
                 averageTimePerGridPoint = (timeAtThisGridPoint - timeAtGridStart)/(combinationIndex+1)
@@ -417,9 +454,9 @@ class parameter_estimation:
             if verbose == True:
                 print("GridPoint", combination, "number", combinationIndex+1, "out of", numGridPoints, "timeOfThisGridPoint", timeOfThisGridPoint)
                 print("GridPoint", combinationIndex+1, "averageTimePerGridPoint", "%.2f" % round(averageTimePerGridPoint,2), "estimated time remaining", "%.2f" % round( numRemainingGridPoints*averageTimePerGridPoint,2), "s" )
-                print("GridPoint", combinationIndex+1, "current logP", self.map_logP, "highest logP", highest_logP)
-            elif type(self.UserInput.parameter_estimation_settings['checkPointFrequency']) != type(None): #If verbose off but checkpoint frequency is on.
-                if (combinationIndex/self.UserInput.parameter_estimation_settings['checkPointFrequency']).is_integer():
+                print("GridPoint", combinationIndex+1, "current logP", self.map_logP, "highest logP", highest_logP, "highest logP Parameter Set", highest_logP_parameter_set)
+            elif type(self.UserInput.parameter_estimation_settings['gridsearch_checkPointFrequency']) != type(None): #If verbose off but checkpoint frequency is on.
+                if (combinationIndex ==0 or ((combinationIndex+1)/self.UserInput.parameter_estimation_settings['gridsearch_checkPointFrequency']).is_integer()):
                     print("GridPoint", combination, "number", combinationIndex+1, "out of", numGridPoints, "timeOfThisGridPoint", timeOfThisGridPoint)
                     print("GridPoint", combinationIndex+1, "averageTimePerGridPoint", "%.2f" % round(averageTimePerGridPoint,2), "estimated time remaining", "%.2f" % round( numRemainingGridPoints*averageTimePerGridPoint,2), "s" )
                     print("GridPoint", combinationIndex+1, "current logP", self.map_logP, "highest logP", highest_logP)
@@ -432,14 +469,23 @@ class parameter_estimation:
         self.map_parameter_set = highest_logP_parameter_set 
         if exportLog == True:
             with open("gridsearch_log_file.txt", 'w') as out_file:
-                out_file.write("result: " + "self.map_logP, self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_logP_un_normed_vec" + "\n")
+                out_file.write("result: " + "self.map_logP, self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec" + "\n")
                 for resultIndex, result in enumerate(allGridResults):
                     out_file.write("result: " + str(resultIndex) + " " +  str(result) + "\n")
-        print("Final map results from gridsearch:", self.map_parameter_set, "final logP:", self.map_logP)
-        if searchType == 'doMetropolisHastings' or 'doEnsembleSliceSampling':
-            #Metropolis hastings has other variables to populate.
-            #[self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_logP_un_normed_vec] =
-            return bestResultSoFar # [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_logP_un_normed_vec] 
+        print("Final map results from gridsearch:", self.map_parameter_set, "Final map logP:", self.map_logP)
+        if searchType == ('doMetropolisHastings' or 'doEnsembleSliceSampling'):
+            #For MCMC, we can now calculate the post_burn_in statistics for the best sampling from the full samplings done. We don't want to lump all together because that would not be unbiased.
+            if calculatePostBurnInStatistics == True:
+                self.post_burn_in_samples = bestResultSoFar[5] #Setting the global variable will allow calculating the info gain and priors also.
+                self.post_burn_in_log_posteriors_un_normed_vec = bestResultSoFar[6]
+                self.calculatePostBurnInStatistics(calculate_post_burn_in_log_priors_vec = True)
+                self.exportPostBurnInStatistics()
+            #One could call calculatePostBurnInStatistics() if one wanted the cumulative from all results. But we don't actually want that.
+            #Below should not be used. These commented out lines are biased towards the center of the grid.
+            #self.post_burn_in_samples = cumulative_post_burn_in_samples
+            #self.post_burn_in_log_priors_vec = cumulative_post_burn_in_log_priors_vec
+            #self.post_burn_in_log_posteriors_un_normed_vec = cumulative_post_burn_in_log_posteriors_un_normed_vec
+            return bestResultSoFar # [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec] 
         if searchType == 'doOptimizeNegLogP':            
             return bestResultSoFar# [self.map_parameter_set, self.map_logP]
         if searchType == 'getLogP':          
@@ -481,9 +527,9 @@ class parameter_estimation:
     software_version = "1.0.2"
     software_unique_id = "https://doi.org/10.1002/cctc.202000976"
     software_kwargs = {"version": software_version, "author": ["Eric A. Walker", "Kishore Ravisankar", "Aditya Savara"], "doi": "https://doi.org/10.1002/cctc.202000976", "cite": "Eric Alan Walker, Kishore Ravisankar, Aditya Savara. CheKiPEUQ Intro 2: Harnessing Uncertainties from Data Sets, Bayesian Design of Experiments in Chemical Kinetics. ChemCatChem. Accepted. doi:10.1002/cctc.202000976"} 
-    @CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
+    #@CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
     @CiteSoft.module_call_cite(unique_id=software_unique_id, software_name=software_name, **software_kwargs)
-    def doeGetInfoGainMatrix(self, parameterCombination):#Note: There is an implied argument of info_gains_matrices_array_format being 'xyz' or 'meshgrid'
+    def doeGetInfoGainMatrix(self, parameterCombination, searchType='doMetropolisHastings'):#Note: There is an implied argument of info_gains_matrices_array_format being 'xyz' or 'meshgrid'
         #At present, we *must* provide a parameterCombination because right now the only way to get an InfoGainMatrix is with synthetic data assuming a particular parameterCombination as the "real" or "actual" parameterCombination.
         doe_settings = self.UserInput.doe_settings
         self.middle_of_doe_flag = True  #This is a work around that is needed because right now the synthetic data creation has an __init__ call which is going to try to modify the independent variables back to their original values if we don't do this.
@@ -507,7 +553,10 @@ class parameter_estimation:
                 #This population Must occur here. It has to be after the indpendent variables have changed, before synthetic data is made, and before the MCMC is performed.
                 self.UserInput.model['populateIndependentVariablesFunction'](conditionsCombination)
                 self.populateResponsesWithSyntheticData(parameterCombination)
-                [map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, logP] = self.doMetropolisHastings()
+                if searchType=='doMetropolisHastings':
+                    [map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, logP] = self.doMetropolisHastings()
+                if searchType=='doEnsembleSliceSampling':
+                    [map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, logP] = self.doEnsembleSliceSampling()
                 conditionsCombination = np.array(conditionsCombination) #we're going to make this an array before adding to the info_gain matrix.
                 conditionsCombinationAndInfoGain = np.hstack((conditionsCombination, info_gain))
                 info_gain_matrix.append(conditionsCombinationAndInfoGain)
@@ -549,7 +598,10 @@ class parameter_estimation:
                         #This population Must occur here. It has to be after the indpendent variables have changed, before synthetic data is made, and before the MCMC is performed.
                         self.UserInput.model['populateIndependentVariablesFunction']([indValue1,indValue2])
                         self.populateResponsesWithSyntheticData(parameterCombination)
-                        [map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, logP] = self.doMetropolisHastings()
+                        if searchType=='doMetropolisHastings':
+                            [map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, logP] = self.doMetropolisHastings()
+                        if searchType=='doEnsembleSliceSampling':
+                            [map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, logP] = self.doEnsembleSliceSampling()
                         conditionsCombination = np.array([indValue1,indValue2])
                         conditionsCombinationAndInfoGain = np.hstack((conditionsCombination, info_gain))
                         info_gain_matrix.append(conditionsCombinationAndInfoGain) #NOTE that the structure *includes* the combinations.
@@ -566,7 +618,7 @@ class parameter_estimation:
                 return np.array(info_gain_matrix)
     
     #This function requires population of the UserInput doe_settings dictionary. It automatically scans many parameter modulation combinations.
-    def doeParameterModulationCombinationsScanner(self):
+    def doeParameterModulationCombinationsScanner(self, searchType='doMetropolisHastings'):
         import CheKiPEUQ.CombinationGeneratorModule as CombinationGeneratorModule
         doe_settings = self.UserInput.doe_settings 
         #For the parameters, we are able to use a default one standard deviation grid if gridSamplingAbsoluteIntervalSize is a blank list.
@@ -593,7 +645,7 @@ class parameter_estimation:
                 info_gains_matrices_lists_one_for_each_parameter.append([]) #These are empty lists create to indices and initialize each parameter's info_gain_matrix. They will be appended to later.
         for parModulationCombinationIndex,parModulationCombination in enumerate(parModulationGridCombinations):                
             #We will get separate info gain matrix for each parameter modulation combination.
-            info_gain_matrix = self.doeGetInfoGainMatrix(parModulationCombination)
+            info_gain_matrix = self.doeGetInfoGainMatrix(parModulationCombination, searchType=searchType)
             #Append the info gain matrix obtainend.
             info_gains_matrices_list.append(np.array(info_gain_matrix))
             if self.UserInput.doe_settings['info_gains_matrices_multiple_parameters'] == 'each': #copy the above lines which were for the sum.
@@ -843,9 +895,12 @@ class parameter_estimation:
         return self.info_gain    
 
     #This function will calculate MAP and mu_AP, evidence, and related quantities.
-    def calculatePostBurnInStatistics(self):       
+    def calculatePostBurnInStatistics(self, calculate_post_burn_in_log_priors_vec = False):       
         #First need to create priors if not already there, because ESS does not store priors during the run (MH does).
-        if not hasattr(self, 'post_burn_in_log_priors_vec'): #Below line following a line from https://github.com/threeML/threeML/blob/master/threeML/bayesian/zeus_sampler.py
+        if not hasattr(self, 'post_burn_in_log_priors_vec'): 
+            calculate_post_burn_in_log_priors_vec = True 
+        if calculate_post_burn_in_log_priors_vec == True:
+                #Below line following a line from https://github.com/threeML/threeML/blob/master/threeML/bayesian/zeus_sampler.py
                 self.post_burn_in_log_priors_vec = np.array([self.getLogPrior(parameterCombination) for parameterCombination in self.post_burn_in_samples])
                 self.post_burn_in_log_priors_vec = np.atleast_2d(self.post_burn_in_log_priors_vec).transpose()
         #Next need to apply filtering before getting statistics.
@@ -854,28 +909,31 @@ class parameter_estimation:
         if type(filterCoeffient) == type("string"):
             if filterCoeffient.lower() == "auto":
                 filterCoeffient = 2.0
-            else: filterCoeffient = float(filterCoeffient)
         if filterSamples == True:   
-            originalLength = np.shape(self.post_burn_in_logP_un_normed_vec)[0] 
-            mergedArray = np.hstack( (self.post_burn_in_logP_un_normed_vec, self.post_burn_in_log_priors_vec, self.post_burn_in_samples) )
+            originalLength = np.shape(self.post_burn_in_log_posteriors_un_normed_vec)[0] 
+            try:
+                mergedArray = np.hstack( (self.post_burn_in_log_posteriors_un_normed_vec, self.post_burn_in_log_priors_vec, self.post_burn_in_samples) )
+            except:
+                print("Line 866: There has been an error, here are post_burn_in_log_posteriors_un_normed_vec, post_burn_in_samples, post_burn_in_log_priors_vec", np.shape(self.post_burn_in_log_posteriors_un_normed_vec), np.shape(self.post_burn_in_samples), np.shape(self.post_burn_in_log_priors_vec))
+                print(self.post_burn_in_log_posteriors_un_normed_vec, self.post_burn_in_samples, self.post_burn_in_log_priors_vec)
+                sys.exit()
             #Now need to find cases where the probability is too low and filter them out.
             #Filtering Step 1: Find average and Stdev of log(-logP)
-            logNegLogP = np.log(-1*self.post_burn_in_logP_un_normed_vec)
+            logNegLogP = np.log(-1*self.post_burn_in_log_posteriors_un_normed_vec)
             meanLogNegLogP = np.mean(logNegLogP)
             stdLogNegLogP = np.std(logNegLogP)
             filteringThreshold = meanLogNegLogP+filterCoeffient*stdLogNegLogP #Threshold.
             #Now, call the function I have made for filtering by deleting the rows above/below a certain value
             truncatedMergedArray = arrayThresholdFilter(mergedArray, filterKey=logNegLogP, thresholdValue=filteringThreshold, removeValues = 'above', transpose=False)
-            self.post_burn_in_logP_un_normed_vec = np.atleast_2d(truncatedMergedArray[:,0]).transpose()
-            self.post_burn_in_log_posteriors_un_normed_vec = self.post_burn_in_logP_un_normed_vec #FIXME: Change it so there is only one variable name.
+            self.post_burn_in_log_posteriors_un_normed_vec = np.atleast_2d(truncatedMergedArray[:,0]).transpose()
             self.post_burn_in_log_priors_vec = np.atleast_2d(truncatedMergedArray[:,1]).transpose()
             self.post_burn_in_samples = truncatedMergedArray[:,2:]
         #Map calculation etc. is intentionally placed below the filtering so that the map_index is assigned correctly per the final values.
         self.mu_AP_parameter_set = np.mean(self.post_burn_in_samples, axis=0) #This is the mean of the posterior, and is the point with the highest expected value of the posterior (for most distributions). For the simplest cases, map and mu_AP will be the same.
         self.stdap_parameter_set = np.std(self.post_burn_in_samples, axis=0) #This is the mean of the posterior, and is the point with the highest expected value of the posterior (for most distributions). For the simplest cases, map and mu_AP will be the same.            
-        map_logP = max(self.post_burn_in_logP_un_normed_vec)
+        map_logP = max(self.post_burn_in_log_posteriors_un_normed_vec)
         self.map_logP = map_logP
-        self.map_index = list(self.post_burn_in_logP_un_normed_vec).index(map_logP) #This does not have to be a unique answer, just one of them places which gives map_logP.
+        self.map_index = list(self.post_burn_in_log_posteriors_un_normed_vec).index(map_logP) #This does not have to be a unique answer, just one of them places which gives map_logP.
         self.map_parameter_set = self.post_burn_in_samples[self.map_index] #This  is the point with the highest probability in the posterior.            
         #TODO: Probably should return the variance of each sample in the post_burn_in
         #posterior probabilites are transformed to a standard normal (std=1) for obtaining the evidence:
@@ -883,76 +941,88 @@ class parameter_estimation:
         if abs((self.map_parameter_set - self.mu_AP_parameter_set)/self.UserInput.var_prior).any() > 0.10:  
             pass #Disabling below warning until if statement it is fixed.
             #print("Warning: The MAP parameter set and mu_AP parameter set differ by more than 10% of prior variance in at least one parameter. This may mean that you need to increase your mcmc_length, increase or decrease your mcmc_relative_step_length, or change what is used for the model response.  There is no general method for knowing the right  value for mcmc_relative_step_length since it depends on the sharpness and smoothness of the response. See for example https://www.sciencedirect.com/science/article/pii/S0039602816300632  ")
+        self.info_gain = self.calculateInfoGain()
+        if self.UserInput.parameter_estimation_settings['verbose'] == True:
+            print("map_parameter_set ", self.map_parameter_set)
+            print("mu_AP_parameter_set ", self.mu_AP_parameter_set)
+            print("stdap_parameter_set ",self.stdap_parameter_set)
+        return [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec]
 
     def exportPostBurnInStatistics(self):
-        if self.UserInput.parameter_estimation_settings['verbose'] == True:
-            print(self.map_parameter_set)
-            print(self.mu_AP_parameter_set)
-            print(self.stdap_parameter_set)
-        if self.UserInput.parameter_estimation_settings['exportLog'] == True:
-            #The self.post_burn_in_samples_simulatedOutputs has length of ALL sampling including burn_in
-            #The self.post_burn_in_samples is only AFTER burn in.
-            #The self.post_burn_in_log_posteriors_un_normed_vec is AFTER burn in.           
-            #TODO: Make header for mcmc_output
-            mcmc_output = np.hstack((self.post_burn_in_logP_un_normed_vec,self.post_burn_in_samples))
-            np.savetxt('mcmc_logP_and_parameter_samples.csv',mcmc_output, delimiter=",")             
-            if self.UserInput.parameter_estimation_settings['exportAllSimulatedOutputs'] == True: #By default, we should not keep this, it's a little too large with large sampling.
-                np.savetxt('mcmc_all_simulated_outputs.csv',self.post_burn_in_samples_simulatedOutputs, delimiter=",")             
-            with open("mcmc_log_file.txt", 'w') as out_file:
-                out_file.write("MAP_logP:" +  str(self.map_logP) + "\n")
-                out_file.write("self.map_index:" +  str(self.map_index) + "\n")
-                out_file.write("self.map_parameter_set:" + str( self.map_parameter_set) + "\n")
-                out_file.write("self.mu_AP_parameter_set:" + str( self.mu_AP_parameter_set) + "\n")
-                out_file.write("self.stdap_parameter_set:" + str( self.stdap_parameter_set) + "\n")
-                out_file.write("self.info_gain:" +  str(self.info_gain) + "\n")
-                out_file.write("evidence:" + str(self.evidence) + "\n")
-                out_file.write("posterior_cov_matrix:" + "\n" + str(np.cov(self.post_burn_in_samples.T)) + "\n")
-                if abs((self.map_parameter_set - self.mu_AP_parameter_set)/self.UserInput.var_prior).any() > 0.10:
-                    pass #Disabling below warning until if statement is fixed.
-                    #out_file.write("Warning: The MAP parameter set and mu_AP parameter set differ by more than 10% of prior variance in at least one parameter. This may mean that you need to increase your mcmc_length, increase or decrease your mcmc_relative_step_length, or change what is used for the model response.  There is no general method for knowing the right  value for mcmc_relative_step_length since it depends on the sharpness and smoothness of the response. See for example https://www.sciencedirect.com/science/article/pii/S0039602816300632")
+        #TODO: Make header for mcmc_samples_array. Also make exporting the mcmc_samples_array optional. 
+        mcmc_samples_array = np.hstack((self.post_burn_in_log_posteriors_un_normed_vec,self.post_burn_in_samples))
+        np.savetxt('mcmc_logP_and_parameter_samples.csv',mcmc_samples_array, delimiter=",")             
+        if self.UserInput.parameter_estimation_settings['exportAllSimulatedOutputs'] == True: #By default, we should not keep this, it's a little too large with large sampling.
+            np.savetxt('mcmc_all_simulated_outputs.csv',self.post_burn_in_samples_simulatedOutputs, delimiter=",")             
+        with open("mcmc_log_file.txt", 'w') as out_file:
+            out_file.write("MAP_logP:" +  str(self.map_logP) + "\n")
+            out_file.write("self.map_index:" +  str(self.map_index) + "\n")
+            out_file.write("self.map_parameter_set:" + str( self.map_parameter_set) + "\n")
+            out_file.write("self.mu_AP_parameter_set:" + str( self.mu_AP_parameter_set) + "\n")
+            out_file.write("self.stdap_parameter_set:" + str( self.stdap_parameter_set) + "\n")
+            out_file.write("self.info_gain:" +  str(self.info_gain) + "\n")
+            out_file.write("evidence:" + str(self.evidence) + "\n")
+            out_file.write("posterior_cov_matrix:" + "\n" + str(np.cov(self.post_burn_in_samples.T)) + "\n")
+            if abs((self.map_parameter_set - self.mu_AP_parameter_set)/self.UserInput.var_prior).any() > 0.10:
+                pass #Disabling below warning until if statement is fixed.
+                #out_file.write("Warning: The MAP parameter set and mu_AP parameter set differ by more than 10% of prior variance in at least one parameter. This may mean that you need to increase your mcmc_length, increase or decrease your mcmc_relative_step_length, or change what is used for the model response.  There is no general method for knowing the right  value for mcmc_relative_step_length since it depends on the sharpness and smoothness of the response. See for example https://www.sciencedirect.com/science/article/pii/S0039602816300632")
     
     #Our EnsembleSliceSampling is done by the Zeus back end. (pip install zeus-mcmc)
     software_name = "zeus"
     software_version = "2.0.0"
     software_unique_id = "https://github.com/minaskar/zeus"
     software_kwargs = {"version": software_version, "author": ["Minas Karamanis", "Florian Beutler"], "cite": ["Minas Karamanis and Florian Beutler. zeus: A Python Implementation of the Ensemble Slice Sampling method. 2020. ","https://arxiv.org/abs/2002.06212", "@article{ess,  title={Ensemble Slice Sampling}, author={Minas Karamanis and Florian Beutler}, year={2020}, eprint={2002.06212}, archivePrefix={arXiv}, primaryClass={stat.ML} }"] }
-    @CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
+    #@CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
     @CiteSoft.module_call_cite(unique_id=software_unique_id, software_name=software_name, **software_kwargs)
-    def doEnsembleSliceSampling(self):
-        if str(self.UserInput.parameter_estimation_settings['mcmc_burn_in']).lower() == 'auto': self.mcmc_burn_in_length = int(self.UserInput.parameter_estimation_settings['mcmc_length']*0.1)
-        else: self.mcmc_burn_in_length = self.UserInput.parameter_estimation_settings['mcmc_burn_in']
+    def doEnsembleSliceSampling(self, mcmc_nwalkers_direct_input = None, walkerInitialDistribution='uniform', calculatePostBurnInStatistics=True, exportLog ='UserChoice'):
+        #The distribution of walkers intial points can be uniform or gaussian. As of OCt 2020, default is uniform spread around the intial guess.
+        #The mcmc_nwalkers_direct_input is really meant for gridsearch to override the other settings, though of course people could also use it directly.  
         import zeus
         '''these variables need to be made part of userinput'''
         numParameters = len(self.UserInput.InputParametersPriorValuesUncertainties) #This is the number of parameters.
-        if 'mcmc_nwalkers' not in self.UserInput.parameter_estimation_settings: nwalkers = 'auto'
-        else: nwalkers = self.UserInput.parameter_estimation_settings['mcmc_nwalkers']
-        if type(nwalkers) == type("string"): 
-            if nwalkers.lower() == "auto":
-                nwalkers = numParameters*4
-            else:
-                nwalkers =  int(nwalkers)
-        if (nwalkers%2) != 0:
+        if type(mcmc_nwalkers_direct_input) == type(None): #This is the normal case.
+            if 'mcmc_nwalkers' not in self.UserInput.parameter_estimation_settings: self.mcmc_nwalkers = 'auto'
+            else: self.mcmc_nwalkers = self.UserInput.parameter_estimation_settings['mcmc_nwalkers']
+            if type(self.mcmc_nwalkers) == type("string"): 
+                if self.mcmc_nwalkers.lower() == "auto":
+                    self.mcmc_nwalkers = numParameters*4
+                else: #else it is an integer, or a string meant to be an integer.
+                    self.mcmc_nwalkers =  int(self.mcmc_nwalkers)
+        else: #this is mainly for gridsearch which will (by default) use the minimum number of walkers per point.
+            self.mcmc_nwalkers = int(mcmc_nwalkers_direct_input)
+        if (self.mcmc_nwalkers%2) != 0: #Check that it's even. If not, add one walker.
             print("The EnsembleSliceSampling requires an even number of Walkers. Adding one Walker.")
-            nwalkers = nwalkers + 1
+            self.mcmc_nwalkers = self.mcmc_nwalkers + 1
         requested_mcmc_steps = self.UserInput.parameter_estimation_settings['mcmc_length']
-        nEnsembleSteps = int(requested_mcmc_steps/nwalkers) #We calculate the calculate number of the Ensemble Steps from the total sampling steps requested divided by nwalkers.
-        
-        def generateWalkerStartPoints():
+        nEnsembleSteps = int(requested_mcmc_steps/self.mcmc_nwalkers) #We calculate the calculate number of the Ensemble Steps from the total sampling steps requested divided by self.mcmc_nwalkers.
+        if nEnsembleSteps == 0:
+            nEnsembleSteps = 1
+        if str(self.UserInput.parameter_estimation_settings['mcmc_burn_in']).lower() == 'auto': self.mcmc_burn_in_length = int(nEnsembleSteps*0.1)
+        else: self.mcmc_burn_in_length = self.UserInput.parameter_estimation_settings['mcmc_burn_in']
+        def generateWalkerStartPoints(mcmc_nwalkers=0, walkerInitialDistribution='uniform'):
             #The initial points will be generated from a distribution based on the number of walkers and the distributions of the parameters.
             #The variable UserInput.std_prior has been populated with 1 sigma values, even for cases with uniform distributions.
             #The random generation at the front of the below expression is from the zeus example https://zeus-mcmc.readthedocs.io/en/latest/
             #The multiplication is based on the randn function using a sigma of one (which we then scale up) and then advising to add mu after: https://docs.scipy.org/doc/numpy-1.15.1/reference/generated/numpy.random.randn.html
-            #walkerStartsFirstTerm = np.random.randn(nwalkers, numParameters) #<--- this was from the zeus example.
-            walkerStartsFirstTerm = 4*(np.random.rand(nwalkers, numParameters)-0.5) #<-- this is from me, trying to remove bias. This way we get sampling from a uniform distribution from -2 standard deviations to +2 standard deviations.
-            walkerStartPoints = walkerStartsFirstTerm*self.UserInput.std_prior + self.UserInput.model['InputParameterInitialGuess']
+            if mcmc_nwalkers == 0:
+                mcmc_nwalkers = self.mcmc_nwalkers
+            if walkerInitialDistribution=='uniform':
+                walkerStartsFirstTerm = 4*(np.random.rand(mcmc_nwalkers, numParameters)-0.5) #<-- this is from me, trying to remove bias. This way we get sampling from a uniform distribution from -2 standard deviations to +2 standard deviations.
+            elif walkerInitialDistribution == 'identical':
+                walkerStartsFirstTerm = np.zeros((mcmc_nwalkers, numParameters)) #Make the first term all zeros.
+            elif walkerInitialDistribution=='gaussian':
+                walkerStartsFirstTerm = np.random.randn(mcmc_nwalkers, numParameters) #<--- this was from the zeus example.
+            #Now we add to self.UserInput.InputParameterInitialGuess. We don't use the UserInput initial guess directly because gridsearch and other things can change it -- so we need to use this one.
+            walkerStartPoints = walkerStartsFirstTerm*self.UserInput.std_prior + self.UserInput.InputParameterInitialGuess 
+
             return walkerStartPoints
 
         if 'mcmc_maxiter' not in self.UserInput.parameter_estimation_settings: mcmc_maxiter = 1E6 #The default from zeus is 1E4, but I have found that is not always sufficient.
         else: mcmc_maxiter = self.UserInput.parameter_estimation_settings['mcmc_maxiter']
         '''end of user input variables'''
         #now to do the mcmc
-        walkerStartPoints = generateWalkerStartPoints() #making the first set of starting points.
-        zeus_sampler = zeus.sampler(nwalkers, numParameters, logprob_fn=self.getLogP, maxiter=mcmc_maxiter) #maxiter=1E4 is the typical number, but we may want to increase it based on some userInput variable.        
+        walkerStartPoints = generateWalkerStartPoints(walkerInitialDistribution=walkerInitialDistribution) #making the first set of starting points.
+        zeus_sampler = zeus.sampler(self.mcmc_nwalkers, numParameters, logprob_fn=self.getLogP, maxiter=mcmc_maxiter) #maxiter=1E4 is the typical number, but we may want to increase it based on some userInput variable.        
         for trialN in range(0,1000):#Todo: This number of this range is hardcoded but should probably be a user selection.
             try:
                 zeus_sampler.run_mcmc(walkerStartPoints, nEnsembleSteps)
@@ -961,7 +1031,7 @@ class parameter_estimation:
                 if "finite" in str(exceptionObject): #This means there is an error message from zeus saying " Invalid walker initial positions!  Initialise walkers from positions of finite log probability."
                     print("One of the starting points has a non-finite probability. Picking new starting points.")
                     walkerStartPoints = generateWalkerStartPoints() #Need to make the sampler again, in this case, to throw away anything that has happened so far.
-                    zeus_sampler = zeus.sampler(nwalkers, numParameters, logprob_fn=self.getLogP, maxiter=mcmc_maxiter) #maxiter=1E4 is the typical number, but we may want to increase it based on some userInput variable.        
+                    zeus_sampler = zeus.sampler(self.mcmc_nwalkers, numParameters, logprob_fn=self.getLogP, maxiter=mcmc_maxiter) #maxiter=1E4 is the typical number, but we may want to increase it based on some userInput variable.        
                 elif "maxiter" in str(exceptionObject): #This means there is an error message from zeus that the max iterations have been reached.
                     print("WARNING: One or more of the Ensemble Slice Sampling walkers encountered an error. The value of mcmc_maxiter is currently", mcmc_maxiter, "you should increase it, perhaps by a factor of 1E2.")
                 else:
@@ -969,18 +1039,24 @@ class parameter_estimation:
                     sys.exit()
         #Now to keep the results:
         self.post_burn_in_samples = zeus_sampler.samples.flatten(discard = self.mcmc_burn_in_length )
-        self.post_burn_in_logP_un_normed_vec = np.atleast_2d(zeus_sampler.samples.flatten_logprob(discard=self.mcmc_burn_in_length)).transpose() #Needed to make it 2D and transpose.
-        self.post_burn_in_log_posteriors_un_normed_vec = self.post_burn_in_logP_un_normed_vec #TODO: This variable is just a repeat and should be removed.
-        self.calculatePostBurnInStatistics()
-        self.info_gain = self.calculateInfoGain()
-        self.exportPostBurnInStatistics()
-        return [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_logP_un_normed_vec] # EAW 2020/01/08
-        
+        self.post_burn_in_log_posteriors_un_normed_vec = np.atleast_2d(zeus_sampler.samples.flatten_logprob(discard=self.mcmc_burn_in_length)).transpose() #Needed to make it 2D and transpose.
+        if calculatePostBurnInStatistics == True:
+            self.calculatePostBurnInStatistics(calculate_post_burn_in_log_priors_vec = True) #This function call will also filter the lowest probability samples out, when using default settings.
+            if str(exportLog) == 'UserChoice':
+                exportLog = bool(self.UserInput.parameter_estimation_settings['exportLog'])
+            if exportLog == True:
+                self.exportPostBurnInStatistics()
+            return [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec] 
+        else: #In this case, we are probably doing a gridsearch or something like that and only want self.map_logP.
+            self.map_logP = max(self.post_burn_in_log_posteriors_un_normed_vec)
+            self.map_index = list(self.post_burn_in_log_posteriors_un_normed_vec).index(self.map_logP) #This does not have to be a unique answer, just one of them places which gives map_logP.
+            self.map_parameter_set = self.post_burn_in_samples[self.map_index] #This  is the point with the highest probability in the posterior.            
+            return self.map_logP
     
     
     #main function to get samples #TODO: Maybe Should return map_log_P and mu_AP_log_P?
-    @CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
-    def doMetropolisHastings(self):
+    #@CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
+    def doMetropolisHastings(self, calculatePostBurnInStatistics = True, exportLog='UserChoice'):
         if str(self.UserInput.parameter_estimation_settings['mcmc_burn_in']).lower() == 'auto': self.mcmc_burn_in_length = int(self.UserInput.parameter_estimation_settings['mcmc_length']*0.1)
         else: self.mcmc_burn_in_length = self.UserInput.parameter_estimation_settings['mcmc_burn_in']
         if 'mcmc_random_seed' in self.UserInput.parameter_estimation_settings:
@@ -996,12 +1072,12 @@ class parameter_estimation:
         log_postereriors_drawn = np.zeros((self.UserInput.parameter_estimation_settings['mcmc_length'])) #TODO: make this optional for efficiency. We don't want this to be 2D, so we don't copy log_posteriors_un_normed_vec.
         log_priors_vec = np.zeros((self.UserInput.parameter_estimation_settings['mcmc_length'],1))
         #Code to initialize checkpoints.
-        if type(self.UserInput.parameter_estimation_settings['checkPointFrequency']) != type(None):
+        if type(self.UserInput.parameter_estimation_settings['mcmc_checkPointFrequency']) != type(None):
             print("Starting MCMC sampling.")
             import timeit
             timeOfFirstCheckpoint = timeit.time.clock()
             timeCheckpoint = timeit.time.clock() - timeOfFirstCheckpoint #First checkpoint at time 0.
-            numCheckPoints = self.UserInput.parameter_estimation_settings['mcmc_length']/self.UserInput.parameter_estimation_settings['checkPointFrequency']
+            numCheckPoints = self.UserInput.parameter_estimation_settings['mcmc_length']/self.UserInput.parameter_estimation_settings['mcmc_checkPointFrequency']
         #Before sampling should fill in the first entry for the posterior vector we have created. #FIXME: It would probably be better to start with i of 0 in below sampling loop. I believe that right now the "burn in" and "samples" arrays are actually off by an index of 1. But trying to change that alters their length relative to other arrays and causes problems. Since we always do many samples and this only affects the initial point being averaged in twice, it is not a major problem. It's also avoided if people use a burn in of at least 1.
         log_posteriors_un_normed_vec[0]= self.getLogP(samples[0])
         for i in range(1, self.UserInput.parameter_estimation_settings['mcmc_length']): #FIXME: Don't we need to start with i of 0?
@@ -1053,11 +1129,11 @@ class parameter_estimation:
                 log_posteriors_un_normed_vec[i] = log_likelihood_current_location+log_prior_current_location
                 log_likelihoods_vec[i] = log_likelihood_current_location
                 log_priors_vec[i] = log_prior_current_location
-            if type(self.UserInput.parameter_estimation_settings['checkPointFrequency']) != type(None):
-                if sampleNumber%self.UserInput.parameter_estimation_settings['checkPointFrequency'] == 0: #The % is a modulus function.
+            if type(self.UserInput.parameter_estimation_settings['mcmc_checkPointFrequency']) != type(None):
+                if sampleNumber%self.UserInput.parameter_estimation_settings['mcmc_checkPointFrequency'] == 0: #The % is a modulus function.
                     timeSinceLastCheckPoint = (timeit.time.clock() - timeOfFirstCheckpoint) -  timeCheckpoint
                     timeCheckpoint = timeit.time.clock() - timeOfFirstCheckpoint
-                    checkPointNumber = sampleNumber/self.UserInput.parameter_estimation_settings['checkPointFrequency']
+                    checkPointNumber = sampleNumber/self.UserInput.parameter_estimation_settings['mcmc_checkPointFrequency']
                     averagetimePerSampling = timeCheckpoint/(sampleNumber)
                     print("MCMC sample number ", sampleNumber, "checkpoint", checkPointNumber, "out of", numCheckPoints) 
                     print("averagetimePerSampling", averagetimePerSampling, "seconds")
@@ -1097,13 +1173,21 @@ class parameter_estimation:
         if self.UserInput.parameter_estimation_settings['exportAllSimulatedOutputs'] == True:
             self.post_burn_in_samples_simulatedOutputs = samples_simulatedOutputs[self.mcmc_burn_in_length:]
         self.post_burn_in_log_posteriors_un_normed_vec = log_posteriors_un_normed_vec[self.mcmc_burn_in_length:]
-        self.post_burn_in_logP_un_normed_vec = (self.post_burn_in_log_posteriors_un_normed_vec)
+        self.post_burn_in_log_posteriors_un_normed_vec = (self.post_burn_in_log_posteriors_un_normed_vec) #Is this increasing dimension?
         self.post_burn_in_log_likelihoods_vec = log_likelihoods_vec[self.mcmc_burn_in_length:]
         self.post_burn_in_log_priors_vec = log_priors_vec[self.mcmc_burn_in_length:]
-        self.calculatePostBurnInStatistics() #This function call will also filter the lowest probability samples out, when using default settings.
-        self.info_gain = self.calculateInfoGain()
-        self.exportPostBurnInStatistics()
-        return [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_logP_un_normed_vec] # EAW 2020/01/08
+        if calculatePostBurnInStatistics == True:
+            self.calculatePostBurnInStatistics() #This function call will also filter the lowest probability samples out, when using default settings.
+            if str(exportLog) == 'UserChoice':
+                exportLog = bool(self.UserInput.parameter_estimation_settings['exportLog'])
+            if exportLog == True:
+                self.exportPostBurnInStatistics()
+            return [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec] # EAW 2020/01/08
+        else: #In this case, we are probably doing a gridsearch or something like that and only want self.map_logP.
+            self.map_logP = max(self.post_burn_in_log_posteriors_un_normed_vec)
+            self.map_index = list(self.post_burn_in_log_posteriors_un_normed_vec).index(self.map_logP) #This does not have to be a unique answer, just one of them places which gives map_logP.
+            self.map_parameter_set = self.post_burn_in_samples[self.map_index] #This  is the point with the highest probability in the posterior.            
+            return self.map_logP
         
     def getLogPrior(self,discreteParameterVector):
         if type(self.UserInput.model['custom_logPrior']) != type(None):
@@ -1334,7 +1418,6 @@ class parameter_estimation:
                     plot_settings['legendLabels'] = ['observed',  'mu_guess', 'MAP']
                 if hasattr(self, "opt_SSR"): #This means we are actually doing an optimization, and self.opt_SSR exists.
                     plot_settings['legendLabels'] = ['observed',  'mu_guess', 'CPE']
-                    print("line 1201 got here!!!")
             #Other allowed settings are like this, but will be fed in as simulated_response_plot_settings keys rather than plot_settings keys.
             #plot_settings['x_label'] = 'T (K)'
             #plot_settings['y_label'] = r'$rate (s^{-1})$'
@@ -1604,6 +1687,8 @@ def arrayThresholdFilter(inputArray, filterKey=[], thresholdValue=0, removeValue
     #The filterKey should be a 1D array and will be taken as the first column of the array if not provided.
     #The function finds where the filterKey is above or below the thresholdValue and then removes those rows from the original array.
     #removeValues can be "above" or "below".  
+    if len(inputArray) == 0: #This should not happen for normal usage, but it has been observed in practice.
+        return inputArray
     if transpose == True: #This is meant for 2D arrays.
         inputArray = np.array(inputArray).transpose()
     if len(np.shape(inputArray)) == 1:
@@ -1628,6 +1713,9 @@ def arrayThresholdFilter(inputArray, filterKey=[], thresholdValue=0, removeValue
     filteredArray = inputArrayThresholdMarked[~mask] #This does the filtering where rows are deleted.
     return filteredArray
 
+@CiteSoft.after_call_compile_consolidated_log()
+def exportCitations():
+    pass
         
 if __name__ == "__main__":
     pass
