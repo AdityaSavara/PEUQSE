@@ -974,7 +974,7 @@ class parameter_estimation:
     software_kwargs = {"version": software_version, "author": ["Minas Karamanis", "Florian Beutler"], "cite": ["Minas Karamanis and Florian Beutler. zeus: A Python Implementation of the Ensemble Slice Sampling method. 2020. ","https://arxiv.org/abs/2002.06212", "@article{ess,  title={Ensemble Slice Sampling}, author={Minas Karamanis and Florian Beutler}, year={2020}, eprint={2002.06212}, archivePrefix={arXiv}, primaryClass={stat.ML} }"] }
     #@CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
     @CiteSoft.module_call_cite(unique_id=software_unique_id, software_name=software_name, **software_kwargs)
-    def doEnsembleSliceSampling(self, mcmc_nwalkers_direct_input = None, walkerInitialDistribution='uniform', walkerInitialDistributionSpread=1.0 calculatePostBurnInStatistics=True, exportLog ='UserChoice'):
+    def doEnsembleSliceSampling(self, mcmc_nwalkers_direct_input = None, walkerInitialDistribution='uniform', walkerInitialDistributionSpread=1.0, calculatePostBurnInStatistics=True, exportLog ='UserChoice'):
         #The distribution of walkers intial points can be uniform or gaussian. As of OCt 2020, default is uniform spread around the intial guess.
         #The mcmc_nwalkers_direct_input is really meant for gridsearch to override the other settings, though of course people could also use it directly.  
         #The walkerInitialDistributionSpread is in relative units (relative to standard deviations). In the case of a uniform inital distribution the default level of spread is actually across two standard deviations, so the walkerInitialDistributionSpread is relative to that (that is, a value of 2 would give 2*2 = 4 for the full spread in each direction from the initial guess).
@@ -1015,7 +1015,6 @@ class parameter_estimation:
                 walkerStartsFirstTerm = np.random.randn(mcmc_nwalkers, numParameters) #<--- this was from the zeus example.
             #Now we add to self.UserInput.InputParameterInitialGuess. We don't use the UserInput initial guess directly because gridsearch and other things can change it -- so we need to use this one.
             walkerStartPoints = walkerStartsFirstTerm*self.UserInput.std_prior*walkerInitialDistributionSpread + self.UserInput.InputParameterInitialGuess 
-
             return walkerStartPoints
 
         if 'mcmc_maxiter' not in self.UserInput.parameter_estimation_settings: mcmc_maxiter = 1E6 #The default from zeus is 1E4, but I have found that is not always sufficient.
@@ -1023,7 +1022,7 @@ class parameter_estimation:
         '''end of user input variables'''
         #now to do the mcmc
         walkerStartPoints = generateWalkerStartPoints(walkerInitialDistribution=walkerInitialDistribution) #making the first set of starting points.
-        zeus_sampler = zeus.sampler(self.mcmc_nwalkers, numParameters, logprob_fn=self.getLogP, maxiter=mcmc_maxiter) #maxiter=1E4 is the typical number, but we may want to increase it based on some userInput variable.        
+        zeus_sampler = zeus.EnsembleSampler(self.mcmc_nwalkers, numParameters, logprob_fn=self.getLogP, maxiter=mcmc_maxiter) #maxiter=1E4 is the typical number, but we may want to increase it based on some userInput variable.        
         for trialN in range(0,1000):#Todo: This number of this range is hardcoded but should probably be a user selection.
             try:
                 zeus_sampler.run_mcmc(walkerStartPoints, nEnsembleSteps)
@@ -1032,7 +1031,7 @@ class parameter_estimation:
                 if "finite" in str(exceptionObject): #This means there is an error message from zeus saying " Invalid walker initial positions!  Initialise walkers from positions of finite log probability."
                     print("One of the starting points has a non-finite probability. Picking new starting points.")
                     walkerStartPoints = generateWalkerStartPoints() #Need to make the sampler again, in this case, to throw away anything that has happened so far.
-                    zeus_sampler = zeus.sampler(self.mcmc_nwalkers, numParameters, logprob_fn=self.getLogP, maxiter=mcmc_maxiter) #maxiter=1E4 is the typical number, but we may want to increase it based on some userInput variable.        
+                    zeus_sampler = zeus.EnsembleSampler(self.mcmc_nwalkers, numParameters, logprob_fn=self.getLogP, maxiter=mcmc_maxiter) #maxiter=1E4 is the typical number, but we may want to increase it based on some userInput variable.        
                 elif "maxiter" in str(exceptionObject): #This means there is an error message from zeus that the max iterations have been reached.
                     print("WARNING: One or more of the Ensemble Slice Sampling walkers encountered an error. The value of mcmc_maxiter is currently", mcmc_maxiter, "you should increase it, perhaps by a factor of 1E2.")
                 else:
@@ -1717,6 +1716,21 @@ def arrayThresholdFilter(inputArray, filterKey=[], thresholdValue=0, removeValue
 @CiteSoft.after_call_compile_consolidated_log()
 def exportCitations():
     pass
+
+def pickleTheObject(objectToPickle, base_file_name, file_name_prefix ='',  file_name_suffix='', file_name_extension='.pkl'):
+    import pickle
+    data_filename = file_name_prefix + base_file_name + file_name_prefix + file_name_extension
+    with open(data_filename, 'wb') as picklefile:
+        pickle.dump(objectToPickle, picklefile)
+
+def unPickleTheObject(base_file_name, file_name_prefix ='',  file_name_suffix='', file_name_extension='.pkl'):
+    import pickle
+    data_filename = file_name_prefix + base_file_name + file_name_prefix + file_name_extension
+    with open(data_filename, 'rb') as picklefile:
+        theObject = pickle.load(picklefile)
+    return theObject
+
+
         
 if __name__ == "__main__":
     pass
