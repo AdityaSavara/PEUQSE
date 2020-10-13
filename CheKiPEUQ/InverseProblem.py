@@ -1513,7 +1513,14 @@ class parameter_estimation:
             self.createSimulatedResponsesPlots()
         except:
             pass
-
+            
+    def save_to_dill(self, base_file_name, file_name_prefix ='',  file_name_suffix='', file_name_extension='.dill'):
+        save_PE_object(self, base_file_name, file_name_prefix ='',  file_name_suffix='', file_name_extension='.dill')
+    def load_from_dill(self, base_file_name, file_name_prefix ='',  file_name_suffix='', file_name_extension='.dill'):
+        theObject = load_PE_object(base_file_name, file_name_prefix ='',  file_name_suffix='', file_name_extension='.dill')
+        print("PE_object.load_from_dill executed. This function returns a new PE_object. To overwrite an existing PE_object, use PE_object = PE_object.load_from_dill(...)")
+        return theObject
+        
 class verbose_optimization_wrapper: #Learned how to use callback from Henri's post https://stackoverflow.com/questions/16739065/how-to-display-progress-of-scipy-optimize-function
     def __init__(self, simulationFunction):
         self.simulationFunction = simulationFunction
@@ -1745,7 +1752,7 @@ def dillPickleTheObject(objectToPickle, base_file_name, file_name_prefix ='',  f
     with open(data_filename, 'wb') as picklefile:
         dill.dump(objectToPickle, picklefile)
 
-def unDillPickleTheObject(self, file_name_prefix ='',  file_name_suffix='', file_name_extension='.dill'):
+def unDillPickleTheObject(base_file_name, file_name_prefix ='',  file_name_suffix='', file_name_extension='.dill'):
     try:
         import dill
     except:
@@ -1758,8 +1765,8 @@ def unDillPickleTheObject(self, file_name_prefix ='',  file_name_suffix='', file
 def save_PE_object(objectToPickle, base_file_name, file_name_prefix ='',  file_name_suffix='', file_name_extension='.dill'):
     dillPickleTheObject(objectToPickle, base_file_name, file_name_prefix ='',  file_name_suffix='', file_name_extension='.dill')
 
-def load_PE_object(self, file_name_prefix ='',  file_name_suffix='', file_name_extension='.dill'):
-    unDillPickleTheObject(self, file_name_prefix ='',  file_name_suffix='', file_name_extension='.dill'):
+def load_PE_object(base_file_name, file_name_prefix ='',  file_name_suffix='', file_name_extension='.dill'):
+    theObject = unDillPickleTheObject(base_file_name, file_name_prefix ='',  file_name_suffix='', file_name_extension='.dill')
     return theObject
 
         

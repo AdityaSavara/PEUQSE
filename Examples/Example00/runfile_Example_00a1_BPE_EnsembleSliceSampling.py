@@ -30,3 +30,7 @@ if __name__ == "__main__":
 #    PE_object.makeHistogramsForEachParameter()    
 #    PE_object.makeSamplingScatterMatrixPlot()
 #    PE_object.createSimulatedResponsesPlot()
+    
+    CKPQ.save_PE_object(PE_object, "it's a frog")
+    
+    PE_object.load_from_dill("it's a frog")
