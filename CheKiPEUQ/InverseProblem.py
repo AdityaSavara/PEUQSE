@@ -1735,6 +1735,33 @@ def unPickleTheObject(base_file_name, file_name_prefix ='',  file_name_suffix=''
     return theObject
 
 
+def dillPickleTheObject(objectToPickle, base_file_name, file_name_prefix ='',  file_name_suffix='', file_name_extension='.dill'):
+    #Can't use pickle. Need to use dill.
+    try:
+        import dill
+    except:
+        print("To use this feature requires dill. If you don't have it, open an anaconda prompt and type 'pip install dill' or use conda install. https://anaconda.org/anaconda/dill")
+    data_filename = file_name_prefix + base_file_name + file_name_prefix + file_name_extension
+    with open(data_filename, 'wb') as picklefile:
+        dill.dump(objectToPickle, picklefile)
+
+def unDillPickleTheObject(self, file_name_prefix ='',  file_name_suffix='', file_name_extension='.dill'):
+    try:
+        import dill
+    except:
+        print("To use this feature requires dill. If you don't have it, open an anaconda prompt and type 'pip install dill' or use conda install. https://anaconda.org/anaconda/dill")
+    data_filename = file_name_prefix + base_file_name + file_name_prefix + file_name_extension
+    with open(data_filename, 'rb') as picklefile:
+        theObject = dill.load(picklefile)
+    return theObject
+
+def save_PE_object(objectToPickle, base_file_name, file_name_prefix ='',  file_name_suffix='', file_name_extension='.dill'):
+    dillPickleTheObject(objectToPickle, base_file_name, file_name_prefix ='',  file_name_suffix='', file_name_extension='.dill')
+
+def load_PE_object(self, file_name_prefix ='',  file_name_suffix='', file_name_extension='.dill'):
+    unDillPickleTheObject(self, file_name_prefix ='',  file_name_suffix='', file_name_extension='.dill'):
+    return theObject
+
         
 if __name__ == "__main__":
     pass
