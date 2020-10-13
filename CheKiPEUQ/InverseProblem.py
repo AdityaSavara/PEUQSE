@@ -353,7 +353,28 @@ class parameter_estimation:
                     if UserInput.responses['response_data_type'][responseIndex] == 'r':
                         pass
         return nestedAllResponsesArray_transformed, nestedAllResponsesUncertainties_transformed  
-  
+
+    def generateWalkerStartPoints(self, mcmc_nwalkers=0, walkerInitialDistribution='uniform', walkerInitialDistributionSpread=1.0, numParameters = 0):
+        #The initial points will be generated from a distribution based on the number of walkers and the distributions of the parameters.
+        #The variable UserInput.std_prior has been populated with 1 sigma values, even for cases with uniform distributions.
+        #The random generation at the front of the below expression is from the zeus example https://zeus-mcmc.readthedocs.io/en/latest/
+        #The multiplication is based on the randn function using a sigma of one (which we then scale up) and then advising to add mu after: https://docs.scipy.org/doc/numpy-1.15.1/reference/generated/numpy.random.randn.html
+        #The numParameters cannot be 0. We just use 0 to mean not provided, in which case we pull it from the initial guess.
+        if numParameters == 0:
+            numParameters = len(self.UserInput.InputParameterInitialGuess)
+        
+        if mcmc_nwalkers == 0:
+            mcmc_nwalkers = self.mcmc_nwalkers
+        if walkerInitialDistribution=='uniform':
+            walkerStartsFirstTerm = 4*(np.random.rand(mcmc_nwalkers, numParameters)-0.5) #<-- this is from me, trying to remove bias. This way we get sampling from a uniform distribution from -2 standard deviations to +2 standard deviations.
+        elif walkerInitialDistribution == 'identical':
+            walkerStartsFirstTerm = np.zeros((mcmc_nwalkers, numParameters)) #Make the first term all zeros.
+        elif walkerInitialDistribution=='gaussian':
+            walkerStartsFirstTerm = np.random.randn(mcmc_nwalkers, numParameters) #<--- this was from the zeus example.
+        #Now we add to self.UserInput.InputParameterInitialGuess. We don't use the UserInput initial guess directly because gridsearch and other things can change it -- so we need to use this one.
+        walkerStartPoints = walkerStartsFirstTerm*self.UserInput.std_prior*walkerInitialDistributionSpread + self.UserInput.InputParameterInitialGuess 
+        return walkerStartPoints
+
     #This helper function has been made so that gridSearch and design of experiments can call it.
     #Although at first glance it may seem like it should be in the gridCombinations module, that is a misconception. This is just a wrapper setting defaults for calling that module, such as using the prior for the grid interval when none is provided.
     #note that a blank list is okay for gridSamplingAbsoluteIntervalSize if doing a parameter grid, but not for other types of grids.
@@ -975,12 +996,12 @@ class parameter_estimation:
     #@CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
     @CiteSoft.module_call_cite(unique_id=software_unique_id, software_name=software_name, **software_kwargs)
     def doEnsembleSliceSampling(self, mcmc_nwalkers_direct_input = None, walkerInitialDistribution='uniform', walkerInitialDistributionSpread=1.0, calculatePostBurnInStatistics=True, exportLog ='UserChoice'):
-        #The distribution of walkers intial points can be uniform or gaussian. As of OCt 2020, default is uniform spread around the intial guess.
+        #The distribution of walkers intial points can be uniform or gaussian or identical. As of OCt 2020, default is uniform spread around the intial guess.
         #The mcmc_nwalkers_direct_input is really meant for gridsearch to override the other settings, though of course people could also use it directly.  
         #The walkerInitialDistributionSpread is in relative units (relative to standard deviations). In the case of a uniform inital distribution the default level of spread is actually across two standard deviations, so the walkerInitialDistributionSpread is relative to that (that is, a value of 2 would give 2*2 = 4 for the full spread in each direction from the initial guess).
         import zeus
         '''these variables need to be made part of userinput'''
-        numParameters = len(self.UserInput.InputParametersPriorValuesUncertainties) #This is the number of parameters.
+        numParameters = len(self.UserInput.InputParameterInitialGuess) #This is the number of parameters.
         if type(mcmc_nwalkers_direct_input) == type(None): #This is the normal case.
             if 'mcmc_nwalkers' not in self.UserInput.parameter_estimation_settings: self.mcmc_nwalkers = 'auto'
             else: self.mcmc_nwalkers = self.UserInput.parameter_estimation_settings['mcmc_nwalkers']
@@ -1000,28 +1021,11 @@ class parameter_estimation:
             nEnsembleSteps = 1
         if str(self.UserInput.parameter_estimation_settings['mcmc_burn_in']).lower() == 'auto': self.mcmc_burn_in_length = int(nEnsembleSteps*0.1)
         else: self.mcmc_burn_in_length = self.UserInput.parameter_estimation_settings['mcmc_burn_in']
-        def generateWalkerStartPoints(mcmc_nwalkers=0, walkerInitialDistribution='uniform'):
-            #The initial points will be generated from a distribution based on the number of walkers and the distributions of the parameters.
-            #The variable UserInput.std_prior has been populated with 1 sigma values, even for cases with uniform distributions.
-            #The random generation at the front of the below expression is from the zeus example https://zeus-mcmc.readthedocs.io/en/latest/
-            #The multiplication is based on the randn function using a sigma of one (which we then scale up) and then advising to add mu after: https://docs.scipy.org/doc/numpy-1.15.1/reference/generated/numpy.random.randn.html
-            if mcmc_nwalkers == 0:
-                mcmc_nwalkers = self.mcmc_nwalkers
-            if walkerInitialDistribution=='uniform':
-                walkerStartsFirstTerm = 4*(np.random.rand(mcmc_nwalkers, numParameters)-0.5) #<-- this is from me, trying to remove bias. This way we get sampling from a uniform distribution from -2 standard deviations to +2 standard deviations.
-            elif walkerInitialDistribution == 'identical':
-                walkerStartsFirstTerm = np.zeros((mcmc_nwalkers, numParameters)) #Make the first term all zeros.
-            elif walkerInitialDistribution=='gaussian':
-                walkerStartsFirstTerm = np.random.randn(mcmc_nwalkers, numParameters) #<--- this was from the zeus example.
-            #Now we add to self.UserInput.InputParameterInitialGuess. We don't use the UserInput initial guess directly because gridsearch and other things can change it -- so we need to use this one.
-            walkerStartPoints = walkerStartsFirstTerm*self.UserInput.std_prior*walkerInitialDistributionSpread + self.UserInput.InputParameterInitialGuess 
-            return walkerStartPoints
-
         if 'mcmc_maxiter' not in self.UserInput.parameter_estimation_settings: mcmc_maxiter = 1E6 #The default from zeus is 1E4, but I have found that is not always sufficient.
         else: mcmc_maxiter = self.UserInput.parameter_estimation_settings['mcmc_maxiter']
         '''end of user input variables'''
         #now to do the mcmc
-        walkerStartPoints = generateWalkerStartPoints(walkerInitialDistribution=walkerInitialDistribution) #making the first set of starting points.
+        walkerStartPoints = self.generateWalkerStartPoints(walkerInitialDistribution=walkerInitialDistribution) #making the first set of starting points.
         zeus_sampler = zeus.EnsembleSampler(self.mcmc_nwalkers, numParameters, logprob_fn=self.getLogP, maxiter=mcmc_maxiter) #maxiter=1E4 is the typical number, but we may want to increase it based on some userInput variable.        
         for trialN in range(0,1000):#Todo: This number of this range is hardcoded but should probably be a user selection.
             try:
