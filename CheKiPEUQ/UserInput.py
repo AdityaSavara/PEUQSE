@@ -1,6 +1,5 @@
 import numpy as np
 
-#####Temperature Programmed Reaction Settings#####
 
 #Response Plot Settings
 simulated_response_plot_settings = {}
@@ -13,7 +12,7 @@ simulated_response_plot_settings['legend'] = True #Can be changed to false to tu
 simulated_response_plot_settings['error_linewidth'] = 'auto' #Integer. Using "auto" or "None" sets to "20" when there is only 1 point, 1 when number of points is > 10, and "4" when number of points is between 1 and 10 and. Using '0' or 'none' will hide the error bars.
 simulated_response_plot_settings['fontdict']= {'size':16} #A font dictionary can be passed in, this will be used for the axes and axes labels.
 
-####BELOW ARE MODEL PARAMETERS, WE WILL WANT TO COMBINE THESE INTO A LIST OF PARAMETERS###
+#### Model Paramerters Variables ###
 model = {} 
 model['InputParameterPriorValues'] =  [] #Should be like: [41.5, 41.5, 13.0, 13.0, 0.1, 0.1] # Ea1_mean, Ea2_mean, log_A1_mean, log_A2_mean, gamma_1_mean, gamma_2_mean 
 model['InputParametersPriorValuesUncertainties'] = []# Should be like: [200, 200, 13, 13, 0.1, 0.1] #If user wants to use a prior with covariance, then this must be a 2D array/ list. To assume no covariance, a 1D
@@ -65,7 +64,8 @@ parameter_estimation_settings['mcmc_maxiter'] = 1E6 #This is related to the expa
 parameter_estimation_settings['mcmc_maxiter'] = 1E6 
 parameter_estimation_settings['mcmc_walkerInitialDistribution'] = 'auto' #Can be 'uniform', 'gaussian', or 'identical'.  Auto will use 'uniform' during gridsearch and 'uniform' for most other cases.
 parameter_estimation_settings['mcmc_checkPointFrequency'] = None #This is only for MH, not ESS. (as of Oct 2020)
-parameter_estimation_settings['gridsearch_checkPointFrequency'] = None #Note: this does not work perfectly with ESS.
+parameter_estimation_settings['mcmc_parallel_sampling'] = False #This makes completely parallelized sampling of a single sampling. syntax to use is like "mpiexec -n 5 python runfile.py" where 5 is the number of processors. Currently, the first processor's results are thrown away.  In the future, this may change.
+parameter_estimation_settings['gridsearch_checkPointFrequency'] = None #Note: this setting does not work perfectly with ESS.
 
 
 #####Plot Settings#####
@@ -78,13 +78,15 @@ samplingScatterMatrixPlotsSettings ={}
 #parameter_estimation_settings['gridSampling'] = False    
 #doGridSearch(self, searchType='doMetropolisHastings', export = True, verbose = False, gridSamplingIntervalSize = [], gridSamplingRadii = [], passThroughArgs = {}):
 
-######mumpce plots##### #####contour plots####
+######mumpce plots##### #####contour plots#### 
 #model_parameter_info = np.array([{'parameter_number': 0, 'parameter_name': r'$E_{a1}$'},
 #{'parameter_number': 1, 'parameter_name': r'$E_{a2}$'},
 #{'parameter_number': 2, 'parameter_name': r'$log(A_{1})$'},
 #{'parameter_number': 3, 'parameter_name': r'$log(A_{2})$'},
 #{'parameter_number': 4, 'parameter_name': r'$\gamma_{1}$'},
 #{'parameter_number': 5, 'parameter_name': r'$\gamma_{2}$'}])
+
+contour_plot_settings = {} #TODO: change below to contour_plot_settings. Make "parameter_pairs_for_contour_plots" and "active_parameters" to be within that.
 active_parameters = [] #Blank by default: gets populated with all parameters (or reduced parameters) if left blank. Warning: trying to set this manually while using the reduced parameters feature is not supported as of April 2020.
 #pairs_of_parameter_indices = [[0, 1], [1, 2],[2, 3],[3, 4],[4, 5]] #This sets which parameters to plot contours for. By default, all pairs are plotted.
 contour_settings_custom = {'figure_name': 'PosteriorContourPlots','fontsize':16 ,'num_y_ticks': 'auto','num_x_ticks':'auto','contours_normalized':True,'center_on':'all','colorbars':True}  #Fontsize can also be set to "auto"
