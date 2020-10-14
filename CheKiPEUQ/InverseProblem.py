@@ -548,7 +548,7 @@ class parameter_estimation:
                         filesInDirectory.remove(name) #Removing so it won't be checked for again, to speed up next search.
             os.chdir("..") #change directory back regardless.
             if np.sum(simulationsKey) == 0:
-                print("This is the end of the last simulation, so now the parallel sampling data will be processed!!!!!!", CheKiPEUQ.parallel_processing.currentProcessorNumber)       
+                print("This is the end of the last simulation, so now the parallel sampling data will be processed!!!!!!")       
                 CheKiPEUQ.parallel_processing.finalProcess = True
                 return True
             else: #if simulationsKey is not zero, then we return False b/c not yet finsihed.
@@ -1603,9 +1603,7 @@ class parameter_estimation:
         if self.UserInput.request_mpi == True: #need to check if UserInput.request_mpi is on, since if so we will only make plots after the final process.
             import os; import sys
             import CheKiPEUQ.parallel_processing
-            print("line 1605", CheKiPEUQ.parallel_processing.finalProcess, CheKiPEUQ.parallel_processing.currentProcessorNumber)
             if CheKiPEUQ.parallel_processing.finalProcess == True:
-                print("line 1606", CheKiPEUQ.parallel_processing.finalProcess, CheKiPEUQ.parallel_processing.currentProcessorNumber)
                 pass#This will proceed as normal.
             elif CheKiPEUQ.parallel_processing.finalProcess == False:
                 return False #this will stop the plots creation.
