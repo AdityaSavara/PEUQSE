@@ -45,6 +45,22 @@ class parameter_estimation:
         if UserInput.parameter_estimation_settings['checkPointFrequency'] != None: #This is for backwards compatibility.
             UserInput.parameter_estimation_settings['mcmc_checkPointFrequency'] = UserInput.parameter_estimation_settings['checkPointFrequency']
             UserInput.parameter_estimation_settings['gridsearch_checkPointFrequency'] = UserInput.parameter_estimation_settings['checkPointFrequency']
+        UserInput.request_mpi = False #Set as false as default.
+        if UserInput.parameter_estimation_settings['mcmc_parallel_sampling'] == True:
+            UserInput.request_mpi = True
+        if UserInput.request_mpi == True: #Rank zero needs to clear out the mpi_log_files directory, so check if we are using rank 0.
+            import os; import sys
+            import CheKiPEUQ.parallel_processing
+            if CheKiPEUQ.parallel_processing.currentProcessorNumber == 0:
+                try: #Fixme: This is using a try statement because the directory cannot be made if it exists. Should use a better way to check if the directory exists.
+                    os.mkdir("./mpi_log_files") 
+                except:
+                    pass
+                os.chdir("./mpi_log_files")
+                deleteAllFilesInDirectory()
+                os.chdir("./..")
+                sys.exit() #TODO: right now, processor zero just exits after making and emptying the directory. In the future, things will be more complex for the processor zero.
+
         
         #Setting this object so that we can make changes to it below without changing userinput dictionaries.
         self.UserInput.mu_prior = np.array(UserInput.model['InputParameterPriorValues']) 
@@ -353,7 +369,28 @@ class parameter_estimation:
                     if UserInput.responses['response_data_type'][responseIndex] == 'r':
                         pass
         return nestedAllResponsesArray_transformed, nestedAllResponsesUncertainties_transformed  
-  
+
+    def generateWalkerStartPoints(self, mcmc_nwalkers=0, walkerInitialDistribution='uniform', walkerInitialDistributionSpread=1.0, numParameters = 0):
+        #The initial points will be generated from a distribution based on the number of walkers and the distributions of the parameters.
+        #The variable UserInput.std_prior has been populated with 1 sigma values, even for cases with uniform distributions.
+        #The random generation at the front of the below expression is from the zeus example https://zeus-mcmc.readthedocs.io/en/latest/
+        #The multiplication is based on the randn function using a sigma of one (which we then scale up) and then advising to add mu after: https://docs.scipy.org/doc/numpy-1.15.1/reference/generated/numpy.random.randn.html
+        #The numParameters cannot be 0. We just use 0 to mean not provided, in which case we pull it from the initial guess.
+        if numParameters == 0:
+            numParameters = len(self.UserInput.InputParameterInitialGuess)
+        
+        if mcmc_nwalkers == 0:
+            mcmc_nwalkers = self.mcmc_nwalkers
+        if walkerInitialDistribution=='uniform':
+            walkerStartsFirstTerm = 4*(np.random.rand(mcmc_nwalkers, numParameters)-0.5) #<-- this is from me, trying to remove bias. This way we get sampling from a uniform distribution from -2 standard deviations to +2 standard deviations.
+        elif walkerInitialDistribution == 'identical':
+            walkerStartsFirstTerm = np.zeros((mcmc_nwalkers, numParameters)) #Make the first term all zeros.
+        elif walkerInitialDistribution=='gaussian':
+            walkerStartsFirstTerm = np.random.randn(mcmc_nwalkers, numParameters) #<--- this was from the zeus example.
+        #Now we add to self.UserInput.InputParameterInitialGuess. We don't use the UserInput initial guess directly because gridsearch and other things can change it -- so we need to use this one.
+        walkerStartPoints = walkerStartsFirstTerm*self.UserInput.std_prior*walkerInitialDistributionSpread + self.UserInput.InputParameterInitialGuess 
+        return walkerStartPoints
+
     #This helper function has been made so that gridSearch and design of experiments can call it.
     #Although at first glance it may seem like it should be in the gridCombinations module, that is a misconception. This is just a wrapper setting defaults for calling that module, such as using the prior for the grid interval when none is provided.
     #note that a blank list is okay for gridSamplingAbsoluteIntervalSize if doing a parameter grid, but not for other types of grids.
@@ -490,6 +527,66 @@ class parameter_estimation:
             return bestResultSoFar# [self.map_parameter_set, self.map_logP]
         if searchType == 'getLogP':          
             return bestResultSoFar# [self.map_parameter_set, self.map_logP]
+
+    def consolidate_parallel_sampling_data(self, parallelizationType="equal"):
+        #parallelizationType='equal' means everything will get averaged together. parallelizationType='gridsearch' will be treated differently, same with parallelizationType='designOfExperiments'
+        import CheKiPEUQ.parallel_processing
+        #CheKiPEUQ.parallel_processing.currentProcessorNumber
+        numSimulations = CheKiPEUQ.parallel_processing.numSimulations
+        def checkIfAllSimulationsDone():
+            import os
+            os.chdir("./mpi_log_files")
+            #now make a list of what we expect.
+            simulationsKey = np.ones(numSimulations)
+            working_dir=os.getcwd()
+            filesInDirectory=os.listdir(working_dir)
+            for simulationIndex in range(0,numSimulations): #For each simulation, we check if it's there and set the simulation key to 0 if it is done.
+                simulationNumberString = str(simulationIndex+1)
+                for name in filesInDirectory:
+                    if "mcmc_post_burn_in_statistics_"+simulationNumberString+".pkl" in name:
+                        simulationsKey[simulationIndex] = 0
+                        filesInDirectory.remove(name) #Removing so it won't be checked for again, to speed up next search.
+            os.chdir("..") #change directory back regardless.
+            if np.sum(simulationsKey) == 0:
+                print("This is the end of the last simulation, so now the parallel sampling data will be processed!!!!!!")       
+                CheKiPEUQ.parallel_processing.finalProcess = True
+                return True
+            else: #if simulationsKey is not zero, then we return False b/c not yet finsihed.
+                CheKiPEUQ.parallel_processing.finalProcess = False
+                return False
+            
+        if checkIfAllSimulationsDone() == True:
+            if parallelizationType.lower() == 'equal':
+                import os
+                os.chdir("./mpi_log_files")
+                for simulationIndex in range(0,numSimulations): #For each simulation, we need to grab the results.
+                    simulationNumberString = str(simulationIndex+1)
+                    #Get the dat aout.    
+                    current_post_burn_in_statistics_filename = "mcmc_post_burn_in_statistics_"+simulationNumberString
+                    current_post_burn_in_statistics_data = unpickleAnObject(current_post_burn_in_statistics_filename)
+                    #Populate the class variables.
+                    [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec] = current_post_burn_in_statistics_data
+                    #Still accumulating.
+                    if simulationIndex == 0: #This is the first data set.
+                        self.cumulative_post_burn_in_samples = self.post_burn_in_samples
+                        self.cumulative_post_burn_in_log_priors_vec = self.post_burn_in_log_priors_vec
+                        self.cumulative_post_burn_in_log_posteriors_un_normed_vec = self.post_burn_in_log_posteriors_un_normed_vec
+                    else: #This is basically elseif combinationIndex > 0:
+                        self.cumulative_post_burn_in_samples = np.vstack((self.cumulative_post_burn_in_samples, self.post_burn_in_samples))
+                        self.cumulative_post_burn_in_log_priors_vec = np.vstack((self.cumulative_post_burn_in_log_priors_vec, self.post_burn_in_log_priors_vec))
+                        self.cumulative_post_burn_in_log_posteriors_un_normed_vec = np.vstack((self.cumulative_post_burn_in_log_posteriors_un_normed_vec, self.post_burn_in_log_posteriors_un_normed_vec))
+                #After the loop is done, we want to keep the accumulated values and then do the regular final calculations.
+                self.post_burn_in_samples = self.cumulative_post_burn_in_samples
+                self.post_burn_in_log_priors_vec = self.cumulative_post_burn_in_log_priors_vec
+                self.post_burn_in_log_posteriors_un_normed_vec = self.cumulative_post_burn_in_log_posteriors_un_normed_vec
+                self.UserInput.request_mpi = False # we need to turn this off, because otherwise it will interfere with our attempts to calculate the post_burn_in statistics.
+                os.chdir("..")
+                self.calculatePostBurnInStatistics(calculate_post_burn_in_log_priors_vec = True) #The argument is provided because otherwise there can be some bad priors if ESS was used.
+                self.exportPostBurnInStatistics()
+                self.UserInput.request_mpi = True #Set this back to true so that consolidating plots etc. doesn't get messed up.
+
+
+
 
     #The below function is a helper function that is used during doeInfoGainMatrix. However, it can certainly be used for other purposes.
     def populateResponsesWithSyntheticData(self, parModulationCombination):
@@ -948,13 +1045,29 @@ class parameter_estimation:
             print("stdap_parameter_set ",self.stdap_parameter_set)
         return [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec]
 
+    def getParallelProcessingPrefixAndSuffix(self):
+        file_name_prefix = ''
+        file_name_suffix = ''
+        if self.UserInput.request_mpi == True: 
+            import CheKiPEUQ.parallel_processing
+            import os
+            if CheKiPEUQ.parallel_processing.currentProcessorNumber == 0:
+                pass
+            if CheKiPEUQ.parallel_processing.currentProcessorNumber > 0:                
+                file_name_suffix = "_"+str(CheKiPEUQ.parallel_processing.currentProcessorNumber)
+                file_name_prefix = "./mpi_log_files/"  #fixme: FIX THIS, IT WILL NOT WORK ON EVERY OS.
+        return file_name_prefix, file_name_suffix
+
+
     def exportPostBurnInStatistics(self):
         #TODO: Make header for mcmc_samples_array. Also make exporting the mcmc_samples_array optional. 
+        file_name_prefix, file_name_suffix = self.getParallelProcessingPrefixAndSuffix()
         mcmc_samples_array = np.hstack((self.post_burn_in_log_posteriors_un_normed_vec,self.post_burn_in_samples))
-        np.savetxt('mcmc_logP_and_parameter_samples.csv',mcmc_samples_array, delimiter=",")             
+        np.savetxt(file_name_prefix+'mcmc_logP_and_parameter_samples'+file_name_suffix+'.csv',mcmc_samples_array, delimiter=",")
+        pickleAnObject(mcmc_samples_array, file_name_prefix+'mcmc_logP_and_parameter_samples'+file_name_suffix)
         if self.UserInput.parameter_estimation_settings['exportAllSimulatedOutputs'] == True: #By default, we should not keep this, it's a little too large with large sampling.
-            np.savetxt('mcmc_all_simulated_outputs.csv',self.post_burn_in_samples_simulatedOutputs, delimiter=",")             
-        with open("mcmc_log_file.txt", 'w') as out_file:
+            np.savetxt(file_name_prefix+'mcmc_all_simulated_outputs'+file_name_suffix+'.csv',self.post_burn_in_samples_simulatedOutputs, delimiter=",")            
+        with open(file_name_prefix+'mcmc_log_file'+file_name_suffix+".txt", 'w') as out_file:
             out_file.write("MAP_logP:" +  str(self.map_logP) + "\n")
             out_file.write("self.map_index:" +  str(self.map_index) + "\n")
             out_file.write("self.map_parameter_set:" + str( self.map_parameter_set) + "\n")
@@ -963,9 +1076,11 @@ class parameter_estimation:
             out_file.write("self.info_gain:" +  str(self.info_gain) + "\n")
             out_file.write("evidence:" + str(self.evidence) + "\n")
             out_file.write("posterior_cov_matrix:" + "\n" + str(np.cov(self.post_burn_in_samples.T)) + "\n")
-            if abs((self.map_parameter_set - self.mu_AP_parameter_set)/self.UserInput.var_prior).any() > 0.10:
-                pass #Disabling below warning until if statement is fixed.
+            if abs((self.map_parameter_set - self.mu_AP_parameter_set)/self.UserInput.std_prior).any() > 0.10:
+                pass #Disabling below warning until if statement is fixed. During mid-2020, it started printing every time. The if statement may be fixed now but not yet tested.
                 #out_file.write("Warning: The MAP parameter set and mu_AP parameter set differ by more than 10% of prior variance in at least one parameter. This may mean that you need to increase your mcmc_length, increase or decrease your mcmc_relative_step_length, or change what is used for the model response.  There is no general method for knowing the right  value for mcmc_relative_step_length since it depends on the sharpness and smoothness of the response. See for example https://www.sciencedirect.com/science/article/pii/S0039602816300632")
+        postBurnInStatistics = [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec]
+        pickleAnObject(postBurnInStatistics, file_name_prefix+'mcmc_post_burn_in_statistics'+file_name_suffix)
     
     #Our EnsembleSliceSampling is done by the Zeus back end. (pip install zeus-mcmc)
     software_name = "zeus"
@@ -974,12 +1089,13 @@ class parameter_estimation:
     software_kwargs = {"version": software_version, "author": ["Minas Karamanis", "Florian Beutler"], "cite": ["Minas Karamanis and Florian Beutler. zeus: A Python Implementation of the Ensemble Slice Sampling method. 2020. ","https://arxiv.org/abs/2002.06212", "@article{ess,  title={Ensemble Slice Sampling}, author={Minas Karamanis and Florian Beutler}, year={2020}, eprint={2002.06212}, archivePrefix={arXiv}, primaryClass={stat.ML} }"] }
     #@CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
     @CiteSoft.module_call_cite(unique_id=software_unique_id, software_name=software_name, **software_kwargs)
-    def doEnsembleSliceSampling(self, mcmc_nwalkers_direct_input = None, walkerInitialDistribution='uniform', calculatePostBurnInStatistics=True, exportLog ='UserChoice'):
-        #The distribution of walkers intial points can be uniform or gaussian. As of OCt 2020, default is uniform spread around the intial guess.
+    def doEnsembleSliceSampling(self, mcmc_nwalkers_direct_input = None, walkerInitialDistribution='uniform', walkerInitialDistributionSpread=1.0, calculatePostBurnInStatistics=True, exportLog ='UserChoice'):
+        #The distribution of walkers intial points can be uniform or gaussian or identical. As of OCt 2020, default is uniform spread around the intial guess.
         #The mcmc_nwalkers_direct_input is really meant for gridsearch to override the other settings, though of course people could also use it directly.  
+        #The walkerInitialDistributionSpread is in relative units (relative to standard deviations). In the case of a uniform inital distribution the default level of spread is actually across two standard deviations, so the walkerInitialDistributionSpread is relative to that (that is, a value of 2 would give 2*2 = 4 for the full spread in each direction from the initial guess).
         import zeus
         '''these variables need to be made part of userinput'''
-        numParameters = len(self.UserInput.InputParametersPriorValuesUncertainties) #This is the number of parameters.
+        numParameters = len(self.UserInput.InputParameterInitialGuess) #This is the number of parameters.
         if type(mcmc_nwalkers_direct_input) == type(None): #This is the normal case.
             if 'mcmc_nwalkers' not in self.UserInput.parameter_estimation_settings: self.mcmc_nwalkers = 'auto'
             else: self.mcmc_nwalkers = self.UserInput.parameter_estimation_settings['mcmc_nwalkers']
@@ -999,30 +1115,12 @@ class parameter_estimation:
             nEnsembleSteps = 1
         if str(self.UserInput.parameter_estimation_settings['mcmc_burn_in']).lower() == 'auto': self.mcmc_burn_in_length = int(nEnsembleSteps*0.1)
         else: self.mcmc_burn_in_length = self.UserInput.parameter_estimation_settings['mcmc_burn_in']
-        def generateWalkerStartPoints(mcmc_nwalkers=0, walkerInitialDistribution='uniform'):
-            #The initial points will be generated from a distribution based on the number of walkers and the distributions of the parameters.
-            #The variable UserInput.std_prior has been populated with 1 sigma values, even for cases with uniform distributions.
-            #The random generation at the front of the below expression is from the zeus example https://zeus-mcmc.readthedocs.io/en/latest/
-            #The multiplication is based on the randn function using a sigma of one (which we then scale up) and then advising to add mu after: https://docs.scipy.org/doc/numpy-1.15.1/reference/generated/numpy.random.randn.html
-            if mcmc_nwalkers == 0:
-                mcmc_nwalkers = self.mcmc_nwalkers
-            if walkerInitialDistribution=='uniform':
-                walkerStartsFirstTerm = 4*(np.random.rand(mcmc_nwalkers, numParameters)-0.5) #<-- this is from me, trying to remove bias. This way we get sampling from a uniform distribution from -2 standard deviations to +2 standard deviations.
-            elif walkerInitialDistribution == 'identical':
-                walkerStartsFirstTerm = np.zeros((mcmc_nwalkers, numParameters)) #Make the first term all zeros.
-            elif walkerInitialDistribution=='gaussian':
-                walkerStartsFirstTerm = np.random.randn(mcmc_nwalkers, numParameters) #<--- this was from the zeus example.
-            #Now we add to self.UserInput.InputParameterInitialGuess. We don't use the UserInput initial guess directly because gridsearch and other things can change it -- so we need to use this one.
-            walkerStartPoints = walkerStartsFirstTerm*self.UserInput.std_prior + self.UserInput.InputParameterInitialGuess 
-
-            return walkerStartPoints
-
         if 'mcmc_maxiter' not in self.UserInput.parameter_estimation_settings: mcmc_maxiter = 1E6 #The default from zeus is 1E4, but I have found that is not always sufficient.
         else: mcmc_maxiter = self.UserInput.parameter_estimation_settings['mcmc_maxiter']
         '''end of user input variables'''
         #now to do the mcmc
-        walkerStartPoints = generateWalkerStartPoints(walkerInitialDistribution=walkerInitialDistribution) #making the first set of starting points.
-        zeus_sampler = zeus.sampler(self.mcmc_nwalkers, numParameters, logprob_fn=self.getLogP, maxiter=mcmc_maxiter) #maxiter=1E4 is the typical number, but we may want to increase it based on some userInput variable.        
+        walkerStartPoints = self.generateWalkerStartPoints(walkerInitialDistribution=walkerInitialDistribution) #making the first set of starting points.
+        zeus_sampler = zeus.EnsembleSampler(self.mcmc_nwalkers, numParameters, logprob_fn=self.getLogP, maxiter=mcmc_maxiter) #maxiter=1E4 is the typical number, but we may want to increase it based on some userInput variable.        
         for trialN in range(0,1000):#Todo: This number of this range is hardcoded but should probably be a user selection.
             try:
                 zeus_sampler.run_mcmc(walkerStartPoints, nEnsembleSteps)
@@ -1031,7 +1129,7 @@ class parameter_estimation:
                 if "finite" in str(exceptionObject): #This means there is an error message from zeus saying " Invalid walker initial positions!  Initialise walkers from positions of finite log probability."
                     print("One of the starting points has a non-finite probability. Picking new starting points.")
                     walkerStartPoints = generateWalkerStartPoints() #Need to make the sampler again, in this case, to throw away anything that has happened so far.
-                    zeus_sampler = zeus.sampler(self.mcmc_nwalkers, numParameters, logprob_fn=self.getLogP, maxiter=mcmc_maxiter) #maxiter=1E4 is the typical number, but we may want to increase it based on some userInput variable.        
+                    zeus_sampler = zeus.EnsembleSampler(self.mcmc_nwalkers, numParameters, logprob_fn=self.getLogP, maxiter=mcmc_maxiter) #maxiter=1E4 is the typical number, but we may want to increase it based on some userInput variable.        
                 elif "maxiter" in str(exceptionObject): #This means there is an error message from zeus that the max iterations have been reached.
                     print("WARNING: One or more of the Ensemble Slice Sampling walkers encountered an error. The value of mcmc_maxiter is currently", mcmc_maxiter, "you should increase it, perhaps by a factor of 1E2.")
                 else:
@@ -1040,13 +1138,17 @@ class parameter_estimation:
         #Now to keep the results:
         self.post_burn_in_samples = zeus_sampler.samples.flatten(discard = self.mcmc_burn_in_length )
         self.post_burn_in_log_posteriors_un_normed_vec = np.atleast_2d(zeus_sampler.samples.flatten_logprob(discard=self.mcmc_burn_in_length)).transpose() #Needed to make it 2D and transpose.
+        if self.UserInput.request_mpi == True: #If we're using parallel processing, we need to make calculatePostBurnInStatistics and also exportLog into True.
+            calculatePostBurnInStatistics = True; exportLog=True
         if calculatePostBurnInStatistics == True:
             self.calculatePostBurnInStatistics(calculate_post_burn_in_log_priors_vec = True) #This function call will also filter the lowest probability samples out, when using default settings.
             if str(exportLog) == 'UserChoice':
                 exportLog = bool(self.UserInput.parameter_estimation_settings['exportLog'])
             if exportLog == True:
                 self.exportPostBurnInStatistics()
-            return [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec] 
+            if self.UserInput.parameter_estimation_settings['mcmc_parallel_sampling'] == True: #We don't call the below function at this time unless we are doing mcmc_parallel_sampling. For gridsearch_parallel_sampling the consolidation is done elsewhere and differently.
+                self.consolidate_parallel_sampling_data(parallelizationType="equal")
+            return [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec]   
         else: #In this case, we are probably doing a gridsearch or something like that and only want self.map_logP.
             self.map_logP = max(self.post_burn_in_log_posteriors_un_normed_vec)
             self.map_index = list(self.post_burn_in_log_posteriors_un_normed_vec).index(self.map_logP) #This does not have to be a unique answer, just one of them places which gives map_logP.
@@ -1176,12 +1278,16 @@ class parameter_estimation:
         self.post_burn_in_log_posteriors_un_normed_vec = (self.post_burn_in_log_posteriors_un_normed_vec) #Is this increasing dimension?
         self.post_burn_in_log_likelihoods_vec = log_likelihoods_vec[self.mcmc_burn_in_length:]
         self.post_burn_in_log_priors_vec = log_priors_vec[self.mcmc_burn_in_length:]
+        if self.UserInput.request_mpi == True: #If we're using parallel processing, we need to make calculatePostBurnInStatistics and also exportLog into True.
+            calculatePostBurnInStatistics = True; exportLog=True
         if calculatePostBurnInStatistics == True:
             self.calculatePostBurnInStatistics() #This function call will also filter the lowest probability samples out, when using default settings.
             if str(exportLog) == 'UserChoice':
                 exportLog = bool(self.UserInput.parameter_estimation_settings['exportLog'])
             if exportLog == True:
                 self.exportPostBurnInStatistics()
+            if self.UserInput.parameter_estimation_settings['mcmc_parallel_sampling'] == True: #We don't call the below function at this time unless we are doing mcmc_parallel_sampling. For gridsearch_parallel_sampling the consolidation is done elsewhere and differently.
+                self.consolidate_parallel_sampling_data(parallelizationType="equal")
             return [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec] # EAW 2020/01/08
         else: #In this case, we are probably doing a gridsearch or something like that and only want self.map_logP.
             self.map_logP = max(self.post_burn_in_log_posteriors_un_normed_vec)
@@ -1494,6 +1600,13 @@ class parameter_estimation:
 
     @CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
     def createAllPlots(self):
+        if self.UserInput.request_mpi == True: #need to check if UserInput.request_mpi is on, since if so we will only make plots after the final process.
+            import os; import sys
+            import CheKiPEUQ.parallel_processing
+            if CheKiPEUQ.parallel_processing.finalProcess == True:
+                pass#This will proceed as normal.
+            elif CheKiPEUQ.parallel_processing.finalProcess == False:
+                return False #this will stop the plots creation.
         try:
             self.makeHistogramsForEachParameter()    
             self.makeSamplingScatterMatrixPlot()
@@ -1509,7 +1622,14 @@ class parameter_estimation:
             self.createSimulatedResponsesPlots()
         except:
             pass
-
+            
+    def save_to_dill(self, base_file_name, file_name_prefix ='',  file_name_suffix='', file_name_extension='.dill'):
+        save_PE_object(self, base_file_name, file_name_prefix ='',  file_name_suffix='', file_name_extension='.dill')
+    def load_from_dill(self, base_file_name, file_name_prefix ='',  file_name_suffix='', file_name_extension='.dill'):
+        theObject = load_PE_object(base_file_name, file_name_prefix ='',  file_name_suffix='', file_name_extension='.dill')
+        print("PE_object.load_from_dill executed. This function returns a new PE_object. To overwrite an existing PE_object, use PE_object = PE_object.load_from_dill(...)")
+        return theObject
+        
 class verbose_optimization_wrapper: #Learned how to use callback from Henri's post https://stackoverflow.com/questions/16739065/how-to-display-progress-of-scipy-optimize-function
     def __init__(self, simulationFunction):
         self.simulationFunction = simulationFunction
@@ -1716,6 +1836,59 @@ def arrayThresholdFilter(inputArray, filterKey=[], thresholdValue=0, removeValue
 @CiteSoft.after_call_compile_consolidated_log()
 def exportCitations():
     pass
+
+def pickleAnObject(objectToPickle, base_file_name, file_name_prefix ='',  file_name_suffix='', file_name_extension='.pkl'):
+    import pickle
+    data_filename = file_name_prefix + base_file_name + file_name_prefix + file_name_extension
+    with open(data_filename, 'wb') as picklefile:
+        pickle.dump(objectToPickle, picklefile)
+
+def unpickleAnObject(base_file_name, file_name_prefix ='',  file_name_suffix='', file_name_extension='.pkl'):
+    import pickle
+    data_filename = file_name_prefix + base_file_name + file_name_prefix + file_name_extension
+    with open(data_filename, 'rb') as picklefile:
+        theObject = pickle.load(picklefile)
+    return theObject
+
+
+def dillpickleAnObject(objectToPickle, base_file_name, file_name_prefix ='',  file_name_suffix='', file_name_extension='.dill'):
+    #Can't use pickle. Need to use dill.
+    try:
+        import dill
+    except:
+        print("To use this feature requires dill. If you don't have it, open an anaconda prompt and type 'pip install dill' or use conda install. https://anaconda.org/anaconda/dill")
+    data_filename = file_name_prefix + base_file_name + file_name_prefix + file_name_extension
+    with open(data_filename, 'wb') as picklefile:
+        dill.dump(objectToPickle, picklefile)
+
+def unDillpickleAnObject(base_file_name, file_name_prefix ='',  file_name_suffix='', file_name_extension='.dill'):
+    try:
+        import dill
+    except:
+        print("To use this feature requires dill. If you don't have it, open an anaconda prompt and type 'pip install dill' or use conda install. https://anaconda.org/anaconda/dill")
+    data_filename = file_name_prefix + base_file_name + file_name_prefix + file_name_extension
+    with open(data_filename, 'rb') as picklefile:
+        theObject = dill.load(picklefile)
+    return theObject
+
+def save_PE_object(objectToPickle, base_file_name, file_name_prefix ='',  file_name_suffix='', file_name_extension='.dill'):
+    dillpickleAnObject(objectToPickle, base_file_name, file_name_prefix ='',  file_name_suffix='', file_name_extension='.dill')
+
+def load_PE_object(base_file_name, file_name_prefix ='',  file_name_suffix='', file_name_extension='.dill'):
+    theObject = unDillpickleAnObject(base_file_name, file_name_prefix ='',  file_name_suffix='', file_name_extension='.dill')
+    return theObject
+
+def deleteAllFilesInDirectory(mydir=''):
+    import os
+    import copy
+    if mydir == '':
+        working_dir=os.getcwd()
+        mydir = working_dir
+    filelist = copy.deepcopy(os.listdir(mydir))
+    for f in filelist:
+        os.remove(os.path.join(mydir, f))
+
+
         
 if __name__ == "__main__":
     pass

@@ -23,6 +23,10 @@ if __name__ == "__main__":
     UserInput.model['simulateByInputParametersOnlyFunction'] = simulation_model_00.simulation_function_wrapper #This must simulate with *only* the parameters listed above, and no other arguments.
     simulation_model_00.x_values_for_data = UserInput.responses['responses_abscissa']  #Setting the x_values_for_data inthe simulation module.
 
+    UserInput.parameter_estimation_settings['mcmc_length'] = 100
+    
+    UserInput.parameter_estimation_settings['mcmc_parallel_sampling'] = True
+
     #After making the UserInput, now we make a 'parameter_estimation' object from it.
     PE_object = CKPQ.parameter_estimation(UserInput)
     mcmc_output = PE_object.doEnsembleSliceSampling()
@@ -30,8 +34,5 @@ if __name__ == "__main__":
 #    PE_object.makeHistogramsForEachParameter()    
 #    PE_object.makeSamplingScatterMatrixPlot()
 #    PE_object.createSimulatedResponsesPlot()
-    
-    CKPQ.save_PE_object(PE_object, "SavingProjectExample")
 
-    PE_object = CKPQ.load_PE_object("SavingProjectExample")
     
