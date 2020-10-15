@@ -46,7 +46,7 @@ class parameter_estimation:
             UserInput.parameter_estimation_settings['mcmc_checkPointFrequency'] = UserInput.parameter_estimation_settings['checkPointFrequency']
             UserInput.parameter_estimation_settings['gridsearch_checkPointFrequency'] = UserInput.parameter_estimation_settings['checkPointFrequency']
         UserInput.request_mpi = False #Set as false as default.
-        if UserInput.parameter_estimation_settings['mcmc_parallel_sampling'] == True:
+        if (UserInput.parameter_estimation_settings['mcmc_parallel_sampling'] or UserInput.parameter_estimation_settings['gridsearch_parallel_sampling']) == True:
             UserInput.request_mpi = True
         if UserInput.request_mpi == True: #Rank zero needs to clear out the mpi_log_files directory, so check if we are using rank 0.
             import os; import sys
@@ -59,8 +59,12 @@ class parameter_estimation:
                 os.chdir("./mpi_log_files")
                 deleteAllFilesInDirectory()
                 os.chdir("./..")
-                sys.exit() #TODO: right now, processor zero just exits after making and emptying the directory. In the future, things will be more complex for the processor zero.
-
+                #Now check the number of processor ranks to see if the person really is using parallel processing.
+                if CheKiPEUQ.parallel_processing.numProcessors > 1:    #This is the normal case.
+                    sys.exit() #TODO: right now, processor zero just exits after making and emptying the directory. In the future, things will be more complex for the processor zero.
+                elif CheKiPEUQ.parallel_processing.numProcessors == 1: #This is the case where the person has only one process rank, so probably does not want code execution to stop just yet. (This is an intentional case for gridsearch for example, where running without mpi will print the number of grid combinations).
+                    print("Notice: you have requested parallel processing by MPI but have only 1 processor rank enabled or are not using mpi for this run. Parallel processing is being disabled for this run. If you are using gridsearch, another message will be printed out for the number of processor ranks to provide to mpi.")
+                    UserInput.request_mpi = False
         
         #Setting this object so that we can make changes to it below without changing userinput dictionaries.
         self.UserInput.mu_prior = np.array(UserInput.model['InputParameterPriorValues']) 
@@ -417,10 +421,7 @@ class parameter_estimation:
         #calculatePostBurnInStatistics will store all the individual runs in memory and will then provide the samples of the best one.
         #TODO: the upper part of the gridsearch may not be compatibile with reduced parameter space. Needs to be checked.
         verbose = self.UserInput.parameter_estimation_settings['verbose']
-
-
-        gridCenter = self.UserInput.InputParameterInitialGuess #This may be a reduced parameter space.
-        
+        gridCenter = self.UserInput.InputParameterInitialGuess #This may be a reduced parameter space.        
         gridCombinations, numGridPoints = self.getGridCombinations(gridCenter, gridSamplingAbsoluteIntervalSize, gridSamplingNumOfIntervals)
         allGridResults = []
         #Initialize some things before loop.
@@ -428,7 +429,7 @@ class parameter_estimation:
                 import timeit
                 timeAtGridStart = timeit.time.clock()
                 timeAtLastGridPoint = timeAtGridStart #just initializing
-        highest_logP = float('-inf') #Just initializing.
+        self.highest_logP = float('-inf') #Just initializing.
         if searchType == 'doEnsembleSliceSampling':
             if str(self.UserInput.parameter_estimation_settings['mcmc_nwalkers']).lower() == 'auto':
                 gridsearch_mcmc_nwalkers = 2*len(gridCenter) #Lowest possible is 2 times num parameters for ESS.
@@ -442,6 +443,17 @@ class parameter_estimation:
                 if walkerInitialDistribution.lower() == 'auto':
                     walkerInitialDistribution = 'uniform'
         for combinationIndex,combination in enumerate(gridCombinations):
+            if self.UserInput.parameter_estimation_settings['gridsearch_parallel_sampling'] == True:
+                #We will only execute the sampling the combinationIndex matches the processor rank.
+                #Additionally, if the rank is 0 and the simulation got here, it will be assumed the person is running this just to find the number of combinations, so that will be spit out and the simulation ended.
+                import CheKiPEUQ.parallel_processing
+                if CheKiPEUQ.parallel_processing.currentProcessorNumber == 0:
+                    print("For the user input settings provided, the number of gridpoints will be",  numGridPoints, ". Please use mpiexec or mpirun with this number for N. If you are not expecting to see this message, change your UserInput choices. You have chosen parallel processing for gridsearch and have run CheKiPEUQ without mpi, which is a procedure to retrieve the number of processor ranks to use for parallelized gridsearch. A typical syntax now would be: mpiexec -n ",  numGridPoints, " python runfile_Example_26a2_BPE.py" )
+                    sys.exit()
+                elif CheKiPEUQ.parallel_processing.currentProcessorNumber != combinationIndex:
+                    continue #This means the combination index does not match the processor rank so nothing should be executed.
+                #elif CheKiPEUQ.parallel_processing.currentProcessorNumber == combinationIndex:
+                #    pass  #This is the "normal" case and is implied, so is commented out.
             self.UserInput.InputParameterInitialGuess = combination #We need to fill the variable InputParameterInitialGuess with the combination being checked.
             if searchType == 'getLogP':
                 self.map_logP = self.getLogP(combination) #The getLogP function does not fill map_logP by itself.
@@ -483,33 +495,37 @@ class parameter_estimation:
                 averageTimePerGridPoint = (timeAtThisGridPoint - timeAtGridStart)/(combinationIndex+1)
                 numRemainingGridPoints = numGridPoints - combinationIndex+1
                 timeAtLastGridPoint = timeAtThisGridPoint #Updating.
-            if self.map_logP > highest_logP: #This is the grid point in space with the highest value found so far and will be kept.
+            if self.map_logP > self.highest_logP: #This is the grid point in space with the highest value found so far and will be kept.
                 bestResultSoFar = thisResult
-                highest_logP = self.map_logP
+                self.highest_logP = self.map_logP
                 highest_logP_parameter_set = self.map_parameter_set
             allGridResults.append(thisResult)
             if verbose == True:
                 print("GridPoint", combination, "number", combinationIndex+1, "out of", numGridPoints, "timeOfThisGridPoint", timeOfThisGridPoint)
                 print("GridPoint", combinationIndex+1, "averageTimePerGridPoint", "%.2f" % round(averageTimePerGridPoint,2), "estimated time remaining", "%.2f" % round( numRemainingGridPoints*averageTimePerGridPoint,2), "s" )
-                print("GridPoint", combinationIndex+1, "current logP", self.map_logP, "highest logP", highest_logP, "highest logP Parameter Set", highest_logP_parameter_set)
+                print("GridPoint", combinationIndex+1, "current logP", self.map_logP, "highest logP", self.highest_logP, "highest logP Parameter Set", highest_logP_parameter_set)
             elif type(self.UserInput.parameter_estimation_settings['gridsearch_checkPointFrequency']) != type(None): #If verbose off but checkpoint frequency is on.
                 if (combinationIndex ==0 or ((combinationIndex+1)/self.UserInput.parameter_estimation_settings['gridsearch_checkPointFrequency']).is_integer()):
                     print("GridPoint", combination, "number", combinationIndex+1, "out of", numGridPoints, "timeOfThisGridPoint", timeOfThisGridPoint)
                     print("GridPoint", combinationIndex+1, "averageTimePerGridPoint", "%.2f" % round(averageTimePerGridPoint,2), "estimated time remaining", "%.2f" % round( numRemainingGridPoints*averageTimePerGridPoint,2), "s" )
-                    print("GridPoint", combinationIndex+1, "current logP", self.map_logP, "highest logP", highest_logP)
-            
+                    print("GridPoint", combinationIndex+1, "current logP", self.map_logP, "highest logP", self.highest_logP)
+        
+        if self.UserInput.parameter_estimation_settings['gridsearch_parallel_sampling'] == True: #This is the parallel sampling mpi case.
+            self.consolidate_parallel_sampling_data(parallelizationType="gridsearch")
+            if CheKiPEUQ.parallel_processing.finalProcess == False:
+                return self.map_logP #This is sortof like a sys.exit(), we are just ending the gridsearch function here if we are not on the finalProcess. 
         #TODO: export the allGridResults to file at end of search in a nicer format.        
         #First set the initial guess back to the center of the grid.
         self.UserInput.InputParameterInitialGuess = gridCenter
         #Now populate the map etc. with those of the best result.
-        self.map_logP = highest_logP 
+        self.map_logP = self.highest_logP 
         self.map_parameter_set = highest_logP_parameter_set 
         if exportLog == True:
             with open("gridsearch_log_file.txt", 'w') as out_file:
                 out_file.write("result: " + "self.map_logP, self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec" + "\n")
                 for resultIndex, result in enumerate(allGridResults):
                     out_file.write("result: " + str(resultIndex) + " " +  str(result) + "\n")
-        print("Final map results from gridsearch:", self.map_parameter_set, "Final map logP:", self.map_logP)
+        print("Final map parameter results from gridsearch:", self.map_parameter_set, "Final map logP:", self.map_logP)
         if searchType == ('doMetropolisHastings' or 'doEnsembleSliceSampling'):
             #For MCMC, we can now calculate the post_burn_in statistics for the best sampling from the full samplings done. We don't want to lump all together because that would not be unbiased.
             if calculatePostBurnInStatistics == True:
@@ -556,7 +572,52 @@ class parameter_estimation:
                 return False
             
         if checkIfAllSimulationsDone() == True:
-            if parallelizationType.lower() == 'equal':
+            if parallelizationType.lower() == 'gridsearch':
+                import os
+                os.chdir("./mpi_log_files")
+                for simulationIndex in range(0,numSimulations): #For each simulation, we need to grab the results.
+                    simulationNumberString = str(simulationIndex+1)
+                    #Get the dat aout.    
+                    current_post_burn_in_statistics_filename = "mcmc_post_burn_in_statistics_"+simulationNumberString
+                    current_post_burn_in_statistics_data = unpickleAnObject(current_post_burn_in_statistics_filename)
+                    
+                    current_post_map_logP_filename = "mcmc_map_logP_"+simulationNumberString
+                    current_post_map_logP_data = unpickleAnObject(current_post_map_logP_filename)
+                    
+                    #Populate the class variables.
+                    [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec] = current_post_burn_in_statistics_data
+                    #Still accumulating.
+                    if simulationIndex == 0: #This is the first data set.
+                        self.map_logP = current_post_map_logP_data                       
+                        self.highest_logP = self.map_logP
+                        self.highest_logP_parameter_set = self.map_parameter_set
+                        self.highest_logP_post_burn_in_samples = self.post_burn_in_samples
+                        self.highest_logP_post_burn_in_log_priors_vec = self.post_burn_in_log_priors_vec
+                        self.highest_logP_post_burn_in_log_posteriors_un_normed_vec = self.post_burn_in_log_posteriors_un_normed_vec
+                    else: #This is basically elseif combinationIndex > 0:
+                        self.map_logP = current_post_map_logP_data
+                        if self.highest_logP < self.map_logP:
+                            self.highest_logP = self.map_logP
+                            self.highest_logP_parameter_set = self.map_parameter_set
+                            self.highest_logP_post_burn_in_samples = self.post_burn_in_samples
+                            self.highest_logP_post_burn_in_log_priors_vec = self.post_burn_in_log_priors_vec
+                            self.highest_logP_post_burn_in_log_posteriors_un_normed_vec = self.post_burn_in_log_posteriors_un_normed_vec
+                #After the loop is done, we want to keep the accumulated values and then do the regular final calculations.
+                self.map_logP = max(self.post_burn_in_log_posteriors_un_normed_vec)
+                self.map_index = list(self.post_burn_in_log_posteriors_un_normed_vec).index(self.map_logP) #This does not have to be a unique answer, just one of them places which gives map_logP.
+                self.map_parameter_set = self.post_burn_in_samples[self.map_index] #This  is the point with the highest probability in the                 
+                self.map_logP = self.highest_logP 
+                self.map_parameter_set = self.highest_logP_parameter_set
+                self.post_burn_in_samples = self.highest_logP_post_burn_in_samples 
+                self.post_burn_in_log_priors_vec = self.highest_logP_post_burn_in_log_priors_vec 
+                self.post_burn_in_log_posteriors_un_normed_vec = self.highest_logP_post_burn_in_log_posteriors_un_normed_vec 
+
+                self.UserInput.request_mpi = False # we need to turn this off, because otherwise it will interfere with our attempts to calculate the post_burn_in statistics.
+                os.chdir("..")
+                self.calculatePostBurnInStatistics(calculate_post_burn_in_log_priors_vec = True) #The argument is provided because otherwise there can be some bad priors if ESS was used.
+                self.exportPostBurnInStatistics()
+                self.UserInput.request_mpi = True #Set this back to true so that consolidating plots etc. doesn't get messed up.
+            elif parallelizationType.lower() == 'equal':
                 import os
                 os.chdir("./mpi_log_files")
                 for simulationIndex in range(0,numSimulations): #For each simulation, we need to grab the results.
@@ -1055,13 +1116,13 @@ class parameter_estimation:
                 pass
             if CheKiPEUQ.parallel_processing.currentProcessorNumber > 0:                
                 file_name_suffix = "_"+str(CheKiPEUQ.parallel_processing.currentProcessorNumber)
-                file_name_prefix = "./mpi_log_files/"  #fixme: FIX THIS, IT WILL NOT WORK ON EVERY OS.
+                file_name_prefix = "./mpi_log_files/"  #TODO: FIX THIS, IT MAY NOT WORK ON EVERY OS. SHOULD USE 'os' MODULE TO FIND DIRECTION OF THE SLASH OR TO DO SOMETHING SIMILAR. CURRENTLY IT IS WORKING ON MY WINDOWS DESPITE BEING "/"
         return file_name_prefix, file_name_suffix
 
 
     def exportPostBurnInStatistics(self):
         #TODO: Make header for mcmc_samples_array. Also make exporting the mcmc_samples_array optional. 
-        file_name_prefix, file_name_suffix = self.getParallelProcessingPrefixAndSuffix()
+        file_name_prefix, file_name_suffix = self.getParallelProcessingPrefixAndSuffix() #Rather self explanatory.
         mcmc_samples_array = np.hstack((self.post_burn_in_log_posteriors_un_normed_vec,self.post_burn_in_samples))
         np.savetxt(file_name_prefix+'mcmc_logP_and_parameter_samples'+file_name_suffix+'.csv',mcmc_samples_array, delimiter=",")
         pickleAnObject(mcmc_samples_array, file_name_prefix+'mcmc_logP_and_parameter_samples'+file_name_suffix)
@@ -1081,7 +1142,8 @@ class parameter_estimation:
                 #out_file.write("Warning: The MAP parameter set and mu_AP parameter set differ by more than 10% of prior variance in at least one parameter. This may mean that you need to increase your mcmc_length, increase or decrease your mcmc_relative_step_length, or change what is used for the model response.  There is no general method for knowing the right  value for mcmc_relative_step_length since it depends on the sharpness and smoothness of the response. See for example https://www.sciencedirect.com/science/article/pii/S0039602816300632")
         postBurnInStatistics = [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec]
         pickleAnObject(postBurnInStatistics, file_name_prefix+'mcmc_post_burn_in_statistics'+file_name_suffix)
-    
+        pickleAnObject(self.map_logP, file_name_prefix+'mcmc_map_logP'+file_name_suffix)
+        
     #Our EnsembleSliceSampling is done by the Zeus back end. (pip install zeus-mcmc)
     software_name = "zeus"
     software_version = "2.0.0"

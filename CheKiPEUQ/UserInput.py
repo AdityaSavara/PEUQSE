@@ -65,7 +65,6 @@ parameter_estimation_settings['mcmc_maxiter'] = 1E6
 parameter_estimation_settings['mcmc_walkerInitialDistribution'] = 'auto' #Can be 'uniform', 'gaussian', or 'identical'.  Auto will use 'uniform' during gridsearch and 'uniform' for most other cases.
 parameter_estimation_settings['mcmc_checkPointFrequency'] = None #This is only for MH, not ESS. (as of Oct 2020)
 parameter_estimation_settings['mcmc_parallel_sampling'] = False #This makes completely parallelized sampling of a single sampling. syntax to use is like "mpiexec -n 5 python runfile.py" where 5 is the number of processors. Currently, the first processor's results are thrown away.  In the future, this may change.
-parameter_estimation_settings['gridsearch_checkPointFrequency'] = None #Note: this setting does not work perfectly with ESS.
 
 
 #####Plot Settings#####
@@ -73,9 +72,14 @@ parameter_estimation_settings['gridsearch_checkPointFrequency'] = None #Note: th
 samplingScatterMatrixPlotsSettings ={}
 
 ######gridSamplingSettings##### 
+parameter_estimation_settings['gridsearch_checkPointFrequency'] = None #Note: this setting does not work perfectly with ESS.
+parameter_estimation_settings['gridsearch_parallel_sampling'] = False
+parameter_estimation_settings['gridsearch_sampling_interval'] = []
+parameter_estimation_settings['gridsearch_sampling_radii'] =  []
+parameter_estimation_settings['gridsearch_export'] = []
+parameter_estimation_settings['gridsearch_passThroughArgs'] = {}
 #At present, all gridSampling settings are fed as arguments directly into the doGridSearch function.
 #Perhaps that should be changed in the future so that wrapper functions can pass arguments to doGridSearch.
-#parameter_estimation_settings['gridSampling'] = False    
 #doGridSearch(self, searchType='doMetropolisHastings', export = True, verbose = False, gridSamplingIntervalSize = [], gridSamplingRadii = [], passThroughArgs = {}):
 
 ######mumpce plots##### #####contour plots#### 
