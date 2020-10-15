@@ -71,16 +71,28 @@ parameter_estimation_settings['mcmc_parallel_sampling'] = False #This makes comp
 #possible dictionary fields include: dpi, figure_name, fontsize, x_label, y_label, figure_name, x_range, y_range
 samplingScatterMatrixPlotsSettings ={}
 
-######gridSamplingSettings##### 
+######gridSearchSettings##### 
 parameter_estimation_settings['gridsearch_checkPointFrequency'] = None #Note: this setting does not work perfectly with ESS.
 parameter_estimation_settings['gridsearch_parallel_sampling'] = False
 parameter_estimation_settings['gridsearch_sampling_interval'] = []
 parameter_estimation_settings['gridsearch_sampling_radii'] =  []
-parameter_estimation_settings['gridsearch_export'] = []
+parameter_estimation_settings['gridsearch_exportLog'] = []
 parameter_estimation_settings['gridsearch_passThroughArgs'] = {}
 #At present, all gridSampling settings are fed as arguments directly into the doGridSearch function.
 #Perhaps that should be changed in the future so that wrapper functions can pass arguments to doGridSearch.
 #doGridSearch(self, searchType='doMetropolisHastings', export = True, verbose = False, gridSamplingIntervalSize = [], gridSamplingRadii = [], passThroughArgs = {}):
+
+######multiStartSettings##### 
+parameter_estimation_settings['multistart_checkPointFrequency'] = None #Note: this setting does not work perfectly with ESS.
+parameter_estimation_settings['multistart_parallel_sampling'] = False
+parameter_estimation_settings['multistart_numStartPoints'] = 0 #If this is left as zero it will be set as 3 times the number of active parameters.
+parameter_estimation_settings['multistart_multiStartInitialDistribution'] = 'uniform' #Can be 'uniform' or 'gaussian'
+parameter_estimation_settings['multistart_relativeInitialDistributionSpread'] = 1.0 #The default value is 1.0. This scales the distribution's spread. By default, the uniform distribution, the points are sampled from a 2 sigma interval in each direction from the initial guess. This value then scales that range.
+parameter_estimation_settings['multistart_calculatePostBurnInStatistics'] = True
+parameter_estimation_settings['multistart_keep_cumulative_post_burn_in_data'] = False
+parameter_estimation_settings['multistart_exportLog'] = []
+parameter_estimation_settings['multistart_passThroughArgs'] = {}
+
 
 ######mumpce plots##### #####contour plots#### 
 #model_parameter_info = np.array([{'parameter_number': 0, 'parameter_name': r'$E_{a1}$'},

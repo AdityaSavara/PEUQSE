@@ -374,6 +374,7 @@ class parameter_estimation:
                         pass
         return nestedAllResponsesArray_transformed, nestedAllResponsesUncertainties_transformed  
 
+    #TODO: Change this to "number of start points"
     def generateWalkerStartPoints(self, mcmc_nwalkers=0, walkerInitialDistribution='uniform', walkerInitialDistributionSpread=1.0, numParameters = 0):
         #The initial points will be generated from a distribution based on the number of walkers and the distributions of the parameters.
         #The variable UserInput.std_prior has been populated with 1 sigma values, even for cases with uniform distributions.
@@ -414,6 +415,24 @@ class parameter_estimation:
         else: gridSamplingAbsoluteIntervalSize = np.array(gridSamplingAbsoluteIntervalSize, dtype='float')
         gridPermutations = CombinationGeneratorModule.combinationGenerator(gridCenterVector, gridSamplingAbsoluteIntervalSize, gridSamplingNumOfIntervals, SpreadType=SpreadType,toFile=toFile)
         return gridPermutations, numPermutations  
+
+
+    @CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
+    def doMultiStart(self, searchType='getLogP', numStartPoints = 0, relativeInitialDistributionSpread=0, exportLog = True, multiStartInitialDistribution='UserChoice', walkerInitialDistribution='UserChoice', passThroughArgs = {}, calculatePostBurnInStatistics=True,  keep_cumulative_post_burn_in_data = False): #This is for non-gridsearch multistarts.
+        #We set many of the arguments to have blank or zero values so that if they are not provided, the values will be taken from the UserInput choices.
+        if multiStartInitialDistribution == 'UserChoice': 
+            multiStartInitialDistribution = self.UserInput.parameter_estimation_settings['multistart_multiStartInitialDistribution']
+        if numStartPoints ==0:
+            numStartPoints = self.UserInput.parameter_estimation_settings['multistart_numStartPoints']
+            if numStartPoints == 0: #if it's still zero, we need to make it the default which is 3 times the number of active parameters.
+                numStartPoints = len(self.UserInput.InputParameterInitialGuess)*3
+        if relativeInitialDistributionSpread == 0:
+            relativeInitialDistributionSpread = self.UserInput.parameter_estimation_settings['multistart_relativeInitialDistributionSpread']
+            if relativeInitialDistributionSpread == 0: #if it's still zero, we need to make it the default which is 1.
+                relativeInitialDistributionSpread = 1.0
+        multiStartInitialPointsList = self.generateWalkerStartPoints(mcmc_nwalkers=numStartPoints, walkerInitialDistributionSpread=relativeInitialDistributionSpread, walkerInitialDistribution=multiStartInitialDistribution)
+        bestResultSoFar = self.doListOfPermutationsSearch(listOfPermutations=multiStartInitialPointsList, searchType=searchType, exportLog=exportLog, walkerInitialDistribution=walkerInitialDistribution, passThroughArgs=passThroughArgs, calculatePostBurnInStatistics=calculatePostBurnInStatistics, keep_cumulative_post_burn_in_data=keep_cumulative_post_burn_in_data)
+        return bestResultSoFar
         
     def doListOfPermutationsSearch(self, listOfPermutations, numPermutations = None, searchType='getLogP', exportLog = True, walkerInitialDistribution='UserChoice', passThroughArgs = {}, calculatePostBurnInStatistics=True,  keep_cumulative_post_burn_in_data = False, centerPoint=None): #This is the 'engine' used by doGridSearch and  doMultiStartSearch
     #The listOfPermutations can also be another type of iterable.
