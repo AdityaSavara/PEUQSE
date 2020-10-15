@@ -374,8 +374,11 @@ class parameter_estimation:
                         pass
         return nestedAllResponsesArray_transformed, nestedAllResponsesUncertainties_transformed  
 
-    #TODO: Change this to "number of start points"
-    def generateWalkerStartPoints(self, mcmc_nwalkers=0, walkerInitialDistribution='uniform', walkerInitialDistributionSpread=1.0, numParameters = 0):
+    #Throughout this file, this function is called to generate initialStartPoint distributions or walkerInitialDistributions. 
+    #    These are **not** identical variables and should not be messed up during editing. walkerInitialDistributions are a special case of initialStartPoints
+    #    The distinction is hierarchical. Somebody could do a multiStart search with a uniformInitialDistributionType and have a walkerInitialDistribution started around each case within that.
+    #    Effectively, the initialDistributionPoints are across parameter space, while the walkerInitialDistribution **could** be designed to find local modes using a smaller spread.
+    def generateInitialPoints(self, numStartPoints=0, initialPointsDistributionType='uniform', relativeInitialDistributionSpread=1.0, numParameters = 0):
         #The initial points will be generated from a distribution based on the number of walkers and the distributions of the parameters.
         #The variable UserInput.std_prior has been populated with 1 sigma values, even for cases with uniform distributions.
         #The random generation at the front of the below expression is from the zeus example https://zeus-mcmc.readthedocs.io/en/latest/
@@ -384,16 +387,16 @@ class parameter_estimation:
         if numParameters == 0:
             numParameters = len(self.UserInput.InputParameterInitialGuess)
         
-        if mcmc_nwalkers == 0:
-            mcmc_nwalkers = self.mcmc_nwalkers
-        if walkerInitialDistribution=='uniform':
-            walkerStartsFirstTerm = 4*(np.random.rand(mcmc_nwalkers, numParameters)-0.5) #<-- this is from me, trying to remove bias. This way we get sampling from a uniform distribution from -2 standard deviations to +2 standard deviations.
-        elif walkerInitialDistribution == 'identical':
-            walkerStartsFirstTerm = np.zeros((mcmc_nwalkers, numParameters)) #Make the first term all zeros.
-        elif walkerInitialDistribution=='gaussian':
-            walkerStartsFirstTerm = np.random.randn(mcmc_nwalkers, numParameters) #<--- this was from the zeus example.
+        if numStartPoints == 0: #This is a deprecated line. The function was originally designed for making mcmc walkers and then was generalized.
+            numStartPoints = self.mcmc_nwalkers
+        if initialPointsDistributionType=='uniform':
+            initialPointsFirstTerm = 4*(np.random.rand(numStartPoints, numParameters)-0.5) #<-- this is from me, trying to remove bias. This way we get sampling from a uniform distribution from -2 standard deviations to +2 standard deviations.
+        elif initialPointsDistributionType == 'identical':
+            initialPointsFirstTerm = np.zeros((numStartPoints, numParameters)) #Make the first term all zeros.
+        elif initialPointsDistributionType=='gaussian':
+            initialPointsFirstTerm = np.random.randn(numStartPoints, numParameters) #<--- this was from the zeus example.
         #Now we add to self.UserInput.InputParameterInitialGuess. We don't use the UserInput initial guess directly because gridsearch and other things can change it -- so we need to use this one.
-        walkerStartPoints = walkerStartsFirstTerm*self.UserInput.std_prior*walkerInitialDistributionSpread + self.UserInput.InputParameterInitialGuess 
+        walkerStartPoints = initialPointsFirstTerm*self.UserInput.std_prior*relativeInitialDistributionSpread + self.UserInput.InputParameterInitialGuess 
         return walkerStartPoints
 
     #This helper function has been made so that gridSearch and design of experiments can call it.
@@ -415,24 +418,6 @@ class parameter_estimation:
         else: gridSamplingAbsoluteIntervalSize = np.array(gridSamplingAbsoluteIntervalSize, dtype='float')
         gridPermutations = CombinationGeneratorModule.combinationGenerator(gridCenterVector, gridSamplingAbsoluteIntervalSize, gridSamplingNumOfIntervals, SpreadType=SpreadType,toFile=toFile)
         return gridPermutations, numPermutations  
-
-
-    @CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
-    def doMultiStart(self, searchType='getLogP', numStartPoints = 0, relativeInitialDistributionSpread=0, exportLog = True, multiStartInitialDistribution='UserChoice', walkerInitialDistribution='UserChoice', passThroughArgs = {}, calculatePostBurnInStatistics=True,  keep_cumulative_post_burn_in_data = False): #This is for non-gridsearch multistarts.
-        #We set many of the arguments to have blank or zero values so that if they are not provided, the values will be taken from the UserInput choices.
-        if multiStartInitialDistribution == 'UserChoice': 
-            multiStartInitialDistribution = self.UserInput.parameter_estimation_settings['multistart_multiStartInitialDistribution']
-        if numStartPoints ==0:
-            numStartPoints = self.UserInput.parameter_estimation_settings['multistart_numStartPoints']
-            if numStartPoints == 0: #if it's still zero, we need to make it the default which is 3 times the number of active parameters.
-                numStartPoints = len(self.UserInput.InputParameterInitialGuess)*3
-        if relativeInitialDistributionSpread == 0:
-            relativeInitialDistributionSpread = self.UserInput.parameter_estimation_settings['multistart_relativeInitialDistributionSpread']
-            if relativeInitialDistributionSpread == 0: #if it's still zero, we need to make it the default which is 1.
-                relativeInitialDistributionSpread = 1.0
-        multiStartInitialPointsList = self.generateWalkerStartPoints(mcmc_nwalkers=numStartPoints, walkerInitialDistributionSpread=relativeInitialDistributionSpread, walkerInitialDistribution=multiStartInitialDistribution)
-        bestResultSoFar = self.doListOfPermutationsSearch(listOfPermutations=multiStartInitialPointsList, searchType=searchType, exportLog=exportLog, walkerInitialDistribution=walkerInitialDistribution, passThroughArgs=passThroughArgs, calculatePostBurnInStatistics=calculatePostBurnInStatistics, keep_cumulative_post_burn_in_data=keep_cumulative_post_burn_in_data)
-        return bestResultSoFar
         
     def doListOfPermutationsSearch(self, listOfPermutations, numPermutations = None, searchType='getLogP', exportLog = True, walkerInitialDistribution='UserChoice', passThroughArgs = {}, calculatePostBurnInStatistics=True,  keep_cumulative_post_burn_in_data = False, centerPoint=None): #This is the 'engine' used by doGridSearch and  doMultiStartSearch
     #The listOfPermutations can also be another type of iterable.
@@ -563,6 +548,22 @@ class parameter_estimation:
         if searchType == 'getLogP':          
             return bestResultSoFar# [self.map_parameter_set, self.map_logP]
 
+    @CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
+    def doMultiStart(self, searchType='getLogP', numStartPoints = 0, relativeInitialDistributionSpread=0, exportLog = True, multiStartInitialDistribution='UserChoice', initialPointsDistributionType='UserChoice', passThroughArgs = {}, calculatePostBurnInStatistics=True,  keep_cumulative_post_burn_in_data = False, walkerInitialDistribution='UserChoice'): #This is for non-gridsearch multistarts.
+        #We set many of the arguments to have blank or zero values so that if they are not provided, the values will be taken from the UserInput choices.
+        if multiStartInitialDistribution == 'UserChoice': 
+            multiStartInitialDistribution = self.UserInput.parameter_estimation_settings['multistart_multiStartInitialDistributionType']
+        if numStartPoints ==0:
+            numStartPoints = self.UserInput.parameter_estimation_settings['multistart_numStartPoints']
+            if numStartPoints == 0: #if it's still zero, we need to make it the default which is 3 times the number of active parameters.
+                numStartPoints = len(self.UserInput.InputParameterInitialGuess)*3
+        if relativeInitialDistributionSpread == 0:
+            relativeInitialDistributionSpread = self.UserInput.parameter_estimation_settings['multistart_relativeInitialDistributionSpread']
+            if relativeInitialDistributionSpread == 0: #if it's still zero, we need to make it the default which is 1.
+                relativeInitialDistributionSpread = 1.0
+        multiStartInitialPointsList = self.generateInitialPoints(numStartPoints=numStartPoints, relativeInitialDistributionSpread=relativeInitialDistributionSpread, initialPointsDistributionType=multiStartInitialDistribution)
+        bestResultSoFar = self.doListOfPermutationsSearch(listOfPermutations=multiStartInitialPointsList, searchType=searchType, exportLog=exportLog, walkerInitialDistribution=walkerInitialDistribution, passThroughArgs=passThroughArgs, calculatePostBurnInStatistics=calculatePostBurnInStatistics, keep_cumulative_post_burn_in_data=keep_cumulative_post_burn_in_data)
+        return bestResultSoFar
   
     @CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
     def doGridSearch(self, searchType='getLogP', exportLog = True, gridSamplingAbsoluteIntervalSize = [], gridSamplingNumOfIntervals = [], passThroughArgs = {}, calculatePostBurnInStatistics=True,  keep_cumulative_post_burn_in_data = False, walkerInitialDistribution='UserChoice'):
@@ -1211,7 +1212,7 @@ class parameter_estimation:
         else: mcmc_maxiter = self.UserInput.parameter_estimation_settings['mcmc_maxiter']
         '''end of user input variables'''
         #now to do the mcmc
-        walkerStartPoints = self.generateWalkerStartPoints(walkerInitialDistribution=walkerInitialDistribution) #making the first set of starting points.
+        walkerStartPoints = self.generateInitialPoints(initialPointsDistributionType=walkerInitialDistribution, numStartPoints = self.mcmc_nwalkers,relativeInitialDistributionSpread=walkerInitialDistributionSpread) #making the first set of starting points.
         zeus_sampler = zeus.EnsembleSampler(self.mcmc_nwalkers, numParameters, logprob_fn=self.getLogP, maxiter=mcmc_maxiter) #maxiter=1E4 is the typical number, but we may want to increase it based on some userInput variable.        
         for trialN in range(0,1000):#Todo: This number of this range is hardcoded but should probably be a user selection.
             try:
@@ -1220,7 +1221,8 @@ class parameter_estimation:
             except Exception as exceptionObject:
                 if "finite" in str(exceptionObject): #This means there is an error message from zeus saying " Invalid walker initial positions!  Initialise walkers from positions of finite log probability."
                     print("One of the starting points has a non-finite probability. Picking new starting points.")
-                    walkerStartPoints = generateWalkerStartPoints() #Need to make the sampler again, in this case, to throw away anything that has happened so far.
+                    #Need to make the sampler again, in this case, to throw away anything that has happened so far
+                    walkerStartPoints = self.generateInitialPoints(initialPointsDistributionType=walkerInitialDistribution, numStartPoints = self.mcmc_nwalkers, relativeInitialDistributionSpread=walkerInitialDistributionSpread) 
                     zeus_sampler = zeus.EnsembleSampler(self.mcmc_nwalkers, numParameters, logprob_fn=self.getLogP, maxiter=mcmc_maxiter) #maxiter=1E4 is the typical number, but we may want to increase it based on some userInput variable.        
                 elif "maxiter" in str(exceptionObject): #This means there is an error message from zeus that the max iterations have been reached.
                     print("WARNING: One or more of the Ensemble Slice Sampling walkers encountered an error. The value of mcmc_maxiter is currently", mcmc_maxiter, "you should increase it, perhaps by a factor of 1E2.")
