@@ -403,36 +403,32 @@ class parameter_estimation:
         numParameters = len(gridCenterVector)
         if len(gridSamplingNumOfIntervals) == 0:
             gridSamplingNumOfIntervals = np.ones(numParameters, dtype='int') #By default, will make ones.
-            numGridPoints = 3**numParameters
+            numPermutations = 3**numParameters
         else: 
             gridSamplingNumOfIntervals = np.array(gridSamplingNumOfIntervals, dtype='int')
-            numGridPoints = 1 #just initializing.
+            numPermutations = 1 #just initializing.
             for radius in gridSamplingNumOfIntervals:
-                numGridPoints=numGridPoints*(2*radius+1)
+                numPermutations=numPermutations*(2*radius+1)
         if len(gridSamplingAbsoluteIntervalSize) == 0:
             gridSamplingAbsoluteIntervalSize = self.UserInput.std_prior #By default, we use the standard deviations associated with the priors.
         else: gridSamplingAbsoluteIntervalSize = np.array(gridSamplingAbsoluteIntervalSize, dtype='float')
         gridPermutations = CombinationGeneratorModule.combinationGenerator(gridCenterVector, gridSamplingAbsoluteIntervalSize, gridSamplingNumOfIntervals, SpreadType=SpreadType,toFile=toFile)
-        return gridPermutations, numGridPoints  
-  
-  
-    def doPermutationsSearch(): #This is the 'engine' used by doGridSearch and 
-  
-  
-    @CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
-    def doGridSearch(self, searchType='getLogP', exportLog = True, gridSamplingAbsoluteIntervalSize = [], gridSamplingNumOfIntervals = [], passThroughArgs = {}, calculatePostBurnInStatistics=True,  keep_cumulative_post_burn_in_data = False, walkerInitialDistribution='UserChoice'):
-        # gridSamplingNumOfIntervals is the number of variations to check in units of variance for each parameter. Can be 0 if you don't want to vary a particular parameter in the grid search.
-        #calculatePostBurnInStatistics will store all the individual runs in memory and will then provide the samples of the best one.
-        #TODO: the upper part of the gridsearch may not be compatibile with reduced parameter space. Needs to be checked.
+        return gridPermutations, numPermutations  
+        
+    def doListOfPermutationsSearch(self, listOfPermutations, numPermutations = None, searchType='getLogP', exportLog = True, walkerInitialDistribution='UserChoice', passThroughArgs = {}, calculatePostBurnInStatistics=True,  keep_cumulative_post_burn_in_data = False, centerPoint=None): #This is the 'engine' used by doGridSearch and  doMultiStartSearch
+    #The listOfPermutations can also be another type of iterable.
+        if str(numPermutations).lower() == str(None).lower():
+            numPermutations = len(listOfPermutations)
+        if str(centerPoint).lower() == str(None).lower():
+            centerPoint = self.UserInput.InputParameterInitialGuess*1.0
+
         verbose = self.UserInput.parameter_estimation_settings['verbose']
-        gridCenter = self.UserInput.InputParameterInitialGuess #This may be a reduced parameter space.        
-        gridPermutations, numGridPoints = self.getGridPermutations(gridCenter, gridSamplingAbsoluteIntervalSize, gridSamplingNumOfIntervals)
-        allGridResults = []
+        allPermutationsResults = []
         #Initialize some things before loop.
         if (type(self.UserInput.parameter_estimation_settings['gridsearch_checkPointFrequency']) != type(None)) or (verbose == True):
                 import timeit
-                timeAtGridStart = timeit.time.clock()
-                timeAtLastGridPoint = timeAtGridStart #just initializing
+                timeAtPermutationSearchStart = timeit.time.clock()
+                timeAtLastPermutation = timeAtPermutationSearchStart #just initializing
         self.highest_logP = float('-inf') #Just initializing.
         if searchType == 'doEnsembleSliceSampling':
             if str(self.UserInput.parameter_estimation_settings['mcmc_nwalkers']).lower() == 'auto':
@@ -446,13 +442,13 @@ class parameter_estimation:
                 #The identical distribution is used by default because otherwise the walkers may be spread out too far and it could defeat the purpose of a gridsearch.
                 if walkerInitialDistribution.lower() == 'auto':
                     walkerInitialDistribution = 'uniform'
-        for permutationIndex,permutation in enumerate(gridPermutations):
+        for permutationIndex,permutation in enumerate(listOfPermutations):
             if self.UserInput.parameter_estimation_settings['gridsearch_parallel_sampling'] == True:
                 #We will only execute the sampling the permutationIndex matches the processor rank.
                 #Additionally, if the rank is 0 and the simulation got here, it will be assumed the person is running this just to find the number of Permutations, so that will be spit out and the simulation ended.
                 import CheKiPEUQ.parallel_processing
                 if CheKiPEUQ.parallel_processing.currentProcessorNumber == 0:
-                    print("For the user input settings provided, the number of gridpoints will be",  numGridPoints, ". Please use mpiexec or mpirun with this number for N. If you are not expecting to see this message, change your UserInput choices. You have chosen parallel processing for gridsearch and have run CheKiPEUQ without mpi, which is a procedure to retrieve the number of processor ranks to use for parallelized gridsearch. A typical syntax now would be: mpiexec -n ",  numGridPoints, " python runfile_Example_26a2_BPE.py" )
+                    print("For the user input settings provided, the number of Permutations will be",  numPermutations, ". Please use mpiexec or mpirun with this number for N. If you are not expecting to see this message, change your UserInput choices. You have chosen parallel processing for gridsearch and have run CheKiPEUQ without mpi, which is a procedure to retrieve the number of processor ranks to use for parallelized gridsearch. A typical syntax now would be: mpiexec -n ",  numPermutations, " python runfile_Example_26a2_BPE.py" )
                     sys.exit()
                 elif CheKiPEUQ.parallel_processing.currentProcessorNumber != permutationIndex:
                     continue #This means the permutation index does not match the processor rank so nothing should be executed.
@@ -494,42 +490,42 @@ class parameter_estimation:
             if searchType == 'doOptimizeSSR':
                 thisResult = self.doOptimizeSSR(**passThroughArgs)
             if (type(self.UserInput.parameter_estimation_settings['gridsearch_checkPointFrequency']) != type(None)) or (verbose == True):
-                timeAtThisGridPoint = timeit.time.clock()
-                timeOfThisGridPoint = timeAtThisGridPoint - timeAtLastGridPoint
-                averageTimePerGridPoint = (timeAtThisGridPoint - timeAtGridStart)/(permutationIndex+1)
-                numRemainingGridPoints = numGridPoints - permutationIndex+1
-                timeAtLastGridPoint = timeAtThisGridPoint #Updating.
+                timeAtThisPermutation = timeit.time.clock()
+                timeOfThisPermutation = timeAtThisPermutation - timeAtLastPermutation
+                averageTimePerPermutation = (timeAtThisPermutation - timeAtPermutationSearchStart)/(permutationIndex+1)
+                numRemainingPermutations = numPermutations - permutationIndex+1
+                timeAtLastPermutation = timeAtThisPermutation #Updating.
             if self.map_logP > self.highest_logP: #This is the grid point in space with the highest value found so far and will be kept.
                 bestResultSoFar = thisResult
                 self.highest_logP = self.map_logP
                 highest_logP_parameter_set = self.map_parameter_set
-            allGridResults.append(thisResult)
+            allPermutationsResults.append(thisResult)
             if verbose == True:
-                print("GridPoint", permutation, "number", permutationIndex+1, "out of", numGridPoints, "timeOfThisGridPoint", timeOfThisGridPoint)
-                print("GridPoint", permutationIndex+1, "averageTimePerGridPoint", "%.2f" % round(averageTimePerGridPoint,2), "estimated time remaining", "%.2f" % round( numRemainingGridPoints*averageTimePerGridPoint,2), "s" )
-                print("GridPoint", permutationIndex+1, "current logP", self.map_logP, "highest logP", self.highest_logP, "highest logP Parameter Set", highest_logP_parameter_set)
+                print("Permutation", permutation, "number", permutationIndex+1, "out of", numPermutations, "timeOfThisPermutation", timeOfThisPermutation)
+                print("Permutation", permutationIndex+1, "averageTimePerPermutation", "%.2f" % round(averageTimePerPermutation,2), "estimated time remaining", "%.2f" % round( numRemainingPermutations*averageTimePerPermutation,2), "s" )
+                print("Permutation", permutationIndex+1, "current logP", self.map_logP, "highest logP", self.highest_logP, "highest logP Parameter Set", highest_logP_parameter_set)
             elif type(self.UserInput.parameter_estimation_settings['gridsearch_checkPointFrequency']) != type(None): #If verbose off but checkpoint frequency is on.
                 if (permutationIndex ==0 or ((permutationIndex+1)/self.UserInput.parameter_estimation_settings['gridsearch_checkPointFrequency']).is_integer()):
-                    print("GridPoint", permutation, "number", permutationIndex+1, "out of", numGridPoints, "timeOfThisGridPoint", timeOfThisGridPoint)
-                    print("GridPoint", permutationIndex+1, "averageTimePerGridPoint", "%.2f" % round(averageTimePerGridPoint,2), "estimated time remaining", "%.2f" % round( numRemainingGridPoints*averageTimePerGridPoint,2), "s" )
-                    print("GridPoint", permutationIndex+1, "current logP", self.map_logP, "highest logP", self.highest_logP)
+                    print("Permutation", permutation, "number", permutationIndex+1, "out of", numPermutations, "timeOfThisPermutation", timeOfThisPermutation)
+                    print("Permutation", permutationIndex+1, "averageTimePerPermutation", "%.2f" % round(averageTimePerPermutation,2), "estimated time remaining", "%.2f" % round( numRemainingPermutations*averageTimePerPermutation,2), "s" )
+                    print("Permutation", permutationIndex+1, "current logP", self.map_logP, "highest logP", self.highest_logP)
         
         if self.UserInput.parameter_estimation_settings['gridsearch_parallel_sampling'] == True: #This is the parallel sampling mpi case.
-            self.consolidate_parallel_sampling_data(parallelizationType="gridsearch")
+            self.consolidate_parallel_sampling_data(parallelizationType="PermutationSearch")
             if CheKiPEUQ.parallel_processing.finalProcess == False:
-                return self.map_logP #This is sortof like a sys.exit(), we are just ending the gridsearch function here if we are not on the finalProcess. 
-        #TODO: export the allGridResults to file at end of search in a nicer format.        
+                return self.map_logP #This is sortof like a sys.exit(), we are just ending the PermutationSearch function here if we are not on the finalProcess. 
+        #TODO: export the allPermutationsResults to file at end of search in a nicer format.        
         #First set the initial guess back to the center of the grid.
-        self.UserInput.InputParameterInitialGuess = gridCenter
+        self.UserInput.InputParameterInitialGuess = centerPoint
         #Now populate the map etc. with those of the best result.
         self.map_logP = self.highest_logP 
         self.map_parameter_set = highest_logP_parameter_set 
         if exportLog == True:
-            with open("gridsearch_log_file.txt", 'w') as out_file:
+            with open("PermutationSearch_log_file.txt", 'w') as out_file:
                 out_file.write("result: " + "self.map_logP, self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec" + "\n")
-                for resultIndex, result in enumerate(allGridResults):
+                for resultIndex, result in enumerate(allPermutationsResults):
                     out_file.write("result: " + str(resultIndex) + " " +  str(result) + "\n")
-        print("Final map parameter results from gridsearch:", self.map_parameter_set,  " \nFinal map logP:", self.map_logP)
+        print("Final map parameter results from PermutationSearch:", self.map_parameter_set,  " \nFinal map logP:", self.map_logP)
         if searchType == ('doMetropolisHastings' or 'doEnsembleSliceSampling'):
             #For MCMC, we can now calculate the post_burn_in statistics for the best sampling from the full samplings done. We don't want to lump all together because that would not be unbiased.
             if calculatePostBurnInStatistics == True:
@@ -548,8 +544,19 @@ class parameter_estimation:
         if searchType == 'getLogP':          
             return bestResultSoFar# [self.map_parameter_set, self.map_logP]
 
+  
+    @CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
+    def doGridSearch(self, searchType='getLogP', exportLog = True, gridSamplingAbsoluteIntervalSize = [], gridSamplingNumOfIntervals = [], passThroughArgs = {}, calculatePostBurnInStatistics=True,  keep_cumulative_post_burn_in_data = False, walkerInitialDistribution='UserChoice'):
+        # gridSamplingNumOfIntervals is the number of variations to check in units of variance for each parameter. Can be 0 if you don't want to vary a particular parameter in the grid search.
+        #calculatePostBurnInStatistics will store all the individual runs in memory and will then provide the samples of the best one.
+        #TODO: the upper part of the gridsearch may not be compatibile with reduced parameter space. Needs to be checked.
+        gridCenter = self.UserInput.InputParameterInitialGuess*1.0 #This may be a reduced parameter space.        
+        gridPermutations, numPermutations = self.getGridPermutations(gridCenter, gridSamplingAbsoluteIntervalSize, gridSamplingNumOfIntervals)
+        bestResultSoFar = self.doListOfPermutationsSearch(gridPermutations, numPermutations = numPermutations, searchType=searchType, exportLog = exportLog, walkerInitialDistribution=walkerInitialDistribution, passThroughArgs=passThroughArgs, calculatePostBurnInStatistics=calculatePostBurnInStatistics,  keep_cumulative_post_burn_in_data = keep_cumulative_post_burn_in_data, centerPoint = gridCenter)
+        return bestResultSoFar
+
     def consolidate_parallel_sampling_data(self, parallelizationType="equal"):
-        #parallelizationType='equal' means everything will get averaged together. parallelizationType='gridsearch' will be treated differently, same with parallelizationType='designOfExperiments'
+        #parallelizationType='equal' means everything will get averaged together. parallelizationType='PermutationSearch' will be treated differently, same with parallelizationType='designOfExperiments'
         import CheKiPEUQ.parallel_processing
         #CheKiPEUQ.parallel_processing.currentProcessorNumber
         numSimulations = CheKiPEUQ.parallel_processing.numSimulations
@@ -576,7 +583,7 @@ class parameter_estimation:
                 return False
             
         if checkIfAllSimulationsDone() == True:
-            if parallelizationType.lower() == 'gridsearch':
+            if parallelizationType.lower() == 'PermutationSearch':
                 import os
                 os.chdir("./mpi_log_files")
                 for simulationIndex in range(0,numSimulations): #For each simulation, we need to grab the results.
@@ -654,7 +661,7 @@ class parameter_estimation:
 
 
     #The below function is a helper function that is used during doeInfoGainMatrix. However, it can certainly be used for other purposes.
-    def populateResponsesWithSyntheticData(self, parModulationCombination):
+    def populateResponsesWithSyntheticData(self, parModulationPermutation):
         #For each parameter Modulation Combination we are going to obtain a matrix of info_gains that is based on a grid of the independent_variables.
         #First we need to make some synthetic data using parModulationPermutation for the discreteParameterVector
         discreteParameterVector = parModulationPermutation
@@ -707,9 +714,9 @@ class parameter_estimation:
             self.info_gains_matrices_array_format = 'xyz'            
             #For the IndependentVariables the grid info must be defined ahead of time. On the fly conditions grid means it's generated again fresh for each parameter combination. (We are doing it this way out of convenience during the first programming of this feature).
             if doe_settings['on_the_fly_conditions_grids'] == True:
-                conditionsGridPermutations, numGridPoints = self.getGridPermutations(doe_settings['independent_variable_grid_center'], doe_settings['independent_variable_grid_interval_size'], doe_settings['independent_variable_grid_num_intervals'])
+                conditionsGridPermutations, numPermutations = self.getGridPermutations(doe_settings['independent_variable_grid_center'], doe_settings['independent_variable_grid_interval_size'], doe_settings['independent_variable_grid_num_intervals'])
             #Here is the loop across conditions.                
-            for conditionspermutationIndex,conditionsCombination in enumerate(conditionsGridPermutations):    
+            for conditionsPermutationIndex,conditionsCombination in enumerate(conditionsGridPermutations):    
                 #It is absolutely critical that we *do not* use syntax like self.UserInput.responses['independent_variables_values'] = xxxx
                 #Because that would move where the pointer is going to. We need to instead populate the individual values in the simulation module's namespace.
                 #This population Must occur here. It has to be after the indpendent variables have changed, before synthetic data is made, and before the MCMC is performed.
@@ -788,7 +795,7 @@ class parameter_estimation:
         parModulationGridCenterVector = self.UserInput.InputParameterInitialGuess
         numParameters = len(parModulationGridCenterVector)
         parModulationGridIntervalSizeAbsolute = doe_settings['parameter_modulation_grid_interval_size']*self.UserInput.std_prior
-        parModulationGridPermutations, numGridPoints = self.getGridPermutations(parModulationGridCenterVector,parModulationGridIntervalSizeAbsolute, doe_settings['parameter_modulation_grid_num_intervals'])
+        parModulationGridPermutations, numPermutations = self.getGridPermutations(parModulationGridCenterVector,parModulationGridIntervalSizeAbsolute, doe_settings['parameter_modulation_grid_num_intervals'])
         
         parModulationGridPermutations= np.array(parModulationGridPermutations)
         if len(self.UserInput.parameterNamesList) == len(self.UserInput.InputParametersPriorValuesUncertainties): #then we assume variable names have been provided.
@@ -805,7 +812,7 @@ class parameter_estimation:
             numParameters = len(self.UserInput.InputParametersPriorValuesUncertainties)
             for parameterIndex in range(0,numParameters):#looping across number of parameters...
                 info_gains_matrices_lists_one_for_each_parameter.append([]) #These are empty lists create to indices and initialize each parameter's info_gain_matrix. They will be appended to later.
-        for parModulationpermutationIndex,parModulationPermutation in enumerate(parModulationGridPermutations):                
+        for parModulationPermutationIndex,parModulationPermutation in enumerate(parModulationGridPermutations):                
             #We will get separate info gain matrix for each parameter modulation combination.
             info_gain_matrix = self.doeGetInfoGainMatrix(parModulationPermutation, searchType=searchType)
             #Append the info gain matrix obtainend.
@@ -1157,7 +1164,7 @@ class parameter_estimation:
     @CiteSoft.module_call_cite(unique_id=software_unique_id, software_name=software_name, **software_kwargs)
     def doEnsembleSliceSampling(self, mcmc_nwalkers_direct_input = None, walkerInitialDistribution='uniform', walkerInitialDistributionSpread=1.0, calculatePostBurnInStatistics=True, exportLog ='UserChoice'):
         #The distribution of walkers intial points can be uniform or gaussian or identical. As of OCt 2020, default is uniform spread around the intial guess.
-        #The mcmc_nwalkers_direct_input is really meant for gridsearch to override the other settings, though of course people could also use it directly.  
+        #The mcmc_nwalkers_direct_input is really meant for PermutationSearch to override the other settings, though of course people could also use it directly.  
         #The walkerInitialDistributionSpread is in relative units (relative to standard deviations). In the case of a uniform inital distribution the default level of spread is actually across two standard deviations, so the walkerInitialDistributionSpread is relative to that (that is, a value of 2 would give 2*2 = 4 for the full spread in each direction from the initial guess).
         import zeus
         '''these variables need to be made part of userinput'''
@@ -1170,7 +1177,7 @@ class parameter_estimation:
                     self.mcmc_nwalkers = numParameters*4
                 else: #else it is an integer, or a string meant to be an integer.
                     self.mcmc_nwalkers =  int(self.mcmc_nwalkers)
-        else: #this is mainly for gridsearch which will (by default) use the minimum number of walkers per point.
+        else: #this is mainly for PermutationSearch which will (by default) use the minimum number of walkers per point.
             self.mcmc_nwalkers = int(mcmc_nwalkers_direct_input)
         if (self.mcmc_nwalkers%2) != 0: #Check that it's even. If not, add one walker.
             print("The EnsembleSliceSampling requires an even number of Walkers. Adding one Walker.")
@@ -1215,7 +1222,7 @@ class parameter_estimation:
             if self.UserInput.parameter_estimation_settings['mcmc_parallel_sampling'] == True: #We don't call the below function at this time unless we are doing mcmc_parallel_sampling. For gridsearch_parallel_sampling the consolidation is done elsewhere and differently.
                 self.consolidate_parallel_sampling_data(parallelizationType="equal")
             return [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec]   
-        else: #In this case, we are probably doing a gridsearch or something like that and only want self.map_logP.
+        else: #In this case, we are probably doing a PermutationSearch or something like that and only want self.map_logP.
             self.map_logP = max(self.post_burn_in_log_posteriors_un_normed_vec)
             self.map_index = list(self.post_burn_in_log_posteriors_un_normed_vec).index(self.map_logP) #This does not have to be a unique answer, just one of them places which gives map_logP.
             self.map_parameter_set = self.post_burn_in_samples[self.map_index] #This  is the point with the highest probability in the posterior.            
@@ -1355,7 +1362,7 @@ class parameter_estimation:
             if self.UserInput.parameter_estimation_settings['mcmc_parallel_sampling'] == True: #We don't call the below function at this time unless we are doing mcmc_parallel_sampling. For gridsearch_parallel_sampling the consolidation is done elsewhere and differently.
                 self.consolidate_parallel_sampling_data(parallelizationType="equal")
             return [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec] # EAW 2020/01/08
-        else: #In this case, we are probably doing a gridsearch or something like that and only want self.map_logP.
+        else: #In this case, we are probably doing a PermutationSearch or something like that and only want self.map_logP.
             self.map_logP = max(self.post_burn_in_log_posteriors_un_normed_vec)
             self.map_index = list(self.post_burn_in_log_posteriors_un_normed_vec).index(self.map_logP) #This does not have to be a unique answer, just one of them places which gives map_logP.
             self.map_parameter_set = self.post_burn_in_samples[self.map_index] #This  is the point with the highest probability in the posterior.            
