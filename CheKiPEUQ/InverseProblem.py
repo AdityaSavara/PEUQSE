@@ -46,7 +46,7 @@ class parameter_estimation:
             UserInput.parameter_estimation_settings['mcmc_checkPointFrequency'] = UserInput.parameter_estimation_settings['checkPointFrequency']
             UserInput.parameter_estimation_settings['gridsearch_checkPointFrequency'] = UserInput.parameter_estimation_settings['checkPointFrequency']
         UserInput.request_mpi = False #Set as false as default.
-        if (UserInput.parameter_estimation_settings['mcmc_parallel_sampling'] or UserInput.parameter_estimation_settings['gridsearch_parallel_sampling']) == True:
+        if (UserInput.parameter_estimation_settings['mcmc_parallel_sampling'] or UserInput.parameter_estimation_settings['gridsearch_parallel_sampling'] or UserInput.parameter_estimation_settings['multistart_parallel_sampling']) == True:
             UserInput.request_mpi = True
         if UserInput.request_mpi == True: #Rank zero needs to clear out the mpi_log_files directory, so check if we are using rank 0.
             import os; import sys
@@ -552,7 +552,7 @@ class parameter_estimation:
     def doMultiStart(self, searchType='getLogP', numStartPoints = 0, relativeInitialDistributionSpread=0, exportLog = True, multiStartInitialDistribution='UserChoice', initialPointsDistributionType='UserChoice', passThroughArgs = {}, calculatePostBurnInStatistics=True,  keep_cumulative_post_burn_in_data = False, walkerInitialDistribution='UserChoice'): #This is for non-gridsearch multistarts.
         #We set many of the arguments to have blank or zero values so that if they are not provided, the values will be taken from the UserInput choices.
         if multiStartInitialDistribution == 'UserChoice': 
-            multiStartInitialDistribution = self.UserInput.parameter_estimation_settings['multistart_multiStartInitialDistributionType']
+            multiStartInitialDistribution = self.UserInput.parameter_estimation_settings['multistart_initialDistributionType']
         if numStartPoints ==0:
             numStartPoints = self.UserInput.parameter_estimation_settings['multistart_numStartPoints']
             if numStartPoints == 0: #if it's still zero, we need to make it the default which is 3 times the number of active parameters.
