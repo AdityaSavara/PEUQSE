@@ -71,7 +71,7 @@ parameter_estimation_settings['mcmc_parallel_sampling'] = False #This makes comp
 #possible dictionary fields include: dpi, figure_name, fontsize, x_label, y_label, figure_name, x_range, y_range
 samplingScatterMatrixPlotsSettings ={}
 
-######gridSearchSettings##### 
+######gridSearchSettings##### Warning: the gridsearch feature is likely to be folded into the multi_start feature with initialDistributionType='gridsearch', and then the relevant variables will be named 'multistart_gridSamplingIntervalSize' etc.
 parameter_estimation_settings['gridsearch_checkPointFrequency'] = None #Note: this setting does not work perfectly with ESS.
 parameter_estimation_settings['gridsearch_parallel_sampling'] = False
 parameter_estimation_settings['gridsearch_sampling_interval'] = []
@@ -112,7 +112,8 @@ contour_settings_custom = {'figure_name': 'PosteriorContourPlots','fontsize':16 
 parameter_pairs_for_contour_plots = [] #This will accept either strings (for variable names) or integers for positions.
 
 ####Design Of Experiments####
-#The design of experiments feature, used like PE_object.designOfExperiments() will modulate the parameters to see how much info gain there would be in different parts of condition space (using synthetic data).
+#The design of experiments feature is used with syntax like PE_object.designOfExperiments()   
+#This feature modulates the parameters to see how much info gain there would be in different parts of condition space (using synthetic data).
 #The normal usage as of May 26 2020 is to first use the indpendent variables feature, which must be used, then fill the doe_settings below.
 #Then call PE_object.doeParameterModulationCombinationsScanner()
 #If a single parameter modulation grid is going to be used, one can instead define the independent variable grid and call like this: PE_object.createInfoGainPlots(plot_suffix="manual")
@@ -120,17 +121,15 @@ parameter_pairs_for_contour_plots = [] #This will accept either strings (for var
 #Note: after calling either of these functions, the variables populated are PE_object.info_gains_matrices_array and PE_object.info_gain_matrix.  So if somebody wants to export these after using the functions, one can cycle across each info gains matrix inside PE_object.info_gains_matrices_array and export to csv.
 #A key is printed out inside of Info_gain_parModulationGridCombinations.csv
 
-doe_settings = {} #To use this automated design of experiments the independent variables feature **must** be used.
+doe_settings = {} #To use the design of experiments feature the independent variables feature **must** be used.
+doe_settings['info_gains_matrices_array_format'] = 'xyz' #options are 'xyz' and 'meshgrid'.  Images are only ouput when scanning two independent variables. If using more than two independent variables, you will need to use the 'xyz' format and will need to analyze the final info_gains_matrices_array written to file directly. Note this variable must be set before running the doe command. You cannot change the format of the info_gains_matrices_array afterwards because the way the sampling is stored during a run is change based on this setting.
 
-doe_settings['info_gains_matrices_array_format'] = 'xyz' #options are 'xyz' and 'meshgrid'.  Images are only ouput when scanning two independent variables. If using more than two, it is probably better to use the 'xyz' format and inspect the final info_gains_matrices_array directly. Note that this setting must be set *before* running the doe command. You cannot change the format of the info_gains_matrices_array afterwards because the way the sampling is conducted will change based on this setting.
-
-doe_settings['info_gains_matrices_multiple_parameters'] = 'sum' #The possible values are 'sum' or 'each'.  The 'each' choice exports info_gains for **each** parameter also exports the sums. #This feature is (for now) only for KL_divergence.
+doe_settings['info_gains_matrices_multiple_parameters'] = 'sum' #The possible values are 'sum' or 'each'.  The 'each' choice exports info_gains for **each** parameter (and also exports the sums). #This feature is (for now) only for KL_divergence.
 
 #Now we will define how big of a modulation / offset we want to apply to each parameter.
-#doe_settings['parameter_modulation_grid_center'] #We do NOT create such a variable. The initial guess variable is used, which i=s the center of the prior if not filled by the user.
-doe_settings['parameter_modulation_grid_interval_size'] = [] #This must be 1D array/list with length of number of parameters.  These are all relative to the standard deviation of the prior of that parmaeter. Such as [1,1]  #You should always use non-zero values for this setting, even if you plan to not modulate that parmeter.
-doe_settings['parameter_modulation_grid_num_intervals'] = [] #This must be a 1D array/list with length of number of paramaeters. #Such as [1,1].  #This is the number of steps in each direction outward from center. So a 2 here gives 5 evaluations. A zero means we don't allow the parameter to vary.
-
+#doe_settings['parameter_modulation_grid_center'] #We do NOT create such a variable. The initial guess variable is used, which is the center of the prior if not filled by the user.
+doe_settings['parameter_modulation_grid_interval_size'] = [] #This must be 1D array/list with length of number of parameters.  These are all relative to the standard deviation of the prior of that parmaeter. Such as [1,1]  #If you wish to manually change this setting, you should use all non-zero values for this setting, even if you plan to not modulate that parmeter (which parameters will be modulated are in the num_intervals variable below).
+doe_settings['parameter_modulation_grid_num_intervals'] = [] #This must be a 1D array/list with length of number of parameters. #Such as [1,1].  #This is the number of steps in each direction outward from center. So a 2 here gives 5 evaluations. A zero means we don't allow the parameter to vary.
 
 #Now we will define the *conditions space* to explore (to find the highest info gain), which will be done for *each* modulation.
 #Note that this means that responses['independent_variables_values'] must be used, AND it must be fed into the model simulation file as a connected variables array. (See  Example13doeFunctionExample directory runfiles).
@@ -138,4 +137,4 @@ doe_settings['independent_variable_grid_center'] = [] #This must be a 1D array/l
 doe_settings['independent_variable_grid_interval_size'] = [] #This must be a 1D array/list with length of number of independent variables.  this how big of each step will be in each direction/dimension (it is the grid spacing).  You should always use non-zero values for this setting, even if you plan to not vary that independent variable. Like [100,0.2]
 doe_settings['independent_variable_grid_num_intervals'] = [] #This must be a 1D array/list with length of number of independent variables. #This is the number of steps in each direction outward from center. So a 2 here gives 5 evaluations. A zero means we don't allow the condition to vary. Example: [2,2] 
 
-doe_settings['on_the_fly_conditions_grids'] = True #Normally should not change. Values are True or False. This makes the independent variable grid each time. This costs more processing but less memory. As of April 2020 the other option has not been implemented but would just require making the combinations into a list the first time and then operating on a copy of that list.
+doe_settings['on_the_fly_conditions_grids'] = True #Oct 2020: do not change this setting. #Values are True or False. This makes the independent variable grid each time. This costs more processing but less memory. As of April 2020 the other option has not been implemented but would just require making the combinations into a list the first time and then operating on a copy of that list.
