@@ -46,11 +46,12 @@ class parameter_estimation:
             UserInput.parameter_estimation_settings['mcmc_checkPointFrequency'] = UserInput.parameter_estimation_settings['checkPointFrequency']
             UserInput.parameter_estimation_settings['gridsearch_checkPointFrequency'] = UserInput.parameter_estimation_settings['checkPointFrequency']
         UserInput.request_mpi = False #Set as false as default.
-        if UserInput.parameter_estimation_settings['mcmc_parallel_sampling'] == True:
+        if (UserInput.parameter_estimation_settings['mcmc_parallel_sampling'] or UserInput.parameter_estimation_settings['gridsearch_parallel_sampling']) == True:
             UserInput.request_mpi = True
         if UserInput.request_mpi == True: #Rank zero needs to clear out the mpi_log_files directory, so check if we are using rank 0.
             import os; import sys
             import CheKiPEUQ.parallel_processing
+
             if CheKiPEUQ.parallel_processing.currentProcessorNumber == 0:
                 try: #Fixme: This is using a try statement because the directory cannot be made if it exists. Should use a better way to check if the directory exists.
                     os.mkdir("./mpi_log_files") 
@@ -59,8 +60,11 @@ class parameter_estimation:
                 os.chdir("./mpi_log_files")
                 deleteAllFilesInDirectory()
                 os.chdir("./..")
+            if CheKiPEUQ.parallel_processing.numProcessors > 1:    
                 sys.exit() #TODO: right now, processor zero just exits after making and emptying the directory. In the future, things will be more complex for the processor zero.
-
+            elif CheKiPEUQ.parallel_processing.numProcessors == 1:
+                print("Notice: you have requested parallel processing by MPI but have only 1 processor enabled or are not using mpi.. Parallel processing is being disabled for this run.")
+                UserInput.request_mpi = False
         
         #Setting this object so that we can make changes to it below without changing userinput dictionaries.
         self.UserInput.mu_prior = np.array(UserInput.model['InputParameterPriorValues']) 
