@@ -23,10 +23,10 @@ if __name__ == "__main__":
     UserInput.model['simulateByInputParametersOnlyFunction'] = simulation_model_00.simulation_function_wrapper #This must simulate with *only* the parameters listed above, and no other arguments.
     simulation_model_00.x_values_for_data = UserInput.responses['responses_abscissa']  #Setting the x_values_for_data inthe simulation module.
 
-    UserInput.parameter_estimation_settings['mcmc_length'] = 1000
+    UserInput.parameter_estimation_settings['mcmc_length'] = 100
     
+    UserInput.parameter_estimation_settings['mcmc_random_seed'] = 0
     UserInput.parameter_estimation_settings['mcmc_parallel_sampling'] = False
-    
     UserInput.parameter_estimation_settings['gridsearch_parallel_sampling'] = True
 
     #After making the UserInput, now we make a 'parameter_estimation' object from it.
