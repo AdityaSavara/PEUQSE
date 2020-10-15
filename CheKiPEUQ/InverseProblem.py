@@ -62,7 +62,7 @@ class parameter_estimation:
                 #Now check the number of processor ranks to see if the person really is using parallel processing.
                 if CheKiPEUQ.parallel_processing.numProcessors > 1:    #This is the normal case.
                     sys.exit() #TODO: right now, processor zero just exits after making and emptying the directory. In the future, things will be more complex for the processor zero.
-                elif CheKiPEUQ.parallel_processing.numProcessors == 1: #This is the case where the person has only one process rank, so probably does not want code execution to stop just yet. (This is an intentional case for gridsearch for example, where running without mpi will print the number of grid combinations).
+                elif CheKiPEUQ.parallel_processing.numProcessors == 1: #This is the case where the person has only one process rank, so probably does not want code execution to stop just yet. (This is an intentional case for gridsearch for example, where running without mpi will print the number of grid Permutations).
                     print("Notice: you have requested parallel processing by MPI but have only 1 processor rank enabled or are not using mpi for this run. Parallel processing is being disabled for this run. If you are using gridsearch, another message will be printed out for the number of processor ranks to provide to mpi.")
                     UserInput.request_mpi = False
         
@@ -119,7 +119,7 @@ class parameter_estimation:
         #TODO: This currently only is programmed for if the uncertainties are uncorrelated standard deviaions (so is not compatible with a directly fed cov_mat). Also, we need to figure out what do when they are not gaussian/symmetric.
         UserInput.responses_observed_transformed, UserInput.responses_observed_transformed_uncertainties  = self.transform_responses(UserInput.responses_observed, UserInput.responses_observed_uncertainties) #This creates transforms for any data that we might need it. The same transforms will also be applied during parameter estimation.
             
-        #The below unusual code is because during doeParameterModulationCombinationsScanner, populate synthetic data calls init again.
+        #The below unusual code is because during doeParameterModulationPermutationsScanner, populate synthetic data calls init again.
         #So we will only call populateIndependentVariablesFunction if we're not in the middle of design of experiments.
         if not hasattr(self, 'middle_of_doe_flag'): #We check of the middle_of_doe_flag exists. #If the flag is not there and the populate function exists, we call it.
             if UserInput.model['populateIndependentVariablesFunction'] != None:
@@ -396,9 +396,9 @@ class parameter_estimation:
         return walkerStartPoints
 
     #This helper function has been made so that gridSearch and design of experiments can call it.
-    #Although at first glance it may seem like it should be in the gridCombinations module, that is a misconception. This is just a wrapper setting defaults for calling that module, such as using the prior for the grid interval when none is provided.
+    #Although at first glance it may seem like it should be in the gridPermutations module, that is a misconception. This is just a wrapper setting defaults for calling that module, such as using the prior for the grid interval when none is provided.
     #note that a blank list is okay for gridSamplingAbsoluteIntervalSize if doing a parameter grid, but not for other types of grids.
-    def getGridCombinations(self, gridCenterVector, gridSamplingAbsoluteIntervalSize, gridSamplingNumOfIntervals, SpreadType="Addition",toFile=False):
+    def getGridPermutations(self, gridCenterVector, gridSamplingAbsoluteIntervalSize, gridSamplingNumOfIntervals, SpreadType="Addition",toFile=False):
         import CheKiPEUQ.CombinationGeneratorModule as CombinationGeneratorModule
         numParameters = len(gridCenterVector)
         if len(gridSamplingNumOfIntervals) == 0:
@@ -412,8 +412,8 @@ class parameter_estimation:
         if len(gridSamplingAbsoluteIntervalSize) == 0:
             gridSamplingAbsoluteIntervalSize = self.UserInput.std_prior #By default, we use the standard deviations associated with the priors.
         else: gridSamplingAbsoluteIntervalSize = np.array(gridSamplingAbsoluteIntervalSize, dtype='float')
-        gridCombinations = CombinationGeneratorModule.combinationGenerator(gridCenterVector, gridSamplingAbsoluteIntervalSize, gridSamplingNumOfIntervals, SpreadType=SpreadType,toFile=toFile)
-        return gridCombinations, numGridPoints  
+        gridPermutations = CombinationGeneratorModule.combinationGenerator(gridCenterVector, gridSamplingAbsoluteIntervalSize, gridSamplingNumOfIntervals, SpreadType=SpreadType,toFile=toFile)
+        return gridPermutations, numGridPoints  
   
     @CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
     def doGridSearch(self, searchType='getLogP', exportLog = True, gridSamplingAbsoluteIntervalSize = [], gridSamplingNumOfIntervals = [], passThroughArgs = {}, calculatePostBurnInStatistics=True,  keep_cumulative_post_burn_in_data = False, walkerInitialDistribution='UserChoice'):
@@ -422,7 +422,7 @@ class parameter_estimation:
         #TODO: the upper part of the gridsearch may not be compatibile with reduced parameter space. Needs to be checked.
         verbose = self.UserInput.parameter_estimation_settings['verbose']
         gridCenter = self.UserInput.InputParameterInitialGuess #This may be a reduced parameter space.        
-        gridCombinations, numGridPoints = self.getGridCombinations(gridCenter, gridSamplingAbsoluteIntervalSize, gridSamplingNumOfIntervals)
+        gridPermutations, numGridPoints = self.getGridPermutations(gridCenter, gridSamplingAbsoluteIntervalSize, gridSamplingNumOfIntervals)
         allGridResults = []
         #Initialize some things before loop.
         if (type(self.UserInput.parameter_estimation_settings['gridsearch_checkPointFrequency']) != type(None)) or (verbose == True):
@@ -442,10 +442,10 @@ class parameter_estimation:
                 #The identical distribution is used by default because otherwise the walkers may be spread out too far and it could defeat the purpose of a gridsearch.
                 if walkerInitialDistribution.lower() == 'auto':
                     walkerInitialDistribution = 'uniform'
-        for combinationIndex,combination in enumerate(gridCombinations):
+        for combinationIndex,combination in enumerate(gridPermutations):
             if self.UserInput.parameter_estimation_settings['gridsearch_parallel_sampling'] == True:
                 #We will only execute the sampling the combinationIndex matches the processor rank.
-                #Additionally, if the rank is 0 and the simulation got here, it will be assumed the person is running this just to find the number of combinations, so that will be spit out and the simulation ended.
+                #Additionally, if the rank is 0 and the simulation got here, it will be assumed the person is running this just to find the number of Permutations, so that will be spit out and the simulation ended.
                 import CheKiPEUQ.parallel_processing
                 if CheKiPEUQ.parallel_processing.currentProcessorNumber == 0:
                     print("For the user input settings provided, the number of gridpoints will be",  numGridPoints, ". Please use mpiexec or mpirun with this number for N. If you are not expecting to see this message, change your UserInput choices. You have chosen parallel processing for gridsearch and have run CheKiPEUQ without mpi, which is a procedure to retrieve the number of processor ranks to use for parallelized gridsearch. A typical syntax now would be: mpiexec -n ",  numGridPoints, " python runfile_Example_26a2_BPE.py" )
@@ -525,7 +525,7 @@ class parameter_estimation:
                 out_file.write("result: " + "self.map_logP, self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec" + "\n")
                 for resultIndex, result in enumerate(allGridResults):
                     out_file.write("result: " + str(resultIndex) + " " +  str(result) + "\n")
-        print("Final map parameter results from gridsearch:", self.map_parameter_set, "Final map logP:", self.map_logP)
+        print("Final map parameter results from gridsearch:", self.map_parameter_set,  " \nFinal map logP:", self.map_logP)
         if searchType == ('doMetropolisHastings' or 'doEnsembleSliceSampling'):
             #For MCMC, we can now calculate the post_burn_in statistics for the best sampling from the full samplings done. We don't want to lump all together because that would not be unbiased.
             if calculatePostBurnInStatistics == True:
@@ -703,9 +703,9 @@ class parameter_estimation:
             self.info_gains_matrices_array_format = 'xyz'            
             #For the IndependentVariables the grid info must be defined ahead of time. On the fly conditions grid means it's generated again fresh for each parameter combination. (We are doing it this way out of convenience during the first programming of this feature).
             if doe_settings['on_the_fly_conditions_grids'] == True:
-                conditionsGridCombinations, numGridPoints = self.getGridCombinations(doe_settings['independent_variable_grid_center'], doe_settings['independent_variable_grid_interval_size'], doe_settings['independent_variable_grid_num_intervals'])
+                conditionsGridPermutations, numGridPoints = self.getGridPermutations(doe_settings['independent_variable_grid_center'], doe_settings['independent_variable_grid_interval_size'], doe_settings['independent_variable_grid_num_intervals'])
             #Here is the loop across conditions.                
-            for conditionsCombinationIndex,conditionsCombination in enumerate(conditionsGridCombinations):    
+            for conditionsCombinationIndex,conditionsCombination in enumerate(conditionsGridPermutations):    
                 #It is absolutely critical that we *do not* use syntax like self.UserInput.responses['independent_variables_values'] = xxxx
                 #Because that would move where the pointer is going to. We need to instead populate the individual values in the simulation module's namespace.
                 #This population Must occur here. It has to be after the indpendent variables have changed, before synthetic data is made, and before the MCMC is performed.
@@ -762,7 +762,7 @@ class parameter_estimation:
                             [map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, logP] = self.doEnsembleSliceSampling()
                         conditionsCombination = np.array([indValue1,indValue2])
                         conditionsCombinationAndInfoGain = np.hstack((conditionsCombination, info_gain))
-                        info_gain_matrix.append(conditionsCombinationAndInfoGain) #NOTE that the structure *includes* the combinations.
+                        info_gain_matrix.append(conditionsCombinationAndInfoGain) #NOTE that the structure *includes* the Permutations.
                         if self.UserInput.doe_settings['info_gains_matrices_multiple_parameters'] == 'each': #copy the above lines for the sum.
                             for parameterIndex in range(0,numParameters):#looping across number of parameters...
                                 conditionsCombinationAndInfoGain = np.hstack((conditionsCombination, np.array(self.info_gain_each_parameter[parameterIndex]))) #Need to pull the info gain matrix from the nested objected named info_gain_each_parameter
@@ -775,8 +775,8 @@ class parameter_estimation:
                 self.middle_of_doe_flag = False #Set this back to false once info gain matrix is ready.
                 return np.array(info_gain_matrix)
     
-    #This function requires population of the UserInput doe_settings dictionary. It automatically scans many parameter modulation combinations.
-    def doeParameterModulationCombinationsScanner(self, searchType='doMetropolisHastings'):
+    #This function requires population of the UserInput doe_settings dictionary. It automatically scans many parameter modulation Permutations.
+    def doeParameterModulationPermutationsScanner(self, searchType='doMetropolisHastings'):
         import CheKiPEUQ.CombinationGeneratorModule as CombinationGeneratorModule
         doe_settings = self.UserInput.doe_settings 
         #For the parameters, we are able to use a default one standard deviation grid if gridSamplingAbsoluteIntervalSize is a blank list.
@@ -784,14 +784,14 @@ class parameter_estimation:
         parModulationGridCenterVector = self.UserInput.InputParameterInitialGuess
         numParameters = len(parModulationGridCenterVector)
         parModulationGridIntervalSizeAbsolute = doe_settings['parameter_modulation_grid_interval_size']*self.UserInput.std_prior
-        parModulationGridCombinations, numGridPoints = self.getGridCombinations(parModulationGridCenterVector,parModulationGridIntervalSizeAbsolute, doe_settings['parameter_modulation_grid_num_intervals'])
+        parModulationGridPermutations, numGridPoints = self.getGridPermutations(parModulationGridCenterVector,parModulationGridIntervalSizeAbsolute, doe_settings['parameter_modulation_grid_num_intervals'])
         
-        parModulationGridCombinations= np.array(parModulationGridCombinations)
+        parModulationGridPermutations= np.array(parModulationGridPermutations)
         if len(self.UserInput.parameterNamesList) == len(self.UserInput.InputParametersPriorValuesUncertainties): #then we assume variable names have been provided.
             headerString = self.UserInput.stringOfParameterNames #This variable is a string, no brackets.
         else: #else no variable names have been provided.
             headerString = ''
-        np.savetxt("Info_gain__parModulationGridCombinations.csv", parModulationGridCombinations, delimiter=",", encoding =None, header=headerString)
+        np.savetxt("Info_gain__parModulationGridPermutations.csv", parModulationGridPermutations, delimiter=",", encoding =None, header=headerString)
         
         #We will get a separate info gain matrix for each parModulationCombination, we'll store that in this variable.
         info_gains_matrices_list = []
@@ -801,7 +801,7 @@ class parameter_estimation:
             numParameters = len(self.UserInput.InputParametersPriorValuesUncertainties)
             for parameterIndex in range(0,numParameters):#looping across number of parameters...
                 info_gains_matrices_lists_one_for_each_parameter.append([]) #These are empty lists create to indices and initialize each parameter's info_gain_matrix. They will be appended to later.
-        for parModulationCombinationIndex,parModulationCombination in enumerate(parModulationGridCombinations):                
+        for parModulationCombinationIndex,parModulationCombination in enumerate(parModulationGridPermutations):                
             #We will get separate info gain matrix for each parameter modulation combination.
             info_gain_matrix = self.doeGetInfoGainMatrix(parModulationCombination, searchType=searchType)
             #Append the info gain matrix obtainend.
@@ -860,7 +860,7 @@ class parameter_estimation:
                     self.info_gains_matrices_array = np.array([self.info_gain_matrix])
             local_info_gains_matrices_array = self.info_gains_matrices_array #We have to switch to a local variable since that way below we can use the local variable whether we're doing the 'global' info_gains_matrices array or a parameter specific one.
         if parameterIndex!=None:
-            if hasattr(self, 'info_gains_matrices_arrays_one_for_each_parameter'): #this structure will only exist if doeParameterModulationCombinationsScanner has been called.
+            if hasattr(self, 'info_gains_matrices_arrays_one_for_each_parameter'): #this structure will only exist if doeParameterModulationPermutationsScanner has been called.
                 local_info_gains_matrices_array = np.array(self.info_gains_matrices_arrays_one_for_each_parameter)[:][parameterIndex] #each "row" is a modulation, and within that are structures for each parameter.  This is further described in the document InfoGainMatrixObjectsStructure.docx
             else: #if a modulation has not been run, and simply doeGetInfoGainMatrix was done, then the larger structure might not exist and we have to just pull out by the parameter index and then make it nested as for a regular info_gain sum.
                 local_info_gains_matrices_array = np.array([self.info_gain_matrices_each_parameter[parameterIndex]])

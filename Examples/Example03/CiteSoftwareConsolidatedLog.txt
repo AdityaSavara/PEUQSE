@@ -2,7 +2,7 @@
 ---
 -
     timestamp: >-
-        2020-10-12T17:01:27
+        2020-10-15T10:32:18
     unique_id: >-
         https://doi.org/10.1016/j.susc.2016.07.001
     software_name: >-
@@ -21,7 +21,7 @@
             Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
 -
     timestamp: >-
-        2020-10-11T18:56:01
+        2020-10-15T10:32:07
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
