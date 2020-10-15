@@ -447,16 +447,16 @@ class parameter_estimation:
                 if walkerInitialDistribution.lower() == 'auto':
                     walkerInitialDistribution = 'uniform'
         for permutationIndex,permutation in enumerate(listOfPermutations):
-            if self.UserInput.parameter_estimation_settings['gridsearch_parallel_sampling'] == True:
+            if (self.UserInput.parameter_estimation_settings['gridsearch_parallel_sampling'] or self.UserInput.parameter_estimation_settings['multistart_parallel_sampling'])== True:
                 #We will only execute the sampling the permutationIndex matches the processor rank.
                 #Additionally, if the rank is 0 and the simulation got here, it will be assumed the person is running this just to find the number of Permutations, so that will be spit out and the simulation ended.
                 import CheKiPEUQ.parallel_processing
                 if CheKiPEUQ.parallel_processing.currentProcessorNumber == 0:
-                    print("For the user input settings provided, the number of Permutations will be",  numPermutations, ". Please use mpiexec or mpirun with this number for N. If you are not expecting to see this message, change your UserInput choices. You have chosen parallel processing for gridsearch and have run CheKiPEUQ without mpi, which is a procedure to retrieve the number of processor ranks to use for parallelized gridsearch. A typical syntax now would be: mpiexec -n ",  numPermutations, " python runfile_for_your_analysis.py" )
+                    print("For the user input settings provided, the number of Permutations+1 will be",  numPermutations+1, ". Please use mpiexec or mpirun with this number for N. If you are not expecting to see this message, change your UserInput choices. You have chosen parallel processing for gridsearch and have run CheKiPEUQ without mpi, which is a procedure to retrieve the number of processor ranks to use for parallelized gridsearch. A typical syntax now would be: mpiexec -n ",  numPermutations+1, " python runfile_for_your_analysis.py" )
                     sys.exit()
-                elif CheKiPEUQ.parallel_processing.currentProcessorNumber != permutationIndex:
+                elif CheKiPEUQ.parallel_processing.currentProcessorNumber != permutationIndex+1:
                     continue #This means the permutation index does not match the processor rank so nothing should be executed.
-                #elif CheKiPEUQ.parallel_processing.currentProcessorNumber == permutationIndex:
+                #elif CheKiPEUQ.parallel_processing.currentProcessorNumber == permutationIndex+1:
                 #    pass  #This is the "normal" case and is implied, so is commented out.
             self.UserInput.InputParameterInitialGuess = permutation #We need to fill the variable InputParameterInitialGuess with the permutation being checked.
             if searchType == 'getLogP':
@@ -514,7 +514,7 @@ class parameter_estimation:
                     print("Permutation", permutationIndex+1, "averageTimePerPermutation", "%.2f" % round(averageTimePerPermutation,2), "estimated time remaining", "%.2f" % round( numRemainingPermutations*averageTimePerPermutation,2), "s" )
                     print("Permutation", permutationIndex+1, "current logP", self.map_logP, "highest logP", self.highest_logP)
         
-        if self.UserInput.parameter_estimation_settings['gridsearch_parallel_sampling'] == True: #This is the parallel sampling mpi case.
+        if (self.UserInput.parameter_estimation_settings['gridsearch_parallel_sampling'] or self.UserInput.parameter_estimation_settings['multistart_parallel_sampling']) == True: #This is the parallel sampling mpi case.
             self.consolidate_parallel_sampling_data(parallelizationType="permutation")
             if CheKiPEUQ.parallel_processing.finalProcess == False:
                 return self.map_logP #This is sortof like a sys.exit(), we are just ending the PermutationSearch function here if we are not on the finalProcess. 
