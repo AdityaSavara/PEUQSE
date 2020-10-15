@@ -1,10 +1,10 @@
-MAP_logP:[-42.66339755]
-self.map_index:34
-self.map_parameter_set:[173.97964591 533.9504396 ]
-self.mu_AP_parameter_set:[147.25981355 499.27517111]
-self.stdap_parameter_set:[ 60.77807843 116.4862424 ]
-self.info_gain:0.08829221964165516
-evidence:3.4202348100253547e-23
+MAP_logP:[-42.63787091]
+self.map_index:50
+self.map_parameter_set:[166.66765362 496.83982487]
+self.mu_AP_parameter_set:[146.86820376 524.6182733 ]
+self.stdap_parameter_set:[ 60.16443908 123.25010471]
+self.info_gain:0.0693974572960897
+evidence:3.168193362370174e-23
 posterior_cov_matrix:
-[[ 3738.48053817   143.65289197]
- [  143.65289197 13732.52713473]]
+[[ 3661.84995904  1995.78504808]
+ [ 1995.78504808 15367.2230576 ]]

@@ -452,7 +452,7 @@ class parameter_estimation:
                 #Additionally, if the rank is 0 and the simulation got here, it will be assumed the person is running this just to find the number of Permutations, so that will be spit out and the simulation ended.
                 import CheKiPEUQ.parallel_processing
                 if CheKiPEUQ.parallel_processing.currentProcessorNumber == 0:
-                    print("For the user input settings provided, the number of Permutations will be",  numPermutations, ". Please use mpiexec or mpirun with this number for N. If you are not expecting to see this message, change your UserInput choices. You have chosen parallel processing for gridsearch and have run CheKiPEUQ without mpi, which is a procedure to retrieve the number of processor ranks to use for parallelized gridsearch. A typical syntax now would be: mpiexec -n ",  numPermutations, " python runfile_Example_26a2_BPE.py" )
+                    print("For the user input settings provided, the number of Permutations will be",  numPermutations, ". Please use mpiexec or mpirun with this number for N. If you are not expecting to see this message, change your UserInput choices. You have chosen parallel processing for gridsearch and have run CheKiPEUQ without mpi, which is a procedure to retrieve the number of processor ranks to use for parallelized gridsearch. A typical syntax now would be: mpiexec -n ",  numPermutations, " python runfile_for_your_analysis.py" )
                     sys.exit()
                 elif CheKiPEUQ.parallel_processing.currentProcessorNumber != permutationIndex:
                     continue #This means the permutation index does not match the processor rank so nothing should be executed.
@@ -515,7 +515,7 @@ class parameter_estimation:
                     print("Permutation", permutationIndex+1, "current logP", self.map_logP, "highest logP", self.highest_logP)
         
         if self.UserInput.parameter_estimation_settings['gridsearch_parallel_sampling'] == True: #This is the parallel sampling mpi case.
-            self.consolidate_parallel_sampling_data(parallelizationType="PermutationSearch")
+            self.consolidate_parallel_sampling_data(parallelizationType="permutation")
             if CheKiPEUQ.parallel_processing.finalProcess == False:
                 return self.map_logP #This is sortof like a sys.exit(), we are just ending the PermutationSearch function here if we are not on the finalProcess. 
         #TODO: export the allPermutationsResults to file at end of search in a nicer format.        
@@ -576,7 +576,7 @@ class parameter_estimation:
         return bestResultSoFar
 
     def consolidate_parallel_sampling_data(self, parallelizationType="equal"):
-        #parallelizationType='equal' means everything will get averaged together. parallelizationType='PermutationSearch' will be treated differently, same with parallelizationType='designOfExperiments'
+        #parallelizationType='equal' means everything will get averaged together. parallelizationType='permutation' will be treated differently, same with parallelizationType='designOfExperiments'
         import CheKiPEUQ.parallel_processing
         #CheKiPEUQ.parallel_processing.currentProcessorNumber
         numSimulations = CheKiPEUQ.parallel_processing.numSimulations
@@ -603,7 +603,7 @@ class parameter_estimation:
                 return False
             
         if checkIfAllSimulationsDone() == True:
-            if parallelizationType.lower() == 'PermutationSearch':
+            if parallelizationType.lower() == 'permutation':
                 import os
                 os.chdir("./mpi_log_files")
                 for simulationIndex in range(0,numSimulations): #For each simulation, we need to grab the results.
