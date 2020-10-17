@@ -46,7 +46,13 @@ class parameter_estimation:
             UserInput.parameter_estimation_settings['mcmc_checkPointFrequency'] = UserInput.parameter_estimation_settings['checkPointFrequency']
             UserInput.parameter_estimation_settings['multistart_checkPointFrequency'] = UserInput.parameter_estimation_settings['checkPointFrequency']
         UserInput.request_mpi = False #Set as false as default.
-        if (UserInput.parameter_estimation_settings['mcmc_parallel_sampling'] or UserInput.parameter_estimation_settings['multistart_parallel_sampling']) == True:
+        if ( \
+            UserInput.parameter_estimation_settings['mcmc_parallel_sampling'] or \
+            UserInput.parameter_estimation_settings['multistart_parallel_sampling'] or \
+            UserInput.doe_settings['parallel_conditions_exploration'] or  \
+            UserInput.doe_settings['parallel_parameter_modulation'] \
+            ) 
+            == True:
             UserInput.request_mpi = True
         if UserInput.request_mpi == True: #Rank zero needs to clear out the mpi_log_files directory, so check if we are using rank 0.
             import os; import sys
@@ -459,6 +465,7 @@ class parameter_estimation:
                 if walkerInitialDistribution.lower() == 'auto':
                     walkerInitialDistribution = 'uniform'
         for permutationIndex,permutation in enumerate(listOfPermutations):
+            #####Begin ChekIPEUQ Parallel Processing During Loop Block####
             if (self.UserInput.parameter_estimation_settings['multistart_parallel_sampling'])== True:
                 #We will only execute the sampling the permutationIndex matches the processor rank.
                 #Additionally, if the rank is 0 and the simulation got here, it will be assumed the person is running this just to find the number of Permutations, so that will be spit out and the simulation ended.
@@ -470,6 +477,7 @@ class parameter_estimation:
                     continue #This means the permutation index does not match the processor rank so nothing should be executed.
                 #elif CheKiPEUQ.parallel_processing.currentProcessorNumber == permutationIndex+1:
                 #    pass  #This is the "normal" case and is implied, so is commented out.
+            #####End ChekIPEUQ Parallel Processing During Loop Block####
             self.UserInput.InputParameterInitialGuess = permutation #We need to fill the variable InputParameterInitialGuess with the permutation being checked.
             if searchType == 'getLogP':
                 self.map_logP = self.getLogP(permutation) #The getLogP function does not fill map_logP by itself.
