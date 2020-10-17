@@ -69,7 +69,7 @@ class parameter_estimation:
                 if CheKiPEUQ.parallel_processing.numProcessors > 1:    #This is the normal case.
                     sys.exit() #TODO: right now, processor zero just exits after making and emptying the directory. In the future, things will be more complex for the processor zero.
                 elif CheKiPEUQ.parallel_processing.numProcessors == 1: #This is the case where the person has only one process rank, so probably does not want code execution to stop just yet. (This is an intentional case for gridsearch for example, where running without mpi will print the number of grid Permutations).
-                    print("Notice: you have requested parallel processing by MPI but have only 1 processor rank enabled or are not using mpi for this run. Parallel processing is being disabled for this run. If you are using gridsearch, another message will be printed out for the number of processor ranks to provide to mpi.")
+                    print("Notice: you have requested parallel processing by MPI but have only 1 processor rank enabled or are not using mpi for this run. Parallel processing is being disabled for this run. If you are running to find the number of process ranks to use, another message will be printed out with the number of processor ranks to provide to mpi.")
                     UserInput.request_mpi = False
         
         #Setting this object so that we can make changes to it below without changing userinput dictionaries.
@@ -893,12 +893,14 @@ class parameter_estimation:
             numParameters = len(self.UserInput.InputParametersPriorValuesUncertainties)
             for parameterIndex in range(0,numParameters):#looping across number of parameters...
                 info_gains_matrices_lists_one_for_each_parameter.append([]) #These are empty lists create to indices and initialize each parameter's info_gain_matrix. They will be appended to later.
+        print("line 896")
         for parModulationPermutationIndex,parModulationPermutation in enumerate(parModulationGridPermutations):                
             #####Begin ChekIPEUQ Parallel Processing During Loop Block####
             if (self.UserInput.doe_settings['parallel_parameter_modulation'])== True:
                 #We will only execute the sampling the permutationIndex matches the processor rank.
                 #Additionally, if the rank is 0 and the simulation got here, it will be assumed the person is running this just to find the number of Permutations, so that will be spit out and the simulation ended.
                 import CheKiPEUQ.parallel_processing
+                print("line 903", CheKiPEUQ.parallel_processing.currentProcessorNumber)
                 if CheKiPEUQ.parallel_processing.currentProcessorNumber == 0:
                     print("For the user input settings provided, the number of Permutations+1 will be",  numPermutations+1, ". Please use mpiexec or mpirun with this number for N. If you are not expecting to see this message, change your UserInput choices. You have chosen parallel processing for gridsearch and have run CheKiPEUQ without mpi, which is a procedure to retrieve the number of processor ranks to use for parallelized gridsearch. A typical syntax now would be: mpiexec -n ",  numPermutations+1, " python runfile_for_your_analysis.py" )
                     sys.exit()
@@ -908,9 +910,11 @@ class parameter_estimation:
                 #    pass  #This is the "normal" case and is implied, so is commented out.
             #####End ChekIPEUQ Parallel Processing During Loop Block####
             #We will get separate info gain matrix for each parameter modulation combination.
+            print("line 913", CheKiPEUQ.parallel_processing.currentProcessorNumber)
             info_gain_matrix = self.doeGetInfoGainMatrix(parModulationPermutation, searchType=searchType)
             #Append the info gain matrix obtainend.
             info_gains_matrices_list.append(np.array(info_gain_matrix))
+            print("line 917", CheKiPEUQ.parallel_processing.currentProcessorNumber)
             if self.UserInput.doe_settings['info_gains_matrices_multiple_parameters'] == 'each': #copy the above lines which were for the sum.
                     for parameterIndex in range(0,numParameters):#looping across number of parameters...
                         info_gains_matrices_lists_one_for_each_parameter[parameterIndex].append(np.array(self.info_gain_matrices_each_parameter[parameterIndex]))
@@ -976,7 +980,12 @@ class parameter_estimation:
                     xValues = local_info_gains_matrices_array[modulationIndex][:,0]
                     yValues = local_info_gains_matrices_array[modulationIndex][:,1]
                     zValues = local_info_gains_matrices_array[modulationIndex][:,2]
-                    plotting_functions.makeTrisurfacePlot(xValues, yValues, zValues, figure_name = "Info_gain_TrisurfacePlot_modulation_"+str(modulationIndex)+plot_suffix)
+                    if self.UserInput.doe_settings['parallel_parameter_modulation'] == False: #This is the normal case.
+                        plotting_functions.makeTrisurfacePlot(xValues, yValues, zValues, figure_name = "Info_gain_TrisurfacePlot_modulation_"+str(modulationIndex)+plot_suffix)
+                    if self.UserInput.doe_settings['parallel_parameter_modulation'] == True: #This is the parallel case. In this case, the actual modulationIndex to attach to the filename is given by the processor rank.
+                        import CheKiPEUQ.parallel_processing
+                        print("line 987", CheKiPEUQ.parallel_processing.currentProcessorNumber)
+                        plotting_functions.makeTrisurfacePlot(xValues, yValues, zValues, figure_name = "Info_gain_TrisurfacePlot_modulation_"+str(CheKiPEUQ.parallel_processing.currentProcessorNumber)+plot_suffix)
             if self.info_gains_matrices_array_format == 'meshgrid':        
                 for modulationIndex in range(len(local_info_gains_matrices_array)):
                     #Now need to get things prepared for the meshgrid.
@@ -986,7 +995,12 @@ class parameter_estimation:
                     XX, YY = np.meshgrid(self.meshGrid_independentVariable1ValuesArray, self.meshGrid_independentVariable2ValuesArray)
                     zValues = local_info_gains_matrices_array[modulationIndex][:,2]
                     ZZ = zValues.reshape(XX.shape) #We know from experience to reshape this way.
-                    plotting_functions.makeMeshGridSurfacePlot(XX, YY, ZZ, figure_name = "Info_gain_Meshgrid_modulation_"+str(modulationIndex)+plot_suffix)
+                    if self.UserInput.doe_settings['parallel_parameter_modulation'] == False: #This is the normal case.
+                        plotting_functions.makeMeshGridSurfacePlot(XX, YY, ZZ, figure_name = "Info_gain_Meshgrid_modulation_"+str(modulationIndex)+plot_suffix)
+                    if self.UserInput.doe_settings['parallel_parameter_modulation'] == True: #This is the parallel case. In this case, the actual modulationIndex to attach to the filename is given by the processor rank.
+                        import CheKiPEUQ.parallel_processing
+                        print("line 1002", CheKiPEUQ.parallel_processing.currentProcessorNumber)
+                        plotting_functions.makeMeshGridSurfacePlot(XX, YY, ZZ, figure_name = "Info_gain_Meshgrid_modulation_"+str(CheKiPEUQ.parallel_processing.currentProcessorNumber)+plot_suffix)
         else:
             print("At present, createInfoGainPlots and createInfoGainModulationPlots only create plots when the length of  independent_variable_grid_center is 2. We don't currently support creation of other dimensional plots.")
     def getLogP(self, proposal_sample): #The proposal sample is specific parameter vector.

@@ -1,17 +1,17 @@
 In this example, a few example files are provided. They each use the design of experiments function which is a class function for the parameter estimation (PE_object) class.
 
+For a quick example that would show reasnoable results, one can run one of the two below files that each take a few minutes.
+runfile_Example13_doe_function_meshgrid_1.py
+and
+runfile_Example13_doe_function_xyz_1.py
 
 
-The two below files take around 10 minutes each. They show the correct syntax but if they examples are run they will not give reasonable results since they are written to be short quick runs. To see more "reasonable" outputs, the mcmc_lengths would need to be increased.
+For syntax of how to do larger grids, the two below files take around 10 minutes each. Currently, if run, the ouputs will look bad since they are just meant to show the syntax. To see more "reasonable" outputs, the mcmc_lengths would need to be increased.
 runfile_Example13_doe_function_xyz_3.py 
 and
 runfile_Example13_doe_function_meshgrid_3.py
 
 
-For a quick example that would show reasnoable results, one can run one of the two below files that each take a few minutes.
-runfile_Example13_doe_function_meshgrid_1.py
-and
-runfile_Example13_doe_function_xyz_1.py
 
 Below explains the variables etc. Check the UserInput file and other documentation as this might be out of date.
     

@@ -23,7 +23,7 @@ UserInput.parameter_estimation_settings['verbose'] = False
 UserInput.parameter_estimation_settings['exportAllSimulatedOutputs'] = False
 UserInput.parameter_estimation_settings['checkPointFrequency'] = None
 UserInput.parameter_estimation_settings['exportLog'] = True
-UserInput.parameter_estimation_settings['mcmc'] = True 
+ 
 UserInput.parameter_estimation_settings['mcmc_mode'] = 'MAP_finding'
 UserInput.parameter_estimation_settings['mcmc_random_seed'] = 0 #Normally set to None so that mcmc is set to be random. To get the same results repeatedly, such as for testing purposes, set the random seed to 0 or another integer for testing purposes.
 UserInput.parameter_estimation_settings['mcmc_burn_in'] = 100
