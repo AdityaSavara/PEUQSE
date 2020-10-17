@@ -113,14 +113,14 @@ parameter_pairs_for_contour_plots = [] #This will accept either strings (for var
 #The normal usage as of May 26 2020 is to first use the indpendent variables feature, which must be used, then fill the doe_settings below.
 #Then call PE_object.doeParameterModulationPermutationsScanner()
 #If a single parameter modulation grid is going to be used, one can instead define the independent variable grid and call like this: PE_object.createInfoGainPlots(plot_suffix="manual")
-#For a real usage, see Example14doeFunctionExample
+#For a real usage, see Example13doeFunctionExample
 #Note: after calling either of these functions, the variables populated are PE_object.info_gains_matrices_array and PE_object.info_gain_matrix.  So if somebody wants to export these after using the functions, one can cycle across each info gains matrix inside PE_object.info_gains_matrices_array and export to csv.
 #A key is printed out inside of Info_gain_parModulationGridCombinations.csv
 
 doe_settings = {} #To use the design of experiments feature the independent variables feature **must** be used.
 doe_settings['info_gains_matrices_array_format'] = 'xyz' #options are 'xyz' and 'meshgrid'.  Images are only ouput when scanning two independent variables. If using more than two independent variables, you will need to use the 'xyz' format and will need to analyze the final info_gains_matrices_array written to file directly. Note this variable must be set before running the doe command. You cannot change the format of the info_gains_matrices_array afterwards because the way the sampling is stored during a run is change based on this setting.
 
-doe_settings['info_gains_matrices_multiple_parameters'] = 'sum' #The possible values are 'sum' or 'each'.  The 'each' choice exports info_gains for **each** parameter (and also exports the sums). #This feature is (for now) only for KL_divergence.
+doe_settings['info_gains_matrices_multiple_parameters'] = 'sum' #The possible values are 'sum' or 'each'. 'sum' is the default such that there is one averaged infogain matrix exported per modulation. The 'each' choice exports info_gains for **each** parameter per modulation (and also exports the sums). #This feature is (for now) only for KL_divergence.
 
 doe_settings['parallel_conditions_exploration'] = False  #this parallelizes the modulation of the conditions exploration and is the recommended usage for parallelizaing doe.
 doe_settings['parallel_parameter_modulation'] = False  #this parallelizes the modulation of parameters. This is not recommended under normal usage. It is not compatible with parallel_conditions_exploration, so only one should be used at a time.
