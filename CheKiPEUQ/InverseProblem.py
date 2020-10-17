@@ -681,6 +681,10 @@ class parameter_estimation:
             elif parallelizationType.lower() == 'equal':
                 import os
                 os.chdir("./mpi_log_files")
+                #These pointers are initialized before the below loop. Mostly in case mpi never actually happened since then after the loop these would be empty.
+                self.cumulative_post_burn_in_samples = self.post_burn_in_samples
+                self.cumulative_post_burn_in_log_priors_vec = self.post_burn_in_log_priors_vec
+                self.cumulative_post_burn_in_log_posteriors_un_normed_vec = self.post_burn_in_log_posteriors_un_normed_vec
                 for simulationIndex in range(0,numSimulations): #For each simulation, we need to grab the results.
                     simulationNumberString = str(simulationIndex+1)
                     #Get the dat aout.    
