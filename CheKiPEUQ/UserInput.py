@@ -122,10 +122,13 @@ doe_settings['info_gains_matrices_array_format'] = 'xyz' #options are 'xyz' and 
 
 doe_settings['info_gains_matrices_multiple_parameters'] = 'sum' #The possible values are 'sum' or 'each'.  The 'each' choice exports info_gains for **each** parameter (and also exports the sums). #This feature is (for now) only for KL_divergence.
 
+doe_settings['parallel_conditions_exploration'] = False  #this paraellizes the modulation of the conditions exploration and is the recommended usage for parallelizaing doe.
+doe_settings['parallel_parameter_modulation'] = False  #this parallelizes the modulation of parameters. This is not recommended under normal usage. It is not compatible with parallel_conditions_exploration, so only one should be used at a time.
+
 #Now we will define how big of a modulation / offset we want to apply to each parameter.
 #doe_settings['parameter_modulation_grid_center'] #We do NOT create such a variable. The initial guess variable is used, which is the center of the prior if not filled by the user.
-doe_settings['parameter_modulation_grid_interval_size'] = [] #This must be 1D array/list with length of number of parameters.  These are all relative to the standard deviation of the prior of that parmaeter. Such as [1,1]  #If you wish to manually change this setting, you should use all non-zero values for this setting, even if you plan to not modulate that parmeter (which parameters will be modulated are in the num_intervals variable below).
-doe_settings['parameter_modulation_grid_num_intervals'] = [] #This must be a 1D array/list with length of number of parameters. #Such as [1,1].  #This is the number of steps in each direction outward from center. So a 2 here gives 5 evaluations. A zero means we don't allow the parameter to vary.
+doe_settings['parameter_modulation_grid_interval_size'] = [] #This must be 1D array/list with length of number of parameters.  These are all relative to the standard deviation of the prior of that parmaeter. Such as [1,1]. The default will set everything to 1.  #If you wish to manually change this setting, you should use all non-zero values for this setting, even if you plan to not modulate that parmeter (which parameters will be modulated are in the num_intervals variable below).
+doe_settings['parameter_modulation_grid_num_intervals'] = [] #This must be a 1D array/list with length of number of parameters. #Such as [1,1]. The default will be set to all 1. #This is the number of steps in each direction outward from center. So a 2 here gives 5 evaluations. A zero means we don't allow the parameter to vary.
 
 #Now we will define the *conditions space* to explore (to find the highest info gain), which will be done for *each* modulation.
 #Note that this means that responses['independent_variables_values'] must be used, AND it must be fed into the model simulation file as a connected variables array. (See  Example13doeFunctionExample directory runfiles).
