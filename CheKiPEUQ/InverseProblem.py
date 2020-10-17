@@ -378,15 +378,22 @@ class parameter_estimation:
     #    These are **not** identical variables and should not be messed up during editing. walkerInitialDistributions are a special case of initialStartPoints
     #    The distinction is hierarchical. Somebody could do a multiStart search with a uniformInitialDistributionType and have a walkerInitialDistribution started around each case within that.
     #    Effectively, the initialDistributionPoints are across parameter space, while the walkerInitialDistribution **could** be designed to find local modes using a smaller spread.
-    def generateInitialPoints(self, numStartPoints=0, initialPointsDistributionType='uniform', relativeInitialDistributionSpread=1.0, numParameters = 0):
+    def generateInitialPoints(self, numStartPoints=0, initialPointsDistributionType='uniform', relativeInitialDistributionSpread=1.0, numParameters = 0, centerPoint=None, gridSamplingAbsoluteIntervalSize = [], gridSamplingNumOfIntervals = []):
         #The initial points will be generated from a distribution based on the number of walkers and the distributions of the parameters.
         #The variable UserInput.std_prior has been populated with 1 sigma values, even for cases with uniform distributions.
         #The random generation at the front of the below expression is from the zeus example https://zeus-mcmc.readthedocs.io/en/latest/
         #The multiplication is based on the randn function using a sigma of one (which we then scale up) and then advising to add mu after: https://docs.scipy.org/doc/numpy-1.15.1/reference/generated/numpy.random.randn.html
-        #The numParameters cannot be 0. We just use 0 to mean not provided, in which case we pull it from the initial guess.
+        #The actual numParameters cannot be 0. We just use 0 to mean not provided, in which case we pull it from the initial guess.
+        #The arguments gridSamplingAbsoluteIntervalSize = [], gridSamplingNumOfIntervals = [] are only for the distribution type 'grid'.
+        if str(centerPoint).lower() == str(None).lower():
+            centerPoint = self.UserInput.InputParameterInitialGuess*1.0 #This may be a reduced parameter space.
+        #For a multi-start with a grid, our algorithm is completely different than other cases.
+        if initialPointsDistributionType=='grid':
+            gridPermutations, numPermutations = self.getGridPermutations(centerPoint, gridSamplingAbsoluteIntervalSize, gridSamplingNumOfIntervals)
+            initialPoints = gridPermutations
+        #Below lines are for non-grid cases.
         if numParameters == 0:
-            numParameters = len(self.UserInput.InputParameterInitialGuess)
-        
+            numParameters = len(centerPoint)
         if numStartPoints == 0: #This is a deprecated line. The function was originally designed for making mcmc walkers and then was generalized.
             numStartPoints = self.mcmc_nwalkers
         if initialPointsDistributionType=='uniform':
@@ -395,9 +402,10 @@ class parameter_estimation:
             initialPointsFirstTerm = np.zeros((numStartPoints, numParameters)) #Make the first term all zeros.
         elif initialPointsDistributionType=='gaussian':
             initialPointsFirstTerm = np.random.randn(numStartPoints, numParameters) #<--- this was from the zeus example.
-        #Now we add to self.UserInput.InputParameterInitialGuess. We don't use the UserInput initial guess directly because gridsearch and other things can change it -- so we need to use this one.
-        walkerStartPoints = initialPointsFirstTerm*self.UserInput.std_prior*relativeInitialDistributionSpread + self.UserInput.InputParameterInitialGuess 
-        return walkerStartPoints
+        if initialPointsDistributionType !='grid'
+            #Now we add to centerPoint, usually self.UserInput.InputParameterInitialGuess. We don't use the UserInput initial guess directly because gridsearch and other things can change it -- so we need to use this one.
+            initialPoints = initialPointsFirstTerm*self.UserInput.std_prior*relativeInitialDistributionSpread + centerPoint
+        return initialPoints
 
     #This helper function has been made so that gridSearch and design of experiments can call it.
     #Although at first glance it may seem like it should be in the CombinationsGeneratorModule, that is a misconception. This is just a wrapper setting defaults for calling that module, such as using the prior for the grid interval when none is provided.
