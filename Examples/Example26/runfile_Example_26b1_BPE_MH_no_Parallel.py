@@ -26,6 +26,8 @@ if __name__ == "__main__":
     UserInput.parameter_estimation_settings['mcmc_length'] = 100
     
     UserInput.parameter_estimation_settings['mcmc_parallel_sampling'] = False
+    
+    UserInput.parameter_estimation_settings['multistart_parallel_sampling'] = False
 
     #After making the UserInput, now we make a 'parameter_estimation' object from it.
     PE_object = CKPQ.parameter_estimation(UserInput)

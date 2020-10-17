@@ -1,0 +1,10 @@
+result: self.map_logP, self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec
+result: 0 [array([165.17091572, 500.02280082]), -42.63738740051096]
+result: 1 [array([165.15265159, 499.98972276]), -42.63738746218146]
+result: 2 [array([165.1707312 , 500.06152225]), -42.63738730919835]
+result: 3 [array([165.12304222, 500.29390614]), -42.63738765355597]
+result: 4 [array([165.1285856 , 500.04719804]), -42.63738738928292]
+result: 5 [array([165.12439254, 500.18599373]), -42.6373873589346]
+result: 6 [array([165.12491229, 500.07538969]), -42.63738736710694]
+result: 7 [array([165.17835349, 500.21105646]), -42.637387360366674]
+result: 8 [array([165.1750549 , 500.06869986]), -42.63738732180945]

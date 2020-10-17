@@ -47,7 +47,7 @@ if __name__ == "__main__":
     #PE_object.doMetropolisHastings()
     #[map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, samples_simulatedOutputs, logP] = PE_object.doMetropolisHastings()
     
-    PE_object.doGridSearch('doMetropolisHastings')
+    PE_object.doMultiStart(searchType='doMetropolisHastings', initialPointsDistributionType='grid')
     #PE_object.doGridSearch('getLogP')
     
     PE_object.createAllPlots() #This function calls each of the below functions.

@@ -27,11 +27,11 @@ if __name__ == "__main__":
 
     UserInput.parameter_estimation_settings['mcmc_random_seed'] = 0
     UserInput.parameter_estimation_settings['mcmc_parallel_sampling'] = False
-    UserInput.parameter_estimation_settings['gridsearch_parallel_sampling'] = False
+    UserInput.parameter_estimation_settings['multistart_parallel_sampling'] = False
 
     #After making the UserInput, now we make a 'parameter_estimation' object from it.
     PE_object = CKPQ.parameter_estimation(UserInput)
-    PE_object.doGridSearch('doMetropolisHastings')
+    PE_object.doMultiStart('doMetropolisHastings', initialPointsDistributionType='grid')
     PE_object.createAllPlots() #This function calls each of the below functions so that the user does not have to.
 #    PE_object.makeHistogramsForEachParameter()    
 #    PE_object.makeSamplingScatterMatrixPlot()
