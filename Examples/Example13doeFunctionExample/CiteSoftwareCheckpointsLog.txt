@@ -1,7 +1,7 @@
 ---
 -
     timestamp: >-
-        2020-10-16T23:05:40
+        2020-10-17T15:26:21
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -23,29 +23,7 @@
 ---
 -
     timestamp: >-
-        2020-10-16T23:05:40
-    unique_id: >-
-        https://doi.org/10.1002/cctc.202000953
-    software_name: >-
-        CheKiPEUQ Bayesian Parameter Estimation
-    version:
-        - >-
-            1.0.0
-    author:
-        - >-
-            Aditya Savara
-        - >-
-            Eric A. Walker
-    doi:
-        - >-
-            https://doi.org/10.1002/cctc.202000953
-    cite:
-        - >-
-            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
----
--
-    timestamp: >-
-        2020-10-16T23:05:40
+        2020-10-17T15:26:21
     unique_id: >-
         https://doi.org/10.1002/cctc.202000976
     software_name: >-
@@ -68,7 +46,7 @@
             Eric Alan Walker, Kishore Ravisankar, Aditya Savara. CheKiPEUQ Intro 2: Harnessing Uncertainties from Data Sets, Bayesian Design of Experiments in Chemical Kinetics. ChemCatChem. Accepted. doi:10.1002/cctc.202000976
 -
     timestamp: >-
-        2020-10-16T23:05:40
+        2020-10-17T15:26:21
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -90,7 +68,7 @@
 ---
 -
     timestamp: >-
-        2020-10-16T23:05:40
+        2020-10-17T15:26:22
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -112,7 +90,7 @@
 ---
 -
     timestamp: >-
-        2020-10-16T23:05:40
+        2020-10-17T15:26:22
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -134,7 +112,7 @@
 ---
 -
     timestamp: >-
-        2020-10-16T23:05:40
+        2020-10-17T15:26:23
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -156,7 +134,7 @@
 ---
 -
     timestamp: >-
-        2020-10-16T23:05:41
+        2020-10-17T15:26:23
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -178,7 +156,7 @@
 ---
 -
     timestamp: >-
-        2020-10-16T23:05:41
+        2020-10-17T15:26:24
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -200,7 +178,7 @@
 ---
 -
     timestamp: >-
-        2020-10-16T23:05:41
+        2020-10-17T15:26:24
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -222,7 +200,7 @@
 ---
 -
     timestamp: >-
-        2020-10-16T23:05:41
+        2020-10-17T15:26:25
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -244,7 +222,7 @@
 ---
 -
     timestamp: >-
-        2020-10-16T23:05:41
+        2020-10-17T15:26:25
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -266,7 +244,7 @@
 ---
 -
     timestamp: >-
-        2020-10-16T23:05:41
+        2020-10-17T15:26:26
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -288,7 +266,7 @@
 ---
 -
     timestamp: >-
-        2020-10-16T23:05:42
+        2020-10-17T15:26:26
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -310,7 +288,7 @@
 ---
 -
     timestamp: >-
-        2020-10-16T23:05:42
+        2020-10-17T15:26:27
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -332,7 +310,7 @@
 ---
 -
     timestamp: >-
-        2020-10-16T23:05:42
+        2020-10-17T15:26:27
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -354,7 +332,7 @@
 ---
 -
     timestamp: >-
-        2020-10-16T23:05:42
+        2020-10-17T15:26:28
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -376,7 +354,7 @@
 ---
 -
     timestamp: >-
-        2020-10-16T23:05:42
+        2020-10-17T15:26:28
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -398,7 +376,7 @@
 ---
 -
     timestamp: >-
-        2020-10-16T23:05:42
+        2020-10-17T15:26:28
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -420,7 +398,7 @@
 ---
 -
     timestamp: >-
-        2020-10-16T23:05:43
+        2020-10-17T15:26:29
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -442,7 +420,7 @@
 ---
 -
     timestamp: >-
-        2020-10-16T23:05:43
+        2020-10-17T15:26:29
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -464,7 +442,7 @@
 ---
 -
     timestamp: >-
-        2020-10-16T23:05:43
+        2020-10-17T15:26:30
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -486,7 +464,7 @@
 ---
 -
     timestamp: >-
-        2020-10-16T23:05:43
+        2020-10-17T15:26:30
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -508,7 +486,7 @@
 ---
 -
     timestamp: >-
-        2020-10-16T23:05:43
+        2020-10-17T15:26:31
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -530,7 +508,7 @@
 ---
 -
     timestamp: >-
-        2020-10-16T23:05:44
+        2020-10-17T15:26:31
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -552,7 +530,7 @@
 ---
 -
     timestamp: >-
-        2020-10-16T23:05:44
+        2020-10-17T15:26:32
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -574,7 +552,7 @@
 ---
 -
     timestamp: >-
-        2020-10-16T23:05:44
+        2020-10-17T15:26:32
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -596,7 +574,7 @@
 ---
 -
     timestamp: >-
-        2020-10-16T23:05:44
+        2020-10-17T15:26:33
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -618,51 +596,7 @@
 ---
 -
     timestamp: >-
-        2020-10-16T23:05:45
-    unique_id: >-
-        https://doi.org/10.1002/cctc.202000953
-    software_name: >-
-        CheKiPEUQ Bayesian Parameter Estimation
-    version:
-        - >-
-            1.0.0
-    author:
-        - >-
-            Aditya Savara
-        - >-
-            Eric A. Walker
-    doi:
-        - >-
-            https://doi.org/10.1002/cctc.202000953
-    cite:
-        - >-
-            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
----
--
-    timestamp: >-
-        2020-10-16T23:05:45
-    unique_id: >-
-        https://doi.org/10.1002/cctc.202000953
-    software_name: >-
-        CheKiPEUQ Bayesian Parameter Estimation
-    version:
-        - >-
-            1.0.0
-    author:
-        - >-
-            Aditya Savara
-        - >-
-            Eric A. Walker
-    doi:
-        - >-
-            https://doi.org/10.1002/cctc.202000953
-    cite:
-        - >-
-            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
----
--
-    timestamp: >-
-        2020-10-16T23:05:45
+        2020-10-17T15:26:33
     unique_id: >-
         https://doi.org/10.1002/cctc.202000976
     software_name: >-
@@ -685,7 +619,7 @@
             Eric Alan Walker, Kishore Ravisankar, Aditya Savara. CheKiPEUQ Intro 2: Harnessing Uncertainties from Data Sets, Bayesian Design of Experiments in Chemical Kinetics. ChemCatChem. Accepted. doi:10.1002/cctc.202000976
 -
     timestamp: >-
-        2020-10-16T23:05:45
+        2020-10-17T15:26:33
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -707,7 +641,7 @@
 ---
 -
     timestamp: >-
-        2020-10-16T23:05:45
+        2020-10-17T15:26:33
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -729,7 +663,7 @@
 ---
 -
     timestamp: >-
-        2020-10-16T23:05:45
+        2020-10-17T15:26:34
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -751,7 +685,7 @@
 ---
 -
     timestamp: >-
-        2020-10-16T23:05:46
+        2020-10-17T15:26:34
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -773,7 +707,7 @@
 ---
 -
     timestamp: >-
-        2020-10-16T23:05:46
+        2020-10-17T15:26:35
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -795,7 +729,7 @@
 ---
 -
     timestamp: >-
-        2020-10-16T23:05:46
+        2020-10-17T15:26:35
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -817,7 +751,7 @@
 ---
 -
     timestamp: >-
-        2020-10-16T23:05:46
+        2020-10-17T15:26:36
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -839,7 +773,7 @@
 ---
 -
     timestamp: >-
-        2020-10-16T23:05:46
+        2020-10-17T15:26:36
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -861,7 +795,7 @@
 ---
 -
     timestamp: >-
-        2020-10-16T23:05:47
+        2020-10-17T15:26:37
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -883,7 +817,7 @@
 ---
 -
     timestamp: >-
-        2020-10-16T23:05:47
+        2020-10-17T15:26:37
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -905,7 +839,7 @@
 ---
 -
     timestamp: >-
-        2020-10-16T23:05:47
+        2020-10-17T15:26:38
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -927,7 +861,7 @@
 ---
 -
     timestamp: >-
-        2020-10-16T23:05:47
+        2020-10-17T15:26:38
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -949,7 +883,7 @@
 ---
 -
     timestamp: >-
-        2020-10-16T23:05:48
+        2020-10-17T15:26:39
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -971,7 +905,7 @@
 ---
 -
     timestamp: >-
-        2020-10-16T23:05:48
+        2020-10-17T15:26:39
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -993,7 +927,7 @@
 ---
 -
     timestamp: >-
-        2020-10-16T23:05:48
+        2020-10-17T15:26:40
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -1015,7 +949,7 @@
 ---
 -
     timestamp: >-
-        2020-10-16T23:05:48
+        2020-10-17T15:26:41
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -1037,7 +971,7 @@
 ---
 -
     timestamp: >-
-        2020-10-16T23:05:49
+        2020-10-17T15:26:41
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -1059,7 +993,7 @@
 ---
 -
     timestamp: >-
-        2020-10-16T23:05:49
+        2020-10-17T15:26:42
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -1081,7 +1015,7 @@
 ---
 -
     timestamp: >-
-        2020-10-16T23:05:49
+        2020-10-17T15:26:42
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -1103,7 +1037,7 @@
 ---
 -
     timestamp: >-
-        2020-10-16T23:05:49
+        2020-10-17T15:26:43
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -1125,7 +1059,7 @@
 ---
 -
     timestamp: >-
-        2020-10-16T23:05:50
+        2020-10-17T15:26:43
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -1147,7 +1081,7 @@
 ---
 -
     timestamp: >-
-        2020-10-16T23:05:50
+        2020-10-17T15:26:44
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -1169,7 +1103,7 @@
 ---
 -
     timestamp: >-
-        2020-10-16T23:05:50
+        2020-10-17T15:26:44
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -1191,7 +1125,7 @@
 ---
 -
     timestamp: >-
-        2020-10-16T23:05:51
+        2020-10-17T15:26:45
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -1213,7 +1147,7 @@
 ---
 -
     timestamp: >-
-        2020-10-16T23:05:51
+        2020-10-17T15:26:45
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -1235,51 +1169,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:44:11
-    unique_id: >-
-        https://doi.org/10.1002/cctc.202000953
-    software_name: >-
-        CheKiPEUQ Bayesian Parameter Estimation
-    version:
-        - >-
-            1.0.0
-    author:
-        - >-
-            Aditya Savara
-        - >-
-            Eric A. Walker
-    doi:
-        - >-
-            https://doi.org/10.1002/cctc.202000953
-    cite:
-        - >-
-            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
----
--
-    timestamp: >-
-        2020-10-17T00:44:12
-    unique_id: >-
-        https://doi.org/10.1002/cctc.202000953
-    software_name: >-
-        CheKiPEUQ Bayesian Parameter Estimation
-    version:
-        - >-
-            1.0.0
-    author:
-        - >-
-            Aditya Savara
-        - >-
-            Eric A. Walker
-    doi:
-        - >-
-            https://doi.org/10.1002/cctc.202000953
-    cite:
-        - >-
-            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
----
--
-    timestamp: >-
-        2020-10-17T00:44:12
+        2020-10-17T15:26:46
     unique_id: >-
         https://doi.org/10.1002/cctc.202000976
     software_name: >-
@@ -1302,7 +1192,7 @@
             Eric Alan Walker, Kishore Ravisankar, Aditya Savara. CheKiPEUQ Intro 2: Harnessing Uncertainties from Data Sets, Bayesian Design of Experiments in Chemical Kinetics. ChemCatChem. Accepted. doi:10.1002/cctc.202000976
 -
     timestamp: >-
-        2020-10-17T00:44:12
+        2020-10-17T15:26:46
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -1324,7 +1214,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:44:12
+        2020-10-17T15:26:46
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -1346,7 +1236,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:44:12
+        2020-10-17T15:26:47
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -1368,7 +1258,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:44:13
+        2020-10-17T15:26:48
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -1390,7 +1280,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:44:13
+        2020-10-17T15:26:48
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -1412,7 +1302,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:44:13
+        2020-10-17T15:26:49
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -1434,7 +1324,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:44:13
+        2020-10-17T15:26:49
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -1456,7 +1346,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:44:14
+        2020-10-17T15:26:50
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -1478,7 +1368,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:44:14
+        2020-10-17T15:26:51
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -1500,7 +1390,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:44:14
+        2020-10-17T15:26:51
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -1522,7 +1412,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:44:14
+        2020-10-17T15:26:52
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -1544,7 +1434,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:44:15
+        2020-10-17T15:26:52
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -1566,7 +1456,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:44:15
+        2020-10-17T15:26:53
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -1588,7 +1478,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:44:15
+        2020-10-17T15:26:53
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -1610,7 +1500,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:44:15
+        2020-10-17T15:26:54
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -1632,7 +1522,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:44:16
+        2020-10-17T15:26:54
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -1654,7 +1544,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:44:16
+        2020-10-17T15:26:55
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -1676,7 +1566,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:44:16
+        2020-10-17T15:26:55
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -1698,7 +1588,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:44:17
+        2020-10-17T15:26:56
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -1720,7 +1610,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:44:17
+        2020-10-17T15:26:57
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -1742,7 +1632,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:44:17
+        2020-10-17T15:26:58
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -1764,7 +1654,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:44:17
+        2020-10-17T15:26:58
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -1786,7 +1676,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:44:18
+        2020-10-17T15:26:59
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -1808,7 +1698,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:44:18
+        2020-10-17T15:26:59
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -1830,7 +1720,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:44:18
+        2020-10-17T15:27:00
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -1852,51 +1742,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:44:19
-    unique_id: >-
-        https://doi.org/10.1002/cctc.202000953
-    software_name: >-
-        CheKiPEUQ Bayesian Parameter Estimation
-    version:
-        - >-
-            1.0.0
-    author:
-        - >-
-            Aditya Savara
-        - >-
-            Eric A. Walker
-    doi:
-        - >-
-            https://doi.org/10.1002/cctc.202000953
-    cite:
-        - >-
-            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
----
--
-    timestamp: >-
-        2020-10-17T00:44:19
-    unique_id: >-
-        https://doi.org/10.1002/cctc.202000953
-    software_name: >-
-        CheKiPEUQ Bayesian Parameter Estimation
-    version:
-        - >-
-            1.0.0
-    author:
-        - >-
-            Aditya Savara
-        - >-
-            Eric A. Walker
-    doi:
-        - >-
-            https://doi.org/10.1002/cctc.202000953
-    cite:
-        - >-
-            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
----
--
-    timestamp: >-
-        2020-10-17T00:44:19
+        2020-10-17T15:27:01
     unique_id: >-
         https://doi.org/10.1002/cctc.202000976
     software_name: >-
@@ -1919,7 +1765,7 @@
             Eric Alan Walker, Kishore Ravisankar, Aditya Savara. CheKiPEUQ Intro 2: Harnessing Uncertainties from Data Sets, Bayesian Design of Experiments in Chemical Kinetics. ChemCatChem. Accepted. doi:10.1002/cctc.202000976
 -
     timestamp: >-
-        2020-10-17T00:44:19
+        2020-10-17T15:27:01
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -1941,7 +1787,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:44:20
+        2020-10-17T15:27:02
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -1963,7 +1809,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:44:20
+        2020-10-17T15:27:02
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -1985,7 +1831,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:44:20
+        2020-10-17T15:27:03
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -2007,7 +1853,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:44:21
+        2020-10-17T15:27:04
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -2029,7 +1875,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:44:21
+        2020-10-17T15:27:04
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -2051,7 +1897,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:44:21
+        2020-10-17T15:27:05
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -2073,7 +1919,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:44:22
+        2020-10-17T15:27:06
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -2095,7 +1941,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:44:22
+        2020-10-17T15:27:07
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -2117,7 +1963,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:44:23
+        2020-10-17T15:27:08
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -2139,7 +1985,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:44:23
+        2020-10-17T15:27:08
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -2161,7 +2007,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:44:23
+        2020-10-17T15:27:09
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -2183,7 +2029,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:44:24
+        2020-10-17T15:27:10
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -2205,7 +2051,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:44:24
+        2020-10-17T15:27:11
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -2227,7 +2073,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:44:24
+        2020-10-17T15:27:12
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -2249,7 +2095,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:44:25
+        2020-10-17T15:27:13
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -2271,7 +2117,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:44:25
+        2020-10-17T15:27:14
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -2293,7 +2139,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:44:26
+        2020-10-17T15:27:14
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -2315,7 +2161,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:44:26
+        2020-10-17T15:27:15
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -2337,7 +2183,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:44:26
+        2020-10-17T15:27:16
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -2359,7 +2205,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:44:27
+        2020-10-17T15:27:16
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -2381,7 +2227,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:44:27
+        2020-10-17T15:27:17
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -2403,7 +2249,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:44:28
+        2020-10-17T15:27:18
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -2425,7 +2271,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:44:28
+        2020-10-17T15:27:18
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -2447,7 +2293,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:44:28
+        2020-10-17T15:27:19
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -2469,51 +2315,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:51:26
-    unique_id: >-
-        https://doi.org/10.1002/cctc.202000953
-    software_name: >-
-        CheKiPEUQ Bayesian Parameter Estimation
-    version:
-        - >-
-            1.0.0
-    author:
-        - >-
-            Aditya Savara
-        - >-
-            Eric A. Walker
-    doi:
-        - >-
-            https://doi.org/10.1002/cctc.202000953
-    cite:
-        - >-
-            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
----
--
-    timestamp: >-
-        2020-10-17T00:51:27
-    unique_id: >-
-        https://doi.org/10.1002/cctc.202000953
-    software_name: >-
-        CheKiPEUQ Bayesian Parameter Estimation
-    version:
-        - >-
-            1.0.0
-    author:
-        - >-
-            Aditya Savara
-        - >-
-            Eric A. Walker
-    doi:
-        - >-
-            https://doi.org/10.1002/cctc.202000953
-    cite:
-        - >-
-            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
----
--
-    timestamp: >-
-        2020-10-17T00:51:27
+        2020-10-17T15:27:20
     unique_id: >-
         https://doi.org/10.1002/cctc.202000976
     software_name: >-
@@ -2536,7 +2338,7 @@
             Eric Alan Walker, Kishore Ravisankar, Aditya Savara. CheKiPEUQ Intro 2: Harnessing Uncertainties from Data Sets, Bayesian Design of Experiments in Chemical Kinetics. ChemCatChem. Accepted. doi:10.1002/cctc.202000976
 -
     timestamp: >-
-        2020-10-17T00:51:27
+        2020-10-17T15:27:20
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -2558,7 +2360,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:51:27
+        2020-10-17T15:27:21
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -2580,7 +2382,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:51:28
+        2020-10-17T15:27:21
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -2602,7 +2404,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:51:28
+        2020-10-17T15:27:22
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -2624,7 +2426,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:51:28
+        2020-10-17T15:27:23
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -2646,7 +2448,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:51:29
+        2020-10-17T15:27:23
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -2668,7 +2470,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:51:29
+        2020-10-17T15:27:24
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -2690,7 +2492,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:51:30
+        2020-10-17T15:27:25
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -2712,7 +2514,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:51:30
+        2020-10-17T15:27:25
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -2734,7 +2536,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:51:31
+        2020-10-17T15:27:26
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -2756,7 +2558,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:51:31
+        2020-10-17T15:27:27
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -2778,7 +2580,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:51:32
+        2020-10-17T15:27:28
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -2800,7 +2602,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:51:32
+        2020-10-17T15:27:29
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -2822,7 +2624,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:51:32
+        2020-10-17T15:27:30
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -2844,7 +2646,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:51:33
+        2020-10-17T15:27:30
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -2866,7 +2668,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:51:33
+        2020-10-17T15:27:31
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -2888,7 +2690,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:51:34
+        2020-10-17T15:27:32
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -2910,7 +2712,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:51:35
+        2020-10-17T15:27:33
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -2932,7 +2734,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:51:35
+        2020-10-17T15:27:33
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -2954,7 +2756,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:51:35
+        2020-10-17T15:27:34
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -2976,7 +2778,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:51:36
+        2020-10-17T15:27:35
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -2998,7 +2800,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:51:36
+        2020-10-17T15:27:36
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -3020,7 +2822,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:51:37
+        2020-10-17T15:27:37
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -3042,7 +2844,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:51:37
+        2020-10-17T15:27:37
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -3064,7 +2866,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:51:38
+        2020-10-17T15:27:38
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -3086,51 +2888,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:51:38
-    unique_id: >-
-        https://doi.org/10.1002/cctc.202000953
-    software_name: >-
-        CheKiPEUQ Bayesian Parameter Estimation
-    version:
-        - >-
-            1.0.0
-    author:
-        - >-
-            Aditya Savara
-        - >-
-            Eric A. Walker
-    doi:
-        - >-
-            https://doi.org/10.1002/cctc.202000953
-    cite:
-        - >-
-            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
----
--
-    timestamp: >-
-        2020-10-17T00:51:39
-    unique_id: >-
-        https://doi.org/10.1002/cctc.202000953
-    software_name: >-
-        CheKiPEUQ Bayesian Parameter Estimation
-    version:
-        - >-
-            1.0.0
-    author:
-        - >-
-            Aditya Savara
-        - >-
-            Eric A. Walker
-    doi:
-        - >-
-            https://doi.org/10.1002/cctc.202000953
-    cite:
-        - >-
-            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
----
--
-    timestamp: >-
-        2020-10-17T00:51:39
+        2020-10-17T15:27:39
     unique_id: >-
         https://doi.org/10.1002/cctc.202000976
     software_name: >-
@@ -3153,7 +2911,7 @@
             Eric Alan Walker, Kishore Ravisankar, Aditya Savara. CheKiPEUQ Intro 2: Harnessing Uncertainties from Data Sets, Bayesian Design of Experiments in Chemical Kinetics. ChemCatChem. Accepted. doi:10.1002/cctc.202000976
 -
     timestamp: >-
-        2020-10-17T00:51:39
+        2020-10-17T15:27:39
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -3175,7 +2933,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:51:40
+        2020-10-17T15:27:40
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -3197,7 +2955,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:51:40
+        2020-10-17T15:27:41
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -3219,7 +2977,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:51:40
+        2020-10-17T15:27:42
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -3241,7 +2999,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:51:41
+        2020-10-17T15:27:43
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -3263,7 +3021,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:51:41
+        2020-10-17T15:27:45
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -3285,7 +3043,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:51:42
+        2020-10-17T15:27:46
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -3307,7 +3065,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:51:42
+        2020-10-17T15:27:47
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -3329,7 +3087,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:51:43
+        2020-10-17T15:27:48
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -3351,7 +3109,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:51:43
+        2020-10-17T15:27:49
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -3373,7 +3131,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:51:43
+        2020-10-17T15:27:50
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -3395,7 +3153,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:51:44
+        2020-10-17T15:27:51
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -3417,7 +3175,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:51:44
+        2020-10-17T15:27:52
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -3439,7 +3197,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:51:45
+        2020-10-17T15:27:54
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -3461,7 +3219,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:51:45
+        2020-10-17T15:27:55
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -3483,7 +3241,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:51:46
+        2020-10-17T15:27:56
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -3505,7 +3263,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:51:46
+        2020-10-17T15:27:57
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -3527,7 +3285,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:51:47
+        2020-10-17T15:27:59
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -3549,7 +3307,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:51:47
+        2020-10-17T15:28:00
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -3571,7 +3329,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:51:47
+        2020-10-17T15:28:01
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -3593,7 +3351,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:51:48
+        2020-10-17T15:28:02
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -3615,7 +3373,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:51:48
+        2020-10-17T15:28:03
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -3637,7 +3395,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:51:49
+        2020-10-17T15:28:04
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -3659,7 +3417,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:51:49
+        2020-10-17T15:28:05
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -3681,7 +3439,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T00:51:50
+        2020-10-17T15:28:07
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -3703,51 +3461,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T12:55:39
-    unique_id: >-
-        https://doi.org/10.1002/cctc.202000953
-    software_name: >-
-        CheKiPEUQ Bayesian Parameter Estimation
-    version:
-        - >-
-            1.0.0
-    author:
-        - >-
-            Aditya Savara
-        - >-
-            Eric A. Walker
-    doi:
-        - >-
-            https://doi.org/10.1002/cctc.202000953
-    cite:
-        - >-
-            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
----
--
-    timestamp: >-
-        2020-10-17T12:55:39
-    unique_id: >-
-        https://doi.org/10.1002/cctc.202000953
-    software_name: >-
-        CheKiPEUQ Bayesian Parameter Estimation
-    version:
-        - >-
-            1.0.0
-    author:
-        - >-
-            Aditya Savara
-        - >-
-            Eric A. Walker
-    doi:
-        - >-
-            https://doi.org/10.1002/cctc.202000953
-    cite:
-        - >-
-            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
----
--
-    timestamp: >-
-        2020-10-17T12:55:39
+        2020-10-17T15:28:08
     unique_id: >-
         https://doi.org/10.1002/cctc.202000976
     software_name: >-
@@ -3770,7 +3484,7 @@
             Eric Alan Walker, Kishore Ravisankar, Aditya Savara. CheKiPEUQ Intro 2: Harnessing Uncertainties from Data Sets, Bayesian Design of Experiments in Chemical Kinetics. ChemCatChem. Accepted. doi:10.1002/cctc.202000976
 -
     timestamp: >-
-        2020-10-17T12:55:39
+        2020-10-17T15:28:08
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -3792,7 +3506,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T12:55:40
+        2020-10-17T15:28:09
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -3814,7 +3528,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T12:55:40
+        2020-10-17T15:28:10
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -3836,7 +3550,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T12:55:41
+        2020-10-17T15:28:12
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -3858,7 +3572,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T12:55:41
+        2020-10-17T15:28:13
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -3880,7 +3594,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T12:55:42
+        2020-10-17T15:28:14
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -3902,7 +3616,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T12:55:42
+        2020-10-17T15:28:15
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -3924,7 +3638,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T12:55:43
+        2020-10-17T15:28:16
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -3946,7 +3660,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T12:55:43
+        2020-10-17T15:28:17
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -3968,7 +3682,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T12:55:44
+        2020-10-17T15:28:19
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -3990,7 +3704,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T12:55:44
+        2020-10-17T15:28:20
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -4012,7 +3726,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T12:55:45
+        2020-10-17T15:28:21
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -4034,7 +3748,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T12:55:45
+        2020-10-17T15:28:22
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -4056,7 +3770,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T12:55:46
+        2020-10-17T15:28:23
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -4078,7 +3792,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T12:55:46
+        2020-10-17T15:28:24
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -4100,7 +3814,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T12:55:47
+        2020-10-17T15:28:26
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -4122,7 +3836,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T12:55:47
+        2020-10-17T15:28:27
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -4144,7 +3858,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T12:55:48
+        2020-10-17T15:28:28
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -4166,7 +3880,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T12:55:48
+        2020-10-17T15:28:29
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -4188,7 +3902,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T12:55:49
+        2020-10-17T15:28:30
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -4210,7 +3924,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T12:55:49
+        2020-10-17T15:28:31
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -4232,7 +3946,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T12:55:50
+        2020-10-17T15:28:33
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -4254,7 +3968,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T12:55:50
+        2020-10-17T15:28:34
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -4276,7 +3990,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T12:55:51
+        2020-10-17T15:28:36
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -4298,7 +4012,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T12:55:51
+        2020-10-17T15:28:37
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -4320,51 +4034,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T12:55:52
-    unique_id: >-
-        https://doi.org/10.1002/cctc.202000953
-    software_name: >-
-        CheKiPEUQ Bayesian Parameter Estimation
-    version:
-        - >-
-            1.0.0
-    author:
-        - >-
-            Aditya Savara
-        - >-
-            Eric A. Walker
-    doi:
-        - >-
-            https://doi.org/10.1002/cctc.202000953
-    cite:
-        - >-
-            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
----
--
-    timestamp: >-
-        2020-10-17T12:55:52
-    unique_id: >-
-        https://doi.org/10.1002/cctc.202000953
-    software_name: >-
-        CheKiPEUQ Bayesian Parameter Estimation
-    version:
-        - >-
-            1.0.0
-    author:
-        - >-
-            Aditya Savara
-        - >-
-            Eric A. Walker
-    doi:
-        - >-
-            https://doi.org/10.1002/cctc.202000953
-    cite:
-        - >-
-            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
----
--
-    timestamp: >-
-        2020-10-17T12:55:53
+        2020-10-17T15:28:38
     unique_id: >-
         https://doi.org/10.1002/cctc.202000976
     software_name: >-
@@ -4387,7 +4057,7 @@
             Eric Alan Walker, Kishore Ravisankar, Aditya Savara. CheKiPEUQ Intro 2: Harnessing Uncertainties from Data Sets, Bayesian Design of Experiments in Chemical Kinetics. ChemCatChem. Accepted. doi:10.1002/cctc.202000976
 -
     timestamp: >-
-        2020-10-17T12:55:53
+        2020-10-17T15:28:38
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -4409,7 +4079,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T12:55:53
+        2020-10-17T15:28:39
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -4431,7 +4101,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T12:55:54
+        2020-10-17T15:28:40
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -4453,7 +4123,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T12:55:54
+        2020-10-17T15:28:41
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -4475,7 +4145,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T12:55:55
+        2020-10-17T15:28:42
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -4497,7 +4167,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T12:55:56
+        2020-10-17T15:28:43
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -4519,7 +4189,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T12:55:56
+        2020-10-17T15:28:44
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -4541,7 +4211,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T12:55:57
+        2020-10-17T15:28:44
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -4563,7 +4233,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T12:55:57
+        2020-10-17T15:28:45
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -4585,7 +4255,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T12:55:58
+        2020-10-17T15:28:46
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -4607,7 +4277,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T12:55:59
+        2020-10-17T15:28:47
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -4629,7 +4299,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T12:55:59
+        2020-10-17T15:28:48
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -4651,7 +4321,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T12:56:00
+        2020-10-17T15:28:49
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -4673,7 +4343,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T12:56:00
+        2020-10-17T15:28:50
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -4695,7 +4365,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T12:56:01
+        2020-10-17T15:28:51
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -4717,7 +4387,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T12:56:02
+        2020-10-17T15:28:52
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -4739,7 +4409,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T12:56:02
+        2020-10-17T15:28:54
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -4761,7 +4431,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T12:56:03
+        2020-10-17T15:28:55
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -4783,7 +4453,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T12:56:03
+        2020-10-17T15:28:56
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -4805,7 +4475,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T12:56:04
+        2020-10-17T15:28:57
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -4827,7 +4497,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T12:56:04
+        2020-10-17T15:28:59
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -4849,7 +4519,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T12:56:05
+        2020-10-17T15:29:00
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -4871,7 +4541,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T12:56:06
+        2020-10-17T15:29:01
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -4893,7 +4563,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T12:56:06
+        2020-10-17T15:29:02
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -4915,7 +4585,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T12:56:07
+        2020-10-17T15:29:03
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -4937,73 +4607,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T15:05:47
-    unique_id: >-
-        https://doi.org/10.1002/cctc.202000953
-    software_name: >-
-        CheKiPEUQ Bayesian Parameter Estimation
-    version:
-        - >-
-            1.0.0
-    author:
-        - >-
-            Aditya Savara
-        - >-
-            Eric A. Walker
-    doi:
-        - >-
-            https://doi.org/10.1002/cctc.202000953
-    cite:
-        - >-
-            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
----
--
-    timestamp: >-
-        2020-10-17T15:06:36
-    unique_id: >-
-        https://doi.org/10.1002/cctc.202000953
-    software_name: >-
-        CheKiPEUQ Bayesian Parameter Estimation
-    version:
-        - >-
-            1.0.0
-    author:
-        - >-
-            Aditya Savara
-        - >-
-            Eric A. Walker
-    doi:
-        - >-
-            https://doi.org/10.1002/cctc.202000953
-    cite:
-        - >-
-            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
----
--
-    timestamp: >-
-        2020-10-17T15:06:36
-    unique_id: >-
-        https://doi.org/10.1002/cctc.202000953
-    software_name: >-
-        CheKiPEUQ Bayesian Parameter Estimation
-    version:
-        - >-
-            1.0.0
-    author:
-        - >-
-            Aditya Savara
-        - >-
-            Eric A. Walker
-    doi:
-        - >-
-            https://doi.org/10.1002/cctc.202000953
-    cite:
-        - >-
-            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
----
--
-    timestamp: >-
-        2020-10-17T15:06:37
+        2020-10-17T15:29:04
     unique_id: >-
         https://doi.org/10.1002/cctc.202000976
     software_name: >-
@@ -5026,7 +4630,7 @@
             Eric Alan Walker, Kishore Ravisankar, Aditya Savara. CheKiPEUQ Intro 2: Harnessing Uncertainties from Data Sets, Bayesian Design of Experiments in Chemical Kinetics. ChemCatChem. Accepted. doi:10.1002/cctc.202000976
 -
     timestamp: >-
-        2020-10-17T15:06:37
+        2020-10-17T15:29:04
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -5048,7 +4652,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T15:06:37
+        2020-10-17T15:29:05
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -5070,7 +4674,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T15:06:38
+        2020-10-17T15:29:06
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -5092,7 +4696,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T15:06:38
+        2020-10-17T15:29:07
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -5114,7 +4718,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T15:06:39
+        2020-10-17T15:29:08
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -5136,7 +4740,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T15:06:40
+        2020-10-17T15:29:09
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -5158,7 +4762,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T15:06:40
+        2020-10-17T15:29:10
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -5180,7 +4784,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T15:06:41
+        2020-10-17T15:29:11
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -5202,7 +4806,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T15:06:42
+        2020-10-17T15:29:12
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -5224,7 +4828,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T15:06:43
+        2020-10-17T15:29:14
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -5246,7 +4850,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T15:06:43
+        2020-10-17T15:29:15
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -5268,7 +4872,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T15:06:44
+        2020-10-17T15:29:17
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -5290,7 +4894,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T15:06:45
+        2020-10-17T15:29:18
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -5312,7 +4916,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T15:06:46
+        2020-10-17T15:29:19
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -5334,7 +4938,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T15:06:47
+        2020-10-17T15:29:21
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -5356,7 +4960,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T15:06:47
+        2020-10-17T15:29:22
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -5378,7 +4982,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T15:06:47
+        2020-10-17T15:29:25
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -5400,7 +5004,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T15:06:48
+        2020-10-17T15:29:26
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -5422,7 +5026,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T15:06:48
+        2020-10-17T15:29:27
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -5444,7 +5048,161 @@
 ---
 -
     timestamp: >-
-        2020-10-17T15:06:48
+        2020-10-17T15:29:29
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:29:30
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:29:32
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:29:33
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:29:34
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:29:36
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:29:41
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:29:42
     unique_id: >-
         https://doi.org/10.1002/cctc.202000976
     software_name: >-
@@ -5467,7 +5225,7 @@
             Eric Alan Walker, Kishore Ravisankar, Aditya Savara. CheKiPEUQ Intro 2: Harnessing Uncertainties from Data Sets, Bayesian Design of Experiments in Chemical Kinetics. ChemCatChem. Accepted. doi:10.1002/cctc.202000976
 -
     timestamp: >-
-        2020-10-17T15:06:48
+        2020-10-17T15:29:42
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -5489,7 +5247,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T15:06:49
+        2020-10-17T15:29:43
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -5511,7 +5269,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T15:06:49
+        2020-10-17T15:29:44
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -5533,7 +5291,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T15:06:50
+        2020-10-17T15:29:45
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -5555,7 +5313,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T15:06:50
+        2020-10-17T15:29:46
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -5577,7 +5335,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T15:06:50
+        2020-10-17T15:29:48
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -5599,7 +5357,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T15:06:50
+        2020-10-17T15:29:49
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -5621,7 +5379,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T15:06:51
+        2020-10-17T15:29:50
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -5643,7 +5401,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T15:06:51
+        2020-10-17T15:29:51
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -5665,7 +5423,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T15:06:52
+        2020-10-17T15:29:52
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -5687,7 +5445,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T15:06:52
+        2020-10-17T15:29:54
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -5709,7 +5467,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T15:06:53
+        2020-10-17T15:29:55
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -5731,7 +5489,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T15:06:53
+        2020-10-17T15:29:56
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -5753,7 +5511,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T15:06:53
+        2020-10-17T15:29:57
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -5775,7 +5533,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T15:06:53
+        2020-10-17T15:29:58
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -5797,7 +5555,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T15:06:54
+        2020-10-17T15:29:59
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -5819,7 +5577,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T15:06:54
+        2020-10-17T15:30:01
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -5841,7 +5599,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T15:06:55
+        2020-10-17T15:30:02
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -5863,7 +5621,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T15:06:56
+        2020-10-17T15:30:03
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -5885,7 +5643,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T15:06:57
+        2020-10-17T15:30:04
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -5907,7 +5665,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T15:06:58
+        2020-10-17T15:30:06
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -5929,7 +5687,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T15:07:00
+        2020-10-17T15:30:07
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -5951,7 +5709,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T15:07:01
+        2020-10-17T15:30:08
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -5973,7 +5731,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T15:07:01
+        2020-10-17T15:30:09
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -5995,7 +5753,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T15:07:02
+        2020-10-17T15:30:10
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -6017,7 +5775,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T15:07:03
+        2020-10-17T15:31:34
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -6039,7 +5797,30 @@
 ---
 -
     timestamp: >-
-        2020-10-17T15:07:04
+        2020-10-17T15:31:34
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000976
+    software_name: >-
+        CheKiPEUQ Bayesian Design of Experiments
+    version:
+        - >-
+            1.0.2
+    author:
+        - >-
+            Eric A. Walker
+        - >-
+            Kishore Ravisankar
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000976
+    cite:
+        - >-
+            Eric Alan Walker, Kishore Ravisankar, Aditya Savara. CheKiPEUQ Intro 2: Harnessing Uncertainties from Data Sets, Bayesian Design of Experiments in Chemical Kinetics. ChemCatChem. Accepted. doi:10.1002/cctc.202000976
+-
+    timestamp: >-
+        2020-10-17T15:31:34
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -6061,7 +5842,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T15:07:05
+        2020-10-17T15:31:35
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -6083,7 +5864,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T15:07:06
+        2020-10-17T15:31:36
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -6105,7 +5886,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T15:07:07
+        2020-10-17T15:31:37
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -6127,7 +5908,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T15:07:07
+        2020-10-17T15:31:38
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -6149,7 +5930,7 @@
 ---
 -
     timestamp: >-
-        2020-10-17T15:07:08
+        2020-10-17T15:31:39
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
@@ -6171,7 +5952,3026 @@
 ---
 -
     timestamp: >-
-        2020-10-17T15:07:09
+        2020-10-17T15:31:40
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:31:40
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:31:41
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:31:42
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:31:43
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:31:44
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:31:45
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:31:46
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:31:47
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:31:48
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:31:49
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:31:50
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:31:51
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:31:52
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:31:53
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:31:54
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:31:54
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:31:55
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:31:56
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:31:57
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000976
+    software_name: >-
+        CheKiPEUQ Bayesian Design of Experiments
+    version:
+        - >-
+            1.0.2
+    author:
+        - >-
+            Eric A. Walker
+        - >-
+            Kishore Ravisankar
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000976
+    cite:
+        - >-
+            Eric Alan Walker, Kishore Ravisankar, Aditya Savara. CheKiPEUQ Intro 2: Harnessing Uncertainties from Data Sets, Bayesian Design of Experiments in Chemical Kinetics. ChemCatChem. Accepted. doi:10.1002/cctc.202000976
+-
+    timestamp: >-
+        2020-10-17T15:31:57
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:31:58
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:31:59
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:32:00
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:32:01
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:32:02
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:32:03
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:32:04
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:32:04
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:32:05
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:32:06
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:32:08
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:32:09
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:32:10
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:32:11
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:32:12
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:32:14
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:32:15
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:32:18
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:32:21
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:32:23
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:32:25
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:32:27
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:32:29
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:32:32
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:32:34
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000976
+    software_name: >-
+        CheKiPEUQ Bayesian Design of Experiments
+    version:
+        - >-
+            1.0.2
+    author:
+        - >-
+            Eric A. Walker
+        - >-
+            Kishore Ravisankar
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000976
+    cite:
+        - >-
+            Eric Alan Walker, Kishore Ravisankar, Aditya Savara. CheKiPEUQ Intro 2: Harnessing Uncertainties from Data Sets, Bayesian Design of Experiments in Chemical Kinetics. ChemCatChem. Accepted. doi:10.1002/cctc.202000976
+-
+    timestamp: >-
+        2020-10-17T15:32:34
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:32:35
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:32:36
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:32:37
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:32:38
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:32:39
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:32:40
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:32:41
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:32:42
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:32:43
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:32:44
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:32:45
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:32:46
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:32:47
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:32:48
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:32:50
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:32:51
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:32:52
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:32:53
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:32:54
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:32:56
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:32:57
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:32:58
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:32:59
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:33:00
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:33:01
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000976
+    software_name: >-
+        CheKiPEUQ Bayesian Design of Experiments
+    version:
+        - >-
+            1.0.2
+    author:
+        - >-
+            Eric A. Walker
+        - >-
+            Kishore Ravisankar
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000976
+    cite:
+        - >-
+            Eric Alan Walker, Kishore Ravisankar, Aditya Savara. CheKiPEUQ Intro 2: Harnessing Uncertainties from Data Sets, Bayesian Design of Experiments in Chemical Kinetics. ChemCatChem. Accepted. doi:10.1002/cctc.202000976
+-
+    timestamp: >-
+        2020-10-17T15:33:01
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:33:03
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:33:04
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:33:05
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:33:06
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:33:07
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:33:08
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:33:10
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:33:12
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:33:13
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:33:15
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:33:16
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:33:17
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:33:19
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:33:20
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:33:21
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:33:22
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:33:23
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:33:24
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:33:26
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:33:27
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:33:28
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:33:29
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:33:30
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:33:31
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:33:32
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000976
+    software_name: >-
+        CheKiPEUQ Bayesian Design of Experiments
+    version:
+        - >-
+            1.0.2
+    author:
+        - >-
+            Eric A. Walker
+        - >-
+            Kishore Ravisankar
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000976
+    cite:
+        - >-
+            Eric Alan Walker, Kishore Ravisankar, Aditya Savara. CheKiPEUQ Intro 2: Harnessing Uncertainties from Data Sets, Bayesian Design of Experiments in Chemical Kinetics. ChemCatChem. Accepted. doi:10.1002/cctc.202000976
+-
+    timestamp: >-
+        2020-10-17T15:33:32
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:33:34
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:33:35
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:33:36
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:33:37
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:33:39
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:33:40
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:33:41
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:33:42
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:33:43
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:33:45
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:33:46
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:33:47
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:33:49
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:33:50
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:33:51
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:33:53
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:33:54
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:33:56
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:33:57
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:33:59
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:34:00
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:34:01
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:34:03
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:34:05
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:34:06
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000976
+    software_name: >-
+        CheKiPEUQ Bayesian Design of Experiments
+    version:
+        - >-
+            1.0.2
+    author:
+        - >-
+            Eric A. Walker
+        - >-
+            Kishore Ravisankar
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000976
+    cite:
+        - >-
+            Eric Alan Walker, Kishore Ravisankar, Aditya Savara. CheKiPEUQ Intro 2: Harnessing Uncertainties from Data Sets, Bayesian Design of Experiments in Chemical Kinetics. ChemCatChem. Accepted. doi:10.1002/cctc.202000976
+-
+    timestamp: >-
+        2020-10-17T15:34:06
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:34:08
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:34:09
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:34:11
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:34:12
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:34:13
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:34:14
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:34:16
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:34:17
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:34:19
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:34:20
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:34:21
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:34:23
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T15:34:25
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-

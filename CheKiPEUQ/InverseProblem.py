@@ -784,7 +784,7 @@ class parameter_estimation:
             if doe_settings['on_the_fly_conditions_grids'] == True:
                 conditionsGridPermutations, numPermutations = self.getGridPermutations(doe_settings['independent_variable_grid_center'], doe_settings['independent_variable_grid_interval_size'], doe_settings['independent_variable_grid_num_intervals'])
             #Here is the loop across conditions.                
-            for conditionsPermutationIndex,conditionsCombination in enumerate(conditionsGridPermutations):    
+            for conditionsPermutationIndex,conditionsPermutation in enumerate(conditionsGridPermutations):    
                 #####Begin ChekIPEUQ Parallel Processing During Loop Block####
                 if (self.UserInput.doe_settings['parallel_conditions_exploration'])== True:
                     #We will only execute the sampling the permutationIndex matches the processor rank.
@@ -801,20 +801,20 @@ class parameter_estimation:
                 #It is absolutely critical that we *do not* use syntax like self.UserInput.responses['independent_variables_values'] = xxxx
                 #Because that would move where the pointer is going to. We need to instead populate the individual values in the simulation module's namespace.
                 #This population Must occur here. It has to be after the indpendent variables have changed, before synthetic data is made, and before the MCMC is performed.
-                self.UserInput.model['populateIndependentVariablesFunction'](conditionsCombination)
+                self.UserInput.model['populateIndependentVariablesFunction'](conditionsPermutation)
                 self.populateResponsesWithSyntheticData(parameterCombination)
                 if searchType=='doMetropolisHastings':
                     [map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, logP] = self.doMetropolisHastings()
                 if searchType=='doEnsembleSliceSampling':
                     [map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, logP] = self.doEnsembleSliceSampling()
-                conditionsCombination = np.array(conditionsCombination) #we're going to make this an array before adding to the info_gain matrix.
-                conditionsCombinationAndInfoGain = np.hstack((conditionsCombination, info_gain))
-                info_gain_matrix.append(conditionsCombinationAndInfoGain)
+                conditionsPermutation = np.array(conditionsPermutation) #we're going to make this an array before adding to the info_gain matrix.
+                conditionsPermutationAndInfoGain = np.hstack((conditionsPermutation, info_gain))
+                info_gain_matrix.append(conditionsPermutationAndInfoGain)
                 if self.UserInput.doe_settings['info_gains_matrices_multiple_parameters'] == 'each': #copy the above lines for the sum.
                     for parameterIndex in range(0,numParameters):#looping across number of parameters...
-                        conditionsCombinationAndInfoGain = np.hstack((conditionsCombination, np.array(self.info_gain_each_parameter[parameterIndex]))) #Need to pull the info gain matrix from the nested objected named info_gain_each_parameter
-                        #Below mimics the line above which reads info_gain_matrix.append(conditionsCombinationAndInfoGain)
-                        info_gain_matrices_each_parameter[parameterIndex].append(conditionsCombinationAndInfoGain)
+                        conditionsPermutationAndInfoGain = np.hstack((conditionsPermutation, np.array(self.info_gain_each_parameter[parameterIndex]))) #Need to pull the info gain matrix from the nested objected named info_gain_each_parameter
+                        #Below mimics the line above which reads info_gain_matrix.append(conditionsPermutationAndInfoGain)
+                        info_gain_matrices_each_parameter[parameterIndex].append(conditionsPermutationAndInfoGain)
             self.info_gain_matrix = np.array(info_gain_matrix) #this is an implied return in addition to the real return.
             if self.UserInput.doe_settings['info_gains_matrices_multiple_parameters'] == 'each': #copy the above line for the sum.
                 for parameterIndex in range(0,numParameters):#looping across number of parameters...
@@ -852,14 +852,14 @@ class parameter_estimation:
                             [map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, logP] = self.doMetropolisHastings()
                         if searchType=='doEnsembleSliceSampling':
                             [map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, logP] = self.doEnsembleSliceSampling()
-                        conditionsCombination = np.array([indValue1,indValue2])
-                        conditionsCombinationAndInfoGain = np.hstack((conditionsCombination, info_gain))
-                        info_gain_matrix.append(conditionsCombinationAndInfoGain) #NOTE that the structure *includes* the Permutations.
+                        conditionsPermutation = np.array([indValue1,indValue2])
+                        conditionsPermutationAndInfoGain = np.hstack((conditionsPermutation, info_gain))
+                        info_gain_matrix.append(conditionsPermutationAndInfoGain) #NOTE that the structure *includes* the Permutations.
                         if self.UserInput.doe_settings['info_gains_matrices_multiple_parameters'] == 'each': #copy the above lines for the sum.
                             for parameterIndex in range(0,numParameters):#looping across number of parameters...
-                                conditionsCombinationAndInfoGain = np.hstack((conditionsCombination, np.array(self.info_gain_each_parameter[parameterIndex]))) #Need to pull the info gain matrix from the nested objected named info_gain_each_parameter
-                                #Below mimics the line above which reads info_gain_matrix.append(conditionsCombinationAndInfoGain)
-                                info_gain_matrices_each_parameter[parameterIndex].append(conditionsCombinationAndInfoGain)
+                                conditionsPermutationAndInfoGain = np.hstack((conditionsPermutation, np.array(self.info_gain_each_parameter[parameterIndex]))) #Need to pull the info gain matrix from the nested objected named info_gain_each_parameter
+                                #Below mimics the line above which reads info_gain_matrix.append(conditionsPermutationAndInfoGain)
+                                info_gain_matrices_each_parameter[parameterIndex].append(conditionsPermutationAndInfoGain)
                 self.info_gain_matrix = np.array(info_gain_matrix) #this is an implied return in addition to the real return.
                 if self.UserInput.doe_settings['info_gains_matrices_multiple_parameters'] == 'each': #copy the above line for the sum.
                     for parameterIndex in range(0,numParameters):#looping across number of parameters...
