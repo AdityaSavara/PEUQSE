@@ -779,6 +779,19 @@ class parameter_estimation:
                 conditionsGridPermutations, numPermutations = self.getGridPermutations(doe_settings['independent_variable_grid_center'], doe_settings['independent_variable_grid_interval_size'], doe_settings['independent_variable_grid_num_intervals'])
             #Here is the loop across conditions.                
             for conditionsPermutationIndex,conditionsCombination in enumerate(conditionsGridPermutations):    
+                #####Begin ChekIPEUQ Parallel Processing During Loop Block####
+                if (self.UserInput.doe_settings['parallel_conditions_exploration'])== True:
+                    #We will only execute the sampling the permutationIndex matches the processor rank.
+                    #Additionally, if the rank is 0 and the simulation got here, it will be assumed the person is running this just to find the number of Permutations, so that will be spit out and the simulation ended.
+                    import CheKiPEUQ.parallel_processing
+                    if CheKiPEUQ.parallel_processing.currentProcessorNumber == 0:
+                        print("For the user input settings provided, the number of Permutations+1 will be",  numPermutations+1, ". Please use mpiexec or mpirun with this number for N. If you are not expecting to see this message, change your UserInput choices. You have chosen parallel processing for gridsearch and have run CheKiPEUQ without mpi, which is a procedure to retrieve the number of processor ranks to use for parallelized gridsearch. A typical syntax now would be: mpiexec -n ",  numPermutations+1, " python runfile_for_your_analysis.py" )
+                        sys.exit()
+                    elif CheKiPEUQ.parallel_processing.currentProcessorNumber != conditionsPermutationIndex+1:
+                        continue #This means the permutation index does not match the processor rank so nothing should be executed.
+                    #elif CheKiPEUQ.parallel_processing.currentProcessorNumber == permutationIndex+1:
+                    #    pass  #This is the "normal" case and is implied, so is commented out.
+                #####End ChekIPEUQ Parallel Processing During Loop Block####
                 #It is absolutely critical that we *do not* use syntax like self.UserInput.responses['independent_variables_values'] = xxxx
                 #Because that would move where the pointer is going to. We need to instead populate the individual values in the simulation module's namespace.
                 #This population Must occur here. It has to be after the indpendent variables have changed, before synthetic data is made, and before the MCMC is performed.
@@ -875,6 +888,19 @@ class parameter_estimation:
             for parameterIndex in range(0,numParameters):#looping across number of parameters...
                 info_gains_matrices_lists_one_for_each_parameter.append([]) #These are empty lists create to indices and initialize each parameter's info_gain_matrix. They will be appended to later.
         for parModulationPermutationIndex,parModulationPermutation in enumerate(parModulationGridPermutations):                
+            #####Begin ChekIPEUQ Parallel Processing During Loop Block####
+            if (self.UserInput.doe_settings['parallel_parameter_modulation'])== True:
+                #We will only execute the sampling the permutationIndex matches the processor rank.
+                #Additionally, if the rank is 0 and the simulation got here, it will be assumed the person is running this just to find the number of Permutations, so that will be spit out and the simulation ended.
+                import CheKiPEUQ.parallel_processing
+                if CheKiPEUQ.parallel_processing.currentProcessorNumber == 0:
+                    print("For the user input settings provided, the number of Permutations+1 will be",  numPermutations+1, ". Please use mpiexec or mpirun with this number for N. If you are not expecting to see this message, change your UserInput choices. You have chosen parallel processing for gridsearch and have run CheKiPEUQ without mpi, which is a procedure to retrieve the number of processor ranks to use for parallelized gridsearch. A typical syntax now would be: mpiexec -n ",  numPermutations+1, " python runfile_for_your_analysis.py" )
+                    sys.exit()
+                elif CheKiPEUQ.parallel_processing.currentProcessorNumber != parModulationPermutationIndex+1:
+                    continue #This means the permutation index does not match the processor rank so nothing should be executed.
+                #elif CheKiPEUQ.parallel_processing.currentProcessorNumber == permutationIndex+1:
+                #    pass  #This is the "normal" case and is implied, so is commented out.
+            #####End ChekIPEUQ Parallel Processing During Loop Block####
             #We will get separate info gain matrix for each parameter modulation combination.
             info_gain_matrix = self.doeGetInfoGainMatrix(parModulationPermutation, searchType=searchType)
             #Append the info gain matrix obtainend.
