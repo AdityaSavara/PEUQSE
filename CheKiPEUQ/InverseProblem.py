@@ -51,7 +51,7 @@ class parameter_estimation:
             UserInput.parameter_estimation_settings['multistart_parallel_sampling'] or \
             UserInput.doe_settings['parallel_conditions_exploration'] or  \
             UserInput.doe_settings['parallel_parameter_modulation'] \
-            ) 
+            ) \
             == True:
             UserInput.request_mpi = True
         if UserInput.request_mpi == True: #Rank zero needs to clear out the mpi_log_files directory, so check if we are using rank 0.
@@ -613,6 +613,12 @@ class parameter_estimation:
         bestResultSoFar = self.doListOfPermutationsSearch(gridPermutations, numPermutations = numPermutations, searchType=searchType, exportLog = exportLog, walkerInitialDistribution=walkerInitialDistribution, passThroughArgs=passThroughArgs, calculatePostBurnInStatistics=calculatePostBurnInStatistics,  keep_cumulative_post_burn_in_data = keep_cumulative_post_burn_in_data, centerPoint = gridCenter)
         return bestResultSoFar
 
+    
+    
+    def consolidate_parallel_doe_data(self, parallelizationType="conditions"):
+        #The parallelization type can be "conditions" or can be "parModulations")
+        pass
+    
     def consolidate_parallel_sampling_data(self, parallelizationType="equal"):
         #parallelizationType='equal' means everything will get averaged together. parallelizationType='permutation' will be treated differently, same with parallelizationType='designOfExperiments'
         import CheKiPEUQ.parallel_processing
