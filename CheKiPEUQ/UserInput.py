@@ -73,6 +73,7 @@ parameter_estimation_settings['mcmc_parallel_sampling'] = False #This makes comp
 samplingScatterMatrixPlotsSettings ={}
 
 ######multiStart (including gridsearch)##### 
+#Change multistart_initialPointsDistributionType if gridsearch is desired. 
 parameter_estimation_settings['multistart_checkPointFrequency'] = None #Note: this setting does not work perfectly with ESS.
 parameter_estimation_settings['multistart_parallel_sampling'] = False
 parameter_estimation_settings['multistart_centerPoint'] = None #With None the centerPoint will be taken as model['InputParameterInitialGuess'] 
