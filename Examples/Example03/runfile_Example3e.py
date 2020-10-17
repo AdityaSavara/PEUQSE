@@ -48,8 +48,14 @@ if __name__ == "__main__":
     #[map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, samples_simulatedOutputs, logP] = PE_object.doMetropolisHastings()
     
     #PE_object.doGridSearch('doMetropolisHastings')
-    UserInput.parameter_estimation_settings['gridsearch_checkPointFrequency'] = 100
-    PE_object.doGridSearch('getLogP', gridSamplingAbsoluteIntervalSize=[ 1, 1, 3, 3, 0.1, 0.1], gridSamplingNumOfIntervals=[5,5,3,3,0,0], passThroughArgs={"method":"Nelder-Mead", "maxiter":5000, "verbose":False})  #The passThroughArgs are not necessary and are just provided here as an example of how to use them.
+    UserInput.parameter_estimation_settings['multistart_checkPointFrequency'] = 100
+    UserInput.parameter_estimation_settings['multistart_initialDistributionType'] = 'grid'
+    UserInput.parameter_estimation_settings['multistart_gridsearchSamplingInterval'] = [ 1, 1, 3, 3, 0.1, 0.1]
+    UserInput.parameter_estimation_settings['multistart_gridsearchSamplingRadii'] = [5,5,3,3,0,0]
+    PE_object.doMultiStart('getLogP', passThroughArgs={"method":"Nelder-Mead", "maxiter":5000, "verbose":False})  #The passThroughArgs are not necessary and are just provided here as an example of how to use them.
+    
+    #Below is the old and deprecated syntax that should not be used.
+    #PE_object.doGridSearch('getLogP', gridSamplingAbsoluteIntervalSize=[ 1, 1, 3, 3, 0.1, 0.1], gridSamplingNumOfIntervals=[5,5,3,3,0,0], passThroughArgs={"method":"Nelder-Mead", "maxiter":5000, "verbose":False})  #The passThroughArgs are not necessary and are just provided here as an example of how to use them.
     
     PE_object.createAllPlots() #This function calls each of the below functions.
 #    PE_object.makeHistogramsForEachParameter()    

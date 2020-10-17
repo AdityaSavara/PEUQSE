@@ -17,12 +17,13 @@ model = {}
 model['InputParameterPriorValues'] =  [] #Should be like: [41.5, 41.5, 13.0, 13.0, 0.1, 0.1] # Ea1_mean, Ea2_mean, log_A1_mean, log_A2_mean, gamma_1_mean, gamma_2_mean 
 model['InputParametersPriorValuesUncertainties'] = []# Should be like: [200, 200, 13, 13, 0.1, 0.1] #If user wants to use a prior with covariance, then this must be a 2D array/ list. To assume no covariance, a 1D
     #A value of -1 in the Uncertainties indicates the parameter in question is described a univorm distribution In this case, the InputParameterPriorValues_upperBounds and InputParameterPriorValues_lowerBounds must be defined for each parmeter (can be defined as None for the non-uniform parameters).
+model['InputParameterInitialGuess'] = [] #This is optional. An initial guess changes where the search is centered without changing the prior. If no initial guess is proided, the InputParameterPriorValues are taken as an initial guess.
 model['parameterNamesAndMathTypeExpressionsDict'] = {} #This must be provided. It can be as simple as {"Param1":"1"} etc. but it must be a dictionary with strings as keys and as values. The next line is a comment with a more complicated example.
 #Example: model['parameterNamesAndMathTypeExpressionsDict'] = {'Ea_1':r'$E_{a1}$','Ea_2':r'$E_{a2}$','log_A1':r'$log(A_{1})$','log_A2':r'$log(A_{2})$','gamma1':r'$\gamma_{1}$','gamma2':r'$\gamma_{2}$'}
-model['populateIndependentVariablesFunction'] = None
+model['populateIndependentVariablesFunction'] = None  #Not normally used. Mainly for design of experiments.
 model['simulateByInputParametersOnlyFunction'] = None #A function must be provided! This cannot be left as None.
 model['simulationOutputProcessingFunction'] = None
-model['reducedParameterSpace'] = [] #This is to keep parameters as 'constants'. Any parameter index in this list will be allowed to change, the rest will be held as constants.
+model['reducedParameterSpace'] = [] #This is to keep parameters as 'constants'. Any parameter index in this list will be allowed to change, the rest will be held as constants. For example, using [0,3,4] would allow the first, fourth, and fifth parameters to vary and would keep the rest as constants (note that array indexing is used).
 model['responses_simulation_uncertainties'] = None #Can be none, a list/vector, or can be a function that returns the uncertainties after each simulation is done. The easiest way would be to have a function that extracts a list that gets updated in another namespace after each simulation.
 model['custom_logLikelihood'] = None #This should point to a function that takes the discrete parameter values as an argument and returns "logLikelihood, simulatedResponses". So the function returns a value for the logLikelihood (or proportional to it). The function must *also* return the simulated response output, though technically can just return the number 0 as the ssecond return.  The function can be a simple as accessing a global dictionary. This feature is intended for cases where the likelihood cannot be described by a normal/gaussian distribution.
 model['custom_logPrior'] = None  #This feature has  been implemented but not tested, it is intended for cases where the prior distribution is not described by a normal distribution. The user will provide a function that takes in the parameters and returns a logPrior (or something proportional to a logPrior). If MCMC will be performed, the user will still need to fill out InputParametersPriorValuesUncertainties with std deviations or a covariance matrix since that is used to decide the mcmc steps.
@@ -71,23 +72,17 @@ parameter_estimation_settings['mcmc_parallel_sampling'] = False #This makes comp
 #possible dictionary fields include: dpi, figure_name, fontsize, x_label, y_label, figure_name, x_range, y_range
 samplingScatterMatrixPlotsSettings ={}
 
-######gridSearchSettings##### Warning: the gridsearch feature is likely to be folded into the multi_start feature with initialDistributionType='gridsearch', and then the relevant variables will be named 'multistart_gridSamplingIntervalSize' etc.
-parameter_estimation_settings['gridsearch_checkPointFrequency'] = None #Note: this setting does not work perfectly with ESS.
-parameter_estimation_settings['gridsearch_parallel_sampling'] = False
-parameter_estimation_settings['gridsearch_sampling_interval'] = []
-parameter_estimation_settings['gridsearch_sampling_radii'] =  []
-parameter_estimation_settings['gridsearch_exportLog'] = []
-parameter_estimation_settings['gridsearch_passThroughArgs'] = {}
-#At present, all gridSampling settings are fed as arguments directly into the doGridSearch function.
-#Perhaps that should be changed in the future so that wrapper functions can pass arguments to doGridSearch.
-#doGridSearch(self, searchType='doMetropolisHastings', export = True, verbose = False, gridSamplingIntervalSize = [], gridSamplingRadii = [], passThroughArgs = {}):
-
-######multiStartSettings##### 
+######multiStart (including gridsearch)##### 
 parameter_estimation_settings['multistart_checkPointFrequency'] = None #Note: this setting does not work perfectly with ESS.
 parameter_estimation_settings['multistart_parallel_sampling'] = False
+parameter_estimation_settings['multistart_centerPoint'] = None #With None the centerPoint will be taken as model['InputParameterInitialGuess'] 
 parameter_estimation_settings['multistart_numStartPoints'] = 0 #If this is left as zero it will be set as 3 times the number of active parameters.
-parameter_estimation_settings['multistart_initialDistributionType'] = 'uniform' #Can be 'uniform' or 'gaussian'
-parameter_estimation_settings['multistart_relativeInitialDistributionSpread'] = 1.0 #The default value is 1.0. This scales the distribution's spread. By default, the uniform distribution, the points are sampled from a 2 sigma interval in each direction from the initial guess. This value then scales that range.
+parameter_estimation_settings['multistart_initialDistributionType'] = 'uniform' #Can be 'uniform', 'gaussian', 'identical', or 'grid'.
+parameter_estimation_settings['multistart_relativeInitialDistributionSpread'] = 1.0 #This settting is for non-grid multistarts. The default value is 1.0. This scales the distribution's spread. By default, the uniform distribution, the points are sampled from a 2 sigma interval in each direction from the initial guess. This value then scales that range.
+parameter_estimation_settings['multistart_gridsearchSamplingInterval'] = [] #This is for gridsearches and is in units of absolute intervals. By default, these intervals will be set to 1 standard deviaion each.  To changefrom the default, make a comma separated list equal to the number of parameters.
+parameter_estimation_settings['multistart_gridsearchSamplingRadii'] = [] #This is for gridsearches and refers to the number of points (or intervals) in each direction to check from the center. For example, 3 would check 3 points in each direction plus the centerpointn for a total of 7 points along that dimension. For a 3 parameter problem, [3,7,2] would check radii of 3, 7, and 2 for those parameters.
+parameter_estimation_settings['multistart_passThroughArgs'] = {}
+
 parameter_estimation_settings['multistart_calculatePostBurnInStatistics'] = True
 parameter_estimation_settings['multistart_keep_cumulative_post_burn_in_data'] = False
 parameter_estimation_settings['multistart_exportLog'] = []

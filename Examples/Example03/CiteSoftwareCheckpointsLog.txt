@@ -1,0 +1,2846 @@
+---
+-
+    timestamp: >-
+        2020-10-16T23:31:29
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+-
+    timestamp: >-
+        2020-10-16T23:31:29
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-16T23:31:33
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+-
+    timestamp: >-
+        2020-10-16T23:31:33
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-16T23:31:40
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+-
+    timestamp: >-
+        2020-10-16T23:31:40
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-16T23:31:43
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+-
+    timestamp: >-
+        2020-10-16T23:31:43
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-16T23:32:08
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+---
+-
+    timestamp: >-
+        2020-10-16T23:32:08
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+---
+-
+    timestamp: >-
+        2020-10-16T23:32:34
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+-
+    timestamp: >-
+        2020-10-16T23:32:34
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-16T23:32:39
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+-
+    timestamp: >-
+        2020-10-16T23:32:39
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-16T23:37:10
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+-
+    timestamp: >-
+        2020-10-16T23:37:10
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-16T23:37:10
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+---
+-
+    timestamp: >-
+        2020-10-16T23:37:10
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+---
+-
+    timestamp: >-
+        2020-10-16T23:39:09
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+-
+    timestamp: >-
+        2020-10-16T23:39:09
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-16T23:39:09
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+---
+-
+    timestamp: >-
+        2020-10-16T23:39:09
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+---
+-
+    timestamp: >-
+        2020-10-16T23:39:32
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+-
+    timestamp: >-
+        2020-10-16T23:39:32
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-16T23:39:32
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+---
+-
+    timestamp: >-
+        2020-10-16T23:39:32
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+---
+-
+    timestamp: >-
+        2020-10-16T23:39:41
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+-
+    timestamp: >-
+        2020-10-16T23:39:41
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-16T23:39:41
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+---
+-
+    timestamp: >-
+        2020-10-16T23:39:41
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+---
+-
+    timestamp: >-
+        2020-10-16T23:40:57
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+-
+    timestamp: >-
+        2020-10-16T23:40:57
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-16T23:41:25
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+---
+-
+    timestamp: >-
+        2020-10-16T23:41:25
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+---
+-
+    timestamp: >-
+        2020-10-16T23:42:22
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+-
+    timestamp: >-
+        2020-10-16T23:42:22
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-16T23:42:51
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+---
+-
+    timestamp: >-
+        2020-10-16T23:42:51
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+---
+-
+    timestamp: >-
+        2020-10-16T23:42:58
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+-
+    timestamp: >-
+        2020-10-16T23:42:58
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-16T23:42:58
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+---
+-
+    timestamp: >-
+        2020-10-16T23:42:58
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+---
+-
+    timestamp: >-
+        2020-10-16T23:44:03
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+-
+    timestamp: >-
+        2020-10-16T23:44:03
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-16T23:44:03
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+---
+-
+    timestamp: >-
+        2020-10-16T23:44:04
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+---
+-
+    timestamp: >-
+        2020-10-16T23:44:16
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+-
+    timestamp: >-
+        2020-10-16T23:44:16
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-16T23:44:21
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+-
+    timestamp: >-
+        2020-10-16T23:44:21
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-16T23:44:21
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+---
+-
+    timestamp: >-
+        2020-10-16T23:44:21
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+---
+-
+    timestamp: >-
+        2020-10-16T23:44:26
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+-
+    timestamp: >-
+        2020-10-16T23:44:26
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-16T23:44:27
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+---
+-
+    timestamp: >-
+        2020-10-16T23:44:27
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+---
+-
+    timestamp: >-
+        2020-10-16T23:44:29
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+-
+    timestamp: >-
+        2020-10-16T23:44:29
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-16T23:44:29
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+---
+-
+    timestamp: >-
+        2020-10-16T23:44:29
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+---
+-
+    timestamp: >-
+        2020-10-16T23:44:31
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+-
+    timestamp: >-
+        2020-10-16T23:44:31
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-16T23:44:31
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+---
+-
+    timestamp: >-
+        2020-10-16T23:44:31
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+---
+-
+    timestamp: >-
+        2020-10-16T23:44:32
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+-
+    timestamp: >-
+        2020-10-16T23:44:32
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-16T23:44:33
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+---
+-
+    timestamp: >-
+        2020-10-16T23:44:33
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+---
+-
+    timestamp: >-
+        2020-10-16T23:45:01
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+-
+    timestamp: >-
+        2020-10-16T23:45:01
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-16T23:45:06
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+---
+-
+    timestamp: >-
+        2020-10-16T23:45:06
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+---
+-
+    timestamp: >-
+        2020-10-16T23:45:31
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+-
+    timestamp: >-
+        2020-10-16T23:45:31
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-16T23:45:35
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+---
+-
+    timestamp: >-
+        2020-10-16T23:45:35
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+---
+-
+    timestamp: >-
+        2020-10-16T23:45:58
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+-
+    timestamp: >-
+        2020-10-16T23:45:58
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-16T23:46:02
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+---
+-
+    timestamp: >-
+        2020-10-16T23:46:02
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+---
+-
+    timestamp: >-
+        2020-10-16T23:48:32
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+-
+    timestamp: >-
+        2020-10-16T23:48:32
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-16T23:48:36
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+---
+-
+    timestamp: >-
+        2020-10-16T23:48:36
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+---
+-
+    timestamp: >-
+        2020-10-16T23:50:45
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+-
+    timestamp: >-
+        2020-10-16T23:50:45
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-16T23:51:06
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+-
+    timestamp: >-
+        2020-10-16T23:51:06
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-16T23:51:29
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+-
+    timestamp: >-
+        2020-10-16T23:51:29
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-16T23:51:43
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+-
+    timestamp: >-
+        2020-10-16T23:51:43
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-16T23:52:51
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+-
+    timestamp: >-
+        2020-10-16T23:52:51
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-16T23:53:25
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+-
+    timestamp: >-
+        2020-10-16T23:53:25
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-16T23:57:43
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+-
+    timestamp: >-
+        2020-10-16T23:57:43
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T00:11:14
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+-
+    timestamp: >-
+        2020-10-17T00:11:14
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T00:11:35
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+-
+    timestamp: >-
+        2020-10-17T00:11:35
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T00:12:14
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+-
+    timestamp: >-
+        2020-10-17T00:12:14
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T00:12:41
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+---
+-
+    timestamp: >-
+        2020-10-17T00:12:41
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+---
+-
+    timestamp: >-
+        2020-10-17T00:13:08
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+-
+    timestamp: >-
+        2020-10-17T00:13:08
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T00:13:34
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+---
+-
+    timestamp: >-
+        2020-10-17T00:13:34
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+---
+-
+    timestamp: >-
+        2020-10-17T00:16:05
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+-
+    timestamp: >-
+        2020-10-17T00:16:05
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T00:17:51
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+-
+    timestamp: >-
+        2020-10-17T00:17:51
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T00:20:03
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+-
+    timestamp: >-
+        2020-10-17T00:20:03
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T00:22:18
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+-
+    timestamp: >-
+        2020-10-17T00:22:18
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T00:22:18
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+---
+-
+    timestamp: >-
+        2020-10-17T00:22:19
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+---
+-
+    timestamp: >-
+        2020-10-17T00:25:14
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+-
+    timestamp: >-
+        2020-10-17T00:25:14
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T00:26:05
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+-
+    timestamp: >-
+        2020-10-17T00:26:05
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T00:26:05
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+---
+-
+    timestamp: >-
+        2020-10-17T00:26:06
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+---
+-
+    timestamp: >-
+        2020-10-17T00:26:55
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+-
+    timestamp: >-
+        2020-10-17T00:26:55
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T00:27:02
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+-
+    timestamp: >-
+        2020-10-17T00:27:02
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T00:30:02
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+-
+    timestamp: >-
+        2020-10-17T00:30:02
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T00:30:22
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+-
+    timestamp: >-
+        2020-10-17T00:30:22
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T00:30:22
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+---
+-
+    timestamp: >-
+        2020-10-17T00:30:23
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+---
+-
+    timestamp: >-
+        2020-10-17T00:30:55
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+-
+    timestamp: >-
+        2020-10-17T00:30:55
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2020-10-17T00:31:21
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
+---
+-
+    timestamp: >-
+        2020-10-17T00:31:22
+    unique_id: >-
+        https://doi.org/10.1016/j.susc.2016.07.001
+    software_name: >-
+        Integrated Production (Objective Function)
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+    doi:
+        - >-
+            https://doi.org/10.1016/j.susc.2016.07.001
+    cite:
+        - >-
+            Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180.
