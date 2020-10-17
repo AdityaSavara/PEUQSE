@@ -82,7 +82,7 @@ if __name__ == "__main__":
     
     
     
-    PE_object.doeParameterModulationCombinationsScanner()
+    PE_object.doeParameterModulationPermutationsScanner()
    # print(PE_object.info_gains_matrices_array[0])
     PE_object.createInfoGainPlots()
     

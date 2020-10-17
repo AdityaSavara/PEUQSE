@@ -80,7 +80,7 @@ PE_object = CKPQ.parameter_estimation(UserInput)
 
 
 '''The below lines are commented out because we just want to do a different set of settings for info gain matrix'''
-#PE_object.doeParameterModulationCombinationsScanner()
+#PE_object.doeParameterModulationPermutationsScanner()
 #print(PE_object.info_gains_matrices_array[0])
 #PE_object.createInfoGainPlots()
 
