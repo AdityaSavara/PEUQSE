@@ -48,7 +48,8 @@ if __name__ == "__main__":
     #[map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, samples_simulatedOutputs, logP] = PE_object.doMetropolisHastings()
     
     #PE_object.doGridSearch('doMetropolisHastings')
-    PE_object.doMultiStart('getLogP', initialPointsDistributionType='grid',  gridsearchSamplingInterval=[ 5, 5, 6, 6, 0.1, 0.1], gridsearchSamplingRadii=[1,1,1,1,0,0], passThroughArgs={"method":"Nelder-Mead", "maxiter":5000, "verbose":False})
+    UserInput.parameter_estimation_settings['multistart_checkPointFrequency'] = 100
+    PE_object.doMultiStart('getLogP', initialPointsDistributionType='grid',  gridsearchSamplingInterval=[ 1, 1, 3, 3, 0.1, 0.1], gridsearchSamplingRadii=[5,5,3,3,0,0], passThroughArgs={"method":"Nelder-Mead", "maxiter":5000, "verbose":False})
     
     #Below is the old and deprecated syntax that should not be used.
     #PE_object.doGridSearch('getLogP', gridSamplingAbsoluteIntervalSize=[ 1, 1, 3, 3, 0.1, 0.1], gridSamplingNumOfIntervals=[5,5,3,3,0,0], passThroughArgs={"method":"Nelder-Mead", "maxiter":5000, "verbose":False})  #The passThroughArgs are not necessary and are just provided here as an example of how to use them.

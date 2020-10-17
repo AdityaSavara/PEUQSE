@@ -49,7 +49,7 @@ if __name__ == "__main__":
     
     #PE_object.doGridSearch('doMetropolisHastings')
     UserInput.parameter_estimation_settings['multistart_checkPointFrequency'] = 100
-    UserInput.parameter_estimation_settings['multistart_initialDistributionType'] = 'grid'
+    UserInput.parameter_estimation_settings['multistart_initialPointsDistributionType'] = 'grid'
     UserInput.parameter_estimation_settings['multistart_gridsearchSamplingInterval'] = [ 1, 1, 3, 3, 0.1, 0.1]
     UserInput.parameter_estimation_settings['multistart_gridsearchSamplingRadii'] = [5,5,3,3,0,0]
     PE_object.doMultiStart('getLogP', passThroughArgs={"method":"Nelder-Mead", "maxiter":5000, "verbose":False})  #The passThroughArgs are not necessary and are just provided here as an example of how to use them.

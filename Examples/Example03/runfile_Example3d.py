@@ -49,7 +49,7 @@ if __name__ == "__main__":
     #[map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, samples_simulatedOutputs, logP] = PE_object.doMetropolisHastings()
     
     #PE_object.doGridSearch('doMetropolisHastings')
-    PE_object.doGridSearch('getLogP')
+    PE_object.doMultiStart(searchType='getLogP', initialPointsDistributionType='grid')
     
     PE_object.createAllPlots() #This function calls each of the below functions.
 #    PE_object.makeHistogramsForEachParameter()    

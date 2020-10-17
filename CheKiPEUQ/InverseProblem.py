@@ -388,9 +388,11 @@ class parameter_estimation:
         #The arguments gridsearchSamplingInterval and gridsearchSamplingRadii are only for the distribution type 'grid', and correspond to the variables  gridsearchSamplingInterval = [], gridsearchSamplingRadii = [] inside getGridPermutations.
         if str(centerPoint).lower() == str(None).lower():
             centerPoint = self.UserInput.InputParameterInitialGuess*1.0 #This may be a reduced parameter space.
+        if initialPointsDistributionType.lower() not in ['grid', 'uniform', 'identical', 'gaussian']:
+            print("Warning: initialPointsDistributionType must be from: 'grid', 'uniform', 'identical', 'gaussian'.  A different choice was received and is not understood.  initialPointsDistributionType is being set as 'uniform'.")
+            initialPointsDistributionType = 'uniform'
         #For a multi-start with a grid, our algorithm is completely different than other cases.
         if initialPointsDistributionType.lower() =='grid':
-            print("line 393 arguments", centerPoint, gridsearchSamplingInterval, gridsearchSamplingRadii)
             gridPermutations, numPermutations = self.getGridPermutations(centerPoint, gridsearchSamplingInterval=gridsearchSamplingInterval, gridsearchSamplingRadii=gridsearchSamplingRadii)
             initialPoints = gridPermutations
         #Below lines are for non-grid cases.
@@ -563,7 +565,7 @@ class parameter_estimation:
         #This function is basically a wrapper that creates a list of initial points and then runs a 'check each permutation' search on that list.
         #We set many of the arguments to have blank or zero values so that if they are not provided, the values will be taken from the UserInput choices.
         if str(initialPointsDistributionType) == 'UserChoice': 
-            initialPointsDistributionType = self.UserInput.parameter_estimation_settings['multistart_initialDistributionType']
+            initialPointsDistributionType = self.UserInput.parameter_estimation_settings['multistart_initialPointsDistributionType']
         if str(numStartPoints) =='UserChoice':
             numStartPoints = self.UserInput.parameter_estimation_settings['multistart_numStartPoints']
         if str(relativeInitialDistributionSpread) == 'UserChoice': 
@@ -586,7 +588,6 @@ class parameter_estimation:
         if relativeInitialDistributionSpread == 0: #if it's still zero, we need to make it the default which is 1.
             relativeInitialDistributionSpread = 1.0              
         #make the initial points list by mostly passing through arguments.
-        print("line 588", initialPointsDistributionType)
         multiStartInitialPointsList = self.generateInitialPoints(numStartPoints=numStartPoints, relativeInitialDistributionSpread=relativeInitialDistributionSpread, initialPointsDistributionType=initialPointsDistributionType, centerPoint = centerPoint, gridsearchSamplingInterval = gridsearchSamplingInterval, gridsearchSamplingRadii = gridsearchSamplingRadii)
         #Look for the best result (highest map_logP) from among these permutations. Maybe later should add optional argument to allow searching for highest mu_AP to find HPD.
         bestResultSoFar = self.doListOfPermutationsSearch(listOfPermutations=multiStartInitialPointsList, searchType=searchType, exportLog=exportLog, walkerInitialDistribution=walkerInitialDistribution, passThroughArgs=passThroughArgs, calculatePostBurnInStatistics=calculatePostBurnInStatistics, keep_cumulative_post_burn_in_data=keep_cumulative_post_burn_in_data, centerPoint = centerPoint)
@@ -594,7 +595,7 @@ class parameter_estimation:
   
     @CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
     def doGridSearch(self, searchType='getLogP', exportLog = True, gridSamplingAbsoluteIntervalSize = [], gridSamplingNumOfIntervals = [], passThroughArgs = {}, calculatePostBurnInStatistics=True,  keep_cumulative_post_burn_in_data = False, walkerInitialDistribution='UserChoice'):
-        print("Warning: You have called doGridSearch.  This function is deprecated and is only retained for old examples. Please use doMultiStart with multistart_initialDistributionType = 'grid' ")
+        print("Warning: You have called doGridSearch.  This function is deprecated and is only retained for old examples. Please use doMultiStart with multistart_initialPointsDistributionType = 'grid' ")
         # gridSamplingNumOfIntervals is the number of variations to check in units of variance for each parameter. Can be 0 if you don't want to vary a particular parameter in the grid search.
         #calculatePostBurnInStatistics will store all the individual runs in memory and will then provide the samples of the best one.
         #TODO: the upper part of the gridsearch may not be compatibile with reduced parameter space. Needs to be checked.
