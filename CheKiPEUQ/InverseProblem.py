@@ -1228,7 +1228,7 @@ class parameter_estimation:
     def getParallelProcessingPrefixAndSuffix(self):
         file_name_prefix = ''
         file_name_suffix = ''
-        if self.UserInput.request_mpi == True: 
+        if (self.UserInput.parameter_estimation_settings['mcmc_parallel_sampling'] or parameter_estimation_settings['multistart_parallel_sampling']) == True: 
             import CheKiPEUQ.parallel_processing
             import os
             if CheKiPEUQ.parallel_processing.currentProcessorNumber == 0:
