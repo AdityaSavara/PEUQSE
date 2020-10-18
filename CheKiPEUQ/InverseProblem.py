@@ -809,6 +809,8 @@ class parameter_estimation:
                 conditionsPermutation = np.array(conditionsPermutation) #we're going to make this an array before adding to the info_gain matrix.
                 conditionsPermutationAndInfoGain = np.hstack((conditionsPermutation, info_gain))
                 info_gain_matrix.append(conditionsPermutationAndInfoGain)
+                if (self.UserInput.doe_settings['parallel_conditions_exploration'])== True:
+                    self.exportSingleConditionInfoGainMatrix(parameterPermutation, conditionsPermutationAndInfoGain, conditionsPermutationIndex)
                 if self.UserInput.doe_settings['info_gains_matrices_multiple_parameters'] == 'each': #copy the above lines for the sum.
                     for parameterIndex in range(0,numParameters):#looping across number of parameters...
                         conditionsPermutationAndInfoGain = np.hstack((conditionsPermutation, np.array(self.info_gain_each_parameter[parameterIndex]))) #Need to pull the info gain matrix from the nested objected named info_gain_each_parameter
@@ -875,12 +877,16 @@ class parameter_estimation:
                             conditionsPermutation = np.array([indValue1,indValue2])
                             conditionsPermutationAndInfoGain = np.hstack((conditionsPermutation, info_gain))
                             info_gain_matrix.append(conditionsPermutationAndInfoGain) #NOTE that the structure *includes* the Permutations.
+                            if (self.UserInput.doe_settings['parallel_conditions_exploration'])== True:
+                                self.exportSingleConditionInfoGainMatrix(parameterPermutation, conditionsPermutationAndInfoGain, conditionsPermutationIndex)
                             if self.UserInput.doe_settings['info_gains_matrices_multiple_parameters'] == 'each': #copy the above lines for the sum.
                                 for parameterIndex in range(0,numParameters):#looping across number of parameters...
                                     conditionsPermutationAndInfoGain = np.hstack((conditionsPermutation, np.array(self.info_gain_each_parameter[parameterIndex]))) #Need to pull the info gain matrix from the nested objected named info_gain_each_parameter
                                     #Below mimics the line above which reads info_gain_matrix.append(conditionsPermutationAndInfoGain)
                                     info_gain_matrices_each_parameter[parameterIndex].append(conditionsPermutationAndInfoGain)
-                        conditionsPermutationIndex = conditionsPermutationIndex + 1
+
+                            
+                        conditionsPermutationIndex = conditionsPermutationIndex + 1 #This variable was added for and is used in parallelization.
                 self.info_gain_matrix = np.array(info_gain_matrix) #this is an implied return in addition to the real return.
                 if self.UserInput.doe_settings['info_gains_matrices_multiple_parameters'] == 'each': #copy the above line for the sum.
                     for parameterIndex in range(0,numParameters):#looping across number of parameters...
