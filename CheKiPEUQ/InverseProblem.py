@@ -614,11 +614,11 @@ class parameter_estimation:
 
     
     
-    def consolidate_parallel_doe_data(self, parallelizationType="conditions"):
+    def consolidate_parallel_doe_data(self, parallelizationType='conditions'):
         #The parallelization type can be "conditions" or can be "parModulations")
         pass
     
-    def consolidate_parallel_sampling_data(self, parallelizationType="equal"):
+    def consolidate_parallel_sampling_data(self, parallelizationType='equal'):
         #parallelizationType='equal' means everything will get averaged together. parallelizationType='permutation' will be treated differently, same with parallelizationType='designOfExperiments'
         import CheKiPEUQ.parallel_processing
         #CheKiPEUQ.parallel_processing.currentProcessorNumber
