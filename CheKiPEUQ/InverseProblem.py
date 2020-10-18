@@ -855,6 +855,7 @@ class parameter_estimation:
                         #####Begin ChekIPEUQ Parallel Processing During Loop Block -- This block is custom for meshgrid since the loop is different.####
                         if (self.UserInput.doe_settings['parallel_conditions_exploration'])== True:
                             numPermutations = len(independentVariable2ValuesArray)*len(independentVariable1ValuesArray)
+                            permutationIndex = conditionsPermutationIndex
                             #We will only execute the sampling the permutationIndex matches the processor rank.
                             #Additionally, if the rank is 0 and the simulation got here, it will be assumed the person is running this just to find the number of Permutations, so that will be spit out and the simulation ended.
                             import CheKiPEUQ.parallel_processing
@@ -883,8 +884,6 @@ class parameter_estimation:
                                     conditionsPermutationAndInfoGain = np.hstack((conditionsPermutation, np.array(self.info_gain_each_parameter[parameterIndex]))) #Need to pull the info gain matrix from the nested objected named info_gain_each_parameter
                                     #Below mimics the line above which reads info_gain_matrix.append(conditionsPermutationAndInfoGain)
                                     info_gain_matrices_each_parameter[parameterIndex].append(conditionsPermutationAndInfoGain)
-
-                            
                         conditionsPermutationIndex = conditionsPermutationIndex + 1 #This variable was added for and is used in parallelization.
                 self.info_gain_matrix = np.array(info_gain_matrix) #this is an implied return in addition to the real return.
                 if self.UserInput.doe_settings['info_gains_matrices_multiple_parameters'] == 'each': #copy the above line for the sum.
@@ -1194,7 +1193,7 @@ class parameter_estimation:
         return self.info_gain    
 
 
-    def exportSingleConditionInfoGainMatrix(parameterPermutationNumber, conditionsPermutationAndInfoGain, conditionsPermutationIndex):
+    def exportSingleConditionInfoGainMatrix(self, parameterPermutationNumber, conditionsPermutationAndInfoGain, conditionsPermutationIndex):
         file_name_prefix, file_name_suffix = self.getParallelProcessingPrefixAndSuffix() #Rather self explanatory.
         if int(conditionsPermutationIndex) != (file_name_suffix):
             print("line 1199: There is a problem in the parallel processing of conditions info gain matrix calculation!")
@@ -1260,7 +1259,7 @@ class parameter_estimation:
     def getParallelProcessingPrefixAndSuffix(self):
         file_name_prefix = ''
         file_name_suffix = ''
-        if (self.UserInput.parameter_estimation_settings['mcmc_parallel_sampling'] or self.UserInput.parameter_estimation_settings['multistart_parallel_sampling']) == True: 
+        if (self.UserInput.parameter_estimation_settings['mcmc_parallel_sampling'] or self.UserInput.parameter_estimation_settings['multistart_parallel_sampling'] or self.UserInput.doe_settings['parallel_conditions_exploration']) == True: 
             import CheKiPEUQ.parallel_processing
             import os
             if CheKiPEUQ.parallel_processing.currentProcessorNumber == 0:
