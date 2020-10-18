@@ -810,7 +810,7 @@ class parameter_estimation:
                 conditionsPermutationAndInfoGain = np.hstack((conditionsPermutation, info_gain))
                 info_gain_matrix.append(conditionsPermutationAndInfoGain)
                 if (self.UserInput.doe_settings['parallel_conditions_exploration'])== True:
-                    self.exportSingleConditionInfoGainMatrix(parameterPermutation, conditionsPermutationAndInfoGain, conditionsPermutationIndex)
+                    self.exportSingleConditionInfoGainMatrix(self.parameterPermutationNumber, conditionsPermutationAndInfoGain, conditionsPermutationIndex)
                 if self.UserInput.doe_settings['info_gains_matrices_multiple_parameters'] == 'each': #copy the above lines for the sum.
                     for parameterIndex in range(0,numParameters):#looping across number of parameters...
                         conditionsPermutationAndInfoGain = np.hstack((conditionsPermutation, np.array(self.info_gain_each_parameter[parameterIndex]))) #Need to pull the info gain matrix from the nested objected named info_gain_each_parameter
@@ -852,7 +852,6 @@ class parameter_estimation:
                         #It is absolutely critical that we *do not* use syntax like self.UserInput.responses['independent_variables_values'] = xxxx
                         #Because that would move where the pointer is going to. We need to instead populate the individual values in the simulation module's namespace.
                         #This population Must occur here. It has to be after the indpendent variables have changed, before synthetic data is made, and before the MCMC is performed.
-
                         #####Begin ChekIPEUQ Parallel Processing During Loop Block -- This block is custom for meshgrid since the loop is different.####
                         if (self.UserInput.doe_settings['parallel_conditions_exploration'])== True:
                             numPermutations = len(independentVariable2ValuesArray)*len(independentVariable1ValuesArray)
@@ -878,7 +877,7 @@ class parameter_estimation:
                             conditionsPermutationAndInfoGain = np.hstack((conditionsPermutation, info_gain))
                             info_gain_matrix.append(conditionsPermutationAndInfoGain) #NOTE that the structure *includes* the Permutations.
                             if (self.UserInput.doe_settings['parallel_conditions_exploration'])== True:
-                                self.exportSingleConditionInfoGainMatrix(parameterPermutation, conditionsPermutationAndInfoGain, conditionsPermutationIndex)
+                                self.exportSingleConditionInfoGainMatrix(self.parameterPermutationNumber, conditionsPermutationAndInfoGain, conditionsPermutationIndex)
                             if self.UserInput.doe_settings['info_gains_matrices_multiple_parameters'] == 'each': #copy the above lines for the sum.
                                 for parameterIndex in range(0,numParameters):#looping across number of parameters...
                                     conditionsPermutationAndInfoGain = np.hstack((conditionsPermutation, np.array(self.info_gain_each_parameter[parameterIndex]))) #Need to pull the info gain matrix from the nested objected named info_gain_each_parameter
@@ -935,6 +934,7 @@ class parameter_estimation:
                 #    pass  #This is the "normal" case and is implied, so is commented out.
             #####End ChekIPEUQ Parallel Processing During Loop Block####
             #We will get separate info gain matrix for each parameter modulation combination.
+            self.parameterPermutationNumber = parModulationPermutationIndex + 1 #This variable is being created for parallel processing of conditions.
             info_gain_matrix = self.doeGetInfoGainMatrix(parModulationPermutation, searchType=searchType)
             #Append the info gain matrix obtainend.
             info_gains_matrices_list.append(np.array(info_gain_matrix))
@@ -1192,6 +1192,16 @@ class parameter_estimation:
             self.info_gain_each_parameter = self.info_gain_KL_each_parameter #could make this optional, but normally shouldn't take much memory.
             self.info_gain = self.info_gain_KL
         return self.info_gain    
+
+
+    def exportSingleConditionInfoGainMatrix(parameterPermutationNumber, conditionsPermutationAndInfoGain, conditionsPermutationIndex):
+        file_name_prefix, file_name_suffix = self.getParallelProcessingPrefixAndSuffix() #Rather self explanatory.
+        if int(conditionsPermutationIndex) != (file_name_suffix):
+            print("line 1199: There is a problem in the parallel processing of conditions info gain matrix calculation!")
+        np.savetxt(file_name_prefix+'conditionsPermutationAndInfoGain_'+str(int(parameterPermutationNumber))+file_name_suffix+'.csv',conditionsPermutationAndInfoGain, delimiter=",")
+        pickleAnObject(conditionsPermutationAndInfoGain, file_name_prefix+'conditionsPermutationAndInfoGain_'+str(int(parameterPermutationNumber))+file_name_suffix)
+        
+
 
     #This function will calculate MAP and mu_AP, evidence, and related quantities.
     def calculatePostBurnInStatistics(self, calculate_post_burn_in_log_priors_vec = False):       
