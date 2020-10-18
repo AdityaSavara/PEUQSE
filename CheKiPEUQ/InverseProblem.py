@@ -765,8 +765,8 @@ class parameter_estimation:
     software_kwargs = {"version": software_version, "author": ["Eric A. Walker", "Kishore Ravisankar", "Aditya Savara"], "doi": "https://doi.org/10.1002/cctc.202000976", "cite": "Eric Alan Walker, Kishore Ravisankar, Aditya Savara. CheKiPEUQ Intro 2: Harnessing Uncertainties from Data Sets, Bayesian Design of Experiments in Chemical Kinetics. ChemCatChem. Accepted. doi:10.1002/cctc.202000976"} 
     #@CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
     @CiteSoft.module_call_cite(unique_id=software_unique_id, software_name=software_name, **software_kwargs)
-    def doeGetInfoGainMatrix(self, parameterCombination, searchType='doMetropolisHastings'):#Note: There is an implied argument of info_gains_matrices_array_format being 'xyz' or 'meshgrid'
-        #At present, we *must* provide a parameterCombination because right now the only way to get an InfoGainMatrix is with synthetic data assuming a particular parameterCombination as the "real" or "actual" parameterCombination.
+    def doeGetInfoGainMatrix(self, parameterPermutation, searchType='doMetropolisHastings'):#Note: There is an implied argument of info_gains_matrices_array_format being 'xyz' or 'meshgrid'
+        #At present, we *must* provide a parameterPermutation because right now the only way to get an InfoGainMatrix is with synthetic data assuming a particular parameterPermutation as the "real" or "actual" parameterPermutation.
         doe_settings = self.UserInput.doe_settings
         self.middle_of_doe_flag = True  #This is a work around that is needed because right now the synthetic data creation has an __init__ call which is going to try to modify the independent variables back to their original values if we don't do this.
         info_gain_matrix = [] #Right now, if using KL_divergence, each item in here is a single array. It is a sum across all parameters. 
@@ -801,7 +801,7 @@ class parameter_estimation:
                 #Because that would move where the pointer is going to. We need to instead populate the individual values in the simulation module's namespace.
                 #This population Must occur here. It has to be after the indpendent variables have changed, before synthetic data is made, and before the MCMC is performed.
                 self.UserInput.model['populateIndependentVariablesFunction'](conditionsPermutation)
-                self.populateResponsesWithSyntheticData(parameterCombination)
+                self.populateResponsesWithSyntheticData(parameterPermutation)
                 if searchType=='doMetropolisHastings':
                     [map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, logP] = self.doMetropolisHastings()
                 if searchType=='doEnsembleSliceSampling':
@@ -815,6 +815,8 @@ class parameter_estimation:
                         #Below mimics the line above which reads info_gain_matrix.append(conditionsPermutationAndInfoGain)
                         info_gain_matrices_each_parameter[parameterIndex].append(conditionsPermutationAndInfoGain)
             self.info_gain_matrix = np.array(info_gain_matrix) #this is an implied return in addition to the real return.
+            if self.UserInput.doe_settings['parallel_conditions_exploration'] == True:
+                self.consolidate_parallel_doe_data(parallelizationType='conditions')
             if self.UserInput.doe_settings['info_gains_matrices_multiple_parameters'] == 'each': #copy the above line for the sum.
                 for parameterIndex in range(0,numParameters):#looping across number of parameters...
                     self.info_gain_matrices_each_parameter[parameterIndex]= np.array(info_gain_matrices_each_parameter[parameterIndex])
@@ -846,7 +848,7 @@ class parameter_estimation:
                         #Because that would move where the pointer is going to. We need to instead populate the individual values in the simulation module's namespace.
                         #This population Must occur here. It has to be after the indpendent variables have changed, before synthetic data is made, and before the MCMC is performed.
                         self.UserInput.model['populateIndependentVariablesFunction']([indValue1,indValue2])
-                        self.populateResponsesWithSyntheticData(parameterCombination)
+                        self.populateResponsesWithSyntheticData(parameterPermutation)
                         if searchType=='doMetropolisHastings':
                             [map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, logP] = self.doMetropolisHastings()
                         if searchType=='doEnsembleSliceSampling':
@@ -1172,7 +1174,7 @@ class parameter_estimation:
             calculate_post_burn_in_log_priors_vec = True 
         if calculate_post_burn_in_log_priors_vec == True:
                 #Below line following a line from https://github.com/threeML/threeML/blob/master/threeML/bayesian/zeus_sampler.py
-                self.post_burn_in_log_priors_vec = np.array([self.getLogPrior(parameterCombination) for parameterCombination in self.post_burn_in_samples])
+                self.post_burn_in_log_priors_vec = np.array([self.getLogPrior(parameterPermutation) for parameterPermutation in self.post_burn_in_samples])
                 self.post_burn_in_log_priors_vec = np.atleast_2d(self.post_burn_in_log_priors_vec).transpose()
         #Next need to apply filtering before getting statistics.
         filterSamples = bool(self.UserInput.parameter_estimation_settings['mcmc_threshold_filter_samples'])
