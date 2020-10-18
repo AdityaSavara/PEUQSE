@@ -13,7 +13,6 @@ import copy
 #import mumce_py.solution mumce_pySolution
 try:
     import CiteSoft
-    print("line 16, importing CiteSoft env")
 except:
     import os #The below lines are to allow CiteSoftLocal to be called regardless of user's working directory.
     lenOfFileName = len(os.path.basename(__file__)) #This is the name of **this** file.
@@ -569,7 +568,7 @@ class parameter_estimation:
         if searchType == 'getLogP':          
             return bestResultSoFar# [self.map_parameter_set, self.map_logP]
 
-    @CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
+    #@CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
     def doMultiStart(self, searchType='getLogP', numStartPoints = 'UserChoice', relativeInitialDistributionSpread='UserChoice', exportLog = 'UserChoice', initialPointsDistributionType='UserChoice', passThroughArgs = 'UserChoice', calculatePostBurnInStatistics='UserChoice',  keep_cumulative_post_burn_in_data = 'UserChoice', walkerInitialDistribution='UserChoice', centerPoint = None, gridsearchSamplingInterval = 'UserChoice', gridsearchSamplingRadii = 'UserChoice'):
         #This function is basically a wrapper that creates a list of initial points and then runs a 'check each permutation' search on that list.
         #We set many of the arguments to have blank or zero values so that if they are not provided, the values will be taken from the UserInput choices.
@@ -602,14 +601,13 @@ class parameter_estimation:
         bestResultSoFar = self.doListOfPermutationsSearch(listOfPermutations=multiStartInitialPointsList, searchType=searchType, exportLog=exportLog, walkerInitialDistribution=walkerInitialDistribution, passThroughArgs=passThroughArgs, calculatePostBurnInStatistics=calculatePostBurnInStatistics, keep_cumulative_post_burn_in_data=keep_cumulative_post_burn_in_data, centerPoint = centerPoint)
         return bestResultSoFar
   
-    @CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
+    #@CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
     def doGridSearch(self, searchType='getLogP', exportLog = True, gridSamplingAbsoluteIntervalSize = [], gridSamplingNumOfIntervals = [], passThroughArgs = {}, calculatePostBurnInStatistics=True,  keep_cumulative_post_burn_in_data = False, walkerInitialDistribution='UserChoice'):
         print("Warning: You have called doGridSearch.  This function is deprecated and is only retained for old examples. Please use doMultiStart with multistart_initialPointsDistributionType = 'grid' ")
         # gridSamplingNumOfIntervals is the number of variations to check in units of variance for each parameter. Can be 0 if you don't want to vary a particular parameter in the grid search.
         #calculatePostBurnInStatistics will store all the individual runs in memory and will then provide the samples of the best one.
         #TODO: the upper part of the gridsearch may not be compatibile with reduced parameter space. Needs to be checked.
         gridCenter = self.UserInput.InputParameterInitialGuess*1.0 #This may be a reduced parameter space.    
-        print("line 591 arguments:", gridCenter, gridSamplingAbsoluteIntervalSize, gridSamplingNumOfIntervals)
         gridPermutations, numPermutations = self.getGridPermutations(gridCenter, gridSamplingAbsoluteIntervalSize, gridSamplingNumOfIntervals)
         bestResultSoFar = self.doListOfPermutationsSearch(gridPermutations, numPermutations = numPermutations, searchType=searchType, exportLog = exportLog, walkerInitialDistribution=walkerInitialDistribution, passThroughArgs=passThroughArgs, calculatePostBurnInStatistics=calculatePostBurnInStatistics,  keep_cumulative_post_burn_in_data = keep_cumulative_post_burn_in_data, centerPoint = gridCenter)
         return bestResultSoFar
@@ -894,14 +892,12 @@ class parameter_estimation:
             numParameters = len(self.UserInput.InputParametersPriorValuesUncertainties)
             for parameterIndex in range(0,numParameters):#looping across number of parameters...
                 info_gains_matrices_lists_one_for_each_parameter.append([]) #These are empty lists create to indices and initialize each parameter's info_gain_matrix. They will be appended to later.
-        print("line 896")
         for parModulationPermutationIndex,parModulationPermutation in enumerate(parModulationGridPermutations):                
             #####Begin ChekIPEUQ Parallel Processing During Loop Block####
             if (self.UserInput.doe_settings['parallel_parameter_modulation'])== True:
                 #We will only execute the sampling the permutationIndex matches the processor rank.
                 #Additionally, if the rank is 0 and the simulation got here, it will be assumed the person is running this just to find the number of Permutations, so that will be spit out and the simulation ended.
                 import CheKiPEUQ.parallel_processing
-                print("line 903", CheKiPEUQ.parallel_processing.currentProcessorNumber)
                 if CheKiPEUQ.parallel_processing.currentProcessorNumber == 0:
                     print("For the user input settings provided, the number of Permutations+1 will be",  numPermutations+1, ". Please use mpiexec or mpirun with this number for N. If you are not expecting to see this message, change your UserInput choices. You have chosen parallel processing for gridsearch and have run CheKiPEUQ without mpi, which is a procedure to retrieve the number of processor ranks to use for parallelized gridsearch. A typical syntax now would be: mpiexec -n ",  numPermutations+1, " python runfile_for_your_analysis.py" )
                     sys.exit()
@@ -984,7 +980,6 @@ class parameter_estimation:
                         plotting_functions.makeTrisurfacePlot(xValues, yValues, zValues, figure_name = "Info_gain_TrisurfacePlot_modulation_"+str(modulationIndex+1)+plot_suffix)
                     if self.UserInput.doe_settings['parallel_parameter_modulation'] == True: #This is the parallel case. In this case, the actual modulationIndex to attach to the filename is given by the processor rank.
                         import CheKiPEUQ.parallel_processing
-                        print("line 987", CheKiPEUQ.parallel_processing.currentProcessorNumber)
                         plotting_functions.makeTrisurfacePlot(xValues, yValues, zValues, figure_name = "Info_gain_TrisurfacePlot_modulation_"+str(CheKiPEUQ.parallel_processing.currentProcessorNumber)+plot_suffix)
             if self.info_gains_matrices_array_format == 'meshgrid':        
                 for modulationIndex in range(len(local_info_gains_matrices_array)):
@@ -999,10 +994,9 @@ class parameter_estimation:
                         plotting_functions.makeMeshGridSurfacePlot(XX, YY, ZZ, figure_name = "Info_gain_Meshgrid_modulation_"+str(modulationIndex+1)+plot_suffix)
                     if self.UserInput.doe_settings['parallel_parameter_modulation'] == True: #This is the parallel case. In this case, the actual modulationIndex to attach to the filename is given by the processor rank.
                         import CheKiPEUQ.parallel_processing
-                        print("line 1002", CheKiPEUQ.parallel_processing.currentProcessorNumber)
                         plotting_functions.makeMeshGridSurfacePlot(XX, YY, ZZ, figure_name = "Info_gain_Meshgrid_modulation_"+str(CheKiPEUQ.parallel_processing.currentProcessorNumber)+plot_suffix)
         else:
-            print("At present, createInfoGainPlots and createInfoGainModulationPlots only create plots when the length of  independent_variable_grid_center is 2. We don't currently support creation of other dimensional plots.")
+            print("At present, createInfoGainPlots and createInfoGainModulationPlots only create plots when the length of  independent_variable_grid_center is 2. We don't currently support creation of other dimensional plots. The infogain data is being exported into the file _____.csv")
     def getLogP(self, proposal_sample): #The proposal sample is specific parameter vector.
         [log_likelihood_proposal, simulationOutput_proposal] = self.getLogLikelihood(proposal_sample)
         log_prior_proposal = self.getLogPrior(proposal_sample)
@@ -1339,7 +1333,7 @@ class parameter_estimation:
     
     
     #main function to get samples #TODO: Maybe Should return map_log_P and mu_AP_log_P?
-    @CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
+    #@CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
     def doMetropolisHastings(self, calculatePostBurnInStatistics = True, exportLog='UserChoice'):
         if str(self.UserInput.parameter_estimation_settings['mcmc_burn_in']).lower() == 'auto': self.mcmc_burn_in_length = int(self.UserInput.parameter_estimation_settings['mcmc_length']*0.1)
         else: self.mcmc_burn_in_length = self.UserInput.parameter_estimation_settings['mcmc_burn_in']
@@ -2015,7 +2009,7 @@ def arrayThresholdFilter(inputArray, filterKey=[], thresholdValue=0, removeValue
     filteredArray = inputArrayThresholdMarked[~mask] #This does the filtering where rows are deleted.
     return filteredArray
 
-@CiteSoft.after_call_compile_consolidated_log()
+@CiteSoft.after_call_compile_consolidated_log(compile_checkpoints=True)
 def exportCitations():
     pass
 
