@@ -1,0 +1,63 @@
+From runfile...fork:
+print("line 1012 the regular case")
+line 1042 0 (3, 3, 3)
+line 1042 1 (3, 3, 3)
+line 1042 2 (3, 3, 3)
+
+Now from mpiexec -n 4 python runfile_Example13_doe_function_meshgrid_1_parallel_conditions_exploration.py
+print("line 1012 the regular case")
+line 1042 0 (3, 1, 3)
+line 1042 0 (3, 1, 3)
+line 1042 0 (3, 1, 3)
+
+
+Working backwards, the info gains modulation plots function uses this implied argument:
+info_gains_matrices_array
+
+it usually gets populated in doeParameterModulationPermutationsScanner by this line:
+info_gains_matrices_list.append(np.array(info_gain_matrix))
+then it gets array cast.
+in fork:
+line 968 (3, 3, 3)
+in mpi:
+line 968 (3, 1, 3)
+line 968 (3, 1, 3)
+line 968 (3, 1, 3)
+
+
+In the normal case we have the info_gain_matrix made like this inside doeGetInfoGainMatrix:
+info_gain_matrix.append(conditionsPermutationAndInfoGain)
+self.info_gain_matrix = np.array(info_gain_matrix)
+
+After that it gets called in doeParameterModulationPermutationsScanner
+info_gain_matrix = self.doeGetInfoGainMatrix(parModulationPermutation, searchType=searchType)
+info_gains_matrices_list.append(np.array(info_gain_matrix))
+self.info_gains_matrices_array=np.array(info_gains_matrices_list)
+
+So after making info_gain_matrix I should pickle it into:
+current_parModulationInfoGainMatrix_filename = "parModulationInfoGainMatrix_mod"+parModulationNumberString 
+
+import CheKiPEUQ.parallel_processing
+#CheKiPEUQ.parallel_processing.currentProcessorNumber
+
+serial:
+ line 985 [[4.00000000e+02 4.00000000e-01 6.07967811e+04]
+ [5.00000000e+02 4.00000000e-01 7.50416415e+04]
+ [6.00000000e+02 4.00000000e-01 5.75898506e+04]
+ [4.00000000e+02 5.00000000e-01 5.94397765e+04]
+ [5.00000000e+02 5.00000000e-01 7.02507514e+04]
+ [6.00000000e+02 5.00000000e-01 6.32765623e+04]
+ [4.00000000e+02 6.00000000e-01 5.99903051e+04]
+ [5.00000000e+02 6.00000000e-01 6.15790472e+04]
+ [6.00000000e+02 6.00000000e-01 5.75529140e+04]]
+ 
+ parallel:
+ line 985 [[4.00000000e+02 4.00000000e-01 7.27500517e+04]
+ [5.00000000e+02 4.00000000e-01 8.77564287e+04]
+ [6.00000000e+02 4.00000000e-01 7.78957805e+04]
+ [4.00000000e+02 5.00000000e-01 6.69460309e+04]
+ [5.00000000e+02 5.00000000e-01 7.59619692e+04]
+ [6.00000000e+02 5.00000000e-01 6.33402797e+04]
+ [4.00000000e+02 6.00000000e-01 6.53931950e+04]
+ [5.00000000e+02 6.00000000e-01 6.17189794e+04]
+ [6.00000000e+02 6.00000000e-01 4.33327229e+04]]
