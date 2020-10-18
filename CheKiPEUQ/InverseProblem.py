@@ -842,25 +842,45 @@ class parameter_estimation:
                 self.meshGrid_independentVariable1ValuesArray = independentVariable1ValuesArray #This is sortof an implied return.
                 self.meshGrid_independentVariable2ValuesArray = independentVariable2ValuesArray #This is sortof an implied return.
                 #Here is the loop across conditions.
+                doSimulation = True #This is a temporary (short-lived) variable being made for parallel processing purposes.
+                conditionsPermutationIndex = 0
+                #We will not be using the function "self.getGridPermutations" for the loops because the meshgrid needs a different loop format.
                 for indValue2 in independentVariable2ValuesArray: #We know from experience that the outer loop should be over the YY variable.
                     for indValue1 in independentVariable1ValuesArray: #We know from experience that the inner loop should be over the XX variable.
                         #It is absolutely critical that we *do not* use syntax like self.UserInput.responses['independent_variables_values'] = xxxx
                         #Because that would move where the pointer is going to. We need to instead populate the individual values in the simulation module's namespace.
                         #This population Must occur here. It has to be after the indpendent variables have changed, before synthetic data is made, and before the MCMC is performed.
-                        self.UserInput.model['populateIndependentVariablesFunction']([indValue1,indValue2])
-                        self.populateResponsesWithSyntheticData(parameterPermutation)
-                        if searchType=='doMetropolisHastings':
-                            [map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, logP] = self.doMetropolisHastings()
-                        if searchType=='doEnsembleSliceSampling':
-                            [map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, logP] = self.doEnsembleSliceSampling()
-                        conditionsPermutation = np.array([indValue1,indValue2])
-                        conditionsPermutationAndInfoGain = np.hstack((conditionsPermutation, info_gain))
-                        info_gain_matrix.append(conditionsPermutationAndInfoGain) #NOTE that the structure *includes* the Permutations.
-                        if self.UserInput.doe_settings['info_gains_matrices_multiple_parameters'] == 'each': #copy the above lines for the sum.
-                            for parameterIndex in range(0,numParameters):#looping across number of parameters...
-                                conditionsPermutationAndInfoGain = np.hstack((conditionsPermutation, np.array(self.info_gain_each_parameter[parameterIndex]))) #Need to pull the info gain matrix from the nested objected named info_gain_each_parameter
-                                #Below mimics the line above which reads info_gain_matrix.append(conditionsPermutationAndInfoGain)
-                                info_gain_matrices_each_parameter[parameterIndex].append(conditionsPermutationAndInfoGain)
+
+                        #####Begin ChekIPEUQ Parallel Processing During Loop Block -- This block is custom for meshgrid since the loop is different.####
+                        if (self.UserInput.doe_settings['parallel_conditions_exploration'])== True:
+                            numPermutations = len(independentVariable2ValuesArray)*len(independentVariable1ValuesArray)
+                            #We will only execute the sampling the permutationIndex matches the processor rank.
+                            #Additionally, if the rank is 0 and the simulation got here, it will be assumed the person is running this just to find the number of Permutations, so that will be spit out and the simulation ended.
+                            import CheKiPEUQ.parallel_processing
+                            if CheKiPEUQ.parallel_processing.currentProcessorNumber == 0:
+                                print("For the user input settings provided, the number of Permutations+1 will be",  numPermutations+1, ". Please use mpiexec or mpirun with this number for N. If you are not expecting to see this message, change your UserInput choices. You have chosen parallel processing for gridsearch and have run CheKiPEUQ without mpi, which is a procedure to retrieve the number of processor ranks to use for parallelized gridsearch. A typical syntax now would be: mpiexec -n ",  numPermutations+1, " python runfile_for_your_analysis.py" )
+                                sys.exit()
+                            elif CheKiPEUQ.parallel_processing.currentProcessorNumber != conditionsPermutationIndex+1:
+                                doSimulation = False #This means the permutation index does not match the processor rank so nothing should be executed.
+                            elif CheKiPEUQ.parallel_processing.currentProcessorNumber == permutationIndex+1:
+                                doSimulation = True  #This is the "normal" case.
+                        #####End ChekIPEUQ Parallel Processing During Loop Block####
+                        if doSimulation == True:
+                            self.UserInput.model['populateIndependentVariablesFunction']([indValue1,indValue2])
+                            self.populateResponsesWithSyntheticData(parameterPermutation)
+                            if searchType=='doMetropolisHastings':
+                                [map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, logP] = self.doMetropolisHastings()
+                            if searchType=='doEnsembleSliceSampling':
+                                [map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, logP] = self.doEnsembleSliceSampling()
+                            conditionsPermutation = np.array([indValue1,indValue2])
+                            conditionsPermutationAndInfoGain = np.hstack((conditionsPermutation, info_gain))
+                            info_gain_matrix.append(conditionsPermutationAndInfoGain) #NOTE that the structure *includes* the Permutations.
+                            if self.UserInput.doe_settings['info_gains_matrices_multiple_parameters'] == 'each': #copy the above lines for the sum.
+                                for parameterIndex in range(0,numParameters):#looping across number of parameters...
+                                    conditionsPermutationAndInfoGain = np.hstack((conditionsPermutation, np.array(self.info_gain_each_parameter[parameterIndex]))) #Need to pull the info gain matrix from the nested objected named info_gain_each_parameter
+                                    #Below mimics the line above which reads info_gain_matrix.append(conditionsPermutationAndInfoGain)
+                                    info_gain_matrices_each_parameter[parameterIndex].append(conditionsPermutationAndInfoGain)
+                        conditionsPermutationIndex = conditionsPermutationIndex + 1
                 self.info_gain_matrix = np.array(info_gain_matrix) #this is an implied return in addition to the real return.
                 if self.UserInput.doe_settings['info_gains_matrices_multiple_parameters'] == 'each': #copy the above line for the sum.
                     for parameterIndex in range(0,numParameters):#looping across number of parameters...
