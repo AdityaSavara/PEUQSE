@@ -66,7 +66,7 @@ UserInput.contour_settings_custom['figure_name'] = 'Mumpce_contour_plot_Langmuir
 #PE_object.createAllPlots()
 
 
-UserInput.doe_settings['info_gains_matrices_array_format'] = 'meshgrid'
+UserInput.doe_settings['info_gains_matrices_array_format'] = 'xyz'
 UserInput.doe_settings['independent_variable_grid_center'] = [500, 0.5]
 UserInput.doe_settings['independent_variable_grid_interval_size'] = [100, 0.1]
 UserInput.doe_settings['independent_variable_grid_num_intervals'] = [2,2] #This is the number in each direction outward from center. So a 2 here gives 5 evaluations. A zero means we don't allow the parameter to vary.
@@ -86,7 +86,7 @@ PE_object = CKPQ.parameter_estimation(UserInput)
 
 #To obtain a single info gain matrix, for a single set of independent variables, we use the following syntax:
 del PE_object
-UserInput.doe_settings['info_gains_matrices_array_format'] = 'meshgrid'
+UserInput.doe_settings['info_gains_matrices_array_format'] = 'xyz'
 #We *still* have to define an independent variable grid.
 UserInput.doe_settings['independent_variable_grid_center'] = [500, 0.5]
 UserInput.doe_settings['independent_variable_grid_interval_size'] = [100, 0.1]

@@ -13,6 +13,7 @@ import copy
 #import mumce_py.solution mumce_pySolution
 try:
     import CiteSoft
+    print("line 16, importing CiteSoft env")
 except:
     import os #The below lines are to allow CiteSoftLocal to be called regardless of user's working directory.
     lenOfFileName = len(os.path.basename(__file__)) #This is the name of **this** file.
@@ -910,11 +911,9 @@ class parameter_estimation:
                 #    pass  #This is the "normal" case and is implied, so is commented out.
             #####End ChekIPEUQ Parallel Processing During Loop Block####
             #We will get separate info gain matrix for each parameter modulation combination.
-            print("line 913", CheKiPEUQ.parallel_processing.currentProcessorNumber)
             info_gain_matrix = self.doeGetInfoGainMatrix(parModulationPermutation, searchType=searchType)
             #Append the info gain matrix obtainend.
             info_gains_matrices_list.append(np.array(info_gain_matrix))
-            print("line 917", CheKiPEUQ.parallel_processing.currentProcessorNumber)
             if self.UserInput.doe_settings['info_gains_matrices_multiple_parameters'] == 'each': #copy the above lines which were for the sum.
                     for parameterIndex in range(0,numParameters):#looping across number of parameters...
                         info_gains_matrices_lists_one_for_each_parameter[parameterIndex].append(np.array(self.info_gain_matrices_each_parameter[parameterIndex]))
@@ -929,6 +928,7 @@ class parameter_estimation:
             #self.info_gains_matrices_array[modulationIndex]  #Write this to file. This is 'xyz' format regardless of whether self.info_gains_matrices_array_format == 'xyz'  or =='meshgrid' is used.
         return self.info_gains_matrices_array
     
+    @CiteSoft.after_call_compile_consolidated_log(compile_checkpoints=True) #This is from the CiteSoft module.
     def createInfoGainPlots(self, parameterIndices=[], plot_suffix = ''):
         #parameterIndices should be a list of parameters if the user only wants as subset of parameters. The default, a blank list, will do all if the setting for doing each is on.
         
@@ -981,7 +981,7 @@ class parameter_estimation:
                     yValues = local_info_gains_matrices_array[modulationIndex][:,1]
                     zValues = local_info_gains_matrices_array[modulationIndex][:,2]
                     if self.UserInput.doe_settings['parallel_parameter_modulation'] == False: #This is the normal case.
-                        plotting_functions.makeTrisurfacePlot(xValues, yValues, zValues, figure_name = "Info_gain_TrisurfacePlot_modulation_"+str(modulationIndex)+plot_suffix)
+                        plotting_functions.makeTrisurfacePlot(xValues, yValues, zValues, figure_name = "Info_gain_TrisurfacePlot_modulation_"+str(modulationIndex+1)+plot_suffix)
                     if self.UserInput.doe_settings['parallel_parameter_modulation'] == True: #This is the parallel case. In this case, the actual modulationIndex to attach to the filename is given by the processor rank.
                         import CheKiPEUQ.parallel_processing
                         print("line 987", CheKiPEUQ.parallel_processing.currentProcessorNumber)
@@ -996,7 +996,7 @@ class parameter_estimation:
                     zValues = local_info_gains_matrices_array[modulationIndex][:,2]
                     ZZ = zValues.reshape(XX.shape) #We know from experience to reshape this way.
                     if self.UserInput.doe_settings['parallel_parameter_modulation'] == False: #This is the normal case.
-                        plotting_functions.makeMeshGridSurfacePlot(XX, YY, ZZ, figure_name = "Info_gain_Meshgrid_modulation_"+str(modulationIndex)+plot_suffix)
+                        plotting_functions.makeMeshGridSurfacePlot(XX, YY, ZZ, figure_name = "Info_gain_Meshgrid_modulation_"+str(modulationIndex+1)+plot_suffix)
                     if self.UserInput.doe_settings['parallel_parameter_modulation'] == True: #This is the parallel case. In this case, the actual modulationIndex to attach to the filename is given by the processor rank.
                         import CheKiPEUQ.parallel_processing
                         print("line 1002", CheKiPEUQ.parallel_processing.currentProcessorNumber)
@@ -1228,7 +1228,7 @@ class parameter_estimation:
     def getParallelProcessingPrefixAndSuffix(self):
         file_name_prefix = ''
         file_name_suffix = ''
-        if (self.UserInput.parameter_estimation_settings['mcmc_parallel_sampling'] or parameter_estimation_settings['multistart_parallel_sampling']) == True: 
+        if (self.UserInput.parameter_estimation_settings['mcmc_parallel_sampling'] or self.UserInput.parameter_estimation_settings['multistart_parallel_sampling']) == True: 
             import CheKiPEUQ.parallel_processing
             import os
             if CheKiPEUQ.parallel_processing.currentProcessorNumber == 0:
@@ -1320,7 +1320,7 @@ class parameter_estimation:
         #Now to keep the results:
         self.post_burn_in_samples = zeus_sampler.samples.flatten(discard = self.mcmc_burn_in_length )
         self.post_burn_in_log_posteriors_un_normed_vec = np.atleast_2d(zeus_sampler.samples.flatten_logprob(discard=self.mcmc_burn_in_length)).transpose() #Needed to make it 2D and transpose.
-        if self.UserInput.request_mpi == True: #If we're using parallel processing, we need to make calculatePostBurnInStatistics and also exportLog into True.
+        if (self.UserInput.parameter_estimation_settings['mcmc_parallel_sampling'] or self.UserInput.parameter_estimation_settings['multistart_parallel_sampling']) == True: #If we're using certain parallel processing, we need to make calculatePostBurnInStatistics and also exportLog into True.
             calculatePostBurnInStatistics = True; exportLog=True
         if calculatePostBurnInStatistics == True:
             self.calculatePostBurnInStatistics(calculate_post_burn_in_log_priors_vec = True) #This function call will also filter the lowest probability samples out, when using default settings.
@@ -1339,7 +1339,7 @@ class parameter_estimation:
     
     
     #main function to get samples #TODO: Maybe Should return map_log_P and mu_AP_log_P?
-    #@CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
+    @CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
     def doMetropolisHastings(self, calculatePostBurnInStatistics = True, exportLog='UserChoice'):
         if str(self.UserInput.parameter_estimation_settings['mcmc_burn_in']).lower() == 'auto': self.mcmc_burn_in_length = int(self.UserInput.parameter_estimation_settings['mcmc_length']*0.1)
         else: self.mcmc_burn_in_length = self.UserInput.parameter_estimation_settings['mcmc_burn_in']
@@ -1460,7 +1460,7 @@ class parameter_estimation:
         self.post_burn_in_log_posteriors_un_normed_vec = (self.post_burn_in_log_posteriors_un_normed_vec) #Is this increasing dimension?
         self.post_burn_in_log_likelihoods_vec = log_likelihoods_vec[self.mcmc_burn_in_length:]
         self.post_burn_in_log_priors_vec = log_priors_vec[self.mcmc_burn_in_length:]
-        if self.UserInput.request_mpi == True: #If we're using parallel processing, we need to make calculatePostBurnInStatistics and also exportLog into True.
+        if (self.UserInput.parameter_estimation_settings['mcmc_parallel_sampling'] or self.UserInput.parameter_estimation_settings['multistart_parallel_sampling']) == True: #If we're using certain parallel processing, we need to make calculatePostBurnInStatistics and also exportLog into True.
             calculatePostBurnInStatistics = True; exportLog=True
         if calculatePostBurnInStatistics == True:
             self.calculatePostBurnInStatistics() #This function call will also filter the lowest probability samples out, when using default settings.
@@ -1780,7 +1780,7 @@ class parameter_estimation:
         figureObject_beta.mumpce_plots(model_parameter_info = self.UserInput.model_parameter_info, active_parameters = active_parameters, pairs_of_parameter_indices = pairs_of_parameter_indices, posterior_mu_vector = posterior_mu_vector, posterior_cov_matrix = posterior_cov_matrix, prior_mu_vector = np.array(self.UserInput.mu_prior), prior_cov_matrix = self.UserInput.covmat_prior, contour_settings_custom = self.UserInput.contour_settings_custom)
         return figureObject_beta
 
-    @CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
+    @CiteSoft.after_call_compile_consolidated_log(compile_checkpoints=True) #This is from the CiteSoft module.
     def createAllPlots(self):
         if self.UserInput.request_mpi == True: #need to check if UserInput.request_mpi is on, since if so we will only make plots after the final process.
             import os; import sys
