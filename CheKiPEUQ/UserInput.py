@@ -2,12 +2,13 @@ import numpy as np
 
 #####Experimental Data Input Files#####
 responses = {}
-responses['responses_abscissa'] = []
-responses['responses_observed'] = []
-responses['responses_observed_uncertainties'] = [] #Normally this variable must be filled. To set the responses_observed_uncertainties to zero, this variable or the values inside must really be set equal to 0. A blank list well autogenerate uncertainties relative to the InputParameterPriorValues.
+responses['responses_abscissa'] = [] #Make 1 or more list or array within a list.
+responses['responses_observed'] = [] #Make 1 list/array for each response.
+responses['responses_observed_uncertainties'] = [] #Normally should be provided with the same structure as responses_observed. To set the responses_observed_uncertainties to zero, this variable or the values inside must really be set equal to 0. A blank list well autogenerate uncertainties relative to the InputParameterPriorValues.
 responses['reducedResponseSpace'] = []
 responses['independent_variables_values'] = []
 responses['independent_variables_names'] = []
+responses['num_responses'] = 'auto' #'auto' is recommended, though an integer can be put in directly.
 
 #### Model Paramerters Variables ###
 model = {} 
