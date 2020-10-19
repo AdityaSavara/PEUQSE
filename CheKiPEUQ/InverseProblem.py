@@ -46,8 +46,19 @@ class parameter_estimation:
             UserInput.parameter_estimation_settings['mcmc_checkPointFrequency'] = UserInput.parameter_estimation_settings['checkPointFrequency']
             UserInput.parameter_estimation_settings['multistart_checkPointFrequency'] = UserInput.parameter_estimation_settings['checkPointFrequency']
         UserInput.request_mpi = False #Set as false as default.
-        if (UserInput.parameter_estimation_settings['mcmc_parallel_sampling'] or UserInput.parameter_estimation_settings['multistart_parallel_sampling']) == True:
+        if ( \
+            UserInput.parameter_estimation_settings['mcmc_parallel_sampling'] or \
+            UserInput.parameter_estimation_settings['multistart_parallel_sampling'] or \
+            UserInput.doe_settings['parallel_conditions_exploration'] or  \
+            UserInput.doe_settings['parallel_parameter_modulation'] \
+            ) \
+            == True:
             UserInput.request_mpi = True
+            if (UserInput.doe_settings['parallel_conditions_exploration'] or UserInput.doe_settings['parallel_parameter_modulation']) and (UserInput.parameter_estimation_settings['mcmc_parallel_sampling'] or UserInput.parameter_estimation_settings['multistart_parallel_sampling']):
+                print("Warning: Parallelization of Design of experiments is not compatible with parallelization of either mcmc_parallel_sampling or multistart_parallel_sampling.  Those other features are being turned off.")
+                UserInput.parameter_estimation_settings['multistart_parallel_sampling'] = False
+                UserInput.parameter_estimation_settings['mcmc_parallel_sampling']
+                
         if UserInput.request_mpi == True: #Rank zero needs to clear out the mpi_log_files directory, so check if we are using rank 0.
             import os; import sys
             import CheKiPEUQ.parallel_processing
@@ -63,7 +74,7 @@ class parameter_estimation:
                 if CheKiPEUQ.parallel_processing.numProcessors > 1:    #This is the normal case.
                     sys.exit() #TODO: right now, processor zero just exits after making and emptying the directory. In the future, things will be more complex for the processor zero.
                 elif CheKiPEUQ.parallel_processing.numProcessors == 1: #This is the case where the person has only one process rank, so probably does not want code execution to stop just yet. (This is an intentional case for gridsearch for example, where running without mpi will print the number of grid Permutations).
-                    print("Notice: you have requested parallel processing by MPI but have only 1 processor rank enabled or are not using mpi for this run. Parallel processing is being disabled for this run. If you are using gridsearch, another message will be printed out for the number of processor ranks to provide to mpi.")
+                    print("Notice: you have requested parallel processing by MPI but have only 1 processor rank enabled or are not using mpi for this run. Parallel processing is being disabled for this run. If you are running to find the number of process ranks to use, another message will be printed out with the number of processor ranks to provide to mpi.")
                     UserInput.request_mpi = False
         
         #Setting this object so that we can make changes to it below without changing userinput dictionaries.
@@ -108,9 +119,12 @@ class parameter_estimation:
         #                          [0., 0., 0., 13.0, 0., 0.],
         #                          [0., 0., 0., 0., 0.1, 0.],
         #                          [0., 0., 0., 0., 0., 0.1]])
-
-
         #Making things at least 2d.  Also changing it to a purely internal variable because that way we don't edit the user input dictionary going forward.
+        
+        #Below, we are generating samples of the prior for info gain purposes.  This requires considering random seeds.
+        if 'mcmc_random_seed' in self.UserInput.parameter_estimation_settings:
+            if type(self.UserInput.parameter_estimation_settings['mcmc_random_seed']) == type(1): #if it's an integer, then it's not a "None" type or string, and we will use it.
+                np.random.seed(self.UserInput.parameter_estimation_settings['mcmc_random_seed'])
         self.samples_of_prior = np.random.multivariate_normal(self.UserInput.mu_prior,UserInput.covmat_prior,UserInput.parameter_estimation_settings['mcmc_length'])
         UserInput.responses_abscissa = np.atleast_2d(UserInput.responses['responses_abscissa'])
         UserInput.responses_observed = np.atleast_2d(UserInput.responses['responses_observed'])
@@ -459,6 +473,7 @@ class parameter_estimation:
                 if walkerInitialDistribution.lower() == 'auto':
                     walkerInitialDistribution = 'uniform'
         for permutationIndex,permutation in enumerate(listOfPermutations):
+            #####Begin ChekIPEUQ Parallel Processing During Loop Block####
             if (self.UserInput.parameter_estimation_settings['multistart_parallel_sampling'])== True:
                 #We will only execute the sampling the permutationIndex matches the processor rank.
                 #Additionally, if the rank is 0 and the simulation got here, it will be assumed the person is running this just to find the number of Permutations, so that will be spit out and the simulation ended.
@@ -470,6 +485,7 @@ class parameter_estimation:
                     continue #This means the permutation index does not match the processor rank so nothing should be executed.
                 #elif CheKiPEUQ.parallel_processing.currentProcessorNumber == permutationIndex+1:
                 #    pass  #This is the "normal" case and is implied, so is commented out.
+            #####End ChekIPEUQ Parallel Processing During Loop Block####
             self.UserInput.InputParameterInitialGuess = permutation #We need to fill the variable InputParameterInitialGuess with the permutation being checked.
             if searchType == 'getLogP':
                 self.map_logP = self.getLogP(permutation) #The getLogP function does not fill map_logP by itself.
@@ -560,7 +576,7 @@ class parameter_estimation:
         if searchType == 'getLogP':          
             return bestResultSoFar# [self.map_parameter_set, self.map_logP]
 
-    @CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
+    #@CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
     def doMultiStart(self, searchType='getLogP', numStartPoints = 'UserChoice', relativeInitialDistributionSpread='UserChoice', exportLog = 'UserChoice', initialPointsDistributionType='UserChoice', passThroughArgs = 'UserChoice', calculatePostBurnInStatistics='UserChoice',  keep_cumulative_post_burn_in_data = 'UserChoice', walkerInitialDistribution='UserChoice', centerPoint = None, gridsearchSamplingInterval = 'UserChoice', gridsearchSamplingRadii = 'UserChoice'):
         #This function is basically a wrapper that creates a list of initial points and then runs a 'check each permutation' search on that list.
         #We set many of the arguments to have blank or zero values so that if they are not provided, the values will be taken from the UserInput choices.
@@ -593,46 +609,93 @@ class parameter_estimation:
         bestResultSoFar = self.doListOfPermutationsSearch(listOfPermutations=multiStartInitialPointsList, searchType=searchType, exportLog=exportLog, walkerInitialDistribution=walkerInitialDistribution, passThroughArgs=passThroughArgs, calculatePostBurnInStatistics=calculatePostBurnInStatistics, keep_cumulative_post_burn_in_data=keep_cumulative_post_burn_in_data, centerPoint = centerPoint)
         return bestResultSoFar
   
-    @CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
+    #@CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
     def doGridSearch(self, searchType='getLogP', exportLog = True, gridSamplingAbsoluteIntervalSize = [], gridSamplingNumOfIntervals = [], passThroughArgs = {}, calculatePostBurnInStatistics=True,  keep_cumulative_post_burn_in_data = False, walkerInitialDistribution='UserChoice'):
         print("Warning: You have called doGridSearch.  This function is deprecated and is only retained for old examples. Please use doMultiStart with multistart_initialPointsDistributionType = 'grid' ")
         # gridSamplingNumOfIntervals is the number of variations to check in units of variance for each parameter. Can be 0 if you don't want to vary a particular parameter in the grid search.
         #calculatePostBurnInStatistics will store all the individual runs in memory and will then provide the samples of the best one.
         #TODO: the upper part of the gridsearch may not be compatibile with reduced parameter space. Needs to be checked.
         gridCenter = self.UserInput.InputParameterInitialGuess*1.0 #This may be a reduced parameter space.    
-        print("line 591 arguments:", gridCenter, gridSamplingAbsoluteIntervalSize, gridSamplingNumOfIntervals)
         gridPermutations, numPermutations = self.getGridPermutations(gridCenter, gridSamplingAbsoluteIntervalSize, gridSamplingNumOfIntervals)
         bestResultSoFar = self.doListOfPermutationsSearch(gridPermutations, numPermutations = numPermutations, searchType=searchType, exportLog = exportLog, walkerInitialDistribution=walkerInitialDistribution, passThroughArgs=passThroughArgs, calculatePostBurnInStatistics=calculatePostBurnInStatistics,  keep_cumulative_post_burn_in_data = keep_cumulative_post_burn_in_data, centerPoint = gridCenter)
         return bestResultSoFar
 
-    def consolidate_parallel_sampling_data(self, parallelizationType="equal"):
+    def checkIfAllParallelSimulationsDone(self, fileNameBase, fileNamePrefix='', fileNameSuffix=''):
+        import CheKiPEUQ.parallel_processing
+        #CheKiPEUQ.parallel_processing.currentProcessorNumber
+        numSimulations = CheKiPEUQ.parallel_processing.numSimulations
+        import os
+        os.chdir("./mpi_log_files")
+        #now make a list of what we expect.
+        simulationsKey = np.ones(numSimulations)
+        working_dir=os.getcwd()
+        filesInDirectory=os.listdir(working_dir)
+        for simulationIndex in range(0,numSimulations): #For each simulation, we check if it's there and set the simulation key to 0 if it is done.
+            simulationNumberString = str(simulationIndex+1)
+            for name in filesInDirectory:
+                if fileNamePrefix+fileNameBase+simulationNumberString+fileNameSuffix+".pkl" in name:
+                    simulationsKey[simulationIndex] = 0
+                    filesInDirectory.remove(name) #Removing so it won't be checked for again, to speed up next search.
+        os.chdir("..") #change directory back regardless.
+        if np.sum(simulationsKey) == 0:
+            CheKiPEUQ.parallel_processing.finalProcess = True
+            return True
+        else: #if simulationsKey is not zero, then we return False b/c not yet finsihed.
+            CheKiPEUQ.parallel_processing.finalProcess = False
+            return False
+
+    def consolidate_parallel_doe_data(self, parallelizationType='conditions'):
+        import CheKiPEUQ.parallel_processing
+        #CheKiPEUQ.parallel_processing.currentProcessorNumber
+        numSimulations = CheKiPEUQ.parallel_processing.numSimulations
+        parModulationNumber = int(self.parModulationPermutationIndex + 1)
+        #We will check **only** for this parModulationNumber. That way, it this processor is the last to finish this parModulation, it will do the infoGainMatrix stacking.
+        if self.checkIfAllParallelSimulationsDone("conditionsPermutationAndInfoGain_mod"+str(parModulationNumber)+"_cond") == True:
+            if parallelizationType.lower() == 'conditions':
+                import os
+                os.chdir("./mpi_log_files")
+                self.info_gain_matrix = [] #Initializing this as a blank list, it will be made into an array after the loop.
+                for simulationIndex in range(0,numSimulations): #For each simulation, we need to grab the results.
+                    simulationNumberString = str(simulationIndex+1)
+                    #Getting the data out.    
+                    current_conditionsPermutationAndInfoGain_filename = "conditionsPermutationAndInfoGain_mod"+str(parModulationNumber)+"_cond"+simulationNumberString
+                    current_conditionsPermutationAndInfoGain_data = unpickleAnObject(current_conditionsPermutationAndInfoGain_filename)
+                    #accumulating.
+                    self.info_gain_matrix.append(current_conditionsPermutationAndInfoGain_data)                        
+                #Now we'll make this info_gain_matrix into an array and pickle it. It will be an implied return.
+                self.info_gain_matrix = np.array(self.info_gain_matrix)
+                current_parModulationInfoGainMatrix_filename = "parModulationInfoGainMatrix_mod"+str(parModulationNumber)
+                pickleAnObject(self.info_gain_matrix,current_parModulationInfoGainMatrix_filename)
+                #Change back to the regular directory since we are done.
+                os.chdir("..")
+                return True #so we know we're done.
+        else:
+            return False #this means we weren't done.
+            
+    def consolidate_parallel_doe_info_gain_matrices(self):
+        import CheKiPEUQ.parallel_processing
+        numSimulations = CheKiPEUQ.parallel_processing.numSimulations        
+        import os
+        os.chdir("./mpi_log_files")
+        info_gains_matrices_list = [] #Initializing this as a blank list, it will be made into an array after the loop.
+        for parModulationIndex in range(0,self.numParModulationPermutations): #For each simulation, we need to grab the results.
+            parModulationNumberString = str(parModulationIndex+1)
+            #Getting the data out.    
+            current_parModulationInfoGainMatrix_filename = "parModulationInfoGainMatrix_mod"+parModulationNumberString 
+            current_parModulationInfoGainMatrix_data = unpickleAnObject(current_parModulationInfoGainMatrix_filename)
+            #accumulating.
+            info_gains_matrices_list.append(current_parModulationInfoGainMatrix_data)                        
+        #nothing more needs to be done except making it into an array: self.info_gains_matrices_array is an implied return.
+        self.info_gains_matrices_array=np.array(info_gains_matrices_list)
+        os.chdir("..")
+
+ 
+    def consolidate_parallel_sampling_data(self, parallelizationType='equal'):
         #parallelizationType='equal' means everything will get averaged together. parallelizationType='permutation' will be treated differently, same with parallelizationType='designOfExperiments'
         import CheKiPEUQ.parallel_processing
         #CheKiPEUQ.parallel_processing.currentProcessorNumber
         numSimulations = CheKiPEUQ.parallel_processing.numSimulations
-        def checkIfAllSimulationsDone():
-            import os
-            os.chdir("./mpi_log_files")
-            #now make a list of what we expect.
-            simulationsKey = np.ones(numSimulations)
-            working_dir=os.getcwd()
-            filesInDirectory=os.listdir(working_dir)
-            for simulationIndex in range(0,numSimulations): #For each simulation, we check if it's there and set the simulation key to 0 if it is done.
-                simulationNumberString = str(simulationIndex+1)
-                for name in filesInDirectory:
-                    if "mcmc_post_burn_in_statistics_"+simulationNumberString+".pkl" in name:
-                        simulationsKey[simulationIndex] = 0
-                        filesInDirectory.remove(name) #Removing so it won't be checked for again, to speed up next search.
-            os.chdir("..") #change directory back regardless.
-            if np.sum(simulationsKey) == 0:
-                print("This is the end of the last simulation, so now the parallel sampling data will be processed!!!!!!")       
-                CheKiPEUQ.parallel_processing.finalProcess = True
-                return True
-            else: #if simulationsKey is not zero, then we return False b/c not yet finsihed.
-                CheKiPEUQ.parallel_processing.finalProcess = False
-                return False
-            
-        if checkIfAllSimulationsDone() == True:
+        if checkIfAllParallelSimulationsDone("mcmc_post_burn_in_statistics_") == True:
             if parallelizationType.lower() == 'permutation':
                 import os
                 os.chdir("./mpi_log_files")
@@ -752,11 +815,11 @@ class parameter_estimation:
     software_kwargs = {"version": software_version, "author": ["Eric A. Walker", "Kishore Ravisankar", "Aditya Savara"], "doi": "https://doi.org/10.1002/cctc.202000976", "cite": "Eric Alan Walker, Kishore Ravisankar, Aditya Savara. CheKiPEUQ Intro 2: Harnessing Uncertainties from Data Sets, Bayesian Design of Experiments in Chemical Kinetics. ChemCatChem. Accepted. doi:10.1002/cctc.202000976"} 
     #@CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
     @CiteSoft.module_call_cite(unique_id=software_unique_id, software_name=software_name, **software_kwargs)
-    def doeGetInfoGainMatrix(self, parameterCombination, searchType='doMetropolisHastings'):#Note: There is an implied argument of info_gains_matrices_array_format being 'xyz' or 'meshgrid'
-        #At present, we *must* provide a parameterCombination because right now the only way to get an InfoGainMatrix is with synthetic data assuming a particular parameterCombination as the "real" or "actual" parameterCombination.
+    def doeGetInfoGainMatrix(self, parameterPermutation, searchType='doMetropolisHastings'):#Note: There is an implied argument of info_gains_matrices_array_format being 'xyz' or 'meshgrid'
+        #At present, we *must* provide a parameterPermutation because right now the only way to get an InfoGainMatrix is with synthetic data assuming a particular parameterPermutation as the "real" or "actual" parameterPermutation.
         doe_settings = self.UserInput.doe_settings
         self.middle_of_doe_flag = True  #This is a work around that is needed because right now the synthetic data creation has an __init__ call which is going to try to modify the independent variables back to their original values if we don't do this.
-        info_gain_matrix = [] #Right now, if using KL_divergence, each item in here is a single array. It is a sum across all parameters. 
+        self.info_gain_matrix = [] #Right now, if using KL_divergence, each item in here is a single array. It is a sum across all parameters. 
         if self.UserInput.doe_settings['info_gains_matrices_multiple_parameters'] == 'each':
             info_gain_matrices_each_parameter = [] #make a matrix ready to copy info_gain_matrix. 
             #need to make a list of lists (or similar) to fill it with the individual matrices necessary.
@@ -770,30 +833,47 @@ class parameter_estimation:
             if doe_settings['on_the_fly_conditions_grids'] == True:
                 conditionsGridPermutations, numPermutations = self.getGridPermutations(doe_settings['independent_variable_grid_center'], doe_settings['independent_variable_grid_interval_size'], doe_settings['independent_variable_grid_num_intervals'])
             #Here is the loop across conditions.                
-            for conditionsPermutationIndex,conditionsCombination in enumerate(conditionsGridPermutations):    
+            for conditionsPermutationIndex,conditionsPermutation in enumerate(conditionsGridPermutations):    
+                #####Begin ChekIPEUQ Parallel Processing During Loop Block####
+                if (self.UserInput.doe_settings['parallel_conditions_exploration'])== True:
+                    #We will only execute the sampling the permutationIndex matches the processor rank.
+                    #Additionally, if the rank is 0 and the simulation got here, it will be assumed the person is running this just to find the number of Permutations, so that will be spit out and the simulation ended.
+                    import CheKiPEUQ.parallel_processing
+                    if CheKiPEUQ.parallel_processing.currentProcessorNumber == 0:
+                        print("For the user input settings provided, the number of Permutations+1 will be",  numPermutations+1, ". Please use mpiexec or mpirun with this number for N. If you are not expecting to see this message, change your UserInput choices. You have chosen parallel processing for gridsearch and have run CheKiPEUQ without mpi, which is a procedure to retrieve the number of processor ranks to use for parallelized gridsearch. A typical syntax now would be: mpiexec -n ",  numPermutations+1, " python runfile_for_your_analysis.py" )
+                        sys.exit()
+                    elif CheKiPEUQ.parallel_processing.currentProcessorNumber != conditionsPermutationIndex+1:
+                        continue #This means the permutation index does not match the processor rank so nothing should be executed.
+                    #elif CheKiPEUQ.parallel_processing.currentProcessorNumber == permutationIndex+1:
+                    #    pass  #This is the "normal" case and is implied, so is commented out.
+                #####End ChekIPEUQ Parallel Processing During Loop Block####
                 #It is absolutely critical that we *do not* use syntax like self.UserInput.responses['independent_variables_values'] = xxxx
                 #Because that would move where the pointer is going to. We need to instead populate the individual values in the simulation module's namespace.
                 #This population Must occur here. It has to be after the indpendent variables have changed, before synthetic data is made, and before the MCMC is performed.
-                self.UserInput.model['populateIndependentVariablesFunction'](conditionsCombination)
-                self.populateResponsesWithSyntheticData(parameterCombination)
+                self.UserInput.model['populateIndependentVariablesFunction'](conditionsPermutation)
+                self.populateResponsesWithSyntheticData(parameterPermutation)
                 if searchType=='doMetropolisHastings':
                     [map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, logP] = self.doMetropolisHastings()
                 if searchType=='doEnsembleSliceSampling':
                     [map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, logP] = self.doEnsembleSliceSampling()
-                conditionsCombination = np.array(conditionsCombination) #we're going to make this an array before adding to the info_gain matrix.
-                conditionsCombinationAndInfoGain = np.hstack((conditionsCombination, info_gain))
-                info_gain_matrix.append(conditionsCombinationAndInfoGain)
+                conditionsPermutation = np.array(conditionsPermutation) #we're going to make this an array before adding to the info_gain matrix.
+                conditionsPermutationAndInfoGain = np.hstack((conditionsPermutation, info_gain))
+                self.info_gain_matrix.append(conditionsPermutationAndInfoGain)
+                if (self.UserInput.doe_settings['parallel_conditions_exploration'])== True:
+                    self.exportSingleConditionInfoGainMatrix(self.parameterPermutationNumber, conditionsPermutationAndInfoGain, conditionsPermutationIndex)
                 if self.UserInput.doe_settings['info_gains_matrices_multiple_parameters'] == 'each': #copy the above lines for the sum.
                     for parameterIndex in range(0,numParameters):#looping across number of parameters...
-                        conditionsCombinationAndInfoGain = np.hstack((conditionsCombination, np.array(self.info_gain_each_parameter[parameterIndex]))) #Need to pull the info gain matrix from the nested objected named info_gain_each_parameter
-                        #Below mimics the line above which reads info_gain_matrix.append(conditionsCombinationAndInfoGain)
-                        info_gain_matrices_each_parameter[parameterIndex].append(conditionsCombinationAndInfoGain)
-            self.info_gain_matrix = np.array(info_gain_matrix) #this is an implied return in addition to the real return.
+                        conditionsPermutationAndInfoGain = np.hstack((conditionsPermutation, np.array(self.info_gain_each_parameter[parameterIndex]))) #Need to pull the info gain matrix from the nested objected named info_gain_each_parameter
+                        #Below mimics the line above which reads self.info_gain_matrix.append(conditionsPermutationAndInfoGain)
+                        info_gain_matrices_each_parameter[parameterIndex].append(conditionsPermutationAndInfoGain)
+            self.info_gain_matrix = np.array(self.info_gain_matrix) #this is an implied return in addition to the real return.
+            if self.UserInput.doe_settings['parallel_conditions_exploration'] == True: #We will overwrite self.info_gain_matrix with a consolidated one if needed.
+                self.consolidate_parallel_doe_data(parallelizationType='conditions')
             if self.UserInput.doe_settings['info_gains_matrices_multiple_parameters'] == 'each': #copy the above line for the sum.
                 for parameterIndex in range(0,numParameters):#looping across number of parameters...
                     self.info_gain_matrices_each_parameter[parameterIndex]= np.array(info_gain_matrices_each_parameter[parameterIndex])
             self.middle_of_doe_flag = False #Set this back to false once info gain matrix is ready.
-            return np.array(info_gain_matrix)            
+            return np.array(self.info_gain_matrix)            
         if self.UserInput.doe_settings['info_gains_matrices_array_format'] == 'meshgrid':
             self.info_gains_matrices_array_format = 'meshgrid'  
             if len(doe_settings['independent_variable_grid_center']) !=2:
@@ -814,31 +894,55 @@ class parameter_estimation:
                 self.meshGrid_independentVariable1ValuesArray = independentVariable1ValuesArray #This is sortof an implied return.
                 self.meshGrid_independentVariable2ValuesArray = independentVariable2ValuesArray #This is sortof an implied return.
                 #Here is the loop across conditions.
+                doSimulation = True #This is a temporary (short-lived) variable being made for parallel processing purposes.
+                conditionsPermutationIndex = 0
+                #We will not be using the function "self.getGridPermutations" for the loops because the meshgrid needs a different loop format.
                 for indValue2 in independentVariable2ValuesArray: #We know from experience that the outer loop should be over the YY variable.
                     for indValue1 in independentVariable1ValuesArray: #We know from experience that the inner loop should be over the XX variable.
                         #It is absolutely critical that we *do not* use syntax like self.UserInput.responses['independent_variables_values'] = xxxx
                         #Because that would move where the pointer is going to. We need to instead populate the individual values in the simulation module's namespace.
                         #This population Must occur here. It has to be after the indpendent variables have changed, before synthetic data is made, and before the MCMC is performed.
-                        self.UserInput.model['populateIndependentVariablesFunction']([indValue1,indValue2])
-                        self.populateResponsesWithSyntheticData(parameterCombination)
-                        if searchType=='doMetropolisHastings':
-                            [map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, logP] = self.doMetropolisHastings()
-                        if searchType=='doEnsembleSliceSampling':
-                            [map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, logP] = self.doEnsembleSliceSampling()
-                        conditionsCombination = np.array([indValue1,indValue2])
-                        conditionsCombinationAndInfoGain = np.hstack((conditionsCombination, info_gain))
-                        info_gain_matrix.append(conditionsCombinationAndInfoGain) #NOTE that the structure *includes* the Permutations.
-                        if self.UserInput.doe_settings['info_gains_matrices_multiple_parameters'] == 'each': #copy the above lines for the sum.
-                            for parameterIndex in range(0,numParameters):#looping across number of parameters...
-                                conditionsCombinationAndInfoGain = np.hstack((conditionsCombination, np.array(self.info_gain_each_parameter[parameterIndex]))) #Need to pull the info gain matrix from the nested objected named info_gain_each_parameter
-                                #Below mimics the line above which reads info_gain_matrix.append(conditionsCombinationAndInfoGain)
-                                info_gain_matrices_each_parameter[parameterIndex].append(conditionsCombinationAndInfoGain)
-                self.info_gain_matrix = np.array(info_gain_matrix) #this is an implied return in addition to the real return.
+                        #####Begin ChekIPEUQ Parallel Processing During Loop Block -- This block is custom for meshgrid since the loop is different.####
+                        if (self.UserInput.doe_settings['parallel_conditions_exploration'])== True:
+                            numPermutations = len(independentVariable2ValuesArray)*len(independentVariable1ValuesArray)
+                            permutationIndex = conditionsPermutationIndex
+                            #We will only execute the sampling the permutationIndex matches the processor rank.
+                            #Additionally, if the rank is 0 and the simulation got here, it will be assumed the person is running this just to find the number of Permutations, so that will be spit out and the simulation ended.
+                            import CheKiPEUQ.parallel_processing
+                            if CheKiPEUQ.parallel_processing.currentProcessorNumber == 0:
+                                print("For the user input settings provided, the number of Permutations+1 will be",  numPermutations+1, ". Please use mpiexec or mpirun with this number for N. If you are not expecting to see this message, change your UserInput choices. You have chosen parallel processing for gridsearch and have run CheKiPEUQ without mpi, which is a procedure to retrieve the number of processor ranks to use for parallelized gridsearch. A typical syntax now would be: mpiexec -n ",  numPermutations+1, " python runfile_for_your_analysis.py" )
+                                sys.exit()
+                            elif CheKiPEUQ.parallel_processing.currentProcessorNumber != conditionsPermutationIndex+1:
+                                doSimulation = False #This means the permutation index does not match the processor rank so nothing should be executed.
+                            elif CheKiPEUQ.parallel_processing.currentProcessorNumber == permutationIndex+1:
+                                doSimulation = True  #This is the "normal" case.
+                        #####End ChekIPEUQ Parallel Processing During Loop Block####
+                        if doSimulation == True:
+                            self.UserInput.model['populateIndependentVariablesFunction']([indValue1,indValue2])
+                            self.populateResponsesWithSyntheticData(parameterPermutation)
+                            if searchType=='doMetropolisHastings':
+                                [map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, logP] = self.doMetropolisHastings()
+                            if searchType=='doEnsembleSliceSampling':
+                                [map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, logP] = self.doEnsembleSliceSampling()
+                            conditionsPermutation = np.array([indValue1,indValue2])
+                            conditionsPermutationAndInfoGain = np.hstack((conditionsPermutation, info_gain))
+                            self.info_gain_matrix.append(conditionsPermutationAndInfoGain) #NOTE that the structure *includes* the Permutations.
+                            if (self.UserInput.doe_settings['parallel_conditions_exploration'])== True:
+                                self.exportSingleConditionInfoGainMatrix(self.parModulationPermutationIndex+1, conditionsPermutationAndInfoGain, conditionsPermutationIndex)
+                            if self.UserInput.doe_settings['info_gains_matrices_multiple_parameters'] == 'each': #copy the above lines for the sum.
+                                for parameterIndex in range(0,numParameters):#looping across number of parameters...
+                                    conditionsPermutationAndInfoGain = np.hstack((conditionsPermutation, np.array(self.info_gain_each_parameter[parameterIndex]))) #Need to pull the info gain matrix from the nested objected named info_gain_each_parameter
+                                    #Below mimics the line above which reads self.info_gain_matrix.append(conditionsPermutationAndInfoGain)
+                                    info_gain_matrices_each_parameter[parameterIndex].append(conditionsPermutationAndInfoGain)
+                        conditionsPermutationIndex = conditionsPermutationIndex + 1 #This variable was added for and is used in parallelization.
+                self.info_gain_matrix = np.array(self.info_gain_matrix) #this is an implied return in addition to the real return.
+                if self.UserInput.doe_settings['parallel_conditions_exploration'] == True: #We will overwrite self.info_gain_matrix with a consolidated one if needed.
+                    self.consolidate_parallel_doe_data(parallelizationType='conditions')
                 if self.UserInput.doe_settings['info_gains_matrices_multiple_parameters'] == 'each': #copy the above line for the sum.
                     for parameterIndex in range(0,numParameters):#looping across number of parameters...
                         self.info_gain_matrices_each_parameter[parameterIndex]= np.array(info_gain_matrices_each_parameter[parameterIndex])
                 self.middle_of_doe_flag = False #Set this back to false once info gain matrix is ready.
-                return np.array(info_gain_matrix)
+                return np.array(self.info_gain_matrix)
     
     #This function requires population of the UserInput doe_settings dictionary. It automatically scans many parameter modulation Permutations.
     def doeParameterModulationPermutationsScanner(self, searchType='doMetropolisHastings'):
@@ -850,14 +954,14 @@ class parameter_estimation:
         numParameters = len(parModulationGridCenterVector)
         parModulationGridIntervalSizeAbsolute = doe_settings['parameter_modulation_grid_interval_size']*self.UserInput.std_prior
         parModulationGridPermutations, numPermutations = self.getGridPermutations(parModulationGridCenterVector,parModulationGridIntervalSizeAbsolute, doe_settings['parameter_modulation_grid_num_intervals'])
-        
+        self.numParModulationPermutations = numPermutations
         parModulationGridPermutations= np.array(parModulationGridPermutations)
+        
         if len(self.UserInput.parameterNamesList) == len(self.UserInput.InputParametersPriorValuesUncertainties): #then we assume variable names have been provided.
             headerString = self.UserInput.stringOfParameterNames #This variable is a string, no brackets.
         else: #else no variable names have been provided.
             headerString = ''
         np.savetxt("Info_gain__parModulationGridPermutations.csv", parModulationGridPermutations, delimiter=",", encoding =None, header=headerString)
-        
         #We will get a separate info gain matrix for each parModulationPermutation, we'll store that in this variable.
         info_gains_matrices_list = []
         if self.UserInput.doe_settings['info_gains_matrices_multiple_parameters'] == 'each': #just making analogous structure which exists for sum.
@@ -867,10 +971,25 @@ class parameter_estimation:
             for parameterIndex in range(0,numParameters):#looping across number of parameters...
                 info_gains_matrices_lists_one_for_each_parameter.append([]) #These are empty lists create to indices and initialize each parameter's info_gain_matrix. They will be appended to later.
         for parModulationPermutationIndex,parModulationPermutation in enumerate(parModulationGridPermutations):                
+            #####Begin ChekIPEUQ Parallel Processing During Loop Block####
+            if (self.UserInput.doe_settings['parallel_parameter_modulation'])== True:
+                #We will only execute the sampling the permutationIndex matches the processor rank.
+                #Additionally, if the rank is 0 and the simulation got here, it will be assumed the person is running this just to find the number of Permutations, so that will be spit out and the simulation ended.
+                import CheKiPEUQ.parallel_processing
+                if CheKiPEUQ.parallel_processing.currentProcessorNumber == 0:
+                    print("For the user input settings provided, the number of Permutations+1 will be",  numPermutations+1, ". Please use mpiexec or mpirun with this number for N. If you are not expecting to see this message, change your UserInput choices. You have chosen parallel processing for gridsearch and have run CheKiPEUQ without mpi, which is a procedure to retrieve the number of processor ranks to use for parallelized gridsearch. A typical syntax now would be: mpiexec -n ",  numPermutations+1, " python runfile_for_your_analysis.py" )
+                    sys.exit()
+                elif CheKiPEUQ.parallel_processing.currentProcessorNumber != parModulationPermutationIndex+1:
+                    continue #This means the permutation index does not match the processor rank so nothing should be executed.
+                #elif CheKiPEUQ.parallel_processing.currentProcessorNumber == permutationIndex+1:
+                #    pass  #This is the "normal" case and is implied, so is commented out.
+            #####End ChekIPEUQ Parallel Processing During Loop Block####
             #We will get separate info gain matrix for each parameter modulation combination.
+            self.parModulationPermutationIndex = parModulationPermutationIndex #This variable is being created for parallel processing of conditions.
             info_gain_matrix = self.doeGetInfoGainMatrix(parModulationPermutation, searchType=searchType)
-            #Append the info gain matrix obtainend.
-            info_gains_matrices_list.append(np.array(info_gain_matrix))
+            #Append the info gain matrix obtainend (unless doing a parallel_conditions_exploration).
+            if self.UserInput.doe_settings['parallel_conditions_exploration'] == False:
+                info_gains_matrices_list.append(np.array(info_gain_matrix))
             if self.UserInput.doe_settings['info_gains_matrices_multiple_parameters'] == 'each': #copy the above lines which were for the sum.
                     for parameterIndex in range(0,numParameters):#looping across number of parameters...
                         info_gains_matrices_lists_one_for_each_parameter[parameterIndex].append(np.array(self.info_gain_matrices_each_parameter[parameterIndex]))
@@ -885,9 +1004,9 @@ class parameter_estimation:
             #self.info_gains_matrices_array[modulationIndex]  #Write this to file. This is 'xyz' format regardless of whether self.info_gains_matrices_array_format == 'xyz'  or =='meshgrid' is used.
         return self.info_gains_matrices_array
     
+    @CiteSoft.after_call_compile_consolidated_log(compile_checkpoints=True) #This is from the CiteSoft module.
     def createInfoGainPlots(self, parameterIndices=[], plot_suffix = ''):
         #parameterIndices should be a list of parameters if the user only wants as subset of parameters. The default, a blank list, will do all if the setting for doing each is on.
-        
         #first make the modulation plots for the Sum.
         self.createInfoGainModulationPlots(parameterIndex=None, plot_suffix = plot_suffix)
         #now, by default, loop through and make plots fore each parameterIndex if the setting for that is on.
@@ -903,6 +1022,7 @@ class parameter_estimation:
                     self.createInfoGainModulationPlots(parameterIndex=parameterIndex, plot_suffix = plotSuffixString)
     
     def createInfoGainModulationPlots(self, parameterIndex=None, plot_suffix = ''): 
+        #self.info_gains_matrices_array is an implied argument that usually gets populated in doeParameterModulationPermutationsScanner (when that is used).
         #Right now, when using KL_divergence and design of experiments there is an option of UserInput.doe_settings['info_gains_matrices_multiple_parameters'] = 'each' or 'sum'
         #the default is sum. But when it is 'each', then it is possible to plot separate info_gains for each parameter.
         #Note: the below code *does not* add a suffix to inidicate when a parameter Index has been fed.
@@ -910,8 +1030,22 @@ class parameter_estimation:
         #xValues = self.info_gains_matrices_array[modulationIndex][:,0] will become xValues = self.info_gains_matrices_array[modulationIndex][parameterInfoGainIndex][:,0]
         #self.meshGrid_independentVariable1ValuesArray will remain unchanged.      
         
+        ####Start block for parallel_conditions_exploration #####
+        if self.UserInput.doe_settings['parallel_conditions_exploration'] == True:
+          #if we're doing a parallel_conditions_exploration, we need to check if we are on the last 
+          #condition exploration of the last parameter modulation. [#things could be done differently, but this works.]          
+          if self.parModulationPermutationIndex+1 != self.numParModulationPermutations:
+            return #this means we do nothing because it's not the final parModulation.
+          elif self.parModulationPermutationIndex+1 == self.numParModulationPermutations:
+            import CheKiPEUQ.parallel_processing #Even if it's the final parModulation, need to check if it's final combination.
+            if CheKiPEUQ.parallel_processing.finalProcess == False: #not final combination.
+                return
+            elif CheKiPEUQ.parallel_processing.finalProcess == True: 
+                #If final parModulation and final combination, we populate self.info_gain_matrices_array
+                self.consolidate_parallel_doe_info_gain_matrices() #And now we continue on with the plotting.
+        ####End block for parallel_conditions_exploration #####        
+
         import CheKiPEUQ.plotting_functions as plotting_functions
-        
         #assess whether the function is called for the overall info_gain matrices or for a particular parameter.
         if parameterIndex==None:  #this means we're using the regular info gain, not the parameter specific case.
             #Normally, the info gain plots should be stored in self.info_gains_matrices_array.
@@ -936,7 +1070,11 @@ class parameter_estimation:
                     xValues = local_info_gains_matrices_array[modulationIndex][:,0]
                     yValues = local_info_gains_matrices_array[modulationIndex][:,1]
                     zValues = local_info_gains_matrices_array[modulationIndex][:,2]
-                    plotting_functions.makeTrisurfacePlot(xValues, yValues, zValues, figure_name = "Info_gain_TrisurfacePlot_modulation_"+str(modulationIndex)+plot_suffix)
+                    if self.UserInput.doe_settings['parallel_parameter_modulation'] == False: #This is the normal case.
+                        plotting_functions.makeTrisurfacePlot(xValues, yValues, zValues, figure_name = "Info_gain_TrisurfacePlot_modulation_"+str(modulationIndex+1)+plot_suffix)
+                    if self.UserInput.doe_settings['parallel_parameter_modulation'] == True: #This is the parallel case. In this case, the actual modulationIndex to attach to the filename is given by the processor rank.
+                        import CheKiPEUQ.parallel_processing
+                        plotting_functions.makeTrisurfacePlot(xValues, yValues, zValues, figure_name = "Info_gain_TrisurfacePlot_modulation_"+str(CheKiPEUQ.parallel_processing.currentProcessorNumber)+plot_suffix)
             if self.info_gains_matrices_array_format == 'meshgrid':        
                 for modulationIndex in range(len(local_info_gains_matrices_array)):
                     #Now need to get things prepared for the meshgrid.
@@ -946,9 +1084,13 @@ class parameter_estimation:
                     XX, YY = np.meshgrid(self.meshGrid_independentVariable1ValuesArray, self.meshGrid_independentVariable2ValuesArray)
                     zValues = local_info_gains_matrices_array[modulationIndex][:,2]
                     ZZ = zValues.reshape(XX.shape) #We know from experience to reshape this way.
-                    plotting_functions.makeMeshGridSurfacePlot(XX, YY, ZZ, figure_name = "Info_gain_Meshgrid_modulation_"+str(modulationIndex)+plot_suffix)
+                    if self.UserInput.doe_settings['parallel_parameter_modulation'] == False: #This is the normal case.
+                        plotting_functions.makeMeshGridSurfacePlot(XX, YY, ZZ, figure_name = "Info_gain_Meshgrid_modulation_"+str(modulationIndex+1)+plot_suffix)
+                    if self.UserInput.doe_settings['parallel_parameter_modulation'] == True: #This is the parallel case. In this case, the actual modulationIndex to attach to the filename is given by the processor rank.
+                        import CheKiPEUQ.parallel_processing
+                        plotting_functions.makeMeshGridSurfacePlot(XX, YY, ZZ, figure_name = "Info_gain_Meshgrid_modulation_"+str(CheKiPEUQ.parallel_processing.currentProcessorNumber)+plot_suffix)
         else:
-            print("At present, createInfoGainPlots and createInfoGainModulationPlots only create plots when the length of  independent_variable_grid_center is 2. We don't currently support creation of other dimensional plots.")
+            print("At present, createInfoGainPlots and createInfoGainModulationPlots only create plots when the length of  independent_variable_grid_center is 2. We don't currently support creation of other dimensional plots. The infogain data is being exported into the file _____.csv")
     def getLogP(self, proposal_sample): #The proposal sample is specific parameter vector.
         [log_likelihood_proposal, simulationOutput_proposal] = self.getLogLikelihood(proposal_sample)
         log_prior_proposal = self.getLogPrior(proposal_sample)
@@ -1117,6 +1259,17 @@ class parameter_estimation:
             self.info_gain = self.info_gain_KL
         return self.info_gain    
 
+
+    def exportSingleConditionInfoGainMatrix(self, parameterPermutationNumber, conditionsPermutationAndInfoGain, conditionsPermutationIndex):
+        #Note that parameterPermutationNumber is parameterPermutationIndex+1
+        file_name_prefix, file_name_suffix = self.getParallelProcessingPrefixAndSuffix() #Rather self explanatory.
+        file_name_suffix=file_name_suffix[1:] #removing the '_' that comes by default, we will add the '_' back in later below.
+        if int(conditionsPermutationIndex+1) != int(file_name_suffix):
+            print("line 1199: There is a problem in the parallel processing of conditions info gain matrix calculation!", conditionsPermutationIndex+1, file_name_suffix)
+        #I am commenting out the below line because the savetxt was causing amysterious "no such file or directory" error.
+        np.savetxt(file_name_prefix+'conditionsPermutationAndInfoGain_'+'mod'+str(int(parameterPermutationNumber))+'_cond'+str(conditionsPermutationIndex+1)+'.csv',conditionsPermutationAndInfoGain, delimiter=",")
+        pickleAnObject(conditionsPermutationAndInfoGain, file_name_prefix+'conditionsPermutationAndInfoGain_'+'mod'+str(int(parameterPermutationNumber))+'_cond'+str(conditionsPermutationIndex+1))
+        
     #This function will calculate MAP and mu_AP, evidence, and related quantities.
     def calculatePostBurnInStatistics(self, calculate_post_burn_in_log_priors_vec = False):       
         #First need to create priors if not already there, because ESS does not store priors during the run (MH does).
@@ -1124,7 +1277,7 @@ class parameter_estimation:
             calculate_post_burn_in_log_priors_vec = True 
         if calculate_post_burn_in_log_priors_vec == True:
                 #Below line following a line from https://github.com/threeML/threeML/blob/master/threeML/bayesian/zeus_sampler.py
-                self.post_burn_in_log_priors_vec = np.array([self.getLogPrior(parameterCombination) for parameterCombination in self.post_burn_in_samples])
+                self.post_burn_in_log_priors_vec = np.array([self.getLogPrior(parameterPermutation) for parameterPermutation in self.post_burn_in_samples])
                 self.post_burn_in_log_priors_vec = np.atleast_2d(self.post_burn_in_log_priors_vec).transpose()
         #Next need to apply filtering before getting statistics.
         filterSamples = bool(self.UserInput.parameter_estimation_settings['mcmc_threshold_filter_samples'])
@@ -1174,7 +1327,7 @@ class parameter_estimation:
     def getParallelProcessingPrefixAndSuffix(self):
         file_name_prefix = ''
         file_name_suffix = ''
-        if self.UserInput.request_mpi == True: 
+        if (self.UserInput.parameter_estimation_settings['mcmc_parallel_sampling'] or self.UserInput.parameter_estimation_settings['multistart_parallel_sampling'] or self.UserInput.doe_settings['parallel_conditions_exploration']) == True: 
             import CheKiPEUQ.parallel_processing
             import os
             if CheKiPEUQ.parallel_processing.currentProcessorNumber == 0:
@@ -1266,7 +1419,7 @@ class parameter_estimation:
         #Now to keep the results:
         self.post_burn_in_samples = zeus_sampler.samples.flatten(discard = self.mcmc_burn_in_length )
         self.post_burn_in_log_posteriors_un_normed_vec = np.atleast_2d(zeus_sampler.samples.flatten_logprob(discard=self.mcmc_burn_in_length)).transpose() #Needed to make it 2D and transpose.
-        if self.UserInput.request_mpi == True: #If we're using parallel processing, we need to make calculatePostBurnInStatistics and also exportLog into True.
+        if (self.UserInput.parameter_estimation_settings['mcmc_parallel_sampling'] or self.UserInput.parameter_estimation_settings['multistart_parallel_sampling']) == True: #If we're using certain parallel processing, we need to make calculatePostBurnInStatistics and also exportLog into True.
             calculatePostBurnInStatistics = True; exportLog=True
         if calculatePostBurnInStatistics == True:
             self.calculatePostBurnInStatistics(calculate_post_burn_in_log_priors_vec = True) #This function call will also filter the lowest probability samples out, when using default settings.
@@ -1406,7 +1559,7 @@ class parameter_estimation:
         self.post_burn_in_log_posteriors_un_normed_vec = (self.post_burn_in_log_posteriors_un_normed_vec) #Is this increasing dimension?
         self.post_burn_in_log_likelihoods_vec = log_likelihoods_vec[self.mcmc_burn_in_length:]
         self.post_burn_in_log_priors_vec = log_priors_vec[self.mcmc_burn_in_length:]
-        if self.UserInput.request_mpi == True: #If we're using parallel processing, we need to make calculatePostBurnInStatistics and also exportLog into True.
+        if (self.UserInput.parameter_estimation_settings['mcmc_parallel_sampling'] or self.UserInput.parameter_estimation_settings['multistart_parallel_sampling']) == True: #If we're using certain parallel processing, we need to make calculatePostBurnInStatistics and also exportLog into True.
             calculatePostBurnInStatistics = True; exportLog=True
         if calculatePostBurnInStatistics == True:
             self.calculatePostBurnInStatistics() #This function call will also filter the lowest probability samples out, when using default settings.
@@ -1726,7 +1879,7 @@ class parameter_estimation:
         figureObject_beta.mumpce_plots(model_parameter_info = self.UserInput.model_parameter_info, active_parameters = active_parameters, pairs_of_parameter_indices = pairs_of_parameter_indices, posterior_mu_vector = posterior_mu_vector, posterior_cov_matrix = posterior_cov_matrix, prior_mu_vector = np.array(self.UserInput.mu_prior), prior_cov_matrix = self.UserInput.covmat_prior, contour_settings_custom = self.UserInput.contour_settings_custom)
         return figureObject_beta
 
-    @CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
+    @CiteSoft.after_call_compile_consolidated_log(compile_checkpoints=True) #This is from the CiteSoft module.
     def createAllPlots(self):
         if self.UserInput.request_mpi == True: #need to check if UserInput.request_mpi is on, since if so we will only make plots after the final process.
             import os; import sys
@@ -1961,7 +2114,7 @@ def arrayThresholdFilter(inputArray, filterKey=[], thresholdValue=0, removeValue
     filteredArray = inputArrayThresholdMarked[~mask] #This does the filtering where rows are deleted.
     return filteredArray
 
-@CiteSoft.after_call_compile_consolidated_log()
+@CiteSoft.after_call_compile_consolidated_log(compile_checkpoints=True)
 def exportCitations():
     pass
 

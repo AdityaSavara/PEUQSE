@@ -57,7 +57,7 @@ UserInput.model['InputParameterPriorValues'] = [200, 500] #prior expected values
 UserInput.model['InputParametersPriorValuesUncertainties'] = [100, 200] #1 sigma, in this example not correlated, but a covariance matrix can be used instead.
 UserInput.model['simulateByInputParametersOnlyFunction'] = simulation_model_00.simulation_function_wrapper #This just points to the User created model equation.
 PE_object = CKPQ.parameter_estimation(UserInput) #This creates a CheKiPEUQ object of the parameter_estimation class from the UserInput.
-PE_object.doEnsembleSliceSampling() #This does the actual parameter_estimation by sampling.
+PE_object.doMetropolisHastings() #This does the actual parameter_estimation by sampling.
 PE_object.createAllPlots() #This creates all of the plots below!
 ```
 CheKiPEUQ has two types of sampling options as of Oct 2020: EnsembleSliceSampling and MetropolisHastings.  These are compared a little bit in Example00 in the examples.
