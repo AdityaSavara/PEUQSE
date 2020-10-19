@@ -137,7 +137,7 @@ doe_settings['independent_variable_grid_center'] = [] #This must be a 1D array/l
 doe_settings['independent_variable_grid_interval_size'] = [] #This must be a 1D array/list with length of number of independent variables.  this how big of each step will be in each direction/dimension (it is the grid spacing).  You should always use non-zero values for this setting, even if you plan to not vary that independent variable. Like [100,0.2]
 doe_settings['independent_variable_grid_num_intervals'] = [] #This must be a 1D array/list with length of number of independent variables. #This is the number of steps in each direction outward from center. So a 2 here gives 5 evaluations. A zero means we don't allow the condition to vary. Example: [2,2] 
 doe_settings['independent_variable_grid_checkPointFrequency'] = None #None means no checkpoints. Recommended values are None or 1.
-doe_settings['parallel_conditions_exploration'] = False  #this parallelizes the modulation of the conditions exploration and is the recommended usage for parallelizaing doe.
+doe_settings['parallel_conditions_exploration'] = False  #this parallelizes the modulation of the conditions exploration. It is not compatible with parallel_parameter_modulation, so only one should be used at a time.
 
 
 doe_settings['on_the_fly_conditions_grids'] = True #Oct 2020: do not change this setting. #Values are True or False. This makes the independent variable grid each time. This costs more processing but less memory. As of April 2020 the other option has not been implemented but would just require making the combinations into a list the first time and then operating on a copy of that list.

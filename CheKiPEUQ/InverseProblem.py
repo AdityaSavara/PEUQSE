@@ -54,6 +54,11 @@ class parameter_estimation:
             ) \
             == True:
             UserInput.request_mpi = True
+            if (UserInput.doe_settings['parallel_conditions_exploration'] or UserInput.doe_settings['parallel_parameter_modulation']) and (UserInput.parameter_estimation_settings['mcmc_parallel_sampling'] or UserInput.parameter_estimation_settings['multistart_parallel_sampling']):
+                print("Warning: Parallelization of Design of experiments is not compatible with parallelization of either mcmc_parallel_sampling or multistart_parallel_sampling.  Those other features are being turned off.")
+                UserInput.parameter_estimation_settings['multistart_parallel_sampling'] = False
+                UserInput.parameter_estimation_settings['mcmc_parallel_sampling']
+                
         if UserInput.request_mpi == True: #Rank zero needs to clear out the mpi_log_files directory, so check if we are using rank 0.
             import os; import sys
             import CheKiPEUQ.parallel_processing
