@@ -70,10 +70,10 @@ if __name__ == "__main__":
     UserInput.doe_settings['info_gains_matrices_multiple_parameters'] = 'sum'
     UserInput.doe_settings['independent_variable_grid_center'] = [500, 0.5]
     UserInput.doe_settings['independent_variable_grid_interval_size'] = [100, 0.1]
-    UserInput.doe_settings['independent_variable_grid_num_intervals'] = [1,1]#[2,2] #This is the number in each direction outward from center. So a 2 here gives 5 evaluations. A zero means we don't allow the parameter to vary.
+    UserInput.doe_settings['independent_variable_grid_num_intervals'] = [2,2] #This is the number in each direction outward from center. So a 2 here gives 5 evaluations. A zero means we don't allow the parameter to vary.
     
     UserInput.doe_settings['parameter_modulation_grid_interval_size'] = [1,1] #use a non-zero value even for parameters that you will not vary.
-    UserInput.doe_settings['parameter_modulation_grid_num_intervals'] = [1,0]#[1,1] #make the number of intervals zero for any parameter that you don't want to vary.
+    UserInput.doe_settings['parameter_modulation_grid_num_intervals'] = [1,1] #make the number of intervals zero for any parameter that you don't want to vary.
     UserInput.doe_settings['parallel_conditions_exploration'] = True
     
     PE_object = CKPQ.parameter_estimation(UserInput)
