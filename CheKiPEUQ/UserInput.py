@@ -1,16 +1,13 @@
 import numpy as np
 
-
-#Response Plot Settings
-simulated_response_plot_settings = {}
-simulated_response_plot_settings['x_label'] = ''
-simulated_response_plot_settings['y_label'] = ''
-#simulated_response_plot_settings['y_range'] = [0.00, 0.025] #optional.
-simulated_response_plot_settings['figure_name'] = 'Posterior_Simulated' #This is the default name for simulated response plots.
-simulated_response_plot_settings['legend'] = True #Can be changed to false to turn off the legend.
-#simulated_response_plot_settings['legendLabels'] = ['experiment', 'mu_guess', 'MAP'] here is an example of how to change the legend labels.
-simulated_response_plot_settings['error_linewidth'] = 'auto' #Integer. Using "auto" or "None" sets to "20" when there is only 1 point, 1 when number of points is > 10, and "4" when number of points is between 1 and 10 and. Using '0' or 'none' will hide the error bars.
-simulated_response_plot_settings['fontdict']= {'size':16} #A font dictionary can be passed in, this will be used for the axes and axes labels.
+#####Experimental Data Input Files#####
+responses = {}
+responses['responses_abscissa'] = []
+responses['responses_observed'] = []
+responses['responses_observed_uncertainties'] = [] #Normally this variable must be filled. To set the responses_observed_uncertainties to zero, this variable or the values inside must really be set equal to 0. A blank list well autogenerate uncertainties relative to the InputParameterPriorValues.
+responses['reducedResponseSpace'] = []
+responses['independent_variables_values'] = []
+responses['independent_variables_names'] = []
 
 #### Model Paramerters Variables ###
 model = {} 
@@ -30,14 +27,6 @@ model['custom_logPrior'] = None  #This feature has  been implemented but not tes
 model['InputParameterPriorValues_upperBounds'] = [] #This should be a list/array of the same shape as InputParameterPriorValues. Use a value of "None" for any parameter that should not be bounded in this direction.  The code then truncates any distribution to have a probability of ~0 when any of the parameters go outside of their bounds. ##As of May 4th 2020, this only has been checked for scaling_uncertainties_type = 'off'
 model['InputParameterPriorValues_lowerBounds'] = []#This should be a list/array of the same shape as InputParameterPriorValues. Use a value of "None" for any parameter that should not be bounded in this direction.  The code then truncates any distribution to have a probability of ~0 when any of the parameters go outside of their bounds. ##As of May 4th 2020, this only has been checked for scaling_uncertainties_type = 'off'
 
-#####Experimental Data Input Files#####
-responses = {}
-responses['responses_abscissa'] = []
-responses['responses_observed'] = []
-responses['responses_observed_uncertainties'] = [] #Normally this variable must be filled. To set the responses_observed_uncertainties to zero, this variable or the values inside must really be set equal to 0. A blank list well autogenerate uncertainties relative to the InputParameterPriorValues.
-responses['reducedResponseSpace'] = []
-responses['independent_variables_values'] = []
-responses['independent_variables_names'] = []
 
 #####Parameter Estimation Inputs#####
 parameter_estimation_settings = {}
@@ -69,6 +58,17 @@ parameter_estimation_settings['mcmc_parallel_sampling'] = False #This makes comp
 
 
 #####Plot Settings#####
+#Response Plot Settings
+simulated_response_plot_settings = {}
+simulated_response_plot_settings['x_label'] = ''
+simulated_response_plot_settings['y_label'] = ''
+#simulated_response_plot_settings['y_range'] = [0.00, 0.025] #optional.
+simulated_response_plot_settings['figure_name'] = 'Posterior_Simulated' #This is the default name for simulated response plots.
+simulated_response_plot_settings['legend'] = True #Can be changed to false to turn off the legend.
+#simulated_response_plot_settings['legendLabels'] = ['experiment', 'mu_guess', 'MAP'] here is an example of how to change the legend labels.
+simulated_response_plot_settings['error_linewidth'] = 'auto' #Integer. Using "auto" or "None" sets to "20" when there is only 1 point, 1 when number of points is > 10, and "4" when number of points is between 1 and 10 and. Using '0' or 'none' will hide the error bars.
+simulated_response_plot_settings['fontdict']= {'size':16} #A font dictionary can be passed in, this will be used for the axes and axes labels.
+
 #possible dictionary fields include: dpi, figure_name, fontsize, x_label, y_label, figure_name, x_range, y_range
 samplingScatterMatrixPlotsSettings ={}
 
