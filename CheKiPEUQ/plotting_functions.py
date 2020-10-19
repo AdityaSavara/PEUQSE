@@ -142,6 +142,12 @@ def makeHistogramsForEachParameter(parameterSamples,parameterNamesAndMathTypeExp
 def createSimulatedResponsesPlot(x_values, listOfYArrays, plot_settings={}, listOfYUncertaintiesArrays=[], showFigure=True):
     exportFigure = True #This variable should be moved to an argument or something in plot_settings.
     #First put some defaults in if not already defined.
+    x_values = np.array(x_values)
+    if len(np.shape(x_values)) == 0: #This 2d line breaks regular arrays, but works when a 'zero length' array comes in (I don't understand how a zero length array can occur, but it has happened.)
+        x_values = np.atleast_2d(x_values)
+    print("line 145", x_values)
+    print("line 145", type(x_values))
+    print("line 145", len(np.shape(x_values)))
     if 'x_label' not in plot_settings: plot_settings['x_label'] = ''
     if 'y_label' not in plot_settings: plot_settings['y_label'] = ''
     if 'legendLabels' not in plot_settings: plot_settings['legendLabels'] = ''

@@ -126,10 +126,31 @@ class parameter_estimation:
             if type(self.UserInput.parameter_estimation_settings['mcmc_random_seed']) == type(1): #if it's an integer, then it's not a "None" type or string, and we will use it.
                 np.random.seed(self.UserInput.parameter_estimation_settings['mcmc_random_seed'])
         self.samples_of_prior = np.random.multivariate_normal(self.UserInput.mu_prior,UserInput.covmat_prior,UserInput.parameter_estimation_settings['mcmc_length'])
+        
+        #Now do some processing on the responses formatting and uncertainties.
+        #Make them 2D.
         UserInput.responses_abscissa = np.atleast_2d(UserInput.responses['responses_abscissa'])
         UserInput.responses_observed = np.atleast_2d(UserInput.responses['responses_observed'])
         UserInput.responses_observed_uncertainties = np.atleast_2d(UserInput.responses['responses_observed_uncertainties'])
-
+        #Make sure all objects inside are arrays (if they are lists we convert them).
+        UserInput.responses_abscissa = convertInternalToNumpyArray(UserInput.responses_abscissa)
+        UserInput.responses_observed = convertInternalToNumpyArray(UserInput.responses_observed)
+        UserInput.responses_observed_uncertainties = convertInternalToNumpyArray(UserInput.responses_observed_uncertainties)
+        #Processing of responses_observed_uncertainties for case that a blank list is received and not zeros.
+        if len(UserInput.responses_observed_uncertainties[0]) == 0: 
+            #if the response uncertainties is blank, we will use the heurestic of sigma = 5% of the observed value, with a floor of 2% of the maximum for that response. 
+            #Note that we are actually checking in index[0], that is because as an atleast_2d array even a blank list / array in it will give a length of 1.
+            UserInput.responses_observed_uncertainties = UserInput.responses_observed * 0.05
+            for responseIndex in range(0,len(UserInput.responses_observed[0])): #need to cycle through because if it's a nested list we can't multiply by 0.05.
+                maxResponseValue = np.max(UserInput.responses_observed[0][responseIndex]) #Because of the "at_least2D" we actually need to use index 0.
+                #The below syntax is a bit hard to read, but it is similar to this: a[a==2] = 10 #replace all 2's with 10's
+                UserInput.responses_observed_uncertainties[0][responseIndex][UserInput.responses_observed_uncertainties[0][responseIndex] < maxResponseValue * 0.02] = maxResponseValue * 0.02
+        elif np.array(np.sum(UserInput.responses_observed_uncertainties[0])).all() == 0:
+            import copy 
+            UserInput.responses_observed_uncertainties = copy.deepcopy(UserInput.responses_observed)
+            for responseIndex in range(0,len(UserInput.responses_observed[0])):
+                UserInput.responses_observed_uncertainties[0][responseIndex]= UserInput.responses_observed[0][responseIndex]*0.0
+                
         #TODO: This currently only is programmed for if the uncertainties are uncorrelated standard deviaions (so is not compatible with a directly fed cov_mat). Also, we need to figure out what do when they are not gaussian/symmetric.
         UserInput.responses_observed_transformed, UserInput.responses_observed_transformed_uncertainties  = self.transform_responses(UserInput.responses_observed, UserInput.responses_observed_uncertainties) #This creates transforms for any data that we might need it. The same transforms will also be applied during parameter estimation.
             
@@ -143,7 +164,32 @@ class parameter_estimation:
                 if UserInput.model['populateIndependentVariablesFunction'] != None:
                     UserInput.model['populateIndependentVariablesFunction'](UserInput.responses['independent_variables_values']) 
         
-        self.UserInput.num_data_points = len(UserInput.responses_observed.flatten()) #FIXME: This is only true for transient data.
+        self.UserInput.num_data_points = len(UserInput.responses_observed.flatten()) #This works if there is a single response series.
+        #The below test is to find out if we have a nested array, in which case we will need to do a further flattening during likelihood calculations.
+        #This is also helps us to find the correct number of response dimensions.        
+        print("line 170",             np.shape(UserInput.responses_observed), UserInput.responses_observed)
+        try:
+            onesArray = np.ones(np.shape(UserInput.responses_observed))
+            onesArray = np.matmul(UserInput.responses_observed.transpose(), onesArray) #This is the key line and catches staggered arrays.
+            self.flattenFurther = False
+            self.UserInput.num_response_dimensions = np.shape(UserInput.responses_observed)[0]
+            #A response data set with many single points can also pass the matmul and get to this point, so we add one more if statement to make sure we get the right number of response dimensions.
+            print("line 177",             np.shape(UserInput.responses_observed))
+            if np.shape(UserInput.responses_observed)[0] > 1:
+                self.UserInput.num_response_dimensions = np.shape(UserInput.responses_observed)[0]
+                print("line 180 inside the if statement")
+            print("line 180", self.UserInput.num_response_dimensions); print("line 180",             np.shape(UserInput.responses_observed))
+        except:
+            self.flattenFurther = True
+            self.UserInput.num_response_dimensions = np.shape(UserInput.responses_observed)[1]
+            print("line 184", self.UserInput.num_response_dimensions)
+        else:
+            self.flattenFurther = False
+        
+        print("line 188")
+        #We will always flatten further (double flatten) to find the number of data_points.
+        self.UserInput.num_data_points= len(   np.hstack(tuple(np.hstack(tuple(UserInput.responses_observed)))))
+            
         #Now scale things as needed:
         if UserInput.parameter_estimation_settings['scaling_uncertainties_type'] == "off":
             self.UserInput.mu_prior_scaled = UserInput.mu_prior*1.0
@@ -175,10 +221,12 @@ class parameter_estimation:
                 #The next line needs to be on UserInput.covmat_prior_scaled and not UserInput.covmat_prior, since we're stacking the divisions.
                 UserInput.covmat_prior_scaled[:,parameterIndex] = UserInput.covmat_prior_scaled[:,parameterIndex]/parameterValue        
         
+        
+        
+
+        
         #To find the *observed* responses covariance matrix, meaning based on the uncertainties reported by the users, we take the uncertainties from the points. This is needed for the likelihood. However, it will be transformed again at that time.
-        self.UserInput.num_response_dimensions = np.shape(UserInput.responses_abscissa)[0] #The first index of shape is the num of responses, but has to be after atleast_2d is performed.
         self.observed_responses_covmat_transformed = returnShapedResponseCovMat(self.UserInput.num_response_dimensions, self.UserInput.responses_observed_transformed_uncertainties)
-                       
         #self.covmat_prior = UserInput.covmat_prior
         self.Q_mu = self.UserInput.mu_prior*0 # Q samples the next step at any point in the chain.  The next step may be accepted or rejected.  Q_mu is centered (0) around the current theta.  
         self.Q_covmat = self.UserInput.covmat_prior # Take small steps. 
@@ -324,7 +372,6 @@ class parameter_estimation:
         nestedAllResponsesArray_transformed = copy.deepcopy(nestedAllResponsesArray) #First make a copy to populate with transformed values.
         nestedAllResponsesUncertainties_transformed = copy.deepcopy(nestedAllResponsesUncertainties) #First make a copy to populate with transformed values. If blank, we won't populate it.        
         UserInput = self.UserInput
-        
         #TODO: Make little function for interpolation in case it's necessary (see below).
 #        def littleInterpolator():
 #            abscissaRange = UserInput.responses_abscissa[responseIndex][-1] - UserInput.responses_abscissa[responseIndex][0] #Last value minus first value.
@@ -1445,7 +1492,7 @@ class parameter_estimation:
         if 'mcmc_random_seed' in self.UserInput.parameter_estimation_settings:
             if type(self.UserInput.parameter_estimation_settings['mcmc_random_seed']) == type(1): #if it's an integer, then it's not a "None" type or string, and we will use it.
                 np.random.seed(self.UserInput.parameter_estimation_settings['mcmc_random_seed'])
-        samples_simulatedOutputs = np.zeros((self.UserInput.parameter_estimation_settings['mcmc_length'],self.UserInput.num_data_points)) #TODO: Consider moving this out of this function.
+        samples_simulatedOutputs = np.zeros((self.UserInput.parameter_estimation_settings['mcmc_length'],self.UserInput.num_data_points))
         samples = np.zeros((self.UserInput.parameter_estimation_settings['mcmc_length'],len(self.UserInput.mu_prior)))
         mcmc_step_modulation_history = np.zeros((self.UserInput.parameter_estimation_settings['mcmc_length'])) #TODO: Make this optional for efficiency. #This allows the steps to be larger or smaller. Make this same length as samples. In future, should probably be same in other dimension also, but that would require 2D sampling with each step.                                                                          
         samples[0,:]=self.UserInput.InputParameterInitialGuess  # Initialize the chain. Theta is initialized as the starting point of the chain.  It is placed at the prior mean if an initial guess is not provided.. Do not use self.UserInput.model['InputParameterInitialGuess']  because that doesn't work with reduced parameter space feature.
@@ -1656,12 +1703,11 @@ class parameter_estimation:
             simulatedResponses = np.array(simulatedResponses).flatten()
             return logLikelihood, simulatedResponses
         #else pass is implied.
-        
+
         #Now get the simulated responses.
         simulatedResponses = self.getSimulatedResponses(discreteParameterVector)
         if type(simulatedResponses) == type(None):
             return float('-inf'), None #This is intended for the case that the simulation fails, indicated by receiving an 'nan' or None type from user's simulation function.
-        
         #need to check if there are any 'responses_simulation_uncertainties'.
         if type(self.UserInput.model['responses_simulation_uncertainties']) == type(None): #if it's a None type, we keep it as a None type
             responses_simulation_uncertainties = None
@@ -1685,7 +1731,14 @@ class parameter_estimation:
         #First we will check whether observed_responses_covmat_transformed is square or not. The multivariate_normal.pdf function requires a diagonal values vector to be 1D.
         observed_responses_covmat_transformed = self.observed_responses_covmat_transformed
         observed_responses_covmat_transformed_shape = np.shape(observed_responses_covmat_transformed) 
-                
+
+        #The below lines are fore cases with multiple responses.
+        if self.flattenFurther == True:
+            simulatedResponses_transformed_flattened=np.hstack(tuple(simulatedResponses_transformed_flattened))
+            if type(simulated_responses_covmat_transformed) != type(None):
+                simulated_responses_covmat_transformed=np.hstack(tuple(simulated_responses_covmat_transformed))
+            observedResponses_transformed_flattened=np.hstack(tuple(observedResponses_transformed_flattened))
+            observed_responses_covmat_transformed=np.hstack(tuple(observed_responses_covmat_transformed))
         #In general, the covmat could be a function of the responses magnitude and independent variables. So eventually, we will use non-linear regression or something to estimate it. However, for now we simply take the observed_responses_covmat_transformed which will work for most cases.
         #TODO: use Ashi's nonlinear regression code (which  he used in this paper https://www.sciencedirect.com/science/article/abs/pii/S0920586118310344).  Put in the response magnitudes and the independent variables.
         #in future it will be something like: if self.UserInput.covmat_regression== True: comprehensive_responses_covmat = nonLinearCovmatPrediction(self.UserInput['independent_variable_values'], observed_responses_covmat_transformed)
@@ -1717,7 +1770,7 @@ class parameter_estimation:
                         print("Warning: There are posterior points that have zero probability. If there are too many points like this, the MAP and mu_AP returned will not be meaningful.")
                         current_log_probability_metric = -1E100 #Just choosing an arbitrarily very severe penalty. I know that I have seen 1E-48 to -303 from the multivariate pdf, and values inbetween like -171, -217, -272. I found that -1000 seems to be worse, but I don't have a systematic testing. I think -1000 was causing numerical errors.
                         log_probability_metric = current_log_probability_metric + log_probability_metric
-        return log_probability_metric, simulatedResponses.flatten()
+        return log_probability_metric, simulatedResponses_transformed_flattened
 
     def makeHistogramsForEachParameter(self):
         import CheKiPEUQ.plotting_functions as plotting_functions 
@@ -1740,6 +1793,7 @@ class parameter_estimation:
         #allResponsesListsOfYArrays  is to have 3 layers of lists: Response > Responses Observed, mu_guess Simulated Responses, map_Simulated Responses, (mu_AP_simulatedResponses) > Values
         if allResponses_x_values == []: 
             allResponses_x_values = np.atleast_2d(self.UserInput.responses_abscissa)
+            print("line 1791", allResponses_x_values)
         if allResponsesListsOfYArrays  ==[]: #In this case, we assume allResponsesListsOfYUncertaintiesArrays == [] also.
             allResponsesListsOfYUncertaintiesArrays = [] #Set accompanying uncertainties list to a blank list in case it is not already one. Otherwise appending would mess up indexing.
             simulationFunction = self.UserInput.simulationFunction #Do NOT use self.UserInput.model['simulateByInputParametersOnlyFunction']  because that won't work with reduced parameter space requests.
@@ -1779,22 +1833,57 @@ class parameter_estimation:
                     self.mu_AP_responses_simulation_uncertainties = self.get_responses_simulation_uncertainties(self.mu_AP_parameter_set)
             
             #Now to populate the allResponsesListsOfYArrays and the allResponsesListsOfYUncertaintiesArrays
+            print("line 1831", self.UserInput.num_response_dimensions)
             for responseDimIndex in range(self.UserInput.num_response_dimensions):
-                if not hasattr(self, 'mu_AP_parameter_set'): #Check if a mu_AP has been assigned. It is normally only assigned if mcmc was used.                
-                    listOfYArrays = [self.UserInput.responses_observed[responseDimIndex], self.mu_guess_SimulatedResponses[responseDimIndex], self.map_SimulatedResponses[responseDimIndex]]        
-                    allResponsesListsOfYArrays.append(listOfYArrays)
-                    #Now to do uncertainties, there are two cases. First case is with only observed uncertainties and no simulation ones.
-                    if type(self.UserInput.model['responses_simulation_uncertainties']) == type(None): #This means there are no simulation uncertainties. So for each response dimension, there will be a list with only the observed uncertainties in that list.
-                        allResponsesListsOfYUncertaintiesArrays.append( [self.UserInput.responses_observed_uncertainties[responseDimIndex]] ) #Just creating nesting, we need to give a list for each response dimension.
-                    else: #This case means that there are some responses_simulation_uncertainties to include, so allResponsesListsOfYUncertaintiesArrays will have more dimensions *within* its nested values.
-                        allResponsesListsOfYUncertaintiesArrays.append([self.UserInput.responses_observed_uncertainties[responseDimIndex],self.mu_guess_responses_simulation_uncertainties,self.map_responses_simulation_uncertainties]) #We need to give a list for each response dimension.                    
+                if not hasattr(self, 'mu_AP_parameter_set'): #Check if a mu_AP has been assigned. It is normally only assigned if mcmc was used.    
+                    if self.UserInput.num_response_dimensions == 1: 
+                        listOfYArrays = [self.UserInput.responses_observed[responseDimIndex], self.mu_guess_SimulatedResponses[responseDimIndex], self.map_SimulatedResponses[responseDimIndex]]        
+                        allResponsesListsOfYArrays.append(listOfYArrays)
+                        #Now to do uncertainties, there are two cases. First case is with only observed uncertainties and no simulation ones.
+                        if type(self.UserInput.model['responses_simulation_uncertainties']) == type(None): #This means there are no simulation uncertainties. So for each response dimension, there will be a list with only the observed uncertainties in that list.
+                            allResponsesListsOfYUncertaintiesArrays.append( [self.UserInput.responses_observed_uncertainties[responseDimIndex]] ) #Just creating nesting, we need to give a list for each response dimension.
+                        else: #This case means that there are some responses_simulation_uncertainties to include, so allResponsesListsOfYUncertaintiesArrays will have more dimensions *within* its nested values.
+                            allResponsesListsOfYUncertaintiesArrays.append([self.UserInput.responses_observed_uncertainties[responseDimIndex],self.mu_guess_responses_simulation_uncertainties,self.map_responses_simulation_uncertainties]) #We need to give a list for each response dimension.                                        
+                    elif self.UserInput.num_response_dimensions > 1: 
+                        listOfYArrays = [self.UserInput.responses_observed[0][responseDimIndex], self.mu_guess_SimulatedResponses[0][responseDimIndex], self.map_SimulatedResponses[0][responseDimIndex]]        
+                        allResponsesListsOfYArrays.append(listOfYArrays)
+                        #Now to do uncertainties, there are two cases. First case is with only observed uncertainties and no simulation ones.
+                        if type(self.UserInput.model['responses_simulation_uncertainties']) == type(None): #This means there are no simulation uncertainties. So for each response dimension, there will be a list with only the observed uncertainties in that list.
+                            allResponsesListsOfYUncertaintiesArrays.append( [self.UserInput.responses_observed_uncertainties[0][responseDimIndex]] ) #Just creating nesting, we need to give a list for each response dimension.
+                        else: #This case means that there are some responses_simulation_uncertainties to include, so allResponsesListsOfYUncertaintiesArrays will have more dimensions *within* its nested values.
+                            allResponsesListsOfYUncertaintiesArrays.append([self.UserInput.responses_observed_uncertainties[0][responseDimIndex],self.mu_guess_responses_simulation_uncertainties,self.map_responses_simulation_uncertainties]) #We need to give a list for each response dimension.                    
                 if hasattr(self, 'mu_AP_parameter_set'):
-                    listOfYArrays = [self.UserInput.responses_observed[responseDimIndex], self.mu_guess_SimulatedResponses[responseDimIndex], self.map_SimulatedResponses[responseDimIndex], self.mu_AP_SimulatedResponses[responseDimIndex]]        
-                    allResponsesListsOfYArrays.append(listOfYArrays)
-                    if type(self.UserInput.model['responses_simulation_uncertainties']) == type(None): #This means there are no simulation uncertainties. So for each response dimension, there will be a list with only the observed uncertainties in that list.
-                        allResponsesListsOfYUncertaintiesArrays.append( [self.UserInput.responses_observed_uncertainties[responseDimIndex]] ) #Just creating nesting, we need to give a list for each response dimension.
-                    else: #This case means that there are some responses_simulation_uncertainties to include, so allResponsesListsOfYUncertaintiesArrays will have more dimensions *within* its nested values.
-                        allResponsesListsOfYUncertaintiesArrays.append([self.UserInput.responses_observed_uncertainties[responseDimIndex],self.mu_guess_responses_simulation_uncertainties,self.map_responses_simulation_uncertainties,self.mu_AP_responses_simulation_uncertainties]) #We need to give a list for each response dimension.                    
+                    if self.UserInput.num_response_dimensions == 1: 
+                        print("line 1855", responseDimIndex, self.mu_AP_parameter_set)
+                        print(np.shape(self.UserInput.responses_observed), np.shape(self.mu_guess_SimulatedResponses), np.shape(self.map_SimulatedResponses), np.shape(self.mu_AP_SimulatedResponses))
+                        listOfYArrays = [self.UserInput.responses_observed[responseDimIndex], self.mu_guess_SimulatedResponses[responseDimIndex], self.map_SimulatedResponses[responseDimIndex], self.mu_AP_SimulatedResponses[responseDimIndex]]        
+                        allResponsesListsOfYArrays.append(listOfYArrays)
+                        if type(self.UserInput.model['responses_simulation_uncertainties']) == type(None): #This means there are no simulation uncertainties. So for each response dimension, there will be a list with only the observed uncertainties in that list.
+                            allResponsesListsOfYUncertaintiesArrays.append( [self.UserInput.responses_observed_uncertainties[responseDimIndex]] ) #Just creating nesting, we need to give a list for each response dimension.
+                        else: #This case means that there are some responses_simulation_uncertainties to include, so allResponsesListsOfYUncertaintiesArrays will have more dimensions *within* its nested values.
+                            allResponsesListsOfYUncertaintiesArrays.append([self.UserInput.responses_observed_uncertainties[responseDimIndex],self.mu_guess_responses_simulation_uncertainties,self.map_responses_simulation_uncertainties,self.mu_AP_responses_simulation_uncertainties]) #We need to give a list for each response dimension.                                        
+                    elif self.UserInput.num_response_dimensions > 1: 
+                        if np.shape(self.UserInput.responses_observed)[0] == 1:#This is the normal case.   
+                            transposeNeeded = False
+                        elif np.shape(self.UserInput.responses_observed)[0] > 1:#This means we have multiple resonses, but transposed compared to what we're expecting. This happens sometimes with numpy if each response has only 1 value.
+                            transposeNeeded = True #TODO: I think there is a better way to fix the data structures before this line.  However, I was having difficulty figuring out how to do things differently, and this worked. To test this, run with runfileExample07f. There is another area below with "transposeNeeded" to be fixed also.
+                        if not transposeNeeded:
+                            #print('line 1871', responseDimIndex, self.UserInput.responses_observed.flatten(), self.UserInput.responses_observed[0])
+                            listOfYArrays = [self.UserInput.responses_observed[0][responseDimIndex], self.mu_guess_SimulatedResponses[0][responseDimIndex], self.map_SimulatedResponses[0][responseDimIndex], self.mu_AP_SimulatedResponses[0][responseDimIndex]]        
+                            allResponsesListsOfYArrays.append(listOfYArrays)
+                        if transposeNeeded:#This means we have multiple responses, but transposed compared to what we're expecting. This happens sometimes with numpy if each response has only 1 value.
+                            listOfYArrays = [self.UserInput.responses_observed.transpose()[0][responseDimIndex], self.mu_guess_SimulatedResponses.transpose()[0][responseDimIndex], self.map_SimulatedResponses.transpose()[0][responseDimIndex], self.mu_AP_SimulatedResponses.transpose()[0][responseDimIndex]]        
+                            allResponsesListsOfYArrays.append(listOfYArrays)    
+                        if type(self.UserInput.model['responses_simulation_uncertainties']) == type(None): #This means there are no simulation uncertainties. So for each response dimension, there will be a list with only the observed uncertainties in that list.
+                            if not transposeNeeded:
+                                allResponsesListsOfYUncertaintiesArrays.append( [self.UserInput.responses_observed_uncertainties[0][responseDimIndex]] ) #Just creating nesting, we need to give a list for each response dimension.
+                            if transposeNeeded:
+                                allResponsesListsOfYUncertaintiesArrays.append( [self.UserInput.responses_observed_uncertainties.transpose()[0][responseDimIndex]] ) #Just creating nesting, we need to give a list for each response dimension.
+                        else: #This case means that there are some responses_simulation_uncertainties to include, so allResponsesListsOfYUncertaintiesArrays will have more dimensions *within* its nested values.
+                            if not transposeNeeded:
+                                allResponsesListsOfYUncertaintiesArrays.append([self.UserInput.responses_observed_uncertainties[0][responseDimIndex],self.mu_guess_responses_simulation_uncertainties,self.map_responses_simulation_uncertainties,self.mu_AP_responses_simulation_uncertainties]) #We need to give a list for each response dimension. 
+                            if transposeNeeded:
+                                allResponsesListsOfYUncertaintiesArrays.append([self.UserInput.responses_observed_uncertainties.transpose()[0][responseDimIndex],self.mu_guess_responses_simulation_uncertainties,self.map_responses_simulation_uncertainties,self.mu_AP_responses_simulation_uncertainties]) #We need to give a list for each response dimension. 
 
         if plot_settings == {}: 
             plot_settings = self.UserInput.simulated_response_plot_settings
@@ -1829,12 +1918,27 @@ class parameter_estimation:
                 if type(plot_settings['y_label']) == type(['list']) and len(plot_settings['y_label']) > 1: #the  label can be a single string, or a list of multiple response's labels. If it's a list of greater than 1 length, then we need to use the response index.
                     individual_plot_settings['y_label'] = plot_settings['y_label'][responseDimIndex]                
             #TODO, low priority: we can check if x_range and y_range are nested, and thereby allow individual response dimension values for those.                               
-            if np.shape(allResponses_x_values)[0] == 1: #This means a single abscissa for all responses.
+            print("line 1884", np.shape(allResponses_x_values))
+            if self.flattenFurther == False:
+                numberAbscissas = np.shape(allResponses_x_values)[0]
+                print("line 1887", numberAbscissas)
+            if self.flattenFurther == True:
+                numberAbscissas = np.shape(allResponses_x_values)[1]
+            if numberAbscissas == 1: #This means a single abscissa for all responses.
                 figureObject = plotting_functions.createSimulatedResponsesPlot(allResponses_x_values[0], allResponsesListsOfYArrays[responseDimIndex], individual_plot_settings, listOfYUncertaintiesArrays=allResponsesListsOfYUncertaintiesArrays[responseDimIndex])
                 np.savetxt(individual_plot_settings['figure_name']+".csv", np.vstack((allResponses_x_values[0], allResponsesListsOfYArrays[responseDimIndex])).transpose(), delimiter=",", header='x_values, observed, sim_initial_guess, sim_MAP, sim_mu_AP', comments='')
-            if np.shape(allResponses_x_values)[0] > 1: #This means a separate abscissa for each response.
-                figureObject = plotting_functions.createSimulatedResponsesPlot(allResponses_x_values[responseDimIndex], allResponsesListsOfYArrays[responseDimIndex], individual_plot_settings, listOfYUncertaintiesArrays=allResponsesListsOfYUncertaintiesArrays[responseDimIndex])
-                np.savetxt(individual_plot_settings['figure_name']+".csv", np.vstack((allResponses_x_values[responseDimIndex], allResponsesListsOfYArrays[responseDimIndex])).transpose(), delimiter=",", header='x_values, observed, sim_initial_guess, sim_MAP, sim_mu_AP', comments='')
+            if numberAbscissas > 1: #This means a separate abscissa for each response.
+                if np.shape(allResponses_x_values)[0] == 1:#This is the normal case.   
+                    print("line 1931", allResponses_x_values, allResponsesListsOfYArrays[responseDimIndex])
+                    transposeNeeded = False
+                    figureObject = plotting_functions.createSimulatedResponsesPlot(allResponses_x_values[0][responseDimIndex], allResponsesListsOfYArrays[responseDimIndex], individual_plot_settings, listOfYUncertaintiesArrays=allResponsesListsOfYUncertaintiesArrays[responseDimIndex])
+                    np.savetxt(individual_plot_settings['figure_name']+".csv", np.vstack((allResponses_x_values[0][responseDimIndex], allResponsesListsOfYArrays[responseDimIndex])).transpose(), delimiter=",", header='x_values, observed, sim_initial_guess, sim_MAP, sim_mu_AP', comments='')
+                elif np.shape(allResponses_x_values)[0] > 1:#This means we have multiple responses, but transposed compared to what we're expecting. This happens sometimes with numpy if each response has only 1 value.
+                    transposeNeeded = True #FIXME: I think there is a better way to fix the data structures before this line.  However, I was having difficulty figuring out how to do things differently, and this worked. I did not succeed in getting the savetxt to work. To test this, run with runfileExample07f. There is another area above with "transposeNeeded" to be fixed also.
+                    figureObject = plotting_functions.createSimulatedResponsesPlot(allResponses_x_values.transpose()[0][responseDimIndex], allResponsesListsOfYArrays[responseDimIndex], individual_plot_settings, listOfYUncertaintiesArrays=allResponsesListsOfYUncertaintiesArrays[responseDimIndex])
+                    print("line 1937", allResponses_x_values,  allResponsesListsOfYArrays[responseDimIndex])
+                    #np.savetxt(individual_plot_settings['figure_name']+".csv", np.vstack((allResponses_x_values[0][responseDimIndex], allResponsesListsOfYArrays[responseDimIndex])).transpose(), delimiter=",", header='x_values, observed, sim_initial_guess, sim_MAP, sim_mu_AP', comments='')
+
             allResponsesFigureObjectsList.append(figureObject)
         return allResponsesFigureObjectsList  #This is a list of matplotlib.pyplot as plt objects.
 
@@ -1892,16 +1996,17 @@ class parameter_estimation:
             self.makeHistogramsForEachParameter()    
             self.makeSamplingScatterMatrixPlot()
         except:
-            pass
+            print("Unable to make histograms and/or scatter matrix plots.")
 
         try:        
             self.createMumpcePlots()
         except:
-            pass
+            print("Unable to make contour plots.")
 
         try:
             self.createSimulatedResponsesPlots()
         except:
+            print("Unable to make simulated response plots.")
             pass
             
     def save_to_dill(self, base_file_name, file_name_prefix ='',  file_name_suffix='', file_name_extension='.dill'):
@@ -2042,6 +2147,14 @@ def returnReducedIterable(iterableObjectToReduce, reducedIndices):
         print("returnReducedIterable received an object type or size that is not supported.")
     return reducedIterable
 
+
+def convertInternalToNumpyArray(inputArray): #This is **specifically** for a nested array of the form [ [1],[2,3] ] Such that it is a 1D array of arrays.
+    inputArrayInternals = inputArray[0]
+    for elementIndex in range(0,len(inputArrayInternals)):
+        inputArrayInternals[elementIndex] = np.array(inputArrayInternals[elementIndex])
+    inputArray[0] = inputArrayInternals
+    return inputArray
+
 def returnShapedResponseCovMat(numResponseDimensions, uncertainties):
     #The uncertainties, whether transformed or not, must be one of the folllowing: a) for a single dimension response can be a 1D array of standard deviations, b) for as ingle dimension response can be a covmat already (so already variances), c) for a multidimensional response we *only* support standard deviations at this time.
     if numResponseDimensions == 1:
@@ -2051,7 +2164,7 @@ def returnShapedResponseCovMat(numResponseDimensions, uncertainties):
         else:
             shapedUncertainties = shapedUncertainties
     elif numResponseDimensions > 1:  #if the dimensionality of responses is greater than 1, we only support providing standard deviations. Will flatten and square.
-        shapedUncertainties = np.array(uncertainties, dtype="float") #Filling variable.  
+        shapedUncertainties = np.array(uncertainties, dtype="object") #Filling variable.  
         shapedUncertainties = shapedUncertainties.flatten() 
         shapedUncertainties = np.square(shapedUncertainties) #Need to square standard deviations to make them into variances.
     return shapedUncertainties

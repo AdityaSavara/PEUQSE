@@ -16,7 +16,7 @@ simulated_response_plot_settings['fontdict']= {'size':16} #A font dictionary can
 model = {} 
 model['InputParameterPriorValues'] =  [] #Should be like: [41.5, 41.5, 13.0, 13.0, 0.1, 0.1] # Ea1_mean, Ea2_mean, log_A1_mean, log_A2_mean, gamma_1_mean, gamma_2_mean 
 model['InputParametersPriorValuesUncertainties'] = []# Should be like: [200, 200, 13, 13, 0.1, 0.1] #If user wants to use a prior with covariance, then this must be a 2D array/ list. To assume no covariance, a 1D
-    #A value of -1 in the Uncertainties indicates the parameter in question is described a univorm distribution In this case, the InputParameterPriorValues_upperBounds and InputParameterPriorValues_lowerBounds must be defined for each parmeter (can be defined as None for the non-uniform parameters).
+    #A value of -1 in the Uncertainties indicates the parameter in question is described a univorm distribution In this case, the InputParameterPriorValues_upperBounds and InputParameterPriorValues_lowerBounds must be defined for each parmeter (can be defined as None for the non-uniform parameters). 
 model['InputParameterInitialGuess'] = [] #This is optional. An initial guess changes where the search is centered without changing the prior. If no initial guess is proided, the InputParameterPriorValues are taken as an initial guess.
 model['parameterNamesAndMathTypeExpressionsDict'] = {} #This must be provided. It can be as simple as {"Param1":"1"} etc. but it must be a dictionary with strings as keys and as values. The next line is a comment with a more complicated example.
 #Example: model['parameterNamesAndMathTypeExpressionsDict'] = {'Ea_1':r'$E_{a1}$','Ea_2':r'$E_{a2}$','log_A1':r'$log(A_{1})$','log_A2':r'$log(A_{2})$','gamma1':r'$\gamma_{1}$','gamma2':r'$\gamma_{2}$'}
@@ -34,7 +34,7 @@ model['InputParameterPriorValues_lowerBounds'] = []#This should be a list/array 
 responses = {}
 responses['responses_abscissa'] = []
 responses['responses_observed'] = []
-responses['responses_observed_uncertainties'] = []
+responses['responses_observed_uncertainties'] = [] #Normally this variable must be filled. To set the responses_observed_uncertainties to zero, this variable or the values inside must really be set equal to 0. A blank list well autogenerate uncertainties relative to the InputParameterPriorValues.
 responses['reducedResponseSpace'] = []
 responses['independent_variables_values'] = []
 responses['independent_variables_names'] = []
