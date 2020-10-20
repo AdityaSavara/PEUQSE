@@ -30,7 +30,7 @@ REQUIRED = [
 
 # What packages are optional?
 EXTRAS = {
-    'COMPLETE': ['UnitTesterSG >= 5.1.1', 'matplotlib', 'scipy', 'numpy', 'pandas', 'CiteSoft', 'zeus-mcmc', 'dill']# 'uncertainties': ['uncertainties'], #pymc...
+    'COMPLETE': ['UnitTesterSG >= 5.1.2', 'matplotlib', 'scipy', 'numpy', 'pandas', 'CiteSoft', 'zeus-mcmc', 'dill']# 'uncertainties': ['uncertainties'], #pymc...
 }
 
 #To make sure the license etc. is included, I added the DATA_FILES object based on https://stackoverflow.com/questions/9977889/how-to-include-license-file-in-setup-py-script

@@ -146,6 +146,7 @@ class parameter_estimation:
         UserInput.responses_observed = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(UserInput.responses_observed)
         UserInput.responses_observed_uncertainties = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(UserInput.responses_observed_uncertainties)
         #Processing of responses_observed_uncertainties for case that a blank list is received and not zeros.
+        print("line 157", UserInput.responses_observed_uncertainties)
         if len(UserInput.responses_observed_uncertainties[0]) == 0: 
             #if the response uncertainties is blank, we will use the heurestic of sigma = 5% of the observed value, with a floor of 2% of the maximum for that response. 
             #Note that we are actually checking in index[0], that is because as an atleast_2d array even a blank list / array in it will give a length of 1.
@@ -166,9 +167,9 @@ class parameter_estimation:
         self.UserInput.num_data_points = len(nestedObjectsFunctions.flatten_2dNested(UserInput.responses_observed)) #This works if there is a single response series.
         #We need to figure out if the abscissa has length equal to the responses or not.
         if len(UserInput.responses_abscissa) == len(UserInput.responses_observed):
-            self.separate_abscissa_per_response == True  #This means we **will** iterate across the abscissa when iterating across each response.
+            self.separate_abscissa_per_response = True  #This means we **will** iterate across the abscissa when iterating across each response.
         else:
-            self.separate_abscissa_per_response == False #This means we **won't** iterate across the abscissa when iterating across each response.
+            self.separate_abscissa_per_response = False #This means we **won't** iterate across the abscissa when iterating across each response.
 
         self.staggeredResponses = nestedObjectsFunctions.checkIfStaggered_2dNested(UserInput.responses_observed)
         #TODO: This currently only is programmed for if the uncertainties are uncorrelated standard deviaions (so is not compatible with a directly fed cov_mat). Also, we need to figure out what do when they are not gaussian/symmetric.
@@ -220,7 +221,11 @@ class parameter_estimation:
 
         
         #To find the *observed* responses covariance matrix, meaning based on the uncertainties reported by the users, we take the uncertainties from the points. This is needed for the likelihood. However, it will be transformed again at that time.
+        print("line 223", np.shape(UserInput.responses_observed))
+        print("line 223", self.UserInput.responses_observed_transformed_uncertainties, np.shape(self.UserInput.responses_observed_transformed_uncertainties))
         self.observed_responses_covmat_transformed = returnShapedResponseCovMat(self.UserInput.num_response_dimensions, self.UserInput.responses_observed_transformed_uncertainties)
+        print("line 224", self.observed_responses_covmat_transformed, np.shape(self.observed_responses_covmat_transformed))
+
         #self.covmat_prior = UserInput.covmat_prior
         self.Q_mu = self.UserInput.mu_prior*0 # Q samples the next step at any point in the chain.  The next step may be accepted or rejected.  Q_mu is centered (0) around the current theta.  
         self.Q_covmat = self.UserInput.covmat_prior # Take small steps. 
@@ -1537,7 +1542,7 @@ class parameter_estimation:
                 samples[i,:] = proposal_sample
                 samples_drawn[i,:] = proposal_sample
                 log_postereriors_drawn[i] = (log_likelihood_proposal+log_prior_proposal) #FIXME: should be using getlogP
-                samples_simulatedOutputs[i,:] = simulationOutput_proposal
+                samples_simulatedOutputs[i,:] = nestedObjectsFunctions.flatten_2dNested(simulationOutput_proposal)
                 log_posteriors_un_normed_vec[i] = log_likelihood_proposal+log_prior_proposal 
                 log_likelihoods_vec[i] = log_likelihood_proposal
                 log_priors_vec[i] = log_prior_proposal
@@ -1549,7 +1554,7 @@ class parameter_estimation:
                 samples[i,:] = samples[i-1,:] #the sample is not kept if it is rejected, though we still store it in the samples_drawn.
                 samples_drawn[i,:] = proposal_sample
                 log_postereriors_drawn[i] = (log_likelihood_proposal+log_prior_proposal)
-                samples_simulatedOutputs[i,:] = simulationOutput_current_location
+                samples_simulatedOutputs[i,:] = nestedObjectsFunctions.flatten_2dNested(simulationOutput_current_location)
                 log_posteriors_un_normed_vec[i] = log_likelihood_current_location+log_prior_current_location
                 log_likelihoods_vec[i] = log_likelihood_current_location
                 log_priors_vec[i] = log_prior_current_location
@@ -1718,7 +1723,7 @@ class parameter_estimation:
             simulated_responses_covmat_transformed = returnShapedResponseCovMat(self.UserInput.num_response_dimensions, responses_simulation_uncertainties_transformed)  #assume we got standard deviations back.
         observedResponses_transformed = self.UserInput.responses_observed_transformed
         
-        print("line 1721, removing flattening on Oct 19th 2020")
+        #print("line 1721, removing flattening on Oct 19th 2020")
         #simulatedResponses_transformed_flattened = np.array(simulatedResponses_transformed).flatten()
         #observedResponses_transformed_flattened = np.array(observedResponses_transformed).flatten()
         
@@ -1728,6 +1733,7 @@ class parameter_estimation:
         #First we will check whether observed_responses_covmat_transformed is square or not. The multivariate_normal.pdf function requires a diagonal values vector to be 1D.
         observed_responses_covmat_transformed = self.observed_responses_covmat_transformed
         observed_responses_covmat_transformed_shape = np.shape(observed_responses_covmat_transformed) 
+        #print("line 1735", observed_responses_covmat_transformed, observed_responses_covmat_transformed_shape)
 
         #In general, the covmat could be a function of the responses magnitude and independent variables. So eventually, we will use non-linear regression or something to estimate it. However, for now we simply take the observed_responses_covmat_transformed which will work for most cases.
         #TODO: use Ashi's nonlinear regression code (which  he used in this paper https://www.sciencedirect.com/science/article/abs/pii/S0920586118310344).  Put in the response magnitudes and the independent variables.
@@ -1735,15 +1741,16 @@ class parameter_estimation:
         #And that covmat_regression will be on by default.  We will need to have an additional argument for people to specify whether magnitude weighting and independent variable values should both be considered, or just one.
         if type(simulated_responses_covmat_transformed) == type(None):
             comprehensive_responses_covmat = observed_responses_covmat_transformed
-        else: #Else we add the uncertainties, assuming they are orthogonal. Note that these are already covmats so are already variances that can be added directly.
-            comprehensive_responses_covmat[responseIndex] = observed_responses_covmat_transformed[responseIndex] + simulated_responses_covmat_transformed[responseIndex]
+        else: #Else we add the uncertainties, assuming they are orthogonal. Note that these are already covmats so are already variances that can be added directly. 
+            comprehensive_responses_covmat = observed_responses_covmat_transformed + simulated_responses_covmat_transformed #FIXME: I think think this needs to be moved own into the responseIndex loop to correctly handle staggered uncertainties. [like one response having full covmatrix and others not]
         comprehensive_responses_covmat_shape = copy.deepcopy(observed_responses_covmat_transformed_shape) #no need to take the shape of the actual comprehensive_responses_covmat since they must be same. This is probably slightly less computation.
-        if len(comprehensive_responses_covmat_shape) == 1: #Matrix is square because has only one value.
+        if (len(comprehensive_responses_covmat_shape) == 1) and (comprehensive_responses_covmat_shape[0]==1): #Matrix is square because has only one value.
+            print("line 1746", (simulatedResponses_transformed), (observedResponses_transformed), (comprehensive_responses_covmat))
             log_probability_metric = multivariate_normal.logpdf(mean=simulatedResponses_transformed,x=observedResponses_transformed,cov=comprehensive_responses_covmat)
             return log_probability_metric, simulatedResponses_transformed #Return this rather than going through loop further.
-        elif comprehensive_responses_covmat_shape[0] == comprehensive_responses_covmat_shape[1]:  #Else it is 2D, check if it's square.
-            log_probability_metric = multivariate_normal.logpdf(mean=simulatedResponses_transformed,x=observedResponses_transformed,cov=comprehensive_responses_covmat)
-            return log_probability_metric, simulatedResponses_transformed #Return this rather than going through loop further.
+        elif len(comprehensive_responses_covmat_shape) > 1 and (comprehensive_responses_covmat_shape[0] == comprehensive_responses_covmat_shape[1]):  #Else it is 2D, check if it's square.
+                log_probability_metric = multivariate_normal.logpdf(mean=simulatedResponses_transformed,x=observedResponses_transformed,cov=comprehensive_responses_covmat)
+                return log_probability_metric, simulatedResponses_transformed #Return this rather than going through loop further.
             #TODO: Put in near-diagonal solution described in github: https://github.com/AdityaSavara/CheKiPEUQ/issues/3
         else:  #If it is not square, it's a list of uncertainties per response.
             log_probability_metric = 0 #Initializing since we will be adding to it.
@@ -1915,26 +1922,14 @@ class parameter_estimation:
             #TODO, low priority: we can check if x_range and y_range are nested, and thereby allow individual response dimension values for those.                               
             print("line 1884", np.shape(allResponses_x_values)) #Shouldn't need to separate the staggered versus non staggered cases now, below.
             numberAbscissas = np.shape(allResponses_x_values)[0]
-            # if self.staggeredResponses == False:
-                # numberAbscissas = np.shape(allResponses_x_values)[0]
-                # print("line 1887", numberAbscissas)
-            # if self.staggeredResponses == True:
-                # numberAbscissas = np.shape(allResponses_x_values)[1]
             if numberAbscissas == 1: #This means a single abscissa for all responses.
                 figureObject = plotting_functions.createSimulatedResponsesPlot(allResponses_x_values[0], allResponsesListsOfYArrays[responseDimIndex], individual_plot_settings, listOfYUncertaintiesArrays=allResponsesListsOfYUncertaintiesArrays[responseDimIndex])
                 np.savetxt(individual_plot_settings['figure_name']+".csv", np.vstack((allResponses_x_values[0], allResponsesListsOfYArrays[responseDimIndex])).transpose(), delimiter=",", header='x_values, observed, sim_initial_guess, sim_MAP, sim_mu_AP', comments='')
-            if numberAbscissas > 1: #This means a separate abscissa for each response.
-                if np.shape(allResponses_x_values)[0] == 1:#This is the normal case.   
-                    print("line 1931", allResponses_x_values, allResponsesListsOfYArrays[responseDimIndex]); sys.exit()
-                    transposeNeeded = False
-                    figureObject = plotting_functions.createSimulatedResponsesPlot(allResponses_x_values[0][responseDimIndex], allResponsesListsOfYArrays[responseDimIndex], individual_plot_settings, listOfYUncertaintiesArrays=allResponsesListsOfYUncertaintiesArrays[responseDimIndex])
-                    np.savetxt(individual_plot_settings['figure_name']+".csv", np.vstack((allResponses_x_values[0][responseDimIndex], allResponsesListsOfYArrays[responseDimIndex])).transpose(), delimiter=",", header='x_values, observed, sim_initial_guess, sim_MAP, sim_mu_AP', comments='')
-                elif np.shape(allResponses_x_values)[0] > 1:#This means we have multiple responses, but transposed compared to what we're expecting. This happens sometimes with numpy if each response has only 1 value.
-                    transposeNeeded = True #FIXME: I think there is a better way to fix the data structures before this line.  However, I was having difficulty figuring out how to do things differently, and this worked. I did not succeed in getting the savetxt to work. To test this, run with runfileExample07f. There is another area above with "transposeNeeded" to be fixed also.
-                    figureObject = plotting_functions.createSimulatedResponsesPlot(allResponses_x_values.transpose()[0][responseDimIndex], allResponsesListsOfYArrays[responseDimIndex], individual_plot_settings, listOfYUncertaintiesArrays=allResponsesListsOfYUncertaintiesArrays[responseDimIndex])
-                    print("line 1937", allResponses_x_values,  allResponsesListsOfYArrays[responseDimIndex]); sys.exit()
-                    #np.savetxt(individual_plot_settings['figure_name']+".csv", np.vstack((allResponses_x_values[0][responseDimIndex], allResponsesListsOfYArrays[responseDimIndex])).transpose(), delimiter=",", header='x_values, observed, sim_initial_guess, sim_MAP, sim_mu_AP', comments='')
-
+            print("line 1926 !!!!!!!", np.shape(allResponses_x_values))
+            if numberAbscissas > 1: #This means a separate abscissa for each response.              
+                print("line 1931", allResponses_x_values, allResponsesListsOfYArrays, allResponsesListsOfYArrays[0][responseDimIndex])
+                figureObject = plotting_functions.createSimulatedResponsesPlot(allResponses_x_values[0][responseDimIndex], allResponsesListsOfYArrays[0][responseDimIndex], individual_plot_settings, listOfYUncertaintiesArrays=allResponsesListsOfYUncertaintiesArrays[responseDimIndex])
+               # np.savetxt(individual_plot_settings['figure_name']+".csv", np.vstack((allResponses_x_values[0][responseDimIndex], allResponsesListsOfYArrays[responseDimIndex])).transpose(), delimiter=",", header='x_values, observed, sim_initial_guess, sim_MAP, sim_mu_AP', comments='')
             allResponsesFigureObjectsList.append(figureObject)
         return allResponsesFigureObjectsList  #This is a list of matplotlib.pyplot as plt objects.
 
@@ -2148,15 +2143,16 @@ def returnReducedIterable(iterableObjectToReduce, reducedIndices):
 def returnShapedResponseCovMat(numResponseDimensions, uncertainties):
     #The uncertainties, whether transformed or not, must be one of the folllowing: a) for a single dimension response can be a 1D array of standard deviations, b) for as ingle dimension response can be a covmat already (so already variances), c) for a multidimensional response we *only* support standard deviations at this time.
     if numResponseDimensions == 1:
+        print("line 2144")
         shapedUncertainties = np.array(uncertainties, dtype="float") #Initializing variable. 
         if np.shape(shapedUncertainties)[0] == (1): #This means it's just a list of standard deviations and needs to be squared to become variances.
             shapedUncertainties = np.square(shapedUncertainties) # Need to square standard deviations to make them into variances.
         else:
             shapedUncertainties = shapedUncertainties
-    elif numResponseDimensions > 1:  #if the dimensionality of responses is greater than 1, we only support providing standard deviations. Will flatten and square.
-        shapedUncertainties = np.array(uncertainties, dtype="object") #Filling variable.  
-        shapedUncertainties = shapedUncertainties.flatten() 
-        shapedUncertainties = np.square(shapedUncertainties) #Need to square standard deviations to make them into variances.
+    elif numResponseDimensions > 1:  #if the dimensionality of responses is greater than 1, we (as of Nov 2020) only support providing standard deviations. Will square.
+        for responseIndex in range(numResponseDimensions):
+            shapedUncertainties = np.array(uncertainties, dtype="object") #Filling variable.   
+            shapedUncertainties[responseIndex] = np.square(shapedUncertainties[responseIndex]) #Need to square standard deviations to make them into variances.
     return shapedUncertainties
 
 def boundsCheck(parameters, parametersBounds, boundsType):

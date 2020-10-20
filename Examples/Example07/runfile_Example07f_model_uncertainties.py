@@ -44,8 +44,8 @@ if __name__ == "__main__":
     PE_object.doMetropolisHastings()
     #[map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, samples_simulatedOutputs, logP] = PE_object.doMetropolisHastings()
     
-    PE_object.createAllPlots() #This function calls each of the below functions.
+   # PE_object.createAllPlots() #This function calls each of the below functions.
 #    PE_object.makeHistogramsForEachParameter()    
 #    PE_object.makeSamplingScatterMatrixPlot()
-   # PE_object.createSimulatedResponsesPlots()
+    PE_object.createSimulatedResponsesPlots()
     #TODO: call the mum_pce plotting objects, which will be PE_object.createContourGraphs() or something like that.

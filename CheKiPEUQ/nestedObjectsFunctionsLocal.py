@@ -164,12 +164,10 @@ def makeAtLeast_2dNested(arr):
 
 def convertInternalToNumpyArray_2dNested(inputArray): #This is **specifically** for a nested array of the form [ [1],[2,3] ] Such that it is a 1D array of arrays.
     import numpy as np
-    inputArrayInternals = inputArray[0]
-    for elementIndex in range(0,len(inputArrayInternals)):
-        inputArrayInternals[elementIndex] = np.array(inputArrayInternals[elementIndex])
-    inputArray[0] = inputArrayInternals
-    return np.array(inputArray)
-    
+    inputArray = np.array(inputArray)
+    for elementIndex in range(0,len(inputArray)):
+        inputArray[elementIndex] = np.array(inputArray[elementIndex])
+    return np.array(inputArray)    
 
 #Takes objects like this: [1,2, [3,4]] and returns objects like this: [1,2,3,4]
 def flatten_2dNested(arr):
