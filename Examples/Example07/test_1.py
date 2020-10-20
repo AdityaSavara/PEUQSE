@@ -21,8 +21,8 @@ prefix = ''
 """
 #For this test, we ***know*** what result to expect.
 """
-expectedFirstPart = [1.45, 3.95]
-expectedSecondPart = [1.45, 3.95]
+expectedFirstPart = [1.00, 3.95]
+expectedSecondPart = [0.90, 3.95]
 expectedResult = (expectedFirstPart,expectedSecondPart) #We are using a tuple, but it this could have been a list.
 
 ut.set_expected_result(expectedResult,expected_result_str=str(expectedResult), prefix=prefix,suffix=suffix) #This is the typical syntax if you want to force an analytical result for your test.

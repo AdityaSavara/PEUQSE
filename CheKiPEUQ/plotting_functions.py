@@ -145,9 +145,6 @@ def createSimulatedResponsesPlot(x_values, listOfYArrays, plot_settings={}, list
     x_values = np.array(x_values)
     if len(np.shape(x_values)) == 0: #This 2d line breaks regular arrays, but works when a 'zero length' array comes in (I don't understand how a zero length array can occur, but it has happened.)
         x_values = np.atleast_2d(x_values)
-    print("line 145", x_values)
-    print("line 145", type(x_values))
-    print("line 145", len(np.shape(x_values)))
     if 'x_label' not in plot_settings: plot_settings['x_label'] = ''
     if 'y_label' not in plot_settings: plot_settings['y_label'] = ''
     if 'legendLabels' not in plot_settings: plot_settings['legendLabels'] = ''
@@ -172,7 +169,7 @@ def createSimulatedResponsesPlot(x_values, listOfYArrays, plot_settings={}, list
         elif len(x_values) > 10:
             error_linewidth = 1
         elif len(x_values) <= 10:
-            error_linewidth = 4
+            error_linewidth = 10
     if str(error_linewidth).lower() == 'none': error_linewidth = 0 #This will hide the rror bars if they are not desired.
     if 'y_range' in plot_settings: ax0.set_ylim(plot_settings['y_range'] )
     if len(listOfYArrays) == 3: #This generally means observed, mu_guess, map, in that order.
