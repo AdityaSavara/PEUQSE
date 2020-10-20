@@ -1717,8 +1717,11 @@ class parameter_estimation:
             simulatedResponses_transformed, responses_simulation_uncertainties_transformed = self.transform_responses(simulatedResponses, responses_simulation_uncertainties) #This creates transforms for any data that we might need it. The same transforms were also applied to the observed responses.
             simulated_responses_covmat_transformed = returnShapedResponseCovMat(self.UserInput.num_response_dimensions, responses_simulation_uncertainties_transformed)  #assume we got standard deviations back.
         observedResponses_transformed = self.UserInput.responses_observed_transformed
-        simulatedResponses_transformed_flattened = np.array(simulatedResponses_transformed).flatten()
-        observedResponses_transformed_flattened = np.array(observedResponses_transformed).flatten()
+        
+        print("line 1721, removing flattening on Oct 19th 2020")
+        #simulatedResponses_transformed_flattened = np.array(simulatedResponses_transformed).flatten()
+        #observedResponses_transformed_flattened = np.array(observedResponses_transformed).flatten()
+        
         #If our likelihood is  “probability of Response given Theta”…  we have a continuous probability distribution for both the response and theta. That means the pdf  must use binning on both variables. Eric notes that the pdf returns a probability density, not a probability mass. So the pdf function here divides by the width of whatever small bin is being used and then returns the density accordingly. Because of this, our what we are calling likelihood is not actually probability (it’s not the actual likelihood) but is proportional to the likelihood.
         #Thus we call it a probability_metric and not a probability. #TODO: consider changing names of likelihood and get likelihood to "likelihoodMetric" and "getLikelihoodMetric"
         #Now we need to make the comprehensive_responses_covmat.
@@ -1726,13 +1729,6 @@ class parameter_estimation:
         observed_responses_covmat_transformed = self.observed_responses_covmat_transformed
         observed_responses_covmat_transformed_shape = np.shape(observed_responses_covmat_transformed) 
 
-        #The below lines are fore cases with multiple responses.
-        if self.staggeredResponses == True:
-            simulatedResponses_transformed_flattened=np.hstack(tuple(simulatedResponses_transformed_flattened))
-            if type(simulated_responses_covmat_transformed) != type(None):
-                simulated_responses_covmat_transformed=np.hstack(tuple(simulated_responses_covmat_transformed))
-            observedResponses_transformed_flattened=np.hstack(tuple(observedResponses_transformed_flattened))
-            observed_responses_covmat_transformed=np.hstack(tuple(observed_responses_covmat_transformed))
         #In general, the covmat could be a function of the responses magnitude and independent variables. So eventually, we will use non-linear regression or something to estimate it. However, for now we simply take the observed_responses_covmat_transformed which will work for most cases.
         #TODO: use Ashi's nonlinear regression code (which  he used in this paper https://www.sciencedirect.com/science/article/abs/pii/S0920586118310344).  Put in the response magnitudes and the independent variables.
         #in future it will be something like: if self.UserInput.covmat_regression== True: comprehensive_responses_covmat = nonLinearCovmatPrediction(self.UserInput['independent_variable_values'], observed_responses_covmat_transformed)
@@ -1740,31 +1736,36 @@ class parameter_estimation:
         if type(simulated_responses_covmat_transformed) == type(None):
             comprehensive_responses_covmat = observed_responses_covmat_transformed
         else: #Else we add the uncertainties, assuming they are orthogonal. Note that these are already covmats so are already variances that can be added directly.
-            comprehensive_responses_covmat = observed_responses_covmat_transformed + simulated_responses_covmat_transformed
+            comprehensive_responses_covmat[responseIndex] = observed_responses_covmat_transformed[responseIndex] + simulated_responses_covmat_transformed[responseIndex]
         comprehensive_responses_covmat_shape = copy.deepcopy(observed_responses_covmat_transformed_shape) #no need to take the shape of the actual comprehensive_responses_covmat since they must be same. This is probably slightly less computation.
         if len(comprehensive_responses_covmat_shape) == 1: #Matrix is square because has only one value.
-            log_probability_metric = multivariate_normal.logpdf(mean=simulatedResponses_transformed_flattened,x=observedResponses_transformed_flattened,cov=comprehensive_responses_covmat)
+            log_probability_metric = multivariate_normal.logpdf(mean=simulatedResponses_transformed,x=observedResponses_transformed,cov=comprehensive_responses_covmat)
+            return log_probability_metric, simulatedResponses_transformed #Return this rather than going through loop further.
         elif comprehensive_responses_covmat_shape[0] == comprehensive_responses_covmat_shape[1]:  #Else it is 2D, check if it's square.
-            log_probability_metric = multivariate_normal.logpdf(mean=simulatedResponses_transformed_flattened,x=observedResponses_transformed_flattened,cov=comprehensive_responses_covmat)
+            log_probability_metric = multivariate_normal.logpdf(mean=simulatedResponses_transformed,x=observedResponses_transformed,cov=comprehensive_responses_covmat)
+            return log_probability_metric, simulatedResponses_transformed #Return this rather than going through loop further.
             #TODO: Put in near-diagonal solution described in github: https://github.com/AdityaSavara/CheKiPEUQ/issues/3
-        else:  #If it is not square, it's a list of variances so we need to take the 1D vector version.
-            try:
-                log_probability_metric = multivariate_normal.logpdf(mean=simulatedResponses_transformed_flattened,x=observedResponses_transformed_flattened,cov=comprehensive_responses_covmat[0])                
-            except:
-                log_probability_metric = 1
-            if log_probability_metric == 1:
-                log_probability_metric = -1E100 #Just initializing, then will add each probability separately.
-                for responseValueIndex in range(len(simulatedResponses_transformed_flattened)):
-                    try:
-                        current_log_probability_metric = multivariate_normal.logpdf(mean=simulatedResponses_transformed_flattened[responseValueIndex],x=observedResponses_transformed_flattened[responseValueIndex],cov=comprehensive_responses_covmat[0][responseValueIndex])    
-                    except: #The above is to catch cases when the multivariate_normal fails.
-                        current_log_probability_metric = float('-inf')
-                    log_probability_metric = current_log_probability_metric + log_probability_metric
-                    if float(current_log_probability_metric) == float('-inf'):
-                        print("Warning: There are posterior points that have zero probability. If there are too many points like this, the MAP and mu_AP returned will not be meaningful.")
-                        current_log_probability_metric = -1E100 #Just choosing an arbitrarily very severe penalty. I know that I have seen 1E-48 to -303 from the multivariate pdf, and values inbetween like -171, -217, -272. I found that -1000 seems to be worse, but I don't have a systematic testing. I think -1000 was causing numerical errors.
-                        log_probability_metric = current_log_probability_metric + log_probability_metric
-        return log_probability_metric, simulatedResponses_transformed_flattened
+        else:  #If it is not square, it's a list of uncertainties per response.
+            log_probability_metric = 0 #Initializing since we will be adding to it.
+            for responseIndex in range(self.UserInput.num_response_dimensions):
+                try:
+                    response_log_probability_metric = multivariate_normal.logpdf(mean=simulatedResponses_transformed[responseIndex],x=observedResponses_transformed[responseIndex],cov=comprehensive_responses_covmat[responseIndex])                
+                except:
+                    response_log_probability_metric = 1
+                if response_log_probability_metric == 1:
+                    response_log_probability_metric = -1E100 #Just initializing, then will add each probability separately. One for each **value** of this response dimension.
+                    for responseValueIndex in range(len(simulatedResponses_transformed[[responseIndex]])):
+                        try:
+                            current_log_probability_metric = multivariate_normal.logpdf(mean=simulatedResponses_transformed[responseValueIndex],x=observedResponses_transformed[responseValueIndex],cov=comprehensive_responses_covmat[0][responseValueIndex])    
+                        except: #The above is to catch cases when the multivariate_normal fails.
+                            current_log_probability_metric = float('-inf')
+                        response_log_probability_metric = current_log_probability_metric + response_log_probability_metric
+                        if float(current_log_probability_metric) == float('-inf'):
+                            print("Warning: There are posterior points that have zero probability. If there are too many points like this, the MAP and mu_AP returned will not be meaningful.")
+                            current_log_probability_metric = -1E100 #Just choosing an arbitrarily very severe penalty. I know that I have seen 1E-48 to -303 from the multivariate pdf, and values inbetween like -171, -217, -272. I found that -1000 seems to be worse, but I don't have a systematic testing. I think -1000 was causing numerical errors.
+                            response_log_probability_metric = current_log_probability_metric + response_log_probability_metric
+            log_probability_metric = log_probability_metric + response_log_probability_metric
+        return log_probability_metric, simulatedResponses_transformed
 
     def makeHistogramsForEachParameter(self):
         import CheKiPEUQ.plotting_functions as plotting_functions 
@@ -1912,25 +1913,26 @@ class parameter_estimation:
                 if type(plot_settings['y_label']) == type(['list']) and len(plot_settings['y_label']) > 1: #the  label can be a single string, or a list of multiple response's labels. If it's a list of greater than 1 length, then we need to use the response index.
                     individual_plot_settings['y_label'] = plot_settings['y_label'][responseDimIndex]                
             #TODO, low priority: we can check if x_range and y_range are nested, and thereby allow individual response dimension values for those.                               
-            print("line 1884", np.shape(allResponses_x_values))
-            if self.staggeredResponses == False:
-                numberAbscissas = np.shape(allResponses_x_values)[0]
-                print("line 1887", numberAbscissas)
-            if self.staggeredResponses == True:
-                numberAbscissas = np.shape(allResponses_x_values)[1]
+            print("line 1884", np.shape(allResponses_x_values)) #Shouldn't need to separate the staggered versus non staggered cases now, below.
+            numberAbscissas = np.shape(allResponses_x_values)[0]
+            # if self.staggeredResponses == False:
+                # numberAbscissas = np.shape(allResponses_x_values)[0]
+                # print("line 1887", numberAbscissas)
+            # if self.staggeredResponses == True:
+                # numberAbscissas = np.shape(allResponses_x_values)[1]
             if numberAbscissas == 1: #This means a single abscissa for all responses.
                 figureObject = plotting_functions.createSimulatedResponsesPlot(allResponses_x_values[0], allResponsesListsOfYArrays[responseDimIndex], individual_plot_settings, listOfYUncertaintiesArrays=allResponsesListsOfYUncertaintiesArrays[responseDimIndex])
                 np.savetxt(individual_plot_settings['figure_name']+".csv", np.vstack((allResponses_x_values[0], allResponsesListsOfYArrays[responseDimIndex])).transpose(), delimiter=",", header='x_values, observed, sim_initial_guess, sim_MAP, sim_mu_AP', comments='')
             if numberAbscissas > 1: #This means a separate abscissa for each response.
                 if np.shape(allResponses_x_values)[0] == 1:#This is the normal case.   
-                    print("line 1931", allResponses_x_values, allResponsesListsOfYArrays[responseDimIndex])
+                    print("line 1931", allResponses_x_values, allResponsesListsOfYArrays[responseDimIndex]); sys.exit()
                     transposeNeeded = False
                     figureObject = plotting_functions.createSimulatedResponsesPlot(allResponses_x_values[0][responseDimIndex], allResponsesListsOfYArrays[responseDimIndex], individual_plot_settings, listOfYUncertaintiesArrays=allResponsesListsOfYUncertaintiesArrays[responseDimIndex])
                     np.savetxt(individual_plot_settings['figure_name']+".csv", np.vstack((allResponses_x_values[0][responseDimIndex], allResponsesListsOfYArrays[responseDimIndex])).transpose(), delimiter=",", header='x_values, observed, sim_initial_guess, sim_MAP, sim_mu_AP', comments='')
                 elif np.shape(allResponses_x_values)[0] > 1:#This means we have multiple responses, but transposed compared to what we're expecting. This happens sometimes with numpy if each response has only 1 value.
                     transposeNeeded = True #FIXME: I think there is a better way to fix the data structures before this line.  However, I was having difficulty figuring out how to do things differently, and this worked. I did not succeed in getting the savetxt to work. To test this, run with runfileExample07f. There is another area above with "transposeNeeded" to be fixed also.
                     figureObject = plotting_functions.createSimulatedResponsesPlot(allResponses_x_values.transpose()[0][responseDimIndex], allResponsesListsOfYArrays[responseDimIndex], individual_plot_settings, listOfYUncertaintiesArrays=allResponsesListsOfYUncertaintiesArrays[responseDimIndex])
-                    print("line 1937", allResponses_x_values,  allResponsesListsOfYArrays[responseDimIndex])
+                    print("line 1937", allResponses_x_values,  allResponsesListsOfYArrays[responseDimIndex]); sys.exit()
                     #np.savetxt(individual_plot_settings['figure_name']+".csv", np.vstack((allResponses_x_values[0][responseDimIndex], allResponsesListsOfYArrays[responseDimIndex])).transpose(), delimiter=",", header='x_values, observed, sim_initial_guess, sim_MAP, sim_mu_AP', comments='')
 
             allResponsesFigureObjectsList.append(figureObject)
