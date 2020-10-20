@@ -145,9 +145,6 @@ def createSimulatedResponsesPlot(x_values, listOfYArrays, plot_settings={}, list
     x_values = np.array(x_values)
     if len(np.shape(x_values)) == 0: #This 2d line breaks regular arrays, but works when a 'zero length' array comes in (I don't understand how a zero length array can occur, but it has happened.)
         x_values = np.atleast_2d(x_values)
-    print("line 145", x_values)
-    print("line 145", type(x_values))
-    print("line 145", len(np.shape(x_values)))
     if 'x_label' not in plot_settings: plot_settings['x_label'] = ''
     if 'y_label' not in plot_settings: plot_settings['y_label'] = ''
     if 'legendLabels' not in plot_settings: plot_settings['legendLabels'] = ''
@@ -215,7 +212,6 @@ def createSimulatedResponsesPlot(x_values, listOfYArrays, plot_settings={}, list
                 if len(listOfYUncertaintiesArrays) > 1: #If length is >1, uncertainties for all data sets
                     ax0.errorbar(x_values, listOfYArrays[3], yerr=listOfYUncertaintiesArrays[3], fmt='.', barsabove=False, markersize=0, linewidth=error_linewidth, color="gray", ecolor="lightgray") #markersize=0 because we want no marker for this.                    
         if len(x_values) == 1: #This means there are single points, and we need to make symbols, by adding an "o".
-                print("line 218",x_values, listOfYArrays)
                 ax0.plot(x_values,listOfYArrays[0],'go')
                 if len(listOfYUncertaintiesArrays) >= 1: #If length is >=1, uncertainties for first data set.
                     ax0.errorbar(x_values, listOfYArrays[0], yerr=listOfYUncertaintiesArrays[0], fmt='.', barsabove=False, markersize=0, linewidth=error_linewidth, color="gray", ecolor="lightgray") #markersize=0 because we want no marker for experiments data series, just a line.
