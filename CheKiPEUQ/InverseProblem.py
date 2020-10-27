@@ -531,7 +531,7 @@ class parameter_estimation:
                 #    pass  #This is the "normal" case and is implied, so is commented out.
             #####End ChekIPEUQ Parallel Processing During Loop Block####
             self.UserInput.InputParameterInitialGuess = permutation #We need to fill the variable InputParameterInitialGuess with the permutation being checked.
-            if searchType == 'getLogP':
+            if searchType == 'getLogP' or 'doGetLogP':
                 self.map_logP = self.getLogP(permutation) #The getLogP function does not fill map_logP by itself.
                 self.map_parameter_set = permutation
                 thisResult = [self.map_logP, str(self.map_parameter_set).replace(",","|").replace("[","").replace('(','').replace(')',''), 'None', 'None', 'None', 'None', 'None', 'None']
