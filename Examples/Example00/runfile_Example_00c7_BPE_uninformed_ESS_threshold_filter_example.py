@@ -2,13 +2,13 @@ import sys; sys.path.append('../../');  import CheKiPEUQ as CKPQ
 import CheKiPEUQ.UserInput as UserInput
 
 if __name__ == "__main__":
-    import simulation_model_00
-    simulation_model_00.x_values_for_data = [600,1100,1400] #Setting the x_values_for_data
-    
-    
-    UserInput.responses['responses_abscissa'] = simulation_model_00.x_values_for_data
-    UserInput.responses['responses_observed'] = [360500, 580500, 1620500]
-    UserInput.responses['responses_observed_uncertainties'] = [200000, 300000, 200000]    
+    import observed_values_00  #Just a simple example. The user can also put the values in directly into the runfile or extract from a csv, for example.
+    import simulation_model_00 #Simple example.
+        
+    UserInput.responses['responses_abscissa'] = observed_values_00.observed_data_x_values
+    UserInput.responses['responses_observed'] = observed_values_00.observed_data_y_values
+    UserInput.responses['responses_observed_uncertainties'] = observed_values_00.observed_data_y_values_uncertainties
+
     
     UserInput.simulated_response_plot_settings['x_label'] = 'distance (m)'
     UserInput.simulated_response_plot_settings['y_label'] = r'$time (s)$'

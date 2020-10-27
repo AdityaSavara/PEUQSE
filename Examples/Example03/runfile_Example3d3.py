@@ -26,7 +26,7 @@ if __name__ == "__main__":
     #InputParametersInitialValuesUncertainties = [200, 200, 13, 13, 0.1, 0.1] #If user wants to use a prior with covariance, then this must be a 2D array/ list. To assume no covariance, a 1D array can be used.
     UserInput.model['simulateByInputParametersOnlyFunction'] = processing_functions_tpd_odeint.TPR_integerated_simulationFunctionWrapper #This must simulate with *only* the parameters listed above, and no other arguments.
     UserInput.model['simulationOutputProcessingFunction'] = None  #Optional: a function to process what comes out of the simulation Function and then return an observable vector.
-    UserInput.parameter_estimation_settings['gridsearch'] = True
+    
     
     UserInput.parameter_estimation_settings['verbose'] = False 
     #UserInput.parameter_estimation_settings['checkPointFrequency'] = 100
@@ -48,8 +48,6 @@ if __name__ == "__main__":
     #[map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, samples_simulatedOutputs, logP] = PE_object.doMetropolisHastings()
     UserInput.parameter_estimation_settings['multistart_checkPointFrequency'] = 1
     PE_object.doMultiStart(searchType='doEnsembleSliceSampling', initialPointsDistributionType='grid')
-
-    
     PE_object.createAllPlots() #This function calls each of the below functions.
 #    PE_object.makeHistogramsForEachParameter()    
 #    PE_object.makeSamplingScatterMatrixPlot()

@@ -39,6 +39,7 @@ parameter_estimation_settings['scaling_uncertainties_type'] = "std" #"std" is fo
 parameter_estimation_settings['undo_scaling_uncertainties_type'] = False #This undoing can be set to True but presently only works for the case of fixed scaling (a single scalar).
 				  
 ######MCMC settings:#####
+parameter_estimation_settings['mcmc_exportLog'] = True #exports additional information during the mcmc.
 parameter_estimation_settings['mcmc_random_seed'] = None #Normally set to None so that mcmc is set to be random. To get the same results repeatedly, such as for testing purposes, set the random seed to 0 or another integer for testing purposes.
 parameter_estimation_settings['mcmc_mode'] = 'unbiased' #can be 'unbiased', 'MAP_finding', or 'HPD_exploring', the exploring one should take the MAP as an initial guess.
 parameter_estimation_settings['mcmc_length'] = 10000   #This is the number of mcmc steps to take.
@@ -73,8 +74,10 @@ simulated_response_plot_settings['fontdict']= {'size':16} #A font dictionary can
 #possible dictionary fields include: dpi, figure_name, fontsize, x_label, y_label, figure_name, x_range, y_range
 samplingScatterMatrixPlotsSettings ={}
 
-######multiStart (including gridsearch)##### 
-#Change multistart_initialPointsDistributionType if gridsearch is desired. 
+######multistart (including gridsearch)##### 
+#Possible searchTypes are: 'getLogP', 'doEnsembleSliceSampling', 'doMetropolisHastings', 'doOptimizeNegLogP', 'doOptimizeSSR'.  These are called by syngatx like PE_object.doMultiStart('doEnsembleSliceSampling') in the runfile
+#To do a gridsearch, make multistart_initialPointsDistributionType into 'grid' and then set the two 'gridsearcSampling' variables.
+#The multistart feature exports the best values to permutations_log_file.txt, and relevant outputs to permutations_initial_points_parameters_values.csv and permutations_MAP_logP_and_parameters_values.csv
 parameter_estimation_settings['multistart_checkPointFrequency'] = None #Note: this setting does not work perfectly with ESS.
 parameter_estimation_settings['multistart_parallel_sampling'] = False
 parameter_estimation_settings['multistart_centerPoint'] = None #With None the centerPoint will be taken as model['InputParameterInitialGuess'] 
@@ -87,7 +90,7 @@ parameter_estimation_settings['multistart_passThroughArgs'] = {}
 
 parameter_estimation_settings['multistart_calculatePostBurnInStatistics'] = True
 parameter_estimation_settings['multistart_keep_cumulative_post_burn_in_data'] = False
-parameter_estimation_settings['multistart_exportLog'] = []
+parameter_estimation_settings['multistart_exportLog'] = False #In the future, this will cause more information to be exported.
 parameter_estimation_settings['multistart_passThroughArgs'] = {}
 
 

@@ -38,7 +38,7 @@ if __name__ == "__main__":
     #InputParametersInitialValuesUncertainties = [200, 200, 13, 13, 0.1, 0.1] #If user wants to use a prior with covariance, then this must be a 2D array/ list. To assume no covariance, a 1D array can be used.
     UserInput.model['simulateByInputParametersOnlyFunction'] = processing_functions_tpd_odeint_two_site_NineParameters.TPR_simulationFunctionWrapperNineParameters #This must simulate with *only* the parameters listed above, and no other arguments.
     UserInput.model['simulationOutputProcessingFunction'] = None  #Optional: a function to process what comes out of the simulation Function and then return an observable vector.
-    UserInput.parameter_estimation_settings['gridsearch'] = True
+    
     
     UserInput.parameter_estimation_settings['scaling_uncertainties_type'] = "std"
     UserInput.parameter_estimation_settings['verbose'] = True 
