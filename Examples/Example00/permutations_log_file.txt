@@ -1,4 +1,4 @@
-highest_MAP_logP: -42.637387199141095
-highest_MAP_logP_parameter_set: [165.15115025 500.1244761 ]
-highest_MAP_initial_point_index: 4
-highest_MAP_initial_point_parameters: [ 70.7423396  824.25161841]
+highest_MAP_logP: -42.63738730919835
+highest_MAP_logP_parameter_set: [165.1707312  500.06152225]
+highest_MAP_initial_point_index: 2
+highest_MAP_initial_point_parameters: (300.0, 500.0)

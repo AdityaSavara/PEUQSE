@@ -489,8 +489,9 @@ class parameter_estimation:
         
     def doListOfPermutationsSearch(self, listOfPermutations, numPermutations = None, searchType='getLogP', exportLog = True, walkerInitialDistribution='UserChoice', passThroughArgs = {}, calculatePostBurnInStatistics=True,  keep_cumulative_post_burn_in_data = False, centerPoint=None): #This is the 'engine' used by doGridSearch and  doMultiStartSearch
     #The listOfPermutations can also be another type of iterable.
+        self.listOfPermutations = listOfPermutations #This is being made into a class variable so that it can be used during parallelization
         if str(numPermutations).lower() == str(None).lower():
-            numPermutations = len(listOfPermutations)
+            numPermutations = len(self.listOfPermutations)
         if str(centerPoint).lower() == str(None).lower():
             centerPoint = self.UserInput.InputParameterInitialGuess*1.0
 
@@ -514,9 +515,8 @@ class parameter_estimation:
                 #The identical distribution is used by default because otherwise the walkers may be spread out too far and it could defeat the purpose of a gridsearch.
                 if walkerInitialDistribution.lower() == 'auto':
                     walkerInitialDistribution = 'uniform'
-        np.savetxt('permutations_initial_points_parameters_values'+'.csv', listOfPermutations, delimiter=",")
         self.permutations_MAP_logP_and_parameters_values = [] #Just initializing.
-        for permutationIndex,permutation in enumerate(listOfPermutations):
+        for permutationIndex,permutation in enumerate(self.listOfPermutations):
             #####Begin ChekIPEUQ Parallel Processing During Loop Block####
             if (self.UserInput.parameter_estimation_settings['multistart_parallel_sampling'])== True:
                 #We will only execute the sampling the permutationIndex matches the processor rank.
@@ -588,9 +588,8 @@ class parameter_estimation:
                     print("Permutation", permutation, "number", permutationIndex+1, "out of", numPermutations, "timeOfThisPermutation", timeOfThisPermutation)
                     print("Permutation", permutationIndex+1, "averageTimePerPermutation", "%.2f" % round(averageTimePerPermutation,2), "estimated time remaining", "%.2f" % round( numRemainingPermutations*averageTimePerPermutation,2), "s" )
                     print("Permutation", permutationIndex+1, "current logP", self.map_logP, "highest logP", self.highest_logP)
-        
         if (self.UserInput.parameter_estimation_settings['multistart_parallel_sampling'] or self.UserInput.parameter_estimation_settings['multistart_parallel_sampling']) == True: #This is the parallel sampling mpi case.
-            self.consolidate_parallel_sampling_data(parallelizationType="permutation")
+            self.consolidate_parallel_sampling_data(parallelizationType="permutation") #this parellizationType means "keep only the best, don't average"
             if CheKiPEUQ.parallel_processing.finalProcess == False:
                 return self.map_logP #This is sortof like a sys.exit(), we are just ending the PermutationSearch function here if we are not on the finalProcess. 
         #TODO: export the allPermutationsResults to file at end of search in a nicer format.        
@@ -599,9 +598,13 @@ class parameter_estimation:
         #Now populate the map etc. with those of the best result.
         self.map_logP = self.highest_logP 
         self.map_parameter_set = highest_logP_parameter_set 
+        #Now do some exporting etc. This is at the end to avoid exporting every single time if parallelization is used.
+        np.savetxt('permutations_initial_points_parameters_values'+'.csv', self.listOfPermutations, delimiter=",")
         np.savetxt('permutations_MAP_logP_and_parameters_values.csv',self.permutations_MAP_logP_and_parameters_values, delimiter=",")
         if exportLog == True:
             pass #Later will do something with allPermutationsResults variable. It has one element for each result (that is, each permutation).
+
+
 
         
         with open("permutations_log_file.txt", 'w') as out_file:
@@ -610,8 +613,8 @@ class parameter_estimation:
                 out_file.write("highest_MAP_initial_point_index: " + str(highest_MAP_initial_point_index)+ "\n")
                 out_file.write("highest_MAP_initial_point_parameters: " + str( highest_MAP_initial_point_parameters)+ "\n")
                 if searchType == ('doMetropolisHastings' or 'doEnsembleSliceSampling'):
-                    out_file.write("self.mu_AP_parameter_set (for the above initial point): ", + str( bestResultSoFar[1])+ "\n")
-                    out_file.write("self.stdap_parameter_set (for the above initial point): ", + str( bestResultSoFar[2])+ "\n")
+                    out_file.write("self.mu_AP_parameter_set (for the above initial point): " + str( bestResultSoFar[1])+ "\n")
+                    out_file.write("self.stdap_parameter_set (for the above initial point): " + str( bestResultSoFar[2])+ "\n")
 
                     
 
@@ -748,14 +751,16 @@ class parameter_estimation:
 
  
     def consolidate_parallel_sampling_data(self, parallelizationType='equal'):
-        #parallelizationType='equal' means everything will get averaged together. parallelizationType='permutation' will be treated differently, same with parallelizationType='designOfExperiments'
+        #parallelizationType='equal' means everything will get averaged together. parallelizationType='permutation' will be treated differently, keeps only the best.
         import CheKiPEUQ.parallel_processing
         #CheKiPEUQ.parallel_processing.currentProcessorNumber
         numSimulations = CheKiPEUQ.parallel_processing.numSimulations
-        if checkIfAllParallelSimulationsDone("mcmc_post_burn_in_statistics_") == True:
+        if self.checkIfAllParallelSimulationsDone("mcmc_post_burn_in_statistics_") == True: #FIXME: Need to make parallelization work even for non-mcmc
             if parallelizationType.lower() == 'permutation':
                 import os
                 os.chdir("./mpi_log_files")
+                self.listOfPermutations = [] #just initializing.
+                self.permutations_MAP_logP_and_parameters_values = [] #just initializing.
                 for simulationIndex in range(0,numSimulations): #For each simulation, we need to grab the results.
                     simulationNumberString = str(simulationIndex+1)
                     #Get the dat aout.    
@@ -764,10 +769,16 @@ class parameter_estimation:
                     
                     current_post_map_logP_filename = "mcmc_map_logP_"+simulationNumberString
                     current_post_map_logP_data = unpickleAnObject(current_post_map_logP_filename)
-                    
+
+                    current_post_initial_parameters_filename = "mcmc_initial_point_parameters_"+simulationNumberString
+                    current_post_initial_parameters_data = unpickleAnObject(current_post_initial_parameters_filename)
+                    self.UserInput.InputParameterInitialGuess = current_post_initial_parameters_data
+
                     #Populate the class variables.
                     [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec] = current_post_burn_in_statistics_data
                     #Still accumulating.
+                    self.permutations_MAP_logP_and_parameters_values.append(np.hstack((self.map_logP, self.map_parameter_set)))
+                    self.listOfPermutations.append(current_post_initial_parameters_data)
                     if simulationIndex == 0: #This is the first data set.
                         self.map_logP = current_post_map_logP_data                       
                         self.highest_logP = self.map_logP
@@ -1418,6 +1429,8 @@ class parameter_estimation:
         postBurnInStatistics = [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec]
         pickleAnObject(postBurnInStatistics, file_name_prefix+'mcmc_post_burn_in_statistics'+file_name_suffix)
         pickleAnObject(self.map_logP, file_name_prefix+'mcmc_map_logP'+file_name_suffix)
+        pickleAnObject(self.UserInput.InputParameterInitialGuess, file_name_prefix+'mcmc_initial_point_parameters'+file_name_suffix)
+
         
     #Our EnsembleSliceSampling is done by the Zeus back end. (pip install zeus-mcmc)
     software_name = "zeus"
@@ -1859,7 +1872,6 @@ class parameter_estimation:
                             allResponsesListsOfYUncertaintiesArrays.append([self.UserInput.responses_observed_uncertainties[responseDimIndex],self.mu_guess_responses_simulation_uncertainties,self.map_responses_simulation_uncertainties]) #We need to give a list for each response dimension.                    
                 if hasattr(self, 'mu_AP_parameter_set'):
                     if self.UserInput.num_response_dimensions == 1: 
-                        print(np.shape(self.UserInput.responses_observed), np.shape(self.mu_guess_SimulatedResponses), np.shape(self.map_SimulatedResponses), np.shape(self.mu_AP_SimulatedResponses))
                         listOfYArrays = [self.UserInput.responses_observed[responseDimIndex], self.mu_guess_SimulatedResponses[responseDimIndex], self.map_SimulatedResponses[responseDimIndex], self.mu_AP_SimulatedResponses[responseDimIndex]]        
                         allResponsesListsOfYArrays.append(listOfYArrays)
                         if type(self.UserInput.model['responses_simulation_uncertainties']) == type(None): #This means there are no simulation uncertainties. So for each response dimension, there will be a list with only the observed uncertainties in that list.
