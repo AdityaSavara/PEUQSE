@@ -1,6 +1,7 @@
+self.initial_point_parameters:[1. 5.]
 MAP_logP:[-3.75743876]
-self.map_index:455
 self.map_parameter_set:[1.01764902 4.02161975]
+self.map_index:455
 self.mu_AP_parameter_set:[0.89863356 3.93585641]
 self.stdap_parameter_set:[0.95669224 0.66476188]
 self.info_gain:11.341955998050384

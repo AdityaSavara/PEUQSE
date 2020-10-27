@@ -592,7 +592,7 @@ class parameter_estimation:
                     print("Permutation", permutationIndex+1, "averageTimePerPermutation", "%.2f" % round(averageTimePerPermutation,2), "estimated time remaining", "%.2f" % round( numRemainingPermutations*averageTimePerPermutation,2), "s" )
                     print("Permutation", permutationIndex+1, "current logP", self.map_logP, "highest logP", self.highest_logP)
         ####START BLOCK RELATED TO PARALLEL SAMPLING####
-        if (self.UserInput.parameter_estimation_settings['multistart_parallel_sampling'] or self.UserInput.parameter_estimation_settings['permutation_parallel_sampling']) == True: #This is the parallel sampling mpi case. 
+        if (self.UserInput.parameter_estimation_settings['multistart_parallel_sampling']) == True: #This is the parallel sampling mpi case. #Consider later adding self.UserInput.parameter_estimation_settings['permutation_parallel_sampling'])
             #We are going to export all of the relevant statistics for each permutation.
             self.exportPostPermutationStatistics(searchType = searchType) #this is needed for **each** permutation if parallel sampling is being done.
             self.checkIfAllParallelSimulationsDone("permutation"+"_map_logP_") #This checks if we are on the final process and also sets the global variable for it accordingly.
