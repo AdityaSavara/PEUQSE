@@ -495,7 +495,7 @@ class parameter_estimation:
             numPermutations = len(self.listOfPermutations)
         if str(centerPoint).lower() == str(None).lower():
             centerPoint = self.UserInput.InputParameterInitialGuess*1.0
-        if searchType == 'doGetLogP': #Fixing a common input mistake.
+        if searchType == 'doGetLogP' or 'doSinglePoint': #Fixing a common input mistake.
             searchType = 'getLogP'
         self.permutation_searchType = searchType #This is mainly for consolidate_parallel_sampling_data
         verbose = self.UserInput.parameter_estimation_settings['verbose']
@@ -672,7 +672,7 @@ class parameter_estimation:
             numStartPoints = len(self.UserInput.InputParameterInitialGuess)*3
         if relativeInitialDistributionSpread == 0: #if it's still zero, we need to make it the default which is 1.
             relativeInitialDistributionSpread = 1.0              
-        if searchType == 'doGetLogP': #Fixing a common input mistake.
+        if searchType == 'doGetLogP' or 'doSinglePoint': #Fixing a common input mistake.
             searchType = 'getLogP'
         #make the initial points list by mostly passing through arguments.
         multiStartInitialPointsList = self.generateInitialPoints(numStartPoints=numStartPoints, relativeInitialDistributionSpread=relativeInitialDistributionSpread, initialPointsDistributionType=initialPointsDistributionType, centerPoint = centerPoint, gridsearchSamplingInterval = gridsearchSamplingInterval, gridsearchSamplingRadii = gridsearchSamplingRadii)
