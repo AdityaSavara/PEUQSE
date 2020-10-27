@@ -47,8 +47,7 @@ if __name__ == "__main__":
     #PE_object.doMetropolisHastings()
     #[map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, samples_simulatedOutputs, logP] = PE_object.doMetropolisHastings()
     UserInput.parameter_estimation_settings['gridsearch_checkPointFrequency'] = 1 
-    PE_object.doGridSearch('doEnsembleSliceSampling')
-
+    PE_object.doMultiStart(searchType='doEnsembleSliceSampling', initialPointsDistributionType='grid')
     PE_object.createAllPlots() #This function calls each of the below functions.
 #    PE_object.makeHistogramsForEachParameter()    
 #    PE_object.makeSamplingScatterMatrixPlot()

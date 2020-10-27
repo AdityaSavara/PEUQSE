@@ -28,6 +28,7 @@ if __name__ == "__main__":
 
     UserInput.parameter_estimation_settings['mcmc_random_seed'] = 0
     UserInput.parameter_estimation_settings['multistart_initialPointsDistributionType'] = 'grid'
+    UserInput.parameter_estimation_settings['multistart_exportLog'] = True
     
     
     #After making the UserInput, now we make a 'parameter_estimation' object from it.

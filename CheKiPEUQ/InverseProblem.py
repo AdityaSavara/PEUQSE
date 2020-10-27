@@ -489,7 +489,6 @@ class parameter_estimation:
         
     def doListOfPermutationsSearch(self, listOfPermutations, numPermutations = None, searchType='getLogP', exportLog = True, walkerInitialDistribution='UserChoice', passThroughArgs = {}, calculatePostBurnInStatistics=True,  keep_cumulative_post_burn_in_data = False, centerPoint=None): #This is the 'engine' used by doGridSearch and  doMultiStartSearch
     #The listOfPermutations can also be another type of iterable.
-        print("line 492", listOfPermutations); sys.exit()
         if str(numPermutations).lower() == str(None).lower():
             numPermutations = len(listOfPermutations)
         if str(centerPoint).lower() == str(None).lower():
@@ -576,6 +575,8 @@ class parameter_estimation:
                 bestResultSoFar = thisResult
                 self.highest_logP = self.map_logP
                 highest_logP_parameter_set = self.map_parameter_set
+                highest_MAP_initial_point_index = permutationIndex
+                highest_MAP_initial_point_parameters = permutation
             allPermutationsResults.append(thisResult)
             self.permutations_MAP_logP_and_parameters_values.append(np.hstack((self.map_logP, self.map_parameter_set)))    
             if verbose == True:
@@ -600,10 +601,19 @@ class parameter_estimation:
         self.map_parameter_set = highest_logP_parameter_set 
         np.savetxt('permutations_MAP_logP_and_parameters_values.csv',self.permutations_MAP_logP_and_parameters_values, delimiter=",")
         if exportLog == True:
-            with open("permutations_log_file.txt", 'w') as out_file:
-                out_file.write("result: " + "self.map_logP, self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec" + "\n")
-                for resultIndex, result in enumerate(allPermutationsResults):
-                    out_file.write("result: " + str(resultIndex) + " " +  str(result) + "\n")
+            pass #Later will do something with allPermutationsResults variable. It has one element for each result (that is, each permutation).
+
+        
+        with open("permutations_log_file.txt", 'w') as out_file:
+                out_file.write("highest_MAP_logP: " + str(self.map_logP) + "\n")
+                out_file.write("highest_MAP_logP_parameter_set: " + str(self.map_parameter_set)+ "\n")
+                out_file.write("highest_MAP_initial_point_index: " + str(highest_MAP_initial_point_index)+ "\n")
+                out_file.write("highest_MAP_initial_point_parameters: " + str( highest_MAP_initial_point_parameters)+ "\n")
+                if searchType == ('doMetropolisHastings' or 'doEnsembleSliceSampling'):
+                    out_file.write("self.mu_AP_parameter_set (for the above initial point): ", + str( bestResultSoFar[1])+ "\n")
+                    out_file.write("self.stdap_parameter_set (for the above initial point): ", + str( bestResultSoFar[2])+ "\n")
+
+                    
 
         print("Final map parameter results from PermutationSearch:", self.map_parameter_set,  " \nFinal map logP:", self.map_logP)
         if searchType == ('doMetropolisHastings' or 'doEnsembleSliceSampling'):
@@ -646,7 +656,6 @@ class parameter_estimation:
             keep_cumulative_post_burn_in_data = self.UserInput.parameter_estimation_settings['multistart_keep_cumulative_post_burn_in_data']
         if str(calculatePostBurnInStatistics) == 'UserChoice':
             calculatePostBurnInStatistics = self.UserInput.parameter_estimation_settings['multistart_calculatePostBurnInStatistics']
-        print("line 649", initialPointsDistributionType); sys.exit()
         if numStartPoints == 0: #if it's still zero, we need to make it the default which is 3 times the number of active parameters.
             numStartPoints = len(self.UserInput.InputParameterInitialGuess)*3
         if relativeInitialDistributionSpread == 0: #if it's still zero, we need to make it the default which is 1.

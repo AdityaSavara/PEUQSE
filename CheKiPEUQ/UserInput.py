@@ -73,8 +73,9 @@ simulated_response_plot_settings['fontdict']= {'size':16} #A font dictionary can
 #possible dictionary fields include: dpi, figure_name, fontsize, x_label, y_label, figure_name, x_range, y_range
 samplingScatterMatrixPlotsSettings ={}
 
-######multiStart (including gridsearch)##### 
+######multistart (including gridsearch)##### 
 #Change multistart_initialPointsDistributionType if gridsearch is desired. 
+#The multistart feature exports the best values to permutations_log_file.txt, and relevant outputs to permutations_initial_points_parameters_values.csv and permutations_MAP_logP_and_parameters_values.csv
 parameter_estimation_settings['multistart_checkPointFrequency'] = None #Note: this setting does not work perfectly with ESS.
 parameter_estimation_settings['multistart_parallel_sampling'] = False
 parameter_estimation_settings['multistart_centerPoint'] = None #With None the centerPoint will be taken as model['InputParameterInitialGuess'] 
@@ -87,7 +88,7 @@ parameter_estimation_settings['multistart_passThroughArgs'] = {}
 
 parameter_estimation_settings['multistart_calculatePostBurnInStatistics'] = True
 parameter_estimation_settings['multistart_keep_cumulative_post_burn_in_data'] = False
-parameter_estimation_settings['multistart_exportLog'] = []
+parameter_estimation_settings['multistart_exportLog'] = False #In the future, this will cause more information to be exported.
 parameter_estimation_settings['multistart_passThroughArgs'] = {}
 
 
