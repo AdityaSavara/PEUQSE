@@ -1,4 +1,0 @@
-highest_MAP_logP: -42.63738730919835
-highest_MAP_logP_parameter_set: [165.12304222 500.29390614]
-highest_MAP_initial_point_index: 3
-highest_MAP_initial_point_parameters: (200.0, 300.0)

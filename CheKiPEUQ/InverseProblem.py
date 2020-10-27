@@ -61,7 +61,7 @@ class parameter_estimation:
             if (UserInput.doe_settings['parallel_conditions_exploration'] or UserInput.doe_settings['parallel_parameter_modulation']) and (UserInput.parameter_estimation_settings['mcmc_parallel_sampling'] or UserInput.parameter_estimation_settings['multistart_parallel_sampling']):
                 print("Warning: Parallelization of Design of experiments is not compatible with parallelization of either mcmc_parallel_sampling or multistart_parallel_sampling.  Those other features are being turned off.")
                 UserInput.parameter_estimation_settings['multistart_parallel_sampling'] = False
-                UserInput.parameter_estimation_settings['mcmc_parallel_sampling']
+                UserInput.parameter_estimation_settings['mcmc_parallel_sampling'] = False
                 
         if UserInput.request_mpi == True: #Rank zero needs to clear out the mpi_log_files directory, so check if we are using rank 0.
             import os; import sys
@@ -80,6 +80,10 @@ class parameter_estimation:
                 elif CheKiPEUQ.parallel_processing.numProcessors == 1: #This is the case where the person has only one process rank, so probably does not want code execution to stop just yet. (This is an intentional case for gridsearch for example, where running without mpi will print the number of grid Permutations).
                     print("Notice: you have requested parallel processing by MPI but have only 1 processor rank enabled or are not using mpi for this run. Parallel processing is being disabled for this run. If you are running to find the number of process ranks to use, another message will be printed out with the number of processor ranks to provide to mpi.")
                     UserInput.request_mpi = False
+                    if UserInput.parameter_estimation_settings['mcmc_parallel_sampling']:
+                        print("Your settings suggest that you are trying to use mcmc_parallel_sampling. Please use the mpi command from the prompt.  To do N parallel samplings requires N+1 process ranks. For example, if you wanted to have 4 parallel samplings, you would need 5 process ranks and would use: mpiexec -n 5 python runfile_for_your_analysis.py")
+                        sys.exit()
+                    
         
         #Setting this object so that we can make changes to it below without changing userinput dictionaries.
         self.UserInput.mu_prior = np.array(UserInput.model['InputParameterPriorValues']) 
@@ -859,10 +863,14 @@ class parameter_estimation:
                 self.post_burn_in_log_priors_vec = self.cumulative_post_burn_in_log_priors_vec
                 self.post_burn_in_log_posteriors_un_normed_vec = self.cumulative_post_burn_in_log_posteriors_un_normed_vec
                 self.UserInput.request_mpi = False # we need to turn this off, because otherwise it will interfere with our attempts to calculate the post_burn_in statistics.
+                self.UserInput.parameter_estimation_settings['mcmc_parallel_sampling'] = False # we need to turn this off, because otherwise it will interfere with our attempts to calculate the post_burn_in statistics.
+                if hasattr(self, "during_burn_in_samples"): #need to remove this so it doesn't get exported for the parallel case, since otherwise will export most recent one which is misleading.
+                    delattr(self, "during_burn_in_samples")
                 os.chdir("..")
                 self.calculatePostBurnInStatistics(calculate_post_burn_in_log_priors_vec = True) #The argument is provided because otherwise there can be some bad priors if ESS was used.
                 self.exportPostBurnInStatistics()
                 self.UserInput.request_mpi = True #Set this back to true so that consolidating plots etc. doesn't get messed up.
+
 
 
 
@@ -1452,6 +1460,9 @@ class parameter_estimation:
                 pass #Disabling below warning until if statement is fixed. During mid-2020, it started printing every time. The if statement may be fixed now but not yet tested.
                 #out_file.write("Warning: The MAP parameter set and mu_AP parameter set differ by more than 10% of prior variance in at least one parameter. This may mean that you need to increase your mcmc_length, increase or decrease your mcmc_relative_step_length, or change what is used for the model response.  There is no general method for knowing the right  value for mcmc_relative_step_length since it depends on the sharpness and smoothness of the response. See for example https://www.sciencedirect.com/science/article/pii/S0039602816300632")
         postBurnInStatistics = [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec]
+        if hasattr(self, 'during_burn_in_samples'):
+            pickleAnObject(np.hstack((self.during_burn_in_log_posteriors_un_normed_vec, self.during_burn_in_samples)), file_name_prefix+'mcmc_during_burn_in_logP_and_parameter_samples'+file_name_suffix)
+            np.savetxt(file_name_prefix+'mcmc_during_burn_in_logP_and_parameter_samples'+file_name_suffix+'.csv',np.hstack((self.during_burn_in_log_posteriors_un_normed_vec, self.during_burn_in_samples)), delimiter=",")
         pickleAnObject(postBurnInStatistics, file_name_prefix+'mcmc_post_burn_in_statistics'+file_name_suffix)
         pickleAnObject(self.map_logP, file_name_prefix+'mcmc_map_logP'+file_name_suffix)
         pickleAnObject(self.UserInput.InputParameterInitialGuess, file_name_prefix+'mcmc_initial_point_parameters'+file_name_suffix)
@@ -1555,7 +1566,6 @@ class parameter_estimation:
             self.calculatePostBurnInStatistics(calculate_post_burn_in_log_priors_vec = True) #This function call will also filter the lowest probability samples out, when using default settings.
             if str(mcmc_exportLog) == 'UserChoice':
                 mcmc_exportLog = bool(self.UserInput.parameter_estimation_settings['mcmc_exportLog'])
-            print("line 1543, mcmc_exportLog ", mcmc_exportLog)
             if mcmc_exportLog == True:
                 self.exportPostBurnInStatistics()
             if self.UserInput.parameter_estimation_settings['mcmc_parallel_sampling'] == True: #We don't call the below function at this time unless we are doing mcmc_parallel_sampling. For multistart_parallel_sampling the consolidation is done elsewhere and differently.
@@ -1682,8 +1692,9 @@ class parameter_estimation:
                             if mcmc_step_dynamic_coefficient > 0.1:
                                 mcmc_step_dynamic_coefficient = mcmc_step_dynamic_coefficient*0.95
             ########################################
-        self.burn_in_samples = samples[0:self.mcmc_burn_in_length] #FIXME: this line will have to change with i indexing changed.
-        self.post_burn_in_samples = samples[self.mcmc_burn_in_length:] #FIXME: this line will have to change with i indexing changed.
+        self.during_burn_in_samples = samples[0:self.mcmc_burn_in_length] #TODO: check that indexing is correct.
+        self.during_burn_in_log_posteriors_un_normed_vec = log_posteriors_un_normed_vec[0:self.mcmc_burn_in_length]
+        self.post_burn_in_samples = samples[self.mcmc_burn_in_length:] #TODO: check that indexing is correct.
         if self.UserInput.parameter_estimation_settings['exportAllSimulatedOutputs'] == True:
             self.post_burn_in_samples_simulatedOutputs = samples_simulatedOutputs[self.mcmc_burn_in_length:]
         self.post_burn_in_log_posteriors_un_normed_vec = log_posteriors_un_normed_vec[self.mcmc_burn_in_length:]
@@ -1693,7 +1704,6 @@ class parameter_estimation:
         #####BELOW HERE SHOUD BE SAME FOR doMetropolisHastings and doEnsembleSliceSampling#####
         if (self.UserInput.parameter_estimation_settings['mcmc_parallel_sampling'] or self.UserInput.parameter_estimation_settings['multistart_parallel_sampling']) == True: #If we're using certain parallel processing, we need to make calculatePostBurnInStatistics into True.
             calculatePostBurnInStatistics = True;
-            print("line 1679", mcmc_exportLog)
         if self.UserInput.parameter_estimation_settings['mcmc_parallel_sampling']: #mcmc_exportLog == True is needed for mcmc_parallel_sampling, but not for multistart_parallel_sampling
             mcmc_exportLog=True
         if calculatePostBurnInStatistics == True:
