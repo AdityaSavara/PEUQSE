@@ -1,3 +1,0 @@
-self.initial_point_parameters:(100.0, 500.0)
-MAP_logP:-43.31087571072205
-self.map_parameter_set:(100.0, 500.0)

@@ -38,6 +38,7 @@ class parameter_estimation:
     @CiteSoft.after_call_compile_consolidated_log()
     @CiteSoft.module_call_cite(unique_id=software_unique_id, software_name=software_name, **software_kwargs)
     def __init__(self, UserInput = None):
+        #TODO: settings that are supposed to be Booleans should get Boolean cast in here. Otherwise if they are strings they will cause problems in "or" statements (where strings can return true even if the string is 'False').
         self.UserInput = UserInput #Note that this is a pointer, so the later lines are within this object.
         #Now will automatically populate some variables from UserInput
         UserInput.parameterNamesList = list(UserInput.model['parameterNamesAndMathTypeExpressionsDict'].keys())
@@ -500,7 +501,7 @@ class parameter_estimation:
             numPermutations = len(self.listOfPermutations)
         if str(centerPoint).lower() == str(None).lower():
             centerPoint = self.UserInput.InputParameterInitialGuess*1.0
-        if searchType == 'doGetLogP' or 'doSinglePoint': #Fixing a common input mistake.
+        if searchType == 'doGetLogP' or searchType == 'doSinglePoint': #Fixing a common input mistake.
             searchType = 'getLogP'
         self.permutation_searchType = searchType #This is mainly for consolidate_parallel_sampling_data
         verbose = self.UserInput.parameter_estimation_settings['verbose']
@@ -544,7 +545,7 @@ class parameter_estimation:
                 self.map_parameter_set = permutation
                 thisResult = [self.map_logP, str(self.map_parameter_set).replace(",","|").replace("[","").replace('(','').replace(')',''), 'None', 'None', 'None', 'None', 'None', 'None']
             if searchType == 'doMetropolisHastings':
-                thisResult = self.doMetropolisHastings(calculatePostBurnInStatistics=calculatePostBurnInStatistics, mcmc_exportLog=False)
+                thisResult = self.doMetropolisHastings(calculatePostBurnInStatistics=calculatePostBurnInStatistics)
                 #self.map_logP gets done by itself in doMetropolisHastings
                 if keep_cumulative_post_burn_in_data == True:
                     if permutationIndex == 0:
@@ -556,7 +557,7 @@ class parameter_estimation:
                         self.cumulative_post_burn_in_log_priors_vec = np.vstack((cumulative_post_burn_in_log_priors_vec, self.post_burn_in_log_priors_vec))
                         self.cumulative_post_burn_in_log_posteriors_un_normed_vec = np.vstack((cumulative_post_burn_in_log_posteriors_un_normed_vec, self.post_burn_in_log_posteriors_un_normed_vec))
             if searchType == 'doEnsembleSliceSampling':
-                thisResult = self.doEnsembleSliceSampling(mcmc_nwalkers_direct_input=permutationSearch_mcmc_nwalkers, calculatePostBurnInStatistics=calculatePostBurnInStatistics, mcmc_exportLog=False, walkerInitialDistribution=walkerInitialDistribution) 
+                thisResult = self.doEnsembleSliceSampling(mcmc_nwalkers_direct_input=permutationSearch_mcmc_nwalkers, calculatePostBurnInStatistics=calculatePostBurnInStatistics, walkerInitialDistribution=walkerInitialDistribution) 
                 #self.map_logP gets done by itself in doEnsembleSliceSampling
                 if keep_cumulative_post_burn_in_data == True:
                     if permutationIndex == 0:
@@ -677,7 +678,7 @@ class parameter_estimation:
             numStartPoints = len(self.UserInput.InputParameterInitialGuess)*3
         if relativeInitialDistributionSpread == 0: #if it's still zero, we need to make it the default which is 1.
             relativeInitialDistributionSpread = 1.0              
-        if searchType == 'doGetLogP' or 'doSinglePoint': #Fixing a common input mistake.
+        if searchType == 'doGetLogP' or searchType == 'doSinglePoint': #Fixing a common input mistake.
             searchType = 'getLogP'
         #make the initial points list by mostly passing through arguments.
         multiStartInitialPointsList = self.generateInitialPoints(numStartPoints=numStartPoints, relativeInitialDistributionSpread=relativeInitialDistributionSpread, initialPointsDistributionType=initialPointsDistributionType, centerPoint = centerPoint, gridsearchSamplingInterval = gridsearchSamplingInterval, gridsearchSamplingRadii = gridsearchSamplingRadii)
@@ -918,6 +919,7 @@ class parameter_estimation:
         #At present, we *must* provide a parameterPermutation because right now the only way to get an InfoGainMatrix is with synthetic data assuming a particular parameterPermutation as the "real" or "actual" parameterPermutation.
         doe_settings = self.UserInput.doe_settings
         self.middle_of_doe_flag = True  #This is a work around that is needed because right now the synthetic data creation has an __init__ call which is going to try to modify the independent variables back to their original values if we don't do this.
+        self.UserInput.parameter_estimation_settings['mcmc_continueSampling'] = False #As of Oct 2020, mcmc_continueSampling is not compatible with design of experiments (doe) feature.
         self.info_gain_matrix = [] #Right now, if using KL_divergence, each item in here is a single array. It is a sum across all parameters. 
         if self.UserInput.doe_settings['info_gains_matrices_multiple_parameters'] == 'each':
             info_gain_matrices_each_parameter = [] #make a matrix ready to copy info_gain_matrix. 
@@ -1462,8 +1464,8 @@ class parameter_estimation:
                 #out_file.write("Warning: The MAP parameter set and mu_AP parameter set differ by more than 10% of prior variance in at least one parameter. This may mean that you need to increase your mcmc_length, increase or decrease your mcmc_relative_step_length, or change what is used for the model response.  There is no general method for knowing the right  value for mcmc_relative_step_length since it depends on the sharpness and smoothness of the response. See for example https://www.sciencedirect.com/science/article/pii/S0039602816300632")
         postBurnInStatistics = [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec]
         if hasattr(self, 'during_burn_in_samples'):
-            pickleAnObject(np.hstack((self.during_burn_in_log_posteriors_un_normed_vec, self.during_burn_in_samples)), file_name_prefix+'mcmc_during_burn_in_logP_and_parameter_samples'+file_name_suffix)
-            np.savetxt(file_name_prefix+'mcmc_during_burn_in_logP_and_parameter_samples'+file_name_suffix+'.csv',np.hstack((self.during_burn_in_log_posteriors_un_normed_vec, self.during_burn_in_samples)), delimiter=",")
+            pickleAnObject(np.hstack((self.during_burn_in_log_posteriors_un_normed_vec, self.during_burn_in_samples)), file_name_prefix+'mcmc_burn_in_logP_and_parameter_samples'+file_name_suffix)
+            np.savetxt(file_name_prefix+'mcmc_burn_in_logP_and_parameter_samples'+file_name_suffix+'.csv',np.hstack((self.during_burn_in_log_posteriors_un_normed_vec, self.during_burn_in_samples)), delimiter=",")
         pickleAnObject(postBurnInStatistics, file_name_prefix+'mcmc_post_burn_in_statistics'+file_name_suffix)
         pickleAnObject(self.map_logP, file_name_prefix+'mcmc_map_logP'+file_name_suffix)
         pickleAnObject(self.UserInput.InputParameterInitialGuess, file_name_prefix+'mcmc_initial_point_parameters'+file_name_suffix)
@@ -1598,19 +1600,21 @@ class parameter_estimation:
             if hasattr(self, 'mcmc_last_point_sampled'): #if If we are continuing from an old
                 self.last_post_burn_in_log_posteriors_un_normed_vec = copy.deepcopy(self.post_burn_in_log_posteriors_un_normed_vec)
                 self.last_post_burn_in_samples = copy.deepcopy(self.post_burn_in_log_posteriors_un_normed_vec)
-            else: #Else we need to read from the file.
-                if self.UserInput.parameter_estimation_settings['multistart_parallel_sampling'] != True:
-                    #First check if we are doing mcmc_parallel_sampling, because in that case we need to read from the file for our correct process rank. We put that info into the prefix and suffix.
-                    filePrefix,fileSuffix = self.getParallelProcessingPrefixAndSuffix()
-                    self.last_logP_and_parameter_samples_filename = filePrefix + "mcmc_logP_and_parameter_samples" + fileSuffix
-                    self.last_logP_and_parameter_samples_data = unpickleAnObject(self.last_logP_and_parameter_samples_filename)
-                    self.last_post_burn_in_log_posteriors_un_normed_vec =  np.array(nestedObjectsFunctions.makeAtLeast_2dNested(self.last_logP_and_parameter_samples_data[:,0]))  #First column is the logP
-                    if np.shape(self.last_post_burn_in_log_posteriors_un_normed_vec)[0] == 1: #In this case, need to transpose.
-                        self.last_post_burn_in_log_posteriors_un_normed_vec = self.last_post_burn_in_log_posteriors_un_normed_vec.transpose()
-                    self.last_post_burn_in_samples =   np.array(nestedObjectsFunctions.makeAtLeast_2dNested(self.last_logP_and_parameter_samples_data[:,1:])) #later columns are the samples.
-                    if np.shape(self.last_post_burn_in_samples)[0] == 1: #In this case, need to transpose.
-                        self.last_post_burn_in_samples = self.last_post_burn_in_samples.transpose()
-                    self.mcmc_last_point_sampled = self.last_post_burn_in_samples[-1]                
+            else: #Else we need to read from the file.                
+                #First check if we are doing some kind of parallel sampling, because in that case we need to read from the file for our correct process rank. We put that info into the prefix and suffix.
+                filePrefix,fileSuffix = self.getParallelProcessingPrefixAndSuffix()
+                self.last_logP_and_parameter_samples_filename = filePrefix + "mcmc_logP_and_parameter_samples" + fileSuffix
+                self.last_logP_and_parameter_samples_data = unpickleAnObject(self.last_logP_and_parameter_samples_filename)
+                self.last_post_burn_in_log_posteriors_un_normed_vec =  np.array(nestedObjectsFunctions.makeAtLeast_2dNested(self.last_logP_and_parameter_samples_data[:,0]))  #First column is the logP
+                if np.shape(self.last_post_burn_in_log_posteriors_un_normed_vec)[0] == 1: #In this case, need to transpose.
+                    self.last_post_burn_in_log_posteriors_un_normed_vec = self.last_post_burn_in_log_posteriors_un_normed_vec.transpose()
+                self.last_post_burn_in_samples =   np.array(nestedObjectsFunctions.makeAtLeast_2dNested(self.last_logP_and_parameter_samples_data[:,1:])) #later columns are the samples.
+                if np.shape(self.last_post_burn_in_samples)[0] == 1: #In this case, need to transpose.
+                    self.last_post_burn_in_samples = self.last_post_burn_in_samples.transpose()
+                self.mcmc_last_point_sampled = self.last_post_burn_in_samples[-1]        
+                self.last_InputParameterInitialGuess_filename = filePrefix + "mcmc_initial_point_parameters" + fileSuffix
+                self.last_InputParameterInitialGuess_data = unpickleAnObject(self.last_InputParameterInitialGuess_filename)
+                self.UserInput.InputParameterInitialGuess = self.last_InputParameterInitialGuess_data #populating this because otherwise non-grid Multi-Start will get the wrong values exported. & Same for final plots.
         #Setting burn_in_length in below few lines (including case for continued sampling).
         if str(self.UserInput.parameter_estimation_settings['mcmc_burn_in']).lower() == 'auto': self.mcmc_burn_in_length = int(self.UserInput.parameter_estimation_settings['mcmc_length']*0.1)
         else: self.mcmc_burn_in_length = self.UserInput.parameter_estimation_settings['mcmc_burn_in']
