@@ -1515,6 +1515,9 @@ class parameter_estimation:
         import zeus
         '''these variables need to be made part of userinput'''
         numParameters = len(self.UserInput.InputParameterInitialGuess) #This is the number of parameters.
+        if 'mcmc_random_seed' in self.UserInput.parameter_estimation_settings:
+            if type(self.UserInput.parameter_estimation_settings['mcmc_random_seed']) == type(1): #if it's an integer, then it's not a "None" type or string, and we will use it.
+                np.random.seed(self.UserInput.parameter_estimation_settings['mcmc_random_seed'])
         if type(mcmc_nwalkers_direct_input) == type(None): #This is the normal case.
             if 'mcmc_nwalkers' not in self.UserInput.parameter_estimation_settings: self.mcmc_nwalkers = 'auto'
             else: self.mcmc_nwalkers = self.UserInput.parameter_estimation_settings['mcmc_nwalkers']
@@ -1582,12 +1585,32 @@ class parameter_estimation:
     #main function to get samples #TODO: Maybe Should return map_log_P and mu_AP_log_P?
     #@CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
     def doMetropolisHastings(self, calculatePostBurnInStatistics = True, mcmc_exportLog='UserChoice', continueSampling = 'auto'):
+        #Check if we need to continue sampling, and prepare for it if we need to.
         if continueSampling == 'auto':
-            if hasattr(self, mcmc_last_point_sampled): #if we have an existing mcmc_last_point_sampled in the object, we will assume more sampling is desired.
-                continueSampling = True
-            else:
-                continueSampling = False
-        #Setting burn_in_length in below few lines.
+            if ('mcmc_continueSampling' not in self.UserInput.parameter_estimation_settings) or self.UserInput.parameter_estimation_settings['mcmc_continueSampling'] == 'auto': #check that UserInput does not overrule the auto.
+                if hasattr(self, 'mcmc_last_point_sampled'): #if we have an existing mcmc_last_point_sampled in the object, we will assume more sampling is desired.
+                    continueSampling = True
+                else:
+                    continueSampling = False
+            else: continueSampling = self.UserInput.parameter_estimation_settings['mcmc_continueSampling'] 
+        if continueSampling == True:
+            if hasattr(self, 'mcmc_last_point_sampled'): #if If we are continuing from an old
+                self.last_post_burn_in_log_posteriors_un_normed_vec = copy.deepcopy(self.post_burn_in_log_posteriors_un_normed_vec)
+                self.last_post_burn_in_samples = copy.deepcopy(self.post_burn_in_log_posteriors_un_normed_vec)
+            else: #Else we need to read from the file.
+                if self.UserInput.parameter_estimation_settings['mcmc_parallel_sampling'] != True:
+                    #First check if we are doing mcmc_parallel_sampling, because in that case we need to read from the file for our correct process rank. We put that info into the prefix and suffix.
+                    filePrefix,fileSuffix = self.getParallelProcessingPrefixAndSuffix()
+                    self.last_logP_and_parameter_samples_filename = filePrefix + "mcmc_logP_and_parameter_samples" + fileSuffix
+                    self.last_logP_and_parameter_samples_data = unpickleAnObject(self.last_logP_and_parameter_samples_filename)
+                    self.last_post_burn_in_log_posteriors_un_normed_vec =  np.array(nestedObjectsFunctions.makeAtLeast_2dNested(self.last_logP_and_parameter_samples_data[:,0]))  #First column is the logP
+                    if np.shape(self.last_post_burn_in_log_posteriors_un_normed_vec)[0] == 1: #In this case, need to transpose.
+                        self.last_post_burn_in_log_posteriors_un_normed_vec = self.last_post_burn_in_log_posteriors_un_normed_vec.transpose()
+                    self.last_post_burn_in_samples =   np.array(nestedObjectsFunctions.makeAtLeast_2dNested(self.last_logP_and_parameter_samples_data[:,1:])) #later columns are the samples.
+                    if np.shape(self.last_post_burn_in_samples)[0] == 1: #In this case, need to transpose.
+                        self.last_post_burn_in_samples = self.last_post_burn_in_samples.transpose()
+                    self.mcmc_last_point_sampled = self.last_post_burn_in_samples[-1]                
+        #Setting burn_in_length in below few lines (including case for continued sampling).
         if str(self.UserInput.parameter_estimation_settings['mcmc_burn_in']).lower() == 'auto': self.mcmc_burn_in_length = int(self.UserInput.parameter_estimation_settings['mcmc_length']*0.1)
         else: self.mcmc_burn_in_length = self.UserInput.parameter_estimation_settings['mcmc_burn_in']
         if continueSampling == True:
@@ -1714,13 +1737,17 @@ class parameter_estimation:
         self.post_burn_in_log_posteriors_un_normed_vec = log_posteriors_un_normed_vec[self.mcmc_burn_in_length:]
         self.mcmc_last_point_sampled = self.post_burn_in_samples[-1]
         self.post_burn_in_log_likelihoods_vec = log_likelihoods_vec[self.mcmc_burn_in_length:]
-        self.post_burn_in_log_priors_vec = log_priors_vec[self.mcmc_burn_in_length:]
+        self.post_burn_in_log_priors_vec = log_priors_vec[self.mcmc_burn_in_length:]        
         #####BELOW HERE SHOUD BE SAME FOR doMetropolisHastings and doEnsembleSliceSampling#####
+        if continueSampling == True:
+            self.post_burn_in_samples = np.vstack((self.last_post_burn_in_samples, self.post_burn_in_samples ))
+            self.post_burn_in_log_posteriors_un_normed_vec = np.vstack( (self.last_post_burn_in_log_posteriors_un_normed_vec, self.post_burn_in_log_posteriors_un_normed_vec))
         if (self.UserInput.parameter_estimation_settings['mcmc_parallel_sampling'] or self.UserInput.parameter_estimation_settings['multistart_parallel_sampling']) == True: #If we're using certain parallel processing, we need to make calculatePostBurnInStatistics into True.
             calculatePostBurnInStatistics = True;
         if self.UserInput.parameter_estimation_settings['mcmc_parallel_sampling']: #mcmc_exportLog == True is needed for mcmc_parallel_sampling, but not for multistart_parallel_sampling
             mcmc_exportLog=True
         if calculatePostBurnInStatistics == True:
+            #FIXME: Below, calculate_post_burn_in_log_priors_vec=True should be false unless we are using continue sampling. For now, will leave it since I am not sure why it is currently set to False.
             self.calculatePostBurnInStatistics(calculate_post_burn_in_log_priors_vec = True) #This function call will also filter the lowest probability samples out, when using default settings.
             if str(mcmc_exportLog) == 'UserChoice':
                 mcmc_exportLog = bool(self.UserInput.parameter_estimation_settings['mcmc_exportLog'])

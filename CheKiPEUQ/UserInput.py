@@ -57,7 +57,7 @@ parameter_estimation_settings['mcmc_maxiter'] = 1E6
 parameter_estimation_settings['mcmc_walkerInitialDistribution'] = 'auto' #Can be 'uniform', 'gaussian', or 'identical'.  Auto will use 'uniform' during gridsearch and 'uniform' for most other cases.
 parameter_estimation_settings['mcmc_checkPointFrequency'] = None #This is only for MH, not ESS. (as of Oct 2020)
 parameter_estimation_settings['mcmc_parallel_sampling'] = False #This makes completely parallelized sampling of a single sampling. syntax to use is like "mpiexec -n 5 python runfile.py" where 5 is the number of processors. Currently, the first processor's results are thrown away.  In the future, this may change.
-
+parameter_estimation_settings['mcmc_continueSampling']  = 'auto' #This can be set to True if user would like to continue sampling from a previous result in the directory.  The mcmc_logP_and_parameter_samples.pkl file will be used.  Note that if one calls the same PE_object after mcmc sampling within a given python instance then continued sampling will also occur in that situation.
 
 #####Plot Settings#####
 #Response Plot Settings
