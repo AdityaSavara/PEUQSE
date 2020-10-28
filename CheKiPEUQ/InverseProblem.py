@@ -1466,6 +1466,7 @@ class parameter_estimation:
         pickleAnObject(postBurnInStatistics, file_name_prefix+'mcmc_post_burn_in_statistics'+file_name_suffix)
         pickleAnObject(self.map_logP, file_name_prefix+'mcmc_map_logP'+file_name_suffix)
         pickleAnObject(self.UserInput.InputParameterInitialGuess, file_name_prefix+'mcmc_initial_point_parameters'+file_name_suffix)
+        pickleAnObject(self.mcmc_last_point_sampled, file_name_prefix+'mcmc_last_point_sampled'+file_name_suffix)
 
     #This function is modelled after exportPostBurnInStatistics. That is why it has the form that it does.
     def exportPostPermutationStatistics(self, searchType=''): #if it is an mcmc run, then we need to save the sampling as well.
@@ -1581,15 +1582,27 @@ class parameter_estimation:
     #main function to get samples #TODO: Maybe Should return map_log_P and mu_AP_log_P?
     #@CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
     def doMetropolisHastings(self, calculatePostBurnInStatistics = True, mcmc_exportLog='UserChoice', continueSampling = 'auto'):
+        if continueSampling == 'auto':
+            if hasattr(self, mcmc_last_point_sampled): #if we have an existing mcmc_last_point_sampled in the object, we will assume more sampling is desired.
+                continueSampling = True
+            else:
+                continueSampling = False
+        #Setting burn_in_length in below few lines.
         if str(self.UserInput.parameter_estimation_settings['mcmc_burn_in']).lower() == 'auto': self.mcmc_burn_in_length = int(self.UserInput.parameter_estimation_settings['mcmc_length']*0.1)
         else: self.mcmc_burn_in_length = self.UserInput.parameter_estimation_settings['mcmc_burn_in']
+        if continueSampling == True:
+            self.mcmc_burn_in_length = 0
         if 'mcmc_random_seed' in self.UserInput.parameter_estimation_settings:
             if type(self.UserInput.parameter_estimation_settings['mcmc_random_seed']) == type(1): #if it's an integer, then it's not a "None" type or string, and we will use it.
                 np.random.seed(self.UserInput.parameter_estimation_settings['mcmc_random_seed'])
         samples_simulatedOutputs = np.zeros((self.UserInput.parameter_estimation_settings['mcmc_length'],self.UserInput.num_data_points))
         samples = np.zeros((self.UserInput.parameter_estimation_settings['mcmc_length'],len(self.UserInput.mu_prior)))
         mcmc_step_modulation_history = np.zeros((self.UserInput.parameter_estimation_settings['mcmc_length'])) #TODO: Make this optional for efficiency. #This allows the steps to be larger or smaller. Make this same length as samples. In future, should probably be same in other dimension also, but that would require 2D sampling with each step.                                                                          
-        samples[0,:]=self.UserInput.InputParameterInitialGuess  # Initialize the chain. Theta is initialized as the starting point of the chain.  It is placed at the prior mean if an initial guess is not provided.. Do not use self.UserInput.model['InputParameterInitialGuess']  because that doesn't work with reduced parameter space feature.
+        if continueSampling == False:
+            samples[0,:]=self.UserInput.InputParameterInitialGuess  # Initialize the chain. Theta is initialized as the starting point of the chain.  It is placed at the prior mean if an initial guess is not provided.. Do not use self.UserInput.model['InputParameterInitialGuess']  because that doesn't work with reduced parameter space feature.
+        elif continueSampling == True:
+            samples[0,:]= self.mcmc_last_point_sampled
+        print("line 1602", samples)
         samples_drawn = samples*1.0 #this includes points that were rejected. #TODO: make this optional for efficiency.               
         log_likelihoods_vec = np.zeros((self.UserInput.parameter_estimation_settings['mcmc_length'],1))
         log_posteriors_un_normed_vec = np.zeros((self.UserInput.parameter_estimation_settings['mcmc_length'],1))
@@ -1692,13 +1705,14 @@ class parameter_estimation:
                             if mcmc_step_dynamic_coefficient > 0.1:
                                 mcmc_step_dynamic_coefficient = mcmc_step_dynamic_coefficient*0.95
             ########################################
-        self.during_burn_in_samples = samples[0:self.mcmc_burn_in_length] #TODO: check that indexing is correct.
-        self.during_burn_in_log_posteriors_un_normed_vec = log_posteriors_un_normed_vec[0:self.mcmc_burn_in_length]
-        self.post_burn_in_samples = samples[self.mcmc_burn_in_length:] #TODO: check that indexing is correct.
+        if continueSampling == False: #Normally we enter this if statement and collect the burn_in samples. If continueSampling, either they already exist in the PE_object and will be exported again later, or they don't exist in the PE_object because are continuing from a previous python instance. If continuing from a previous python instance, during_burn_in_samples won't be created and also won't be exported again. (This logic is so we don't overwrite the old during_burn_in_samples).
+            self.during_burn_in_samples = samples[0:self.mcmc_burn_in_length] 
+            self.during_burn_in_log_posteriors_un_normed_vec = log_posteriors_un_normed_vec[0:self.mcmc_burn_in_length]
+        self.post_burn_in_samples = samples[self.mcmc_burn_in_length:] 
         if self.UserInput.parameter_estimation_settings['exportAllSimulatedOutputs'] == True:
             self.post_burn_in_samples_simulatedOutputs = samples_simulatedOutputs[self.mcmc_burn_in_length:]
         self.post_burn_in_log_posteriors_un_normed_vec = log_posteriors_un_normed_vec[self.mcmc_burn_in_length:]
-        self.post_burn_in_log_posteriors_un_normed_vec = (self.post_burn_in_log_posteriors_un_normed_vec)
+        self.mcmc_last_point_sampled = self.post_burn_in_samples[-1]
         self.post_burn_in_log_likelihoods_vec = log_likelihoods_vec[self.mcmc_burn_in_length:]
         self.post_burn_in_log_priors_vec = log_priors_vec[self.mcmc_burn_in_length:]
         #####BELOW HERE SHOUD BE SAME FOR doMetropolisHastings and doEnsembleSliceSampling#####
