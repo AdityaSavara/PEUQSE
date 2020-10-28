@@ -63,7 +63,7 @@ class parameter_estimation:
                 UserInput.parameter_estimation_settings['multistart_parallel_sampling'] = False
                 UserInput.parameter_estimation_settings['mcmc_parallel_sampling'] = False
                 
-        if UserInput.request_mpi == True: #Rank zero needs to clear out the mpi_log_files directory, so check if we are using rank 0.
+        if UserInput.request_mpi == True: #Rank zero needs to clear out the mpi_log_files directory (unless we are continuing sampling), so check if we are using rank 0.
             import os; import sys
             import CheKiPEUQ.parallel_processing
             if CheKiPEUQ.parallel_processing.currentProcessorNumber == 0:
@@ -72,7 +72,8 @@ class parameter_estimation:
                 except:
                     pass
                 os.chdir("./mpi_log_files")
-                deleteAllFilesInDirectory()
+                if ('mcmc_continueSampling' not in UserInput.parameter_estimation_settings) or (UserInput.parameter_estimation_settings['mcmc_continueSampling'] == False) or (UserInput.parameter_estimation_settings['mcmc_continueSampling'] == 'auto'):
+                    deleteAllFilesInDirectory()
                 os.chdir("./..")
                 #Now check the number of processor ranks to see if the person really is using parallel processing.
                 if CheKiPEUQ.parallel_processing.numProcessors > 1:    #This is the normal case.
@@ -1598,7 +1599,7 @@ class parameter_estimation:
                 self.last_post_burn_in_log_posteriors_un_normed_vec = copy.deepcopy(self.post_burn_in_log_posteriors_un_normed_vec)
                 self.last_post_burn_in_samples = copy.deepcopy(self.post_burn_in_log_posteriors_un_normed_vec)
             else: #Else we need to read from the file.
-                if self.UserInput.parameter_estimation_settings['mcmc_parallel_sampling'] != True:
+                if self.UserInput.parameter_estimation_settings['multistart_parallel_sampling'] != True:
                     #First check if we are doing mcmc_parallel_sampling, because in that case we need to read from the file for our correct process rank. We put that info into the prefix and suffix.
                     filePrefix,fileSuffix = self.getParallelProcessingPrefixAndSuffix()
                     self.last_logP_and_parameter_samples_filename = filePrefix + "mcmc_logP_and_parameter_samples" + fileSuffix
@@ -1625,7 +1626,6 @@ class parameter_estimation:
             samples[0,:]=self.UserInput.InputParameterInitialGuess  # Initialize the chain. Theta is initialized as the starting point of the chain.  It is placed at the prior mean if an initial guess is not provided.. Do not use self.UserInput.model['InputParameterInitialGuess']  because that doesn't work with reduced parameter space feature.
         elif continueSampling == True:
             samples[0,:]= self.mcmc_last_point_sampled
-        print("line 1602", samples)
         samples_drawn = samples*1.0 #this includes points that were rejected. #TODO: make this optional for efficiency.               
         log_likelihoods_vec = np.zeros((self.UserInput.parameter_estimation_settings['mcmc_length'],1))
         log_posteriors_un_normed_vec = np.zeros((self.UserInput.parameter_estimation_settings['mcmc_length'],1))
