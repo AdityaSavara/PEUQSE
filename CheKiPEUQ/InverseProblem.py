@@ -1103,6 +1103,20 @@ class parameter_estimation:
         #TODO: write the self.info_gains_matrices_array individual elements to file.
         #for modulationIndex in range(len(self.info_gains_matrices_array)):
             #self.info_gains_matrices_array[modulationIndex]  #Write this to file. This is 'xyz' format regardless of whether self.info_gains_matrices_array_format == 'xyz'  or =='meshgrid' is used.
+        ####Start block for parallel_conditions_exploration #####
+        if self.UserInput.doe_settings['parallel_conditions_exploration'] == True:
+          #if we're doing a parallel_conditions_exploration, we need to check if we are on the last 
+          #condition exploration of the last parameter modulation. [#things could be done differently, but this works.]          
+          if self.parModulationPermutationIndex+1 != self.numParModulationPermutations:
+            return #this means we do nothing because it's not the final parModulation.
+          elif self.parModulationPermutationIndex+1 == self.numParModulationPermutations:
+            import CheKiPEUQ.parallel_processing #Even if it's the final parModulation, need to check if it's final combination.
+            if CheKiPEUQ.parallel_processing.finalProcess == False: #not final combination.
+                return
+            elif CheKiPEUQ.parallel_processing.finalProcess == True: 
+                #If final parModulation and final combination, we populate self.info_gain_matrices_array
+                self.consolidate_parallel_doe_info_gain_matrices() #And now we continue on with the plotting.
+        ####End block for parallel_conditions_exploration #####        
         return self.info_gains_matrices_array
     
     @CiteSoft.after_call_compile_consolidated_log(compile_checkpoints=True) #This is from the CiteSoft module.
@@ -1131,21 +1145,6 @@ class parameter_estimation:
         #xValues = self.info_gains_matrices_array[modulationIndex][:,0] will become xValues = self.info_gains_matrices_array[modulationIndex][parameterInfoGainIndex][:,0]
         #self.meshGrid_independentVariable1ValuesArray will remain unchanged.      
         
-        ####Start block for parallel_conditions_exploration #####
-        if self.UserInput.doe_settings['parallel_conditions_exploration'] == True:
-          #if we're doing a parallel_conditions_exploration, we need to check if we are on the last 
-          #condition exploration of the last parameter modulation. [#things could be done differently, but this works.]          
-          if self.parModulationPermutationIndex+1 != self.numParModulationPermutations:
-            return #this means we do nothing because it's not the final parModulation.
-          elif self.parModulationPermutationIndex+1 == self.numParModulationPermutations:
-            import CheKiPEUQ.parallel_processing #Even if it's the final parModulation, need to check if it's final combination.
-            if CheKiPEUQ.parallel_processing.finalProcess == False: #not final combination.
-                return
-            elif CheKiPEUQ.parallel_processing.finalProcess == True: 
-                #If final parModulation and final combination, we populate self.info_gain_matrices_array
-                self.consolidate_parallel_doe_info_gain_matrices() #And now we continue on with the plotting.
-        ####End block for parallel_conditions_exploration #####        
-
         import CheKiPEUQ.plotting_functions as plotting_functions
         #assess whether the function is called for the overall info_gain matrices or for a particular parameter.
         if parameterIndex==None:  #this means we're using the regular info gain, not the parameter specific case.
