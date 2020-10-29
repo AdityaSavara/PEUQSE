@@ -7,7 +7,7 @@ from scipy.stats import multivariate_normal
 from scipy.integrate import odeint
 import pandas as pd
 import sys
-import timeit
+import time
 import copy
 #import mumce_py.Project as mumce_pyProject #FIXME: Eric to fix plotting/graphing issue described in issue 9 -- https://github.com/AdityaSavara/ODE-KIN-BAYES-SG-EW/issues/9
 #import mumce_py.solution mumce_pySolution
@@ -508,8 +508,8 @@ class parameter_estimation:
         allPermutationsResults = []
         #Initialize some things before loop.
         if (type(self.UserInput.parameter_estimation_settings['multistart_checkPointFrequency']) != type(None)) or (verbose == True):
-                import timeit
-                timeAtPermutationSearchStart = timeit.time.clock()
+                
+                timeAtPermutationSearchStart = time.time()
                 timeAtLastPermutation = timeAtPermutationSearchStart #just initializing
         self.highest_logP = float('-inf') #Just initializing.
         if searchType == 'doEnsembleSliceSampling':
@@ -575,7 +575,7 @@ class parameter_estimation:
             if searchType == 'doOptimizeSSR':
                 thisResult = self.doOptimizeSSR(**passThroughArgs)
             if (type(self.UserInput.parameter_estimation_settings['multistart_checkPointFrequency']) != type(None)) or (verbose == True):
-                timeAtThisPermutation = timeit.time.clock()
+                timeAtThisPermutation = time.time()
                 timeOfThisPermutation = timeAtThisPermutation - timeAtLastPermutation
                 averageTimePerPermutation = (timeAtThisPermutation - timeAtPermutationSearchStart)/(permutationIndex+1)
                 numRemainingPermutations = numPermutations - permutationIndex+1
@@ -1674,9 +1674,9 @@ class parameter_estimation:
         #Code to initialize checkpoints.
         if type(self.UserInput.parameter_estimation_settings['mcmc_checkPointFrequency']) != type(None):
             print("Starting MCMC sampling.")
-            import timeit
-            timeOfFirstCheckpoint = timeit.time.clock()
-            timeCheckpoint = timeit.time.clock() - timeOfFirstCheckpoint #First checkpoint at time 0.
+            
+            timeOfFirstCheckpoint = time.time()
+            timeCheckpoint = time.time() - timeOfFirstCheckpoint #First checkpoint at time 0.
             numCheckPoints = self.UserInput.parameter_estimation_settings['mcmc_length']/self.UserInput.parameter_estimation_settings['mcmc_checkPointFrequency']
         #Before sampling should fill in the first entry for the posterior vector we have created. #FIXME: It would probably be better to start with i of 0 in below sampling loop. I believe that right now the "burn in" and "samples" arrays are actually off by an index of 1. But trying to change that alters their length relative to other arrays and causes problems. Since we always do many samples and this only affects the initial point being averaged in twice, it is not a major problem. It's also avoided if people use a burn in of at least 1.
         log_posteriors_un_normed_vec[0]= self.getLogP(samples[0])
@@ -1731,8 +1731,8 @@ class parameter_estimation:
                 log_priors_vec[i] = log_prior_current_location
             if type(self.UserInput.parameter_estimation_settings['mcmc_checkPointFrequency']) != type(None):
                 if sampleNumber%self.UserInput.parameter_estimation_settings['mcmc_checkPointFrequency'] == 0: #The % is a modulus function.
-                    timeSinceLastCheckPoint = (timeit.time.clock() - timeOfFirstCheckpoint) -  timeCheckpoint
-                    timeCheckpoint = timeit.time.clock() - timeOfFirstCheckpoint
+                    timeSinceLastCheckPoint = (time.time() - timeOfFirstCheckpoint) -  timeCheckpoint
+                    timeCheckpoint = time.time() - timeOfFirstCheckpoint
                     checkPointNumber = sampleNumber/self.UserInput.parameter_estimation_settings['mcmc_checkPointFrequency']
                     averagetimePerSampling = timeCheckpoint/(sampleNumber)
                     print("MCMC sample number ", sampleNumber, "checkpoint", checkPointNumber, "out of", numCheckPoints) 
