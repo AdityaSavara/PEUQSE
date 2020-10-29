@@ -1,11 +1,11 @@
 self.initial_point_parameters:[200. 500.]
-MAP_logP:[-42.63747847]
-self.map_parameter_set:[165.46556807 497.66262669]
-self.map_index:7702
-self.mu_AP_parameter_set:[168.42184719 473.44689581]
-self.stdap_parameter_set:[ 52.56128962 180.07364034]
-self.info_gain:0.04813702294679731
-evidence:3.2236516694730008e-24
+MAP_logP:[-42.63742232]
+self.map_parameter_set:[165.07995415 498.47861515]
+self.map_index:3294
+self.mu_AP_parameter_set:[167.85102781 485.22426288]
+self.stdap_parameter_set:[ 51.65279882 178.2363113 ]
+self.info_gain:0.05078221836794983
+evidence:2.166274645116923e-24
 posterior_cov_matrix:
-[[ 2763.01202396   188.67275251]
- [  188.67275251 32430.30541782]]
+[[ 2.66815523e+03 -1.62180664e+01]
+ [-1.62180664e+01  3.17698926e+04]]
