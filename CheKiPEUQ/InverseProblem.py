@@ -449,7 +449,7 @@ class parameter_estimation:
         #The actual numParameters cannot be 0. We just use 0 to mean not provided, in which case we pull it from the initial guess.
         #The arguments gridsearchSamplingInterval and gridsearchSamplingRadii are only for the distribution type 'grid', and correspond to the variables  gridsearchSamplingInterval = [], gridsearchSamplingRadii = [] inside getGridPermutations.
         if str(centerPoint).lower() == str(None).lower():
-            centerPoint = self.UserInput.InputParameterInitialGuess*1.0 #This may be a reduced parameter space.
+            centerPoint = np.array(self.UserInput.InputParameterInitialGuess)*1.0 #This may be a reduced parameter space.
         if initialPointsDistributionType.lower() not in ['grid', 'uniform', 'identical', 'gaussian']:
             print("Warning: initialPointsDistributionType must be from: 'grid', 'uniform', 'identical', 'gaussian'.  A different choice was received and is not understood.  initialPointsDistributionType is being set as 'uniform'.")
             initialPointsDistributionType = 'uniform'
