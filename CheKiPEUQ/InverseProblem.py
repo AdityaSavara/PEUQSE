@@ -38,6 +38,7 @@ class parameter_estimation:
     @CiteSoft.after_call_compile_consolidated_log()
     @CiteSoft.module_call_cite(unique_id=software_unique_id, software_name=software_name, **software_kwargs)
     def __init__(self, UserInput = None):
+        #TODO: settings that are supposed to be Booleans should get Boolean cast in here. Otherwise if they are strings they will cause problems in "or" statements (where strings can return true even if the string is 'False').
         self.UserInput = UserInput #Note that this is a pointer, so the later lines are within this object.
         #Now will automatically populate some variables from UserInput
         UserInput.parameterNamesList = list(UserInput.model['parameterNamesAndMathTypeExpressionsDict'].keys())
@@ -63,7 +64,7 @@ class parameter_estimation:
                 UserInput.parameter_estimation_settings['multistart_parallel_sampling'] = False
                 UserInput.parameter_estimation_settings['mcmc_parallel_sampling'] = False
                 
-        if UserInput.request_mpi == True: #Rank zero needs to clear out the mpi_log_files directory, so check if we are using rank 0.
+        if UserInput.request_mpi == True: #Rank zero needs to clear out the mpi_log_files directory (unless we are continuing sampling), so check if we are using rank 0.
             import os; import sys
             import CheKiPEUQ.parallel_processing
             if CheKiPEUQ.parallel_processing.currentProcessorNumber == 0:
@@ -72,7 +73,8 @@ class parameter_estimation:
                 except:
                     pass
                 os.chdir("./mpi_log_files")
-                deleteAllFilesInDirectory()
+                if ('mcmc_continueSampling' not in UserInput.parameter_estimation_settings) or (UserInput.parameter_estimation_settings['mcmc_continueSampling'] == False) or (UserInput.parameter_estimation_settings['mcmc_continueSampling'] == 'auto'):
+                    deleteAllFilesInDirectory()
                 os.chdir("./..")
                 #Now check the number of processor ranks to see if the person really is using parallel processing.
                 if CheKiPEUQ.parallel_processing.numProcessors > 1:    #This is the normal case.
@@ -499,7 +501,7 @@ class parameter_estimation:
             numPermutations = len(self.listOfPermutations)
         if str(centerPoint).lower() == str(None).lower():
             centerPoint = self.UserInput.InputParameterInitialGuess*1.0
-        if searchType == 'doGetLogP' or 'doSinglePoint': #Fixing a common input mistake.
+        if searchType == 'doGetLogP' or searchType == 'doSinglePoint': #Fixing a common input mistake.
             searchType = 'getLogP'
         self.permutation_searchType = searchType #This is mainly for consolidate_parallel_sampling_data
         verbose = self.UserInput.parameter_estimation_settings['verbose']
@@ -543,7 +545,7 @@ class parameter_estimation:
                 self.map_parameter_set = permutation
                 thisResult = [self.map_logP, str(self.map_parameter_set).replace(",","|").replace("[","").replace('(','').replace(')',''), 'None', 'None', 'None', 'None', 'None', 'None']
             if searchType == 'doMetropolisHastings':
-                thisResult = self.doMetropolisHastings(calculatePostBurnInStatistics=calculatePostBurnInStatistics, mcmc_exportLog=False)
+                thisResult = self.doMetropolisHastings(calculatePostBurnInStatistics=calculatePostBurnInStatistics)
                 #self.map_logP gets done by itself in doMetropolisHastings
                 if keep_cumulative_post_burn_in_data == True:
                     if permutationIndex == 0:
@@ -555,7 +557,7 @@ class parameter_estimation:
                         self.cumulative_post_burn_in_log_priors_vec = np.vstack((cumulative_post_burn_in_log_priors_vec, self.post_burn_in_log_priors_vec))
                         self.cumulative_post_burn_in_log_posteriors_un_normed_vec = np.vstack((cumulative_post_burn_in_log_posteriors_un_normed_vec, self.post_burn_in_log_posteriors_un_normed_vec))
             if searchType == 'doEnsembleSliceSampling':
-                thisResult = self.doEnsembleSliceSampling(mcmc_nwalkers_direct_input=permutationSearch_mcmc_nwalkers, calculatePostBurnInStatistics=calculatePostBurnInStatistics, mcmc_exportLog=False, walkerInitialDistribution=walkerInitialDistribution) 
+                thisResult = self.doEnsembleSliceSampling(mcmc_nwalkers_direct_input=permutationSearch_mcmc_nwalkers, calculatePostBurnInStatistics=calculatePostBurnInStatistics, walkerInitialDistribution=walkerInitialDistribution) 
                 #self.map_logP gets done by itself in doEnsembleSliceSampling
                 if keep_cumulative_post_burn_in_data == True:
                     if permutationIndex == 0:
@@ -676,7 +678,7 @@ class parameter_estimation:
             numStartPoints = len(self.UserInput.InputParameterInitialGuess)*3
         if relativeInitialDistributionSpread == 0: #if it's still zero, we need to make it the default which is 1.
             relativeInitialDistributionSpread = 1.0              
-        if searchType == 'doGetLogP' or 'doSinglePoint': #Fixing a common input mistake.
+        if searchType == 'doGetLogP' or searchType == 'doSinglePoint': #Fixing a common input mistake.
             searchType = 'getLogP'
         #make the initial points list by mostly passing through arguments.
         multiStartInitialPointsList = self.generateInitialPoints(numStartPoints=numStartPoints, relativeInitialDistributionSpread=relativeInitialDistributionSpread, initialPointsDistributionType=initialPointsDistributionType, centerPoint = centerPoint, gridsearchSamplingInterval = gridsearchSamplingInterval, gridsearchSamplingRadii = gridsearchSamplingRadii)
@@ -917,6 +919,7 @@ class parameter_estimation:
         #At present, we *must* provide a parameterPermutation because right now the only way to get an InfoGainMatrix is with synthetic data assuming a particular parameterPermutation as the "real" or "actual" parameterPermutation.
         doe_settings = self.UserInput.doe_settings
         self.middle_of_doe_flag = True  #This is a work around that is needed because right now the synthetic data creation has an __init__ call which is going to try to modify the independent variables back to their original values if we don't do this.
+        self.UserInput.parameter_estimation_settings['mcmc_continueSampling'] = False #As of Oct 2020, mcmc_continueSampling is not compatible with design of experiments (doe) feature.
         self.info_gain_matrix = [] #Right now, if using KL_divergence, each item in here is a single array. It is a sum across all parameters. 
         if self.UserInput.doe_settings['info_gains_matrices_multiple_parameters'] == 'each':
             info_gain_matrices_each_parameter = [] #make a matrix ready to copy info_gain_matrix. 
@@ -1461,11 +1464,12 @@ class parameter_estimation:
                 #out_file.write("Warning: The MAP parameter set and mu_AP parameter set differ by more than 10% of prior variance in at least one parameter. This may mean that you need to increase your mcmc_length, increase or decrease your mcmc_relative_step_length, or change what is used for the model response.  There is no general method for knowing the right  value for mcmc_relative_step_length since it depends on the sharpness and smoothness of the response. See for example https://www.sciencedirect.com/science/article/pii/S0039602816300632")
         postBurnInStatistics = [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec]
         if hasattr(self, 'during_burn_in_samples'):
-            pickleAnObject(np.hstack((self.during_burn_in_log_posteriors_un_normed_vec, self.during_burn_in_samples)), file_name_prefix+'mcmc_during_burn_in_logP_and_parameter_samples'+file_name_suffix)
-            np.savetxt(file_name_prefix+'mcmc_during_burn_in_logP_and_parameter_samples'+file_name_suffix+'.csv',np.hstack((self.during_burn_in_log_posteriors_un_normed_vec, self.during_burn_in_samples)), delimiter=",")
+            pickleAnObject(np.hstack((self.during_burn_in_log_posteriors_un_normed_vec, self.during_burn_in_samples)), file_name_prefix+'mcmc_burn_in_logP_and_parameter_samples'+file_name_suffix)
+            np.savetxt(file_name_prefix+'mcmc_burn_in_logP_and_parameter_samples'+file_name_suffix+'.csv',np.hstack((self.during_burn_in_log_posteriors_un_normed_vec, self.during_burn_in_samples)), delimiter=",")
         pickleAnObject(postBurnInStatistics, file_name_prefix+'mcmc_post_burn_in_statistics'+file_name_suffix)
         pickleAnObject(self.map_logP, file_name_prefix+'mcmc_map_logP'+file_name_suffix)
         pickleAnObject(self.UserInput.InputParameterInitialGuess, file_name_prefix+'mcmc_initial_point_parameters'+file_name_suffix)
+        pickleAnObject(self.mcmc_last_point_sampled, file_name_prefix+'mcmc_last_point_sampled'+file_name_suffix)
 
     #This function is modelled after exportPostBurnInStatistics. That is why it has the form that it does.
     def exportPostPermutationStatistics(self, searchType=''): #if it is an mcmc run, then we need to save the sampling as well.
@@ -1514,6 +1518,9 @@ class parameter_estimation:
         import zeus
         '''these variables need to be made part of userinput'''
         numParameters = len(self.UserInput.InputParameterInitialGuess) #This is the number of parameters.
+        if 'mcmc_random_seed' in self.UserInput.parameter_estimation_settings:
+            if type(self.UserInput.parameter_estimation_settings['mcmc_random_seed']) == type(1): #if it's an integer, then it's not a "None" type or string, and we will use it.
+                np.random.seed(self.UserInput.parameter_estimation_settings['mcmc_random_seed'])
         if type(mcmc_nwalkers_direct_input) == type(None): #This is the normal case.
             if 'mcmc_nwalkers' not in self.UserInput.parameter_estimation_settings: self.mcmc_nwalkers = 'auto'
             else: self.mcmc_nwalkers = self.UserInput.parameter_estimation_settings['mcmc_nwalkers']
@@ -1580,16 +1587,49 @@ class parameter_estimation:
     
     #main function to get samples #TODO: Maybe Should return map_log_P and mu_AP_log_P?
     #@CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
-    def doMetropolisHastings(self, calculatePostBurnInStatistics = True, mcmc_exportLog='UserChoice'):
+    def doMetropolisHastings(self, calculatePostBurnInStatistics = True, mcmc_exportLog='UserChoice', continueSampling = 'auto'):
+        #Check if we need to continue sampling, and prepare for it if we need to.
+        if continueSampling == 'auto':
+            if ('mcmc_continueSampling' not in self.UserInput.parameter_estimation_settings) or self.UserInput.parameter_estimation_settings['mcmc_continueSampling'] == 'auto': #check that UserInput does not overrule the auto.
+                if hasattr(self, 'mcmc_last_point_sampled'): #if we have an existing mcmc_last_point_sampled in the object, we will assume more sampling is desired.
+                    continueSampling = True
+                else:
+                    continueSampling = False
+            else: continueSampling = self.UserInput.parameter_estimation_settings['mcmc_continueSampling'] 
+        if continueSampling == True:
+            if hasattr(self, 'mcmc_last_point_sampled'): #if If we are continuing from an old
+                self.last_post_burn_in_log_posteriors_un_normed_vec = copy.deepcopy(self.post_burn_in_log_posteriors_un_normed_vec)
+                self.last_post_burn_in_samples = copy.deepcopy(self.post_burn_in_log_posteriors_un_normed_vec)
+            else: #Else we need to read from the file.                
+                #First check if we are doing some kind of parallel sampling, because in that case we need to read from the file for our correct process rank. We put that info into the prefix and suffix.
+                filePrefix,fileSuffix = self.getParallelProcessingPrefixAndSuffix()
+                self.last_logP_and_parameter_samples_filename = filePrefix + "mcmc_logP_and_parameter_samples" + fileSuffix
+                self.last_logP_and_parameter_samples_data = unpickleAnObject(self.last_logP_and_parameter_samples_filename)
+                self.last_post_burn_in_log_posteriors_un_normed_vec =  np.array(nestedObjectsFunctions.makeAtLeast_2dNested(self.last_logP_and_parameter_samples_data[:,0]))  #First column is the logP
+                if np.shape(self.last_post_burn_in_log_posteriors_un_normed_vec)[0] == 1: #In this case, need to transpose.
+                    self.last_post_burn_in_log_posteriors_un_normed_vec = self.last_post_burn_in_log_posteriors_un_normed_vec.transpose()
+                self.last_post_burn_in_samples =   np.array(nestedObjectsFunctions.makeAtLeast_2dNested(self.last_logP_and_parameter_samples_data[:,1:])) #later columns are the samples.
+                if np.shape(self.last_post_burn_in_samples)[0] == 1: #In this case, need to transpose.
+                    self.last_post_burn_in_samples = self.last_post_burn_in_samples.transpose()
+                self.mcmc_last_point_sampled = self.last_post_burn_in_samples[-1]        
+                self.last_InputParameterInitialGuess_filename = filePrefix + "mcmc_initial_point_parameters" + fileSuffix
+                self.last_InputParameterInitialGuess_data = unpickleAnObject(self.last_InputParameterInitialGuess_filename)
+                self.UserInput.InputParameterInitialGuess = self.last_InputParameterInitialGuess_data #populating this because otherwise non-grid Multi-Start will get the wrong values exported. & Same for final plots.
+        #Setting burn_in_length in below few lines (including case for continued sampling).
         if str(self.UserInput.parameter_estimation_settings['mcmc_burn_in']).lower() == 'auto': self.mcmc_burn_in_length = int(self.UserInput.parameter_estimation_settings['mcmc_length']*0.1)
         else: self.mcmc_burn_in_length = self.UserInput.parameter_estimation_settings['mcmc_burn_in']
+        if continueSampling == True:
+            self.mcmc_burn_in_length = 0
         if 'mcmc_random_seed' in self.UserInput.parameter_estimation_settings:
             if type(self.UserInput.parameter_estimation_settings['mcmc_random_seed']) == type(1): #if it's an integer, then it's not a "None" type or string, and we will use it.
                 np.random.seed(self.UserInput.parameter_estimation_settings['mcmc_random_seed'])
         samples_simulatedOutputs = np.zeros((self.UserInput.parameter_estimation_settings['mcmc_length'],self.UserInput.num_data_points))
         samples = np.zeros((self.UserInput.parameter_estimation_settings['mcmc_length'],len(self.UserInput.mu_prior)))
         mcmc_step_modulation_history = np.zeros((self.UserInput.parameter_estimation_settings['mcmc_length'])) #TODO: Make this optional for efficiency. #This allows the steps to be larger or smaller. Make this same length as samples. In future, should probably be same in other dimension also, but that would require 2D sampling with each step.                                                                          
-        samples[0,:]=self.UserInput.InputParameterInitialGuess  # Initialize the chain. Theta is initialized as the starting point of the chain.  It is placed at the prior mean if an initial guess is not provided.. Do not use self.UserInput.model['InputParameterInitialGuess']  because that doesn't work with reduced parameter space feature.
+        if continueSampling == False:
+            samples[0,:]=self.UserInput.InputParameterInitialGuess  # Initialize the chain. Theta is initialized as the starting point of the chain.  It is placed at the prior mean if an initial guess is not provided.. Do not use self.UserInput.model['InputParameterInitialGuess']  because that doesn't work with reduced parameter space feature.
+        elif continueSampling == True:
+            samples[0,:]= self.mcmc_last_point_sampled
         samples_drawn = samples*1.0 #this includes points that were rejected. #TODO: make this optional for efficiency.               
         log_likelihoods_vec = np.zeros((self.UserInput.parameter_estimation_settings['mcmc_length'],1))
         log_posteriors_un_normed_vec = np.zeros((self.UserInput.parameter_estimation_settings['mcmc_length'],1))
@@ -1692,21 +1732,26 @@ class parameter_estimation:
                             if mcmc_step_dynamic_coefficient > 0.1:
                                 mcmc_step_dynamic_coefficient = mcmc_step_dynamic_coefficient*0.95
             ########################################
-        self.during_burn_in_samples = samples[0:self.mcmc_burn_in_length] #TODO: check that indexing is correct.
-        self.during_burn_in_log_posteriors_un_normed_vec = log_posteriors_un_normed_vec[0:self.mcmc_burn_in_length]
-        self.post_burn_in_samples = samples[self.mcmc_burn_in_length:] #TODO: check that indexing is correct.
+        if continueSampling == False: #Normally we enter this if statement and collect the burn_in samples. If continueSampling, either they already exist in the PE_object and will be exported again later, or they don't exist in the PE_object because are continuing from a previous python instance. If continuing from a previous python instance, during_burn_in_samples won't be created and also won't be exported again. (This logic is so we don't overwrite the old during_burn_in_samples).
+            self.during_burn_in_samples = samples[0:self.mcmc_burn_in_length] 
+            self.during_burn_in_log_posteriors_un_normed_vec = log_posteriors_un_normed_vec[0:self.mcmc_burn_in_length]
+        self.post_burn_in_samples = samples[self.mcmc_burn_in_length:] 
         if self.UserInput.parameter_estimation_settings['exportAllSimulatedOutputs'] == True:
             self.post_burn_in_samples_simulatedOutputs = samples_simulatedOutputs[self.mcmc_burn_in_length:]
         self.post_burn_in_log_posteriors_un_normed_vec = log_posteriors_un_normed_vec[self.mcmc_burn_in_length:]
-        self.post_burn_in_log_posteriors_un_normed_vec = (self.post_burn_in_log_posteriors_un_normed_vec) #Is this increasing dimension?
+        self.mcmc_last_point_sampled = self.post_burn_in_samples[-1]
         self.post_burn_in_log_likelihoods_vec = log_likelihoods_vec[self.mcmc_burn_in_length:]
-        self.post_burn_in_log_priors_vec = log_priors_vec[self.mcmc_burn_in_length:]
+        self.post_burn_in_log_priors_vec = log_priors_vec[self.mcmc_burn_in_length:]        
         #####BELOW HERE SHOUD BE SAME FOR doMetropolisHastings and doEnsembleSliceSampling#####
+        if continueSampling == True:
+            self.post_burn_in_samples = np.vstack((self.last_post_burn_in_samples, self.post_burn_in_samples ))
+            self.post_burn_in_log_posteriors_un_normed_vec = np.vstack( (self.last_post_burn_in_log_posteriors_un_normed_vec, self.post_burn_in_log_posteriors_un_normed_vec))
         if (self.UserInput.parameter_estimation_settings['mcmc_parallel_sampling'] or self.UserInput.parameter_estimation_settings['multistart_parallel_sampling']) == True: #If we're using certain parallel processing, we need to make calculatePostBurnInStatistics into True.
             calculatePostBurnInStatistics = True;
         if self.UserInput.parameter_estimation_settings['mcmc_parallel_sampling']: #mcmc_exportLog == True is needed for mcmc_parallel_sampling, but not for multistart_parallel_sampling
             mcmc_exportLog=True
         if calculatePostBurnInStatistics == True:
+            #FIXME: Below, calculate_post_burn_in_log_priors_vec=True should be false unless we are using continue sampling. For now, will leave it since I am not sure why it is currently set to False.
             self.calculatePostBurnInStatistics(calculate_post_burn_in_log_priors_vec = True) #This function call will also filter the lowest probability samples out, when using default settings.
             if str(mcmc_exportLog) == 'UserChoice':
                 mcmc_exportLog = bool(self.UserInput.parameter_estimation_settings['mcmc_exportLog'])

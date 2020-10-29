@@ -28,8 +28,8 @@ if __name__ == "__main__":
     UserInput.parameter_estimation_settings['mcmc_random_seed'] = 0
     UserInput.parameter_estimation_settings['mcmc_parallel_sampling'] = False
     UserInput.parameter_estimation_settings['multistart_parallel_sampling'] = True
-    UserInput.parameter_estimation_settings['mcmc_exportLog'] = True #note that if we want the mcmc results for each parallel run to be exported, we need to state that, otherwise they won't be.
-    
+    UserInput.parameter_estimation_settings['mcmc_exportLog'] = True
+    UserInput.parameter_estimation_settings['mcmc_continueSampling'] = True #NOTE: For parallel sampling this cannot be fed as an argument to doMultiStart, it must be through UserInput and before the PE_object is made.
     
 
 

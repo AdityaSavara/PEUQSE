@@ -24,18 +24,13 @@ if __name__ == "__main__":
     simulation_model_00.x_values_for_data = UserInput.responses['responses_abscissa']  #Setting the x_values_for_data inthe simulation module.
 
     UserInput.parameter_estimation_settings['mcmc_length'] = 100
+    UserInput.parameter_estimation_settings['mcmc_parallel_sampling'] = True
+    UserInput.parameter_estimation_settings['mcmc_continueSampling'] = True #IMPORTANT: for mcmc_parallel_sampling, you **must** put the continue in the UserInput and **before** the PE_object is created. Putting it as an argument in doMetropolisHastings won't work since all the previous logs will get deleted when the PE_object is initialized.
     
-    UserInput.parameter_estimation_settings['mcmc_random_seed'] = 0
-    UserInput.parameter_estimation_settings['mcmc_parallel_sampling'] = False
-    UserInput.parameter_estimation_settings['multistart_parallel_sampling'] = True
-    UserInput.parameter_estimation_settings['mcmc_exportLog'] = True #note that if we want the mcmc results for each parallel run to be exported, we need to state that, otherwise they won't be.
-    
-    
-
-
     #After making the UserInput, now we make a 'parameter_estimation' object from it.
     PE_object = CKPQ.parameter_estimation(UserInput)
-    PE_object.doMultiStart('doMetropolisHastings', initialPointsDistributionType='grid')
+    
+    mcmc_output = PE_object.doMetropolisHastings()
     PE_object.createAllPlots() #This function calls each of the below functions so that the user does not have to.
 #    PE_object.makeHistogramsForEachParameter()    
 #    PE_object.makeSamplingScatterMatrixPlot()
