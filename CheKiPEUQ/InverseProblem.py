@@ -1511,12 +1511,41 @@ class parameter_estimation:
     software_kwargs = {"version": software_version, "author": ["Minas Karamanis", "Florian Beutler"], "cite": ["Minas Karamanis and Florian Beutler. zeus: A Python Implementation of the Ensemble Slice Sampling method. 2020. ","https://arxiv.org/abs/2002.06212", "@article{ess,  title={Ensemble Slice Sampling}, author={Minas Karamanis and Florian Beutler}, year={2020}, eprint={2002.06212}, archivePrefix={arXiv}, primaryClass={stat.ML} }"] }
     #@CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
     @CiteSoft.module_call_cite(unique_id=software_unique_id, software_name=software_name, **software_kwargs)
-    def doEnsembleSliceSampling(self, mcmc_nwalkers_direct_input = None, walkerInitialDistribution='uniform', walkerInitialDistributionSpread=1.0, calculatePostBurnInStatistics=True, mcmc_exportLog ='UserChoice'):
+    def doEnsembleSliceSampling(self, mcmc_nwalkers_direct_input = None, walkerInitialDistribution='uniform', walkerInitialDistributionSpread=1.0, calculatePostBurnInStatistics=True, mcmc_exportLog ='UserChoice', continueSampling='auto'):
         #The distribution of walkers intial points can be uniform or gaussian or identical. As of OCt 2020, default is uniform spread around the intial guess.
         #The mcmc_nwalkers_direct_input is really meant for PermutationSearch to override the other settings, though of course people could also use it directly.  
         #The walkerInitialDistributionSpread is in relative units (relative to standard deviations). In the case of a uniform inital distribution the default level of spread is actually across two standard deviations, so the walkerInitialDistributionSpread is relative to that (that is, a value of 2 would give 2*2 = 4 for the full spread in each direction from the initial guess).
         import zeus
-        '''these variables need to be made part of userinput'''
+        #Check if we need to continue sampling, and prepare for it if we need to.
+        if continueSampling == 'auto':
+            if ('mcmc_continueSampling' not in self.UserInput.parameter_estimation_settings) or self.UserInput.parameter_estimation_settings['mcmc_continueSampling'] == 'auto': #check that UserInput does not overrule the auto.
+                if hasattr(self, 'mcmc_last_point_sampled'): #if we have an existing mcmc_last_point_sampled in the object, we will assume more sampling is desired.
+                    continueSampling = True
+                else:
+                    continueSampling = False
+            else: continueSampling = self.UserInput.parameter_estimation_settings['mcmc_continueSampling'] 
+        if continueSampling == True:
+            if hasattr(self, 'mcmc_last_point_sampled'): #If we are continuing from an old mcmc in this object.
+                self.last_post_burn_in_log_posteriors_un_normed_vec = copy.deepcopy(self.post_burn_in_log_posteriors_un_normed_vec)
+                self.last_post_burn_in_samples = copy.deepcopy(self.post_burn_in_samples)
+            else: #Else we need to read from the file.                
+                #First check if we are doing some kind of parallel sampling, because in that case we need to read from the file for our correct process rank. We put that info into the prefix and suffix.
+                filePrefix,fileSuffix = self.getParallelProcessingPrefixAndSuffix()
+                self.last_logP_and_parameter_samples_filename = filePrefix + "mcmc_logP_and_parameter_samples" + fileSuffix
+                self.last_logP_and_parameter_samples_data = unpickleAnObject(self.last_logP_and_parameter_samples_filename)
+                self.last_post_burn_in_log_posteriors_un_normed_vec =  np.array(nestedObjectsFunctions.makeAtLeast_2dNested(self.last_logP_and_parameter_samples_data[:,0]))  #First column is the logP
+                if np.shape(self.last_post_burn_in_log_posteriors_un_normed_vec)[0] == 1: #In this case, need to transpose.
+                    self.last_post_burn_in_log_posteriors_un_normed_vec = self.last_post_burn_in_log_posteriors_un_normed_vec.transpose()
+                self.last_post_burn_in_samples =   np.array(nestedObjectsFunctions.makeAtLeast_2dNested(self.last_logP_and_parameter_samples_data[:,1:])) #later columns are the samples.
+                if np.shape(self.last_post_burn_in_samples)[0] == 1: #In this case, need to transpose.
+                    self.last_post_burn_in_samples = self.last_post_burn_in_samples.transpose()
+                self.mcmc_last_point_sampled_filename = filePrefix + "mcmc_last_point_sampled" + fileSuffix
+                self.mcmc_last_point_sampled_data = unpickleAnObject(self.mcmc_last_point_sampled_filename)
+                self.mcmc_last_point_sampled = self.mcmc_last_point_sampled_data
+                self.last_InputParameterInitialGuess_filename = filePrefix + "mcmc_initial_point_parameters" + fileSuffix
+                self.last_InputParameterInitialGuess_data = unpickleAnObject(self.last_InputParameterInitialGuess_filename)
+                self.UserInput.InputParameterInitialGuess = self.last_InputParameterInitialGuess_data #populating this because otherwise non-grid Multi-Start will get the wrong values exported. & Same for final plots.
+        ####these variables need to be made part of userinput####
         numParameters = len(self.UserInput.InputParameterInitialGuess) #This is the number of parameters.
         if 'mcmc_random_seed' in self.UserInput.parameter_estimation_settings:
             if type(self.UserInput.parameter_estimation_settings['mcmc_random_seed']) == type(1): #if it's an integer, then it's not a "None" type or string, and we will use it.
@@ -1542,9 +1571,12 @@ class parameter_estimation:
         else: self.mcmc_burn_in_length = self.UserInput.parameter_estimation_settings['mcmc_burn_in']
         if 'mcmc_maxiter' not in self.UserInput.parameter_estimation_settings: mcmc_maxiter = 1E6 #The default from zeus is 1E4, but I have found that is not always sufficient.
         else: mcmc_maxiter = self.UserInput.parameter_estimation_settings['mcmc_maxiter']
-        '''end of user input variables'''
+        ####end of user input variables####
         #now to do the mcmc
-        walkerStartPoints = self.generateInitialPoints(initialPointsDistributionType=walkerInitialDistribution, numStartPoints = self.mcmc_nwalkers,relativeInitialDistributionSpread=walkerInitialDistributionSpread) #making the first set of starting points.
+        if continueSampling == False:
+            walkerStartPoints = self.generateInitialPoints(initialPointsDistributionType=walkerInitialDistribution, numStartPoints = self.mcmc_nwalkers,relativeInitialDistributionSpread=walkerInitialDistributionSpread) #making the first set of starting points.
+        elif continueSampling == True:
+            walkerStartPoints = self.mcmc_last_point_sampled
         zeus_sampler = zeus.EnsembleSampler(self.mcmc_nwalkers, numParameters, logprob_fn=self.getLogP, maxiter=mcmc_maxiter) #maxiter=1E4 is the typical number, but we may want to increase it based on some userInput variable.        
         for trialN in range(0,1000):#Todo: This number of this range is hardcoded but should probably be a user selection.
             try:
@@ -1564,6 +1596,10 @@ class parameter_estimation:
         #Now to keep the results:
         self.post_burn_in_samples = zeus_sampler.samples.flatten(discard = self.mcmc_burn_in_length )
         self.post_burn_in_log_posteriors_un_normed_vec = np.atleast_2d(zeus_sampler.samples.flatten_logprob(discard=self.mcmc_burn_in_length)).transpose() #Needed to make it 2D and transpose.
+        self.mcmc_last_point_sampled=zeus_sampler.get_last_sample #Note that for **zeus** the last point sampled is actually an array of points equal to the number of walkers.        
+        if continueSampling == True:
+            self.post_burn_in_samples = np.vstack((self.last_post_burn_in_samples, self.post_burn_in_samples ))
+            self.post_burn_in_log_posteriors_un_normed_vec = np.vstack( (self.last_post_burn_in_log_posteriors_un_normed_vec, self.post_burn_in_log_posteriors_un_normed_vec))        
         #####BELOW HERE SHOUD BE SAME FOR doMetropolisHastings and doEnsembleSliceSampling#####
         if (self.UserInput.parameter_estimation_settings['mcmc_parallel_sampling'] or self.UserInput.parameter_estimation_settings['multistart_parallel_sampling']) == True: #If we're using certain parallel processing, we need to make calculatePostBurnInStatistics into True.
             calculatePostBurnInStatistics = True;
@@ -1599,7 +1635,7 @@ class parameter_estimation:
         if continueSampling == True:
             if hasattr(self, 'mcmc_last_point_sampled'): #if If we are continuing from an old
                 self.last_post_burn_in_log_posteriors_un_normed_vec = copy.deepcopy(self.post_burn_in_log_posteriors_un_normed_vec)
-                self.last_post_burn_in_samples = copy.deepcopy(self.post_burn_in_log_posteriors_un_normed_vec)
+                self.last_post_burn_in_samples = copy.deepcopy(self.post_burn_in_samples)
             else: #Else we need to read from the file.                
                 #First check if we are doing some kind of parallel sampling, because in that case we need to read from the file for our correct process rank. We put that info into the prefix and suffix.
                 filePrefix,fileSuffix = self.getParallelProcessingPrefixAndSuffix()
@@ -1745,7 +1781,7 @@ class parameter_estimation:
         #####BELOW HERE SHOUD BE SAME FOR doMetropolisHastings and doEnsembleSliceSampling#####
         if continueSampling == True:
             self.post_burn_in_samples = np.vstack((self.last_post_burn_in_samples, self.post_burn_in_samples ))
-            self.post_burn_in_log_posteriors_un_normed_vec = np.vstack( (self.last_post_burn_in_log_posteriors_un_normed_vec, self.post_burn_in_log_posteriors_un_normed_vec))
+            self.post_burn_in_log_posteriors_un_normed_vec = np.vstack( (np.array(self.last_post_burn_in_log_posteriors_un_normed_vec), np.array(self.post_burn_in_log_posteriors_un_normed_vec)))
         if (self.UserInput.parameter_estimation_settings['mcmc_parallel_sampling'] or self.UserInput.parameter_estimation_settings['multistart_parallel_sampling']) == True: #If we're using certain parallel processing, we need to make calculatePostBurnInStatistics into True.
             calculatePostBurnInStatistics = True;
         if self.UserInput.parameter_estimation_settings['mcmc_parallel_sampling']: #mcmc_exportLog == True is needed for mcmc_parallel_sampling, but not for multistart_parallel_sampling
