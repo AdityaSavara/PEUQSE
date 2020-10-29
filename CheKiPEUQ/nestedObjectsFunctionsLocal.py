@@ -7,7 +7,7 @@ import collections
 # and [1, 2, [3, 4, 5], 6] will give 21.
 def sumNested(arr):
     currentSum = 0
-    if isinstance(arr,collections.Iterable):
+    if isinstance(arr,collections.abc.Iterable):
         for elem in arr:
             returnSum = sumNested(elem)
             currentSum = currentSum + returnSum
@@ -21,7 +21,7 @@ def sumNested(arr):
 # and [1, 2, [3, 4, 5], 6] will give 21.
 def sumNestedAbsValues(arrayOrNumber):
     currentSum = 0
-    if isinstance(arrayOrNumber,collections.Iterable):
+    if isinstance(arrayOrNumber,collections.abc.Iterable):
         for elem in arrayOrNumber:
             returnSum = sumNestedAbsValues(elem)
             currentSum = currentSum + returnSum
@@ -38,9 +38,9 @@ def sumNestedAbsValues(arrayOrNumber):
 #[1,2] is iterable but neither 1 nor 2 are iterable so isNestedOrString will return false
 #[1,[2,3]] is iterable, 1 is not iterable but [2,3] is so isNestedOrString will return true
 def isNestedOrString(arr):
-    if isinstance(arr,collections.Iterable):
+    if isinstance(arr,collections.abc.Iterable):
         for elem in arr:
-            if isinstance(elem,collections.Iterable):
+            if isinstance(elem,collections.abc.Iterable):
                 return True
         #If it finishes the loop then it hasn't found a non-iterable object and is not nested
         return False
@@ -57,7 +57,7 @@ subtractNested(arr1,arr2,subtractionResult)
 #we do allow approximate comparisons using the variables relativeTolerance and absoluteTolerance
 '''
 def subtractNested(arr1,arr2,subtractionResult, relativeTolerance=None, absoluteTolerance=None, softStringCompare=False):
-    if isinstance(arr1,collections.Iterable):
+    if isinstance(arr1,collections.abc.Iterable):
         for elemindex,elem in enumerate(arr1):
             if type(elem) == str:
                 if softStringCompare == True: #if using softStringCompare
@@ -75,7 +75,7 @@ def subtractNested(arr1,arr2,subtractionResult, relativeTolerance=None, absolute
                     else:
                         subtractionResult[elemindex] = 1
             else: 
-                if isinstance(elem,collections.Iterable):
+                if isinstance(elem,collections.abc.Iterable):
                     subtractNested(arr1[elemindex],arr2[elemindex],subtractionResult[elemindex], relativeTolerance=relativeTolerance, absoluteTolerance=absoluteTolerance, softStringCompare=softStringCompare)
                 else: #this is for final elements, like integers and floats.
                     #we do allow approximate comparisons using the variables relativeTolerance and absoluteTolerance
@@ -111,13 +111,13 @@ def subtractNested(arr1,arr2,subtractionResult, relativeTolerance=None, absolute
 def nested_iter_to_nested_list(iterReceived):
     #The first two lines are justs to return the object immediately if it's not an iterable.
     #This is mostly to prevent bugs if someone tries to feed an integer, for example.
-    if not isinstance(iterReceived,collections.Iterable):
+    if not isinstance(iterReceived,collections.abc.Iterable):
         return iterReceived
     list_at_this_level = list(iterReceived)
     for elemIndex, elem in enumerate(iterReceived):
         #A string is iterable and a single value in a string is also iterable
         #So check to see if it is not a string to avoid recursion error
-        if isinstance(elem,collections.Iterable) and type(elem) != str:
+        if isinstance(elem,collections.abc.Iterable) and type(elem) != str:
             list_at_this_level[elemIndex] = nested_iter_to_nested_list(elem)
         else:
             list_at_this_level[elemIndex] = elem
