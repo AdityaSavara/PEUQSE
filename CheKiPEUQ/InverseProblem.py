@@ -1468,7 +1468,8 @@ class parameter_estimation:
         pickleAnObject(postBurnInStatistics, file_name_prefix+'mcmc_post_burn_in_statistics'+file_name_suffix)
         pickleAnObject(self.map_logP, file_name_prefix+'mcmc_map_logP'+file_name_suffix)
         pickleAnObject(self.UserInput.InputParameterInitialGuess, file_name_prefix+'mcmc_initial_point_parameters'+file_name_suffix)
-        pickleAnObject(self.mcmc_last_point_sampled, file_name_prefix+'mcmc_last_point_sampled'+file_name_suffix)
+        if hasattr(self, 'mcmc_last_point_sampled'):
+            pickleAnObject(self.mcmc_last_point_sampled, file_name_prefix+'mcmc_last_point_sampled'+file_name_suffix)
 
     #This function is modelled after exportPostBurnInStatistics. That is why it has the form that it does.
     def exportPostPermutationStatistics(self, searchType=''): #if it is an mcmc run, then we need to save the sampling as well.

@@ -23,10 +23,10 @@ if __name__ == "__main__":
     
     UserInput.model['simulateByInputParametersOnlyFunction'] = simulation_model_00.simulation_function_wrapper #This must simulate with *only* the parameters listed above, and no other arguments.
 
-    
-    UserInput.parameter_estimation_settings['mcmc_threshold_filter_samples'] = True
+    UserInput.parameter_estimation_settings['mcmc_length'] = 10000 #10000 is the default.
 
-    UserInput.parameter_estimation_settings['mcmc_random_seed'] = 0
+
+    #UserInput.parameter_estimation_settings['mcmc_random_seed'] = 0 This can be useful for testing.
     #After making the UserInput, now we make a 'parameter_estimation' object from it.
     PE_object = CKPQ.parameter_estimation(UserInput)
     PE_object.doMetropolisHastings()
