@@ -82,7 +82,7 @@ PE_object = CKPQ.parameter_estimation(UserInput)
 
 
 PE_object.doeParameterModulationPermutationsScanner()
-PE_object.createInfoGainPlots() #This is when PE_object.info_gains_matrices_array actually gets populated.
+#PE_object.createInfoGainPlots() 
 
 if len(PE_object.info_gains_matrices_array) > 0:
     CKPQ.pickleAnObject(PE_object.info_gains_matrices_array, "runfile_for_unit_test_parallel_doe_conditions_exploration")
