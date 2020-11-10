@@ -19,7 +19,7 @@ Why should you use CheKiPEUQ to get parameters from observed data? Because a few
 
 Consider a situation where we have three observed experimental data points with uncertainties:
 
-![](https://github.com/AdityaSavara/CheKiPEUQ/blob/master/CheKiPEUQ/readmeImages/image001.png=321x212)
+![](https://github.com/AdityaSavara/CheKiPEUQ/blob/master/CheKiPEUQ/readmeImages/image001.png =321x212)
 
 Their values, including uncertainties, are:<br>
 160500 +/- 200000 <br>
