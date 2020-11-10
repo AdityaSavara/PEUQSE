@@ -240,6 +240,11 @@ class parameter_estimation:
         self.UserInput.simulationFunction = self.UserInput.model['simulateByInputParametersOnlyFunction']
         self.UserInput.simulationOutputProcessingFunction = self.UserInput.model['simulationOutputProcessingFunction']
     
+        #Check the shapes of the arrays for UserInput.responses_observed and UserInput.responses_observed_uncertainties by doing a simulation. Warn the user if the shapes don't match.
+        initialGuessSimulatedResponses = self.getSimulatedResponses(self.UserInput.InputParameterInitialGuess)
+        if np.shape(initialGuessSimulatedResponses) != np.shape(UserInput.responses_observed):
+            print("CheKiPEUQ Warning: the shape of the responses_observed is", np.shape(UserInput.responses_observed), ", but the shape using your provided simulation function is", np.shape(initialGuessSimulatedResponses), " .  CheKiPEUQ is probably going to crash when trying to calculate the likelihood.")
+
         #Now reduce the parameter space if requested by the user. #Considered having this if statement as a function called outside of init.  However, using it in init is the best practice since it forces correct ordering of reduceParameterSpace and reduceResponseSpace
         if len(self.UserInput.model['reducedParameterSpace']) > 0:
             print("Important: the UserInput.model['reducedParameterSpace'] is not blank. That means the only parameters allowed to change will be the ones in the indices inside 'reducedParameterSpace'.   All others will be held constant.  The values inside  'InputParameterInitialGuess will be used', and 'InputParameterPriorValues' if an initial guess was not provided.")
