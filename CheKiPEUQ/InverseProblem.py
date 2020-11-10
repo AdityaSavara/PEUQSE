@@ -147,7 +147,10 @@ class parameter_estimation:
         else:
             self.UserInput.num_response_dimensions = UserInput.responses['num_responses']
         if len(UserInput.responses['responses_abscissa']) == 0: #This means it has not been provided and we will make one.
-            UserInput.responses_abscissa = np.linspace(0, self.UserInput.num_response_dimensions, self.UserInput.num_response_dimensions)
+            UserInput.responses_abscissa = [] #the one from input should already be a list, but we start a fresh one.
+            for responseIndex in range(0,self.UserInput.num_response_dimensions):
+                numPoints = len(UserInput.responses_observed[responseIndex])
+                UserInput.responses_abscissa.append(np.linspace(0, numPoints,numPoints))
         else:
             UserInput.responses_abscissa = UserInput.responses['responses_abscissa']
         UserInput.responses_abscissa = np.array(nestedObjectsFunctions.makeAtLeast_2dNested(UserInput.responses_abscissa))        
