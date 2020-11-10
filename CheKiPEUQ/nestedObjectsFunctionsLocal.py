@@ -152,8 +152,8 @@ def stringCompare(firstString,secondString):
 #This is designed for arrays of numbers.
 def makeAtLeast_2dNested(arr):
     import numpy as np
-    if type(arr) == type('str'): #If it's a string it's not nested.
-        nestedArray = [arr]
+    if type(arr) == type('str') or type(arr) == type(1) or type(arr) == type(1.0): #If it's a string, int, or float, it's not nested.
+        nestedArray = [[arr]]
     elif type(arr) != type('str'):#in the normal case, check if it's nested.
         if isNestedOrString(arr) == False:
             nestedArray = [arr]
