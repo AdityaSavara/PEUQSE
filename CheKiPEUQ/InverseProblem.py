@@ -139,14 +139,18 @@ class parameter_estimation:
         
         #Now do some processing on the responses formatting and uncertainties.
         #Make them 2dNested if needed..
-        UserInput.responses_abscissa = np.array(nestedObjectsFunctions.makeAtLeast_2dNested(UserInput.responses['responses_abscissa']))
+
         UserInput.responses_observed = np.array(nestedObjectsFunctions.makeAtLeast_2dNested(UserInput.responses['responses_observed']))
         UserInput.responses_observed_uncertainties = np.array(nestedObjectsFunctions.makeAtLeast_2dNested(UserInput.responses['responses_observed_uncertainties']))
         if UserInput.responses['num_responses']=='auto':
             self.UserInput.num_response_dimensions = np.shape(UserInput.responses_observed)[0]
         else:
             self.UserInput.num_response_dimensions = UserInput.responses['num_responses']
-        #We don't need the below few lines.
+        if len(UserInput.responses['responses_abscissa']) == 0: #This means it has not been provided and we will make one.
+            UserInput.responses_abscissa = np.linspace(0, self.UserInput.num_response_dimensions, self.UserInput.num_response_dimensions)
+        else:
+            UserInput.responses_abscissa = UserInput.responses['responses_abscissa']
+        UserInput.responses_abscissa = np.array(nestedObjectsFunctions.makeAtLeast_2dNested(UserInput.responses_abscissa))        
         #Make sure all objects inside are arrays (if they are lists we convert them). This is needed to apply the heurestic.
         UserInput.responses_abscissa = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(UserInput.responses_abscissa)
         UserInput.responses_observed = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(UserInput.responses_observed)
