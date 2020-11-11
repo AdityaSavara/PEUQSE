@@ -505,9 +505,10 @@ class parameter_estimation:
         gridPermutations = CombinationGeneratorModule.combinationGenerator(gridCenterVector, gridsearchSamplingInterval, gridsearchSamplingRadii, SpreadType=SpreadType,toFile=toFile)
         return gridPermutations, numPermutations  
         
-    def doListOfPermutationsSearch(self, listOfPermutations, numPermutations = None, searchType='getLogP', exportLog = True, walkerInitialDistribution='UserChoice', passThroughArgs = {}, calculatePostBurnInStatistics=True,  keep_cumulative_post_burn_in_data = False, centerPoint=None): #This is the 'engine' used by doGridSearch and  doMultiStartSearch
+    def doListOfPermutationsSearch(self, listOfPermutations, numPermutations = None, searchType='getLogP', exportLog = True, walkerInitialDistribution='UserChoice', passThroughArgs = {}, calculatePostBurnInStatistics=True,  keep_cumulative_post_burn_in_data = False, centerPoint=None, permutationsToSamples=False): #This is the 'engine' used by doGridSearch and  doMultiStartSearch
     #The listOfPermutations can also be another type of iterable.
         #Possible searchTypes are: 'getLogP', 'doEnsembleSliceSampling', 'doMetropolisHastings', 'doOptimizeNegLogP', 'doOptimizeSSR'
+        #permutationsToSamples should normally only be True if somebody is using gridsearch or uniform multistart with getLogP.
         self.listOfPermutations = listOfPermutations #This is being made into a class variable so that it can be used during parallelization
         if str(numPermutations).lower() == str(None).lower():
             numPermutations = len(self.listOfPermutations)
@@ -555,7 +556,8 @@ class parameter_estimation:
             if (searchType == 'getLogP'):
                 self.map_logP = self.getLogP(permutation) #The getLogP function does not fill map_logP by itself.
                 self.map_parameter_set = permutation
-                thisResult = [self.map_logP, str(self.map_parameter_set).replace(",","|").replace("[","").replace('(','').replace(')',''), 'None', 'None', 'None', 'None', 'None', 'None']
+                thisResult = [self.map_logP, self.map_parameter_set, None, None, None, None, None, None]
+                #thisResultStr = [self.map_logP, str(self.map_parameter_set).replace(",","|").replace("[","").replace('(','').replace(')',''), 'None', 'None', 'None', 'None', 'None', 'None']
             if searchType == 'doMetropolisHastings':
                 thisResult = self.doMetropolisHastings(calculatePostBurnInStatistics=calculatePostBurnInStatistics)
                 #self.map_logP gets done by itself in doMetropolisHastings
@@ -641,9 +643,6 @@ class parameter_estimation:
                 if (searchType == 'doEnsembleSliceSampling') or (searchType == 'doMetropolisHastings'):
                     out_file.write("self.mu_AP_parameter_set (for the above initial point): " + str( bestResultSoFar[1])+ "\n")
                     out_file.write("self.stdap_parameter_set (for the above initial point): " + str( bestResultSoFar[2])+ "\n")
-
-                    
-
         print("Final map parameter results from PermutationSearch:", self.map_parameter_set,  " \nFinal map logP:", self.map_logP)
         if (searchType == 'doEnsembleSliceSampling') or (searchType == 'doMetropolisHastings'):
             #For MCMC, we can now calculate the post_burn_in statistics for the best sampling from the full samplings done. We don't want to lump all together because that would not be unbiased.
@@ -661,6 +660,23 @@ class parameter_estimation:
         if searchType == 'doOptimizeNegLogP':            
             return bestResultSoFar# [self.map_parameter_set, self.map_logP]
         if searchType == 'getLogP':          
+            #if it's getLogP gridsearch, we are going to convert it to samples if requested.
+            if permutationsToSamples == True:
+                self.permutations_MAP_logP_and_parameters_values = np.vstack( self.permutations_MAP_logP_and_parameters_values)
+                #First set the multistart_gridsearch_threshold_filter_coefficient. We will take 10**-(thisnumber) later.
+                if str(self.UserInput.parameter_estimation_settings['multistart_gridsearch_threshold_filter_coefficient']).lower() == 'auto':
+                    multistart_gridsearch_threshold_filter_coefficient = 2.0
+                else:
+                    multistart_gridsearch_threshold_filter_coefficient = self.UserInput.parameter_estimation_settings['multistart_gridsearch_threshold_filter_coefficient']
+                logP_values_and_samples = convertPermutationsToSamples(self.permutations_MAP_logP_and_parameters_values, maxLogP=float(bestResultSoFar[0]), relativeFilteringThreshold = 10**(-1*multistart_gridsearch_threshold_filter_coefficient))
+                self.post_burn_in_log_posteriors_un_normed_vec = logP_values_and_samples[:,0]
+                self.post_burn_in_log_posteriors_un_normed_vec = np.array(nestedObjectsFunctions.makeAtLeast_2dNested(self.post_burn_in_log_posteriors_un_normed_vec)).transpose()
+                self.post_burn_in_samples = logP_values_and_samples[:,1:]
+                #need to populate post_burn_in_log_priors_vec this with an object, otherwise calculatePostBurnInStatistics will try to calculate all the priors.
+                self.post_burn_in_log_priors_vec = None
+                #Below is needed to avoid causing an error in the calculatePostBurnInStatistics since we don't have a real priors vec.
+                self.UserInput.parameter_estimation_settings['mcmc_threshold_filter_samples'] = False
+                self.calculatePostBurnInStatistics()
             return bestResultSoFar# [self.map_parameter_set, self.map_logP]
 
     #@CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
@@ -694,8 +710,16 @@ class parameter_estimation:
             searchType = 'getLogP'
         #make the initial points list by mostly passing through arguments.
         multiStartInitialPointsList = self.generateInitialPoints(numStartPoints=numStartPoints, relativeInitialDistributionSpread=relativeInitialDistributionSpread, initialPointsDistributionType=initialPointsDistributionType, centerPoint = centerPoint, gridsearchSamplingInterval = gridsearchSamplingInterval, gridsearchSamplingRadii = gridsearchSamplingRadii)
+        
+        #we only turn on permutationsToSamples if grid or uniform and if getLogP.
+        permutationsToSamples = False#initialize with default
+        if self.UserInput.parameter_estimation_settings['multistart_gridsearchToSamples'] == True:
+            if initialPointsDistributionType == 'grid' or initialPointsDistributionType == 'uniform':
+                if searchType == 'getLogP':
+                    permutationsToSamples = True
+                        
         #Look for the best result (highest map_logP) from among these permutations. Maybe later should add optional argument to allow searching for highest mu_AP to find HPD.
-        bestResultSoFar = self.doListOfPermutationsSearch(listOfPermutations=multiStartInitialPointsList, searchType=searchType, exportLog=exportLog, walkerInitialDistribution=walkerInitialDistribution, passThroughArgs=passThroughArgs, calculatePostBurnInStatistics=calculatePostBurnInStatistics, keep_cumulative_post_burn_in_data=keep_cumulative_post_burn_in_data, centerPoint = centerPoint)
+        bestResultSoFar = self.doListOfPermutationsSearch(listOfPermutations=multiStartInitialPointsList, searchType=searchType, exportLog=exportLog, walkerInitialDistribution=walkerInitialDistribution, passThroughArgs=passThroughArgs, calculatePostBurnInStatistics=calculatePostBurnInStatistics, keep_cumulative_post_burn_in_data=keep_cumulative_post_burn_in_data, centerPoint = centerPoint, permutationsToSamples=permutationsToSamples)
         return bestResultSoFar
   
     #@CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
@@ -1388,6 +1412,7 @@ class parameter_estimation:
         if not hasattr(self, 'post_burn_in_log_priors_vec'): 
             calculate_post_burn_in_log_priors_vec = True 
         if calculate_post_burn_in_log_priors_vec == True:
+                #TODO: change below to use numpy vectorize. It will probably be faster then.
                 #Below line following a line from https://github.com/threeML/threeML/blob/master/threeML/bayesian/zeus_sampler.py
                 self.post_burn_in_log_priors_vec = np.array([self.getLogPrior(parameterPermutation) for parameterPermutation in self.post_burn_in_samples])
                 self.post_burn_in_log_priors_vec = np.atleast_2d(self.post_burn_in_log_priors_vec).transpose()
@@ -2205,6 +2230,39 @@ class verbose_optimization_wrapper: #Learned how to use callback from Henri's po
         print(iterationOutputString)
         self.iterationNumber += 1 #In principle, could be done inside the simulateAndStoreObjectiveFunction, but this way it is after the itration number has been printed.
 
+
+def convertPermutationsToSamples(permutations_MAP_logP_and_parameters_values, maxLogP=None, relativeFilteringThreshold=1E-2, priorsVector=None):
+    #The relative filtering threshold removes anything which has a probability lower than that relative to maxLogP.
+    #relativeFilteringThreshold should be a value between 0 and 1.
+    #the permutations_MAP_logP_and_parameters_values should have the form logP, Parameter1, Parameter2, etc.
+    #first get maxLogP if it's not provided.
+    permutationsArray = permutations_MAP_logP_and_parameters_values
+    
+    if type(maxLogP) != type(None):
+        maxLogP = maxLogP
+    elif type(maxLogP) == type(None):
+        maxLogP= -1*float('inf') #initializing.
+        for element in permutationsArray:
+            if element[0] > maxLogP:
+                maxLogP = element[0]    
+    #now calculate the absoluteFilteringThreshold:
+    absoluteFilteringThreshold = maxLogP + np.log(relativeFilteringThreshold)    
+    #Now make the samples repetitions based no the logP values.
+    expandedArraysList = []
+    for element in permutationsArray:
+        if element[0] > absoluteFilteringThreshold:
+            #If P2 is the smaller probability, here given by the absoluteFilteringThreshold, then...
+            #it turns out we want P1/P2 = e^(logP1-logP2), where the logs here are all base e, which is our situation.
+            #if it was base 10, we would want P1/P2 = 10^(log10(P1) -log10(P2)
+            numberOfRepetitionsNeeded = np.exp(element[0]-absoluteFilteringThreshold)
+            onesArray = np.ones((int(numberOfRepetitionsNeeded),len(element)))
+            repeatedArray = onesArray * element
+            expandedArraysList.append(repeatedArray)            
+        elif element[0] < absoluteFilteringThreshold:
+            pass        
+    return np.vstack(expandedArraysList) #This stacks the expandedArraysList into a single array.
+
+
 '''Below are a bunch of functions for Euler's Method.'''
 #This takes an array of dydt values. #Note this is a local dydtArray, it is NOT a local deltaYArray.
 software_name = "Integrated Production (Objective Function)"
@@ -2261,7 +2319,7 @@ def dydtNumericalExtraction(t_values, y_values, last_point_derivative = 0):
     delta_t = t_values[1]-t_values[0]
     dydtNumerical = delta_y_numerical/delta_t
     return dydtNumerical
-
+'''End of functions related to Euler's Method'''
 
 #TODO: move this into some kind of support module for parsing. Like XYYYDataFunctions or something like that.
 def returnReducedIterable(iterableObjectToReduce, reducedIndices):
