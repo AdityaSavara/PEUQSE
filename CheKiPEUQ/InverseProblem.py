@@ -555,7 +555,8 @@ class parameter_estimation:
             if (searchType == 'getLogP'):
                 self.map_logP = self.getLogP(permutation) #The getLogP function does not fill map_logP by itself.
                 self.map_parameter_set = permutation
-                thisResult = [self.map_logP, str(self.map_parameter_set).replace(",","|").replace("[","").replace('(','').replace(')',''), 'None', 'None', 'None', 'None', 'None', 'None']
+                thisResult = [self.map_logP, self.map_parameter_set, None, None, None, None, None, None]
+                #thisResultStr = [self.map_logP, str(self.map_parameter_set).replace(",","|").replace("[","").replace('(','').replace(')',''), 'None', 'None', 'None', 'None', 'None', 'None']
             if searchType == 'doMetropolisHastings':
                 thisResult = self.doMetropolisHastings(calculatePostBurnInStatistics=calculatePostBurnInStatistics)
                 #self.map_logP gets done by itself in doMetropolisHastings
@@ -641,9 +642,6 @@ class parameter_estimation:
                 if (searchType == 'doEnsembleSliceSampling') or (searchType == 'doMetropolisHastings'):
                     out_file.write("self.mu_AP_parameter_set (for the above initial point): " + str( bestResultSoFar[1])+ "\n")
                     out_file.write("self.stdap_parameter_set (for the above initial point): " + str( bestResultSoFar[2])+ "\n")
-
-                    
-
         print("Final map parameter results from PermutationSearch:", self.map_parameter_set,  " \nFinal map logP:", self.map_logP)
         if (searchType == 'doEnsembleSliceSampling') or (searchType == 'doMetropolisHastings'):
             #For MCMC, we can now calculate the post_burn_in statistics for the best sampling from the full samplings done. We don't want to lump all together because that would not be unbiased.
@@ -661,6 +659,19 @@ class parameter_estimation:
         if searchType == 'doOptimizeNegLogP':            
             return bestResultSoFar# [self.map_parameter_set, self.map_logP]
         if searchType == 'getLogP':          
+            #if it's getLogP gridsearch, we are going to convert it to samples if requested.
+            if self.UserInput.parameter_estimation_settings['multistart_gridsearchToSamples'] == True:
+                self.permutations_MAP_logP_and_parameters_values = np.vstack( self.permutations_MAP_logP_and_parameters_values)
+                #First set the multistart_gridsearch_threshold_filter_coefficient. We will take 10**-(thisnumber) later.
+                if str(self.UserInput.parameter_estimation_settings['multistart_gridsearch_threshold_filter_coefficient']).lower() == 'auto':
+                    multistart_gridsearch_threshold_filter_coefficient = 3
+                else:
+                    multistart_gridsearch_threshold_filter_coefficient = self.UserInput.parameter_estimation_settings['multistart_gridsearch_threshold_filter_coefficient']
+                logP_values_and_samples = permutationsToSamples(self.permutations_MAP_logP_and_parameters_values, maxLogP=float(bestResultSoFar[0]), relativeFilteringThreshold = 10**(-1*multistart_gridsearch_threshold_filter_coefficient))
+                self.post_burn_in_log_posteriors_un_normed_vec = logP_values_and_samples[:,0]
+                self.post_burn_in_log_posteriors_un_normed_vec = np.array(nestedObjectsFunctions.makeAtLeast_2dNested(self.post_burn_in_log_posteriors_un_normed_vec)).transpose()
+                self.post_burn_in_samples = logP_values_and_samples[:,1:]
+                self.calculatePostBurnInStatistics()
             return bestResultSoFar# [self.map_parameter_set, self.map_logP]
 
     #@CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
