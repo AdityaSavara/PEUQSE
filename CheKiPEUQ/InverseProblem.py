@@ -505,9 +505,10 @@ class parameter_estimation:
         gridPermutations = CombinationGeneratorModule.combinationGenerator(gridCenterVector, gridsearchSamplingInterval, gridsearchSamplingRadii, SpreadType=SpreadType,toFile=toFile)
         return gridPermutations, numPermutations  
         
-    def doListOfPermutationsSearch(self, listOfPermutations, numPermutations = None, searchType='getLogP', exportLog = True, walkerInitialDistribution='UserChoice', passThroughArgs = {}, calculatePostBurnInStatistics=True,  keep_cumulative_post_burn_in_data = False, centerPoint=None): #This is the 'engine' used by doGridSearch and  doMultiStartSearch
+    def doListOfPermutationsSearch(self, listOfPermutations, numPermutations = None, searchType='getLogP', exportLog = True, walkerInitialDistribution='UserChoice', passThroughArgs = {}, calculatePostBurnInStatistics=True,  keep_cumulative_post_burn_in_data = False, centerPoint=None, permutationsToSamples=False): #This is the 'engine' used by doGridSearch and  doMultiStartSearch
     #The listOfPermutations can also be another type of iterable.
         #Possible searchTypes are: 'getLogP', 'doEnsembleSliceSampling', 'doMetropolisHastings', 'doOptimizeNegLogP', 'doOptimizeSSR'
+        #permutationsToSamples should normally only be True if somebody is using gridsearch or uniform multistart with getLogP.
         self.listOfPermutations = listOfPermutations #This is being made into a class variable so that it can be used during parallelization
         if str(numPermutations).lower() == str(None).lower():
             numPermutations = len(self.listOfPermutations)
@@ -660,17 +661,21 @@ class parameter_estimation:
             return bestResultSoFar# [self.map_parameter_set, self.map_logP]
         if searchType == 'getLogP':          
             #if it's getLogP gridsearch, we are going to convert it to samples if requested.
-            if self.UserInput.parameter_estimation_settings['multistart_gridsearchToSamples'] == True:
+            if permutationsToSamples == True:
                 self.permutations_MAP_logP_and_parameters_values = np.vstack( self.permutations_MAP_logP_and_parameters_values)
                 #First set the multistart_gridsearch_threshold_filter_coefficient. We will take 10**-(thisnumber) later.
                 if str(self.UserInput.parameter_estimation_settings['multistart_gridsearch_threshold_filter_coefficient']).lower() == 'auto':
-                    multistart_gridsearch_threshold_filter_coefficient = 3
+                    multistart_gridsearch_threshold_filter_coefficient = 2.0
                 else:
                     multistart_gridsearch_threshold_filter_coefficient = self.UserInput.parameter_estimation_settings['multistart_gridsearch_threshold_filter_coefficient']
-                logP_values_and_samples = permutationsToSamples(self.permutations_MAP_logP_and_parameters_values, maxLogP=float(bestResultSoFar[0]), relativeFilteringThreshold = 10**(-1*multistart_gridsearch_threshold_filter_coefficient))
+                logP_values_and_samples = convertPermutationsToSamples(self.permutations_MAP_logP_and_parameters_values, maxLogP=float(bestResultSoFar[0]), relativeFilteringThreshold = 10**(-1*multistart_gridsearch_threshold_filter_coefficient))
                 self.post_burn_in_log_posteriors_un_normed_vec = logP_values_and_samples[:,0]
                 self.post_burn_in_log_posteriors_un_normed_vec = np.array(nestedObjectsFunctions.makeAtLeast_2dNested(self.post_burn_in_log_posteriors_un_normed_vec)).transpose()
                 self.post_burn_in_samples = logP_values_and_samples[:,1:]
+                #need to populate post_burn_in_log_priors_vec this with an object, otherwise calculatePostBurnInStatistics will try to calculate all the priors.
+                self.post_burn_in_log_priors_vec = None
+                #Below is needed to avoid causing an error in the calculatePostBurnInStatistics since we don't have a real priors vec.
+                self.UserInput.parameter_estimation_settings['mcmc_threshold_filter_samples'] = False
                 self.calculatePostBurnInStatistics()
             return bestResultSoFar# [self.map_parameter_set, self.map_logP]
 
@@ -705,8 +710,16 @@ class parameter_estimation:
             searchType = 'getLogP'
         #make the initial points list by mostly passing through arguments.
         multiStartInitialPointsList = self.generateInitialPoints(numStartPoints=numStartPoints, relativeInitialDistributionSpread=relativeInitialDistributionSpread, initialPointsDistributionType=initialPointsDistributionType, centerPoint = centerPoint, gridsearchSamplingInterval = gridsearchSamplingInterval, gridsearchSamplingRadii = gridsearchSamplingRadii)
+        
+        #we only turn on permutationsToSamples if grid or uniform and if getLogP.
+        permutationsToSamples = False#initialize with default
+        if self.UserInput.parameter_estimation_settings['multistart_gridsearchToSamples'] == True:
+            if initialPointsDistributionType == 'grid' or initialPointsDistributionType == 'uniform':
+                if searchType == 'getLogP':
+                    permutationsToSamples = True
+                        
         #Look for the best result (highest map_logP) from among these permutations. Maybe later should add optional argument to allow searching for highest mu_AP to find HPD.
-        bestResultSoFar = self.doListOfPermutationsSearch(listOfPermutations=multiStartInitialPointsList, searchType=searchType, exportLog=exportLog, walkerInitialDistribution=walkerInitialDistribution, passThroughArgs=passThroughArgs, calculatePostBurnInStatistics=calculatePostBurnInStatistics, keep_cumulative_post_burn_in_data=keep_cumulative_post_burn_in_data, centerPoint = centerPoint)
+        bestResultSoFar = self.doListOfPermutationsSearch(listOfPermutations=multiStartInitialPointsList, searchType=searchType, exportLog=exportLog, walkerInitialDistribution=walkerInitialDistribution, passThroughArgs=passThroughArgs, calculatePostBurnInStatistics=calculatePostBurnInStatistics, keep_cumulative_post_burn_in_data=keep_cumulative_post_burn_in_data, centerPoint = centerPoint, permutationsToSamples=permutationsToSamples)
         return bestResultSoFar
   
     #@CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
@@ -1399,6 +1412,7 @@ class parameter_estimation:
         if not hasattr(self, 'post_burn_in_log_priors_vec'): 
             calculate_post_burn_in_log_priors_vec = True 
         if calculate_post_burn_in_log_priors_vec == True:
+                #TODO: change below to use numpy vectorize. It will probably be faster then.
                 #Below line following a line from https://github.com/threeML/threeML/blob/master/threeML/bayesian/zeus_sampler.py
                 self.post_burn_in_log_priors_vec = np.array([self.getLogPrior(parameterPermutation) for parameterPermutation in self.post_burn_in_samples])
                 self.post_burn_in_log_priors_vec = np.atleast_2d(self.post_burn_in_log_priors_vec).transpose()
@@ -2217,7 +2231,7 @@ class verbose_optimization_wrapper: #Learned how to use callback from Henri's po
         self.iterationNumber += 1 #In principle, could be done inside the simulateAndStoreObjectiveFunction, but this way it is after the itration number has been printed.
 
 
-def permutationsToSamples(permutations_MAP_logP_and_parameters_values, maxLogP=None, relativeFilteringThreshold=1E-3, priorsVector=None):
+def convertPermutationsToSamples(permutations_MAP_logP_and_parameters_values, maxLogP=None, relativeFilteringThreshold=1E-2, priorsVector=None):
     #The relative filtering threshold removes anything which has a probability lower than that relative to maxLogP.
     #relativeFilteringThreshold should be a value between 0 and 1.
     #the permutations_MAP_logP_and_parameters_values should have the form logP, Parameter1, Parameter2, etc.
