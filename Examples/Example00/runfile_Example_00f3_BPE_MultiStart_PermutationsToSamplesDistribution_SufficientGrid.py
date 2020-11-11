@@ -35,7 +35,7 @@ if __name__ == "__main__":
     PE_object = CKPQ.parameter_estimation(UserInput)
     #PE_object.doMetropolisHastings()
     #PE_object.doOptimizeNegLogP(method="BFGS", printOptimum=True, verbose=True) #method can also be Nelder-Meade.
-    PE_object.doMultiStart('getLogP', initialPointsDistributionType='grid', gridsearchSamplingInterval=[50,50], gridsearchSamplingRadii=[10,10] )
+    PE_object.doMultiStart('getLogP', initialPointsDistributionType='grid', gridsearchSamplingInterval=[50,50], gridsearchSamplingRadii=[15,15] )
     PE_object.createAllPlots() #This function calls each of the below functions so that the user does not have to.
 #    PE_object.makeHistogramsForEachParameter()    
 #    PE_object.makeSamplingScatterMatrixPlot()
