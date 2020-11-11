@@ -2205,6 +2205,39 @@ class verbose_optimization_wrapper: #Learned how to use callback from Henri's po
         print(iterationOutputString)
         self.iterationNumber += 1 #In principle, could be done inside the simulateAndStoreObjectiveFunction, but this way it is after the itration number has been printed.
 
+
+def permutationsToSamples(permutations_MAP_logP_and_parameters_values, maxLogP=None, relativeFilteringThreshold=1E-3, priorsVector=None):
+    #The relative filtering threshold removes anything which has a probability lower than that relative to maxLogP.
+    #relativeFilteringThreshold should be a value between 0 and 1.
+    #the permutations_MAP_logP_and_parameters_values should have the form logP, Parameter1, Parameter2, etc.
+    #first get maxLogP if it's not provided.
+    permutationsArray = permutations_MAP_logP_and_parameters_values
+    
+    if type(maxLogP) != type(None):
+        maxLogP = maxLogP
+    elif type(maxLogP) == type(None):
+        maxLogP= -1*float('inf') #initializing.
+        for element in permutationsArray:
+            if element[0] > maxLogP:
+                maxLogP = element[0]    
+    #now calculate the absoluteFilteringThreshold:
+    absoluteFilteringThreshold = maxLogP + np.log(relativeFilteringThreshold)    
+    #Now make the samples repetitions based no the logP values.
+    expandedArraysList = []
+    for element in permutationsArray:
+        if element[0] > absoluteFilteringThreshold:
+            #If P2 is the smaller probability, here given by the absoluteFilteringThreshold, then...
+            #it turns out we want P1/P2 = e^(logP1-logP2), where the logs here are all base e, which is our situation.
+            #if it was base 10, we would want P1/P2 = 10^(log10(P1) -log10(P2)
+            numberOfRepetitionsNeeded = np.exp(element[0]-absoluteFilteringThreshold)
+            onesArray = np.ones((int(numberOfRepetitionsNeeded),len(element)))
+            repeatedArray = onesArray * element
+            expandedArraysList.append(repeatedArray)            
+        elif element[0] < absoluteFilteringThreshold:
+            pass        
+    return np.vstack(expandedArraysList) #This stacks the expandedArraysList into a single array.
+
+
 '''Below are a bunch of functions for Euler's Method.'''
 #This takes an array of dydt values. #Note this is a local dydtArray, it is NOT a local deltaYArray.
 software_name = "Integrated Production (Objective Function)"
@@ -2261,7 +2294,7 @@ def dydtNumericalExtraction(t_values, y_values, last_point_derivative = 0):
     delta_t = t_values[1]-t_values[0]
     dydtNumerical = delta_y_numerical/delta_t
     return dydtNumerical
-
+'''End of functions related to Euler's Method'''
 
 #TODO: move this into some kind of support module for parsing. Like XYYYDataFunctions or something like that.
 def returnReducedIterable(iterableObjectToReduce, reducedIndices):
