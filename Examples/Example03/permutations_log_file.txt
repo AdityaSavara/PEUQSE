@@ -1,0 +1,6 @@
+highest_MAP_logP: [-272.95219724]
+highest_MAP_logP_parameter_set: [46.94490479 22.77308498 13.99020849 12.6365326   0.06693264  0.28337978]
+highest_MAP_initial_point_index: 0
+highest_MAP_initial_point_parameters: [40.  40.  13.  13.   0.1  0.2]
+self.mu_AP_parameter_set :  (for the above initial point) [48.02099091 23.31768063 13.87857184 13.23862849  0.07256993  0.24593781]
+self.stdap_parameter_set :  (for the above initial point) [0.81889337 0.28381336 0.07526202 0.3115849  0.00476717 0.01979546]
