@@ -633,17 +633,6 @@ class parameter_estimation:
         #do some exporting etc. This is at the end to avoid exporting every single time if parallelization is used.
         np.savetxt('permutations_initial_points_parameters_values'+'.csv', self.listOfPermutations, delimiter=",")
         np.savetxt('permutations_MAP_logP_and_parameters_values.csv',self.permutations_MAP_logP_and_parameters_values, delimiter=",")
-        if exportLog == True:
-            pass #Later will do something with allPermutationsResults variable. It has one element for each result (that is, each permutation).
-        with open("permutations_log_file.txt", 'w') as out_file:
-                out_file.write("highest_MAP_logP: " + str(self.map_logP) + "\n")
-                out_file.write("highest_MAP_logP_parameter_set: " + str(self.map_parameter_set)+ "\n")
-                out_file.write("highest_MAP_initial_point_index: " + str(highest_MAP_initial_point_index)+ "\n")
-                out_file.write("highest_MAP_initial_point_parameters: " + str( highest_MAP_initial_point_parameters)+ "\n")
-                if (searchType == 'doEnsembleSliceSampling') or (searchType == 'doMetropolisHastings'):
-                    out_file.write("self.mu_AP_parameter_set (for the above initial point): " + str( bestResultSoFar[1])+ "\n")
-                    out_file.write("self.stdap_parameter_set (for the above initial point): " + str( bestResultSoFar[2])+ "\n")
-        print("Final map parameter results from PermutationSearch:", self.map_parameter_set,  " \nFinal map logP:", self.map_logP)
         if (searchType == 'doEnsembleSliceSampling') or (searchType == 'doMetropolisHastings'):
             #For MCMC, we can now calculate the post_burn_in statistics for the best sampling from the full samplings done. We don't want to lump all together because that would not be unbiased.
             if calculatePostBurnInStatistics == True:
@@ -656,9 +645,9 @@ class parameter_estimation:
             #self.post_burn_in_samples = cumulative_post_burn_in_samples
             #self.post_burn_in_log_priors_vec = cumulative_post_burn_in_log_priors_vec
             #self.post_burn_in_log_posteriors_un_normed_vec = cumulative_post_burn_in_log_posteriors_un_normed_vec
-            return bestResultSoFar # [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec] 
+            #implied return bestResultSoFar # [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec] 
         if searchType == 'doOptimizeNegLogP':            
-            return bestResultSoFar# [self.map_parameter_set, self.map_logP]
+            pass# implied return bestResultSoFar# [self.map_parameter_set, self.map_logP]
         if searchType == 'getLogP':          
             #if it's getLogP gridsearch, we are going to convert it to samples if requested.
             if permutationsToSamples == True:
@@ -677,7 +666,20 @@ class parameter_estimation:
                 #Below is needed to avoid causing an error in the calculatePostBurnInStatistics since we don't have a real priors vec.
                 self.UserInput.parameter_estimation_settings['mcmc_threshold_filter_samples'] = False
                 self.calculatePostBurnInStatistics()
-            return bestResultSoFar# [self.map_parameter_set, self.map_logP]
+            #implied return bestResultSoFar# [self.map_parameter_set, self.map_logP]
+        #This has to be below the later parts so that permutationsToSamples can occur first.
+        if exportLog == True:
+            pass #Later will do something with allPermutationsResults variable. It has one element for each result (that is, each permutation).
+        with open("permutations_log_file.txt", 'w') as out_file:
+                out_file.write("highest_MAP_logP: " + str(self.map_logP) + "\n")
+                out_file.write("highest_MAP_logP_parameter_set: " + str(self.map_parameter_set)+ "\n")
+                out_file.write("highest_MAP_initial_point_index: " + str(highest_MAP_initial_point_index)+ "\n")
+                out_file.write("highest_MAP_initial_point_parameters: " + str( highest_MAP_initial_point_parameters)+ "\n")
+                if (searchType == 'doEnsembleSliceSampling') or (searchType == 'doMetropolisHastings') or (permutationsToSamples == True):
+                    out_file.write("self.mu_AP_parameter_set (for the above initial point): " + str( bestResultSoFar[1])+ "\n")
+                    out_file.write("self.stdap_parameter_set (for the above initial point): " + str( bestResultSoFar[2])+ "\n")
+        print("Final map parameter results from PermutationSearch:", self.map_parameter_set,  " \nFinal map logP:", self.map_logP)
+        return bestResultSoFar# [self.map_parameter_set, self.map_logP, etc.]
 
     #@CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
     def doMultiStart(self, searchType='getLogP', numStartPoints = 'UserChoice', relativeInitialDistributionSpread='UserChoice', exportLog = 'UserChoice', initialPointsDistributionType='UserChoice', passThroughArgs = 'UserChoice', calculatePostBurnInStatistics='UserChoice',  keep_cumulative_post_burn_in_data = 'UserChoice', walkerInitialDistribution='UserChoice', centerPoint = None, gridsearchSamplingInterval = 'UserChoice', gridsearchSamplingRadii = 'UserChoice'):
