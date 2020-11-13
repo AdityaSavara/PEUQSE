@@ -14,6 +14,7 @@ The software can also be downloaded and used directly, or used by "python setup.
 # A Quick Introduction
 
 Why should you use CheKiPEUQ to get parameters from observed data? Because a few lines of code will give you realistic parameter estimates, possibly their uncertainties, and also some graphs.
+
 If you don't see images in this quick introduction, then read online at: https://github.com/AdityaSavara/CheKiPEUQ 
 
 Consider a situation where we have three observed experimental data points with uncertainties:
