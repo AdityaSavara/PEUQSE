@@ -13,7 +13,7 @@ The software can also be downloaded and used directly, or used by "python setup.
 
 # A Quick Introduction
 
-This quick introduction is best viewed on the homepage: https://github.com/AdityaSavara/CheKiPEUQ
+( If you don't see images in this quick introduction, then read online at: https://github.com/AdityaSavara/CheKiPEUQ ) 
 
 Why should you use CheKiPEUQ to get parameters from observed data? Because a few lines of code will give you realistic parameter estimates, possibly their uncertainties, and also some graphs.
 
