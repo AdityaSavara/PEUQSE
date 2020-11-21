@@ -26,7 +26,7 @@ if __name__ == "__main__":
     
     UserInput.parameter_estimation_settings['mcmc_threshold_filter_samples'] = True
 
-    UserInput.parameter_estimation_settings['mcmc_random_seed'] = 0
+    UserInput.parameter_estimation_settings['mcmc_random_seed'] = None
     #After making the UserInput, now we make a 'parameter_estimation' object from it.
     PE_object = CKPQ.parameter_estimation(UserInput)
     PE_object.doEnsembleSliceSampling()

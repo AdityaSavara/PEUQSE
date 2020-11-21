@@ -30,7 +30,7 @@ if __name__ == "__main__":
     UserInput.parameter_estimation_settings['multistart_initialPointsDistributionType'] = 'uniform'
     UserInput.parameter_estimation_settings['multistart_exportLog'] = True
     UserInput.parameter_estimation_settings['multistart_gridsearch_threshold_filter_coefficient'] = 2.0 #The lower this is, the more the points become filtered. It is not recommended to go below 2.0.
-    UserInput.parameter_estimation_settings['multistart_numStartPoints'] = 10000
+    UserInput.parameter_estimation_settings['multistart_numStartPoints'] = 100
     UserInput.parameter_estimation_settings['multistart_relativeInitialDistributionSpread'] = 2.0
     
     #After making the UserInput, now we make a 'parameter_estimation' object from it.

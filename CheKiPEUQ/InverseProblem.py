@@ -2280,7 +2280,7 @@ def convertPermutationsToSamples(permutations_MAP_logP_and_parameters_values, ma
     #the permutations_MAP_logP_and_parameters_values should have the form logP, Parameter1, Parameter2, etc.
     #first get maxLogP if it's not provided.
     permutationsArray = permutations_MAP_logP_and_parameters_values
-    
+    print("line 2283", np.shape(permutationsArray))
     if type(maxLogP) != type(None):
         maxLogP = maxLogP
     elif type(maxLogP) == type(None):
