@@ -518,12 +518,31 @@ class parameter_estimation:
             searchType = 'getLogP'
         self.permutation_searchType = searchType #This is mainly for consolidate_parallel_sampling_data
         verbose = self.UserInput.parameter_estimation_settings['verbose']
+
         if self.UserInput.parameter_estimation_settings['mcmc_continueSampling']  == 'auto':
-            mcmc_continueSampling = False #need to set this variable to false if it's an auto. The only time continue sampling should be on for multistart is if someone is doing it intentionally, which would normally only be during an MPI case.                                                                                            
+            mcmc_continueSampling = False #need to set this variable to false if it's an auto. The only time mcmc_continue sampling should be on for multistart is if someone is doing it intentionally, which would normally only be during an MPI case.                                                                                            
+        #Check if we need to do multistart_continueSampling, and prepare for it if we need to.
+        if ('multistart_continueSampling' not in self.UserInput.parameter_estimation_settings) or self.UserInput.parameter_estimation_settings['multistart_continueSampling']  == 'auto':
+            if hasattr(self, 'permutations_MAP_logP_and_parameters_values'):
+                multistart_continueSampling = True
+            else:
+                multistart_continueSampling = False
+        else: multistart_continueSampling = self.UserInput.parameter_estimation_settings['multistart_continueSampling']
+        if multistart_continueSampling = True:
+            if hasattr(self, 'permutations_MAP_logP_and_parameters_values'): #if we are continuing from old results in the same instance
+                self.last_permutations_MAP_logP_and_parameters_values = copy.deepcopy(last_permutations_MAP_logP_and_parameters_values)
+            else: #Else we need to read from the file.
+                filePrefix,fileSuffix = self.getParallelProcessingPrefixAndSuffix() #As of Nov 21st 2020, these should always be '' since multiStart_continueSampling is not intended to be used with parallel sampling.
+                self.last_permutations_MAP_logP_and_parameters_values_filename = filePrefix + "last_permutations_MAP_logP_and_parameters_values" + fileSuffix
+                self.last_permutations_MAP_logP_and_parameters_values_data = unpickleAnObject(self.last_logP_and_parameter_samples_filename)
+                self.last_listOfPermutations =   np.array(nestedObjectsFunctions.makeAtLeast_2dNested(self.last_permutations_MAP_logP_and_parameters_values_data[:,1:])) #later columns are the permutations.
+                if np.shape(self.last_listOfPermutations)[0] == 1: #In this case, need to transpose.
+                    self.last_listOfPermutations = self.last_listOfPermutations.transpose()
+                #unlike in mcmc_continueSampling, we don't need the last_InputParameterInitialGuess information.
+        #Initialize some things before permutations loop.
         allPermutationsResults = []
-        #Initialize some things before loop.
+        self.permutations_MAP_logP_and_parameters_values = [] #Just initializing as fresh.
         if (type(self.UserInput.parameter_estimation_settings['multistart_checkPointFrequency']) != type(None)) or (verbose == True):
-                
                 timeAtPermutationSearchStart = time.time()
                 timeAtLastPermutation = timeAtPermutationSearchStart #just initializing
         self.highest_logP = float('-inf') #Just initializing.
@@ -539,7 +558,6 @@ class parameter_estimation:
                 #The identical distribution is used by default because otherwise the walkers may be spread out too far and it could defeat the purpose of a gridsearch.
                 if walkerInitialDistribution.lower() == 'auto':
                     walkerInitialDistribution = 'uniform'
-        self.permutations_MAP_logP_and_parameters_values = [] #Just initializing.
         for permutationIndex,permutation in enumerate(self.listOfPermutations):
             #####Begin ChekIPEUQ Parallel Processing During Loop Block####
             if (self.UserInput.parameter_estimation_settings['multistart_parallel_sampling'])== True:
