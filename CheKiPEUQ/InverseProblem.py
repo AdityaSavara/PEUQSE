@@ -532,12 +532,13 @@ class parameter_estimation:
             if hasattr(self, 'permutations_MAP_logP_and_parameters_values'): #if we are continuing from old results in the same instance
                 self.last_permutations_MAP_logP_and_parameters_values = copy.deepcopy(self.permutations_MAP_logP_and_parameters_values)
             else: #Else we need to read from the file.
-                self.last_permutations_MAP_logP_and_parameters_values_filename = filePrefix + "last_permutations_MAP_logP_and_parameters_values" + fileSuffix
-                self.last_permutations_MAP_logP_and_parameters_values_data = unpickleAnObject(self.last_logP_and_parameter_samples_filename)
-                self.last_listOfPermutations =   np.array(nestedObjectsFunctions.makeAtLeast_2dNested(self.last_permutations_MAP_logP_and_parameters_values_data[:,1:])) #later columns are the permutations.
-                if np.shape(self.last_listOfPermutations)[0] == 1: #In this case, need to transpose.
-                    self.last_listOfPermutations = self.last_listOfPermutations.transpose()
-                #unlike in mcmc_continueSampling, we don't need the last_InputParameterInitialGuess information.
+                self.last_permutations_MAP_logP_and_parameters_values_filename = filePrefix + "permutations_MAP_logP_and_parameters_values" + fileSuffix
+                self.last_permutations_MAP_logP_and_parameters_values = unpickleAnObject(self.last_permutations_MAP_logP_and_parameters_values_filename)
+            #extract he last_listOfPermutations from the array object.
+            self.last_listOfPermutations =   np.array(nestedObjectsFunctions.makeAtLeast_2dNested(self.last_permutations_MAP_logP_and_parameters_values[:,1:])) #later columns are the permutations.
+            if np.shape(self.last_listOfPermutations)[0] == 1: #In this case, need to transpose.
+                self.last_listOfPermutations = self.last_listOfPermutations.transpose()
+            #unlike in mcmc_continueSampling, we don't need the last_InputParameterInitialGuess information.
         #Initialize some things before permutations loop.
         allPermutationsResults = []
         self.permutations_MAP_logP_and_parameters_values = [] #Just initializing as fresh.
@@ -651,9 +652,6 @@ class parameter_estimation:
         #populate the map etc. with those of the best result.
         self.map_logP = self.highest_logP 
         self.map_parameter_set = highest_logP_parameter_set 
-        #do some exporting etc. This is at the end to avoid exporting every single time if parallelization is used.
-        np.savetxt('permutations_initial_points_parameters_values'+'.csv', self.listOfPermutations, delimiter=",")
-        np.savetxt('permutations_MAP_logP_and_parameters_values.csv',self.permutations_MAP_logP_and_parameters_values, delimiter=",")
         if (searchType == 'doEnsembleSliceSampling') or (searchType == 'doMetropolisHastings'):
             #For MCMC, we can now calculate the post_burn_in statistics for the best sampling from the full samplings done. We don't want to lump all together because that would not be unbiased.
             
@@ -678,8 +676,11 @@ class parameter_estimation:
                 self.permutations_MAP_logP_and_parameters_values = np.vstack( self.permutations_MAP_logP_and_parameters_values) #Note that vstack actually requires a tuple with multiple elements as an argument. So this list or array like structure is being converted to a tuple of many elements and then being stacked.
                 #now stack with earlier results for multistart_continueSampling if needed.
                 if multistart_continueSampling == True:
-                        self.permutations_MAP_logP_and_parameters_values = np.vstack((self.permutations_MAP_logP_and_parameters_values, self.last_permutations_MAP_logP_and_parameters_values))
-                pickleAnObject(self.permutations_MAP_logP_and_parameters_values, filePrefix+'permutations_MAP_logP_and_parameters_values'+fileSuffix)
+                        print("line 681, it should be stacking the samples here!", np.shape(self.permutations_MAP_logP_and_parameters_values))
+                        self.permutations_MAP_logP_and_parameters_values = np.vstack((self.last_permutations_MAP_logP_and_parameters_values,self.permutations_MAP_logP_and_parameters_values))                        
+                        self.listOfPermutations = np.vstack((self.last_listOfPermutations, self.listOfPermutations))
+                        highest_MAP_initial_point_index = "Not provided with continueSampling." #TODO: take self.map_parameter_set from after calculatePostBurnIn Statistics highest_MAP_initial_point_index and search for the right row in listOfPermutations.
+                        print("line 683 after the stacking!", np.shape(self.permutations_MAP_logP_and_parameters_values))
                 #First set the multistart_gridsearch_threshold_filter_coefficient. We will take 10**-(thisnumber) later.
                 if str(self.UserInput.parameter_estimation_settings['multistart_gridsearch_threshold_filter_coefficient']).lower() == 'auto':
                     multistart_gridsearch_threshold_filter_coefficient = 2.0
@@ -694,6 +695,7 @@ class parameter_estimation:
                 #Below is needed to avoid causing an error in the calculatePostBurnInStatistics since we don't have a real priors vec.
                 self.UserInput.parameter_estimation_settings['mcmc_threshold_filter_samples'] = False
                 self.calculatePostBurnInStatistics()
+                
             #implied return bestResultSoFar# [self.map_parameter_set, self.map_logP]
         #This has to be below the later parts so that permutationsToSamples can occur first.
         if exportLog == True:
@@ -711,7 +713,13 @@ class parameter_estimation:
                         caveat = ''
                     out_file.write("self.mu_AP_parameter_set : " + caveat + str( self.mu_AP_parameter_set)+ "\n")
                     out_file.write("self.stdap_parameter_set : " + caveat  + str( self.stdap_parameter_set)+ "\n")
+        #do some exporting etc. This is at the end to avoid exporting every single time if parallelization is used.
+        np.savetxt('permutations_initial_points_parameters_values'+'.csv', self.listOfPermutations, delimiter=",")
+        np.savetxt('permutations_MAP_logP_and_parameters_values.csv',self.permutations_MAP_logP_and_parameters_values, delimiter=",")
+        pickleAnObject(self.permutations_MAP_logP_and_parameters_values, filePrefix+'permutations_MAP_logP_and_parameters_values'+fileSuffix)
         print("Final map parameter results from PermutationSearch:", self.map_parameter_set,  " \nFinal map logP:", self.map_logP, "more details available in permutations_log_file.txt")
+        
+        
         return bestResultSoFar# [self.map_parameter_set, self.map_logP, etc.]
 
     #@CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
