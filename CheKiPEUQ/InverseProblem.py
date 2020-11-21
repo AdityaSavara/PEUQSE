@@ -518,7 +518,7 @@ class parameter_estimation:
             searchType = 'getLogP'
         self.permutation_searchType = searchType #This is mainly for consolidate_parallel_sampling_data
         verbose = self.UserInput.parameter_estimation_settings['verbose']
-
+        filePrefix,fileSuffix = self.getParallelProcessingPrefixAndSuffix() #As of Nov 21st 2020, these should always be '' since multiStart_continueSampling is not intended to be used with parallel sampling.
         if self.UserInput.parameter_estimation_settings['mcmc_continueSampling']  == 'auto':
             mcmc_continueSampling = False #need to set this variable to false if it's an auto. The only time mcmc_continue sampling should be on for multistart is if someone is doing it intentionally, which would normally only be during an MPI case.                                                                                            
         #Check if we need to do multistart_continueSampling, and prepare for it if we need to.
@@ -532,7 +532,6 @@ class parameter_estimation:
             if hasattr(self, 'permutations_MAP_logP_and_parameters_values'): #if we are continuing from old results in the same instance
                 self.last_permutations_MAP_logP_and_parameters_values = copy.deepcopy(last_permutations_MAP_logP_and_parameters_values)
             else: #Else we need to read from the file.
-                filePrefix,fileSuffix = self.getParallelProcessingPrefixAndSuffix() #As of Nov 21st 2020, these should always be '' since multiStart_continueSampling is not intended to be used with parallel sampling.
                 self.last_permutations_MAP_logP_and_parameters_values_filename = filePrefix + "last_permutations_MAP_logP_and_parameters_values" + fileSuffix
                 self.last_permutations_MAP_logP_and_parameters_values_data = unpickleAnObject(self.last_logP_and_parameter_samples_filename)
                 self.last_listOfPermutations =   np.array(nestedObjectsFunctions.makeAtLeast_2dNested(self.last_permutations_MAP_logP_and_parameters_values_data[:,1:])) #later columns are the permutations.
@@ -676,7 +675,8 @@ class parameter_estimation:
         if searchType == 'getLogP':          
             #if it's getLogP gridsearch, we are going to convert it to samples if requested.
             if permutationsToSamples == True:
-                self.permutations_MAP_logP_and_parameters_values = np.vstack( self.permutations_MAP_logP_and_parameters_values)
+                self.permutations_MAP_logP_and_parameters_values = np.vstack( self.permutations_MAP_logP_and_parameters_values)                
+                pickleAnObject(permutations_MAP_logP_and_parameters_values, file_name_prefix+'permutations_MAP_logP_and_parameters_values'+file_name_suffix)
                 #First set the multistart_gridsearch_threshold_filter_coefficient. We will take 10**-(thisnumber) later.
                 if str(self.UserInput.parameter_estimation_settings['multistart_gridsearch_threshold_filter_coefficient']).lower() == 'auto':
                     multistart_gridsearch_threshold_filter_coefficient = 2.0
