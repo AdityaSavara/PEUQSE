@@ -530,7 +530,7 @@ class parameter_estimation:
         else: multistart_continueSampling = self.UserInput.parameter_estimation_settings['multistart_continueSampling']
         if multistart_continueSampling == True:
             if hasattr(self, 'permutations_MAP_logP_and_parameters_values'): #if we are continuing from old results in the same instance
-                self.last_permutations_MAP_logP_and_parameters_values = copy.deepcopy(last_permutations_MAP_logP_and_parameters_values)
+                self.last_permutations_MAP_logP_and_parameters_values = copy.deepcopy(self.permutations_MAP_logP_and_parameters_values)
             else: #Else we need to read from the file.
                 self.last_permutations_MAP_logP_and_parameters_values_filename = filePrefix + "last_permutations_MAP_logP_and_parameters_values" + fileSuffix
                 self.last_permutations_MAP_logP_and_parameters_values_data = unpickleAnObject(self.last_logP_and_parameter_samples_filename)
