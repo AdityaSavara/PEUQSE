@@ -8,7 +8,7 @@ if __name__ == "__main__":
     UserInput.responses['responses_abscissa'] = observed_values_00.observed_data_x_values
     UserInput.responses['responses_observed'] = observed_values_00.observed_data_y_values
     UserInput.responses['responses_observed_uncertainties'] = observed_values_00.observed_data_y_values_uncertainties
-
+  
     
     UserInput.simulated_response_plot_settings['x_label'] = 'distance (m)'
     UserInput.simulated_response_plot_settings['y_label'] = r'$time (s)$'
@@ -26,12 +26,20 @@ if __name__ == "__main__":
     
     UserInput.parameter_estimation_settings['mcmc_threshold_filter_samples'] = True
 
-    UserInput.parameter_estimation_settings['mcmc_random_seed'] = None
+    UserInput.parameter_estimation_settings['mcmc_random_seed'] = None #it is important that this is None, otherwise it will keep sampling the same points again and again.
+    UserInput.parameter_estimation_settings['multistart_initialPointsDistributionType'] = 'uniform'
+    UserInput.parameter_estimation_settings['multistart_exportLog'] = True
+    UserInput.parameter_estimation_settings['multistart_gridsearch_threshold_filter_coefficient'] = 2.0 #The lower this is, the more the points become filtered. It is not recommended to go below 2.0.
+    UserInput.parameter_estimation_settings['multistart_numStartPoints'] = 100
+    UserInput.parameter_estimation_settings['multistart_relativeInitialDistributionSpread'] = 2.0
+    UserInput.parameter_estimation_settings['multistart_continueSampling'] = True
+    
     #After making the UserInput, now we make a 'parameter_estimation' object from it.
     PE_object = CKPQ.parameter_estimation(UserInput)
-    PE_object.doMetropolisHastings()
-    PE_object.doMetropolisHastings()
-   # PE_object.createAllPlots() #This function calls each of the below functions so that the user does not have to.
+    #PE_object.doMetropolisHastings()
+    #PE_object.doOptimizeNegLogP(method="BFGS", printOptimum=True, verbose=True) #method can also be Nelder-Meade.
+    PE_object.doMultiStart('getLogP')
+    PE_object.createAllPlots() #This function calls each of the below functions so that the user does not have to.
 #    PE_object.makeHistogramsForEachParameter()    
 #    PE_object.makeSamplingScatterMatrixPlot()
 #    PE_object.createSimulatedResponsesPlot()
