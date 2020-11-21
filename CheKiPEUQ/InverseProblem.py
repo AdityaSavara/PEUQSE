@@ -677,7 +677,7 @@ class parameter_estimation:
             if permutationsToSamples == True:
                 self.permutations_MAP_logP_and_parameters_values = np.vstack( self.permutations_MAP_logP_and_parameters_values) #Note that vstack actually requires a tuple with multiple elements as an argument. So this list or array like structure is being converted to a tuple of many elements and then being stacked.
                 #now stack with earlier results for multistart_continueSampling if needed.
-                if multistart_continueSampling = True:
+                if multistart_continueSampling == True:
                         self.permutations_MAP_logP_and_parameters_values = np.vstack((self.permutations_MAP_logP_and_parameters_values, self.last_permutations_MAP_logP_and_parameters_values))
                 pickleAnObject(self.permutations_MAP_logP_and_parameters_values, filePrefix+'permutations_MAP_logP_and_parameters_values'+fileSuffix)
                 #First set the multistart_gridsearch_threshold_filter_coefficient. We will take 10**-(thisnumber) later.
