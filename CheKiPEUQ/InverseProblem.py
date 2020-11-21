@@ -676,7 +676,7 @@ class parameter_estimation:
             #if it's getLogP gridsearch, we are going to convert it to samples if requested.
             if permutationsToSamples == True:
                 self.permutations_MAP_logP_and_parameters_values = np.vstack( self.permutations_MAP_logP_and_parameters_values)                
-                pickleAnObject(self.permutations_MAP_logP_and_parameters_values, file_name_prefix+'permutations_MAP_logP_and_parameters_values'+file_name_suffix)
+                pickleAnObject(self.permutations_MAP_logP_and_parameters_values, filePrefix+'permutations_MAP_logP_and_parameters_values'+fileSuffix)
                 #First set the multistart_gridsearch_threshold_filter_coefficient. We will take 10**-(thisnumber) later.
                 if str(self.UserInput.parameter_estimation_settings['multistart_gridsearch_threshold_filter_coefficient']).lower() == 'auto':
                     multistart_gridsearch_threshold_filter_coefficient = 2.0
