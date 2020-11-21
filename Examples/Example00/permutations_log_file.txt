@@ -1,5 +1,7 @@
 centerPoint: [200. 500.]
-highest_MAP_logP: -42.63738730919835
-highest_MAP_logP_parameter_set: [165.1707312  500.06152225]
-highest_MAP_initial_point_index: 2
-highest_MAP_initial_point_parameters: (300.0, 500.0)
+highest_MAP_logP: [-42.64443172]
+highest_MAP_logP_parameter_set: [163.7650587  476.88889637]
+highest_MAP_initial_point_index: Not provided with continueSampling.
+highest_MAP_initial_point_parameters: [143.32009202 496.8909469 ]
+self.mu_AP_parameter_set : [168.4363084  503.02019073]
+self.stdap_parameter_set : [ 55.39150276 186.32205022]
