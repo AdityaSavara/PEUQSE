@@ -548,7 +548,8 @@ class parameter_estimation:
         if (type(self.UserInput.parameter_estimation_settings['multistart_checkPointFrequency']) != type(None)) or (verbose == True):
                 timeAtPermutationSearchStart = time.time()
                 timeAtLastPermutation = timeAtPermutationSearchStart #just initializing
-        self.highest_logP = float('-inf') #Just initializing.
+        self.highest_logP = self.getlogP(self.UserInput.InputParameterInitialGuess) #just initializing
+        highest_logP_parameter_set = self.UserInput.InputParameterInitialGuess #just initializing
         if searchType == 'doEnsembleSliceSampling':
             if str(self.UserInput.parameter_estimation_settings['mcmc_nwalkers']).lower() == 'auto':
                 permutationSearch_mcmc_nwalkers = 2*len(centerPoint) #Lowest possible is 2 times num parameters for ESS.
