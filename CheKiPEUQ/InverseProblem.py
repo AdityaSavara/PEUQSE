@@ -417,7 +417,10 @@ class parameter_estimation:
                     if UserInput.responses['response_data_type'][responseIndex] == 'c':
                         pass
                     if UserInput.responses['response_data_type'][responseIndex] == 'r':
-                        LittleEuler
+                        #TODO: use responses['points_if_transformed'] variable to interpolate the right number of points. This is for data that's not already evenly spaced.
+                        t_values, nestedAllResponsesArray_transformed[responseIndex], dydt_values = littleEulerGivenArray(0, UserInput.responses_abscissa[abscissaIndex], nestedAllResponsesArray[responseIndex])
+                        if len(nestedAllResponsesUncertainties) > 0:
+                            nestedAllResponsesUncertainties_transformed[responseIndex] = littleEulerUncertaintyPropagation(nestedAllResponsesUncertainties[responseIndex], UserInput.responses_abscissa[abscissaIndex], np.mean(nestedAllResponsesUncertainties[responseIndex])/10) 
                 if UserInput.responses['response_types'][responseIndex] == 'P':	 #For product
                     
                     if UserInput.responses['response_data_type'][responseIndex] == 'c':
@@ -427,10 +430,10 @@ class parameter_estimation:
                         t_values, nestedAllResponsesArray_transformed[responseIndex], dydt_values = littleEulerGivenArray(0, UserInput.responses_abscissa[abscissaIndex], nestedAllResponsesArray[responseIndex])
                         if len(nestedAllResponsesUncertainties) > 0:
                             nestedAllResponsesUncertainties_transformed[responseIndex] = littleEulerUncertaintyPropagation(nestedAllResponsesUncertainties[responseIndex], UserInput.responses_abscissa[abscissaIndex], np.mean(nestedAllResponsesUncertainties[responseIndex])/10) 
-                if UserInput.responses['response_types'][responseIndex] == 'O':
-                    if UserInput.responses['response_data_type'][responseIndex] == 'o':
+                if UserInput.responses['response_types'][responseIndex] == 'O': #O is for other.
+                    if UserInput.responses['response_data_type'][responseIndex] == 'o': #other
                         pass
-                    if UserInput.responses['response_data_type'][responseIndex] == 'c':
+                    if UserInput.responses['response_data_type'][responseIndex] == 'c': #concentration
                         LittleEuler
                     if UserInput.responses['response_data_type'][responseIndex] == 'r':
                         LittleEulerTwice
@@ -588,9 +591,9 @@ class parameter_estimation:
                         self.cumulative_post_burn_in_log_priors_vec = self.post_burn_in_log_priors_vec
                         self.cumulative_post_burn_in_log_posteriors_un_normed_vec = self.post_burn_in_log_posteriors_un_normed_vec
                     else: #This is basically elseif permutationIndex > 0:
-                        self.cumulative_post_burn_in_samples = np.vstack((cumulative_post_burn_in_samples, self.post_burn_in_samples))
-                        self.cumulative_post_burn_in_log_priors_vec = np.vstack((cumulative_post_burn_in_log_priors_vec, self.post_burn_in_log_priors_vec))
-                        self.cumulative_post_burn_in_log_posteriors_un_normed_vec = np.vstack((cumulative_post_burn_in_log_posteriors_un_normed_vec, self.post_burn_in_log_posteriors_un_normed_vec))
+                        self.cumulative_post_burn_in_samples = np.vstack((self.cumulative_post_burn_in_samples, self.post_burn_in_samples))
+                        self.cumulative_post_burn_in_log_priors_vec = np.vstack((self.cumulative_post_burn_in_log_priors_vec, self.post_burn_in_log_priors_vec))
+                        self.cumulative_post_burn_in_log_posteriors_un_normed_vec = np.vstack((self.cumulative_post_burn_in_log_posteriors_un_normed_vec, self.post_burn_in_log_posteriors_un_normed_vec))
             if searchType == 'doEnsembleSliceSampling':
                 thisResult = self.doEnsembleSliceSampling(mcmc_nwalkers_direct_input=permutationSearch_mcmc_nwalkers, calculatePostBurnInStatistics=calculatePostBurnInStatistics, walkerInitialDistribution=walkerInitialDistribution, continueSampling=mcmc_continueSampling) 
                 #Note that "thisResult" has the form: [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec]
@@ -601,9 +604,9 @@ class parameter_estimation:
                         self.cumulative_post_burn_in_log_priors_vec = self.post_burn_in_log_priors_vec
                         self.cumulative_post_burn_in_log_posteriors_un_normed_vec = self.post_burn_in_log_posteriors_un_normed_vec
                     else: #This is basically elseif permutationIndex > 0:
-                        self.cumulative_post_burn_in_samples = np.vstack((cumulative_post_burn_in_samples, self.post_burn_in_samples))
-                        self.cumulative_post_burn_in_log_priors_vec = np.vstack((cumulative_post_burn_in_log_priors_vec, self.post_burn_in_log_priors_vec))
-                        self.cumulative_post_burn_in_log_posteriors_un_normed_vec = np.vstack((cumulative_post_burn_in_log_posteriors_un_normed_vec, self.post_burn_in_log_posteriors_un_normed_vec))
+                        self.cumulative_post_burn_in_samples = np.vstack((self.cumulative_post_burn_in_samples, self.post_burn_in_samples))
+                        self.cumulative_post_burn_in_log_priors_vec = np.vstack((self.cumulative_post_burn_in_log_priors_vec, self.post_burn_in_log_priors_vec))
+                        self.cumulative_post_burn_in_log_posteriors_un_normed_vec = np.vstack((self.cumulative_post_burn_in_log_posteriors_un_normed_vec, self.post_burn_in_log_posteriors_un_normed_vec))
             if searchType == 'doOptimizeNegLogP':
                 thisResult = self.doOptimizeNegLogP(**passThroughArgs)
                 #FIXME: the column headings of "thisResult" are wrong for the case of doOptimizeNegLogP.
@@ -2355,8 +2358,8 @@ def littleEulerGivenFunction(y_initial, deltat_resolution, dydtFunction, t_initi
     return simulated_t_values, simulated_y_values, dydt_values
 
 def dydtNumericalExtraction(t_values, y_values, last_point_derivative = 0):
-    lastIndex = len(simulated_y_values)-1
-    delta_y_numerical = np.diff(np.insert(simulated_y_values,lastIndex,simulated_y_values[lastIndex])) #The diff command gives one less than what is fed in, so we insert the last value again. This gives a final value derivative of 0.
+    lastIndex = len(y_values)-1
+    delta_y_numerical = np.diff(np.insert(y_values,lastIndex,y_values[lastIndex])) #The diff command gives one less than what is fed in, so we insert the last value again. This gives a final value derivative of 0.
     delta_y_numerical[lastIndex] = last_point_derivative #now we set that last point to the optional argument.
     #It is ASSUMED that the t_values are evenly spaced.
     delta_t = t_values[1]-t_values[0]
