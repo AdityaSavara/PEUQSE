@@ -548,8 +548,11 @@ class parameter_estimation:
         if (type(self.UserInput.parameter_estimation_settings['multistart_checkPointFrequency']) != type(None)) or (verbose == True):
                 timeAtPermutationSearchStart = time.time()
                 timeAtLastPermutation = timeAtPermutationSearchStart #just initializing
-        self.highest_logP = self.getlogP(self.UserInput.InputParameterInitialGuess) #just initializing
+        self.highest_logP = self.getLogP(self.UserInput.InputParameterInitialGuess) #just initializing
         highest_logP_parameter_set = self.UserInput.InputParameterInitialGuess #just initializing
+        bestResultSoFar = [self.highest_logP, highest_logP_parameter_set, None, None, None, None, None, None] #just initializing
+        highest_MAP_initial_point_index = None #just initializing
+        highest_MAP_initial_point_parameters = None #just initializing
         if searchType == 'doEnsembleSliceSampling':
             if str(self.UserInput.parameter_estimation_settings['mcmc_nwalkers']).lower() == 'auto':
                 permutationSearch_mcmc_nwalkers = 2*len(centerPoint) #Lowest possible is 2 times num parameters for ESS.
@@ -680,25 +683,27 @@ class parameter_estimation:
                 self.permutations_MAP_logP_and_parameters_values = np.vstack( self.permutations_MAP_logP_and_parameters_values) #Note that vstack actually requires a tuple with multiple elements as an argument. So this list or array like structure is being converted to a tuple of many elements and then being stacked.
                 #now stack with earlier results for multistart_continueSampling if needed.
                 if multistart_continueSampling == True:
-                        print("line 681, it should be stacking the samples here!", np.shape(self.permutations_MAP_logP_and_parameters_values))
                         self.permutations_MAP_logP_and_parameters_values = np.vstack((self.last_permutations_MAP_logP_and_parameters_values,self.permutations_MAP_logP_and_parameters_values))                        
                         self.listOfPermutations = np.vstack((self.last_listOfPermutations, self.listOfPermutations))
                         highest_MAP_initial_point_index = "Not provided with continueSampling." #TODO: take self.map_parameter_set from after calculatePostBurnIn Statistics highest_MAP_initial_point_index and search for the right row in listOfPermutations.
-                        print("line 683 after the stacking!", np.shape(self.permutations_MAP_logP_and_parameters_values))
                 #First set the multistart_gridsearch_threshold_filter_coefficient. We will take 10**-(thisnumber) later.
                 if str(self.UserInput.parameter_estimation_settings['multistart_gridsearch_threshold_filter_coefficient']).lower() == 'auto':
                     multistart_gridsearch_threshold_filter_coefficient = 2.0
                 else:
                     multistart_gridsearch_threshold_filter_coefficient = self.UserInput.parameter_estimation_settings['multistart_gridsearch_threshold_filter_coefficient']
-                logP_values_and_samples = convertPermutationsToSamples(self.permutations_MAP_logP_and_parameters_values, maxLogP=float(bestResultSoFar[0]), relativeFilteringThreshold = 10**(-1*multistart_gridsearch_threshold_filter_coefficient))
-                self.post_burn_in_log_posteriors_un_normed_vec = logP_values_and_samples[:,0]
-                self.post_burn_in_log_posteriors_un_normed_vec = np.array(nestedObjectsFunctions.makeAtLeast_2dNested(self.post_burn_in_log_posteriors_un_normed_vec)).transpose()
-                self.post_burn_in_samples = logP_values_and_samples[:,1:]
-                #need to populate post_burn_in_log_priors_vec this with an object, otherwise calculatePostBurnInStatistics will try to calculate all the priors.
-                self.post_burn_in_log_priors_vec = None
-                #Below is needed to avoid causing an error in the calculatePostBurnInStatistics since we don't have a real priors vec.
-                self.UserInput.parameter_estimation_settings['mcmc_threshold_filter_samples'] = False
-                self.calculatePostBurnInStatistics()
+                try:
+                    logP_values_and_samples = convertPermutationsToSamples(self.permutations_MAP_logP_and_parameters_values, maxLogP=float(bestResultSoFar[0]), relativeFilteringThreshold = 10**(-1*multistart_gridsearch_threshold_filter_coefficient))
+                    self.post_burn_in_log_posteriors_un_normed_vec = logP_values_and_samples[:,0]
+                    self.post_burn_in_log_posteriors_un_normed_vec = np.array(nestedObjectsFunctions.makeAtLeast_2dNested(self.post_burn_in_log_posteriors_un_normed_vec)).transpose()
+                    self.post_burn_in_samples = logP_values_and_samples[:,1:]
+                    #need to populate post_burn_in_log_priors_vec this with an object, otherwise calculatePostBurnInStatistics will try to calculate all the priors.
+                    self.post_burn_in_log_priors_vec = None
+                    #Below is needed to avoid causing an error in the calculatePostBurnInStatistics since we don't have a real priors vec.
+                    self.UserInput.parameter_estimation_settings['mcmc_threshold_filter_samples'] = False
+                    self.calculatePostBurnInStatistics()
+                except:
+                    print("Could not convertPermutationsToSamples. This usually means there were no finite probability points sampled.")
+                    permutationsToSamples = False #changing to false to prevent errors during exporting.
                 
             #implied return bestResultSoFar# [self.map_parameter_set, self.map_logP]
         #This has to be below the later parts so that permutationsToSamples can occur first.
