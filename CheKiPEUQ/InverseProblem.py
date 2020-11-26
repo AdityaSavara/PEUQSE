@@ -1970,7 +1970,7 @@ class parameter_estimation:
         elif type(simulationOutputProcessingFunction) != type(None):
             simulatedResponses = simulationOutputProcessingFunction(simulationOutput) 
         simulatedResponses = nestedObjectsFunctions.makeAtLeast_2dNested(simulatedResponses)
-        if doSimulatedResponsesBoundsChecks(simulatedResponses) == False:
+        if self.doSimulatedResponsesBoundsChecks(simulatedResponses) == False:
             simulatedResponses = None
         return simulatedResponses
     
