@@ -1943,6 +1943,18 @@ class parameter_estimation:
                 return False
         return True #If the test has gotten here without failing any of the tests, we return true.
 
+
+    def doSimulatedResponsesBoundsChecks(self, simulatedResponses): #Bounds intended for the likelihood.
+        if len(self.UserInput.model['InputParameterPriorValues_upperBounds']) > 0:
+            upperCheck = boundsCheck(simulatedResponses, self.UserInput.model['simulatedResponses_upperBounds'], 'upper')
+            if upperCheck == False:
+                return False
+        if len(self.UserInput.model['InputParameterPriorValues_lowerBounds']) > 0:
+            lowerCheck = boundsCheck(simulatedResponses, self.UserInput.model['simulatedResponses_lowerBounds'], 'lower')
+            if lowerCheck == False:
+                return False
+        return True #If the test has gotten here without failing any of the tests, we return true.
+
     #This helper function must be used because it allows for the output processing function etc. It has been separated from getLogLikelihood so that it can be used by doOptimizeSSR etc.
     def getSimulatedResponses(self, discreteParameterVector): 
         simulationFunction = self.UserInput.simulationFunction #Do NOT use self.UserInput.model['simulateByInputParametersOnlyFunction']  because that won't work with reduced parameter space requests.  
@@ -1958,6 +1970,8 @@ class parameter_estimation:
         elif type(simulationOutputProcessingFunction) != type(None):
             simulatedResponses = simulationOutputProcessingFunction(simulationOutput) 
         simulatedResponses = nestedObjectsFunctions.makeAtLeast_2dNested(simulatedResponses)
+        if self.doSimulatedResponsesBoundsChecks(simulatedResponses) == False:
+            simulatedResponses = None
         return simulatedResponses
     
     def getLogLikelihood(self,discreteParameterVector): #The variable discreteParameterVector represents a vector of values for the parameters being sampled. So it represents a single point in the multidimensional parameter space.
