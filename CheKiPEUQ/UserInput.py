@@ -110,13 +110,18 @@ parameter_estimation_settings['multistart_passThroughArgs'] = {}
 #{'parameter_number': 5, 'parameter_name': r'$\gamma_{2}$'}])
 
 contour_plot_settings = {} #TODO: change below to contour_plot_settings. Make "parameter_pairs_for_contour_plots" and "active_parameters" to be within that.
-active_parameters = [] #Blank by default: gets populated with all parameters (or reduced parameters) if left blank. Warning: trying to set this manually while using the reduced parameters feature is not supported as of April 2020.
-#pairs_of_parameter_indices = [[0, 1], [1, 2],[2, 3],[3, 4],[4, 5]] #This sets which parameters to plot contours for. By default, all pairs are plotted.
-contour_settings_custom = {'figure_name': 'PosteriorContourPlots','fontsize':16 ,'num_y_ticks': 'auto','num_x_ticks':'auto','contours_normalized':True,'center_on':'all','colorbars':True}  #Fontsize can also be set to "auto"
+contour_plot_settings['active_parameters'] = [] #Blank by default: gets populated with all parameters (or reduced parameters) if left blank. Warning: trying to set this manually while using the reduced parameters feature is not supported as of April 2020.
+contour_plot_settings['parameter_pairs'] = [] #This will accept either strings (for variable names) or integers for positions. #This sets which parameters to plot contours for. By default, all pairs are plotted. For example,  [[0, 1], [1, 2],[2, 3],[3, 4],[4, 5]] 
+contour_plot_settings['figure_name'] = 'PosteriorContourPlots'
+contour_plot_settings['fontsize']=16  #Fontsize can also be set to "auto"
+contour_plot_settings['num_y_ticks'] = 'auto'  #num_y_ticks and num_x_ticks must be either a string ('auto') or an integer (such as 4, either without string or with integer casting like int('5')).
+contour_plot_settings['num_x_ticks'] = 'auto'
+contour_plot_settings['contours_normalized']=True
+contour_plot_settings['center_on']='all'
+contour_plot_settings['colorbars']=True
+contour_plot_settings['colormap_posterior'] = 'default' #can also be 'Oranges' for example.
+contour_plot_settings['colormap_prior'] = 'default' #can also be 'Greens' for example.
 #See the file mumpce_custom_plotting_example.py for the full set of arguments that can be provided inside contour_settings_custom.
-#'colormap_posterior_customized':'Oranges','colormap_prior_customized':'Greens'
-#num_y_ticks and num_x_ticks must be either a string ('auto') or an integer (such as 4, either without string or with integer casting like int('5')).
-parameter_pairs_for_contour_plots = [] #This will accept either strings (for variable names) or integers for positions.
 
 ####Design Of Experiments####
 #The design of experiments feature is used with syntax like PE_object.designOfExperiments()   
