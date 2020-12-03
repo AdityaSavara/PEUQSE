@@ -2223,8 +2223,14 @@ class parameter_estimation:
             for  pairIndex in range(len(pairs_of_parameter_indices)):
                 firstParameter = int(self.UserInput.parameterNamesAndMathTypeExpressionsDict[pairIndex[0]])
                 secondParameter = int(self.UserInput.parameterNamesAndMathTypeExpressionsDict[pairIndex[0]])
-                pairs_of_parameter_indices[pairIndex] = [firstParameter, secondParameter]        
-        figureObject_beta.mumpce_plots(model_parameter_info = self.UserInput.model_parameter_info, active_parameters = active_parameters, pairs_of_parameter_indices = pairs_of_parameter_indices, posterior_mu_vector = posterior_mu_vector, posterior_cov_matrix = posterior_cov_matrix, prior_mu_vector = np.array(self.UserInput.mu_prior), prior_cov_matrix = self.UserInput.covmat_prior, contour_settings_custom = self.UserInput.contour_settings_custom)
+                pairs_of_parameter_indices[pairIndex] = [firstParameter, secondParameter]
+        #Below we populate any custom fields as necessary.
+        contour_settings_custom = {}
+        contour_settings_custom_fields = {'figure_name','fontsize','num_y_ticks','num_x_ticks','colormap_posterior_customized','colormap_prior_customized','contours_normalized','colorbars','axis_limits'} #This is a set, not a dictionary.
+        for custom_field in contour_settings_custom_fields:
+            if custom_field in self.UserInput.contour_plot_settings:
+                contour_settings_custom[custom_field] = self.UserInput.contour_plot_settings[custom_field]
+        figureObject_beta.mumpce_plots(model_parameter_info = self.UserInput.model_parameter_info, active_parameters = active_parameters, pairs_of_parameter_indices = pairs_of_parameter_indices, posterior_mu_vector = posterior_mu_vector, posterior_cov_matrix = posterior_cov_matrix, prior_mu_vector = np.array(self.UserInput.mu_prior), prior_cov_matrix = self.UserInput.covmat_prior, contour_settings_custom = contour_settings_custom)
         return figureObject_beta
 
     @CiteSoft.after_call_compile_consolidated_log(compile_checkpoints=True) #This is from the CiteSoft module.

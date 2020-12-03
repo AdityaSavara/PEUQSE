@@ -119,8 +119,8 @@ contour_plot_settings['num_x_ticks'] = 'auto'
 contour_plot_settings['contours_normalized']=True
 contour_plot_settings['center_on']='all'
 contour_plot_settings['colorbars']=True
-contour_plot_settings['colormap_posterior'] = 'default' #can also be 'Oranges' for example.
-contour_plot_settings['colormap_prior'] = 'default' #can also be 'Greens' for example.
+contour_plot_settings['colormap_posterior_customized'] = 'default' #can also be 'Oranges' for example.
+contour_plot_settings['colormap_prior_customized'] = 'default' #can also be 'Greens' for example.
 #See the file mumpce_custom_plotting_example.py for the full set of arguments that can be provided inside contour_plot_settings.
 
 ####Design Of Experiments####
