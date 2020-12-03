@@ -2203,12 +2203,12 @@ class parameter_estimation:
             individual_model_parameter_dictionary = {'parameter_number': parameterIndex, 'parameter_name': self.UserInput.parameterNamesAndMathTypeExpressionsDict[parameterName]} #we are actually putting the MathTypeExpression as the parameter name when feeding to mum_pce.
             self.UserInput.model_parameter_info.append(individual_model_parameter_dictionary)
         self.UserInput.model_parameter_info = np.array(self.UserInput.model_parameter_info)
-        if len(self.UserInput.active_parameters) == 0:
+        if len(self.UserInput.contour_plot_settings['active_parameters']) == 0:
             numParams = len(self.UserInput.model_parameter_info)
             active_parameters = np.linspace(0, numParams-1, numParams) #just a list of whole numbers.
             active_parameters = np.array(active_parameters, dtype='int')
         else:
-            active_parameters = self.UserInput.active_parameters
+            active_parameters = self.UserInput.contour_plot_settings['active_parameters']
         #TODO: reduce active_parameters by anything that has been set as a constant.
         pairs_of_parameter_indices = self.UserInput.contour_plot_settings['parameter_pairs']
         if pairs_of_parameter_indices == []:
