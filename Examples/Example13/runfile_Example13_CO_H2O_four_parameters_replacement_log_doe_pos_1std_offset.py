@@ -51,7 +51,7 @@ if __name__ == "__main__":
     UserInput.parameter_estimation_settings['mcmc_info_gain_returned'] = 'log_ratio' #obtains the information gain using the Kullback-Leibler divergence    
    
     UserInput.parameter_pairs_for_contour_plots = [[0, 1]]
-    UserInput.contour_settings_custom['contours_normalized'] = False
+    UserInput.contour_plot_settings['contours_normalized'] = False
     UserInput.contour_settings_custom['figure_name'] = 'Mumpce_contour_plot_Langmuir_compete_ads'
     #After making the UserInput, now we make a 'parameter_estimation' object from it.
     
