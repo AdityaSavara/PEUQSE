@@ -58,7 +58,7 @@ def main():
     # PE_object.createAllPlots()
     
         
-    UserInput.contour_settings_custom['figure_name']='PosteriorContourPlotDisproportionation'
+    UserInput.contour_plot_settings['figure_name']='PosteriorContourPlotDisproportionation'
     UserInput.contour_settings_custom['fontsize']='22'
     UserInput.contour_settings_custom['num_y_ticks']=3
     UserInput.contour_settings_custom['num_x_ticks']=3

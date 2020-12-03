@@ -57,7 +57,7 @@ if __name__ == "__main__":
    
     UserInput.parameter_pairs_for_contour_plots = [[0, 1]]
     UserInput.contour_plot_settings['contours_normalized'] = False
-    UserInput.contour_settings_custom['figure_name'] = 'Mumpce_contour_plot_Langmuir_compete_ads'
+    UserInput.contour_plot_settings['figure_name'] = 'Mumpce_contour_plot_Langmuir_compete_ads'
     #After making the UserInput, now we make a 'parameter_estimation' object from it.
     
     '''Below here is the doe code. We are not going to do a full scan because that's not necessary to test this feature.'''

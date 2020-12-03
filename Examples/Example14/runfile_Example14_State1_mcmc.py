@@ -51,7 +51,7 @@ if __name__ == "__main__":
     #TODO: call the mum_pce plotting objects, which will be PE_object.createContourGraphs() or something like that.
 
     
-    UserInput.contour_settings_custom['figure_name']='PosteriorContourPlotState1'
+    UserInput.contour_plot_settings['figure_name']='PosteriorContourPlotState1'
     UserInput.contour_settings_custom['fontsize']='22'
     UserInput.contour_settings_custom['num_y_ticks']=3
     UserInput.contour_settings_custom['num_x_ticks']=3

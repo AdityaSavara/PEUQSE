@@ -46,7 +46,7 @@ if __name__ == "__main__":
     
     UserInput.parameter_pairs_for_contour_plots = [[0, 0]]
     UserInput.contour_plot_settings['contours_normalized'] = False
-    UserInput.contour_settings_custom['figure_name'] = 'Mumpce_contour_plot_mem_reactor'
+    UserInput.contour_plot_settings['figure_name'] = 'Mumpce_contour_plot_mem_reactor'
     #After making the UserInput, now we make a 'parameter_estimation' object from it.
     global T
     global volume

@@ -40,7 +40,7 @@ if __name__ == "__main__":
     
     UserInput.parameter_pairs_for_contour_plots = [[0, 0]]
     UserInput.contour_plot_settings['contours_normalized'] = False
-    UserInput.contour_settings_custom['figure_name'] = 'Mumpce_contour_plot_chem_rxn'
+    UserInput.contour_plot_settings['figure_name'] = 'Mumpce_contour_plot_chem_rxn'
     #After making the UserInput, now we make a 'parameter_estimation' object from it.
     global T
     list_of_T = np.linspace(698.15,298.15,5)#[298.15,398.15,498.15,598.15,698.15]
