@@ -121,7 +121,7 @@ contour_plot_settings['center_on']='all'
 contour_plot_settings['colorbars']=True
 contour_plot_settings['colormap_posterior'] = 'default' #can also be 'Oranges' for example.
 contour_plot_settings['colormap_prior'] = 'default' #can also be 'Greens' for example.
-#See the file mumpce_custom_plotting_example.py for the full set of arguments that can be provided inside contour_settings_custom.
+#See the file mumpce_custom_plotting_example.py for the full set of arguments that can be provided inside contour_plot_settings.
 
 ####Design Of Experiments####
 #The design of experiments feature is used with syntax like PE_object.designOfExperiments()   
