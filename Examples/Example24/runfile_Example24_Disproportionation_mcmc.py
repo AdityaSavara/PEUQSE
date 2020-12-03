@@ -59,7 +59,7 @@ def main():
     
         
     UserInput.contour_plot_settings['figure_name']='PosteriorContourPlotDisproportionation'
-    UserInput.contour_settings_custom['fontsize']='22'
+    UserInput.contour_plot_settings['fontsize']='22'
     UserInput.contour_settings_custom['num_y_ticks']=3
     UserInput.contour_settings_custom['num_x_ticks']=3
     UserInput.contour_plot_settings['colorbars']='False'

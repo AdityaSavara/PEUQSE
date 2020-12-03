@@ -58,7 +58,7 @@ if __name__ == "__main__":
     UserInput.parameter_estimation_settings['mcmc_info_gain_cutoff'] = 0
     UserInput.contour_plot_settings['contours_normalized'] = True
     UserInput.contour_plot_settings['colorbars'] = False
-    UserInput.contour_settings_custom['fontsize']=20
+    UserInput.contour_plot_settings['fontsize']=20
     #UserInput.contour_settings_custom['center_on'] = 'prior'
     UserInput.contour_settings_custom['axis_limits'] = [0,80, 0, 60]
     UserInput.contour_settings_custom['num_x_ticks']= 4                                                      

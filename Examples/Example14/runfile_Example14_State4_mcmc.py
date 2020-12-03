@@ -48,7 +48,7 @@ if __name__ == "__main__":
     ####NOTE: FOR EXAMPLE 14 STATE 4, THE LIKELIHOOD IS FLAT, SO COMPARING MAP AND mu_AP SIMULATED OUTPUTS DIRECTLY WILL NOT CONVERGE. JUST NEED TO SEE WHEN POSTERIOR HAS CONVERGED, WHICH ID DOES BY 20000 SAMPLED POINTS. GOING TO 500,000 DOES NOT CHANGE IT MUCH.######
     
     UserInput.contour_plot_settings['figure_name']='PosteriorContourPlotState4'
-    UserInput.contour_settings_custom['fontsize']='22'
+    UserInput.contour_plot_settings['fontsize']='22'
     UserInput.contour_settings_custom['num_y_ticks']=4
     UserInput.contour_settings_custom['num_x_ticks']=3
     UserInput.contour_plot_settings['colorbars']='False'
