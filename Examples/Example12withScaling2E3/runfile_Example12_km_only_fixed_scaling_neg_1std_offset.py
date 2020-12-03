@@ -43,7 +43,7 @@ if __name__ == "__main__":
     UserInput.parameter_estimation_settings['mcmc_info_gain_cutoff'] = 0
     UserInput.parameter_estimation_settings['mcmc_info_gain_returned'] = 'KL_divergence' #current options are 'log_ratio' and 'KL'
     
-    UserInput.parameter_pairs_for_contour_plots = [[0, 0]]
+    UserInput.contour_plot_settings['parameter_pairs'] = [[0, 0]]
     UserInput.contour_plot_settings['contours_normalized'] = False
     UserInput.contour_plot_settings['figure_name'] = 'Mumpce_contour_plot_mem_reactor'
     #After making the UserInput, now we make a 'parameter_estimation' object from it.

@@ -37,7 +37,7 @@ if __name__ == "__main__":
     
     UserInput.model['simulateByInputParametersOnlyFunction'] = processing_functions_tpd_odeint.TPR_internalPiecewiseSimulationFunctionWrapperScaledAndOffset #This must simulate with *only* the parameters listed above, and no other arguments.
     UserInput.model['simulationOutputProcessingFunction'] = processing_functions_tpd_odeint.no_log_wrapper_func  #Optional: a function to process what comes out of the simulation Function and then return an observable vector.
-    #UserInput.parameter_pairs_for_contour_plots=[[2,3],[2,4]]
+    #UserInput.contour_plot_settings['parameter_pairs']=[[2,3],[2,4]]
         
     UserInput.model['reducedParameterSpace'] = [2,3]
     UserInput.parameter_estimation_settings['scaling_uncertainties_type'] = "std"

@@ -46,7 +46,7 @@ if __name__ == "__main__":
     
     UserInput.model['simulateByInputParametersOnlyFunction'] = processing_functions_tpd_odeint.TPR_internalPiecewiseSimulationFunctionWrapper #This must simulate with *only* the parameters listed above, and no other arguments.
     UserInput.model['simulationOutputProcessingFunction'] = processing_functions_tpd_odeint.no_log_wrapper_func  #Optional: a function to process what comes out of the simulation Function and then return an observable vector.
-    UserInput.parameter_pairs_for_contour_plots=[[0,1],[0,1]]
+    UserInput.contour_plot_settings['parameter_pairs']=[[0,1],[0,1]]
         
     UserInput.parameter_estimation_settings['verbose'] = False 
     UserInput.parameter_estimation_settings['checkPointFrequency'] = 100
