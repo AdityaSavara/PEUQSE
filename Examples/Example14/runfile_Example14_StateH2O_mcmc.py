@@ -59,7 +59,7 @@ if __name__ == "__main__":
     UserInput.contour_settings_custom['fontsize']='22'
     UserInput.contour_settings_custom['num_y_ticks']=2
     UserInput.contour_settings_custom['num_x_ticks']=3
-    UserInput.contour_settings_custom['colorbars']='False'
+    UserInput.contour_plot_settings['colorbars']='False'
     
     PE_object.createAllPlots()
     
