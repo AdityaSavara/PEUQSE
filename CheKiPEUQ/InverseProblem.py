@@ -2210,7 +2210,7 @@ class parameter_estimation:
         else:
             active_parameters = self.UserInput.active_parameters
         #TODO: reduce active_parameters by anything that has been set as a constant.
-        pairs_of_parameter_indices = self.UserInput.parameter_pairs_for_contour_plots
+        pairs_of_parameter_indices = self.UserInput.contour_plot_settings['parameter_pairs']
         if pairs_of_parameter_indices == []:
             import itertools 
             all_pairs_iter = itertools.combinations(active_parameters, 2)
