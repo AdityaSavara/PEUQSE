@@ -84,6 +84,6 @@ if __name__ == "__main__":
     uncertaintyForTp = (((upperRateTp-lowerRateTp)/2)**2+25**2)**0.5
     print(uncertaintyForTp)
     
-    UserInput.contour_settings_custom['axis_limits'] = [7,20,0,140000]
+    UserInput.contour_plot_settings['axis_limits'] = [7,20,0,140000]
     UserInput.contour_plot_settings['num_y_ticks']=4
     PE_object.createMumpcePlots()

@@ -38,7 +38,7 @@ if __name__ == "__main__":
     UserInput.parameter_pairs_for_contour_plots = [[0, 1]] #[[0, 1],[1, 0]]
     UserInput.contour_plot_settings['contours_normalized'] = False
 ######mumpce plots#####
-    UserInput.contour_settings_custom['axis_limits'] = [-1.0, 3.0, 3.0, 7.0] #[-2.0, 4.0, 1.0, 7.0]# for the alternate plot: [-1.0, 3.0, 3.0, 7.0]
+    UserInput.contour_plot_settings['axis_limits'] = [-1.0, 3.0, 3.0, 7.0] #[-2.0, 4.0, 1.0, 7.0]# for the alternate plot: [-1.0, 3.0, 3.0, 7.0]
     #After making the UserInput, now we make a 'parameter_estimation' object from it.
     PE_object = CKPQ.parameter_estimation(UserInput)
     
