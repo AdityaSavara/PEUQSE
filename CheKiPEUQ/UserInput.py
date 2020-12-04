@@ -61,20 +61,6 @@ parameter_estimation_settings['mcmc_checkPointFrequency'] = None #This is only f
 parameter_estimation_settings['mcmc_parallel_sampling'] = False #This makes completely parallelized sampling of a single sampling. syntax to use is like "mpiexec -n 5 python runfile.py" where 5 is the number of processors. Currently, the first processor's results are thrown away.  In the future, this may change.
 parameter_estimation_settings['mcmc_continueSampling']  = 'auto' #This can be set to True if user would like to continue sampling from a previous result in the directory.  The mcmc_logP_and_parameter_samples.pkl file will be used.  Note that if one calls the same PE_object after mcmc sampling within a given python instance then continued sampling will also occur in that situation.
 
-#####Plot Settings#####
-#Response Plot Settings
-simulated_response_plot_settings = {}
-simulated_response_plot_settings['x_label'] = ''
-simulated_response_plot_settings['y_label'] = ''
-#simulated_response_plot_settings['y_range'] = [0.00, 0.025] #optional.
-simulated_response_plot_settings['figure_name'] = 'Posterior_Simulated' #This is the default name for simulated response plots.
-simulated_response_plot_settings['legend'] = True #Can be changed to false to turn off the legend.
-#simulated_response_plot_settings['legendLabels'] = ['experiment', 'mu_guess', 'MAP'] here is an example of how to change the legend labels.
-simulated_response_plot_settings['error_linewidth'] = 'auto' #Integer. Using "auto" or "None" sets to "20" when there is only 1 point, 1 when number of points is > 10, and "4" when number of points is between 1 and 10 and. Using '0' or 'none' will hide the error bars.
-simulated_response_plot_settings['fontdict']= {'size':16} #A font dictionary can be passed in, this will be used for the axes and axes labels.
-
-#possible dictionary fields include: dpi, figure_name, fontsize, x_label, y_label, figure_name, x_range, y_range
-samplingScatterMatrixPlotsSettings ={}
 
 ######multistart (including gridsearch)##### 
 #Possible searchTypes are: 'getLogP', 'doEnsembleSliceSampling', 'doMetropolisHastings', 'doOptimizeNegLogP', 'doOptimizeSSR'.  These are called by syngatx like PE_object.doMultiStart('doEnsembleSliceSampling') in the runfile
@@ -92,14 +78,28 @@ parameter_estimation_settings['multistart_gridsearchToSamples'] = True #if this 
 parameter_estimation_settings['multistart_gridsearch_threshold_filter_samples'] = True #This feature removes low probability tails from the posterior. This can be important for getting mu_AP, especially when using ESS. Default is true. This only has an effect if multistart_gridsearchToSamples is set to True.
 parameter_estimation_settings['multistart_gridsearch_threshold_filter_coefficient'] = 'auto' #This can be a float or the string 'auto'. Currently (Oct 2020), 'auto' sets the value at 2.0.  The smaller the value the more aggressive the filtering. This only has an effect if multistart_gridsearchToSamples is set to True.
 parameter_estimation_settings['multistart_continueSampling']  = 'auto' #This only works with multistart_gridsearchToSamples. This can be set to True if user would like to continue sampling from a previous result in the directory.  The permutations_MAP_logP_and_parameters_values.pkl file will be used.  Note that if one calls the same PE_object after multistart_gridsearchToSamples sampling within a given python instance then continued sampling will also occur in that situation.
-
-
 parameter_estimation_settings['multistart_passThroughArgs'] = {}
 parameter_estimation_settings['multistart_calculatePostBurnInStatistics'] = True
 parameter_estimation_settings['multistart_keep_cumulative_post_burn_in_data'] = False
 parameter_estimation_settings['multistart_exportLog'] = False #In the future, this will cause more information to be exported.
 parameter_estimation_settings['multistart_passThroughArgs'] = {}
 
+#####Plot Settings#####
+#Response Plot Settings
+simulated_response_plot_settings = {}
+simulated_response_plot_settings['x_label'] = ''
+simulated_response_plot_settings['y_label'] = ''
+#simulated_response_plot_settings['y_range'] = [0.00, 0.025] #optional.
+simulated_response_plot_settings['figure_name'] = 'Posterior_Simulated' #This is the default name for simulated response plots.
+simulated_response_plot_settings['legend'] = True #Can be changed to false to turn off the legend.
+#simulated_response_plot_settings['legendLabels'] = ['experiment', 'mu_guess', 'MAP'] here is an example of how to change the legend labels.
+simulated_response_plot_settings['error_linewidth'] = 'auto' #Integer. Using "auto" or "None" sets to "20" when there is only 1 point, 1 when number of points is > 10, and "4" when number of points is between 1 and 10 and. Using '0' or 'none' will hide the error bars.
+simulated_response_plot_settings['fontdict']= {'size':16} #A font dictionary can be passed in, this will be used for the axes and axes labels.
+
+#Future possible dictionary fields include: dpi, figure_name, fontsize, x_label, y_label, figure_name, x_range, y_range
+scatter_matrix_plots_settings ={}
+scatter_matrix_plots_settings['individual_plots'] = 'auto' #presently does nothing. #True, False, or 'auto'. With 'auto', the individual_plots will always be created. 
+scatter_matrix_plots_settings['combined_plots'] = 'auto' #True, False, or  'auto'. With 'auto', the combined plots are only created if there are 5 pairs or less.
 
 ######mumpce plots##### #####contour plots#### 
 #model_parameter_info = np.array([{'parameter_number': 0, 'parameter_name': r'$E_{a1}$'},
