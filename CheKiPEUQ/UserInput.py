@@ -118,21 +118,22 @@ contour_plot_settings['parameter_pairs'] = [] #This will accept either strings (
 contour_plot_settings['figure_name'] = 'PosteriorContourPlots'
 contour_plot_settings['individual_plots'] = 'auto' #True, False, or 'auto'. With 'auto', the individual_plots will always be created.
 contour_plot_settings['combined_plots'] = 'auto' #True, False, or  'auto'. With 'auto', the combined plots are only created if there are 5 pairs or less.
-#contour_settings_custom['zoom_std_devs'] = 2.5 #how zoomed in the image is.
+contour_plot_settings['zoom_std_devs'] = 2.5 #how zoomed in the image is.
 contour_plot_settings['fontsize']=16  #sets the fontsize for everything except the colorbars. Can be an integer or the word 'auto', or the word "None". Should change space_between_subplots if fontsize is changed. 
-#contour_settings_custom['space_between_subplots'] = 4.0 #Typically a value between 0.20 and 5.0. Set to 4.0 by default. Should be changed when font size is changed. Fontsize 'auto' tends to make small fonts which needs smaller values like 0.20.
-#contour_settings_custom["cmap_levels"] = 4   #This is the number of contours.
+contour_plot_settings['space_between_subplots'] = 0.40 #Typically a value between 0.20 and 5.0. Set to 0.40 by default. Should be changed when font size is changed. Fontsize 'auto' tends to make small fonts which needs smaller values like 0.20.
+contour_plot_settings["cmap_levels"] = 4   #This is the number of contour levels.
 contour_plot_settings['num_y_ticks'] = 'auto'  #adusts number of y ticks (actually sets a maximum number of them). #num_y_ticks and num_x_ticks must be either a string ('auto') or an integer (such as 4, either without string or with integer casting like int('5')). This feature is recommended.  #Note that this is a *request* When it's not fulfilled exactly, the user can play with the number.
 contour_plot_settings['num_x_ticks'] = 'auto'  #adjusts number of x ticks (actually sets a maximum number of them). #num_y_ticks and num_x_ticks must be either a string ('auto') or an integer (such as 4, either without string or with integer casting like int('5')).This feature is recommended. #Note that this is a *request* When it's not fulfilled exactly, the user can play with the number.
-#contour_settings_custom['num_pts_per_axis'] = 500 #This sets the resolution of the contours.
-#contour_settings_custom['x_ticks'] #feed in an array of directly. Not recommended to change.
-#contour_settings_custom['y_ticks'] #feed in an array of directly. Not recommended to change.
-#contour_settings_custom['axis_limits'] #Feed in list of [x_min, x_max, y_min, y_max]. This is appropriate to use. If a list of lists is provided, then the individual_plots will each receive the appropriate axis_limits.
+contour_plot_settings['num_pts_per_axis'] = 500 #This sets the resolution of the contours.
+contour_plot_settings['dpi'] = 220
+contour_plot_settings['x_ticks'] = 'auto' #feed in an array of numbers directly. Not recommended to change.
+contour_plot_settings['y_ticks'] = 'auto' #feed in an array of numbers directly. Not recommended to change.
+contour_plot_settings['axis_limits'] = 'auto' #Feed in list of [x_min, x_max, y_min, y_max]. This is appropriate to use. If a list of lists is provided, then the individual_plots will each receive the appropriate axis_limits.
 contour_plot_settings['contours_normalized']=True #This sets the scales on the color bars to 1.0.  Changing to False shows absolute density values for the posterior and prior. With all default settings, shows contours at 0.2, 0.4, 0.6., 0.8
 contour_plot_settings['center_on']='all' # #can be 'all', 'prior' or 'posterior'. 
 contour_plot_settings['colorbars']=True #can be true or false.
-contour_plot_settings['colormap_posterior_customized'] = 'default' #can also be 'Oranges' for example. #accepts a string (matplotlib colormap names, like 'Greens') or a list of tuples with 0-to-1 and colornames to interpolate between. For example, the default right now is:  [(0,    '#00FFFF'),(1,    '#0000FF')]. The tuple could have 0, 0.7, and 1, for example. #colors can be obtained from: https://www.htmlcsscolor.com/hex/244162  
-contour_plot_settings['colormap_prior_customized'] = 'default' #can also be 'Greens' for example. #accepts a string (matplotlib colormap names, like 'Oranges') or a list of tuples with 0-to-1 and colornames to interpolate between. For example, the default right now is:  [(0,    '#FFFF00'),(1,    '#FF0000')]. The tuple could have 0, 0.7, and 1, for example. #colors can be obtained from: https://www.htmlcsscolor.com/hex/244162  
+contour_plot_settings['colormap_posterior_customized'] = 'auto' #can also be 'Oranges' for example. #accepts a string (matplotlib colormap names, like 'Greens') or a list of tuples with 0-to-1 and colornames to interpolate between. For example, the default right now is:  [(0,    '#00FFFF'),(1,    '#0000FF')]. The tuple could have 0, 0.7, and 1, for example. #colors can be obtained from: https://www.htmlcsscolor.com/hex/244162  
+contour_plot_settings['colormap_prior_customized'] = 'auto' #can also be 'Greens' for example. #accepts a string (matplotlib colormap names, like 'Oranges') or a list of tuples with 0-to-1 and colornames to interpolate between. For example, the default right now is:  [(0,    '#FFFF00'),(1,    '#FF0000')]. The tuple could have 0, 0.7, and 1, for example. #colors can be obtained from: https://www.htmlcsscolor.com/hex/244162  
 #See the file mumpce_custom_plotting_example.py for the full set of arguments that can be provided inside contour_plot_settings.
 
 ####Design Of Experiments####
