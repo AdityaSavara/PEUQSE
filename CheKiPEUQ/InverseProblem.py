@@ -161,7 +161,7 @@ class parameter_estimation:
         
         #Now to process responses_observed_uncertainties, there are several options so we need to process it according to the cases.
         #The normal case:
-        if isinstance(self.UserInput.model['responses_observed_uncertainties'], Iterable): #If it's an array or like one, we take it as is. The other options are a none object or a function.
+        if isinstance(self.UserInput.responses['responses_observed_uncertainties'], Iterable): #If it's an array or like one, we take it as is. The other options are a none object or a function.
             UserInput.responses_observed_uncertainties = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(UserInput.responses_observed_uncertainties)
             #Processing of responses_observed_uncertainties for case that a blank list is received and not zeros.
             if len(UserInput.responses_observed_uncertainties[0]) == 0: 
@@ -179,7 +179,7 @@ class parameter_estimation:
                 #for responseIndex in range(0,len(UserInput.responses_observed[0])):
                 #    UserInput.responses_observed_uncertainties[0][responseIndex]= UserInput.responses_observed[0][responseIndex]*0.0
         else: #The other possibilities are a None object or a function. For either of thtose cases, we simply set UserInput.responses_observed_uncertainties equal to what the user provided.
-            UserInput.responses_observed_uncertainties = self.UserInput.model['responses_observed_uncertainties']
+            UserInput.responses_observed_uncertainties = self.UserInput.responses['responses_observed_uncertainties']
             
 
         
