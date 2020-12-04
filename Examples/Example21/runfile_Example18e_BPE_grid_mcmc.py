@@ -37,7 +37,7 @@ if __name__ == "__main__":
     
     UserInput.model['simulateByInputParametersOnlyFunction'] = processing_functions_tpd_odeint.TPR_internalPiecewiseSimulationFunctionWrapperScaledAndOffset #This must simulate with *only* the parameters listed above, and no other arguments.
     UserInput.model['simulationOutputProcessingFunction'] = processing_functions_tpd_odeint.no_log_wrapper_func  #Optional: a function to process what comes out of the simulation Function and then return an observable vector.
-    #UserInput.parameter_pairs_for_contour_plots=[[2,3],[2,4]]
+    #UserInput.contour_plot_settings['parameter_pairs']=[[2,3],[2,4]]
         
     UserInput.model['reducedParameterSpace'] = [2,3]
     UserInput.parameter_estimation_settings['scaling_uncertainties_type'] = "std"
@@ -52,12 +52,12 @@ if __name__ == "__main__":
     UserInput.parameter_estimation_settings['mcmc_relative_step_length'] = 0.01
     UserInput.parameter_estimation_settings['mcmc_modulate_accept_probability']  = 0 #Default value of 0. Changing this value sharpens or flattens the posterior. A value greater than 1 flattens the posterior by accepting low values more often. It can be useful when greater sampling is more important than accuracy. One way of using this feature is to try with a value of 0, then with the value equal to the number of priors for comparison, and then to gradually decrease this number as low as is useful (to minimize distortion of the result). A downside of changing changing this variable to greater than 1 is that it slows the the ascent to the maximum of the prior, so there is a balance in using it. In contrast, numbers increasingly less than one (such as 0.90 or 0.10) will speed up the ascent to the maximum of the posterior, but will also result in fewer points being retained.
     UserInput.parameter_estimation_settings['mcmc_info_gain_cutoff'] = 0
-    UserInput.contour_settings_custom['contours_normalized'] = True
-    UserInput.contour_settings_custom['colorbars'] = False
-    UserInput.contour_settings_custom['fontsize']=20
-    #UserInput.contour_settings_custom['center_on'] = 'prior'
-    UserInput.contour_settings_custom['axis_limits'] = [0,80, 0, 60]
-    UserInput.contour_settings_custom['num_x_ticks']= 4
+    UserInput.contour_plot_settings['contours_normalized'] = True
+    UserInput.contour_plot_settings['colorbars'] = False
+    UserInput.contour_plot_settings['fontsize']=20
+    #UserInput.contour_plot_settings['center_on'] = 'prior'
+    UserInput.contour_plot_settings['axis_limits'] = [0,80, 0, 60]
+    UserInput.contour_plot_settings['num_x_ticks']= 4
     
 
     #After making the UserInput, now we make a 'parameter_estimation' object from it.

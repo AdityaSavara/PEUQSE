@@ -929,6 +929,9 @@ class Project(object):
                 contour_settings_custom["cmap_levels"] = 4
             #The below lines of code are all geared towards making the colormaps for the prior and posterior and allowing versatility.
             #Defining cmap prior
+            if 'colormap_prior_customized' in contour_settings_custom: #Originally, the default coloring would occur only if this field was missing. So removing this field if it is set to 'default'.
+                if contour_settings_custom['colormap_prior_customized'].lower() == 'default' or contour_settings_custom['colormap_prior_customized'].lower() == 'auto':
+                    del contour_settings_custom['colormap_prior_customized']
             if ('cmap_prior' not in contour_settings_custom) and ('colormap_prior_customized' not in contour_settings_custom):
                 contour_settings_custom['cmap_prior'] = matplotlib.colors.LinearSegmentedColormap.from_list('custom prior colors', 
                  [(0,    '#00FFFF'),#colors can be obtained from: https://www.htmlcsscolor.com/hex/244162
@@ -940,6 +943,9 @@ class Project(object):
                     contour_settings_custom['cmap_prior'] = matplotlib.colors.LinearSegmentedColormap.from_list('custom prior colors', 
                                            contour_settings_custom['colormap_prior_customized'], N=256)      
             #Defining cmap posterior
+            if 'colormap_posterior_customized' in contour_settings_custom: #Originally, the default coloring would occur only if this field was missing. So removing this field if it is set to 'default'.
+                if contour_settings_custom['colormap_posterior_customized'].lower() == 'default' or  contour_settings_custom['colormap_posterior_customized'].lower() == 'auto':
+                    del contour_settings_custom['colormap_posterior_customized']
             if ('cmap_posterior' not in contour_settings_custom) and ('colormap_posterior_customized' not in contour_settings_custom):
                 contour_settings_custom['cmap_posterior'] = matplotlib.colors.LinearSegmentedColormap.from_list('custom posterior colors', 
                  [(0,    '#FFFF00'), #colors can be obtained from: https://www.htmlcsscolor.com/hex/244162

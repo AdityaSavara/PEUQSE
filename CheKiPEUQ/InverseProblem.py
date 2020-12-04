@@ -2203,14 +2203,14 @@ class parameter_estimation:
             individual_model_parameter_dictionary = {'parameter_number': parameterIndex, 'parameter_name': self.UserInput.parameterNamesAndMathTypeExpressionsDict[parameterName]} #we are actually putting the MathTypeExpression as the parameter name when feeding to mum_pce.
             self.UserInput.model_parameter_info.append(individual_model_parameter_dictionary)
         self.UserInput.model_parameter_info = np.array(self.UserInput.model_parameter_info)
-        if len(self.UserInput.active_parameters) == 0:
+        if len(self.UserInput.contour_plot_settings['active_parameters']) == 0:
             numParams = len(self.UserInput.model_parameter_info)
             active_parameters = np.linspace(0, numParams-1, numParams) #just a list of whole numbers.
             active_parameters = np.array(active_parameters, dtype='int')
         else:
-            active_parameters = self.UserInput.active_parameters
+            active_parameters = self.UserInput.contour_plot_settings['active_parameters']
         #TODO: reduce active_parameters by anything that has been set as a constant.
-        pairs_of_parameter_indices = self.UserInput.parameter_pairs_for_contour_plots
+        pairs_of_parameter_indices = self.UserInput.contour_plot_settings['parameter_pairs']
         if pairs_of_parameter_indices == []:
             import itertools 
             all_pairs_iter = itertools.combinations(active_parameters, 2)
@@ -2223,8 +2223,21 @@ class parameter_estimation:
             for  pairIndex in range(len(pairs_of_parameter_indices)):
                 firstParameter = int(self.UserInput.parameterNamesAndMathTypeExpressionsDict[pairIndex[0]])
                 secondParameter = int(self.UserInput.parameterNamesAndMathTypeExpressionsDict[pairIndex[0]])
-                pairs_of_parameter_indices[pairIndex] = [firstParameter, secondParameter]        
-        figureObject_beta.mumpce_plots(model_parameter_info = self.UserInput.model_parameter_info, active_parameters = active_parameters, pairs_of_parameter_indices = pairs_of_parameter_indices, posterior_mu_vector = posterior_mu_vector, posterior_cov_matrix = posterior_cov_matrix, prior_mu_vector = np.array(self.UserInput.mu_prior), prior_cov_matrix = self.UserInput.covmat_prior, contour_settings_custom = self.UserInput.contour_settings_custom)
+                pairs_of_parameter_indices[pairIndex] = [firstParameter, secondParameter]
+        #Below we populate any custom fields as necessary.
+        contour_settings_custom = {}
+        contour_settings_custom_fields = {'figure_name','fontsize','num_y_ticks','num_x_ticks','colormap_posterior_customized','colormap_prior_customized','contours_normalized','colorbars','axis_limits'} #This is a set, not a dictionary.
+        for custom_field in contour_settings_custom_fields:
+            if custom_field in self.UserInput.contour_plot_settings:
+                contour_settings_custom[custom_field] = self.UserInput.contour_plot_settings[custom_field]        
+        #The colormap fields need to be removed if they are set to the default, because the default coloring is set in the mumpce class when they are not provided.
+        if 'colormap_posterior_customized' in contour_settings_custom:
+            if contour_settings_custom['colormap_posterior_customized'].lower() == 'default' or  contour_settings_custom['colormap_posterior_customized'].lower() == 'auto':
+                del contour_settings_custom['colormap_posterior_customized']
+        if 'colormap_prior_customized' in contour_settings_custom:
+            if contour_settings_custom['colormap_prior_customized'].lower() == 'default' or contour_settings_custom['colormap_prior_customized'].lower() == 'auto':
+                del contour_settings_custom['colormap_prior_customized']
+        figureObject_beta.mumpce_plots(model_parameter_info = self.UserInput.model_parameter_info, active_parameters = active_parameters, pairs_of_parameter_indices = pairs_of_parameter_indices, posterior_mu_vector = posterior_mu_vector, posterior_cov_matrix = posterior_cov_matrix, prior_mu_vector = np.array(self.UserInput.mu_prior), prior_cov_matrix = self.UserInput.covmat_prior, contour_settings_custom = contour_settings_custom)
         return figureObject_beta
 
     @CiteSoft.after_call_compile_consolidated_log(compile_checkpoints=True) #This is from the CiteSoft module.
