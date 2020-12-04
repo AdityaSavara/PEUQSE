@@ -1017,7 +1017,6 @@ class parameter_estimation:
             simulatedResponses = simulationOutputProcessingFunction(simulationOutput) 
         simulatedResponses = nestedObjectsFunctions.makeAtLeast_2dNested(simulatedResponses)
         #need to check if there are any 'responses_simulation_uncertainties'. #TODO: This isn't really implemented yet.
-        print("line 987", self.UserInput.responses_simulation_uncertainties)
         if type(self.UserInput.responses_simulation_uncertainties) == type(None): #if it's a None type, we keep it as a None type
             responses_simulation_uncertainties = None
         else:  #Else we get it based on the the discreteParameterVector
