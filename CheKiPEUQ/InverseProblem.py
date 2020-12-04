@@ -161,7 +161,7 @@ class parameter_estimation:
         
         #Now to process responses_observed_uncertainties, there are several options so we need to process it according to the cases.
         #The normal case:
-        if isinstance(self.UserInput.model['responses_simulation_uncertainties'], Iterable): #If it's an array or like one, we take it as is. The other options are a none object or a function.
+        if isinstance(self.UserInput.model['responses_observed_uncertainties'], Iterable): #If it's an array or like one, we take it as is. The other options are a none object or a function.
             UserInput.responses_observed_uncertainties = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(UserInput.responses_observed_uncertainties)
             #Processing of responses_observed_uncertainties for case that a blank list is received and not zeros.
             if len(UserInput.responses_observed_uncertainties[0]) == 0: 
@@ -179,7 +179,7 @@ class parameter_estimation:
                 #for responseIndex in range(0,len(UserInput.responses_observed[0])):
                 #    UserInput.responses_observed_uncertainties[0][responseIndex]= UserInput.responses_observed[0][responseIndex]*0.0
         else: #The other possibilities are a None object or a function. For either of thtose cases, we simply set UserInput.responses_observed_uncertainties equal to what the user provided.
-            UserInput.responses_observed_uncertainties = self.UserInput.model['responses_simulation_uncertainties']
+            UserInput.responses_observed_uncertainties = self.UserInput.model['responses_observed_uncertainties']
             
 
         
@@ -241,7 +241,11 @@ class parameter_estimation:
 
         
         #To find the *observed* responses covariance matrix, meaning based on the uncertainties reported by the users, we take the uncertainties from the points. This is needed for the likelihood. However, it will be transformed again at that time.
-        self.observed_responses_covmat_transformed = returnShapedResponseCovMat(self.UserInput.num_response_dimensions, self.UserInput.responses_observed_transformed_uncertainties)
+        #First, we have to make sure self.UserInput.responses_observed_transformed_uncertainties is an iterable. It could be a none-type or a function.
+        if isinstance(self.UserInput.responses_observed_transformed_uncertainties, Iterable):
+            self.observed_responses_covmat_transformed = returnShapedResponseCovMat(self.UserInput.num_response_dimensions, self.UserInput.responses_observed_transformed_uncertainties)
+        else: #If responses_observed_transformed_uncertainties is a None type, then we don't need observed_responses_covmat_transformed.  If it is a function, then we have to create the object on the fly so can't create it now.
+            pass
 
         #self.covmat_prior = UserInput.covmat_prior
         self.Q_mu = self.UserInput.mu_prior*0 # Q samples the next step at any point in the chain.  The next step may be accepted or rejected.  Q_mu is centered (0) around the current theta.  
