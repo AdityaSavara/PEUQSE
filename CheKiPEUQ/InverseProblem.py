@@ -9,6 +9,7 @@ import pandas as pd
 import sys
 import time
 import copy
+from collections.abc import Iterable 
 #import mumce_py.Project as mumce_pyProject #FIXME: Eric to fix plotting/graphing issue described in issue 9 -- https://github.com/AdityaSavara/ODE-KIN-BAYES-SG-EW/issues/9
 #import mumce_py.solution mumce_pySolution
 try:
@@ -141,7 +142,6 @@ class parameter_estimation:
         #Make them 2dNested if needed..
 
         UserInput.responses_observed = np.array(nestedObjectsFunctions.makeAtLeast_2dNested(UserInput.responses['responses_observed']))
-        UserInput.responses_observed_uncertainties = np.array(nestedObjectsFunctions.makeAtLeast_2dNested(UserInput.responses['responses_observed_uncertainties']))
         if UserInput.responses['num_responses']=='auto':
             self.UserInput.num_response_dimensions = np.shape(UserInput.responses_observed)[0]
         else:
@@ -157,22 +157,50 @@ class parameter_estimation:
         #Make sure all objects inside are arrays (if they are lists we convert them). This is needed to apply the heurestic.
         UserInput.responses_abscissa = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(UserInput.responses_abscissa)
         UserInput.responses_observed = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(UserInput.responses_observed)
-        UserInput.responses_observed_uncertainties = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(UserInput.responses_observed_uncertainties)
-        #Processing of responses_observed_uncertainties for case that a blank list is received and not zeros.
-        if len(UserInput.responses_observed_uncertainties[0]) == 0: 
-            #if the response uncertainties is blank, we will use the heurestic of sigma = 5% of the observed value, with a floor of 2% of the maximum for that response. 
-            #Note that we are actually checking in index[0], that is because as an atleast_2d array even a blank list / array in it will give a length of 1.
-            UserInput.responses_observed_uncertainties = UserInput.responses_observed * 0.05
-            for responseIndex in range(0,UserInput.num_response_dimensions): #need to cycle through to apply the "minimum" uncertainty of 0.02 times the max value.
-                maxResponseValue = np.max(UserInput.responses_observed[responseIndex]) #Because of the "at_least2D" we actually need to use index 0.
-                #The below syntax is a bit hard to read, but it is similar to this: a[a==2] = 10 #replace all 2's with 10's
-                UserInput.responses_observed_uncertainties[responseIndex][UserInput.responses_observed_uncertainties[responseIndex] < maxResponseValue * 0.02] = maxResponseValue * 0.02
-        elif nestedObjectsFunctions.sumNested(UserInput.responses_observed_uncertainties) == 0: #If a 0 (or list summing to 0) is provided, we will make the uncertainties zero.
-            import copy 
-            UserInput.responses_observed_uncertainties = UserInput.responses_observed * 0.0 #This will work because we've converted the internals to array already.
-            #Below two lines not needed. Should be removed if everythig is working fine after Nov 2020.
-            #for responseIndex in range(0,len(UserInput.responses_observed[0])):
-            #    UserInput.responses_observed_uncertainties[0][responseIndex]= UserInput.responses_observed[0][responseIndex]*0.0
+        
+        #Now to process responses_observed_uncertainties, there are several options so we need to process it according to the cases.
+        #The normal case:
+        if isinstance(self.UserInput.responses['responses_observed_uncertainties'], Iterable): #If it's an array or like one, we take it as is. The other options are a none object or a function.
+            UserInput.responses_observed_uncertainties = np.array(nestedObjectsFunctions.makeAtLeast_2dNested(UserInput.responses['responses_observed_uncertainties']))
+            UserInput.responses_observed_uncertainties = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(UserInput.responses_observed_uncertainties)
+            #Processing of responses_observed_uncertainties for case that a blank list is received and not zeros.
+            if len(UserInput.responses_observed_uncertainties[0]) == 0: 
+                #if the response uncertainties is blank, we will use the heurestic of sigma = 5% of the observed value, with a floor of 2% of the maximum for that response. 
+                #Note that we are actually checking in index[0], that is because as an atleast_2d array even a blank list / array in it will give a length of 1.
+                UserInput.responses_observed_uncertainties = UserInput.responses_observed * 0.05
+                for responseIndex in range(0,UserInput.num_response_dimensions): #need to cycle through to apply the "minimum" uncertainty of 0.02 times the max value.
+                    maxResponseValue = np.max(UserInput.responses_observed[responseIndex]) #Because of the "at_least2D" we actually need to use index 0.
+                    #The below syntax is a bit hard to read, but it is similar to this: a[a==2] = 10 #replace all 2's with 10's
+                    UserInput.responses_observed_uncertainties[responseIndex][UserInput.responses_observed_uncertainties[responseIndex] < maxResponseValue * 0.02] = maxResponseValue * 0.02
+            elif nestedObjectsFunctions.sumNested(UserInput.responses_observed_uncertainties) == 0: #If a 0 (or list summing to 0) is provided, we will make the uncertainties zero.
+                import copy 
+                UserInput.responses_observed_uncertainties = UserInput.responses_observed * 0.0 #This will work because we've converted the internals to array already.
+                #Below two lines not needed. Should be removed if everythig is working fine after Nov 2020.
+                #for responseIndex in range(0,len(UserInput.responses_observed[0])):
+                #    UserInput.responses_observed_uncertainties[0][responseIndex]= UserInput.responses_observed[0][responseIndex]*0.0
+        else: #The other possibilities are a None object or a function. For either of thtose cases, we simply set UserInput.responses_observed_uncertainties equal to what the user provided.
+            UserInput.responses_observed_uncertainties = self.UserInput.responses['responses_observed_uncertainties']
+            
+        #Now to process responses_simulation_uncertainties, there are several options so we need to process it according to the cases.
+        #The normal case:
+        if isinstance(self.UserInput.model['responses_simulation_uncertainties'], Iterable): #If it's an array or like one, we take it as is. The other options are a none object or a function.
+            UserInput.responses_simulation_uncertainties = np.array(nestedObjectsFunctions.makeAtLeast_2dNested(self.UserInput.model['responses_simulation_uncertainties']))
+            UserInput.responses_simulation_uncertainties = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(UserInput.responses_simulation_uncertainties)
+            #TODO: allow a length of zero 'responses_simulation_uncertainties' to mean that the heurestic function should be called after each simulation. That is not what it is doing right now (Dec 2020). Right now it is just using a static value from the heurestic applied to the observed_responses.
+            #Processing of responses_simulation_uncertainties for case that a blank list is received and not zeros.
+            if len(UserInput.responses_simulation_uncertainties[0]) == 0: 
+                #if the response uncertainties is blank, we will use the heurestic of sigma = 5% of the observed value, with a floor of 2% of the maximum for that response. 
+                #Note that we are actually checking in index[0], that is because as an atleast_2d array even a blank list / array in it will give a length of 1.
+                UserInput.responses_simulation_uncertainties = UserInput.responses_observed * 0.05
+                for responseIndex in range(0,UserInput.num_response_dimensions): #need to cycle through to apply the "minimum" uncertainty of 0.02 times the max value.
+                    maxResponseValue = np.max(UserInput.responses_observed[responseIndex]) #Because of the "at_least2D" we actually need to use index 0.
+                    #The below syntax is a bit hard to read, but it is similar to this: a[a==2] = 10 #replace all 2's with 10's
+                    UserInput.responses_simulation_uncertainties[responseIndex][UserInput.responses_simulation_uncertainties[responseIndex] < maxResponseValue * 0.02] = maxResponseValue * 0.02
+            elif nestedObjectsFunctions.sumNested(UserInput.responses_simulation_uncertainties) == 0: #If a 0 (or list summing to 0) is provided, we will make the uncertainties zero.
+                import copy 
+                UserInput.responses_simulation_uncertainties = UserInput.responses_observed * 0.0 #This will work because we've converted the internals to array already.
+        else: #The other possibilities are a None object or a function. For either of thtose cases, we simply set UserInput.responses_simulation_uncertainties equal to what the user provided.
+            UserInput.responses_simulation_uncertainties = self.UserInput.model['responses_simulation_uncertainties']
 
         
             
@@ -233,7 +261,11 @@ class parameter_estimation:
 
         
         #To find the *observed* responses covariance matrix, meaning based on the uncertainties reported by the users, we take the uncertainties from the points. This is needed for the likelihood. However, it will be transformed again at that time.
-        self.observed_responses_covmat_transformed = returnShapedResponseCovMat(self.UserInput.num_response_dimensions, self.UserInput.responses_observed_transformed_uncertainties)
+        #First, we have to make sure self.UserInput.responses_observed_transformed_uncertainties is an iterable. It could be a none-type or a function.
+        if isinstance(self.UserInput.responses_observed_transformed_uncertainties, Iterable):
+            self.observed_responses_covmat_transformed = returnShapedResponseCovMat(self.UserInput.num_response_dimensions, self.UserInput.responses_observed_transformed_uncertainties)
+        else: #If responses_observed_transformed_uncertainties is a None type, then we don't need observed_responses_covmat_transformed.  If it is a function, then we have to create the object on the fly so can't create it now.
+            pass
 
         #self.covmat_prior = UserInput.covmat_prior
         self.Q_mu = self.UserInput.mu_prior*0 # Q samples the next step at any point in the chain.  The next step may be accepted or rejected.  Q_mu is centered (0) around the current theta.  
@@ -343,11 +375,12 @@ class parameter_estimation:
         return
 
     def get_responses_simulation_uncertainties(self, discreteParameterVector): #FIXME: Make sure this works with responses['reducedResponseSpace']  and model['reducedParameterSpace']. I don't think it does.
-        from collections.abc import Iterable 
-        if isinstance(self.UserInput.model['responses_simulation_uncertainties'], Iterable): #If it's an array or like one, we take it as is.
-            responses_simulation_uncertainties = np.array(self.UserInput.model['responses_simulation_uncertainties'])*1.0
+        if isinstance(self.UserInput.responses_simulation_uncertainties, Iterable): #If it's an array or like one, we take it as is. The other options are a non object or a function.
+            responses_simulation_uncertainties = np.array(self.UserInput.responses_simulation_uncertainties)*1.0
+        elif type(self.UserInput.responses_simulation_uncertainties) == type(None):
+            responses_simulation_uncertainties = self.UserInput.responses_simulation_uncertainties
         else:  #Else we assume it's a function taking the discreteParameterVector.
-            responses_simulation_uncertainties = self.UserInput.model['responses_simulation_uncertainties'](discreteParameterVector) #This is passing an argument to a function.
+            responses_simulation_uncertainties = self.UserInput.responses_simulation_uncertainties(discreteParameterVector) #This is passing an argument to a function.
         return responses_simulation_uncertainties
 
     def simulateWithSubsetOfParameters(self,reducedParametersVector): #This is a wrapper.
@@ -984,7 +1017,7 @@ class parameter_estimation:
             simulatedResponses = simulationOutputProcessingFunction(simulationOutput) 
         simulatedResponses = nestedObjectsFunctions.makeAtLeast_2dNested(simulatedResponses)
         #need to check if there are any 'responses_simulation_uncertainties'. #TODO: This isn't really implemented yet.
-        if type(self.UserInput.model['responses_simulation_uncertainties']) == type(None): #if it's a None type, we keep it as a None type
+        if type(self.UserInput.responses_simulation_uncertainties) == type(None): #if it's a None type, we keep it as a None type
             responses_simulation_uncertainties = None
         else:  #Else we get it based on the the discreteParameterVector
             responses_simulation_uncertainties = self.get_responses_simulation_uncertainties(discreteParameterVector)
@@ -993,7 +1026,7 @@ class parameter_estimation:
         synthetic_data_uncertainties = responses_simulation_uncertainties
         #We need to populate the "observed" responses in userinput with the synthetic data.
         self.UserInput.responses['responses_observed'] = simulatedResponses
-        self.UserInput.responses['responses_observed_uncertainties'] = simulatedResponses
+        self.UserInput.responses['responses_observed_uncertainties'] = responses_simulation_uncertainties
         #Now need to do something unusual: Need to call the __init__ function again so that the arrays get reshaped as needed etc.
         self.__init__(self.UserInput)
     
@@ -1993,7 +2026,7 @@ class parameter_estimation:
         if type(simulatedResponses) == type(None):
             return float('-inf'), None #This is intended for the case that the simulation fails, indicated by receiving an 'nan' or None type from user's simulation function.
         #need to check if there are any 'responses_simulation_uncertainties'.
-        if type(self.UserInput.model['responses_simulation_uncertainties']) == type(None): #if it's a None type, we keep it as a None type
+        if type(self.UserInput.responses_simulation_uncertainties) == type(None): #if it's a None type, we keep it as a None type
             responses_simulation_uncertainties = None
         else:  #Else we get it based on the the discreteParameterVector
             responses_simulation_uncertainties = self.get_responses_simulation_uncertainties(discreteParameterVector)
@@ -2093,7 +2126,7 @@ class parameter_estimation:
             if type(simulationOutputProcessingFunction) != type(None):
                 self.mu_guess_SimulatedResponses =  nestedObjectsFunctions.makeAtLeast_2dNested(     simulationOutputProcessingFunction(self.mu_guess_SimulatedOutput)     )
             #Check if we have simulation uncertainties, and populate if so.
-            if type(self.UserInput.model['responses_simulation_uncertainties']) != type(None):
+            if type(self.UserInput.responses_simulation_uncertainties) != type(None):
                 self.mu_guess_responses_simulation_uncertainties = nestedObjectsFunctions.makeAtLeast_2dNested(self.get_responses_simulation_uncertainties(self.UserInput.InputParameterInitialGuess))
                 
             #Get map simiulated output and simulated responses.
@@ -2103,7 +2136,7 @@ class parameter_estimation:
             if type(simulationOutputProcessingFunction) != type(None):
                 self.map_SimulatedResponses =  nestedObjectsFunctions.makeAtLeast_2dNested(     simulationOutputProcessingFunction(self.map_SimulatedOutput)     )
             #Check if we have simulation uncertainties, and populate if so.
-            if type(self.UserInput.model['responses_simulation_uncertainties']) != type(None):
+            if type(self.UserInput.responses_simulation_uncertainties) != type(None):
                 self.map_responses_simulation_uncertainties = nestedObjectsFunctions.makeAtLeast_2dNested(self.get_responses_simulation_uncertainties(self.map_parameter_set))
             
             if hasattr(self, 'mu_AP_parameter_set'): #Check if a mu_AP has been assigned. It is normally only assigned if mcmc was used.           
@@ -2114,7 +2147,7 @@ class parameter_estimation:
                 if type(simulationOutputProcessingFunction) != type(None):
                     self.mu_AP_SimulatedResponses =  nestedObjectsFunctions.makeAtLeast_2dNested(     simulationOutputProcessingFunction(self.mu_AP_SimulatedOutput)      )
                 #Check if we have simulation uncertainties, and populate if so.
-                if type(self.UserInput.model['responses_simulation_uncertainties']) != type(None):
+                if type(self.UserInput.responses_simulation_uncertainties) != type(None):
                     self.mu_AP_responses_simulation_uncertainties = nestedObjectsFunctions.makeAtLeast_2dNested( self.get_responses_simulation_uncertainties(self.mu_AP_parameter_set))
             
             #Now to populate the allResponsesListsOfYArrays and the allResponsesListsOfYUncertaintiesArrays
@@ -2124,7 +2157,7 @@ class parameter_estimation:
                         listOfYArrays = [self.UserInput.responses_observed[responseDimIndex], self.mu_guess_SimulatedResponses[responseDimIndex], self.map_SimulatedResponses[responseDimIndex]]        
                         allResponsesListsOfYArrays.append(listOfYArrays)
                         #Now to do uncertainties, there are two cases. First case is with only observed uncertainties and no simulation ones.
-                        if type(self.UserInput.model['responses_simulation_uncertainties']) == type(None): #This means there are no simulation uncertainties. So for each response dimension, there will be a list with only the observed uncertainties in that list.
+                        if type(self.UserInput.responses_simulation_uncertainties) == type(None): #This means there are no simulation uncertainties. So for each response dimension, there will be a list with only the observed uncertainties in that list.
                             allResponsesListsOfYUncertaintiesArrays.append( [self.UserInput.responses_observed_uncertainties[responseDimIndex]] ) #Just creating nesting, we need to give a list for each response dimension.
                         else: #This case means that there are some responses_simulation_uncertainties to include, so allResponsesListsOfYUncertaintiesArrays will have more dimensions *within* its nested values.
                             allResponsesListsOfYUncertaintiesArrays.append([self.UserInput.responses_observed_uncertainties[responseDimIndex],self.mu_guess_responses_simulation_uncertainties,self.map_responses_simulation_uncertainties]) #We need to give a list for each response dimension.                                        
@@ -2132,7 +2165,7 @@ class parameter_estimation:
                         listOfYArrays = [self.UserInput.responses_observed[responseDimIndex], self.mu_guess_SimulatedResponses[responseDimIndex], self.map_SimulatedResponses[responseDimIndex]]        
                         allResponsesListsOfYArrays.append(listOfYArrays)
                         #Now to do uncertainties, there are two cases. First case is with only observed uncertainties and no simulation ones.
-                        if type(self.UserInput.model['responses_simulation_uncertainties']) == type(None): #This means there are no simulation uncertainties. So for each response dimension, there will be a list with only the observed uncertainties in that list.
+                        if type(self.UserInput.responses_simulation_uncertainties) == type(None): #This means there are no simulation uncertainties. So for each response dimension, there will be a list with only the observed uncertainties in that list.
                             allResponsesListsOfYUncertaintiesArrays.append( [self.UserInput.responses_observed_uncertainties[responseDimIndex]] ) #Just creating nesting, we need to give a list for each response dimension.
                         else: #This case means that there are some responses_simulation_uncertainties to include, so allResponsesListsOfYUncertaintiesArrays will have more dimensions *within* its nested values.
                             allResponsesListsOfYUncertaintiesArrays.append([self.UserInput.responses_observed_uncertainties[responseDimIndex],self.mu_guess_responses_simulation_uncertainties,self.map_responses_simulation_uncertainties]) #We need to give a list for each response dimension.                    
@@ -2140,14 +2173,14 @@ class parameter_estimation:
                     if self.UserInput.num_response_dimensions == 1: 
                         listOfYArrays = [self.UserInput.responses_observed[responseDimIndex], self.mu_guess_SimulatedResponses[responseDimIndex], self.map_SimulatedResponses[responseDimIndex], self.mu_AP_SimulatedResponses[responseDimIndex]]        
                         allResponsesListsOfYArrays.append(listOfYArrays)
-                        if type(self.UserInput.model['responses_simulation_uncertainties']) == type(None): #This means there are no simulation uncertainties. So for each response dimension, there will be a list with only the observed uncertainties in that list.
+                        if type(self.UserInput.responses_simulation_uncertainties) == type(None): #This means there are no simulation uncertainties. So for each response dimension, there will be a list with only the observed uncertainties in that list.
                             allResponsesListsOfYUncertaintiesArrays.append( [self.UserInput.responses_observed_uncertainties[responseDimIndex]] ) #Just creating nesting, we need to give a list for each response dimension.
                         else: #This case means that there are some responses_simulation_uncertainties to include, so allResponsesListsOfYUncertaintiesArrays will have more dimensions *within* its nested values.
                             allResponsesListsOfYUncertaintiesArrays.append([self.UserInput.responses_observed_uncertainties[responseDimIndex],self.mu_guess_responses_simulation_uncertainties,self.map_responses_simulation_uncertainties,self.mu_AP_responses_simulation_uncertainties]) #We need to give a list for each response dimension.                                        
                     elif self.UserInput.num_response_dimensions > 1: 
                         listOfYArrays = [self.UserInput.responses_observed[responseDimIndex], self.mu_guess_SimulatedResponses[responseDimIndex], self.map_SimulatedResponses[responseDimIndex], self.mu_AP_SimulatedResponses[responseDimIndex]]        
                         allResponsesListsOfYArrays.append(listOfYArrays)
-                        if type(self.UserInput.model['responses_simulation_uncertainties']) == type(None): #This means there are no simulation uncertainties. So for each response dimension, there will be a list with only the observed uncertainties in that list.
+                        if type(self.UserInput.responses_simulation_uncertainties) == type(None): #This means there are no simulation uncertainties. So for each response dimension, there will be a list with only the observed uncertainties in that list.
                             allResponsesListsOfYUncertaintiesArrays.append( [self.UserInput.responses_observed_uncertainties[responseDimIndex]] ) #Just creating nesting, we need to give a list for each response dimension.
                         else: #This case means that there are some responses_simulation_uncertainties to include, so allResponsesListsOfYUncertaintiesArrays will have more dimensions *within* its nested values.
                             allResponsesListsOfYUncertaintiesArrays.append([self.UserInput.responses_observed_uncertainties[responseDimIndex],self.mu_guess_responses_simulation_uncertainties,self.map_responses_simulation_uncertainties,self.mu_AP_responses_simulation_uncertainties]) #We need to give a list for each response dimension. 
