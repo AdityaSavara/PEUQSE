@@ -993,7 +993,7 @@ class parameter_estimation:
         synthetic_data_uncertainties = responses_simulation_uncertainties
         #We need to populate the "observed" responses in userinput with the synthetic data.
         self.UserInput.responses['responses_observed'] = simulatedResponses
-        self.UserInput.responses['responses_observed_uncertainties'] = simulatedResponses
+        self.UserInput.responses['responses_observed_uncertainties'] = responses_simulation_uncertainties
         #Now need to do something unusual: Need to call the __init__ function again so that the arrays get reshaped as needed etc.
         self.__init__(self.UserInput)
     
