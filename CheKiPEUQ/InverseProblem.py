@@ -2229,7 +2229,14 @@ class parameter_estimation:
         contour_settings_custom_fields = {'figure_name','fontsize','num_y_ticks','num_x_ticks','colormap_posterior_customized','colormap_prior_customized','contours_normalized','colorbars','axis_limits'} #This is a set, not a dictionary.
         for custom_field in contour_settings_custom_fields:
             if custom_field in self.UserInput.contour_plot_settings:
-                contour_settings_custom[custom_field] = self.UserInput.contour_plot_settings[custom_field]
+                contour_settings_custom[custom_field] = self.UserInput.contour_plot_settings[custom_field]        
+        #The colormap fields need to be removed if they are set to the default, because the default coloring is set in the mumpce class when they are not provided.
+        if 'colormap_posterior_customized' in contour_settings_custom:
+            if contour_settings_custom['colormap_posterior_customized'].lower() == 'default' or  contour_settings_custom['colormap_posterior_customized'].lower() == 'auto':
+                del contour_settings_custom['colormap_posterior_customized']
+        if 'colormap_prior_customized' in contour_settings_custom:
+            if contour_settings_custom['colormap_prior_customized'].lower() == 'default' or contour_settings_custom['colormap_prior_customized'].lower() == 'auto':
+                del contour_settings_custom['colormap_prior_customized']
         figureObject_beta.mumpce_plots(model_parameter_info = self.UserInput.model_parameter_info, active_parameters = active_parameters, pairs_of_parameter_indices = pairs_of_parameter_indices, posterior_mu_vector = posterior_mu_vector, posterior_cov_matrix = posterior_cov_matrix, prior_mu_vector = np.array(self.UserInput.mu_prior), prior_cov_matrix = self.UserInput.covmat_prior, contour_settings_custom = contour_settings_custom)
         return figureObject_beta
 
