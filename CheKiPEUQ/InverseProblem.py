@@ -343,7 +343,8 @@ class parameter_estimation:
         return
 
     def get_responses_simulation_uncertainties(self, discreteParameterVector): #FIXME: Make sure this works with responses['reducedResponseSpace']  and model['reducedParameterSpace']. I don't think it does.
-        if type(np.array(self.UserInput.model['responses_simulation_uncertainties'])) == type(np.array([0])): #If it's an array, we take it as is.
+        from collections.abc import Iterable 
+        if isinstance(self.UserInput.model['responses_simulation_uncertainties'], Iterable): #If it's an array or like one, we take it as is.
             responses_simulation_uncertainties = np.array(self.UserInput.model['responses_simulation_uncertainties'])*1.0
         else:  #Else we assume it's a function taking the discreteParameterVector.
             responses_simulation_uncertainties = self.UserInput.model['responses_simulation_uncertainties'](discreteParameterVector) #This is passing an argument to a function.
