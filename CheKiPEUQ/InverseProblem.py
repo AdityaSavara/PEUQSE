@@ -2237,7 +2237,20 @@ class parameter_estimation:
         if 'colormap_prior_customized' in contour_settings_custom:
             if contour_settings_custom['colormap_prior_customized'].lower() == 'default' or contour_settings_custom['colormap_prior_customized'].lower() == 'auto':
                 del contour_settings_custom['colormap_prior_customized']
-        figureObject_beta.mumpce_plots(model_parameter_info = self.UserInput.model_parameter_info, active_parameters = active_parameters, pairs_of_parameter_indices = pairs_of_parameter_indices, posterior_mu_vector = posterior_mu_vector, posterior_cov_matrix = posterior_cov_matrix, prior_mu_vector = np.array(self.UserInput.mu_prior), prior_cov_matrix = self.UserInput.covmat_prior, contour_settings_custom = contour_settings_custom)
+        #First make individual plots if requested.
+        if self.UserInput.contour_plot_settings['individual_plots'] == 'auto':
+            individual_plots = True
+        if individual_plots == True:
+            for pair in pairs_of_parameter_indices:
+                figureObject_beta.mumpce_plots(model_parameter_info = self.UserInput.model_parameter_info, active_parameters = active_parameters, pairs_of_parameter_indices = [pair], posterior_mu_vector = posterior_mu_vector, posterior_cov_matrix = posterior_cov_matrix, prior_mu_vector = np.array(self.UserInput.mu_prior), prior_cov_matrix = self.UserInput.covmat_prior, contour_settings_custom = contour_settings_custom)               
+        #now make combined plots if requested.
+        if self.UserInput.contour_plot_settings['combined_plots'] == 'auto':
+            if len(pairs_of_parameter_indices) > 5:
+                combined_plots = False
+            else:
+                combined_plots = True
+        if combined_plots == True:
+            figureObject_beta.mumpce_plots(model_parameter_info = self.UserInput.model_parameter_info, active_parameters = active_parameters, pairs_of_parameter_indices = pairs_of_parameter_indices, posterior_mu_vector = posterior_mu_vector, posterior_cov_matrix = posterior_cov_matrix, prior_mu_vector = np.array(self.UserInput.mu_prior), prior_cov_matrix = self.UserInput.covmat_prior, contour_settings_custom = contour_settings_custom)
         return figureObject_beta
 
     @CiteSoft.after_call_compile_consolidated_log(compile_checkpoints=True) #This is from the CiteSoft module.
