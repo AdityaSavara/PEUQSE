@@ -96,10 +96,13 @@ simulated_response_plot_settings['legend'] = True #Can be changed to false to tu
 simulated_response_plot_settings['error_linewidth'] = 'auto' #Integer. Using "auto" or "None" sets to "20" when there is only 1 point, 1 when number of points is > 10, and "4" when number of points is between 1 and 10 and. Using '0' or 'none' will hide the error bars.
 simulated_response_plot_settings['fontdict']= {'size':16} #A font dictionary can be passed in, this will be used for the axes and axes labels.
 
-#Future possible dictionary fields include: dpi, figure_name, fontsize, x_label, y_label, figure_name, x_range, y_range
+#possible dictionary fields include: dpi, figure_name, fontsize, x_label, y_label, figure_name, x_range, y_range
 scatter_matrix_plots_settings ={}
 scatter_matrix_plots_settings['individual_plots'] = 'auto' #presently does nothing. #True, False, or 'auto'. With 'auto', the individual_plots will always be created. 
-scatter_matrix_plots_settings['combined_plots'] = 'auto' #True, False, or  'auto'. With 'auto', the combined plots are only created if there are 5 pairs or less.
+scatter_matrix_plots_settings['combined_plots'] = 'auto' #True, False, or  'auto'. With 'auto', the combined plots are only created if there are 5 parameters or less.
+scatter_matrix_plots_settings['dpi'] = 220
+scatter_matrix_plots_settings['figure_name'] = 'scatter_matrix_posterior'
+
 
 ######mumpce plots##### #####contour plots#### 
 #model_parameter_info = np.array([{'parameter_number': 0, 'parameter_name': r'$E_{a1}$'},

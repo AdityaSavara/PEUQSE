@@ -2058,13 +2058,18 @@ class parameter_estimation:
         parameterNamesAndMathTypeExpressionsDict = self.UserInput.parameterNamesAndMathTypeExpressionsDict
         plotting_functions.makeHistogramsForEachParameter(parameterSamples,parameterNamesAndMathTypeExpressionsDict)
 
-    def makeSamplingScatterMatrixPlot(self, parameterSamples = [], parameterNamesAndMathTypeExpressionsDict={}, parameterNamesList =[], plot_settings={}):
+    def makeSamplingScatterMatrixPlot(self, parameterSamples = [], parameterNamesAndMathTypeExpressionsDict={}, parameterNamesList =[], plot_settings={'combined_plots':'auto'}):
         if 'dpi' not in  plot_settings:  plot_settings['dpi'] = 220
         if 'figure_name' not in  plot_settings:  plot_settings['figure_name'] = 'scatter_matrix_posterior'
         if parameterSamples  ==[] : parameterSamples = self.post_burn_in_samples
         if parameterNamesAndMathTypeExpressionsDict == {}: parameterNamesAndMathTypeExpressionsDict = self.UserInput.parameterNamesAndMathTypeExpressionsDict
         if parameterNamesList == []: parameterNamesList = self.UserInput.parameterNamesList #This is created when the parameter_estimation object is initialized.        
-
+        combined_plots = plot_settings['combined_plots']
+        if combined_plots == 'auto': #by default, we will not make the scatter matrix when there are more than 5 parameters.
+            if (len(parameterNamesList) > 5) or (len(parameterNamesAndMathTypeExpressionsDict) > 5):
+                combined_plots = False
+        if combined_plots == False: #This means no figure will be made so we just return.
+            return 
         posterior_df = pd.DataFrame(parameterSamples,columns=[parameterNamesAndMathTypeExpressionsDict[x] for x in parameterNamesList])
         pd.plotting.scatter_matrix(posterior_df)
         plt.savefig(plot_settings['figure_name'],dpi=plot_settings['dpi'])
@@ -2265,9 +2270,10 @@ class parameter_estimation:
                 pass#This will proceed as normal.
             elif CheKiPEUQ.parallel_processing.finalProcess == False:
                 return False #this will stop the plots creation.
+
         try:
-            self.makeHistogramsForEachParameter()    
-            self.makeSamplingScatterMatrixPlot()
+            self.makeHistogramsForEachParameter()               
+            self.makeSamplingScatterMatrixPlot(plot_settings=self.UserInput.scatter_matrix_plots_settings)
         except:
             print("Unable to make histograms and/or scatter matrix plots.")
 
