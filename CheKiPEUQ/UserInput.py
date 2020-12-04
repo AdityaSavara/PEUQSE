@@ -96,6 +96,7 @@ simulated_response_plot_settings['legend'] = True #Can be changed to false to tu
 simulated_response_plot_settings['error_linewidth'] = 'auto' #Integer. Using "auto" or "None" sets to "20" when there is only 1 point, 1 when number of points is > 10, and "4" when number of points is between 1 and 10 and. Using '0' or 'none' will hide the error bars.
 simulated_response_plot_settings['fontdict']= {'size':16} #A font dictionary can be passed in, this will be used for the axes and axes labels.
 
+#Scatter Matrix Plot Settings
 #possible dictionary fields include: dpi, figure_name, fontsize, x_label, y_label, figure_name, x_range, y_range
 scatter_matrix_plots_settings ={}
 scatter_matrix_plots_settings['individual_plots'] = 'auto' #presently does nothing. #True, False, or 'auto'. With 'auto', the individual_plots will always be created. 
@@ -104,15 +105,14 @@ scatter_matrix_plots_settings['dpi'] = 220
 scatter_matrix_plots_settings['figure_name'] = 'scatter_matrix_posterior'
 
 
-######mumpce plots##### #####contour plots#### 
+#contour plots# / #mumpce plots#
 #model_parameter_info = np.array([{'parameter_number': 0, 'parameter_name': r'$E_{a1}$'},
 #{'parameter_number': 1, 'parameter_name': r'$E_{a2}$'},
 #{'parameter_number': 2, 'parameter_name': r'$log(A_{1})$'},
 #{'parameter_number': 3, 'parameter_name': r'$log(A_{2})$'},
 #{'parameter_number': 4, 'parameter_name': r'$\gamma_{1}$'},
 #{'parameter_number': 5, 'parameter_name': r'$\gamma_{2}$'}])
-
-contour_plot_settings = {} #TODO: change below to contour_plot_settings. Make "parameter_pairs_for_contour_plots" and "active_parameters" to be within that.
+contour_plot_settings = {}
 contour_plot_settings['active_parameters'] = [] #Blank by default: gets populated with all parameters (or reduced parameters) if left blank. Warning: trying to set this manually while using the reduced parameters feature is not supported as of April 2020.
 contour_plot_settings['parameter_pairs'] = [] #This will accept either strings (for variable names) or integers for positions. #This sets which parameters to plot contours for. By default, all pairs are plotted. For example,  [[0, 1], [1, 2],[2, 3],[3, 4],[4, 5]] 
 contour_plot_settings['figure_name'] = 'PosteriorContourPlots'
