@@ -142,7 +142,6 @@ class parameter_estimation:
         #Make them 2dNested if needed..
 
         UserInput.responses_observed = np.array(nestedObjectsFunctions.makeAtLeast_2dNested(UserInput.responses['responses_observed']))
-        UserInput.responses_observed_uncertainties = np.array(nestedObjectsFunctions.makeAtLeast_2dNested(UserInput.responses['responses_observed_uncertainties']))
         if UserInput.responses['num_responses']=='auto':
             self.UserInput.num_response_dimensions = np.shape(UserInput.responses_observed)[0]
         else:
@@ -162,6 +161,7 @@ class parameter_estimation:
         #Now to process responses_observed_uncertainties, there are several options so we need to process it according to the cases.
         #The normal case:
         if isinstance(self.UserInput.responses['responses_observed_uncertainties'], Iterable): #If it's an array or like one, we take it as is. The other options are a none object or a function.
+            UserInput.responses_observed_uncertainties = np.array(nestedObjectsFunctions.makeAtLeast_2dNested(UserInput.responses['responses_observed_uncertainties']))
             UserInput.responses_observed_uncertainties = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(UserInput.responses_observed_uncertainties)
             #Processing of responses_observed_uncertainties for case that a blank list is received and not zeros.
             if len(UserInput.responses_observed_uncertainties[0]) == 0: 
