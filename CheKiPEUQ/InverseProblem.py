@@ -2058,13 +2058,18 @@ class parameter_estimation:
         parameterNamesAndMathTypeExpressionsDict = self.UserInput.parameterNamesAndMathTypeExpressionsDict
         plotting_functions.makeHistogramsForEachParameter(parameterSamples,parameterNamesAndMathTypeExpressionsDict)
 
-    def makeSamplingScatterMatrixPlot(self, parameterSamples = [], parameterNamesAndMathTypeExpressionsDict={}, parameterNamesList =[], plot_settings={}):
+    def makeSamplingScatterMatrixPlot(self, parameterSamples = [], parameterNamesAndMathTypeExpressionsDict={}, parameterNamesList =[], plot_settings={'combined_plots':'auto'}):
         if 'dpi' not in  plot_settings:  plot_settings['dpi'] = 220
         if 'figure_name' not in  plot_settings:  plot_settings['figure_name'] = 'scatter_matrix_posterior'
         if parameterSamples  ==[] : parameterSamples = self.post_burn_in_samples
         if parameterNamesAndMathTypeExpressionsDict == {}: parameterNamesAndMathTypeExpressionsDict = self.UserInput.parameterNamesAndMathTypeExpressionsDict
         if parameterNamesList == []: parameterNamesList = self.UserInput.parameterNamesList #This is created when the parameter_estimation object is initialized.        
-
+        combined_plots = plot_settings['combined_plots']
+        if combined_plots == 'auto': #by default, we will not make the scatter matrix when there are more than 5 parameters.
+            if (len(parameterNamesList) > 5) or (len(parameterNamesAndMathTypeExpressionsDict) > 5):
+                combined_plots = False
+        if combined_plots == False: #This means no figure will be made so we just return.
+            return 
         posterior_df = pd.DataFrame(parameterSamples,columns=[parameterNamesAndMathTypeExpressionsDict[x] for x in parameterNamesList])
         pd.plotting.scatter_matrix(posterior_df)
         plt.savefig(plot_settings['figure_name'],dpi=plot_settings['dpi'])
@@ -2224,9 +2229,10 @@ class parameter_estimation:
                 firstParameter = int(self.UserInput.parameterNamesAndMathTypeExpressionsDict[pairIndex[0]])
                 secondParameter = int(self.UserInput.parameterNamesAndMathTypeExpressionsDict[pairIndex[0]])
                 pairs_of_parameter_indices[pairIndex] = [firstParameter, secondParameter]
-        #Below we populate any custom fields as necessary.
+        #Below we populate any custom fields as necessary. These go into a separate argument when making mumpce plots
+        #Because these are basically arguments for a 'patch' on mumpce made by A. Savara and E. Walker.
         contour_settings_custom = {}
-        contour_settings_custom_fields = {'figure_name','fontsize','num_y_ticks','num_x_ticks','colormap_posterior_customized','colormap_prior_customized','contours_normalized','colorbars','axis_limits'} #This is a set, not a dictionary.
+        contour_settings_custom_fields = {'figure_name','fontsize','num_y_ticks','num_x_ticks','colormap_posterior_customized','colormap_prior_customized','contours_normalized','colorbars','axis_limits','dpi', 'num_pts_per_axis','cmap_levels', 'space_between_subplots', 'zoom_std_devs', 'x_ticks', 'y_ticks', 'center_on'} #This is a set, not a dictionary.
         for custom_field in contour_settings_custom_fields:
             if custom_field in self.UserInput.contour_plot_settings:
                 contour_settings_custom[custom_field] = self.UserInput.contour_plot_settings[custom_field]        
@@ -2237,7 +2243,23 @@ class parameter_estimation:
         if 'colormap_prior_customized' in contour_settings_custom:
             if contour_settings_custom['colormap_prior_customized'].lower() == 'default' or contour_settings_custom['colormap_prior_customized'].lower() == 'auto':
                 del contour_settings_custom['colormap_prior_customized']
-        figureObject_beta.mumpce_plots(model_parameter_info = self.UserInput.model_parameter_info, active_parameters = active_parameters, pairs_of_parameter_indices = pairs_of_parameter_indices, posterior_mu_vector = posterior_mu_vector, posterior_cov_matrix = posterior_cov_matrix, prior_mu_vector = np.array(self.UserInput.mu_prior), prior_cov_matrix = self.UserInput.covmat_prior, contour_settings_custom = contour_settings_custom)
+        baseFigureName = contour_settings_custom['figure_name']
+        #First make individual plots if requested.
+        if self.UserInput.contour_plot_settings['individual_plots'] == 'auto':
+            individual_plots = True
+        if individual_plots == True:
+            for pair in pairs_of_parameter_indices:
+                contour_settings_custom['figure_name'] = baseFigureName + "__" + str(pair).replace('[','').replace(']','').replace(',','_')
+                figureObject_beta.mumpce_plots(model_parameter_info = self.UserInput.model_parameter_info, active_parameters = active_parameters, pairs_of_parameter_indices = [pair], posterior_mu_vector = posterior_mu_vector, posterior_cov_matrix = posterior_cov_matrix, prior_mu_vector = np.array(self.UserInput.mu_prior), prior_cov_matrix = self.UserInput.covmat_prior, contour_settings_custom = contour_settings_custom)               
+        #now make combined plots if requested.
+        if self.UserInput.contour_plot_settings['combined_plots'] == 'auto':
+            if len(pairs_of_parameter_indices) > 5:
+                combined_plots = False
+            else:
+                combined_plots = True
+        if combined_plots == True:
+            contour_settings_custom['figure_name'] = baseFigureName + "__combined"
+            figureObject_beta.mumpce_plots(model_parameter_info = self.UserInput.model_parameter_info, active_parameters = active_parameters, pairs_of_parameter_indices = pairs_of_parameter_indices, posterior_mu_vector = posterior_mu_vector, posterior_cov_matrix = posterior_cov_matrix, prior_mu_vector = np.array(self.UserInput.mu_prior), prior_cov_matrix = self.UserInput.covmat_prior, contour_settings_custom = contour_settings_custom)
         return figureObject_beta
 
     @CiteSoft.after_call_compile_consolidated_log(compile_checkpoints=True) #This is from the CiteSoft module.
@@ -2249,9 +2271,10 @@ class parameter_estimation:
                 pass#This will proceed as normal.
             elif CheKiPEUQ.parallel_processing.finalProcess == False:
                 return False #this will stop the plots creation.
+
         try:
-            self.makeHistogramsForEachParameter()    
-            self.makeSamplingScatterMatrixPlot()
+            self.makeHistogramsForEachParameter()               
+            self.makeSamplingScatterMatrixPlot(plot_settings=self.UserInput.scatter_matrix_plots_settings)
         except:
             print("Unable to make histograms and/or scatter matrix plots.")
 

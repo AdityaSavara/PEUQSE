@@ -960,7 +960,8 @@ class Project(object):
                 contour_settings_custom['contours_normalized'] = True            
             #This makes the locations of the points in the contours.
             if 'axis_limits' in contour_settings_custom:
-                x_axis_min, x_axis_max, y_axis_min, y_axis_max = contour_settings_custom['axis_limits']
+                if str(contour_settings_custom['axis_limits']).lower() != 'auto':
+                    x_axis_min, x_axis_max, y_axis_min, y_axis_max = contour_settings_custom['axis_limits']
             xpts = np.linspace(x_axis_min,x_axis_max,contour_settings_custom['num_pts_per_axis'])
             ypts = np.linspace(y_axis_min,y_axis_max,contour_settings_custom['num_pts_per_axis'])
             x_mesh, y_mesh = np.meshgrid(xpts, ypts) 
@@ -999,9 +1000,11 @@ class Project(object):
                 from matplotlib.ticker import MaxNLocator
                 ax.yaxis.set_major_locator( MaxNLocator(nbins = contour_settings_custom['num_y_ticks'] ) )
             if 'x_ticks' in  contour_settings_custom: #This feature is not recommended to be used.
-                ax.set_xticks(contour_settings_custom['x_ticks'])
+                if str(contour_settings_custom['x_ticks']).lower() != 'auto':
+                    ax.set_xticks(contour_settings_custom['x_ticks'])
             if 'y_ticks' in  contour_settings_custom: #This feature is not recommended to be used.
-                ax.set_yticks(contour_settings_custom['y_ticks'])     
+                if str(contour_settings_custom['y_ticks']).lower() != 'auto':
+                    ax.set_yticks(contour_settings_custom['y_ticks'])     
             for item in ([ax.title, ax.xaxis.label, ax.yaxis.label] +
                 ax.get_xticklabels() + ax.get_yticklabels()):
                 item.set_fontsize(contour_settings_custom['fontsize'])
@@ -1026,7 +1029,7 @@ class Project(object):
             self._single_pdf_plot(factors=factors_list[0],ax=axes, fig=fig, contour_settings_custom = contour_settings_custom)
             fig.tight_layout()
             if 'figure_name' in contour_settings_custom:
-                fig.savefig(contour_settings_custom['figure_name']+".png",dpi=220)
+                fig.savefig(contour_settings_custom['figure_name']+".png",dpi=contour_settings_custom['dpi'])
 
         if len(contour_settings_custom) == 0 and not len(factors_list) == 1: 
             for ax,factors in zip(axes,factors_list):
@@ -1040,7 +1043,7 @@ class Project(object):
                 contour_settings_custom['space_between_subplots'] = 0.40
             fig.subplots_adjust(wspace = contour_settings_custom['space_between_subplots']) 
             if 'figure_name' in contour_settings_custom:
-                fig.savefig(contour_settings_custom['figure_name']+".png",dpi=220)
+                fig.savefig(contour_settings_custom['figure_name']+".png",dpi=contour_settings_custom['dpi'])
         return fig
     
     def plot_covariance(self,factors_list=None):

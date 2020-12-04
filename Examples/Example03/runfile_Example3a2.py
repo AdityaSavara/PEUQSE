@@ -39,6 +39,7 @@ if __name__ == "__main__":
     UserInput.parameter_estimation_settings['mcmc_modulate_accept_probability']  = 0 #Default value of 0. Changing this value sharpens or flattens the posterior. A value greater than 1 flattens the posterior by accepting low values more often. It can be useful when greater sampling is more important than accuracy. One way of using this feature is to try with a value of 0, then with the value equal to the number of priors for comparison, and then to gradually decrease this number as low as is useful (to minimize distortion of the result). A downside of changing changing this variable to greater than 1 is that it slows the the ascent to the maximum of the prior, so there is a balance in using it. In contrast, numbers increasingly less than one (such as 0.90 or 0.10) will speed up the ascent to the maximum of the posterior, but will also result in fewer points being retained.
     UserInput.parameter_estimation_settings['mcmc_info_gain_cutoff'] = 0
     UserInput.contour_plot_settings['contours_normalized'] = True
+    UserInput.contour_plot_settings['combined_plots'] = True
 
     #After making the UserInput, now we make a 'parameter_estimation' object from it.
     PE_object = CKPQ.parameter_estimation(UserInput)

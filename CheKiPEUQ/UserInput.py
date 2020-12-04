@@ -61,20 +61,6 @@ parameter_estimation_settings['mcmc_checkPointFrequency'] = None #This is only f
 parameter_estimation_settings['mcmc_parallel_sampling'] = False #This makes completely parallelized sampling of a single sampling. syntax to use is like "mpiexec -n 5 python runfile.py" where 5 is the number of processors. Currently, the first processor's results are thrown away.  In the future, this may change.
 parameter_estimation_settings['mcmc_continueSampling']  = 'auto' #This can be set to True if user would like to continue sampling from a previous result in the directory.  The mcmc_logP_and_parameter_samples.pkl file will be used.  Note that if one calls the same PE_object after mcmc sampling within a given python instance then continued sampling will also occur in that situation.
 
-#####Plot Settings#####
-#Response Plot Settings
-simulated_response_plot_settings = {}
-simulated_response_plot_settings['x_label'] = ''
-simulated_response_plot_settings['y_label'] = ''
-#simulated_response_plot_settings['y_range'] = [0.00, 0.025] #optional.
-simulated_response_plot_settings['figure_name'] = 'Posterior_Simulated' #This is the default name for simulated response plots.
-simulated_response_plot_settings['legend'] = True #Can be changed to false to turn off the legend.
-#simulated_response_plot_settings['legendLabels'] = ['experiment', 'mu_guess', 'MAP'] here is an example of how to change the legend labels.
-simulated_response_plot_settings['error_linewidth'] = 'auto' #Integer. Using "auto" or "None" sets to "20" when there is only 1 point, 1 when number of points is > 10, and "4" when number of points is between 1 and 10 and. Using '0' or 'none' will hide the error bars.
-simulated_response_plot_settings['fontdict']= {'size':16} #A font dictionary can be passed in, this will be used for the axes and axes labels.
-
-#possible dictionary fields include: dpi, figure_name, fontsize, x_label, y_label, figure_name, x_range, y_range
-samplingScatterMatrixPlotsSettings ={}
 
 ######multistart (including gridsearch)##### 
 #Possible searchTypes are: 'getLogP', 'doEnsembleSliceSampling', 'doMetropolisHastings', 'doOptimizeNegLogP', 'doOptimizeSSR'.  These are called by syngatx like PE_object.doMultiStart('doEnsembleSliceSampling') in the runfile
@@ -92,13 +78,30 @@ parameter_estimation_settings['multistart_gridsearchToSamples'] = True #if this 
 parameter_estimation_settings['multistart_gridsearch_threshold_filter_samples'] = True #This feature removes low probability tails from the posterior. This can be important for getting mu_AP, especially when using ESS. Default is true. This only has an effect if multistart_gridsearchToSamples is set to True.
 parameter_estimation_settings['multistart_gridsearch_threshold_filter_coefficient'] = 'auto' #This can be a float or the string 'auto'. Currently (Oct 2020), 'auto' sets the value at 2.0.  The smaller the value the more aggressive the filtering. This only has an effect if multistart_gridsearchToSamples is set to True.
 parameter_estimation_settings['multistart_continueSampling']  = 'auto' #This only works with multistart_gridsearchToSamples. This can be set to True if user would like to continue sampling from a previous result in the directory.  The permutations_MAP_logP_and_parameters_values.pkl file will be used.  Note that if one calls the same PE_object after multistart_gridsearchToSamples sampling within a given python instance then continued sampling will also occur in that situation.
-
-
 parameter_estimation_settings['multistart_passThroughArgs'] = {}
 parameter_estimation_settings['multistart_calculatePostBurnInStatistics'] = True
 parameter_estimation_settings['multistart_keep_cumulative_post_burn_in_data'] = False
 parameter_estimation_settings['multistart_exportLog'] = False #In the future, this will cause more information to be exported.
 parameter_estimation_settings['multistart_passThroughArgs'] = {}
+
+#####Plot Settings#####
+#Response Plot Settings
+simulated_response_plot_settings = {}
+simulated_response_plot_settings['x_label'] = ''
+simulated_response_plot_settings['y_label'] = ''
+#simulated_response_plot_settings['y_range'] = [0.00, 0.025] #optional.
+simulated_response_plot_settings['figure_name'] = 'Posterior_Simulated' #This is the default name for simulated response plots.
+simulated_response_plot_settings['legend'] = True #Can be changed to false to turn off the legend.
+#simulated_response_plot_settings['legendLabels'] = ['experiment', 'mu_guess', 'MAP'] here is an example of how to change the legend labels.
+simulated_response_plot_settings['error_linewidth'] = 'auto' #Integer. Using "auto" or "None" sets to "20" when there is only 1 point, 1 when number of points is > 10, and "4" when number of points is between 1 and 10 and. Using '0' or 'none' will hide the error bars.
+simulated_response_plot_settings['fontdict']= {'size':16} #A font dictionary can be passed in, this will be used for the axes and axes labels.
+
+#possible dictionary fields include: dpi, figure_name, fontsize, x_label, y_label, figure_name, x_range, y_range
+scatter_matrix_plots_settings ={}
+scatter_matrix_plots_settings['individual_plots'] = 'auto' #presently does nothing. #True, False, or 'auto'. With 'auto', the individual_plots will always be created. 
+scatter_matrix_plots_settings['combined_plots'] = 'auto' #True, False, or  'auto'. With 'auto', the combined plots are only created if there are 5 parameters or less.
+scatter_matrix_plots_settings['dpi'] = 220
+scatter_matrix_plots_settings['figure_name'] = 'scatter_matrix_posterior'
 
 
 ######mumpce plots##### #####contour plots#### 
@@ -113,14 +116,24 @@ contour_plot_settings = {} #TODO: change below to contour_plot_settings. Make "p
 contour_plot_settings['active_parameters'] = [] #Blank by default: gets populated with all parameters (or reduced parameters) if left blank. Warning: trying to set this manually while using the reduced parameters feature is not supported as of April 2020.
 contour_plot_settings['parameter_pairs'] = [] #This will accept either strings (for variable names) or integers for positions. #This sets which parameters to plot contours for. By default, all pairs are plotted. For example,  [[0, 1], [1, 2],[2, 3],[3, 4],[4, 5]] 
 contour_plot_settings['figure_name'] = 'PosteriorContourPlots'
-contour_plot_settings['fontsize']=16  #Fontsize can also be set to "auto"
-contour_plot_settings['num_y_ticks'] = 'auto'  #num_y_ticks and num_x_ticks must be either a string ('auto') or an integer (such as 4, either without string or with integer casting like int('5')).
-contour_plot_settings['num_x_ticks'] = 'auto'
-contour_plot_settings['contours_normalized']=True
-contour_plot_settings['center_on']='all'
-contour_plot_settings['colorbars']=True
-contour_plot_settings['colormap_posterior_customized'] = 'default' #can also be 'Oranges' for example.
-contour_plot_settings['colormap_prior_customized'] = 'default' #can also be 'Greens' for example.
+contour_plot_settings['individual_plots'] = 'auto' #True, False, or 'auto'. With 'auto', the individual_plots will always be created.
+contour_plot_settings['combined_plots'] = 'auto' #True, False, or  'auto'. With 'auto', the combined plots are only created if there are 5 pairs or less.
+contour_plot_settings['zoom_std_devs'] = 2.5 #how zoomed in the image is.
+contour_plot_settings['fontsize']=16  #sets the fontsize for everything except the colorbars. Can be an integer or the word 'auto', or the word "None". Should change space_between_subplots if fontsize is changed. 
+contour_plot_settings['space_between_subplots'] = 0.40 #Typically a value between 0.20 and 5.0. Set to 0.40 by default. Should be changed when font size is changed. Fontsize 'auto' tends to make small fonts which needs smaller values like 0.20.
+contour_plot_settings['cmap_levels'] = 4   #This is the number of contour levels.
+contour_plot_settings['num_y_ticks'] = 'auto'  #adusts number of y ticks (actually sets a maximum number of them). #num_y_ticks and num_x_ticks must be either a string ('auto') or an integer (such as 4, either without string or with integer casting like int('5')). This feature is recommended.  #Note that this is a *request* When it's not fulfilled exactly, the user can play with the number.
+contour_plot_settings['num_x_ticks'] = 'auto'  #adjusts number of x ticks (actually sets a maximum number of them). #num_y_ticks and num_x_ticks must be either a string ('auto') or an integer (such as 4, either without string or with integer casting like int('5')).This feature is recommended. #Note that this is a *request* When it's not fulfilled exactly, the user can play with the number.
+contour_plot_settings['num_pts_per_axis'] = 500 #This sets the resolution of the contours.
+contour_plot_settings['dpi'] = 220
+contour_plot_settings['x_ticks'] = 'auto' #feed in an array of numbers directly. Not recommended to change.
+contour_plot_settings['y_ticks'] = 'auto' #feed in an array of numbers directly. Not recommended to change.
+contour_plot_settings['axis_limits'] = 'auto' #Feed in list of [x_min, x_max, y_min, y_max]. This is appropriate to use. If a list of lists is provided, then the individual_plots will each receive the appropriate axis_limits.
+contour_plot_settings['contours_normalized']=True #This sets the scales on the color bars to 1.0.  Changing to False shows absolute density values for the posterior and prior. With all default settings, shows contours at 0.2, 0.4, 0.6., 0.8
+contour_plot_settings['center_on']='all' # #can be 'all', 'prior' or 'posterior'. 
+contour_plot_settings['colorbars']=True #can be true or false.
+contour_plot_settings['colormap_posterior_customized'] = 'auto' #can also be 'Oranges' for example. #accepts a string (matplotlib colormap names, like 'Greens') or a list of tuples with 0-to-1 and colornames to interpolate between. For example, the default right now is:  [(0,    '#00FFFF'),(1,    '#0000FF')]. The tuple could have 0, 0.7, and 1, for example. #colors can be obtained from: https://www.htmlcsscolor.com/hex/244162  
+contour_plot_settings['colormap_prior_customized'] = 'auto' #can also be 'Greens' for example. #accepts a string (matplotlib colormap names, like 'Oranges') or a list of tuples with 0-to-1 and colornames to interpolate between. For example, the default right now is:  [(0,    '#FFFF00'),(1,    '#FF0000')]. The tuple could have 0, 0.7, and 1, for example. #colors can be obtained from: https://www.htmlcsscolor.com/hex/244162  
 #See the file mumpce_custom_plotting_example.py for the full set of arguments that can be provided inside contour_plot_settings.
 
 ####Design Of Experiments####
