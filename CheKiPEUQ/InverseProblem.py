@@ -582,8 +582,8 @@ class parameter_estimation:
         if (type(self.UserInput.parameter_estimation_settings['multistart_checkPointFrequency']) != type(None)) or (verbose == True):
                 timeAtPermutationSearchStart = time.time()
                 timeAtLastPermutation = timeAtPermutationSearchStart #just initializing
-        self.highest_logP = self.getLogP(self.UserInput.InputParameterInitialGuess) #just initializing
-        highest_logP_parameter_set = self.UserInput.InputParameterInitialGuess #just initializing
+        self.highest_logP = float('-inf') #just initializing
+        highest_logP_parameter_set = np.ones(len(self.UserInput.InputParameterInitialGuess))*float('nan') #just initializing
         bestResultSoFar = [self.highest_logP, highest_logP_parameter_set, None, None, None, None, None, None] #just initializing
         highest_MAP_initial_point_index = None #just initializing
         highest_MAP_initial_point_parameters = None #just initializing
