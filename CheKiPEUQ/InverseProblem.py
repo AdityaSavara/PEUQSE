@@ -2297,6 +2297,8 @@ class parameter_estimation:
         #First make individual plots if requested.
         if self.UserInput.contour_plot_settings['individual_plots'] == 'auto':
             individual_plots = True
+        else:
+            individual_plots = self.UserInput.contour_plot_settings['individual_plots']
         if individual_plots == True:
             for pair in pairs_of_parameter_indices:
                 contour_settings_custom['figure_name'] = baseFigureName + "__" + str(pair).replace('[','').replace(']','').replace(',','_').replace(' ','')
