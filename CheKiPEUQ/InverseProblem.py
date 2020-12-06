@@ -1516,6 +1516,11 @@ class parameter_estimation:
             if filterCoeffient.lower() == "auto":
                 filterCoeffient = 2.0
         if filterSamples == True:   
+            #before filtering, we will keep an unfiltered version in case of ['exportAllSimulatedOutputs'] == True:
+            if self.UserInput.parameter_estimation_settings['exportAllSimulatedOutputs'] == True:
+                self.post_burn_in_samples_unfiltered = copy.deepcopy(self.post_burn_in_samples)
+                self.post_burn_in_log_posteriors_un_normed_vec_unfiltered = copy.deepcopy(self.post_burn_in_log_posteriors_un_normed_vec)
+                self.post_burn_in_log_priors_vec_unfiltered = copy.deepcopy(self.post_burn_in_log_priors_vec)
             originalLength = np.shape(self.post_burn_in_log_posteriors_un_normed_vec)[0] 
             try:
                 mergedArray = np.hstack( (self.post_burn_in_log_posteriors_un_normed_vec, self.post_burn_in_log_priors_vec, self.post_burn_in_samples) )
@@ -1577,7 +1582,10 @@ class parameter_estimation:
         np.savetxt(file_name_prefix+'mcmc_logP_and_parameter_samples'+file_name_suffix+'.csv',mcmc_samples_array, delimiter=",")
         pickleAnObject(mcmc_samples_array, file_name_prefix+'mcmc_logP_and_parameter_samples'+file_name_suffix)
         if self.UserInput.parameter_estimation_settings['exportAllSimulatedOutputs'] == True: #By default, we should not keep this, it's a little too large with large sampling.
-            np.savetxt(file_name_prefix+'mcmc_all_simulated_outputs'+file_name_suffix+'.csv',self.post_burn_in_samples_simulatedOutputs, delimiter=",")            
+            np.savetxt(file_name_prefix+'mcmc_all_simulated_outputs_unfiltered'+file_name_suffix+'.csv',self.post_burn_in_samples_simulatedOutputs, delimiter=",")         
+            np.savetxt(file_name_prefix+'mcmc_post_burn_in_samples_unfiltered'+file_name_suffix+'.csv',self.post_burn_in_samples_unfiltered, delimiter=",")            
+            np.savetxt(file_name_prefix+'mcmc_post_burn_in_log_priors_vec_unfiltered'+file_name_suffix+'.csv',self.post_burn_in_log_posteriors_un_normed_vec_unfiltered, delimiter=",")            
+            np.savetxt(file_name_prefix+'mcmc_post_burn_in_log_posteriors_un_normed_vec_unfiltered'+file_name_suffix+'.csv',self.post_burn_in_log_priors_vec_unfiltered, delimiter=",")                        
         with open(file_name_prefix+'mcmc_log_file'+file_name_suffix+".txt", 'w') as out_file:
             out_file.write("self.initial_point_parameters:" + str( self.UserInput.InputParameterInitialGuess) + "\n")
             out_file.write("MAP_logP:" +  str(self.map_logP) + "\n")
@@ -1605,12 +1613,15 @@ class parameter_estimation:
     def exportPostPermutationStatistics(self, searchType=''): #if it is an mcmc run, then we need to save the sampling as well.
         #TODO: Consider to Make header for mcmc_samples_array. Also make exporting the mcmc_samples_array optional. 
         file_name_prefix, file_name_suffix = self.getParallelProcessingPrefixAndSuffix() #Rather self explanatory.
-        if (searchType == 'doEnsembleSliceSampling') or (searchType == 'doMetropolisHastings'):
+        if (searchType == 'doEnsembleSliceSampling') or (searchType == 'doMetropolisHastings'): #Note: this might be needed for parallel processing, not sure.
             mcmc_samples_array = np.hstack((self.post_burn_in_log_posteriors_un_normed_vec,self.post_burn_in_samples))
             np.savetxt(file_name_prefix+'permutation_logP_and_parameter_samples'+file_name_suffix+'.csv',mcmc_samples_array, delimiter=",")
             pickleAnObject(mcmc_samples_array, file_name_prefix+'permutation_logP_and_parameter_samples'+file_name_suffix)
         if self.UserInput.parameter_estimation_settings['exportAllSimulatedOutputs'] == True: #By default, we should not keep this, it's a little too large with large sampling.
-            np.savetxt(file_name_prefix+'permutation_all_simulated_outputs'+file_name_suffix+'.csv',self.post_burn_in_samples_simulatedOutputs, delimiter=",")            
+            np.savetxt(file_name_prefix+'permutation_all_simulated_outputs_unfiltered'+file_name_suffix+'.csv',self.post_burn_in_samples_simulatedOutputs, delimiter=",")            
+            np.savetxt(file_name_prefix+'permutation_post_burn_in_samples_unfiltered'+file_name_suffix+'.csv',self.post_burn_in_samples_unfiltered, delimiter=",")            
+            np.savetxt(file_name_prefix+'permutation_post_burn_in_log_priors_vec_unfiltered'+file_name_suffix+'.csv',self.post_burn_in_log_posteriors_un_normed_vec_unfiltered, delimiter=",")            
+            np.savetxt(file_name_prefix+'permutation_post_burn_in_log_posteriors_un_normed_vec_unfiltered'+file_name_suffix+'.csv',self.post_burn_in_log_priors_vec_unfiltered, delimiter=",")                        
         with open(file_name_prefix+'permutation_log_file'+file_name_suffix+".txt", 'w') as out_file:
             out_file.write("self.initial_point_parameters:" + str( self.UserInput.InputParameterInitialGuess) + "\n")
             out_file.write("MAP_logP:" +  str(self.map_logP) + "\n")
@@ -1804,7 +1815,6 @@ class parameter_estimation:
         #Code to initialize checkpoints.
         if type(self.UserInput.parameter_estimation_settings['mcmc_checkPointFrequency']) != type(None):
             print("Starting MCMC sampling.")
-            
             timeOfFirstCheckpoint = time.time()
             timeCheckpoint = time.time() - timeOfFirstCheckpoint #First checkpoint at time 0.
             numCheckPoints = self.UserInput.parameter_estimation_settings['mcmc_length']/self.UserInput.parameter_estimation_settings['mcmc_checkPointFrequency']
@@ -1902,8 +1912,6 @@ class parameter_estimation:
             self.during_burn_in_samples = samples[0:self.mcmc_burn_in_length] 
             self.during_burn_in_log_posteriors_un_normed_vec = log_posteriors_un_normed_vec[0:self.mcmc_burn_in_length]
         self.post_burn_in_samples = samples[self.mcmc_burn_in_length:] 
-        if self.UserInput.parameter_estimation_settings['exportAllSimulatedOutputs'] == True:
-            self.post_burn_in_samples_simulatedOutputs = samples_simulatedOutputs[self.mcmc_burn_in_length:]
         self.post_burn_in_log_posteriors_un_normed_vec = log_posteriors_un_normed_vec[self.mcmc_burn_in_length:]
         self.mcmc_last_point_sampled = self.post_burn_in_samples[-1]
         self.post_burn_in_log_likelihoods_vec = log_likelihoods_vec[self.mcmc_burn_in_length:]

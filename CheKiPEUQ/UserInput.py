@@ -11,7 +11,7 @@ responses['independent_variables_names'] = []
 responses['num_responses'] = 'auto' #'auto' is recommended, though an integer can be put in directly.
 
 #(Optional) data transforms  This is for transforming the responses to improve the objective function.  Will be applied on simulated data also. 
-#Currently not compatible with simulatedResponses_upperBounds and simulatedResponses_lowerBounds. Contact the developer if this is needed
+#This feature is not compatible with simulatedResponses_upperBounds and simulatedResponses_lowerBounds as of Dec 2020. Contact the developer if this is needed
 responses['data_overcategory'] = '' #Choices are currently 'transient_kinetics' and 'steady_state_kinetics'.  If this is used, then one also needs to provide response_types ( One for each response dimension). Additional features are welcome.
 responses['response_types'] = [] #Response types can currently  be 'P' (product), 'I' (intermediate), 'R' (reactant), 'T' (temperature), 'O' (other)
 responses['response_data_types'] = [] #Response data types can be 'c' (concentration), 'r' (rate), 'o' (other)
@@ -34,15 +34,15 @@ model['custom_logLikelihood'] = None #Optional. This should point to a function 
 model['custom_logPrior'] = None  #Optional. This feature has  been implemented but not tested, it is intended for cases where the prior distribution is not described by a normal distribution. The user will provide a function that takes in the parameters and returns a logPrior (or something proportional to a logPrior). If MCMC will be performed, the user will still need to fill out InputParametersPriorValuesUncertainties with std deviations or a covariance matrix since that is used to decide the mcmc steps.
 model['InputParameterPriorValues_upperBounds'] = [] #Optional. This should be a list/array of the same shape as InputParameterPriorValues. Use a value of "None" for any parameter that should not be bounded in this direction.  The code then truncates any distribution to have a probability of ~0 when any of the parameters go outside of their bounds. ##As of May 4th 2020, this only has been checked for scaling_uncertainties_type = 'off'
 model['InputParameterPriorValues_lowerBounds'] = []#Optional. This should be a list/array of the same shape as InputParameterPriorValues. Use a value of "None" for any parameter that should not be bounded in this direction.  The code then truncates any distribution to have a probability of ~0 when any of the parameters go outside of their bounds. ##As of May 4th 2020, this only has been checked for scaling_uncertainties_type = 'off'
-model['simulatedResponses_upperBounds'] = [] #Optional. Disallows responses outside of provided bounds. This should be a list/array of the same shape as responses_observed. Use a value of "None" for any parameter that should not be bounded in this direction.  The code then sets the likelihood (and posterior) to ~0 when any of the responses go outside of their bounds. 
-model['simulatedResponses_lowerBounds'] = [] #Optional. Disallows responses outside of provided bounds. This should be a list/array of the same shape as responses_observed. Use a value of "None" for any parameter that should not be bounded in this direction.  The code then sets the likelihood (and posterior) to ~0 when any of the responses go outside of their bounds. 
+model['simulatedResponses_upperBounds'] = [] #Optional. Disallows responses outside of provided bounds. This should be a list/array of the same shape as responses_observed. Use a value of "None" for any parameter that should not be bounded in this direction.  The code then sets the likelihood (and posterior) to ~0 when any of the responses go outside of their bounds.  Not compatible with data_overcategory feature.
+model['simulatedResponses_lowerBounds'] = [] #Optional. Disallows responses outside of provided bounds. This should be a list/array of the same shape as responses_observed. Use a value of "None" for any parameter that should not be bounded in this direction.  The code then sets the likelihood (and posterior) to ~0 when any of the responses go outside of their bounds.  Not compatible with data_overcategory feature.
 
 
 #####Parameter Estimation Inputs#####
 parameter_estimation_settings = {}
 parameter_estimation_settings['verbose'] = False
 parameter_estimation_settings['exportLog'] = True
-parameter_estimation_settings['exportAllSimulatedOutputs'] = False
+parameter_estimation_settings['exportAllSimulatedOutputs'] = False #If this is changed to True, then all of the simulated outputs will be stored and exported.  Even if filtering is on, all of the simulated outputs will be exported, not just the filtered ones.
 parameter_estimation_settings['checkPointFrequency'] = None #Deprecated. It will override all other checkpoint choices if it is changed from None. The user should use the similar variables below.
 parameter_estimation_settings['scaling_uncertainties_type'] = "std" #"std" is for standard deviation. there is also "off" and the option of "mu" for using the absolute values of the mean(s) of the prior distribution(s). If a scalar is entered (a float) then that fixed value will be used for all scalings.
 parameter_estimation_settings['undo_scaling_uncertainties_type'] = False #This undoing can be set to True but presently only works for the case of fixed scaling (a single scalar).
