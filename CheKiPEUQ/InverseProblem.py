@@ -201,6 +201,13 @@ class parameter_estimation:
             UserInput.responses_simulation_uncertainties = copy.deepcopy(self.UserInput.model['responses_simulation_uncertainties'])
 
         
+        #Now to process simulatedResponses_upperBounds and simulatedResponses_lowerBounds. Can be a blank list or a nested list.
+        if len(UserInput.model['simulatedResponses_upperBounds']) > 0:
+            UserInput.model['simulatedResponses_upperBounds'] = np.array(nestedObjectsFunctions.makeAtLeast_2dNested(self.UserInput.model['simulatedResponses_upperBounds']))
+            UserInput.model['simulatedResponses_upperBounds'] = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(UserInput.model['simulatedResponses_upperBounds'])
+        if len(UserInput.model['simulatedResponses_lowerBounds']) > 0:
+            UserInput.model['simulatedResponses_lowerBounds'] = np.array(nestedObjectsFunctions.makeAtLeast_2dNested(self.UserInput.model['simulatedResponses_lowerBounds']))
+            UserInput.model['simulatedResponses_lowerBounds'] = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(UserInput.model['simulatedResponses_lowerBounds'])
             
         self.UserInput.num_data_points = len(nestedObjectsFunctions.flatten_2dNested(UserInput.responses_observed)) #This works if there is a single response series.
         #We need to figure out if the abscissa has length equal to the responses or not.
