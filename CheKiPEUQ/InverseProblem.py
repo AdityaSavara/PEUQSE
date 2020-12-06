@@ -594,7 +594,7 @@ class parameter_estimation:
         bestResultSoFar = [self.highest_logP, highest_logP_parameter_set, None, None, None, None, None, None] #just initializing
         highest_MAP_initial_point_index = None #just initializing
         highest_MAP_initial_point_parameters = None #just initializing
-        if self.UserInput.parameter_estimation_settings['exportAllSimulatedOutputs'] = True:
+        if self.UserInput.parameter_estimation_settings['exportAllSimulatedOutputs'] == True:
             self.permutation_unfiltered_map_simulated_outputs = []
         if searchType == 'doEnsembleSliceSampling':
             if str(self.UserInput.parameter_estimation_settings['mcmc_nwalkers']).lower() == 'auto':
@@ -653,7 +653,7 @@ class parameter_estimation:
                     else: #This is basically elseif permutationIndex > 0:
                         self.cumulative_post_burn_in_samples = np.vstack((self.cumulative_post_burn_in_samples, self.post_burn_in_samples))
                         self.cumulative_post_burn_in_log_priors_vec = np.vstack((self.cumulative_post_burn_in_log_priors_vec, self.post_burn_in_log_priors_vec))
-                        self.cumulative_post_burn_in_log_posteriors_un_normed_vec = np.vstack((self.cumulative_post_burn_in_log_posteriors_un_normed_vec, self.post_burn_in_log_posteriors_un_normed_vec))
+                        self.cumulative_post_burn_in_log_posteriors_un_normed_vec = np.vstack((self.cumulative_post_burn_in_log_posteriors_un_normed_vec, self.post_burn_in_log_posteriors_un_normed_vec))                    
             if searchType == 'doOptimizeNegLogP':
                 thisResult = self.doOptimizeNegLogP(**passThroughArgs)
                 #FIXME: the column headings of "thisResult" are wrong for the case of doOptimizeNegLogP.
@@ -673,11 +673,11 @@ class parameter_estimation:
                 highest_MAP_initial_point_index = permutationIndex
                 highest_MAP_initial_point_parameters = permutation
             allPermutationsResults.append(thisResult)
-            if self.UserInput.parameter_estimation_settings['exportAllSimulatedOutputs'] = True:
-                if searchType == 'doEnsembleSliceSampling' or searchType == 'doMetropolisHastings':
-                    self.permutation_unfiltered_map_simulated_outputs.append(self.mapSimulatedResponses)
-                else:
-                    self.permutation_unfiltered_map_simulated_outputs.append(self.lastSimulatedResponses)
+            if self.UserInput.parameter_estimation_settings['exportAllSimulatedOutputs'] == True:
+                if searchType == 'doEnsembleSliceSampling' or searchType=='doMetropolisHastings': #we need to run the map again, outside of mcmc, to populate 
+                    self.map_logP = self.getLogP(self.map_parameter_set) #this has an implied return of self.lastSimulatedResponses.
+                #else no extra work needs to be done since the last simulation was the map.
+                self.permutation_unfiltered_map_simulated_outputs.append(self.lastSimulatedResponses)
             self.permutations_MAP_logP_and_parameters_values.append(np.hstack((self.map_logP, self.map_parameter_set)))    
             if verbose == True:
                 print("Permutation", permutation, "number", permutationIndex+1, "out of", numPermutations, "timeOfThisPermutation", timeOfThisPermutation)
