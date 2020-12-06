@@ -379,6 +379,8 @@ class parameter_estimation:
             responses_simulation_uncertainties = self.UserInput.responses_simulation_uncertainties
         else:  #Else we assume it's a function taking the discreteParameterVector.
             responses_simulation_uncertainties = self.UserInput.responses_simulation_uncertainties(discreteParameterVector) #This is passing an argument to a function.
+            responses_simulation_uncertainties = np.array(nestedObjectsFunctions.makeAtLeast_2dNested(responses_simulation_uncertainties))
+            responses_simulation_uncertainties = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(responses_simulation_uncertainties)
         return responses_simulation_uncertainties
 
     def simulateWithSubsetOfParameters(self,reducedParametersVector): #This is a wrapper.
@@ -2078,7 +2080,7 @@ class parameter_estimation:
                             current_log_probability_metric = float('-inf')
                         response_log_probability_metric = current_log_probability_metric + response_log_probability_metric
                         if float(current_log_probability_metric) == float('-inf'):
-                            print("Warning: There are posterior points that have zero probability. If there are too many points like this, the MAP and mu_AP returned will not be meaningful.")
+                            print("Warning: There are posterior points that have zero probability. If there are too many points like this, the MAP and mu_AP returned will not be meaningful. Parameters:", discreteParameterVector)
                             current_log_probability_metric = -1E100 #Just choosing an arbitrarily very severe penalty. I know that I have seen 1E-48 to -303 from the multivariate pdf, and values inbetween like -171, -217, -272. I found that -1000 seems to be worse, but I don't have a systematic testing. I think -1000 was causing numerical errors.
                             response_log_probability_metric = current_log_probability_metric + response_log_probability_metric
             log_probability_metric = log_probability_metric + response_log_probability_metric
@@ -2121,21 +2123,27 @@ class parameter_estimation:
             self.mu_guess_SimulatedOutput = simulationFunction( self.UserInput.InputParameterInitialGuess) #Do NOT use self.UserInput.model['InputParameterInitialGuess'] because that won't work with reduced parameter space requests.
             if type(simulationOutputProcessingFunction) == type(None):
                 self.mu_guess_SimulatedResponses = nestedObjectsFunctions.makeAtLeast_2dNested(self.mu_guess_SimulatedOutput)
+                self.mu_guess_SimulatedResponses = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(self.mu_guess_SimulatedResponses)
             if type(simulationOutputProcessingFunction) != type(None):
                 self.mu_guess_SimulatedResponses =  nestedObjectsFunctions.makeAtLeast_2dNested(     simulationOutputProcessingFunction(self.mu_guess_SimulatedOutput)     )
+                self.mu_guess_SimulatedResponses = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(self.mu_guess_SimulatedResponses)
             #Check if we have simulation uncertainties, and populate if so.
             if type(self.UserInput.responses_simulation_uncertainties) != type(None):
                 self.mu_guess_responses_simulation_uncertainties = nestedObjectsFunctions.makeAtLeast_2dNested(self.get_responses_simulation_uncertainties(self.UserInput.InputParameterInitialGuess))
+                self.mu_guess_responses_simulation_uncertainties = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(self.mu_guess_responses_simulation_uncertainties)
                 
             #Get map simiulated output and simulated responses.
             self.map_SimulatedOutput = simulationFunction(self.map_parameter_set)           
             if type(simulationOutputProcessingFunction) == type(None):
                 self.map_SimulatedResponses = nestedObjectsFunctions.makeAtLeast_2dNested(self.map_SimulatedOutput)
+                self.map_SimulatedResponses = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(self.map_SimulatedResponses)
             if type(simulationOutputProcessingFunction) != type(None):
                 self.map_SimulatedResponses =  nestedObjectsFunctions.makeAtLeast_2dNested(     simulationOutputProcessingFunction(self.map_SimulatedOutput)     )
+                self.map_SimulatedResponses = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(self.map_SimulatedResponses)
             #Check if we have simulation uncertainties, and populate if so.
             if type(self.UserInput.responses_simulation_uncertainties) != type(None):
                 self.map_responses_simulation_uncertainties = nestedObjectsFunctions.makeAtLeast_2dNested(self.get_responses_simulation_uncertainties(self.map_parameter_set))
+                self.map_responses_simulation_uncertainties = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(self.map_responses_simulation_uncertainties)
             
             if hasattr(self, 'mu_AP_parameter_set'): #Check if a mu_AP has been assigned. It is normally only assigned if mcmc was used.           
                 #Get mu_AP simiulated output and simulated responses.
