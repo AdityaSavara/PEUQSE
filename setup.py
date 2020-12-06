@@ -21,7 +21,7 @@ URL = 'https://github.com/AdityaSavara/CheKiPEUQ'
 EMAIL = 'AditySavara2008@u.northwestern.edu'  #Eric A. Walker is a co-author and can be reached at WALKER, ERIC <walke299@email.sc.edu>
 AUTHOR = 'Aditya Savara'
 REQUIRES_PYTHON = '>=3.5.0'
-VERSION = '0.5.0'
+VERSION = '0.6.0'
 LICENSE = 'BSD-3-Clause'
 
 # What packages are required for this module to be executed?
@@ -30,7 +30,7 @@ REQUIRED = [
 
 # What packages are optional?
 EXTRAS = {
-    'COMPLETE': ['UnitTesterSG >= 5.2.0', 'matplotlib', 'scipy', 'numpy', 'pandas', 'CiteSoft', 'zeus-mcmc', 'dill']# 'uncertainties': ['uncertainties'], #pymc...
+    'COMPLETE': ['UnitTesterSG >= 5.3.0', 'matplotlib', 'scipy', 'numpy', 'pandas', 'CiteSoft', 'zeus-mcmc', 'dill']# 'uncertainties': ['uncertainties'], #pymc...
 }
 
 #To make sure the license etc. is included, I added the DATA_FILES object based on https://stackoverflow.com/questions/9977889/how-to-include-license-file-in-setup-py-script
