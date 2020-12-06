@@ -167,11 +167,11 @@ class parameter_estimation:
             if len(UserInput.responses_observed_uncertainties[0]) == 0: 
                 #if the response uncertainties is blank, we will use the heurestic of sigma = 5% of the observed value, with a floor of 2% of the maximum for that response. 
                 #Note that we are actually checking in index[0], that is because as an atleast_2d array even a blank list / array in it will give a length of 1.
-                UserInput.responses_observed_uncertainties = UserInput.responses_observed * 0.05
+                UserInput.responses_observed_uncertainties = np.abs( UserInput.responses_observed) * 0.05
                 for responseIndex in range(0,UserInput.num_response_dimensions): #need to cycle through to apply the "minimum" uncertainty of 0.02 times the max value.
-                    maxResponseValue = np.max(UserInput.responses_observed[responseIndex]) #Because of the "at_least2D" we actually need to use index 0.
+                    maxResponseAbsValue = np.max(np.abs(UserInput.responses_observed[responseIndex])) #Because of the "at_least2D" we actually need to use index 0.
                     #The below syntax is a bit hard to read, but it is similar to this: a[a==2] = 10 #replace all 2's with 10's
-                    UserInput.responses_observed_uncertainties[responseIndex][UserInput.responses_observed_uncertainties[responseIndex] < maxResponseValue * 0.02] = maxResponseValue * 0.02
+                    UserInput.responses_observed_uncertainties[responseIndex][UserInput.responses_observed_uncertainties[responseIndex] < maxResponseAbsValue * 0.02] = maxResponseAbsValue * 0.02
             elif nestedObjectsFunctions.sumNested(UserInput.responses_observed_uncertainties) == 0: #If a 0 (or list summing to 0) is provided, we will make the uncertainties zero.
                 import copy 
                 UserInput.responses_observed_uncertainties = UserInput.responses_observed * 0.0 #This will work because we've converted the internals to array already.
@@ -179,7 +179,7 @@ class parameter_estimation:
                 #for responseIndex in range(0,len(UserInput.responses_observed[0])):
                 #    UserInput.responses_observed_uncertainties[0][responseIndex]= UserInput.responses_observed[0][responseIndex]*0.0
         else: #The other possibilities are a None object or a function. For either of thtose cases, we simply set UserInput.responses_observed_uncertainties equal to what the user provided.
-            UserInput.responses_observed_uncertainties = self.UserInput.responses['responses_observed_uncertainties']
+            UserInput.responses_observed_uncertainties = copy.deepcopy(self.UserInput.responses['responses_observed_uncertainties'])
             
         #Now to process responses_simulation_uncertainties, there are several options so we need to process it according to the cases.
         #The normal case:
@@ -191,16 +191,16 @@ class parameter_estimation:
             if len(UserInput.responses_simulation_uncertainties[0]) == 0: 
                 #if the response uncertainties is blank, we will use the heurestic of sigma = 5% of the observed value, with a floor of 2% of the maximum for that response. 
                 #Note that we are actually checking in index[0], that is because as an atleast_2d array even a blank list / array in it will give a length of 1.
-                UserInput.responses_simulation_uncertainties = UserInput.responses_observed * 0.05
+                UserInput.responses_simulation_uncertainties = np.abs(UserInput.responses_observed) * 0.05
                 for responseIndex in range(0,UserInput.num_response_dimensions): #need to cycle through to apply the "minimum" uncertainty of 0.02 times the max value.
-                    maxResponseValue = np.max(UserInput.responses_observed[responseIndex]) #Because of the "at_least2D" we actually need to use index 0.
+                    maxResponseAbsValue = np.max(np.abs(UserInput.responses_observed[responseIndex])) #Because of the "at_least2D" we actually need to use index 0.
                     #The below syntax is a bit hard to read, but it is similar to this: a[a==2] = 10 #replace all 2's with 10's
-                    UserInput.responses_simulation_uncertainties[responseIndex][UserInput.responses_simulation_uncertainties[responseIndex] < maxResponseValue * 0.02] = maxResponseValue * 0.02
+                    UserInput.responses_simulation_uncertainties[responseIndex][UserInput.responses_simulation_uncertainties[responseIndex] < maxResponseAbsValue * 0.02] = maxResponseAbsValue * 0.02
             elif nestedObjectsFunctions.sumNested(UserInput.responses_simulation_uncertainties) == 0: #If a 0 (or list summing to 0) is provided, we will make the uncertainties zero.
                 import copy 
                 UserInput.responses_simulation_uncertainties = UserInput.responses_observed * 0.0 #This will work because we've converted the internals to array already.
         else: #The other possibilities are a None object or a function. For either of thtose cases, we simply set UserInput.responses_simulation_uncertainties equal to what the user provided.
-            UserInput.responses_simulation_uncertainties = self.UserInput.model['responses_simulation_uncertainties']
+            UserInput.responses_simulation_uncertainties = copy.deepcopy(self.UserInput.model['responses_simulation_uncertainties'])
 
         
             
@@ -478,7 +478,7 @@ class parameter_estimation:
                         pass
                     if UserInput.responses['response_data_type'][responseIndex] == 'r':
                         pass
-                if UserInput.responses['response_types'][responseIndex] == 'c':	 #For abscissa of concentration dependence.
+                if UserInput.responses['response_types'][responseIndex] == 'I' or UserInput.responses['response_types'][responseIndex] == 'P' or UserInput.responses['response_types'][responseIndex] == 'R': #For abscissa of concentration dependence.
                     if UserInput.responses['response_data_type'][responseIndex] == 'c':
                         pass
                     if UserInput.responses['response_data_type'][responseIndex] == 'r':
