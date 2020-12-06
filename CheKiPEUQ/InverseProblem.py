@@ -1525,9 +1525,12 @@ class parameter_estimation:
         if filterSamples == True:   
             #before filtering, we will keep an unfiltered version in case of ['exportAllSimulatedOutputs'] == True:
             if self.UserInput.parameter_estimation_settings['exportAllSimulatedOutputs'] == True:
-                self.post_burn_in_samples_unfiltered = copy.deepcopy(self.post_burn_in_samples)
-                self.post_burn_in_log_posteriors_un_normed_vec_unfiltered = copy.deepcopy(self.post_burn_in_log_posteriors_un_normed_vec)
-                self.post_burn_in_log_priors_vec_unfiltered = copy.deepcopy(self.post_burn_in_log_priors_vec)
+                try: #This try and except is primarily because as of Dec 6th 2020, the feature has been implemented for MH but not ESS. With ESS, post_burn_in_log_priors_vec_unfiltered is not gauranteed.
+                    self.post_burn_in_samples_unfiltered = copy.deepcopy(self.post_burn_in_samples)
+                    self.post_burn_in_log_posteriors_un_normed_vec_unfiltered = copy.deepcopy(self.post_burn_in_log_posteriors_un_normed_vec)
+                    self.post_burn_in_log_priors_vec_unfiltered = copy.deepcopy(self.post_burn_in_log_priors_vec)
+                except:
+                    pass
             originalLength = np.shape(self.post_burn_in_log_posteriors_un_normed_vec)[0] 
             try:
                 mergedArray = np.hstack( (self.post_burn_in_log_posteriors_un_normed_vec, self.post_burn_in_log_priors_vec, self.post_burn_in_samples) )
@@ -1589,10 +1592,13 @@ class parameter_estimation:
         np.savetxt(file_name_prefix+'mcmc_logP_and_parameter_samples'+file_name_suffix+'.csv',mcmc_samples_array, delimiter=",")
         pickleAnObject(mcmc_samples_array, file_name_prefix+'mcmc_logP_and_parameter_samples'+file_name_suffix)
         if self.UserInput.parameter_estimation_settings['exportAllSimulatedOutputs'] == True: #By default, we should not keep this, it's a little too large with large sampling.
-            np.savetxt(file_name_prefix+'mcmc_unfiltered_post_burn_in_simulated_outputs'+file_name_suffix+'.csv',self.post_burn_in_samples_simulatedOutputs, delimiter=",")         
-            np.savetxt(file_name_prefix+'mcmc_unfiltered_post_burn_in_parameter_samples'+file_name_suffix+'.csv',self.post_burn_in_samples_unfiltered, delimiter=",")            
-            np.savetxt(file_name_prefix+'mcmc_unfiltered_post_burn_in_log_priors_vec'+file_name_suffix+'.csv',self.post_burn_in_log_posteriors_un_normed_vec_unfiltered, delimiter=",")            
-            np.savetxt(file_name_prefix+'mcmc_unfiltered_post_burn_in_log_posteriors_un_normed_vec'+file_name_suffix+'.csv',self.post_burn_in_log_priors_vec_unfiltered, delimiter=",")                        
+            try: #The main reason to use a try and except is because this feature has not been implemented for ESS. With ESS, the mcmc_unfiltered_post_burn_in_simulated_outputs would not be retained and the program would crash.
+                np.savetxt(file_name_prefix+'mcmc_unfiltered_post_burn_in_simulated_outputs'+file_name_suffix+'.csv',self.post_burn_in_samples_simulatedOutputs, delimiter=",")         
+                np.savetxt(file_name_prefix+'mcmc_unfiltered_post_burn_in_parameter_samples'+file_name_suffix+'.csv',self.post_burn_in_samples_unfiltered, delimiter=",")            
+                np.savetxt(file_name_prefix+'mcmc_unfiltered_post_burn_in_log_priors_vec'+file_name_suffix+'.csv',self.post_burn_in_log_posteriors_un_normed_vec_unfiltered, delimiter=",")            
+                np.savetxt(file_name_prefix+'mcmc_unfiltered_post_burn_in_log_posteriors_un_normed_vec'+file_name_suffix+'.csv',self.post_burn_in_log_priors_vec_unfiltered, delimiter=",")                        
+            except:
+                pass
         with open(file_name_prefix+'mcmc_log_file'+file_name_suffix+".txt", 'w') as out_file:
             out_file.write("self.initial_point_parameters:" + str( self.UserInput.InputParameterInitialGuess) + "\n")
             out_file.write("MAP_logP:" +  str(self.map_logP) + "\n")
@@ -1625,10 +1631,13 @@ class parameter_estimation:
             np.savetxt(file_name_prefix+'permutation_logP_and_parameter_samples'+file_name_suffix+'.csv',mcmc_samples_array, delimiter=",")
             pickleAnObject(mcmc_samples_array, file_name_prefix+'permutation_logP_and_parameter_samples'+file_name_suffix)
         if self.UserInput.parameter_estimation_settings['exportAllSimulatedOutputs'] == True: #By default, we should not keep this, it's a little too large with large sampling.
-            np.savetxt(file_name_prefix+'permutation_unfiltered_post_burn_in_simulated_outputs'+file_name_suffix+'.csv',self.post_burn_in_samples_simulatedOutputs, delimiter=",")            
-            np.savetxt(file_name_prefix+'permutation_unfiltered_post_burn_in_parameter_samples'+file_name_suffix+'.csv',self.post_burn_in_samples_unfiltered, delimiter=",")            
-            np.savetxt(file_name_prefix+'permutation_unfiltered_post_burn_in_log_priors_vec'+file_name_suffix+'.csv',self.post_burn_in_log_posteriors_un_normed_vec_unfiltered, delimiter=",")            
-            np.savetxt(file_name_prefix+'permutation_unfiltered_post_burn_in_log_posteriors_un_normed_vec'+file_name_suffix+'.csv',self.post_burn_in_log_priors_vec_unfiltered, delimiter=",")                        
+            try: #The main reason to use a try and except is because this feature has not been implemented for ESS. With ESS, the mcmc_unfiltered_post_burn_in_simulated_outputs would not be retained and the program would crash.
+                np.savetxt(file_name_prefix+'permutation_unfiltered_post_burn_in_simulated_outputs'+file_name_suffix+'.csv',self.post_burn_in_samples_simulatedOutputs, delimiter=",")            
+                np.savetxt(file_name_prefix+'permutation_unfiltered_post_burn_in_parameter_samples'+file_name_suffix+'.csv',self.post_burn_in_samples_unfiltered, delimiter=",")            
+                np.savetxt(file_name_prefix+'permutation_unfiltered_post_burn_in_log_priors_vec'+file_name_suffix+'.csv',self.post_burn_in_log_posteriors_un_normed_vec_unfiltered, delimiter=",")            
+                np.savetxt(file_name_prefix+'permutation_unfiltered_post_burn_in_log_posteriors_un_normed_vec'+file_name_suffix+'.csv',self.post_burn_in_log_priors_vec_unfiltered, delimiter=",")                        
+            except:
+                pass
         with open(file_name_prefix+'permutation_log_file'+file_name_suffix+".txt", 'w') as out_file:
             out_file.write("self.initial_point_parameters:" + str( self.UserInput.InputParameterInitialGuess) + "\n")
             out_file.write("MAP_logP:" +  str(self.map_logP) + "\n")
