@@ -595,7 +595,7 @@ class parameter_estimation:
         highest_MAP_initial_point_index = None #just initializing
         highest_MAP_initial_point_parameters = None #just initializing
         if self.UserInput.parameter_estimation_settings['exportAllSimulatedOutputs'] == True:
-            self.permutation_unfiltered_map_simulated_outputs = []
+            self.permutations_unfiltered_map_simulated_outputs = []
         if searchType == 'doEnsembleSliceSampling':
             if str(self.UserInput.parameter_estimation_settings['mcmc_nwalkers']).lower() == 'auto':
                 permutationSearch_mcmc_nwalkers = 2*len(centerPoint) #Lowest possible is 2 times num parameters for ESS.
@@ -677,7 +677,7 @@ class parameter_estimation:
                 if searchType == 'doEnsembleSliceSampling' or searchType=='doMetropolisHastings': #we need to run the map again, outside of mcmc, to populate 
                     self.map_logP = self.getLogP(self.map_parameter_set) #this has an implied return of self.lastSimulatedResponses.
                 #else no extra work needs to be done since the last simulation was the map.
-                self.permutation_unfiltered_map_simulated_outputs.append(self.lastSimulatedResponses)
+                self.permutations_unfiltered_map_simulated_outputs.append(np.array(self.lastSimulatedResponses).flatten())
             self.permutations_MAP_logP_and_parameters_values.append(np.hstack((self.map_logP, self.map_parameter_set)))    
             if verbose == True:
                 print("Permutation", permutation, "number", permutationIndex+1, "out of", numPermutations, "timeOfThisPermutation", timeOfThisPermutation)
@@ -774,9 +774,9 @@ class parameter_estimation:
         np.savetxt('permutations_initial_points_parameters_values'+'.csv', self.listOfPermutations, delimiter=",")
         np.savetxt('permutations_MAP_logP_and_parameters_values.csv',self.permutations_MAP_logP_and_parameters_values, delimiter=",")
         pickleAnObject(self.permutations_MAP_logP_and_parameters_values, filePrefix+'permutations_MAP_logP_and_parameters_values'+fileSuffix)
-        print("Final map parameter results from PermutationSearch:", self.map_parameter_set,  " \nFinal map logP:", self.map_logP, "more details available in permutations_log_file.txt")
-        
-        
+        if self.UserInput.parameter_estimation_settings['exportAllSimulatedOutputs'] == True:
+            np.savetxt('permutations_unfiltered_map_simulated_outputs'+'.csv', self.permutations_unfiltered_map_simulated_outputs, delimiter=",")       
+        print("Final map parameter results from PermutationSearch:", self.map_parameter_set,  " \nFinal map logP:", self.map_logP, "more details available in permutations_log_file.txt")        
         return bestResultSoFar# [self.map_parameter_set, self.map_logP, etc.]
 
     #@CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
