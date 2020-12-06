@@ -594,6 +594,8 @@ class parameter_estimation:
         bestResultSoFar = [self.highest_logP, highest_logP_parameter_set, None, None, None, None, None, None] #just initializing
         highest_MAP_initial_point_index = None #just initializing
         highest_MAP_initial_point_parameters = None #just initializing
+        if self.UserInput.parameter_estimation_settings['exportAllSimulatedOutputs'] = True:
+            self.permutation_unfiltered_map_simulated_outputs = []
         if searchType == 'doEnsembleSliceSampling':
             if str(self.UserInput.parameter_estimation_settings['mcmc_nwalkers']).lower() == 'auto':
                 permutationSearch_mcmc_nwalkers = 2*len(centerPoint) #Lowest possible is 2 times num parameters for ESS.
@@ -671,6 +673,11 @@ class parameter_estimation:
                 highest_MAP_initial_point_index = permutationIndex
                 highest_MAP_initial_point_parameters = permutation
             allPermutationsResults.append(thisResult)
+            if self.UserInput.parameter_estimation_settings['exportAllSimulatedOutputs'] = True:
+                if searchType == 'doEnsembleSliceSampling' or searchType == 'doMetropolisHastings':
+                    self.permutation_unfiltered_map_simulated_outputs.append(self.mapSimulatedResponses)
+                else:
+                    self.permutation_unfiltered_map_simulated_outputs.append(self.lastSimulatedResponses)
             self.permutations_MAP_logP_and_parameters_values.append(np.hstack((self.map_logP, self.map_parameter_set)))    
             if verbose == True:
                 print("Permutation", permutation, "number", permutationIndex+1, "out of", numPermutations, "timeOfThisPermutation", timeOfThisPermutation)
@@ -2023,6 +2030,10 @@ class parameter_estimation:
         simulatedResponses = nestedObjectsFunctions.makeAtLeast_2dNested(simulatedResponses)
         if self.doSimulatedResponsesBoundsChecks(simulatedResponses) == False:
             simulatedResponses = None
+        #if self.userInput.parameter_estimation_settings['exportAllSimulatedOutputs' == True: 
+        #decided to always keep the lastSimulatedResponses in memory. Should be okay because only the most recent should be kept.
+        #At least, that is my understanding after searching for "garbage" here and then reading: http://www.digi.com/wiki/developer/index.php/Python_Garbage_Collection
+        self.lastSimulatedResponses = copy.deepcopy(simulatedResponses)
         return simulatedResponses
     
     def getLogLikelihood(self,discreteParameterVector): #The variable discreteParameterVector represents a vector of values for the parameters being sampled. So it represents a single point in the multidimensional parameter space.
