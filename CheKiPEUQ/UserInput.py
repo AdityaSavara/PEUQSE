@@ -10,6 +10,13 @@ responses['independent_variables_values'] = []
 responses['independent_variables_names'] = []
 responses['num_responses'] = 'auto' #'auto' is recommended, though an integer can be put in directly.
 
+#(Optional) data transforms  This is for transforming the responses to improve the objective function.  Will be applied on simulated data also. 
+#Currently not compatible with simulatedResponses_upperBounds and simulatedResponses_lowerBounds. Contact the developer if this is needed
+responses['data_overcategory'] = '' #Choices are currently 'transient_kinetics' and 'steady_state_kinetics'.  If this is used, then one also needs to provide response_types ( One for each response dimension). Additional features are welcome.
+responses['response_types'] = [] #Response types can currently  be 'P' (product), 'I' (intermediate), 'R' (reactant), 'T' (temperature), 'O' (other)
+responses['response_data_types'] = [] #Response data types can be 'c' (concentration), 'r' (rate), 'o' (other)
+
+
 #### Model Paramerters Variables ###
 model = {} 
 model['InputParameterPriorValues'] =  [] #Should be like: [41.5, 41.5, 13.0, 13.0, 0.1, 0.1] # Ea1_mean, Ea2_mean, log_A1_mean, log_A2_mean, gamma_1_mean, gamma_2_mean 
