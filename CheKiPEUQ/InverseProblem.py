@@ -2062,7 +2062,7 @@ class parameter_estimation:
         if type(simulated_responses_covmat_transformed) == type(None):
             comprehensive_responses_covmat = observed_responses_covmat_transformed
         else: #Else we add the uncertainties, assuming they are orthogonal. Note that these are already covmats so are already variances that can be added directly. 
-            comprehensive_responses_covmat = observed_responses_covmat_transformed + simulated_responses_covmat_transformed #FIXME: I think think this needs to be moved own into the responseIndex loop to correctly handle staggered uncertainties. [like one response having full covmatrix and others not]
+            comprehensive_responses_covmat = observed_responses_covmat_transformed + simulated_responses_covmat_transformed #TODO: I think think this needs to be moved own into the responseIndex loop to correctly handle staggered uncertainties. [like one response having full covmatrix and others not]
         comprehensive_responses_covmat_shape = copy.deepcopy(observed_responses_covmat_transformed_shape) #no need to take the shape of the actual comprehensive_responses_covmat since they must be same. This is probably slightly less computation.
         if (len(comprehensive_responses_covmat_shape) == 1) and (comprehensive_responses_covmat_shape[0]==1): #Matrix is square because has only one value.
             log_probability_metric = multivariate_normal.logpdf(mean=simulatedResponses_transformed,x=observedResponses_transformed,cov=comprehensive_responses_covmat)
@@ -2521,10 +2521,13 @@ def returnShapedResponseCovMat(numResponseDimensions, uncertainties):
             shapedUncertainties = np.square(shapedUncertainties) # Need to square standard deviations to make them into variances.
         else:
             shapedUncertainties = shapedUncertainties
-    elif numResponseDimensions > 1:  #if the dimensionality of responses is greater than 1, we (as of Nov 2020) only support providing standard deviations. Will square.
+    elif numResponseDimensions > 1:  #if the dimensionality of responses is greater than 1, we need to go through each one separately to check.
         for responseIndex in range(numResponseDimensions):
             shapedUncertainties = np.array(uncertainties, dtype="object") #Filling variable.   
-            shapedUncertainties[responseIndex] = np.square(shapedUncertainties[responseIndex]) #Need to square standard deviations to make them into variances.
+            if np.shape(shapedUncertainties[responseIndex])[0] == (1): #This means it's just a list of standard deviations and needs to be squared to become variances.
+                shapedUncertainties[responseIndex] = np.square(shapedUncertainties[responseIndex]) # Need to square standard deviations to make them into variances.
+            else:
+                shapedUncertainties[responseIndex] = shapedUncertainties[responseIndex]
     return shapedUncertainties
 
 def boundsCheck(parameters, parametersBounds, boundsType):
