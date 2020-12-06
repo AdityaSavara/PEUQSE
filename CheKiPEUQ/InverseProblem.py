@@ -2073,7 +2073,7 @@ class parameter_estimation:
                     response_log_probability_metric = 1
                 if response_log_probability_metric == 1:
                     response_log_probability_metric = -1E100 #Just initializing, then will add each probability separately. One for each **value** of this response dimension.
-                    for responseValueIndex in range(len(simulatedResponses_transformed[[responseIndex]])):
+                    for responseValueIndex in range(len(simulatedResponses_transformed[responseIndex])):
                         try:
                             current_log_probability_metric = multivariate_normal.logpdf(mean=simulatedResponses_transformed[responseValueIndex],x=observedResponses_transformed[responseValueIndex],cov=comprehensive_responses_covmat[0][responseValueIndex])    
                         except: #The above is to catch cases when the multivariate_normal fails.
