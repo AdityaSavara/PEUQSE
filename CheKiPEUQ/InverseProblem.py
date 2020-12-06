@@ -2082,15 +2082,15 @@ class parameter_estimation:
                     response_log_probability_metric = -1E100 #Just initializing, then will add each probability separately. One for each **value** of this response dimension.
                     for responseValueIndex in range(len(simulatedResponses_transformed[responseIndex])):
                         try:
-                            current_log_probability_metric = multivariate_normal.logpdf(mean=simulatedResponses_transformed[responseValueIndex],x=observedResponses_transformed[responseValueIndex],cov=comprehensive_responses_covmat[0][responseValueIndex])    
+                            current_log_probability_metric = multivariate_normal.logpdf(mean=simulatedResponses_transformed[responseIndex][responseValueIndex],x=observedResponses_transformed[responseIndex][responseValueIndex],cov=comprehensive_responses_covmat[responseIndex][responseValueIndex])    
                         except: #The above is to catch cases when the multivariate_normal fails.
                             current_log_probability_metric = float('-inf')
-                        response_log_probability_metric = current_log_probability_metric + response_log_probability_metric
+                        #response_log_probability_metric = current_log_probability_metric + response_log_probability_metric
                         if float(current_log_probability_metric) == float('-inf'):
                             print("Warning: There are posterior points that have zero probability. If there are too many points like this, the MAP and mu_AP returned will not be meaningful. Parameters:", discreteParameterVector)
                             current_log_probability_metric = -1E100 #Just choosing an arbitrarily very severe penalty. I know that I have seen 1E-48 to -303 from the multivariate pdf, and values inbetween like -171, -217, -272. I found that -1000 seems to be worse, but I don't have a systematic testing. I think -1000 was causing numerical errors.
-                            response_log_probability_metric = current_log_probability_metric + response_log_probability_metric
-            log_probability_metric = log_probability_metric + response_log_probability_metric
+                        response_log_probability_metric = current_log_probability_metric + response_log_probability_metric
+                log_probability_metric = log_probability_metric + response_log_probability_metric
         return log_probability_metric, simulatedResponses_transformed
 
     def makeHistogramsForEachParameter(self):
