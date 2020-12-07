@@ -20,6 +20,7 @@ if __name__ == "__main__":
     UserInput.model['InputParameterPriorValues_upperBounds'] = [1E6, 1E6] 
     UserInput.model['InputParameterPriorValues_lowerBounds'] = [-1E6, -1E6]
     UserInput.parameter_estimation_settings['scaling_uncertainties_type'] = "off"
+    UserInput.parameter_estimation_settings['mcmc_random_seed'] = 0
         #UserInput.model['InputParameterInitialGuess'] = [150,400] #Can optionally change the initial guess to be different from prior means.
     UserInput.parameter_estimation_settings['exportAllSimulatedOutputs'] = True
     
@@ -31,7 +32,7 @@ if __name__ == "__main__":
     UserInput.parameter_estimation_settings['multistart_initialPointsDistributionType'] = 'uniform'
     UserInput.parameter_estimation_settings['multistart_exportLog'] = True
     UserInput.parameter_estimation_settings['multistart_gridsearch_threshold_filter_coefficient'] = 2.0 #The lower this is, the more the points become filtered. It is not recommended to go below 2.0.
-    UserInput.parameter_estimation_settings['multistart_numStartPoints'] = 10000
+    UserInput.parameter_estimation_settings['multistart_numStartPoints'] = 1000000
     UserInput.parameter_estimation_settings['multistart_relativeInitialDistributionSpread'] = 0.50
     
     

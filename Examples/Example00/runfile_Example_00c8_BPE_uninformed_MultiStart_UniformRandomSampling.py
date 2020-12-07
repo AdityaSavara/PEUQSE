@@ -20,6 +20,7 @@ if __name__ == "__main__":
     UserInput.model['InputParameterPriorValues_upperBounds'] = [1E6, 1E6] 
     UserInput.model['InputParameterPriorValues_lowerBounds'] = [-1E6, -1E6]
     UserInput.parameter_estimation_settings['scaling_uncertainties_type'] = "off"
+    UserInput.parameter_estimation_settings['mcmc_random_seed'] = 0
         #UserInput.model['InputParameterInitialGuess'] = [150,400] #Can optionally change the initial guess to be different from prior means.
 
     UserInput.model['simulateByInputParametersOnlyFunction'] = simulation_model_00.simulation_function_wrapper #This must simulate with *only* the parameters listed above, and no other arguments.
