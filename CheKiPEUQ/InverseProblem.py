@@ -594,6 +594,8 @@ class parameter_estimation:
         bestResultSoFar = [self.highest_logP, highest_logP_parameter_set, None, None, None, None, None, None] #just initializing
         highest_MAP_initial_point_index = None #just initializing
         highest_MAP_initial_point_parameters = None #just initializing
+        if self.UserInput.parameter_estimation_settings['exportAllSimulatedOutputs'] == True:
+            self.permutations_unfiltered_map_simulated_outputs = []
         if searchType == 'doEnsembleSliceSampling':
             if str(self.UserInput.parameter_estimation_settings['mcmc_nwalkers']).lower() == 'auto':
                 permutationSearch_mcmc_nwalkers = 2*len(centerPoint) #Lowest possible is 2 times num parameters for ESS.
@@ -651,7 +653,7 @@ class parameter_estimation:
                     else: #This is basically elseif permutationIndex > 0:
                         self.cumulative_post_burn_in_samples = np.vstack((self.cumulative_post_burn_in_samples, self.post_burn_in_samples))
                         self.cumulative_post_burn_in_log_priors_vec = np.vstack((self.cumulative_post_burn_in_log_priors_vec, self.post_burn_in_log_priors_vec))
-                        self.cumulative_post_burn_in_log_posteriors_un_normed_vec = np.vstack((self.cumulative_post_burn_in_log_posteriors_un_normed_vec, self.post_burn_in_log_posteriors_un_normed_vec))
+                        self.cumulative_post_burn_in_log_posteriors_un_normed_vec = np.vstack((self.cumulative_post_burn_in_log_posteriors_un_normed_vec, self.post_burn_in_log_posteriors_un_normed_vec))                    
             if searchType == 'doOptimizeNegLogP':
                 thisResult = self.doOptimizeNegLogP(**passThroughArgs)
                 #FIXME: the column headings of "thisResult" are wrong for the case of doOptimizeNegLogP.
@@ -671,6 +673,11 @@ class parameter_estimation:
                 highest_MAP_initial_point_index = permutationIndex
                 highest_MAP_initial_point_parameters = permutation
             allPermutationsResults.append(thisResult)
+            if self.UserInput.parameter_estimation_settings['exportAllSimulatedOutputs'] == True:
+                if searchType == 'doEnsembleSliceSampling' or searchType=='doMetropolisHastings': #we need to run the map again, outside of mcmc, to populate 
+                    self.map_logP = self.getLogP(self.map_parameter_set) #this has an implied return of self.lastSimulatedResponses.
+                #else no extra work needs to be done since the last simulation was the map.
+                self.permutations_unfiltered_map_simulated_outputs.append(np.array(self.lastSimulatedResponses).flatten())
             self.permutations_MAP_logP_and_parameters_values.append(np.hstack((self.map_logP, self.map_parameter_set)))    
             if verbose == True:
                 print("Permutation", permutation, "number", permutationIndex+1, "out of", numPermutations, "timeOfThisPermutation", timeOfThisPermutation)
@@ -767,9 +774,9 @@ class parameter_estimation:
         np.savetxt('permutations_initial_points_parameters_values'+'.csv', self.listOfPermutations, delimiter=",")
         np.savetxt('permutations_MAP_logP_and_parameters_values.csv',self.permutations_MAP_logP_and_parameters_values, delimiter=",")
         pickleAnObject(self.permutations_MAP_logP_and_parameters_values, filePrefix+'permutations_MAP_logP_and_parameters_values'+fileSuffix)
-        print("Final map parameter results from PermutationSearch:", self.map_parameter_set,  " \nFinal map logP:", self.map_logP, "more details available in permutations_log_file.txt")
-        
-        
+        if self.UserInput.parameter_estimation_settings['exportAllSimulatedOutputs'] == True:
+            np.savetxt('permutations_unfiltered_map_simulated_outputs'+'.csv', self.permutations_unfiltered_map_simulated_outputs, delimiter=",")       
+        print("Final map parameter results from PermutationSearch:", self.map_parameter_set,  " \nFinal map logP:", self.map_logP, "more details available in permutations_log_file.txt")        
         return bestResultSoFar# [self.map_parameter_set, self.map_logP, etc.]
 
     #@CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
@@ -1516,6 +1523,14 @@ class parameter_estimation:
             if filterCoeffient.lower() == "auto":
                 filterCoeffient = 2.0
         if filterSamples == True:   
+            #before filtering, we will keep an unfiltered version in case of ['exportAllSimulatedOutputs'] == True:
+            if self.UserInput.parameter_estimation_settings['exportAllSimulatedOutputs'] == True:
+                try: #This try and except is primarily because as of Dec 6th 2020, the feature has been implemented for MH but not ESS. With ESS, post_burn_in_log_priors_vec_unfiltered is not gauranteed.
+                    self.post_burn_in_samples_unfiltered = copy.deepcopy(self.post_burn_in_samples)
+                    self.post_burn_in_log_posteriors_un_normed_vec_unfiltered = copy.deepcopy(self.post_burn_in_log_posteriors_un_normed_vec)
+                    self.post_burn_in_log_priors_vec_unfiltered = copy.deepcopy(self.post_burn_in_log_priors_vec)
+                except:
+                    pass
             originalLength = np.shape(self.post_burn_in_log_posteriors_un_normed_vec)[0] 
             try:
                 mergedArray = np.hstack( (self.post_burn_in_log_posteriors_un_normed_vec, self.post_burn_in_log_priors_vec, self.post_burn_in_samples) )
@@ -1577,7 +1592,13 @@ class parameter_estimation:
         np.savetxt(file_name_prefix+'mcmc_logP_and_parameter_samples'+file_name_suffix+'.csv',mcmc_samples_array, delimiter=",")
         pickleAnObject(mcmc_samples_array, file_name_prefix+'mcmc_logP_and_parameter_samples'+file_name_suffix)
         if self.UserInput.parameter_estimation_settings['exportAllSimulatedOutputs'] == True: #By default, we should not keep this, it's a little too large with large sampling.
-            np.savetxt(file_name_prefix+'mcmc_all_simulated_outputs'+file_name_suffix+'.csv',self.post_burn_in_samples_simulatedOutputs, delimiter=",")            
+            try: #The main reason to use a try and except is because this feature has not been implemented for ESS. With ESS, the mcmc_unfiltered_post_burn_in_simulated_outputs would not be retained and the program would crash.
+                np.savetxt(file_name_prefix+'mcmc_unfiltered_post_burn_in_simulated_outputs'+file_name_suffix+'.csv',self.post_burn_in_samples_simulatedOutputs, delimiter=",")         
+                np.savetxt(file_name_prefix+'mcmc_unfiltered_post_burn_in_parameter_samples'+file_name_suffix+'.csv',self.post_burn_in_samples_unfiltered, delimiter=",")            
+                np.savetxt(file_name_prefix+'mcmc_unfiltered_post_burn_in_log_priors_vec'+file_name_suffix+'.csv',self.post_burn_in_log_posteriors_un_normed_vec_unfiltered, delimiter=",")            
+                np.savetxt(file_name_prefix+'mcmc_unfiltered_post_burn_in_log_posteriors_un_normed_vec'+file_name_suffix+'.csv',self.post_burn_in_log_priors_vec_unfiltered, delimiter=",")                        
+            except:
+                pass
         with open(file_name_prefix+'mcmc_log_file'+file_name_suffix+".txt", 'w') as out_file:
             out_file.write("self.initial_point_parameters:" + str( self.UserInput.InputParameterInitialGuess) + "\n")
             out_file.write("MAP_logP:" +  str(self.map_logP) + "\n")
@@ -1605,12 +1626,18 @@ class parameter_estimation:
     def exportPostPermutationStatistics(self, searchType=''): #if it is an mcmc run, then we need to save the sampling as well.
         #TODO: Consider to Make header for mcmc_samples_array. Also make exporting the mcmc_samples_array optional. 
         file_name_prefix, file_name_suffix = self.getParallelProcessingPrefixAndSuffix() #Rather self explanatory.
-        if (searchType == 'doEnsembleSliceSampling') or (searchType == 'doMetropolisHastings'):
+        if (searchType == 'doEnsembleSliceSampling') or (searchType == 'doMetropolisHastings'): #Note: this might be needed for parallel processing, not sure.
             mcmc_samples_array = np.hstack((self.post_burn_in_log_posteriors_un_normed_vec,self.post_burn_in_samples))
             np.savetxt(file_name_prefix+'permutation_logP_and_parameter_samples'+file_name_suffix+'.csv',mcmc_samples_array, delimiter=",")
             pickleAnObject(mcmc_samples_array, file_name_prefix+'permutation_logP_and_parameter_samples'+file_name_suffix)
         if self.UserInput.parameter_estimation_settings['exportAllSimulatedOutputs'] == True: #By default, we should not keep this, it's a little too large with large sampling.
-            np.savetxt(file_name_prefix+'permutation_all_simulated_outputs'+file_name_suffix+'.csv',self.post_burn_in_samples_simulatedOutputs, delimiter=",")            
+            try: #The main reason to use a try and except is because this feature has not been implemented for ESS. With ESS, the mcmc_unfiltered_post_burn_in_simulated_outputs would not be retained and the program would crash.
+                np.savetxt(file_name_prefix+'permutation_unfiltered_post_burn_in_simulated_outputs'+file_name_suffix+'.csv',self.post_burn_in_samples_simulatedOutputs, delimiter=",")            
+                np.savetxt(file_name_prefix+'permutation_unfiltered_post_burn_in_parameter_samples'+file_name_suffix+'.csv',self.post_burn_in_samples_unfiltered, delimiter=",")            
+                np.savetxt(file_name_prefix+'permutation_unfiltered_post_burn_in_log_priors_vec'+file_name_suffix+'.csv',self.post_burn_in_log_posteriors_un_normed_vec_unfiltered, delimiter=",")            
+                np.savetxt(file_name_prefix+'permutation_unfiltered_post_burn_in_log_posteriors_un_normed_vec'+file_name_suffix+'.csv',self.post_burn_in_log_priors_vec_unfiltered, delimiter=",")                        
+            except:
+                pass
         with open(file_name_prefix+'permutation_log_file'+file_name_suffix+".txt", 'w') as out_file:
             out_file.write("self.initial_point_parameters:" + str( self.UserInput.InputParameterInitialGuess) + "\n")
             out_file.write("MAP_logP:" +  str(self.map_logP) + "\n")
@@ -1804,7 +1831,6 @@ class parameter_estimation:
         #Code to initialize checkpoints.
         if type(self.UserInput.parameter_estimation_settings['mcmc_checkPointFrequency']) != type(None):
             print("Starting MCMC sampling.")
-            
             timeOfFirstCheckpoint = time.time()
             timeCheckpoint = time.time() - timeOfFirstCheckpoint #First checkpoint at time 0.
             numCheckPoints = self.UserInput.parameter_estimation_settings['mcmc_length']/self.UserInput.parameter_estimation_settings['mcmc_checkPointFrequency']
@@ -1902,8 +1928,8 @@ class parameter_estimation:
             self.during_burn_in_samples = samples[0:self.mcmc_burn_in_length] 
             self.during_burn_in_log_posteriors_un_normed_vec = log_posteriors_un_normed_vec[0:self.mcmc_burn_in_length]
         self.post_burn_in_samples = samples[self.mcmc_burn_in_length:] 
-        if self.UserInput.parameter_estimation_settings['exportAllSimulatedOutputs'] == True:
-            self.post_burn_in_samples_simulatedOutputs = samples_simulatedOutputs[self.mcmc_burn_in_length:]
+        self.post_burn_in_samples_simulatedOutputs = copy.deepcopy(samples_simulatedOutputs)
+        self.post_burn_in_samples_simulatedOutputs[self.mcmc_burn_in_length:0] #Note: this feature is presently not compatible with continueSampling.
         self.post_burn_in_log_posteriors_un_normed_vec = log_posteriors_un_normed_vec[self.mcmc_burn_in_length:]
         self.mcmc_last_point_sampled = self.post_burn_in_samples[-1]
         self.post_burn_in_log_likelihoods_vec = log_likelihoods_vec[self.mcmc_burn_in_length:]
@@ -2013,6 +2039,10 @@ class parameter_estimation:
         simulatedResponses = nestedObjectsFunctions.makeAtLeast_2dNested(simulatedResponses)
         if self.doSimulatedResponsesBoundsChecks(simulatedResponses) == False:
             simulatedResponses = None
+        #if self.userInput.parameter_estimation_settings['exportAllSimulatedOutputs' == True: 
+        #decided to always keep the lastSimulatedResponses in memory. Should be okay because only the most recent should be kept.
+        #At least, that is my understanding after searching for "garbage" here and then reading: http://www.digi.com/wiki/developer/index.php/Python_Garbage_Collection
+        self.lastSimulatedResponses = copy.deepcopy(simulatedResponses)
         return simulatedResponses
     
     def getLogLikelihood(self,discreteParameterVector): #The variable discreteParameterVector represents a vector of values for the parameters being sampled. So it represents a single point in the multidimensional parameter space.
