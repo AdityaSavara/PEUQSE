@@ -6,7 +6,7 @@ import numpy as np
 
 UserInput.responses['responses_abscissa'] = np.array([[0,1], [1]]) # These represent theta_1 and theta_2 abscissay points. Note that this is *nested* it is a multi-dimensional response, and produces two posteriors.
 UserInput.responses['responses_observed'] = np.array([[2,2], [3]]) # Note that this is *nested* it is a multi-dimensional response, and produces two posteriors.
-UserInput.responses['responses_observed_uncertainties'] =[[1,1],[1]] #np.array([[1], [1]]) #leaving blank to create uncertainties by heuristic.
+UserInput.responses['responses_observed_uncertainties'] =[[1,1],[1]] #np.array([[1], [1]]) #leave blank to create uncertainties by heuristic.
 
 UserInput.model['parameterNamesAndMathTypeExpressionsDict'] = {'theta_1':r'$\theta_{1}$','theta_2':r'$\theta_{2}$'}
 UserInput.model['InputParameterPriorValues'] = [1, 5] 
@@ -41,8 +41,8 @@ PE_object = CKPQ.parameter_estimation(UserInput)
 PE_object.doMetropolisHastings()
 #[map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, samples_simulatedOutputs, logP] = PE_object.doMetropolisHastings()
 
-#PE_object.createAllPlots() #This function calls each of the below functions.
+PE_object.createAllPlots() #This function calls each of the below functions.
 #    PE_object.makeHistogramsForEachParameter()    
 #    PE_object.makeSamplingScatterMatrixPlot()
-PE_object.createSimulatedResponsesPlots()
+#PE_object.createSimulatedResponsesPlots()
 #TODO: call the mum_pce plotting objects, which will be PE_object.createContourGraphs() or something like that.
