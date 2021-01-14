@@ -4,7 +4,8 @@ import numpy as np
 responses = {}
 responses['responses_abscissa'] = [] #Make 1 or more list or array within a list.
 responses['responses_observed'] = [] #Make 1 list/array for each response.
-responses['responses_observed_uncertainties'] = [] #Normally should not be blank, and should be provided with the same structure as responses_observed. One standard deviation of uncertainty should be provided for each response value. To set the responses_observed_uncertainties to zero, this variable or the values inside must really be set equal to 0. A blank list will not result in zeros and will autogenerate uncertainties relative to the responses_observed.
+responses['responses_observed_uncertainties'] = [] #Normally should not be blank, and should be provided with the same structure as responses_observed. One standard deviation of uncertainty should be provided for each response value. To set the responses_observed_uncertainties to zero, this variable or the values inside must really be set equal to 0. A blank list will not result in zeros and will autogenerate uncertainties relative to the responses_observed. A full covariance matrix can alternatively be used, but not all features are compatible with a full covariance matrix.
+responses['responses_observed_weighting'] = [] #This feature is not recommended for normal use. If used, the input should be the same shape as responses_observed_uncertainties. This adds coefficients to responses_observed_uncertainties based on 1/(weighting)^0.5 to 'back propagate' any additional weighting terms (in analogy to variance weighted SSR).  If the responses_observed_uncertainties are appropriately defined, this should generally not be needed. This feature is only compatible when responses_observed_uncertainties consists of standard deviations rather than a covariance matrix.
 responses['reducedResponseSpace'] = []
 responses['independent_variables_values'] = []
 responses['independent_variables_names'] = []
