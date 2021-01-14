@@ -89,10 +89,10 @@ class parameter_estimation:
                     
         
         #Setting this object so that we can make changes to it below without changing userinput dictionaries.
-        self.UserInput.mu_prior = np.array(UserInput.model['InputParameterPriorValues']) 
+        self.UserInput.mu_prior = np.array(UserInput.model['InputParameterPriorValues'], dtype='float')
         
         #Below code is mainly for allowing uniform distributions in priors.
-        UserInput.InputParametersPriorValuesUncertainties = np.array(UserInput.model['InputParametersPriorValuesUncertainties'],dtype='float32') #Doing this so that the -1.0 check below should work.
+        UserInput.InputParametersPriorValuesUncertainties = np.array(UserInput.model['InputParametersPriorValuesUncertainties'],dtype='float') #Doing this so that the -1.0 check below should work.
         if -1.0 in UserInput.InputParametersPriorValuesUncertainties: #This means that at least one of the uncertainties has been set to "-1" which means a uniform distribution. 
             UserInput.InputParametersPriorValuesUniformDistributionsIndices = [] #intializing.
             if len(np.shape(UserInput.InputParametersPriorValuesUncertainties)) != 1:
@@ -115,11 +115,11 @@ class parameter_estimation:
         
         #Now to make covmat. Leaving the original dictionary object intact, but making a new object to make covmat_prior.
         if len(np.shape(UserInput.InputParametersPriorValuesUncertainties)) == 1 and (len(UserInput.InputParametersPriorValuesUncertainties) > 0): #If it's a 1D array/list that is filled, we'll diagonalize it.
-            UserInput.std_prior = np.array(UserInput.InputParametersPriorValuesUncertainties, dtype='float32') #using 32 since not everyone has 64.
+            UserInput.std_prior = np.array(UserInput.InputParametersPriorValuesUncertainties, dtype='float') #using 32 since not everyone has 64.
             UserInput.var_prior = np.power(UserInput.InputParametersPriorValuesUncertainties,2)
             UserInput.covmat_prior = np.diagflat(self.UserInput.var_prior) 
         elif len(np.shape(UserInput.InputParametersPriorValuesUncertainties)) > 1: #If it's non-1D, we assume it's already a covariance matrix.
-            UserInput.covmat_prior = np.array(UserInput.InputParametersPriorValuesUncertainties, dtype='float32')
+            UserInput.covmat_prior = np.array(UserInput.InputParametersPriorValuesUncertainties, dtype='float')
             UserInput.var_prior = np.diagonal(UserInput.covmat_prior)
             UserInput.std_prior = np.power(UserInput.covmat_prior,0.5)
         else: #If a blank list is received, that means the user
