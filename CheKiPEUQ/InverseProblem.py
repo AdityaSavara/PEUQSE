@@ -181,7 +181,8 @@ class parameter_estimation:
             if len(self.UserInput.responses['responses_observed_weighting']) > 0:
                 UserInput.responses_observed_weighting = np.array(nestedObjectsFunctions.makeAtLeast_2dNested(UserInput.responses['responses_observed_weighting']))
                 UserInput.responses_observed_weighting = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(UserInput.responses_observed_weighting)
-                UserInput.responses_observed_weight_coefficients = copy.deepcopy(UserInput.responses_observed_weighting) #initialize the weight_coefficients
+                UserInput.responses_observed_weighting = UserInput.responses_observed_weighting.astype(np.float)
+                UserInput.responses_observed_weight_coefficients = copy.deepcopy(UserInput.responses_observed_weighting).astype(np.float) #initialize the weight_coefficients
                 #We'll apply it 1 response at a time.
                 for responseIndex, responseWeightingArray in enumerate(UserInput.responses_observed_weighting):
                     if 0 in responseWeightingArray: #we can't have zeros in weights. So if we have any zeros, we will set the weighting of those to 1E6 times less than other values.
@@ -200,7 +201,6 @@ class parameter_estimation:
                     # UserInput.responses_observed_uncertainties[responseIndex] = multipliedArray*1.0
                     # print("after setting multplied array", UserInput.responses_observed_uncertainties[responseIndex])
                 UserInput.responses_observed_uncertainties = UserInput.responses_observed_uncertainties*UserInput.responses_observed_weight_coefficients
-                print("line 196", UserInput.responses_observed_uncertainties);                 sys.exit()
         else: #The other possibilities are a None object or a function. For either of thtose cases, we simply set UserInput.responses_observed_uncertainties equal to what the user provided.
             UserInput.responses_observed_uncertainties = copy.deepcopy(self.UserInput.responses['responses_observed_uncertainties'])
             
@@ -2122,29 +2122,32 @@ class parameter_estimation:
             log_probability_metric = multivariate_normal.logpdf(mean=simulatedResponses_transformed,x=observedResponses_transformed,cov=comprehensive_responses_covmat)
             return log_probability_metric, simulatedResponses_transformed #Return this rather than going through loop further.
         elif len(comprehensive_responses_covmat_shape) > 1 and (comprehensive_responses_covmat_shape[0] == comprehensive_responses_covmat_shape[1]):  #Else it is 2D, check if it's square.
+            try:
                 log_probability_metric = multivariate_normal.logpdf(mean=simulatedResponses_transformed,x=observedResponses_transformed,cov=comprehensive_responses_covmat)
                 return log_probability_metric, simulatedResponses_transformed #Return this rather than going through loop further.
+            except:
+                pass #If it failed, we assume it is not square. For example, it could be 2 responses of length 2 each, which is not actually square.
             #TODO: Put in near-diagonal solution described in github: https://github.com/AdityaSavara/CheKiPEUQ/issues/3
-        else:  #If it is not square, it's a list of uncertainties per response.
-            log_probability_metric = 0 #Initializing since we will be adding to it.
-            for responseIndex in range(self.UserInput.num_response_dimensions):
-                try:
-                    response_log_probability_metric = multivariate_normal.logpdf(mean=simulatedResponses_transformed[responseIndex],x=observedResponses_transformed[responseIndex],cov=comprehensive_responses_covmat[responseIndex])                
-                except:
-                    response_log_probability_metric = 1
-                if response_log_probability_metric == 1:
-                    response_log_probability_metric = -1E100 #Just initializing, then will add each probability separately. One for each **value** of this response dimension.
-                    for responseValueIndex in range(len(simulatedResponses_transformed[responseIndex])):
-                        try:
-                            current_log_probability_metric = multivariate_normal.logpdf(mean=simulatedResponses_transformed[responseIndex][responseValueIndex],x=observedResponses_transformed[responseIndex][responseValueIndex],cov=comprehensive_responses_covmat[responseIndex][responseValueIndex])    
-                        except: #The above is to catch cases when the multivariate_normal fails.
-                            current_log_probability_metric = float('-inf')
-                        #response_log_probability_metric = current_log_probability_metric + response_log_probability_metric
-                        if float(current_log_probability_metric) == float('-inf'):
-                            print("Warning: There are posterior points that have zero probability. If there are too many points like this, the MAP and mu_AP returned will not be meaningful. Parameters:", discreteParameterVector)
-                            current_log_probability_metric = -1E100 #Just choosing an arbitrarily very severe penalty. I know that I have seen 1E-48 to -303 from the multivariate pdf, and values inbetween like -171, -217, -272. I found that -1000 seems to be worse, but I don't have a systematic testing. I think -1000 was causing numerical errors.
-                        response_log_probability_metric = current_log_probability_metric + response_log_probability_metric
-                log_probability_metric = log_probability_metric + response_log_probability_metric
+        #If neither of the above return statements have occurred, we should go through the uncertainties per response.
+        log_probability_metric = 0 #Initializing since we will be adding to it.
+        for responseIndex in range(self.UserInput.num_response_dimensions):
+            try:
+                response_log_probability_metric = multivariate_normal.logpdf(mean=simulatedResponses_transformed[responseIndex],x=observedResponses_transformed[responseIndex],cov=comprehensive_responses_covmat[responseIndex])                
+            except:
+                response_log_probability_metric = 1
+            if response_log_probability_metric == 1:
+                response_log_probability_metric = -1E100 #Just initializing, then will add each probability separately. One for each **value** of this response dimension.
+                for responseValueIndex in range(len(simulatedResponses_transformed[responseIndex])):
+                    try:
+                        current_log_probability_metric = multivariate_normal.logpdf(mean=simulatedResponses_transformed[responseIndex][responseValueIndex],x=observedResponses_transformed[responseIndex][responseValueIndex],cov=comprehensive_responses_covmat[responseIndex][responseValueIndex])    
+                    except: #The above is to catch cases when the multivariate_normal fails.
+                        current_log_probability_metric = float('-inf')
+                    #response_log_probability_metric = current_log_probability_metric + response_log_probability_metric
+                    if float(current_log_probability_metric) == float('-inf'):
+                        print("Warning: There are posterior points that have zero probability. If there are too many points like this, the MAP and mu_AP returned will not be meaningful. Parameters:", discreteParameterVector)
+                        current_log_probability_metric = -1E100 #Just choosing an arbitrarily very severe penalty. I know that I have seen 1E-48 to -303 from the multivariate pdf, and values inbetween like -171, -217, -272. I found that -1000 seems to be worse, but I don't have a systematic testing. I think -1000 was causing numerical errors.
+                    response_log_probability_metric = current_log_probability_metric + response_log_probability_metric
+            log_probability_metric = log_probability_metric + response_log_probability_metric
         return log_probability_metric, simulatedResponses_transformed
 
     def makeHistogramsForEachParameter(self):
