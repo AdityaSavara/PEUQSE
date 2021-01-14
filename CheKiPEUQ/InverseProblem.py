@@ -181,15 +181,26 @@ class parameter_estimation:
             if len(self.UserInput.responses['responses_observed_weighting']) > 0:
                 UserInput.responses_observed_weighting = np.array(nestedObjectsFunctions.makeAtLeast_2dNested(UserInput.responses['responses_observed_weighting']))
                 UserInput.responses_observed_weighting = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(UserInput.responses_observed_weighting)
+                UserInput.responses_observed_weight_coefficients = copy.deepcopy(UserInput.responses_observed_weighting) #initialize the weight_coefficients
                 #We'll apply it 1 response at a time.
-                for responseIndex, responseWeightingArray in UserInput.responses_observed_weighting:
+                for responseIndex, responseWeightingArray in enumerate(UserInput.responses_observed_weighting):
                     if 0 in responseWeightingArray: #we can't have zeros in weights. So if we have any zeros, we will set the weighting of those to 1E6 times less than other values.
-                        minNonZero = np.min(responseWeightingArray[responseWeightingArray>0]) #get array of nonzeros, then take min.
-                        responseWeightingArray[responseWeightingArray=0] = minNonZero/1E6  #set the 0 values to be 1E6 times smaller than minNonZero.
+                        minNonZero = np.min(UserInput.responses_observed_weighting[UserInput.responses_observed_weighting>0]) #get array of nonzeros, then take min.
+                        responseWeightingArray[responseWeightingArray==0] = minNonZero/1E6  #set the 0 values to be 1E6 times smaller than minNonZero.
                         UserInput.responses_observed_weighting[responseIndex] = responseWeightingArray #Make sure the modified array is kept.
-                    #now calculate and apply the weight coefficients.
+                #now calculate and apply the weight coefficients.
+                for responseIndex in range(len(UserInput.responses_observed_weighting)):
                     UserInput.responses_observed_weight_coefficients[responseIndex] = (UserInput.responses_observed_weighting[responseIndex])**(-0.5) #this is analagous to the sigma of a variance weighted heuristic.
-                    UserInput.responses_observed_uncertainties[responseIndex] = UserInput.responses_observed_uncertainties[responseIndex]*UserInput.responses_observed_weight_coefficients[responseIndex]
+                    # print("line 193", UserInput.responses_observed_uncertainties[responseIndex], UserInput.responses_observed_weight_coefficients[responseIndex])
+                    # print("line 194", UserInput.responses_observed_uncertainties[responseIndex]*UserInput.responses_observed_weight_coefficients[responseIndex])
+                    # multipliedArray = UserInput.responses_observed_uncertainties[responseIndex]*UserInput.responses_observed_weight_coefficients[responseIndex]
+                    # print("response index", responseIndex, "multiplied array", multipliedArray)
+                    # print("before setting multplied array", UserInput.responses_observed_uncertainties[responseIndex])
+                    # print(type(UserInput.responses_observed_uncertainties[responseIndex]))
+                    # UserInput.responses_observed_uncertainties[responseIndex] = multipliedArray*1.0
+                    # print("after setting multplied array", UserInput.responses_observed_uncertainties[responseIndex])
+                UserInput.responses_observed_uncertainties = UserInput.responses_observed_uncertainties*UserInput.responses_observed_weight_coefficients
+                print("line 196", UserInput.responses_observed_uncertainties);                 sys.exit()
         else: #The other possibilities are a None object or a function. For either of thtose cases, we simply set UserInput.responses_observed_uncertainties equal to what the user provided.
             UserInput.responses_observed_uncertainties = copy.deepcopy(self.UserInput.responses['responses_observed_uncertainties'])
             
