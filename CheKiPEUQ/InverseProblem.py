@@ -1506,6 +1506,7 @@ class parameter_estimation:
             self.info_gain_KL = 0
             self.info_gain_KL_each_parameter  = []
             for param in range(width):
+                import matplotlib.pyplot as plt #FIXME: #TODO: this plotting needs to be moved into the plotting area and as optinoal.
                 (density0,bins0,pathces0)=plt.hist([self.samples_of_prior[:,param].flatten(),self.post_burn_in_samples[:,param].flatten()],bins=100,density=True)
                 current_info_gain_KL = density0[1]*np.log(density0[1]/density0[0])
                 current_info_gain_KL = current_info_gain_KL[np.isfinite(current_info_gain_KL)]
