@@ -241,6 +241,7 @@ def createSimulatedResponsesPlot(x_values, listOfYArrays, plot_settings={}, list
     return fig0
 
 def makeTrisurfacePlot(xValues, yValues, zValues, exportFigure = True, figure_name="TrisurfacePlot", showFigure=True):
+    from mpl_toolkits.mplot3d import Axes3D #Although it does not look like this is called here, the InfoGain plots will fail without this line.
     fig1, ax1 =  plt.subplots(1)
     ax1 = plt.axes(projection ='3d')
     image = ax1.plot_trisurf(xValues,yValues, zValues)
@@ -253,6 +254,7 @@ def makeTrisurfacePlot(xValues, yValues, zValues, exportFigure = True, figure_na
 def makeMeshGridSurfacePlot(XX, YY, ZZ,  plot_settings = {}, exportFigure = True, figure_name="MeshGridSurfacePlot", showFigure=True):
     #TODO: plot_settings should be used for axis labels etc, like above.
     #TODO: create a UserInput variable named info_gain_plot_settings (like what the other cases have).
+    from mpl_toolkits.mplot3d import Axes3D #I am not sure if this line is needed here, it might b.
     fig1,ax1 = plt.subplots(figsize=(5,5))
     #ax = fig.add_subplot(111, projection='3d')
     surf = ax1.pcolor(XX,YY,ZZ,cmap=matplotlib.cm.coolwarm)
