@@ -1,11 +1,8 @@
 import numpy as np
-import matplotlib
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-import scipy
+#from mpl_toolkits.mplot3d import Axes3D
+#import scipy
 from scipy.stats import multivariate_normal
-from scipy.integrate import odeint
-import pandas as pd
+#from scipy.integrate import odeint
 import sys
 import time
 import copy
@@ -2157,6 +2154,8 @@ class parameter_estimation:
         plotting_functions.makeHistogramsForEachParameter(parameterSamples,parameterNamesAndMathTypeExpressionsDict)
 
     def makeSamplingScatterMatrixPlot(self, parameterSamples = [], parameterNamesAndMathTypeExpressionsDict={}, parameterNamesList =[], plot_settings={'combined_plots':'auto'}):
+        import pandas as pd #This is the only function that needs pandas.
+        import matplotlib.pyplot as plt
         if 'dpi' not in  plot_settings:  plot_settings['dpi'] = 220
         if 'figure_name' not in  plot_settings:  plot_settings['figure_name'] = 'scatter_matrix_posterior'
         if parameterSamples  ==[] : parameterSamples = self.post_burn_in_samples
