@@ -5,10 +5,11 @@ responses = {}
 responses['responses_abscissa'] = [] #Make 1 or more list or array within a list.
 responses['responses_observed'] = [] #Make 1 list/array for each response.
 responses['responses_observed_uncertainties'] = [] #Normally should not be blank, and should be provided with the same structure as responses_observed. One standard deviation of uncertainty should be provided for each response value. To set the responses_observed_uncertainties to zero, this variable or the values inside must really be set equal to 0. A blank list will not result in zeros and will autogenerate uncertainties relative to the responses_observed. A full covariance matrix can alternatively be used, but not all features are compatible with a full covariance matrix.
+responses['responses_observed_max_covmat_size'] = 100 #The user should nor normally change this. if any response has more datapoints than this, that response will have variances evaluated separately (only the diagonal of the covmat) in a way which changes the computational cost to linear scaling.  For most regular computers around Jan 25 2020, the crossover happens after a few hundred points, so this variable has been set to have a default value of 100.                                                                                                                                                                                           
 responses['responses_observed_weighting'] = [] #This feature is not recommended for normal use. If used, the input should be the same shape as responses_observed_uncertainties. This adds coefficients to responses_observed_uncertainties based on 1/(weighting)^0.5 to 'back propagate' any additional weighting terms (in analogy to variance weighted SSR).  If the responses_observed_uncertainties are appropriately defined, this should generally not be needed. This feature is only compatible when responses_observed_uncertainties consists of standard deviations rather than a covariance matrix.
-responses['reducedResponseSpace'] = []
-responses['independent_variables_values'] = []
-responses['independent_variables_names'] = []
+responses['reducedResponseSpace'] = [] #If there are multiple responses, the user can ignore some of the responses during parameter estimation.
+responses['independent_variables_values'] = []  #This field is mainly for design of experiments, but can be used as a type of connected variables for other cases also.
+responses['independent_variables_names'] = [] #names associated with independent_variables_values.
 responses['num_responses'] = 'auto' #'auto' is recommended, though an integer can be put in directly.
 
 #(Optional) data transforms  This is for transforming the responses to improve the objective function.  Will be applied on simulated data also. 
