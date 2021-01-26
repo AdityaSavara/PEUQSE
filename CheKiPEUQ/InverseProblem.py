@@ -2130,7 +2130,7 @@ class parameter_estimation:
         log_probability_metric = 0 #Initializing since we will be adding to it.
         for responseIndex in range(self.UserInput.num_response_dimensions):
             #We will check if the response has too many values. If has too many values, then the covmat will be too large and will evaluate each value separately (with only variance, no covariance) in order to achive a linear scaling.
-            if len(simulatedResponses_transformed[responseIndex]]) > self.UserInput.responses['responses_observed_max_covmat_size']:
+            if len(simulatedResponses_transformed[responseIndex]) > self.UserInput.responses['responses_observed_max_covmat_size']:
                 calculate_log_probability_metric_per_value = True
             else:
                 calculate_log_probability_metric_per_value = False
