@@ -87,7 +87,6 @@ class parameter_estimation:
         
         #Setting this object so that we can make changes to it below without changing userinput dictionaries.
         self.UserInput.mu_prior = np.array(UserInput.model['InputParameterPriorValues'], dtype='float')
-        
         #Below code is mainly for allowing uniform distributions in priors.
         UserInput.InputParametersPriorValuesUncertainties = np.array(UserInput.model['InputParametersPriorValuesUncertainties'],dtype='float') #Doing this so that the -1.0 check below should work.
         if -1.0 in UserInput.InputParametersPriorValuesUncertainties: #This means that at least one of the uncertainties has been set to "-1" which means a uniform distribution. 
@@ -154,26 +153,26 @@ class parameter_estimation:
         #Make sure all objects inside are arrays (if they are lists we convert them). This is needed to apply the heurestic.
         UserInput.responses_abscissa = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(UserInput.responses_abscissa)
         UserInput.responses_observed = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(UserInput.responses_observed)
-        
+
         #Now to process responses_observed_uncertainties, there are several options so we need to process it according to the cases.
         #The normal case:
         if isinstance(self.UserInput.responses['responses_observed_uncertainties'], Iterable): #If it's an array or like one, we take it as is. The other options are a none object or a function.
-            UserInput.responses_observed_uncertainties = np.array(nestedObjectsFunctions.makeAtLeast_2dNested(UserInput.responses['responses_observed_uncertainties']))
-            UserInput.responses_observed_uncertainties = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(UserInput.responses_observed_uncertainties)
             #Processing of responses_observed_uncertainties for case that a blank list is received and not zeros.
-            if len(UserInput.responses_observed_uncertainties[0]) == 0: 
-                #if the response uncertainties is blank, we will use the heurestic of sigma = 5% of the observed value, with a floor of 2% of the maximum for that response. 
+            if len(UserInput.responses['responses_observed_uncertainties']) == 0 or len(UserInput.responses_observed_uncertainties[0])==0: 
+                #if the response uncertainties is blank, we will use the heurestic of sigma = 5% of the observed value, and then add an orthogonal uncertainty of 2% of the maximum for that response. 
                 #Note that we are actually checking in index[0], that is because as an atleast_2d array even a blank list / array in it will give a length of 1.
                 UserInput.responses_observed_uncertainties = np.abs( UserInput.responses_observed) * 0.05
                 for responseIndex in range(0,UserInput.num_response_dimensions): #need to cycle through to apply the "minimum" uncertainty of 0.02 times the max value.
-                    maxResponseAbsValue = np.max(np.abs(UserInput.responses_observed[responseIndex])) #Because of the "at_least2D" we actually need to use index 0.
-                    #The below syntax is a bit hard to read, but it is similar to this: a[a==2] = 10 #replace all 2's with 10's
-                    UserInput.responses_observed_uncertainties[responseIndex][UserInput.responses_observed_uncertainties[responseIndex] < maxResponseAbsValue * 0.02] = maxResponseAbsValue * 0.02
+                    maxResponseAbsValue = np.max(np.abs(UserInput.responses_observed[responseIndex]))
+                    UserInput.responses_observed_uncertainties[responseIndex] = ( UserInput.responses_observed_uncertainties[responseIndex]**2 + (maxResponseAbsValue*0.02)**2 ) ** 0.5
+                    #The below deprecated syntax is a bit hard to read, but it is similar to this: a[a==2] = 10 #replace all 2's with 10's                    #UserInput.responses_observed_uncertainties[responseIndex][UserInput.responses_observed_uncertainties[responseIndex] < maxResponseAbsValue * 0.02] = maxResponseAbsValue * 0.02
             elif nestedObjectsFunctions.sumNested(UserInput.responses_observed_uncertainties) == 0: #If a 0 (or list summing to 0) is provided, we will make the uncertainties zero.
                 UserInput.responses_observed_uncertainties = UserInput.responses_observed * 0.0 #This will work because we've converted the internals to array already.
                 #Below two lines not needed. Should be removed if everythig is working fine after Nov 2020.
                 #for responseIndex in range(0,len(UserInput.responses_observed[0])):
                 #    UserInput.responses_observed_uncertainties[0][responseIndex]= UserInput.responses_observed[0][responseIndex]*0.0
+            UserInput.responses_observed_uncertainties = np.array(nestedObjectsFunctions.makeAtLeast_2dNested(UserInput.responses_observed_uncertainties))
+            UserInput.responses_observed_uncertainties = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(UserInput.responses_observed_uncertainties)
             #If the feature of self.UserInput.responses['responses_observed_weighting'] has been used, then we need to apply that weighting to the uncertainties.
             if len(self.UserInput.responses['responses_observed_weighting']) > 0:
                 UserInput.responses_observed_weighting = np.array(nestedObjectsFunctions.makeAtLeast_2dNested(UserInput.responses['responses_observed_weighting']))
@@ -183,24 +182,17 @@ class parameter_estimation:
                 #We'll apply it 1 response at a time.
                 for responseIndex, responseWeightingArray in enumerate(UserInput.responses_observed_weighting):
                     if 0 in responseWeightingArray: #we can't have zeros in weights. So if we have any zeros, we will set the weighting of those to 1E6 times less than other values.
-                        minNonZero = np.min(UserInput.responses_observed_weighting[UserInput.responses_observed_weighting>0]) #get array of nonzeros, then take min.
-                        responseWeightingArray[responseWeightingArray==0] = minNonZero/1E6  #set the 0 values to be 1E6 times smaller than minNonZero.
-                        UserInput.responses_observed_weighting[responseIndex] = responseWeightingArray #Make sure the modified array is kept.
+                        #Originally, used minNonZero/1E6. Now, use eps which is the smallest non-zero value allowed.
+                        #minNonZero = np.min(UserInput.responses_observed_weighting[UserInput.responses_observed_weighting>0])
+                        responseWeightingArray[responseWeightingArray==0] = np.finfo(float).eps #minNonZero/1E6  #set the 0 values to be 1E6 times smaller than minNonZero.
+                        UserInput.responses_observed_weighting[responseIndex] = responseWeightingArray 
                 #now calculate and apply the weight coefficients.
                 for responseIndex in range(len(UserInput.responses_observed_weighting)):
                     UserInput.responses_observed_weight_coefficients[responseIndex] = (UserInput.responses_observed_weighting[responseIndex])**(-0.5) #this is analagous to the sigma of a variance weighted heuristic.
-                    # print("line 193", UserInput.responses_observed_uncertainties[responseIndex], UserInput.responses_observed_weight_coefficients[responseIndex])
-                    # print("line 194", UserInput.responses_observed_uncertainties[responseIndex]*UserInput.responses_observed_weight_coefficients[responseIndex])
-                    # multipliedArray = UserInput.responses_observed_uncertainties[responseIndex]*UserInput.responses_observed_weight_coefficients[responseIndex]
-                    # print("response index", responseIndex, "multiplied array", multipliedArray)
-                    # print("before setting multplied array", UserInput.responses_observed_uncertainties[responseIndex])
-                    # print(type(UserInput.responses_observed_uncertainties[responseIndex]))
-                    # UserInput.responses_observed_uncertainties[responseIndex] = multipliedArray*1.0
-                    # print("after setting multplied array", UserInput.responses_observed_uncertainties[responseIndex])
                 UserInput.responses_observed_uncertainties = UserInput.responses_observed_uncertainties*UserInput.responses_observed_weight_coefficients
         else: #The other possibilities are a None object or a function. For either of thtose cases, we simply set UserInput.responses_observed_uncertainties equal to what the user provided.
             UserInput.responses_observed_uncertainties = copy.deepcopy(self.UserInput.responses['responses_observed_uncertainties'])
-            
+
         #Now to process responses_simulation_uncertainties, there are several options so we need to process it according to the cases.
         #The normal case:
         if isinstance(self.UserInput.model['responses_simulation_uncertainties'], Iterable): #If it's an array or like one, we take it as is. The other options are a none object or a function.
@@ -2132,8 +2124,10 @@ class parameter_estimation:
             #We will check if the response has too many values. If has too many values, then the covmat will be too large and will evaluate each value separately (with only variance, no covariance) in order to achive a linear scaling.
             if len(simulatedResponses_transformed[responseIndex]) > self.UserInput.responses['responses_observed_max_covmat_size']:
                 calculate_log_probability_metric_per_value = True
+                response_log_probability_metric = 0 #initializing so that can check if it is a 'nan' or not a bit further down below.
             else:
                 calculate_log_probability_metric_per_value = False
+                #no need oto intialize response_log_probability_metric.
             #Now try to calculate response_log_probability_metric
             if calculate_log_probability_metric_per_value == False: #The normal case.            
                 try: #try to evaluate, but switch to individual values if there is any problem.
