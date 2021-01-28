@@ -27,7 +27,7 @@ def split_to_separated_lists_plus_1h(inputArray):
     return listAfterSplitPlus1
 
 
-def split_to_separated_lists_plus_1i(input):
+def split_to_separated_lists_plus_1i(inputArray):
     listAfterSplit = []
     for element in inputArray:
         listAfterSplit.append([element]) #Note the extra bracket inside to create nesting.
