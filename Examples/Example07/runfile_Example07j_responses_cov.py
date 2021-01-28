@@ -6,7 +6,7 @@ import numpy as np
 
 UserInput.responses['responses_abscissa'] = np.array([[0,1], [1]]) # These represent theta_1 and theta_2 abscissay points. Note that this is *nested* it is a multi-dimensional response, and produces two posteriors.
 UserInput.responses['responses_observed'] = np.array([[1,2], [3]]) # Note that this is *nested* it is a multi-dimensional response, and produces two posteriors.
-UserInput.responses['responses_observed_uncertainties'] =[np.array([[2,-1],[-1,3]]),[1]] #np.array([[1], [1]]) #if one changes the -1 to 1, the final output changes.
+UserInput.responses['responses_observed_uncertainties'] =[np.array([[2,-1],[-1,3]]),[1]] #np.array([[1], [1]]) #if one changes the first -1 to 1, the final output changes.
 
 UserInput.model['parameterNamesAndMathTypeExpressionsDict'] = {'theta_1':r'$\theta_{1}$','theta_2':r'$\theta_{2}$'}
 UserInput.model['InputParameterPriorValues'] = [1, 5] 
