@@ -16,7 +16,7 @@ UserInput.model['InputParameterInitialGuess'] = [1, 5] #This is where the mcmc c
 
 UserInput.model['simulateByInputParametersOnlyFunction'] = processing_function_two_response.split_to_separated_lists_plus_1i #This must simulate with *only* the parameters listed above, and no other arguments.
 
-UserInput.model['responses_simulation_uncertainties'] = [np.array([[2,-1],[-1,3]]),[1]] #np.array([[1], [1]]) #if one changes the -1 to 1, the final output changes.
+UserInput.model['responses_simulation_uncertainties'] = [np.array([[2,-1],[-1,3]]),[1]] #if one changes both of the -1 to 1, the final output changes.  Please note that only the 'bottom left' of the covariance matrix is used, such that np.array([[2,1],[1,3]]) is actually the same as np.array([[2,-500],[1,3]]).  Here, the -500 would be ignored.
 
 UserInput.simulated_response_plot_settings['figure_name'] = 'Posterior_Example_two_response' #This creates the filename, also.
 
