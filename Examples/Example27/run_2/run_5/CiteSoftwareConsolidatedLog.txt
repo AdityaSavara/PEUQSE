@@ -1,0 +1,23 @@
+#Warning: CiteSoftwareConsolidatedLog.txt may not include all softwares used. It is the end-user’s responsibility to verify that the no software citations are missing relative to those recorded in the complete logfile, CiteSoftwareCheckpointsLog.txt . This verification is important to do when using two or more codes together for the first time.
+---
+-
+    timestamp: >-
+        2021-03-28T12:24:16
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        CheKiPEUQ Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953

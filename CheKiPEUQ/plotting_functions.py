@@ -119,7 +119,7 @@ def sampledParameterHistogramMaker(parameterSamples, parameterName,parameterName
         sampledParameterAxesDictionary[parameterName].tick_params(axis='x', labelsize=16) #TODO: make these labels sizes a setting that can be changed.
         sampledParameterAxesDictionary[parameterName].tick_params(axis='y', labelsize=16)
         sampledParameterFiguresDictionary[parameterName].tight_layout()
-        sampledParameterFiguresDictionary[parameterName].savefig('Histogram_sampling_'+parameterName+'.png', dpi=220)
+        sampledParameterFiguresDictionary[parameterName].savefig('Histogram_sampling_'+str(parameterIndex)+'_'+parameterName+'.png', dpi=220)
 
         
         

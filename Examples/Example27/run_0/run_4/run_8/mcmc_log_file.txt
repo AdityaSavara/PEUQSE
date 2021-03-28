@@ -1,0 +1,11 @@
+self.initial_point_parameters:[200. 500.]
+MAP_logP:[-42.72026534]
+self.map_parameter_set:[171.86750574 551.0267563 ]
+self.map_index:719
+self.mu_AP_parameter_set:[176.05803938 566.04279164]
+self.stdap_parameter_set:[ 54.11899725 194.60114838]
+self.info_gain:0.05105389593943982
+evidence:2.4454117837014216e-24
+posterior_cov_matrix:
+[[ 2929.20786114   489.43669568]
+ [  489.43669568 37874.02890533]]
