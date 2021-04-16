@@ -50,7 +50,7 @@ def main():
     PE_object.createAllPlots() #This function calls each of the below functions.
 #    PE_object.makeHistogramsForEachParameter()    
 #    PE_object.makeSamplingScatterMatrixPlot()
-#    PE_object.createSimulatedResponsesPlot()
+#    PE_object.createSimulatedResponsesPlots()
     #TODO: call the mum_pce plotting objects, which will be PE_object.createContourGraphs() or something like that.
 
     # PE_object = CKPQ.parameter_estimation(UserInput)

@@ -64,7 +64,7 @@ if __name__ == "__main__":
         PE_object_list[i].createAllPlots() #This function calls each of the below functions.
    #    PE_object.makeHistogramsForEachParameter()    
    #    PE_object.makeSamplingScatterMatrixPlot()
-   #    PE_object.createSimulatedResponsesPlot()
+   #    PE_object.createSimulatedResponsesPlots()
    #TODO: call the mum_pce plotting objects, which will be PE_object.createContourGraphs() or something like that.
         fig, ax = plt.subplots()
         (density0,bins0,pathces0)=ax.hist([prior,PE_object_list[i].post_burn_in_samples.flatten()],bins=100,label=['prior','posterior'],density=True)
