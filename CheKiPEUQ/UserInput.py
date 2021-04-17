@@ -2,7 +2,7 @@ import numpy as np
 
 #####Directory Settings####
 directories = {}
-directories['graphs'] = "/Graphs/" 
+directories['graphs'] = "./Graphs/" 
 #directories['text_and_csv_outputs'] = "/text_and_csv_outputs/" This feature is not implemented yet. In the future, this is where log files, csv files, and the Citations Log will be saved.  A complication in implementing this feature is that some features (like continueSampling and parallel processing runs) need to access files in the main directory, so those reading statements will need to be changed to point towards this subdirectory.
 
 
