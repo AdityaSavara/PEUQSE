@@ -107,7 +107,7 @@ class plotting_functions_class():
     def rate_tot_plot(self):
         return
 
-def sampledParameterHistogramMaker(parameterSamples, parameterName,parameterNamesAndMathTypeExpressionsDict, sampledParameterFiguresDictionary, sampledParameterAxesDictionary):
+def sampledParameterHistogramMaker(parameterSamples, parameterName,parameterNamesAndMathTypeExpressionsDict, sampledParameterFiguresDictionary, sampledParameterAxesDictionary, directory=''):
         parameterIndex = list(parameterNamesAndMathTypeExpressionsDict).index(parameterName)
         sampledParameterFiguresDictionary[parameterName], sampledParameterAxesDictionary[parameterName] = plt.subplots()   #making plt objects    
         sampledParameterAxesDictionary[parameterName].hist(parameterSamples[:,parameterIndex]) #filling the object with data
@@ -119,7 +119,7 @@ def sampledParameterHistogramMaker(parameterSamples, parameterName,parameterName
         sampledParameterAxesDictionary[parameterName].tick_params(axis='x', labelsize=16) #TODO: make these labels sizes a setting that can be changed.
         sampledParameterAxesDictionary[parameterName].tick_params(axis='y', labelsize=16)
         sampledParameterFiguresDictionary[parameterName].tight_layout()
-        sampledParameterFiguresDictionary[parameterName].savefig('Histogram_sampling_'+str(parameterIndex)+'_'+parameterName+'.png', dpi=220)
+        sampledParameterFiguresDictionary[parameterName].savefig(directory+'Histogram_sampling_'+str(parameterIndex)+'_'+parameterName+'.png', dpi=220)
 
         
         
@@ -132,14 +132,14 @@ def sampledParameterHistogramMaker(parameterSamples, parameterName,parameterName
         # fig2.savefig('Ea2.png', dpi=220)
 
     #Make histograms for each parameter. Need to make some dictionaries where relevant objects will be stored.
-def makeHistogramsForEachParameter(parameterSamples,parameterNamesAndMathTypeExpressionsDict):
+def makeHistogramsForEachParameter(parameterSamples,parameterNamesAndMathTypeExpressionsDict, directory=''):
     sampledParameterFiguresDictionary = copy.deepcopy(parameterNamesAndMathTypeExpressionsDict) #This must be a deep copy to perserve original.
     sampledParameterAxesDictionary = copy.deepcopy(parameterNamesAndMathTypeExpressionsDict) #This must be a deep copy to preserve original.
     for key in parameterNamesAndMathTypeExpressionsDict:
         parameterName = key
-        sampledParameterHistogramMaker(parameterSamples, parameterName,parameterNamesAndMathTypeExpressionsDict, sampledParameterFiguresDictionary, sampledParameterAxesDictionary)        
+        sampledParameterHistogramMaker(parameterSamples, parameterName,parameterNamesAndMathTypeExpressionsDict, sampledParameterFiguresDictionary, sampledParameterAxesDictionary, directory=directory)        
 
-def createSimulatedResponsesPlot(x_values, listOfYArrays, plot_settings={}, listOfYUncertaintiesArrays=[], showFigure=True):
+def createSimulatedResponsesPlot(x_values, listOfYArrays, plot_settings={}, listOfYUncertaintiesArrays=[], showFigure=True, directory=''):
     exportFigure = True #This variable should be moved to an argument or something in plot_settings.
     #First put some defaults in if not already defined.
     x_values = np.array(x_values)
@@ -235,23 +235,23 @@ def createSimulatedResponsesPlot(x_values, listOfYArrays, plot_settings={}, list
         ax0.legend(plot_settings['legendLabels']) #legends must be after plots are made.
     fig0.tight_layout()
     if exportFigure==True:
-        fig0.savefig(plot_settings['figure_name'] + '.png', dpi=plot_settings['dpi'])
+        fig0.savefig(directory + plot_settings['figure_name'] + '.png', dpi=plot_settings['dpi'])
     if showFigure==False:
         plt.close(fig0)
     return fig0
 
-def makeTrisurfacePlot(xValues, yValues, zValues, exportFigure = True, figure_name="TrisurfacePlot", showFigure=True):
+def makeTrisurfacePlot(xValues, yValues, zValues, exportFigure = True, figure_name="TrisurfacePlot", showFigure=True, directory=''):
     from mpl_toolkits.mplot3d import Axes3D #Although it does not look like this is called here, the InfoGain plots will fail without this line.
     fig1, ax1 =  plt.subplots(1)
     ax1 = plt.axes(projection ='3d')
     image = ax1.plot_trisurf(xValues,yValues, zValues)
     if exportFigure == True:
-        fig1.savefig(figure_name + '.png')
+        fig1.savefig(directory + figure_name + '.png')
     if showFigure==False:
         plt.close(fig1)
     return fig1, ax1, image
 
-def makeMeshGridSurfacePlot(XX, YY, ZZ,  plot_settings = {}, exportFigure = True, figure_name="MeshGridSurfacePlot", showFigure=True):
+def makeMeshGridSurfacePlot(XX, YY, ZZ,  plot_settings = {}, exportFigure = True, figure_name="MeshGridSurfacePlot", showFigure=True, directory=''):
     #TODO: plot_settings should be used for axis labels etc, like above.
     #TODO: create a UserInput variable named info_gain_plot_settings (like what the other cases have).
     from mpl_toolkits.mplot3d import Axes3D #I am not sure if this line is needed here, it might b.
@@ -266,7 +266,7 @@ def makeMeshGridSurfacePlot(XX, YY, ZZ,  plot_settings = {}, exportFigure = True
     ax1.set_title('Information Gain Surface')
     fig1.colorbar(surf, shrink=0.5, aspect=5)
     if exportFigure==True:
-        fig1.savefig(figure_name + '.png')
+        fig1.savefig(directory + figure_name + '.png')
     if showFigure==False:
         plt.close(fig1)
     return fig1, ax1#, image
