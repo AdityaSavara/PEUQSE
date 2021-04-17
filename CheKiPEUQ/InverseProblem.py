@@ -39,6 +39,11 @@ class parameter_estimation:
         #TODO: settings that are supposed to be Booleans should get Boolean cast in here. Otherwise if they are strings they will cause problems in "or" statements (where strings can return true even if the string is 'False').
         self.UserInput = UserInput #Note that this is a pointer, so the later lines are within this object.
         #Now will automatically populate some variables from UserInput
+        #Check if there are parameterNames provided. If not, we will make some.
+        if len(UserInput.model['parameterNamesAndMathTypeExpressionsDict']) == 0:
+            numParameters = len(UserInput.model['InputParameterPriorValues'])
+            for parameterIndex in range(0,numParameters):
+                UserInput.model['parameterNamesAndMathTypeExpressionsDict'][str(parameterIndex)]= 'ParInd_'+str(parameterIndex)
         UserInput.parameterNamesList = list(UserInput.model['parameterNamesAndMathTypeExpressionsDict'].keys())
         UserInput.stringOfParameterNames = str(UserInput.parameterNamesList).replace("'","")[1:-1]
         UserInput.parameterNamesAndMathTypeExpressionsDict = UserInput.model['parameterNamesAndMathTypeExpressionsDict']
