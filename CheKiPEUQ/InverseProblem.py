@@ -680,9 +680,10 @@ class parameter_estimation:
                         self.cumulative_post_burn_in_log_priors_vec = np.vstack((self.cumulative_post_burn_in_log_priors_vec, self.post_burn_in_log_priors_vec))
                         self.cumulative_post_burn_in_log_posteriors_un_normed_vec = np.vstack((self.cumulative_post_burn_in_log_posteriors_un_normed_vec, self.post_burn_in_log_posteriors_un_normed_vec))                    
             if searchType == 'doOptimizeNegLogP':
-                thisResult = self.doOptimizeNegLogP(**passThroughArgs)
-                #FIXME: the column headings of "thisResult" are wrong for the case of doOptimizeNegLogP.
-                #What we really need to do is have the log file's column headings generated based on the searchType.
+                optimizationOutput = self.doOptimizeNegLogP(**passThroughArgs)
+                self.map_logP = optimizationOutput[1]
+                self.map_parameter_set = optimizationOutput[0]
+                thisResult = [self.map_logP, self.map_parameter_set, None, None, None, None, None, None]
             if searchType == 'doOptimizeSSR':
                 thisResult = self.doOptimizeSSR(**passThroughArgs)
             if (type(self.UserInput.parameter_estimation_settings['multistart_checkPointFrequency']) != type(None)) or (verbose == True):
@@ -734,7 +735,6 @@ class parameter_estimation:
         self.map_parameter_set = highest_logP_parameter_set 
         if (searchType == 'doEnsembleSliceSampling') or (searchType == 'doMetropolisHastings'):
             #For MCMC, we can now calculate the post_burn_in statistics for the best sampling from the full samplings done. We don't want to lump all together because that would not be unbiased.
-            
             #Note that "thisResult" and thus "bestResultSoFar" has the form: [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec]
             [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec] = bestResultSoFar
             if calculatePostBurnInStatistics == True:
@@ -748,9 +748,7 @@ class parameter_estimation:
             #self.post_burn_in_log_priors_vec = cumulative_post_burn_in_log_priors_vec
             #self.post_burn_in_log_posteriors_un_normed_vec = cumulative_post_burn_in_log_posteriors_un_normed_vec
             #implied return bestResultSoFar # [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec] 
-        if searchType == 'doOptimizeNegLogP':            
-            pass# implied return bestResultSoFar# [self.map_parameter_set, self.map_logP]
-        if searchType == 'getLogP':          
+        if (searchType == 'getLogP') or (searchType == 'doOptimizeNegLogP'):
             #if it's getLogP gridsearch, we are going to convert it to samples if requested.
             if permutationsToSamples == True:
                 self.permutations_MAP_logP_and_parameters_values = np.vstack( self.permutations_MAP_logP_and_parameters_values) #Note that vstack actually requires a tuple with multiple elements as an argument. So this list or array like structure is being converted to a tuple of many elements and then being stacked.
@@ -836,11 +834,11 @@ class parameter_estimation:
         #make the initial points list by mostly passing through arguments.
         multiStartInitialPointsList = self.generateInitialPoints(numStartPoints=numStartPoints, relativeInitialDistributionSpread=relativeInitialDistributionSpread, initialPointsDistributionType=initialPointsDistributionType, centerPoint = centerPoint, gridsearchSamplingInterval = gridsearchSamplingInterval, gridsearchSamplingRadii = gridsearchSamplingRadii)
         
-        #we only turn on permutationsToSamples if grid or uniform and if getLogP.
+        #we normally only turn on permutationsToSamples if grid or uniform and if getLogP or doOptimizeNegLogP.
         permutationsToSamples = False#initialize with default
         if self.UserInput.parameter_estimation_settings['multistart_gridsearchToSamples'] == True:
             if initialPointsDistributionType == 'grid' or initialPointsDistributionType == 'uniform':
-                if searchType == 'getLogP':
+                if (searchType == 'getLogP') or (searchType=='doOptimizeNegLogP'):
                     permutationsToSamples = True
                         
         #Look for the best result (highest map_logP) from among these permutations. Maybe later should add optional argument to allow searching for highest mu_AP to find HPD.
@@ -1683,7 +1681,7 @@ class parameter_estimation:
         pickleAnObject(self.map_logP, file_name_prefix+'permutation_map_logP'+file_name_suffix)
         pickleAnObject(self.map_parameter_set, file_name_prefix+'permutation_map_parameter_set'+file_name_suffix)
         pickleAnObject(self.UserInput.InputParameterInitialGuess, file_name_prefix+'permutation_initial_point_parameters'+file_name_suffix)
-
+        
     #Our EnsembleSliceSampling is done by the Zeus back end. (pip install zeus-mcmc)
     software_name = "zeus"
     software_version = "2.0.0"
@@ -1799,7 +1797,7 @@ class parameter_estimation:
             self.map_index = list(self.post_burn_in_log_posteriors_un_normed_vec).index(self.map_logP) #This does not have to be a unique answer, just one of them places which gives map_logP.
             self.map_parameter_set = self.post_burn_in_samples[self.map_index] #This  is the point with the highest probability in the posterior.            
             return self.map_logP
-
+            
     #main function to get samples #TODO: Maybe Should return map_log_P and mu_AP_log_P?
     #@CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
     def doMetropolisHastings(self, calculatePostBurnInStatistics = True, mcmc_exportLog='UserChoice', continueSampling = 'auto'):
