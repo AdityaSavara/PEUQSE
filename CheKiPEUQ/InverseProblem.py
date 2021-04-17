@@ -219,7 +219,6 @@ class parameter_estimation:
         else: #The other possibilities are a None object or a function. For either of thtose cases, we simply set UserInput.responses_simulation_uncertainties equal to what the user provided.
             UserInput.responses_simulation_uncertainties = copy.deepcopy(self.UserInput.model['responses_simulation_uncertainties'])
 
-        
         #Now to process simulatedResponses_upperBounds and simulatedResponses_lowerBounds. Can be a blank list or a nested list.
         if len(UserInput.model['simulatedResponses_upperBounds']) > 0:
             UserInput.model['simulatedResponses_upperBounds'] = np.array(nestedObjectsFunctions.makeAtLeast_2dNested(self.UserInput.model['simulatedResponses_upperBounds']))
@@ -280,10 +279,6 @@ class parameter_estimation:
                 #The next line needs to be on UserInput.covmat_prior_scaled and not UserInput.covmat_prior, since we're stacking the divisions.
                 UserInput.covmat_prior_scaled[:,parameterIndex] = UserInput.covmat_prior_scaled[:,parameterIndex]/parameterValue        
         
-        
-        
-
-        
         #To find the *observed* responses covariance matrix, meaning based on the uncertainties reported by the users, we take the uncertainties from the points. This is needed for the likelihood. However, it will be transformed again at that time.
         #First, we have to make sure self.UserInput.responses_observed_transformed_uncertainties is an iterable. It could be a none-type or a function.
         if isinstance(self.UserInput.responses_observed_transformed_uncertainties, Iterable):
@@ -318,7 +313,18 @@ class parameter_estimation:
         if len(self.UserInput.responses['reducedResponseSpace']) > 0:
             print("Important: the UserInput.model['reducedResponseSpace'] is not blank. That means the only responses examined will be the ones in the indices inside 'reducedReponseSpace'.   The values of all others will be discarded during each simulation.")
             self.reduceResponseSpace()
-            
+        
+        #Check if we should plan to split the responses into separate likelihood terms. 
+        self.prepareResponsesForSplitLikelihood = False #initialized as false, will change to True if needed.
+        #First check if it is a single response, then if so a singlepoint with the initial values and see if it turns out okay.
+        if len(self.UserInput.responses_observed_transformed)==1: #this means single response
+            initialLogP = self.getLogP(self.UserInput.InputParameterInitialGuess)
+            if (np.isnan(initialLogP) or initialLogP < -1E90):    
+                if np.shape(UserInput.responses_observed) == np.shape(UserInput.responses_observed_uncertainties):
+                    #this if statement only occurs if uncertainties are standard deviations and not covmat, 
+                    #which means we can prepare the responses for split likelihood and should plan to.
+                    self.prepareResponsesForSplitLikelihood = True
+                
     
     def reduceResponseSpace(self):
         #This function has no explicit arguments, but takes everything in self.UserInput as an implied argument.
@@ -1604,7 +1610,6 @@ class parameter_estimation:
                 file_name_prefix = "./mpi_log_files/"  #TODO: FIX THIS, IT MAY NOT WORK ON EVERY OS. SHOULD USE 'os' MODULE TO FIND DIRECTION OF THE SLASH OR TO DO SOMETHING SIMILAR. CURRENTLY IT IS WORKING ON MY WINDOWS DESPITE BEING "/"
         return file_name_prefix, file_name_suffix
 
-
     def exportPostBurnInStatistics(self):
         #TODO: Consider to Make header for mcmc_samples_array. Also make exporting the mcmc_samples_array optional. 
         file_name_prefix, file_name_suffix = self.getParallelProcessingPrefixAndSuffix() #Rather self explanatory.
@@ -1679,8 +1684,6 @@ class parameter_estimation:
         pickleAnObject(self.map_parameter_set, file_name_prefix+'permutation_map_parameter_set'+file_name_suffix)
         pickleAnObject(self.UserInput.InputParameterInitialGuess, file_name_prefix+'permutation_initial_point_parameters'+file_name_suffix)
 
-
-        
     #Our EnsembleSliceSampling is done by the Zeus back end. (pip install zeus-mcmc)
     software_name = "zeus"
     software_version = "2.0.0"
@@ -1796,8 +1799,7 @@ class parameter_estimation:
             self.map_index = list(self.post_burn_in_log_posteriors_un_normed_vec).index(self.map_logP) #This does not have to be a unique answer, just one of them places which gives map_logP.
             self.map_parameter_set = self.post_burn_in_samples[self.map_index] #This  is the point with the highest probability in the posterior.            
             return self.map_logP
-    
-    
+
     #main function to get samples #TODO: Maybe Should return map_log_P and mu_AP_log_P?
     #@CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
     def doMetropolisHastings(self, calculatePostBurnInStatistics = True, mcmc_exportLog='UserChoice', continueSampling = 'auto'):
@@ -1977,7 +1979,6 @@ class parameter_estimation:
             self.map_index = list(self.post_burn_in_log_posteriors_un_normed_vec).index(self.map_logP) #This does not have to be a unique answer, just one of them places which gives map_logP.
             self.map_parameter_set = self.post_burn_in_samples[self.map_index] #This  is the point with the highest probability in the posterior.            
             return self.map_logP
-
         
     def getLogPrior(self,discreteParameterVector):
         if type(self.UserInput.model['custom_logPrior']) != type(None):
@@ -2029,7 +2030,6 @@ class parameter_estimation:
             if lowerCheck == False:
                 return False
         return True #If the test has gotten here without failing any of the tests, we return true.
-
 
     def doSimulatedResponsesBoundsChecks(self, simulatedResponses): #Bounds intended for the likelihood.
         if len(self.UserInput.model['InputParameterPriorValues_upperBounds']) > 0:
@@ -2097,18 +2097,25 @@ class parameter_estimation:
             simulatedResponses_transformed, responses_simulation_uncertainties_transformed = self.transform_responses(simulatedResponses, responses_simulation_uncertainties) #This creates transforms for any data that we might need it. The same transforms were also applied to the observed responses.
             simulated_responses_covmat_transformed = returnShapedResponseCovMat(self.UserInput.num_response_dimensions, responses_simulation_uncertainties_transformed)  #assume we got standard deviations back.
         observedResponses_transformed = self.UserInput.responses_observed_transformed
-                
         #If our likelihood is  “probability of Response given Theta”…  we have a continuous probability distribution for both the response and theta. That means the pdf  must use binning on both variables. Eric notes that the pdf returns a probability density, not a probability mass. So the pdf function here divides by the width of whatever small bin is being used and then returns the density accordingly. Because of this, our what we are calling likelihood is not actually probability (it’s not the actual likelihood) but is proportional to the likelihood.
         #Thus we call it a probability_metric and not a probability. #TODO: consider changing names of likelihood and get likelihood to "likelihoodMetric" and "getLikelihoodMetric"
         #Now we need to make the comprehensive_responses_covmat.
         #First we will check whether observed_responses_covmat_transformed is square or not. The multivariate_normal.pdf function requires a diagonal values vector to be 1D.
         observed_responses_covmat_transformed = self.observed_responses_covmat_transformed
-        observed_responses_covmat_transformed_shape = np.shape(observed_responses_covmat_transformed) 
-
+        
+        #For some cases, we should prepare to split the likelihood.
+        if self.prepareResponsesForSplitLikelihood == True:
+            simulatedResponses_transformed = nestedObjectsFunctions.convertToNested(simulatedResponses_transformed[0])
+            if type(simulated_responses_covmat_transformed) != type(None):
+                    simulated_responses_covmat_transformed = nestedObjectsFunctions.convertToNested(simulated_responses_covmat_transformed[0])
+            observedResponses_transformed = nestedObjectsFunctions.convertToNested(observedResponses_transformed[0])
+            observed_responses_covmat_transformed = nestedObjectsFunctions.convertToNested(observed_responses_covmat_transformed[0])
         #In general, the covmat could be a function of the responses magnitude and independent variables. So eventually, we will use non-linear regression or something to estimate it. However, for now we simply take the observed_responses_covmat_transformed which will work for most cases.
         #TODO: use Ashi's nonlinear regression code (which  he used in this paper https://www.sciencedirect.com/science/article/abs/pii/S0920586118310344).  Put in the response magnitudes and the independent variables.
         #in future it will be something like: if self.UserInput.covmat_regression== True: comprehensive_responses_covmat = nonLinearCovmatPrediction(self.UserInput['independent_variable_values'], observed_responses_covmat_transformed)
         #And that covmat_regression will be on by default.  We will need to have an additional argument for people to specify whether magnitude weighting and independent variable values should both be considered, or just one.
+        #First, get the shape of the covmat.
+        observed_responses_covmat_transformed_shape = np.shape(observed_responses_covmat_transformed)
         if type(simulated_responses_covmat_transformed) == type(None):
             comprehensive_responses_covmat = observed_responses_covmat_transformed
         else: #Else we add the uncertainties, assuming they are orthogonal. Note that these are already covmats so are already variances that can be added directly. 
