@@ -44,6 +44,12 @@ class parameter_estimation:
             numParameters = len(UserInput.model['InputParameterPriorValues'])
             for parameterIndex in range(0,numParameters):
                 UserInput.model['parameterNamesAndMathTypeExpressionsDict'][str(parameterIndex)]= 'ParInd_'+str(parameterIndex)
+        elif type(UserInput.model['parameterNamesAndMathTypeExpressionsDict']) == type([1]): # if it's a list, make a dictionary.
+                listToMakeDictionary = UserInput.model['parameterNamesAndMathTypeExpressionsDict']
+                newDictionary = {}
+                for paramName in listToMakeDictionary:
+                    newDictionary[str(paramName)] = str(paramName)
+                UserInput.model['parameterNamesAndMathTypeExpressionsDict'] = newDictionary
         UserInput.parameterNamesList = list(UserInput.model['parameterNamesAndMathTypeExpressionsDict'].keys())
         UserInput.stringOfParameterNames = str(UserInput.parameterNamesList).replace("'","")[1:-1]
         UserInput.parameterNamesAndMathTypeExpressionsDict = UserInput.model['parameterNamesAndMathTypeExpressionsDict']
