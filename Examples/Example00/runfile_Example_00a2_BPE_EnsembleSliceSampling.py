@@ -28,7 +28,7 @@ if __name__ == "__main__":
     PE_object.createAllPlots() #This function calls each of the below functions so that the user does not have to.
 #    PE_object.makeHistogramsForEachParameter()    
 #    PE_object.makeSamplingScatterMatrixPlot()
-#    PE_object.createSimulatedResponsesPlot()
+#    PE_object.createSimulatedResponsesPlots()
     
     CKPQ.save_PE_object(PE_object, "SavingProjectExample")
 

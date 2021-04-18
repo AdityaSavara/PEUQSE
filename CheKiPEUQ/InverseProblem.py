@@ -36,9 +36,25 @@ class parameter_estimation:
     @CiteSoft.after_call_compile_consolidated_log()
     @CiteSoft.module_call_cite(unique_id=software_unique_id, software_name=software_name, **software_kwargs)
     def __init__(self, UserInput = None):
-        #TODO: settings that are supposed to be Booleans should get Boolean cast in here. Otherwise if they are strings they will cause problems in "or" statements (where strings can return true even if the string is 'False').
+        #TODO: settings that are supposed to be Booleans should get Boolean cast in here. Otherwise if they are strings they will cause problems in "or" statements (where strings can return true even if the string is 'False').        
         self.UserInput = UserInput #Note that this is a pointer, so the later lines are within this object.
         #Now will automatically populate some variables from UserInput
+        #make subdirectories as needed.
+        import os
+        for directoryName in UserInput.directories:
+            if not os.path.exists(directoryName):
+                os.makedirs(directoryName)
+        #Check if there are parameterNames provided. If not, we will make some.
+        if len(UserInput.model['parameterNamesAndMathTypeExpressionsDict']) == 0:
+            numParameters = len(UserInput.model['InputParameterPriorValues'])
+            for parameterIndex in range(0,numParameters):
+                UserInput.model['parameterNamesAndMathTypeExpressionsDict'][str(parameterIndex)]= 'ParInd_'+str(parameterIndex)
+        elif type(UserInput.model['parameterNamesAndMathTypeExpressionsDict']) == type([1]): # if it's a list, make a dictionary.
+                listToMakeDictionary = UserInput.model['parameterNamesAndMathTypeExpressionsDict']
+                newDictionary = {}
+                for paramName in listToMakeDictionary:
+                    newDictionary[str(paramName)] = str(paramName)
+                UserInput.model['parameterNamesAndMathTypeExpressionsDict'] = newDictionary
         UserInput.parameterNamesList = list(UserInput.model['parameterNamesAndMathTypeExpressionsDict'].keys())
         UserInput.stringOfParameterNames = str(UserInput.parameterNamesList).replace("'","")[1:-1]
         UserInput.parameterNamesAndMathTypeExpressionsDict = UserInput.model['parameterNamesAndMathTypeExpressionsDict']
@@ -214,7 +230,6 @@ class parameter_estimation:
         else: #The other possibilities are a None object or a function. For either of thtose cases, we simply set UserInput.responses_simulation_uncertainties equal to what the user provided.
             UserInput.responses_simulation_uncertainties = copy.deepcopy(self.UserInput.model['responses_simulation_uncertainties'])
 
-        
         #Now to process simulatedResponses_upperBounds and simulatedResponses_lowerBounds. Can be a blank list or a nested list.
         if len(UserInput.model['simulatedResponses_upperBounds']) > 0:
             UserInput.model['simulatedResponses_upperBounds'] = np.array(nestedObjectsFunctions.makeAtLeast_2dNested(self.UserInput.model['simulatedResponses_upperBounds']))
@@ -275,10 +290,6 @@ class parameter_estimation:
                 #The next line needs to be on UserInput.covmat_prior_scaled and not UserInput.covmat_prior, since we're stacking the divisions.
                 UserInput.covmat_prior_scaled[:,parameterIndex] = UserInput.covmat_prior_scaled[:,parameterIndex]/parameterValue        
         
-        
-        
-
-        
         #To find the *observed* responses covariance matrix, meaning based on the uncertainties reported by the users, we take the uncertainties from the points. This is needed for the likelihood. However, it will be transformed again at that time.
         #First, we have to make sure self.UserInput.responses_observed_transformed_uncertainties is an iterable. It could be a none-type or a function.
         if isinstance(self.UserInput.responses_observed_transformed_uncertainties, Iterable):
@@ -313,7 +324,18 @@ class parameter_estimation:
         if len(self.UserInput.responses['reducedResponseSpace']) > 0:
             print("Important: the UserInput.model['reducedResponseSpace'] is not blank. That means the only responses examined will be the ones in the indices inside 'reducedReponseSpace'.   The values of all others will be discarded during each simulation.")
             self.reduceResponseSpace()
-            
+        
+        #Check if we should plan to split the responses into separate likelihood terms. 
+        self.prepareResponsesForSplitLikelihood = False #initialized as false, will change to True if needed.
+        #First check if it is a single response, then if so a singlepoint with the initial values and see if it turns out okay.
+        if len(self.UserInput.responses_observed_transformed)==1: #this means single response
+            initialLogP = self.getLogP(self.UserInput.InputParameterInitialGuess)
+            if (np.isnan(initialLogP) or initialLogP < -1E90):    
+                if np.shape(UserInput.responses_observed) == np.shape(UserInput.responses_observed_uncertainties):
+                    #this if statement only occurs if uncertainties are standard deviations and not covmat, 
+                    #which means we can prepare the responses for split likelihood and should plan to.
+                    self.prepareResponsesForSplitLikelihood = True
+                
     
     def reduceResponseSpace(self):
         #This function has no explicit arguments, but takes everything in self.UserInput as an implied argument.
@@ -669,9 +691,10 @@ class parameter_estimation:
                         self.cumulative_post_burn_in_log_priors_vec = np.vstack((self.cumulative_post_burn_in_log_priors_vec, self.post_burn_in_log_priors_vec))
                         self.cumulative_post_burn_in_log_posteriors_un_normed_vec = np.vstack((self.cumulative_post_burn_in_log_posteriors_un_normed_vec, self.post_burn_in_log_posteriors_un_normed_vec))                    
             if searchType == 'doOptimizeNegLogP':
-                thisResult = self.doOptimizeNegLogP(**passThroughArgs)
-                #FIXME: the column headings of "thisResult" are wrong for the case of doOptimizeNegLogP.
-                #What we really need to do is have the log file's column headings generated based on the searchType.
+                optimizationOutput = self.doOptimizeNegLogP(**passThroughArgs)
+                self.map_logP = optimizationOutput[1]
+                self.map_parameter_set = optimizationOutput[0]
+                thisResult = [self.map_logP, self.map_parameter_set, None, None, None, None, None, None]
             if searchType == 'doOptimizeSSR':
                 thisResult = self.doOptimizeSSR(**passThroughArgs)
             if (type(self.UserInput.parameter_estimation_settings['multistart_checkPointFrequency']) != type(None)) or (verbose == True):
@@ -723,7 +746,6 @@ class parameter_estimation:
         self.map_parameter_set = highest_logP_parameter_set 
         if (searchType == 'doEnsembleSliceSampling') or (searchType == 'doMetropolisHastings'):
             #For MCMC, we can now calculate the post_burn_in statistics for the best sampling from the full samplings done. We don't want to lump all together because that would not be unbiased.
-            
             #Note that "thisResult" and thus "bestResultSoFar" has the form: [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec]
             [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec] = bestResultSoFar
             if calculatePostBurnInStatistics == True:
@@ -737,9 +759,7 @@ class parameter_estimation:
             #self.post_burn_in_log_priors_vec = cumulative_post_burn_in_log_priors_vec
             #self.post_burn_in_log_posteriors_un_normed_vec = cumulative_post_burn_in_log_posteriors_un_normed_vec
             #implied return bestResultSoFar # [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec] 
-        if searchType == 'doOptimizeNegLogP':            
-            pass# implied return bestResultSoFar# [self.map_parameter_set, self.map_logP]
-        if searchType == 'getLogP':          
+        if (searchType == 'getLogP') or (searchType == 'doOptimizeNegLogP'):
             #if it's getLogP gridsearch, we are going to convert it to samples if requested.
             if permutationsToSamples == True:
                 self.permutations_MAP_logP_and_parameters_values = np.vstack( self.permutations_MAP_logP_and_parameters_values) #Note that vstack actually requires a tuple with multiple elements as an argument. So this list or array like structure is being converted to a tuple of many elements and then being stacked.
@@ -825,11 +845,11 @@ class parameter_estimation:
         #make the initial points list by mostly passing through arguments.
         multiStartInitialPointsList = self.generateInitialPoints(numStartPoints=numStartPoints, relativeInitialDistributionSpread=relativeInitialDistributionSpread, initialPointsDistributionType=initialPointsDistributionType, centerPoint = centerPoint, gridsearchSamplingInterval = gridsearchSamplingInterval, gridsearchSamplingRadii = gridsearchSamplingRadii)
         
-        #we only turn on permutationsToSamples if grid or uniform and if getLogP.
+        #we normally only turn on permutationsToSamples if grid or uniform and if getLogP or doOptimizeNegLogP.
         permutationsToSamples = False#initialize with default
         if self.UserInput.parameter_estimation_settings['multistart_gridsearchToSamples'] == True:
             if initialPointsDistributionType == 'grid' or initialPointsDistributionType == 'uniform':
-                if searchType == 'getLogP':
+                if (searchType == 'getLogP') or (searchType=='doOptimizeNegLogP'):
                     permutationsToSamples = True
                         
         #Look for the best result (highest map_logP) from among these permutations. Maybe later should add optional argument to allow searching for highest mu_AP to find HPD.
@@ -1321,10 +1341,10 @@ class parameter_estimation:
                     yValues = local_info_gains_matrices_array[modulationIndex][:,1]
                     zValues = local_info_gains_matrices_array[modulationIndex][:,2]
                     if self.UserInput.doe_settings['parallel_parameter_modulation'] == False: #This is the normal case.
-                        plotting_functions.makeTrisurfacePlot(xValues, yValues, zValues, figure_name = "Info_gain_TrisurfacePlot_modulation_"+str(modulationIndex+1)+plot_suffix)
+                        plotting_functions.makeTrisurfacePlot(xValues, yValues, zValues, figure_name = "Info_gain_TrisurfacePlot_modulation_"+str(modulationIndex+1)+plot_suffix, directory = self.UserInput.directories['graphs'])
                     if self.UserInput.doe_settings['parallel_parameter_modulation'] == True: #This is the parallel case. In this case, the actual modulationIndex to attach to the filename is given by the processor rank.
                         import CheKiPEUQ.parallel_processing
-                        plotting_functions.makeTrisurfacePlot(xValues, yValues, zValues, figure_name = "Info_gain_TrisurfacePlot_modulation_"+str(CheKiPEUQ.parallel_processing.currentProcessorNumber)+plot_suffix)
+                        plotting_functions.makeTrisurfacePlot(xValues, yValues, zValues, figure_name = "Info_gain_TrisurfacePlot_modulation_"+str(CheKiPEUQ.parallel_processing.currentProcessorNumber)+plot_suffix, directory = self.UserInput.directories['graphs'])
             if self.info_gains_matrices_array_format == 'meshgrid':        
                 for modulationIndex in range(len(local_info_gains_matrices_array)):
                     #Now need to get things prepared for the meshgrid.
@@ -1335,10 +1355,10 @@ class parameter_estimation:
                     zValues = local_info_gains_matrices_array[modulationIndex][:,2]
                     ZZ = zValues.reshape(XX.shape) #We know from experience to reshape this way.
                     if self.UserInput.doe_settings['parallel_parameter_modulation'] == False: #This is the normal case.
-                        plotting_functions.makeMeshGridSurfacePlot(XX, YY, ZZ, figure_name = "Info_gain_Meshgrid_modulation_"+str(modulationIndex+1)+plot_suffix)
+                        plotting_functions.makeMeshGridSurfacePlot(XX, YY, ZZ, figure_name = "Info_gain_Meshgrid_modulation_"+str(modulationIndex+1)+plot_suffix, directory = self.UserInput.directories['graphs'])
                     if self.UserInput.doe_settings['parallel_parameter_modulation'] == True: #This is the parallel case. In this case, the actual modulationIndex to attach to the filename is given by the processor rank.
                         import CheKiPEUQ.parallel_processing
-                        plotting_functions.makeMeshGridSurfacePlot(XX, YY, ZZ, figure_name = "Info_gain_Meshgrid_modulation_"+str(CheKiPEUQ.parallel_processing.currentProcessorNumber)+plot_suffix)
+                        plotting_functions.makeMeshGridSurfacePlot(XX, YY, ZZ, figure_name = "Info_gain_Meshgrid_modulation_"+str(CheKiPEUQ.parallel_processing.currentProcessorNumber)+plot_suffix, directory = self.UserInput.directories['graphs'])
         else:
             print("At present, createInfoGainPlots and createInfoGainModulationPlots only create plots when the length of  independent_variable_grid_center is 2. We don't currently support creation of other dimensional plots. The infogain data is being exported into the file _____.csv")
     def getLogP(self, proposal_sample): #The proposal sample is specific parameter vector.
@@ -1599,7 +1619,6 @@ class parameter_estimation:
                 file_name_prefix = "./mpi_log_files/"  #TODO: FIX THIS, IT MAY NOT WORK ON EVERY OS. SHOULD USE 'os' MODULE TO FIND DIRECTION OF THE SLASH OR TO DO SOMETHING SIMILAR. CURRENTLY IT IS WORKING ON MY WINDOWS DESPITE BEING "/"
         return file_name_prefix, file_name_suffix
 
-
     def exportPostBurnInStatistics(self):
         #TODO: Consider to Make header for mcmc_samples_array. Also make exporting the mcmc_samples_array optional. 
         file_name_prefix, file_name_suffix = self.getParallelProcessingPrefixAndSuffix() #Rather self explanatory.
@@ -1673,8 +1692,6 @@ class parameter_estimation:
         pickleAnObject(self.map_logP, file_name_prefix+'permutation_map_logP'+file_name_suffix)
         pickleAnObject(self.map_parameter_set, file_name_prefix+'permutation_map_parameter_set'+file_name_suffix)
         pickleAnObject(self.UserInput.InputParameterInitialGuess, file_name_prefix+'permutation_initial_point_parameters'+file_name_suffix)
-
-
         
     #Our EnsembleSliceSampling is done by the Zeus back end. (pip install zeus-mcmc)
     software_name = "zeus"
@@ -1791,8 +1808,7 @@ class parameter_estimation:
             self.map_index = list(self.post_burn_in_log_posteriors_un_normed_vec).index(self.map_logP) #This does not have to be a unique answer, just one of them places which gives map_logP.
             self.map_parameter_set = self.post_burn_in_samples[self.map_index] #This  is the point with the highest probability in the posterior.            
             return self.map_logP
-    
-    
+            
     #main function to get samples #TODO: Maybe Should return map_log_P and mu_AP_log_P?
     #@CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
     def doMetropolisHastings(self, calculatePostBurnInStatistics = True, mcmc_exportLog='UserChoice', continueSampling = 'auto'):
@@ -1972,7 +1988,6 @@ class parameter_estimation:
             self.map_index = list(self.post_burn_in_log_posteriors_un_normed_vec).index(self.map_logP) #This does not have to be a unique answer, just one of them places which gives map_logP.
             self.map_parameter_set = self.post_burn_in_samples[self.map_index] #This  is the point with the highest probability in the posterior.            
             return self.map_logP
-
         
     def getLogPrior(self,discreteParameterVector):
         if type(self.UserInput.model['custom_logPrior']) != type(None):
@@ -2024,7 +2039,6 @@ class parameter_estimation:
             if lowerCheck == False:
                 return False
         return True #If the test has gotten here without failing any of the tests, we return true.
-
 
     def doSimulatedResponsesBoundsChecks(self, simulatedResponses): #Bounds intended for the likelihood.
         if len(self.UserInput.model['InputParameterPriorValues_upperBounds']) > 0:
@@ -2092,18 +2106,25 @@ class parameter_estimation:
             simulatedResponses_transformed, responses_simulation_uncertainties_transformed = self.transform_responses(simulatedResponses, responses_simulation_uncertainties) #This creates transforms for any data that we might need it. The same transforms were also applied to the observed responses.
             simulated_responses_covmat_transformed = returnShapedResponseCovMat(self.UserInput.num_response_dimensions, responses_simulation_uncertainties_transformed)  #assume we got standard deviations back.
         observedResponses_transformed = self.UserInput.responses_observed_transformed
-                
         #If our likelihood is  “probability of Response given Theta”…  we have a continuous probability distribution for both the response and theta. That means the pdf  must use binning on both variables. Eric notes that the pdf returns a probability density, not a probability mass. So the pdf function here divides by the width of whatever small bin is being used and then returns the density accordingly. Because of this, our what we are calling likelihood is not actually probability (it’s not the actual likelihood) but is proportional to the likelihood.
         #Thus we call it a probability_metric and not a probability. #TODO: consider changing names of likelihood and get likelihood to "likelihoodMetric" and "getLikelihoodMetric"
         #Now we need to make the comprehensive_responses_covmat.
         #First we will check whether observed_responses_covmat_transformed is square or not. The multivariate_normal.pdf function requires a diagonal values vector to be 1D.
         observed_responses_covmat_transformed = self.observed_responses_covmat_transformed
-        observed_responses_covmat_transformed_shape = np.shape(observed_responses_covmat_transformed) 
-
+        
+        #For some cases, we should prepare to split the likelihood.
+        if self.prepareResponsesForSplitLikelihood == True:
+            simulatedResponses_transformed = nestedObjectsFunctions.convertToNested(simulatedResponses_transformed[0])
+            if type(simulated_responses_covmat_transformed) != type(None):
+                    simulated_responses_covmat_transformed = nestedObjectsFunctions.convertToNested(simulated_responses_covmat_transformed[0])
+            observedResponses_transformed = nestedObjectsFunctions.convertToNested(observedResponses_transformed[0])
+            observed_responses_covmat_transformed = nestedObjectsFunctions.convertToNested(observed_responses_covmat_transformed[0])
         #In general, the covmat could be a function of the responses magnitude and independent variables. So eventually, we will use non-linear regression or something to estimate it. However, for now we simply take the observed_responses_covmat_transformed which will work for most cases.
         #TODO: use Ashi's nonlinear regression code (which  he used in this paper https://www.sciencedirect.com/science/article/abs/pii/S0920586118310344).  Put in the response magnitudes and the independent variables.
         #in future it will be something like: if self.UserInput.covmat_regression== True: comprehensive_responses_covmat = nonLinearCovmatPrediction(self.UserInput['independent_variable_values'], observed_responses_covmat_transformed)
         #And that covmat_regression will be on by default.  We will need to have an additional argument for people to specify whether magnitude weighting and independent variable values should both be considered, or just one.
+        #First, get the shape of the covmat.
+        observed_responses_covmat_transformed_shape = np.shape(observed_responses_covmat_transformed)
         if type(simulated_responses_covmat_transformed) == type(None):
             comprehensive_responses_covmat = observed_responses_covmat_transformed
         else: #Else we add the uncertainties, assuming they are orthogonal. Note that these are already covmats so are already variances that can be added directly. 
@@ -2158,7 +2179,7 @@ class parameter_estimation:
         import CheKiPEUQ.plotting_functions as plotting_functions 
         parameterSamples = self.post_burn_in_samples
         parameterNamesAndMathTypeExpressionsDict = self.UserInput.parameterNamesAndMathTypeExpressionsDict
-        plotting_functions.makeHistogramsForEachParameter(parameterSamples,parameterNamesAndMathTypeExpressionsDict)
+        plotting_functions.makeHistogramsForEachParameter(parameterSamples,parameterNamesAndMathTypeExpressionsDict, directory = self.UserInput.directories['graphs'])
 
     def makeSamplingScatterMatrixPlot(self, parameterSamples = [], parameterNamesAndMathTypeExpressionsDict={}, parameterNamesList =[], plot_settings={'combined_plots':'auto'}):
         import pandas as pd #This is the only function that needs pandas.
@@ -2176,7 +2197,7 @@ class parameter_estimation:
             return 
         posterior_df = pd.DataFrame(parameterSamples,columns=[parameterNamesAndMathTypeExpressionsDict[x] for x in parameterNamesList])
         pd.plotting.scatter_matrix(posterior_df)
-        plt.savefig(plot_settings['figure_name'],dpi=plot_settings['dpi'])
+        plt.savefig(self.UserInput.directories['graphs']+plot_settings['figure_name'],dpi=plot_settings['dpi'])
         
     def createSimulatedResponsesPlots(self, allResponses_x_values=[], allResponsesListsOfYArrays =[], plot_settings={},allResponsesListsOfYUncertaintiesArrays=[] ): 
         #allResponsesListsOfYArrays  is to have 3 layers of lists: Response > Responses Observed, mu_guess Simulated Responses, map_Simulated Responses, (mu_AP_simulatedResponses) > Values
@@ -2299,7 +2320,7 @@ class parameter_estimation:
             #TODO, low priority: we can check if x_range and y_range are nested, and thereby allow individual response dimension values for those.                               
             numberAbscissas = np.shape(allResponses_x_values)[0]
             #We have a separate abscissa for each response.              
-            figureObject = plotting_functions.createSimulatedResponsesPlot(allResponses_x_values[responseDimIndex], allResponsesListsOfYArrays[responseDimIndex], individual_plot_settings, listOfYUncertaintiesArrays=allResponsesListsOfYUncertaintiesArrays[responseDimIndex])
+            figureObject = plotting_functions.createSimulatedResponsesPlot(allResponses_x_values[responseDimIndex], allResponsesListsOfYArrays[responseDimIndex], individual_plot_settings, listOfYUncertaintiesArrays=allResponsesListsOfYUncertaintiesArrays[responseDimIndex], directory = self.UserInput.directories['graphs'])
                # np.savetxt(individual_plot_settings['figure_name']+".csv", np.vstack((allResponses_x_values[responseDimIndex], allResponsesListsOfYArrays[responseDimIndex])).transpose(), delimiter=",", header='x_values, observed, sim_initial_guess, sim_MAP, sim_mu_AP', comments='')
             allResponsesFigureObjectsList.append(figureObject)
         return allResponsesFigureObjectsList  #This is a list of matplotlib.pyplot as plt objects.
@@ -2364,7 +2385,7 @@ class parameter_estimation:
             individual_plots = self.UserInput.contour_plot_settings['individual_plots']
         if individual_plots == True:
             for pair in pairs_of_parameter_indices:
-                contour_settings_custom['figure_name'] = baseFigureName + "__" + str(pair).replace('[','').replace(']','').replace(',','_').replace(' ','')
+                contour_settings_custom['figure_name'] = self.UserInput.directories['graphs'] + baseFigureName + "__" + str(pair).replace('[','').replace(']','').replace(',','_').replace(' ','')
                 figureObject_beta.mumpce_plots(model_parameter_info = self.UserInput.model_parameter_info, active_parameters = active_parameters, pairs_of_parameter_indices = [pair], posterior_mu_vector = posterior_mu_vector, posterior_cov_matrix = posterior_cov_matrix, prior_mu_vector = np.array(self.UserInput.mu_prior), prior_cov_matrix = self.UserInput.covmat_prior, contour_settings_custom = contour_settings_custom)               
         #now make combined plots if requested.
         if self.UserInput.contour_plot_settings['combined_plots'] == 'auto':

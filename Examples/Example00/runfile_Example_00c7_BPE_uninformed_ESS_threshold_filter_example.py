@@ -34,7 +34,7 @@ PE_object.doEnsembleSliceSampling()
 PE_object.createAllPlots() #This function calls each of the below functions so that the user does not have to.
 #    PE_object.makeHistogramsForEachParameter()    
 #    PE_object.makeSamplingScatterMatrixPlot()
-#    PE_object.createSimulatedResponsesPlot()
+#    PE_object.createSimulatedResponsesPlots()
 
 #The below lines are written with the intent that this file be run in spyder (one could also convert this file into a jupyter notebook).  This file will then create a series of plots with different mcmc threshold filters.
 UserInput.parameter_estimation_settings['mcmc_threshold_filter_samples'] = True

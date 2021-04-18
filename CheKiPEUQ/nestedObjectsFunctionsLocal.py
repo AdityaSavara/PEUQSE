@@ -201,3 +201,10 @@ def checkIfStaggered_2dNested(arr):
             return False
         except:
             return True
+            
+#Takes an arrayLike object like [1,2,3,4] and returns a nested version like [[1],[2],[3],[4]]            
+def convertToNested(inputList):
+    nestedList = []
+    for individualItem in inputList:
+        nestedList.append([individualItem])
+    return nestedList
