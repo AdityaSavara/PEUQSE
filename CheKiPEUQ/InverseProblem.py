@@ -1548,13 +1548,13 @@ class parameter_estimation:
 
     def exportSingleConditionInfoGainMatrix(self, parameterPermutationNumber, conditionsPermutationAndInfoGain, conditionsPermutationIndex):
         #Note that parameterPermutationNumber is parameterPermutationIndex+1
-        file_name_prefix, file_name_suffix = self.getParallelProcessingPrefixAndSuffix() #Rather self explanatory.
+        file_name_prefix, file_name_suffix, directory_name_suffix = self.getParallelProcessingPrefixAndSuffix() #Rather self explanatory.
         file_name_suffix=file_name_suffix[1:] #removing the '_' that comes by default, we will add the '_' back in later below.
         if int(conditionsPermutationIndex+1) != int(file_name_suffix):
             print("line 1199: There is a problem in the parallel processing of conditions info gain matrix calculation!", conditionsPermutationIndex+1, file_name_suffix)
         #I am commenting out the below line because the savetxt was causing amysterious "no such file or directory" error.
-        np.savetxt(self.UserInput.directories['logs_and_csvs']+file_name_prefix+'conditionsPermutationAndInfoGain_'+'mod'+str(int(parameterPermutationNumber))+'_cond'+str(conditionsPermutationIndex+1)+'.csv',conditionsPermutationAndInfoGain, delimiter=",")
-        pickleAnObject(conditionsPermutationAndInfoGain, self.UserInput.directories['pickles']+file_name_prefix+'conditionsPermutationAndInfoGain_'+'mod'+str(int(parameterPermutationNumber))+'_cond'+str(conditionsPermutationIndex+1))
+        np.savetxt(self.UserInput.directories['logs_and_csvs']+directory_name_suffix+file_name_prefix+'conditionsPermutationAndInfoGain_'+'mod'+str(int(parameterPermutationNumber))+'_cond'+str(conditionsPermutationIndex+1)+'.csv',conditionsPermutationAndInfoGain, delimiter=",")
+        pickleAnObject(conditionsPermutationAndInfoGain, self.UserInput.directories['pickles']+directory_name_suffix+file_name_prefix+'conditionsPermutationAndInfoGain_'+'mod'+str(int(parameterPermutationNumber))+'_cond'+str(conditionsPermutationIndex+1))
         
     #This function will calculate MAP and mu_AP, evidence, and related quantities.
     def calculatePostBurnInStatistics(self, calculate_post_burn_in_log_priors_vec = False):       
@@ -1631,24 +1631,25 @@ class parameter_estimation:
                 pass
             if CheKiPEUQ.parallel_processing.currentProcessorNumber > 0:                
                 file_name_suffix = "_"+str(CheKiPEUQ.parallel_processing.currentProcessorNumber)
-                file_name_prefix = "./mpi_log_files/"  #TODO: FIX THIS, IT MAY NOT WORK ON EVERY OS. SHOULD USE 'os' MODULE TO FIND DIRECTION OF THE SLASH OR TO DO SOMETHING SIMILAR. CURRENTLY IT IS WORKING ON MY WINDOWS DESPITE BEING "/"
-        return file_name_prefix, file_name_suffix
+                file_name_prefix = ""  
+                directory_name_suffix = "/mpi_log_files/" #TODO: FIX THIS, IT MAY NOT WORK ON EVERY OS. SHOULD USE 'os' MODULE TO FIND DIRECTION OF THE SLASH OR TO DO SOMETHING SIMILAR. CURRENTLY IT IS WORKING ON MY WINDOWS DESPITE BEING "/"
+        return file_name_prefix, file_name_suffix, directory_name_suffix
 
     def exportPostBurnInStatistics(self):
         #TODO: Consider to Make header for mcmc_samples_array. Also make exporting the mcmc_samples_array optional. 
-        file_name_prefix, file_name_suffix = self.getParallelProcessingPrefixAndSuffix() #Rather self explanatory.
+        file_name_prefix, file_name_suffix, directory_name_suffix = self.getParallelProcessingPrefixAndSuffix() #Rather self explanatory.
         mcmc_samples_array = np.hstack((self.post_burn_in_log_posteriors_un_normed_vec,self.post_burn_in_samples))
-        np.savetxt(self.UserInput.directories['logs_and_csvs']+file_name_prefix+'mcmc_logP_and_parameter_samples'+file_name_suffix+'.csv',mcmc_samples_array, delimiter=",")
-        pickleAnObject(mcmc_samples_array, self.UserInput.directories['pickles']+file_name_prefix+'mcmc_logP_and_parameter_samples'+file_name_suffix)
+        np.savetxt(self.UserInput.directories['logs_and_csvs']+directory_name_suffix+file_name_prefix+'mcmc_logP_and_parameter_samples'+file_name_suffix+'.csv',mcmc_samples_array, delimiter=",")
+        pickleAnObject(mcmc_samples_array, self.UserInput.directories['pickles']+directory_name_suffix+file_name_prefix+'mcmc_logP_and_parameter_samples'+file_name_suffix)
         if self.UserInput.parameter_estimation_settings['exportAllSimulatedOutputs'] == True: #By default, we should not keep this, it's a little too large with large sampling.
             try: #The main reason to use a try and except is because this feature has not been implemented for ESS. With ESS, the mcmc_unfiltered_post_burn_in_simulated_outputs would not be retained and the program would crash.
-                np.savetxt(self.UserInput.directories['logs_and_csvs']+file_name_prefix+'mcmc_unfiltered_post_burn_in_simulated_outputs'+file_name_suffix+'.csv',self.post_burn_in_samples_simulatedOutputs, delimiter=",")         
-                np.savetxt(self.UserInput.directories['logs_and_csvs']+file_name_prefix+'mcmc_unfiltered_post_burn_in_parameter_samples'+file_name_suffix+'.csv',self.post_burn_in_samples_unfiltered, delimiter=",")            
-                np.savetxt(self.UserInput.directories['logs_and_csvs']+file_name_prefix+'mcmc_unfiltered_post_burn_in_log_priors_vec'+file_name_suffix+'.csv',self.post_burn_in_log_posteriors_un_normed_vec_unfiltered, delimiter=",")            
-                np.savetxt(self.UserInput.directories['logs_and_csvs']+file_name_prefix+'mcmc_unfiltered_post_burn_in_log_posteriors_un_normed_vec'+file_name_suffix+'.csv',self.post_burn_in_log_priors_vec_unfiltered, delimiter=",")                        
+                np.savetxt(self.UserInput.directories['logs_and_csvs']+directory_name_suffix+file_name_prefix+'mcmc_unfiltered_post_burn_in_simulated_outputs'+file_name_suffix+'.csv',self.post_burn_in_samples_simulatedOutputs, delimiter=",")         
+                np.savetxt(self.UserInput.directories['logs_and_csvs']+directory_name_suffix+file_name_prefix+'mcmc_unfiltered_post_burn_in_parameter_samples'+file_name_suffix+'.csv',self.post_burn_in_samples_unfiltered, delimiter=",")            
+                np.savetxt(self.UserInput.directories['logs_and_csvs']+directory_name_suffix+file_name_prefix+'mcmc_unfiltered_post_burn_in_log_priors_vec'+file_name_suffix+'.csv',self.post_burn_in_log_posteriors_un_normed_vec_unfiltered, delimiter=",")            
+                np.savetxt(self.UserInput.directories['logs_and_csvs']+directory_name_suffix+file_name_prefix+'mcmc_unfiltered_post_burn_in_log_posteriors_un_normed_vec'+file_name_suffix+'.csv',self.post_burn_in_log_priors_vec_unfiltered, delimiter=",")                        
             except:
                 pass
-        with open(self.UserInput.directories['logs_and_csvs']+file_name_prefix+'mcmc_log_file'+file_name_suffix+".txt", 'w') as out_file:
+        with open(self.UserInput.directories['logs_and_csvs']+directory_name_suffix+file_name_prefix+'mcmc_log_file'+file_name_suffix+".txt", 'w') as out_file:
             out_file.write("self.initial_point_parameters:" + str( self.UserInput.InputParameterInitialGuess) + "\n")
             out_file.write("MAP_logP:" +  str(self.map_logP) + "\n")
             out_file.write("self.map_parameter_set:" + str( self.map_parameter_set) + "\n")
@@ -1665,31 +1666,31 @@ class parameter_estimation:
                 #out_file.write("Warning: The MAP parameter set and mu_AP parameter set differ by more than 10% of prior variance in at least one parameter. This may mean that you need to increase your mcmc_length, increase or decrease your mcmc_relative_step_length, or change what is used for the model response.  There is no general method for knowing the right  value for mcmc_relative_step_length since it depends on the sharpness and smoothness of the response. See for example https://www.sciencedirect.com/science/article/pii/S0039602816300632")
         postBurnInStatistics = [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec]
         if hasattr(self, 'during_burn_in_samples'):
-            pickleAnObject(np.hstack((self.during_burn_in_log_posteriors_un_normed_vec, self.during_burn_in_samples)),self.UserInput.directories['pickles']+ file_name_prefix+'mcmc_burn_in_logP_and_parameter_samples'+file_name_suffix)
-            np.savetxt(self.UserInput.directories['logs_and_csvs']+file_name_prefix+'mcmc_burn_in_logP_and_parameter_samples'+file_name_suffix+'.csv',np.hstack((self.during_burn_in_log_posteriors_un_normed_vec, self.during_burn_in_samples)), delimiter=",")
-        pickleAnObject(postBurnInStatistics,self.UserInput.directories['pickles']+ file_name_prefix+'mcmc_post_burn_in_statistics'+file_name_suffix)
-        pickleAnObject(self.map_logP,self.UserInput.directories['pickles']+ file_name_prefix+'mcmc_map_logP'+file_name_suffix)
-        pickleAnObject(self.UserInput.InputParameterInitialGuess,self.UserInput.directories['pickles']+ file_name_prefix+'mcmc_initial_point_parameters'+file_name_suffix)
+            pickleAnObject(np.hstack((self.during_burn_in_log_posteriors_un_normed_vec, self.during_burn_in_samples)),self.UserInput.directories['pickles']+directory_name_suffix+file_name_prefix+'mcmc_burn_in_logP_and_parameter_samples'+file_name_suffix)
+            np.savetxt(self.UserInput.directories['logs_and_csvs']+directory_name_suffix+file_name_prefix+'mcmc_burn_in_logP_and_parameter_samples'+file_name_suffix+'.csv',np.hstack((self.during_burn_in_log_posteriors_un_normed_vec, self.during_burn_in_samples)), delimiter=",")
+        pickleAnObject(postBurnInStatistics,self.UserInput.directories['pickles']+directory_name_suffix+file_name_prefix+'mcmc_post_burn_in_statistics'+file_name_suffix)
+        pickleAnObject(self.map_logP,self.UserInput.directories['pickles']+directory_name_suffix+file_name_prefix+'mcmc_map_logP'+file_name_suffix)
+        pickleAnObject(self.UserInput.InputParameterInitialGuess,self.UserInput.directories['pickles']+directory_name_suffix+file_name_prefix+'mcmc_initial_point_parameters'+file_name_suffix)
         if hasattr(self, 'mcmc_last_point_sampled'):
-            pickleAnObject(self.mcmc_last_point_sampled, self.UserInput.directories['pickles']+file_name_prefix+'mcmc_last_point_sampled'+file_name_suffix)
+            pickleAnObject(self.mcmc_last_point_sampled, self.UserInput.directories['pickles']+directory_name_suffix+file_name_prefix+'mcmc_last_point_sampled'+file_name_suffix)
 
     #This function is modelled after exportPostBurnInStatistics. That is why it has the form that it does.
     def exportPostPermutationStatistics(self, searchType=''): #if it is an mcmc run, then we need to save the sampling as well.
         #TODO: Consider to Make header for mcmc_samples_array. Also make exporting the mcmc_samples_array optional. 
-        file_name_prefix, file_name_suffix = self.getParallelProcessingPrefixAndSuffix() #Rather self explanatory.
+        file_name_prefix, file_name_suffix, directory_name_suffix = self.getParallelProcessingPrefixAndSuffix() #Rather self explanatory.
         if (searchType == 'doEnsembleSliceSampling') or (searchType == 'doMetropolisHastings'): #Note: this might be needed for parallel processing, not sure.
             mcmc_samples_array = np.hstack((self.post_burn_in_log_posteriors_un_normed_vec,self.post_burn_in_samples))
-            np.savetxt(self.UserInput.directories['logs_and_csvs']+file_name_prefix+'permutation_logP_and_parameter_samples'+file_name_suffix+'.csv',mcmc_samples_array, delimiter=",")
-            pickleAnObject(mcmc_samples_array, self.UserInput.directories['pickles']+file_name_prefix+'permutation_logP_and_parameter_samples'+file_name_suffix)
+            np.savetxt(self.UserInput.directories['logs_and_csvs']+directory_name_suffix+file_name_prefix+'permutation_logP_and_parameter_samples'+file_name_suffix+'.csv',mcmc_samples_array, delimiter=",")
+            pickleAnObject(mcmc_samples_array, self.UserInput.directories['pickles']+directory_name_suffix+file_name_prefix+'permutation_logP_and_parameter_samples'+file_name_suffix)
         if self.UserInput.parameter_estimation_settings['exportAllSimulatedOutputs'] == True: #By default, we should not keep this, it's a little too large with large sampling.
             try: #The main reason to use a try and except is because this feature has not been implemented for ESS. With ESS, the mcmc_unfiltered_post_burn_in_simulated_outputs would not be retained and the program would crash.
-                np.savetxt(self.UserInput.directories['logs_and_csvs']+file_name_prefix+'permutation_unfiltered_post_burn_in_simulated_outputs'+file_name_suffix+'.csv',self.post_burn_in_samples_simulatedOutputs, delimiter=",")            
-                np.savetxt(self.UserInput.directories['logs_and_csvs']+file_name_prefix+'permutation_unfiltered_post_burn_in_parameter_samples'+file_name_suffix+'.csv',self.post_burn_in_samples_unfiltered, delimiter=",")            
-                np.savetxt(self.UserInput.directories['logs_and_csvs']+file_name_prefix+'permutation_unfiltered_post_burn_in_log_priors_vec'+file_name_suffix+'.csv',self.post_burn_in_log_posteriors_un_normed_vec_unfiltered, delimiter=",")            
-                np.savetxt(self.UserInput.directories['logs_and_csvs']+file_name_prefix+'permutation_unfiltered_post_burn_in_log_posteriors_un_normed_vec'+file_name_suffix+'.csv',self.post_burn_in_log_priors_vec_unfiltered, delimiter=",")                        
+                np.savetxt(self.UserInput.directories['logs_and_csvs']+directory_name_suffix+file_name_prefix+'permutation_unfiltered_post_burn_in_simulated_outputs'+file_name_suffix+'.csv',self.post_burn_in_samples_simulatedOutputs, delimiter=",")            
+                np.savetxt(self.UserInput.directories['logs_and_csvs']+directory_name_suffix+file_name_prefix+'permutation_unfiltered_post_burn_in_parameter_samples'+file_name_suffix+'.csv',self.post_burn_in_samples_unfiltered, delimiter=",")            
+                np.savetxt(self.UserInput.directories['logs_and_csvs']+directory_name_suffix+file_name_prefix+'permutation_unfiltered_post_burn_in_log_priors_vec'+file_name_suffix+'.csv',self.post_burn_in_log_posteriors_un_normed_vec_unfiltered, delimiter=",")            
+                np.savetxt(self.UserInput.directories['logs_and_csvs']+directory_name_suffix+file_name_prefix+'permutation_unfiltered_post_burn_in_log_posteriors_un_normed_vec'+file_name_suffix+'.csv',self.post_burn_in_log_priors_vec_unfiltered, delimiter=",")                        
             except:
                 pass
-        with open(self.UserInput.directories['logs_and_csvs']+file_name_prefix+'permutation_log_file'+file_name_suffix+".txt", 'w') as out_file:
+        with open(self.UserInput.directories['logs_and_csvs']+directory_name_suffix+file_name_prefix+'permutation_log_file'+file_name_suffix+".txt", 'w') as out_file:
             out_file.write("self.initial_point_parameters:" + str( self.UserInput.InputParameterInitialGuess) + "\n")
             out_file.write("MAP_logP:" +  str(self.map_logP) + "\n")
             out_file.write("self.map_parameter_set:" + str( self.map_parameter_set) + "\n")
@@ -1705,10 +1706,10 @@ class parameter_estimation:
                     #out_file.write("Warning: The MAP parameter set and mu_AP parameter set differ by more than 10% of prior variance in at least one parameter. This may mean that you need to increase your mcmc_length, increase or decrease your mcmc_relative_step_length, or change what is used for the model response.  There is no general method for knowing the right  value for mcmc_relative_step_length since it depends on the sharpness and smoothness of the response. See for example https://www.sciencedirect.com/science/article/pii/S0039602816300632")
         if (searchType == 'doEnsembleSliceSampling') or (searchType == 'doMetropolisHastings'):
             postBurnInStatistics = [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec]
-            pickleAnObject(postBurnInStatistics, self.UserInput.directories['pickles']+file_name_prefix+'permutation_post_burn_in_statistics'+file_name_suffix)
-        pickleAnObject(self.map_logP, self.UserInput.directories['pickles']+file_name_prefix+'permutation_map_logP'+file_name_suffix)
-        pickleAnObject(self.map_parameter_set, self.UserInput.directories['pickles']+file_name_prefix+'permutation_map_parameter_set'+file_name_suffix)
-        pickleAnObject(self.UserInput.InputParameterInitialGuess, self.UserInput.directories['pickles']+file_name_prefix+'permutation_initial_point_parameters'+file_name_suffix)
+            pickleAnObject(postBurnInStatistics, self.UserInput.directories['pickles']+directory_name_suffix+file_name_prefix+'permutation_post_burn_in_statistics'+file_name_suffix)
+        pickleAnObject(self.map_logP, self.UserInput.directories['pickles']+directory_name_suffix+file_name_prefix+'permutation_map_logP'+file_name_suffix)
+        pickleAnObject(self.map_parameter_set, self.UserInput.directories['pickles']+directory_name_suffix+file_name_prefix+'permutation_map_parameter_set'+file_name_suffix)
+        pickleAnObject(self.UserInput.InputParameterInitialGuess, self.UserInput.directories['pickles']+directory_name_suffix+file_name_prefix+'permutation_initial_point_parameters'+file_name_suffix)
         
     #Our EnsembleSliceSampling is done by the Zeus back end. (pip install zeus-mcmc)
     software_name = "zeus"
