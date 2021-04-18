@@ -23,6 +23,8 @@ if __name__ == "__main__":
     
     UserInput.model['simulateByInputParametersOnlyFunction'] = simulation_model_00.simulation_function_wrapper #This must simulate with *only* the parameters listed above, and no other arguments.
 
+
+    UserInput.parameter_estimation_settings['multistart_searchType'] = 'getLogP'
     UserInput.parameter_estimation_settings['multistart_exportLog'] = True
     UserInput.parameter_estimation_settings['multistart_initialPointsDistributionType'] = 'grid'
 
@@ -34,7 +36,7 @@ if __name__ == "__main__":
     PE_object = CKPQ.parameter_estimation(UserInput)
     #PE_object.doMetropolisHastings()
     #PE_object.doOptimizeNegLogP(method="BFGS", printOptimum=True, verbose=True) #method can also be Nelder-Meade.
-    PE_object.doMultiStart('getLogP')
+    PE_object.doMultiStart()
     PE_object.createAllPlots() #This function calls each of the below functions so that the user does not have to.
 #    PE_object.makeHistogramsForEachParameter()    
 #    PE_object.makeSamplingScatterMatrixPlot()

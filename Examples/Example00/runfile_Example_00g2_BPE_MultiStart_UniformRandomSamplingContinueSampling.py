@@ -27,6 +27,8 @@ if __name__ == "__main__":
     UserInput.parameter_estimation_settings['mcmc_threshold_filter_samples'] = True
 
     UserInput.parameter_estimation_settings['mcmc_random_seed'] = None #it is important that this is None, otherwise it will keep sampling the same points again and again.
+    
+    UserInput.parameter_estimation_settings['multistart_searchType'] = 'getLogP'
     UserInput.parameter_estimation_settings['multistart_initialPointsDistributionType'] = 'uniform'
     UserInput.parameter_estimation_settings['multistart_exportLog'] = True
     UserInput.parameter_estimation_settings['multistart_gridsearch_threshold_filter_coefficient'] = 2.0 #The lower this is, the more the points become filtered. It is not recommended to go below 2.0.
@@ -38,7 +40,7 @@ if __name__ == "__main__":
     PE_object = CKPQ.parameter_estimation(UserInput)
     #PE_object.doMetropolisHastings()
     #PE_object.doOptimizeNegLogP(method="BFGS", printOptimum=True, verbose=True) #method can also be Nelder-Meade.
-    PE_object.doMultiStart('getLogP')
+    PE_object.doMultiStart()
     PE_object.createAllPlots() #This function calls each of the below functions so that the user does not have to.
 #    PE_object.makeHistogramsForEachParameter()    
 #    PE_object.makeSamplingScatterMatrixPlot()

@@ -622,16 +622,16 @@ class parameter_estimation:
             mcmc_continueSampling = False #need to set this variable to false if it's an auto. The only time mcmc_continue sampling should be on for multistart is if someone is doing it intentionally, which would normally only be during an MPI case.                                                                                            
         #Check if we need to do multistart_continueSampling, and prepare for it if we need to.
         if ('multistart_continueSampling' not in self.UserInput.parameter_estimation_settings) or self.UserInput.parameter_estimation_settings['multistart_continueSampling']  == 'auto':
-            if hasattr(self, 'permutations_MAP_logP_and_parameters_values'):
+            if hasattr(self, 'multistart_MAP_logP_and_parameters_values'):
                 multistart_continueSampling = True
             else:
                 multistart_continueSampling = False
         else: multistart_continueSampling = self.UserInput.parameter_estimation_settings['multistart_continueSampling']
         if multistart_continueSampling == True:
-            if hasattr(self, 'permutations_MAP_logP_and_parameters_values'): #if we are continuing from old results in the same instance
+            if hasattr(self, 'multistart_MAP_logP_and_parameters_values'): #if we are continuing from old results in the same instance
                 self.last_permutations_MAP_logP_and_parameters_values = copy.deepcopy(self.permutations_MAP_logP_and_parameters_values)
             else: #Else we need to read from the file.
-                self.last_permutations_MAP_logP_and_parameters_values_filename = file_name_prefix + "permutations_MAP_logP_and_parameters_values" + file_name_suffix
+                self.last_permutations_MAP_logP_and_parameters_values_filename = file_name_prefix + "multistart_MAP_logP_and_parameters_values" + file_name_suffix
                 self.last_permutations_MAP_logP_and_parameters_values = unpickleAnObject(self.UserInput.directories['pickles']+self.last_permutations_MAP_logP_and_parameters_values_filename)
             #extract he last_listOfPermutations from the array object.
             self.last_listOfPermutations =   np.array(nestedObjectsFunctions.makeAtLeast_2dNested(self.last_permutations_MAP_logP_and_parameters_values[:,1:])) #later columns are the permutations.
@@ -812,7 +812,7 @@ class parameter_estimation:
         #This has to be below the later parts so that permutationsToSamples can occur first.
         if exportLog == True:
             pass #Later will do something with allPermutationsResults variable. It has one element for each result (that is, each permutation).
-        with open(self.UserInput.directories['logs_and_csvs'] + "permutations_log_file.txt", 'w') as out_file:
+        with open(self.UserInput.directories['logs_and_csvs'] + "multistart_log_file.txt", 'w') as out_file:
                 out_file.write("centerPoint: " + str(centerPoint) + "\n")
                 out_file.write("highest_MAP_logP: " + str(self.map_logP) + "\n")
                 out_file.write("highest_MAP_logP_parameter_set: " + str(self.map_parameter_set)+ "\n")
@@ -826,19 +826,21 @@ class parameter_estimation:
                     out_file.write("self.mu_AP_parameter_set : " + caveat + str( self.mu_AP_parameter_set)+ "\n")
                     out_file.write("self.stdap_parameter_set : " + caveat  + str( self.stdap_parameter_set)+ "\n")
         #do some exporting etc. This is at the end to avoid exporting every single time if parallelization is used.
-        np.savetxt(self.UserInput.directories['logs_and_csvs']+'permutations_initial_points_parameters_values'+'.csv', self.listOfPermutations, delimiter=",")
-        np.savetxt(self.UserInput.directories['logs_and_csvs']+'permutations_MAP_logP_and_parameters_values.csv',self.permutations_MAP_logP_and_parameters_values, delimiter=",")
-        pickleAnObject(self.permutations_MAP_logP_and_parameters_values, self.UserInput.directories['pickles']+file_name_prefix+'permutations_MAP_logP_and_parameters_values'+file_name_suffix)
+        np.savetxt(self.UserInput.directories['logs_and_csvs']+'multistart_initial_points_parameters_values'+'.csv', self.listOfPermutations, delimiter=",")
+        np.savetxt(self.UserInput.directories['logs_and_csvs']+'multistart_MAP_logP_and_parameters_values.csv',self.permutations_MAP_logP_and_parameters_values, delimiter=",")
+        pickleAnObject(self.permutations_MAP_logP_and_parameters_values, self.UserInput.directories['pickles']+file_name_prefix+'multistart_MAP_logP_and_parameters_values'+file_name_suffix)
         if self.UserInput.parameter_estimation_settings['exportAllSimulatedOutputs'] == True:
-            np.savetxt(self.UserInput.directories['logs_and_csvs']+'permutations_unfiltered_map_simulated_outputs'+'.csv', self.permutations_unfiltered_map_simulated_outputs, delimiter=",")       
-        print("Final map parameter results from PermutationSearch:", self.map_parameter_set,  " \nFinal map logP:", self.map_logP, "more details available in permutations_log_file.txt")        
+            np.savetxt(self.UserInput.directories['logs_and_csvs']+'multistart_unfiltered_map_simulated_outputs'+'.csv', self.permutations_unfiltered_map_simulated_outputs, delimiter=",")       
+        print("Final map parameter results from PermutationSearch:", self.map_parameter_set,  " \nFinal map logP:", self.map_logP, "more details available in multistart_log_file.txt")        
         return bestResultSoFar# [self.map_parameter_set, self.map_logP, etc.]
 
     #@CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
-    def doMultiStart(self, searchType='getLogP', numStartPoints = 'UserChoice', relativeInitialDistributionSpread='UserChoice', exportLog = 'UserChoice', initialPointsDistributionType='UserChoice', passThroughArgs = 'UserChoice', calculatePostBurnInStatistics='UserChoice',  keep_cumulative_post_burn_in_data = 'UserChoice', walkerInitialDistribution='UserChoice', centerPoint = None, gridsearchSamplingInterval = 'UserChoice', gridsearchSamplingRadii = 'UserChoice'):
+    def doMultiStart(self, searchType='UserChoice', numStartPoints = 'UserChoice', relativeInitialDistributionSpread='UserChoice', exportLog = 'UserChoice', initialPointsDistributionType='UserChoice', passThroughArgs = 'UserChoice', calculatePostBurnInStatistics='UserChoice',  keep_cumulative_post_burn_in_data = 'UserChoice', walkerInitialDistribution='UserChoice', centerPoint = None, gridsearchSamplingInterval = 'UserChoice', gridsearchSamplingRadii = 'UserChoice'):
         #See doListOfPermutationsSearch for possible values of searchType variable
         #This function is basically a wrapper that creates a list of initial points and then runs a 'check each permutation' search on that list.
         #We set many of the arguments to have blank or zero values so that if they are not provided, the values will be taken from the UserInput choices.
+        if str(searchType) == 'UserChoice': 
+            searchType = self.UserInput.parameter_estimation_settings['multistart_searchType']
         if str(initialPointsDistributionType) == 'UserChoice': 
             initialPointsDistributionType = self.UserInput.parameter_estimation_settings['multistart_initialPointsDistributionType']
         if str(numStartPoints) =='UserChoice':
@@ -2453,17 +2455,17 @@ class parameter_estimation:
             self.makeHistogramsForEachParameter()               
             self.makeSamplingScatterMatrixPlot(plot_settings=self.UserInput.scatter_matrix_plots_settings)
         except:
-            print("Unable to make histograms and/or scatter matrix plots.")
+            print("Unable to make histograms and/or scatter matrix plots. This usually means your run is not an MCMC run, or that the sampling did not work well. If you are using Metropolis-Hastings, try EnsembleSliceSampling or try a uniform distribution multistart.")
 
         try:        
             self.createMumpcePlots()
         except:
-            print("Unable to make contour plots.")
+            print("Unable to make contour plots. This usually means your run is not an MCMC run.")
 
         try:
-            self.createSimulatedResponsesPlots()
+            self.createSimulatedResponsesPlots(allResponses_x_values=[], allResponsesListsOfYArrays =[], plot_settings={},allResponsesListsOfYUncertaintiesArrays=[]) #forcing the arguments to be blanks, because otherwise it might use some cached values.
         except:
-            print("Unable to make simulated response plots.")
+            print("Unable to make simulated response plots. This is unusual and typically means your observed values and simulated values are not the same array shape. If so, that needs to be fixed.")
             pass
             
     def save_to_dill(self, base_file_name, file_name_prefix ='',  file_name_suffix='', file_name_extension='.dill'):

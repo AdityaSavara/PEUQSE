@@ -79,14 +79,14 @@ parameter_estimation_settings['mcmc_continueSampling']  = 'auto' #This can be se
 
 
 ######multistart (including gridsearch)##### 
-#Possible searchTypes are: 'getLogP', 'doEnsembleSliceSampling', 'doMetropolisHastings', 'doOptimizeNegLogP', 'doOptimizeSSR'.  These are called by syngatx like PE_object.doMultiStart('doEnsembleSliceSampling') in the runfile
-#To do a gridsearch, make multistart_initialPointsDistributionType into 'grid' and then set the two 'gridsearcSampling' variables.
+#To do a gridsearch, make multistart_initialPointsDistributionType into 'grid' and then set the two 'gridsearchSampling' variables.
 #The multistart feature exports the best values to permutations_log_file.txt, and relevant outputs to permutations_initial_points_parameters_values.csv and permutations_MAP_logP_and_parameters_values.csv
+parameter_estimation_settings['multistart_searchType'] = 'getLogP' #Possible searchTypes are: 'getLogP', 'doEnsembleSliceSampling', 'doMetropolisHastings', 'doOptimizeNegLogP', 'doOptimizeSSR'.  These can also be called by syntax like PE_object.doMultiStart('doEnsembleSliceSampling') in the runfile
 parameter_estimation_settings['multistart_checkPointFrequency'] = None #Note: this setting does not work perfectly with ESS.
 parameter_estimation_settings['multistart_parallel_sampling'] = False
 parameter_estimation_settings['multistart_centerPoint'] = None #With None the centerPoint will be taken as model['InputParameterInitialGuess'] 
 parameter_estimation_settings['multistart_numStartPoints'] = 0 #If this is left as zero it will be set as 3 times the number of active parameters.
-parameter_estimation_settings['multistart_initialPointsDistributionType'] = 'uniform' #Can be 'uniform', 'gaussian', 'identical', or 'grid'.
+parameter_estimation_settings['multistart_initialPointsDistributionType'] = 'uniform' #Can be 'uniform', 'gaussian', 'identical', or 'grid'. 
 parameter_estimation_settings['multistart_relativeInitialDistributionSpread'] = 1.0 #This settting is for non-grid multistarts. The default value is 1.0. This scales the distribution's spread. By default, the uniform distribution, the points are sampled from a 2 sigma interval in each direction from the initial guess. This value then scales that range.
 parameter_estimation_settings['multistart_gridsearchSamplingInterval'] = [] #This is for gridsearches and is in units of absolute intervals. By default, these intervals will be set to 1 standard deviaion each.  To changefrom the default, make a comma separated list equal to the number of parameters.
 parameter_estimation_settings['multistart_gridsearchSamplingRadii'] = [] #This is for gridsearches and refers to the number of points (or intervals) in each direction to check from the center. For example, 3 would check 3 points in each direction plus the centerpointn for a total of 7 points along that dimension. For a 3 parameter problem, [3,7,2] would check radii of 3, 7, and 2 for those parameters.
@@ -94,11 +94,10 @@ parameter_estimation_settings['multistart_gridsearchToSamples'] = True #if this 
 parameter_estimation_settings['multistart_gridsearch_threshold_filter_samples'] = True #This feature removes low probability tails from the posterior. This can be important for getting mu_AP, especially when using ESS. Default is true. This only has an effect if multistart_gridsearchToSamples is set to True.
 parameter_estimation_settings['multistart_gridsearch_threshold_filter_coefficient'] = 'auto' #This can be a float or the string 'auto'. Currently (Oct 2020), 'auto' sets the value at 2.0.  The smaller the value the more aggressive the filtering. This only has an effect if multistart_gridsearchToSamples is set to True.
 parameter_estimation_settings['multistart_continueSampling']  = 'auto' #This only works with multistart_gridsearchToSamples. This can be set to True if user would like to continue sampling from a previous result in the directory.  The permutations_MAP_logP_and_parameters_values.pkl file will be used.  Note that if one calls the same PE_object after multistart_gridsearchToSamples sampling within a given python instance then continued sampling will also occur in that situation.
-parameter_estimation_settings['multistart_passThroughArgs'] = {}
+parameter_estimation_settings['multistart_passThroughArgs'] = {}  #Typically, one would put here the arguments for doOptimizeNegLogP:  {'method':"Nelder-Mead", 'printOptimum':True, 'verbose':False}  To find additional details of which arguments can be used with doOptimizeNegLogP, see the function doOptimizeNegLogP in CheKiPEUQ\InverseProblem.py
 parameter_estimation_settings['multistart_calculatePostBurnInStatistics'] = True
 parameter_estimation_settings['multistart_keep_cumulative_post_burn_in_data'] = False
 parameter_estimation_settings['multistart_exportLog'] = False #In the future, this will cause more information to be exported.
-parameter_estimation_settings['multistart_passThroughArgs'] = {}
 
 #####Plot Settings#####
 #Response Plot Settings

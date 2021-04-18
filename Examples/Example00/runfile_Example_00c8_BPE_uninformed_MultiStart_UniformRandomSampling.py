@@ -28,6 +28,7 @@ if __name__ == "__main__":
     #UserInput.parameter_estimation_settings['mcmc_length'] = 100000 #The uninformed prior int his example has a "bad" MCMC walker so requires lots of sampling to converge.
     UserInput.parameter_estimation_settings['checkPointFrequency'] = 10000 #This example is long enough that it's good to get updates.
     
+    UserInput.parameter_estimation_settings['multistart_searchType'] = 'getLogP'
     UserInput.parameter_estimation_settings['multistart_initialPointsDistributionType'] = 'uniform'
     UserInput.parameter_estimation_settings['multistart_exportLog'] = True
     UserInput.parameter_estimation_settings['multistart_gridsearch_threshold_filter_coefficient'] = 2.0 #The lower this is, the more the points become filtered. It is not recommended to go below 2.0.
@@ -38,7 +39,7 @@ if __name__ == "__main__":
     #After making the UserInput, now we make a 'parameter_estimation' object from it.
     PE_object = CKPQ.parameter_estimation(UserInput)
     
-    PE_object.doMultiStart('getLogP')
+    PE_object.doMultiStart()
     PE_object.createAllPlots() #This function calls each of the below functions so that the user does not have to.
 #    PE_object.makeHistogramsForEachParameter()    
 #    PE_object.makeSamplingScatterMatrixPlot()

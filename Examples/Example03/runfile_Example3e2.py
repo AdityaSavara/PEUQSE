@@ -48,7 +48,7 @@ if __name__ == "__main__":
     #PE_object.doMetropolisHastings()
     #[map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, samples_simulatedOutputs, logP] = PE_object.doMetropolisHastings()
     
-    PE_object.doMultiStart('doMetropolisHastings', initialPointsDistributionType='grid',  gridsearchSamplingInterval=[ 5, 5, 6, 6, 0.1, 0.1], gridsearchSamplingRadii=[1,1,1,1,0,0])
+    PE_object.doMultiStart('doMetropolisHastings', initialPointsDistributionType='grid',  gridsearchSamplingInterval=[ 5, 5, 6, 6, 0.1, 0.1], gridsearchSamplingRadii=[1,1,1,1,0,0]) #This is an old non-recommended syntax though it still works. The UserInput dictionaries should be used, as in other examples.
     #PE_object.doGridSearch('getLogP')
     
     PE_object.createAllPlots() #This function calls each of the below functions.

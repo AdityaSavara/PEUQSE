@@ -32,7 +32,7 @@ if __name__ == "__main__":
     #PE_object.doMetropolisHastings()
     #PE_object.doOptimizeNegLogP(method="BFGS", printOptimum=True, verbose=True) #method can also be Nelder-Meade.
     #PE_object.doGridSearch('doOptimizeNegLogP', passThroughArgs={'method':'BFGS'})
-    PE_object.doMultiStart('doOptimizeNegLogP', passThroughArgs={'method':'BFGS'})
+    PE_object.doMultiStart('doOptimizeNegLogP', passThroughArgs={'method':'BFGS'}) #This is an old non-recommended syntax though it still works. The UserInput dictionaries should be used, as in other examples.
     PE_object.createAllPlots() #This function calls each of the below functions so that the user does not have to.
 #    PE_object.makeHistogramsForEachParameter()    
 #    PE_object.makeSamplingScatterMatrixPlot()

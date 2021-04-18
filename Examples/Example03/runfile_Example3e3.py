@@ -49,7 +49,7 @@ if __name__ == "__main__":
     UserInput.parameter_estimation_settings['multistart_checkPointFrequency'] = 1
     
     #NOTE: This has the deprecated syntax. Please use doMultiStart as shown in example 3e.
-    PE_object.doMultiStart('doEnsembleSliceSampling',  initialPointsDistributionType='grid', gridsearchSamplingInterval=[ 5, 5, 6, 6, 0.1, 0.1], gridsearchSamplingRadii=[1,1,1,1,0,0])
+    PE_object.doMultiStart('doEnsembleSliceSampling',  initialPointsDistributionType='grid', gridsearchSamplingInterval=[ 5, 5, 6, 6, 0.1, 0.1], gridsearchSamplingRadii=[1,1,1,1,0,0]) #This is an old non-recommended syntax though it still works. The UserInput dictionaries should be used, as in other examples.
 
     PE_object.createAllPlots() #This function calls each of the below functions.
 #    PE_object.makeHistogramsForEachParameter()    
