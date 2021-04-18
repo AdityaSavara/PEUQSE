@@ -85,13 +85,13 @@ class parameter_estimation:
                 try: #Fixme: This is using a try statement because the directory cannot be made if it exists. Should use a better way to check if the directory exists.
                     #We need to put these in the logs and csvs sub directory if necessary. It is different if there is a blank list versus not.
                     if self.UserInput.directories['logs_and_csvs'] != '':
-                        os.mkdir(directories['logs_and_csvs'] + "mpi_log_files") 
+                        os.mkdir(self.UserInput.directories['logs_and_csvs'] + "mpi_log_files") 
                     else:
                         os.mkdir("./mpi_log_files") 
                 except:
                     pass
                 if self.UserInput.directories['logs_and_csvs'] != '':
-                    os.chdir(directories['logs_and_csvs'] + "mpi_log_files") 
+                    os.chdir(self.UserInput.directories['logs_and_csvs'] + "mpi_log_files") 
                 else:
                     os.chdir("./mpi_log_files")                
                 if ('mcmc_continueSampling' not in UserInput.parameter_estimation_settings) or (UserInput.parameter_estimation_settings['mcmc_continueSampling'] == False) or (UserInput.parameter_estimation_settings['mcmc_continueSampling'] == 'auto'):
