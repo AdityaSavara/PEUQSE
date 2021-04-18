@@ -807,7 +807,7 @@ class parameter_estimation:
         #do some exporting etc. This is at the end to avoid exporting every single time if parallelization is used.
         np.savetxt(self.UserInput.directories['logs_and_csvs']+'permutations_initial_points_parameters_values'+'.csv', self.listOfPermutations, delimiter=",")
         np.savetxt(self.UserInput.directories['logs_and_csvs']+'permutations_MAP_logP_and_parameters_values.csv',self.permutations_MAP_logP_and_parameters_values, delimiter=",")
-        pickleAnObject(self.UserInput.directories['pickles']+self.permutations_MAP_logP_and_parameters_values, filePrefix+'permutations_MAP_logP_and_parameters_values'+fileSuffix)
+        pickleAnObject(self.permutations_MAP_logP_and_parameters_values, self.UserInput.directories['pickles']+filePrefix+'permutations_MAP_logP_and_parameters_values'+fileSuffix)
         if self.UserInput.parameter_estimation_settings['exportAllSimulatedOutputs'] == True:
             np.savetxt(self.UserInput.directories['logs_and_csvs']+'permutations_unfiltered_map_simulated_outputs'+'.csv', self.permutations_unfiltered_map_simulated_outputs, delimiter=",")       
         print("Final map parameter results from PermutationSearch:", self.map_parameter_set,  " \nFinal map logP:", self.map_logP, "more details available in permutations_log_file.txt")        
@@ -912,7 +912,7 @@ class parameter_estimation:
                 #Now we'll make this info_gain_matrix into an array and pickle it. It will be an implied return.
                 self.info_gain_matrix = np.array(self.info_gain_matrix)
                 current_parModulationInfoGainMatrix_filename = "parModulationInfoGainMatrix_mod"+str(parModulationNumber)
-                pickleAnObject(self.info_gain_matrix,self.UserInput.directories['pickles']+current_parModulationInfoGainMatrix_filename)
+                pickleAnObject(self.info_gain_matrix,self.UserInput.directories['pickles']+self.UserInput.directories['pickles']+current_parModulationInfoGainMatrix_filename)
                 #Change back to the regular directory since we are done.
                 os.chdir("..")
                 return True #so we know we're done.
