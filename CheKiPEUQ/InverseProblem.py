@@ -631,7 +631,7 @@ class parameter_estimation:
             if hasattr(self, 'permutations_MAP_logP_and_parameters_values'): #if we are continuing from old results in the same instance
                 self.last_permutations_MAP_logP_and_parameters_values = copy.deepcopy(self.permutations_MAP_logP_and_parameters_values)
             else: #Else we need to read from the file.
-                self.last_permutations_MAP_logP_and_parameters_values_filename = filePrefix + "permutations_MAP_logP_and_parameters_values" + fileSuffix
+                self.last_permutations_MAP_logP_and_parameters_values_filename = file_name_prefix + "permutations_MAP_logP_and_parameters_values" + file_name_suffix
                 self.last_permutations_MAP_logP_and_parameters_values = unpickleAnObject(self.UserInput.directories['pickles']+self.last_permutations_MAP_logP_and_parameters_values_filename)
             #extract he last_listOfPermutations from the array object.
             self.last_listOfPermutations =   np.array(nestedObjectsFunctions.makeAtLeast_2dNested(self.last_permutations_MAP_logP_and_parameters_values[:,1:])) #later columns are the permutations.
@@ -828,7 +828,7 @@ class parameter_estimation:
         #do some exporting etc. This is at the end to avoid exporting every single time if parallelization is used.
         np.savetxt(self.UserInput.directories['logs_and_csvs']+'permutations_initial_points_parameters_values'+'.csv', self.listOfPermutations, delimiter=",")
         np.savetxt(self.UserInput.directories['logs_and_csvs']+'permutations_MAP_logP_and_parameters_values.csv',self.permutations_MAP_logP_and_parameters_values, delimiter=",")
-        pickleAnObject(self.permutations_MAP_logP_and_parameters_values, self.UserInput.directories['pickles']+filePrefix+'permutations_MAP_logP_and_parameters_values'+fileSuffix)
+        pickleAnObject(self.permutations_MAP_logP_and_parameters_values, self.UserInput.directories['pickles']+file_name_prefix+'permutations_MAP_logP_and_parameters_values'+file_name_suffix)
         if self.UserInput.parameter_estimation_settings['exportAllSimulatedOutputs'] == True:
             np.savetxt(self.UserInput.directories['logs_and_csvs']+'permutations_unfiltered_map_simulated_outputs'+'.csv', self.permutations_unfiltered_map_simulated_outputs, delimiter=",")       
         print("Final map parameter results from PermutationSearch:", self.map_parameter_set,  " \nFinal map logP:", self.map_logP, "more details available in permutations_log_file.txt")        
@@ -1761,7 +1761,7 @@ class parameter_estimation:
             else: #Else we need to read from the file.                
                 #First check if we are doing some kind of parallel sampling, because in that case we need to read from the file for our correct process rank. We put that info into the prefix and suffix.
                 file_name_prefix, file_name_suffix, directory_name_suffix = self.getParallelProcessingPrefixAndSuffix()
-                self.last_logP_and_parameter_samples_filename = filePrefix + "mcmc_logP_and_parameter_samples" + fileSuffix
+                self.last_logP_and_parameter_samples_filename = file_name_prefix + "mcmc_logP_and_parameter_samples" + file_name_suffix
                 self.last_logP_and_parameter_samples_data = unpickleAnObject(self.UserInput.directories['pickles']+self.last_logP_and_parameter_samples_filename)
                 self.last_post_burn_in_log_posteriors_un_normed_vec =  np.array(nestedObjectsFunctions.makeAtLeast_2dNested(self.last_logP_and_parameter_samples_data[:,0]))  #First column is the logP
                 if np.shape(self.last_post_burn_in_log_posteriors_un_normed_vec)[0] == 1: #In this case, need to transpose.
@@ -1769,10 +1769,10 @@ class parameter_estimation:
                 self.last_post_burn_in_samples =   np.array(nestedObjectsFunctions.makeAtLeast_2dNested(self.last_logP_and_parameter_samples_data[:,1:])) #later columns are the samples.
                 if np.shape(self.last_post_burn_in_samples)[0] == 1: #In this case, need to transpose.
                     self.last_post_burn_in_samples = self.last_post_burn_in_samples.transpose()
-                self.mcmc_last_point_sampled_filename = filePrefix + "mcmc_last_point_sampled" + fileSuffix
+                self.mcmc_last_point_sampled_filename = file_name_prefix + "mcmc_last_point_sampled" + file_name_suffix
                 self.mcmc_last_point_sampled_data = unpickleAnObject(self.UserInput.directories['pickles']+self.mcmc_last_point_sampled_filename)
                 self.mcmc_last_point_sampled = self.mcmc_last_point_sampled_data
-                self.last_InputParameterInitialGuess_filename = filePrefix + "mcmc_initial_point_parameters" + fileSuffix
+                self.last_InputParameterInitialGuess_filename = file_name_prefix + "mcmc_initial_point_parameters" + file_name_suffix
                 self.last_InputParameterInitialGuess_data = unpickleAnObject(self.UserInput.directories['pickles']+self.last_InputParameterInitialGuess_filename)
                 self.UserInput.InputParameterInitialGuess = self.last_InputParameterInitialGuess_data #populating this because otherwise non-grid Multi-Start will get the wrong values exported. & Same for final plots.
         ####these variables need to be made part of userinput####
@@ -1868,7 +1868,7 @@ class parameter_estimation:
             else: #Else we need to read from the file.                
                 #First check if we are doing some kind of parallel sampling, because in that case we need to read from the file for our correct process rank. We put that info into the prefix and suffix.
                 file_name_prefix, file_name_suffix, directory_name_suffix = self.getParallelProcessingPrefixAndSuffix()
-                self.last_logP_and_parameter_samples_filename = filePrefix + "mcmc_logP_and_parameter_samples" + fileSuffix
+                self.last_logP_and_parameter_samples_filename = file_name_prefix + "mcmc_logP_and_parameter_samples" + file_name_suffix
                 self.last_logP_and_parameter_samples_data = unpickleAnObject(self.UserInput.directories['pickles']+self.last_logP_and_parameter_samples_filename)
                 self.last_post_burn_in_log_posteriors_un_normed_vec =  np.array(nestedObjectsFunctions.makeAtLeast_2dNested(self.last_logP_and_parameter_samples_data[:,0]))  #First column is the logP
                 if np.shape(self.last_post_burn_in_log_posteriors_un_normed_vec)[0] == 1: #In this case, need to transpose.
@@ -1877,7 +1877,7 @@ class parameter_estimation:
                 if np.shape(self.last_post_burn_in_samples)[0] == 1: #In this case, need to transpose.
                     self.last_post_burn_in_samples = self.last_post_burn_in_samples.transpose()
                 self.mcmc_last_point_sampled = self.last_post_burn_in_samples[-1]        
-                self.last_InputParameterInitialGuess_filename = filePrefix + "mcmc_initial_point_parameters" + fileSuffix
+                self.last_InputParameterInitialGuess_filename = file_name_prefix + "mcmc_initial_point_parameters" + file_name_suffix
                 self.last_InputParameterInitialGuess_data = unpickleAnObject(self.UserInput.directories['pickles']+self.last_InputParameterInitialGuess_filename)
                 self.UserInput.InputParameterInitialGuess = self.last_InputParameterInitialGuess_data #populating this because otherwise non-grid Multi-Start will get the wrong values exported. & Same for final plots.
         #Setting burn_in_length in below few lines (including case for continued sampling).
