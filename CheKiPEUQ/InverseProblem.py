@@ -83,13 +83,24 @@ class parameter_estimation:
             import CheKiPEUQ.parallel_processing
             if CheKiPEUQ.parallel_processing.currentProcessorNumber == 0:
                 try: #Fixme: This is using a try statement because the directory cannot be made if it exists. Should use a better way to check if the directory exists.
-                    os.mkdir("./mpi_log_files") 
+                    #We need to put these in the logs and csvs sub directory if necessary. It is different if there is a blank list versus not.
+                    if self.UserInput.directories['logs_and_csvs'] != '':
+                        os.mkdir(directories['logs_and_csvs'] + "mpi_log_files") 
+                    else:
+                        os.mkdir("./mpi_log_files") 
                 except:
                     pass
-                os.chdir("./mpi_log_files")
+                if self.UserInput.directories['logs_and_csvs'] != '':
+                    os.chdir(directories['logs_and_csvs'] + "mpi_log_files") 
+                else:
+                    os.chdir("./mpi_log_files")                
                 if ('mcmc_continueSampling' not in UserInput.parameter_estimation_settings) or (UserInput.parameter_estimation_settings['mcmc_continueSampling'] == False) or (UserInput.parameter_estimation_settings['mcmc_continueSampling'] == 'auto'):
                     deleteAllFilesInDirectory()
-                os.chdir("./..")
+                if self.UserInput.directories['logs_and_csvs'] != '':
+                    os.chdir("./../..")
+                else:
+                    os.chdir("./..")
+                
                 #Now check the number of processor ranks to see if the person really is using parallel processing.
                 if CheKiPEUQ.parallel_processing.numProcessors > 1:    #This is the normal case.
                     sys.exit() #TODO: right now, processor zero just exits after making and emptying the directory. In the future, things will be more complex for the processor zero.
@@ -1643,6 +1654,8 @@ class parameter_estimation:
             out_file.write("self.info_gain:" +  str(self.info_gain) + "\n")
             out_file.write("evidence:" + str(self.evidence) + "\n")
             out_file.write("posterior_cov_matrix:" + "\n" + str(np.cov(self.post_burn_in_samples.T)) + "\n")
+            if self.permutation_and_doOptimizeNegLogP == True:
+                out_file.write("\n WARNING: It appears this run used doOptimizeNegLogP with multi-start. In this case, the MAP_logP and map_parameter_set are as reported.  However, the mu_AP_parameter_set and stdap_parameter_set are not meaningful, since this was not an even weighted exploration of the posterior.")
             if abs((self.map_parameter_set - self.mu_AP_parameter_set)/self.UserInput.std_prior).any() > 0.10:
                 pass #Disabling below warning until if statement is fixed. During mid-2020, it started printing every time. The if statement may be fixed now but not yet tested.
                 #out_file.write("Warning: The MAP parameter set and mu_AP parameter set differ by more than 10% of prior variance in at least one parameter. This may mean that you need to increase your mcmc_length, increase or decrease your mcmc_relative_step_length, or change what is used for the model response.  There is no general method for knowing the right  value for mcmc_relative_step_length since it depends on the sharpness and smoothness of the response. See for example https://www.sciencedirect.com/science/article/pii/S0039602816300632")
