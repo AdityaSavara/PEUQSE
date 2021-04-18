@@ -617,7 +617,7 @@ class parameter_estimation:
             searchType = 'getLogP'
         self.permutation_searchType = searchType #This is mainly for consolidate_parallel_sampling_data
         verbose = self.UserInput.parameter_estimation_settings['verbose']
-        filePrefix,fileSuffix = self.getParallelProcessingPrefixAndSuffix() #As of Nov 21st 2020, these should always be '' since multiStart_continueSampling is not intended to be used with parallel sampling.
+        file_name_prefix, file_name_suffix, directory_name_suffix = self.getParallelProcessingPrefixAndSuffix() #As of Nov 21st 2020, these should always be '' since multiStart_continueSampling is not intended to be used with parallel sampling.
         if self.UserInput.parameter_estimation_settings['mcmc_continueSampling']  == 'auto':
             mcmc_continueSampling = False #need to set this variable to false if it's an auto. The only time mcmc_continue sampling should be on for multistart is if someone is doing it intentionally, which would normally only be during an MPI case.                                                                                            
         #Check if we need to do multistart_continueSampling, and prepare for it if we need to.
@@ -1760,7 +1760,7 @@ class parameter_estimation:
                 self.last_post_burn_in_samples = copy.deepcopy(self.post_burn_in_samples)
             else: #Else we need to read from the file.                
                 #First check if we are doing some kind of parallel sampling, because in that case we need to read from the file for our correct process rank. We put that info into the prefix and suffix.
-                filePrefix,fileSuffix = self.getParallelProcessingPrefixAndSuffix()
+                file_name_prefix, file_name_suffix, directory_name_suffix = self.getParallelProcessingPrefixAndSuffix()
                 self.last_logP_and_parameter_samples_filename = filePrefix + "mcmc_logP_and_parameter_samples" + fileSuffix
                 self.last_logP_and_parameter_samples_data = unpickleAnObject(self.UserInput.directories['pickles']+self.last_logP_and_parameter_samples_filename)
                 self.last_post_burn_in_log_posteriors_un_normed_vec =  np.array(nestedObjectsFunctions.makeAtLeast_2dNested(self.last_logP_and_parameter_samples_data[:,0]))  #First column is the logP
@@ -1867,7 +1867,7 @@ class parameter_estimation:
                 self.last_post_burn_in_samples = copy.deepcopy(self.post_burn_in_samples)
             else: #Else we need to read from the file.                
                 #First check if we are doing some kind of parallel sampling, because in that case we need to read from the file for our correct process rank. We put that info into the prefix and suffix.
-                filePrefix,fileSuffix = self.getParallelProcessingPrefixAndSuffix()
+                file_name_prefix, file_name_suffix, directory_name_suffix = self.getParallelProcessingPrefixAndSuffix()
                 self.last_logP_and_parameter_samples_filename = filePrefix + "mcmc_logP_and_parameter_samples" + fileSuffix
                 self.last_logP_and_parameter_samples_data = unpickleAnObject(self.UserInput.directories['pickles']+self.last_logP_and_parameter_samples_filename)
                 self.last_post_burn_in_log_posteriors_un_normed_vec =  np.array(nestedObjectsFunctions.makeAtLeast_2dNested(self.last_logP_and_parameter_samples_data[:,0]))  #First column is the logP
