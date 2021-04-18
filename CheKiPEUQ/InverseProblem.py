@@ -78,28 +78,34 @@ class parameter_estimation:
                 UserInput.parameter_estimation_settings['multistart_parallel_sampling'] = False
                 UserInput.parameter_estimation_settings['mcmc_parallel_sampling'] = False
                 
-        if UserInput.request_mpi == True: #Rank zero needs to clear out the mpi_log_files directory (unless we are continuing sampling), so check if we are using rank 0.
+        if UserInput.request_mpi == True: #Rank zero needs to clear out the mpi_cached_files directory (unless we are continuing sampling), so check if we are using rank 0.
             import os; import sys
             import CheKiPEUQ.parallel_processing
             if CheKiPEUQ.parallel_processing.currentProcessorNumber == 0:
-                try: #Fixme: This is using a try statement because the directory cannot be made if it exists. Should use a better way to check if the directory exists.
-                    #We need to put these in the logs and csvs sub directory if necessary. It is different if there is a blank list versus not.
-                    if self.UserInput.directories['logs_and_csvs'] != '':
-                        os.mkdir(self.UserInput.directories['logs_and_csvs'] + "mpi_log_files") 
-                    else:
-                        os.mkdir("./mpi_log_files") 
-                except:
-                    pass
-                if self.UserInput.directories['logs_and_csvs'] != '':
-                    os.chdir(self.UserInput.directories['logs_and_csvs'] + "mpi_log_files") 
-                else:
-                    os.chdir("./mpi_log_files")                
+                if not os.path.exists('./mpi_cached_files'):
+                    os.makedirs('./mpi_cached_files')
+                if not os.path.exists(UserInput.directories['graphs']+"mpi_cached_files"):
+                    os.makedirs(UserInput.directories['graphs']+"mpi_cached_files")                
+                if not os.path.exists(UserInput.directories['logs_and_csvs']+"mpi_cached_files"):
+                    os.makedirs(UserInput.directories['logs_and_csvs']+"mpi_cached_files")                
+                if not os.path.exists(UserInput.directories['pickles']+"mpi_cached_files"):
+                    os.makedirs(UserInput.directories['pickles']+"mpi_cached_files")                
                 if ('mcmc_continueSampling' not in UserInput.parameter_estimation_settings) or (UserInput.parameter_estimation_settings['mcmc_continueSampling'] == False) or (UserInput.parameter_estimation_settings['mcmc_continueSampling'] == 'auto'):
+                    os.chdir("./mpi_cached_files")                
                     deleteAllFilesInDirectory()
-                if self.UserInput.directories['logs_and_csvs'] != '':
-                    os.chdir("./../..")
-                else:
                     os.chdir("./..")
+                    if UserInput.directories['graphs'] != "./":
+                        os.chdir(UserInput.directories['graphs']+"mpi_cached_files")
+                        deleteAllFilesInDirectory()
+                        os.chdir("./../..")
+                    if UserInput.directories['logs_and_csvs'] != "./":
+                        os.chdir(UserInput.directories['graphs']+"mpi_cached_files")
+                        deleteAllFilesInDirectory()
+                        os.chdir("./../..")
+                    if UserInput.directories['pickles'] != "./":
+                        os.chdir(UserInput.directories['graphs']+"mpi_cached_files")
+                        deleteAllFilesInDirectory()
+                        os.chdir("./../..")
                 
                 #Now check the number of processor ranks to see if the person really is using parallel processing.
                 if CheKiPEUQ.parallel_processing.numProcessors > 1:    #This is the normal case.
@@ -747,7 +753,7 @@ class parameter_estimation:
                 return self.map_logP #This is sortof like a sys.exit(), we are just ending the PermutationSearch function here if we are not on the finalProcess. 
             if CheKiPEUQ.parallel_processing.finalProcess == True:
                 self.UserInput.parameter_estimation_settings['multistart_parallel_sampling'] = False ##We are turning off the parallel sampling variable because the parallel sampling is over now. The export log will become export extra things if we keep this on for the next step.
-                self.consolidate_parallel_sampling_data(parallelizationType="permutation", mpi_log_files_prefix='permutation') #this parallelizationType means "keep only the best, don't average"
+                self.consolidate_parallel_sampling_data(parallelizationType="permutation", mpi_cached_files_prefix='permutation') #this parallelizationType means "keep only the best, don't average"
                 
         ####END BLOCK RELATED TO PARALLEL SAMPLING####
         ####Doing some statistics across the full permutation set.  TODO: Consider merging this into exportPostPermutationStatistics and calling that same function again, which is what I think the mcmc parallel sampling does. But the filenames are different, so some care would be needed if that is going to be done.####
@@ -887,7 +893,7 @@ class parameter_estimation:
         #CheKiPEUQ.parallel_processing.currentProcessorNumber
         numSimulations = CheKiPEUQ.parallel_processing.numSimulations
         import os
-        os.chdir("./mpi_log_files")
+        os.chdir(self.UserInput.directories['pickles']+"mpi_cached_files")
         #now make a list of what we expect.
         simulationsKey = np.ones(numSimulations)
         working_dir=os.getcwd()
@@ -898,7 +904,10 @@ class parameter_estimation:
                 if fileNamePrefix+fileNameBase+simulationNumberString+fileNameSuffix+".pkl" in name:
                     simulationsKey[simulationIndex] = 0
                     filesInDirectory.remove(name) #Removing so it won't be checked for again, to speed up next search.
-        os.chdir("..") #change directory back regardless.
+        if self.UserInput.directories['pickles'] == "./":
+            os.chdir("..") #change directory back regardless.
+        else:
+            os.chdir("../..") #change directory back regardless.
         if np.sum(simulationsKey) == 0:
             CheKiPEUQ.parallel_processing.finalProcess = True
             return True
@@ -915,21 +924,25 @@ class parameter_estimation:
         if self.checkIfAllParallelSimulationsDone("conditionsPermutationAndInfoGain_mod"+str(parModulationNumber)+"_cond") == True:
             if parallelizationType.lower() == 'conditions':
                 import os
-                os.chdir("./mpi_log_files")
+                os.chdir(self.UserInput.directories['pickles'] + "mpi_cached_files")
                 self.info_gain_matrix = [] #Initializing this as a blank list, it will be made into an array after the loop.
                 for simulationIndex in range(0,numSimulations): #For each simulation, we need to grab the results.
+                    print("line 297", os.getcwd())
                     simulationNumberString = str(simulationIndex+1)
                     #Getting the data out.    
                     current_conditionsPermutationAndInfoGain_filename = "conditionsPermutationAndInfoGain_mod"+str(parModulationNumber)+"_cond"+simulationNumberString
-                    current_conditionsPermutationAndInfoGain_data = unpickleAnObject(self.UserInput.directories['pickles']+current_conditionsPermutationAndInfoGain_filename)
+                    current_conditionsPermutationAndInfoGain_data = unpickleAnObject(current_conditionsPermutationAndInfoGain_filename)
                     #accumulating.
                     self.info_gain_matrix.append(current_conditionsPermutationAndInfoGain_data)                        
                 #Now we'll make this info_gain_matrix into an array and pickle it. It will be an implied return.
                 self.info_gain_matrix = np.array(self.info_gain_matrix)
                 current_parModulationInfoGainMatrix_filename = "parModulationInfoGainMatrix_mod"+str(parModulationNumber)
-                pickleAnObject(self.info_gain_matrix,self.UserInput.directories['pickles']+self.UserInput.directories['pickles']+current_parModulationInfoGainMatrix_filename)
+                pickleAnObject(self.info_gain_matrix,current_parModulationInfoGainMatrix_filename)
                 #Change back to the regular directory since we are done.
-                os.chdir("..")
+                if self.UserInput.directories['pickles'] == "./":
+                    os.chdir("..")
+                else:
+                    os.chdir("../..")
                 return True #so we know we're done.
         else:
             return False #this means we weren't done.
@@ -938,31 +951,34 @@ class parameter_estimation:
         import CheKiPEUQ.parallel_processing
         numSimulations = CheKiPEUQ.parallel_processing.numSimulations        
         import os
-        os.chdir("./mpi_log_files")
+        os.chdir(self.UserInput.directories['pickles'] + "mpi_cached_files")
         info_gains_matrices_list = [] #Initializing this as a blank list, it will be made into an array after the loop.
         for parModulationIndex in range(0,self.numParModulationPermutations): #For each simulation, we need to grab the results.
             parModulationNumberString = str(parModulationIndex+1)
             #Getting the data out.    
             current_parModulationInfoGainMatrix_filename = "parModulationInfoGainMatrix_mod"+parModulationNumberString 
-            current_parModulationInfoGainMatrix_data = unpickleAnObject(self.UserInput.directories['pickles']+current_parModulationInfoGainMatrix_filename)
+            current_parModulationInfoGainMatrix_data = unpickleAnObject(current_parModulationInfoGainMatrix_filename)
             #accumulating.
             info_gains_matrices_list.append(current_parModulationInfoGainMatrix_data)                        
         #nothing more needs to be done except making it into an array: self.info_gains_matrices_array is an implied return.
         self.info_gains_matrices_array=np.array(info_gains_matrices_list)
-        os.chdir("..")
+        if self.UserInput.directories['pickles'] == "./":
+            os.chdir("..")
+        else:
+            os.chdir("../..")
 
  
-    def consolidate_parallel_sampling_data(self, parallelizationType='equal', mpi_log_files_prefix=''):
+    def consolidate_parallel_sampling_data(self, parallelizationType='equal', mpi_cached_files_prefix=''):
         #parallelizationType='equal' means everything will get averaged together. parallelizationType='permutation' will be treated differently, keeps only the best.
-        #mpi_log_files_prefix can be 'mcmc' or 'permutation' or '' and looks for a prefix before 'map_logP_6.pkl' where '6' would be the processor rank.
+        #mpi_cached_files_prefix can be 'mcmc' or 'permutation' or '' and looks for a prefix before 'map_logP_6.pkl' where '6' would be the processor rank.
         import CheKiPEUQ.parallel_processing
         #CheKiPEUQ.parallel_processing.currentProcessorNumber
         numSimulations = CheKiPEUQ.parallel_processing.numSimulations
-        if self.checkIfAllParallelSimulationsDone(mpi_log_files_prefix+"_map_logP_") == True: #FIXME: Need to make parallelization work even for non-mcmc
+        if self.checkIfAllParallelSimulationsDone(mpi_cached_files_prefix+"_map_logP_") == True: #FIXME: Need to make parallelization work even for non-mcmc
             if parallelizationType.lower() == 'permutation':
                 searchType = self.permutation_searchType
-                import os
-                os.chdir("./mpi_log_files")
+                import os #All of the below happens in the pickles directory
+                os.chdir(self.UserInput.directories['pickles']+"mpi_cached_files")
                 self.listOfPermutations = [] #just initializing.
                 self.permutations_MAP_logP_and_parameters_values = [] #just initializing.
                 for simulationIndex in range(0,numSimulations): #For each simulation, we need to grab the results.
@@ -970,20 +986,20 @@ class parameter_estimation:
                     #Get the data out.    
                     
                     current_post_map_logP_filename = "permutation_map_logP_"+simulationNumberString
-                    current_post_map_logP_data = unpickleAnObject(self.UserInput.directories['pickles']+current_post_map_logP_filename)
+                    current_post_map_logP_data = unpickleAnObject(current_post_map_logP_filename)
                     self.map_logP = current_post_map_logP_data
 
                     current_post_initial_parameters_filename = "permutation_initial_point_parameters_"+simulationNumberString
-                    current_post_initial_parameters_data = unpickleAnObject(self.UserInput.directories['pickles']+current_post_initial_parameters_filename)
+                    current_post_initial_parameters_data = unpickleAnObject(current_post_initial_parameters_filename)
                     self.UserInput.InputParameterInitialGuess = current_post_initial_parameters_data
 
                     current_post_map_parameter_set_filename = "permutation_map_parameter_set_"+simulationNumberString
-                    current_post_map_parameter_set_data = unpickleAnObject(self.UserInput.directories['pickles']+current_post_map_parameter_set_filename)
+                    current_post_map_parameter_set_data = unpickleAnObject(current_post_map_parameter_set_filename)
                     self.map_parameter_set = current_post_map_parameter_set_data
 
                     if (searchType == 'doEnsembleSliceSampling') or (searchType == 'doMetropolisHastings'):
                         current_post_burn_in_statistics_filename = "permutation_post_burn_in_statistics_"+simulationNumberString
-                        current_post_burn_in_statistics_data = unpickleAnObject(self.UserInput.directories['pickles']+current_post_burn_in_statistics_filename)
+                        current_post_burn_in_statistics_data = unpickleAnObject(current_post_burn_in_statistics_filename)
                         [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec] = current_post_burn_in_statistics_data
 
                     #Still accumulating.
@@ -1016,15 +1032,18 @@ class parameter_estimation:
                     self.post_burn_in_log_priors_vec = self.highest_logP_post_burn_in_log_priors_vec 
                     self.post_burn_in_log_posteriors_un_normed_vec = self.highest_logP_post_burn_in_log_posteriors_un_normed_vec 
                 #Now go back to the earlier directory since the consolidation is done.
-                os.chdir("..")
+                if self.UserInput.directories['pickles'] == "./":
+                    os.chdir("..")
+                else:
+                    os.chdir("../..")
                 if (searchType == 'doEnsembleSliceSampling') or (searchType == 'doMetropolisHastings'):
                     self.UserInput.request_mpi = False # we need to turn this off, because otherwise it will interfere with our attempts to calculate the post_burn_in statistics.
                     self.calculatePostBurnInStatistics(calculate_post_burn_in_log_priors_vec = True) #The argument is provided because otherwise there can be some bad priors if ESS was used.
                     self.exportPostBurnInStatistics()
                     self.UserInput.request_mpi = True #Set this back to true so that consolidating plots etc. doesn't get messed up.
             elif parallelizationType.lower() == 'equal':
-                import os
-                os.chdir("./mpi_log_files")
+                import os #All of the below happens in the pickles directory
+                os.chdir(self.UserInput.directories['pickles']+"./mpi_cached_files")
                 #These pointers are initialized before the below loop. Mostly in case mpi never actually happened since then after the loop these would be empty.
                 self.cumulative_post_burn_in_samples = self.post_burn_in_samples
                 self.cumulative_post_burn_in_log_priors_vec = self.post_burn_in_log_priors_vec
@@ -1033,7 +1052,7 @@ class parameter_estimation:
                     simulationNumberString = str(simulationIndex+1)
                     #Get the dat aout.    
                     current_post_burn_in_statistics_filename = "mcmc_post_burn_in_statistics_"+simulationNumberString
-                    current_post_burn_in_statistics_data = unpickleAnObject(self.UserInput.directories['pickles']+current_post_burn_in_statistics_filename)
+                    current_post_burn_in_statistics_data = unpickleAnObject(current_post_burn_in_statistics_filename)
                     #Populate the class variables.
                     [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec] = current_post_burn_in_statistics_data
                     #Still accumulating.
@@ -1053,7 +1072,10 @@ class parameter_estimation:
                 self.UserInput.parameter_estimation_settings['mcmc_parallel_sampling'] = False # we need to turn this off, because otherwise it will interfere with our attempts to calculate the post_burn_in statistics.
                 if hasattr(self, "during_burn_in_samples"): #need to remove this so it doesn't get exported for the parallel case, since otherwise will export most recent one which is misleading.
                     delattr(self, "during_burn_in_samples")
-                os.chdir("..")
+                if self.UserInput.directories['pickles'] == "./":
+                    os.chdir("..")
+                else:
+                    os.chdir("../..")
                 self.calculatePostBurnInStatistics(calculate_post_burn_in_log_priors_vec = True) #The argument is provided because otherwise there can be some bad priors if ESS was used.
                 self.exportPostBurnInStatistics()
                 self.UserInput.request_mpi = True #Set this back to true so that consolidating plots etc. doesn't get messed up.
@@ -1633,7 +1655,7 @@ class parameter_estimation:
             if CheKiPEUQ.parallel_processing.currentProcessorNumber > 0:                
                 file_name_suffix = "_"+str(CheKiPEUQ.parallel_processing.currentProcessorNumber)
                 file_name_prefix = ""  
-                directory_name_suffix = "mpi_log_files/" #TODO: FIX THIS, IT MAY NOT WORK ON EVERY OS. SHOULD USE 'os' MODULE TO FIND DIRECTION OF THE SLASH OR TO DO SOMETHING SIMILAR. CURRENTLY IT IS WORKING ON MY WINDOWS DESPITE BEING "/"
+                directory_name_suffix = "mpi_cached_files/" #TODO: FIX THIS, IT MAY NOT WORK ON EVERY OS. SHOULD USE 'os' MODULE TO FIND DIRECTION OF THE SLASH OR TO DO SOMETHING SIMILAR. CURRENTLY IT IS WORKING ON MY WINDOWS DESPITE BEING "/"
         return file_name_prefix, file_name_suffix, directory_name_suffix
 
     def exportPostBurnInStatistics(self):
@@ -1820,7 +1842,7 @@ class parameter_estimation:
             if mcmc_exportLog == True:
                 self.exportPostBurnInStatistics()
             if self.UserInput.parameter_estimation_settings['mcmc_parallel_sampling'] == True: #We don't call the below function at this time unless we are doing mcmc_parallel_sampling. For multistart_parallel_sampling the consolidation is done elsewhere and differently.
-                self.consolidate_parallel_sampling_data(parallelizationType="equal", mpi_log_files_prefix='mcmc')
+                self.consolidate_parallel_sampling_data(parallelizationType="equal", mpi_cached_files_prefix='mcmc')
             return [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec]   
         else: #In this case, we are probably doing a PermutationSearch or something like that and only want self.map_logP.
             self.map_logP = max(self.post_burn_in_log_posteriors_un_normed_vec)
@@ -2000,7 +2022,7 @@ class parameter_estimation:
             if mcmc_exportLog == True:
                 self.exportPostBurnInStatistics()
             if self.UserInput.parameter_estimation_settings['mcmc_parallel_sampling'] == True: #We don't call the below function at this time unless we are doing mcmc_parallel_sampling. For multistart_parallel_sampling the consolidation is done elsewhere and differently.
-                self.consolidate_parallel_sampling_data(parallelizationType="equal", mpi_log_files_prefix='mcmc')
+                self.consolidate_parallel_sampling_data(parallelizationType="equal", mpi_cached_files_prefix='mcmc')
             return [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec]   
         else: #In this case, we are probably doing a PermutationSearch or something like that and only want self.map_logP.
             self.map_logP = max(self.post_burn_in_log_posteriors_un_normed_vec)
