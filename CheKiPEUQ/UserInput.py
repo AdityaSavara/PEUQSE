@@ -94,11 +94,10 @@ parameter_estimation_settings['multistart_gridsearchToSamples'] = True #if this 
 parameter_estimation_settings['multistart_gridsearch_threshold_filter_samples'] = True #This feature removes low probability tails from the posterior. This can be important for getting mu_AP, especially when using ESS. Default is true. This only has an effect if multistart_gridsearchToSamples is set to True.
 parameter_estimation_settings['multistart_gridsearch_threshold_filter_coefficient'] = 'auto' #This can be a float or the string 'auto'. Currently (Oct 2020), 'auto' sets the value at 2.0.  The smaller the value the more aggressive the filtering. This only has an effect if multistart_gridsearchToSamples is set to True.
 parameter_estimation_settings['multistart_continueSampling']  = 'auto' #This only works with multistart_gridsearchToSamples. This can be set to True if user would like to continue sampling from a previous result in the directory.  The permutations_MAP_logP_and_parameters_values.pkl file will be used.  Note that if one calls the same PE_object after multistart_gridsearchToSamples sampling within a given python instance then continued sampling will also occur in that situation.
-parameter_estimation_settings['multistart_passThroughArgs'] = {}
+parameter_estimation_settings['multistart_passThroughArgs'] = {}  #Typically, one would put here the arguments for doOptimizeNegLogP:  {'method':"Nelder-Mead", 'printOptimum':True, 'verbose':False}  To find additional details of which arguments can be used with doOptimizeNegLogP, see the function doOptimizeNegLogP in CheKiPEUQ\InverseProblem.py
 parameter_estimation_settings['multistart_calculatePostBurnInStatistics'] = True
 parameter_estimation_settings['multistart_keep_cumulative_post_burn_in_data'] = False
 parameter_estimation_settings['multistart_exportLog'] = False #In the future, this will cause more information to be exported.
-parameter_estimation_settings['multistart_passThroughArgs'] = {}
 
 #####Plot Settings#####
 #Response Plot Settings

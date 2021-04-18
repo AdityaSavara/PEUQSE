@@ -2455,17 +2455,17 @@ class parameter_estimation:
             self.makeHistogramsForEachParameter()               
             self.makeSamplingScatterMatrixPlot(plot_settings=self.UserInput.scatter_matrix_plots_settings)
         except:
-            print("Unable to make histograms and/or scatter matrix plots.")
+            print("Unable to make histograms and/or scatter matrix plots. This usually means your run is not an MCMC run, or that the sampling did not work well. If you are using Metropolis-Hastings, try EnsembleSliceSampling or try a uniform distribution multistart.")
 
         try:        
             self.createMumpcePlots()
         except:
-            print("Unable to make contour plots.")
+            print("Unable to make contour plots. This usually means your run is not an MCMC run.")
 
         try:
             self.createSimulatedResponsesPlots()
         except:
-            print("Unable to make simulated response plots.")
+            print("Unable to make simulated response plots. This is unusual and typically means your observed values and simulated values are not the same array shape. If so, that needs to be fixed.")
             pass
             
     def save_to_dill(self, base_file_name, file_name_prefix ='',  file_name_suffix='', file_name_extension='.dill'):
