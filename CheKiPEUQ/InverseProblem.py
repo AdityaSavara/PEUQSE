@@ -347,7 +347,7 @@ class parameter_estimation:
                     #which means we can prepare the responses for split likelihood and should plan to.
                     self.prepareResponsesForSplitLikelihood = True
         
-        self.permutation_and_doOptimizeNegLogP == False #just initializing this flag with its default.
+        self.permutation_and_doOptimizeNegLogP = False #just initializing this flag with its default.
                 
     
     def reduceResponseSpace(self):
