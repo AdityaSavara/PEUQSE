@@ -21,7 +21,7 @@ UserInput.simulated_response_plot_settings['figure_name'] = 'Posterior_Example_t
 
 UserInput.parameter_estimation_settings['verbose'] = False 
 UserInput.parameter_estimation_settings['exportAllSimulatedOutputs'] = False
-UserInput.parameter_estimation_settings['checkPointFrequency'] = 1000
+UserInput.parameter_estimation_settings['mcmc_checkPointFrequency'] = 1000
 UserInput.parameter_estimation_settings['exportLog'] = True
  
 UserInput.parameter_estimation_settings['mcmc_mode'] = 'unbiased'

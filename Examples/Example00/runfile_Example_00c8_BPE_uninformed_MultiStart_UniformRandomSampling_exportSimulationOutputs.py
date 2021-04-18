@@ -27,7 +27,7 @@ if __name__ == "__main__":
     UserInput.model['simulateByInputParametersOnlyFunction'] = simulation_model_00.simulation_function_wrapper #This must simulate with *only* the parameters listed above, and no other arguments.
     #UserInput.parameter_estimation_settings['mcmc_burn_in'] = 10000
     #UserInput.parameter_estimation_settings['mcmc_length'] = 100000 #The uninformed prior int his example has a "bad" MCMC walker so requires lots of sampling to converge.
-    UserInput.parameter_estimation_settings['checkPointFrequency'] = 10000 #This example is long enough that it's good to get updates.
+    UserInput.parameter_estimation_settings['multistart_checkPointFrequency'] = 10000 #This example is long enough that it's good to get updates.
     
     UserInput.parameter_estimation_settings['multistart_searchType'] = 'getLogP'
     UserInput.parameter_estimation_settings['multistart_initialPointsDistributionType'] = 'uniform'

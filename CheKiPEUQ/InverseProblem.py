@@ -61,7 +61,7 @@ class parameter_estimation:
         if self.UserInput.parameter_estimation_settings['verbose']: 
             print("Paremeter Estimation Object Initialized")
         
-        if UserInput.parameter_estimation_settings['checkPointFrequency'] != None: #This is for backwards compatibility.
+        if type(UserInput.parameter_estimation_settings['checkPointFrequency']) != type(None): #This is for backwards compatibility.
             UserInput.parameter_estimation_settings['mcmc_checkPointFrequency'] = UserInput.parameter_estimation_settings['checkPointFrequency']
             UserInput.parameter_estimation_settings['multistart_checkPointFrequency'] = UserInput.parameter_estimation_settings['checkPointFrequency']
         UserInput.request_mpi = False #Set as false as default.
@@ -269,11 +269,11 @@ class parameter_estimation:
         #The below unusual code is because during doeParameterModulationPermutationsScanner, populate synthetic data calls init again.
         #So we will only call populateIndependentVariablesFunction if we're not in the middle of design of experiments.
         if not hasattr(self, 'middle_of_doe_flag'): #We check of the middle_of_doe_flag exists. #If the flag is not there and the populate function exists, we call it.
-            if UserInput.model['populateIndependentVariablesFunction'] != None:
+            if type(UserInput.model['populateIndependentVariablesFunction']) != type(None):
                 UserInput.model['populateIndependentVariablesFunction'](UserInput.responses['independent_variables_values']) 
         if hasattr(self, 'middle_of_doe_flag'): #We check of the middle_of_doe_flag exists. If it's there, no problem.
             if self.middle_of_doe_flag == False: #If the flag is there, we only proceed to call the function if the flag is set to false.
-                if UserInput.model['populateIndependentVariablesFunction'] != None:
+                if type(UserInput.model['populateIndependentVariablesFunction']) != type(None):
                     UserInput.model['populateIndependentVariablesFunction'](UserInput.responses['independent_variables_values']) 
                 
         #Now scale things as needed:
@@ -2668,8 +2668,8 @@ def boundsCheck(parameters, parametersBounds, boundsType):
     parameters = np.array(parameters).flatten()
     parametersBounds = np.array(parametersBounds).flatten()
     #to remove, we use brackets that pull out the indices where the comparison is not None. This is special numpy array syntax.
-    parametersTruncated = parameters[parametersBounds != None]
-    parametersBoundsTruncated = parametersBounds[parametersBounds != None]    
+    parametersTruncated = parameters[parametersBounds != None] #TODO: this might need to be changed to type(parametersBounds) != type(None)
+    parametersBoundsTruncated = parametersBounds[parametersBounds != None] #TODO: this might need to be changed to type(parametersBounds) != type(None)
     if boundsType.lower() == 'upper': #we make the input into lower case before proceeding.
         upperCheck = parametersTruncated < parametersBoundsTruncated #Check if all are smaller.
         if False in upperCheck: #If any of them failed, we return False.
