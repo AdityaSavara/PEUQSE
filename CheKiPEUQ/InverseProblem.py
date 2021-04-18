@@ -835,10 +835,12 @@ class parameter_estimation:
         return bestResultSoFar# [self.map_parameter_set, self.map_logP, etc.]
 
     #@CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
-    def doMultiStart(self, searchType='getLogP', numStartPoints = 'UserChoice', relativeInitialDistributionSpread='UserChoice', exportLog = 'UserChoice', initialPointsDistributionType='UserChoice', passThroughArgs = 'UserChoice', calculatePostBurnInStatistics='UserChoice',  keep_cumulative_post_burn_in_data = 'UserChoice', walkerInitialDistribution='UserChoice', centerPoint = None, gridsearchSamplingInterval = 'UserChoice', gridsearchSamplingRadii = 'UserChoice'):
+    def doMultiStart(self, searchType='UserChoice', numStartPoints = 'UserChoice', relativeInitialDistributionSpread='UserChoice', exportLog = 'UserChoice', initialPointsDistributionType='UserChoice', passThroughArgs = 'UserChoice', calculatePostBurnInStatistics='UserChoice',  keep_cumulative_post_burn_in_data = 'UserChoice', walkerInitialDistribution='UserChoice', centerPoint = None, gridsearchSamplingInterval = 'UserChoice', gridsearchSamplingRadii = 'UserChoice'):
         #See doListOfPermutationsSearch for possible values of searchType variable
         #This function is basically a wrapper that creates a list of initial points and then runs a 'check each permutation' search on that list.
         #We set many of the arguments to have blank or zero values so that if they are not provided, the values will be taken from the UserInput choices.
+        if str(searchType) == 'UserChoice': 
+            searchType = self.UserInput.parameter_estimation_settings['multistart_searchType']
         if str(initialPointsDistributionType) == 'UserChoice': 
             initialPointsDistributionType = self.UserInput.parameter_estimation_settings['multistart_initialPointsDistributionType']
         if str(numStartPoints) =='UserChoice':
