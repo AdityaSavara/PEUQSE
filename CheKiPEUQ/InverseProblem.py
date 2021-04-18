@@ -59,7 +59,7 @@ class parameter_estimation:
         UserInput.stringOfParameterNames = str(UserInput.parameterNamesList).replace("'","")[1:-1]
         UserInput.parameterNamesAndMathTypeExpressionsDict = UserInput.model['parameterNamesAndMathTypeExpressionsDict']
         if self.UserInput.parameter_estimation_settings['verbose']: 
-            print("Paremeter Estimation Object Initialized")
+            print("Parameter Estimation Object Initialized")
         
         if type(UserInput.parameter_estimation_settings['checkPointFrequency']) != type(None): #This is for backwards compatibility.
             UserInput.parameter_estimation_settings['mcmc_checkPointFrequency'] = UserInput.parameter_estimation_settings['checkPointFrequency']
