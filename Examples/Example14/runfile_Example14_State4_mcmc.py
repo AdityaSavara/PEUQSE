@@ -23,7 +23,7 @@ if __name__ == "__main__":
     
     UserInput.parameter_estimation_settings['verbose'] = False 
     UserInput.parameter_estimation_settings['exportAllSimulatedOutputs'] = False
-    UserInput.parameter_estimation_settings['checkPointFrequency'] = 1000
+    UserInput.parameter_estimation_settings['mcmc_checkPointFrequency'] = 1000
     UserInput.parameter_estimation_settings['exportLog'] = True
      
     UserInput.parameter_estimation_settings['mcmc_mode'] = 'unbiased'

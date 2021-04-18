@@ -33,7 +33,7 @@ if __name__ == "__main__":
     UserInput.model['simulationOutputProcessingFunction'] = None  #Optional: a function to process what comes out of the simulation Function and then return an observable vector.
         
     UserInput.parameter_estimation_settings['verbose'] = False 
-    UserInput.parameter_estimation_settings['checkPointFrequency'] = 100
+    UserInput.parameter_estimation_settings['mcmc_checkPointFrequency'] = 100
      
     UserInput.parameter_estimation_settings['mcmc_mode'] = 'unbiased'
     UserInput.parameter_estimation_settings['mcmc_random_seed'] = 0 #Normally set to None so that mcmc is set to be random. To get the same results repeatedly, such as for testing purposes, set the random seed to 0 or another integer for testing purposes.
