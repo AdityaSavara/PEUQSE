@@ -11,6 +11,7 @@ runfile_Example13_doe_function_xyz_3.py
 and
 runfile_Example13_doe_function_meshgrid_3.py
 
+If one of the unit tests fails, run the tests again.
 
 
 Below explains the variables etc. Check the UserInput file and other documentation as this might be out of date.
