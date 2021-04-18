@@ -715,7 +715,10 @@ class parameter_estimation:
                 self.map_parameter_set = optimizationOutput[0]
                 thisResult = [self.map_logP, self.map_parameter_set, None, None, None, None, None, None]
             if searchType == 'doOptimizeSSR':
-                thisResult = self.doOptimizeSSR(**passThroughArgs)
+                optimizationOutput = self.doOptimizeSSR(**passThroughArgs)
+                self.map_logP = optimizationOutput[1]
+                self.map_parameter_set = optimizationOutput[0]
+                thisResult = [self.map_logP, self.map_parameter_set, None, None, None, None, None, None]
             if (type(self.UserInput.parameter_estimation_settings['multistart_checkPointFrequency']) != type(None)) or (verbose == True):
                 timeAtThisPermutation = time.time()
                 timeOfThisPermutation = timeAtThisPermutation - timeAtLastPermutation
