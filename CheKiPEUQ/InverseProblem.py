@@ -2394,7 +2394,7 @@ class parameter_estimation:
             else:
                 combined_plots = True
         if combined_plots == True:
-            contour_settings_custom['figure_name'] = baseFigureName + "__combined"
+            contour_settings_custom['figure_name'] = self.UserInput.directories['graphs']+baseFigureName + "__combined"
             figureObject_beta.mumpce_plots(model_parameter_info = self.UserInput.model_parameter_info, active_parameters = active_parameters, pairs_of_parameter_indices = pairs_of_parameter_indices, posterior_mu_vector = posterior_mu_vector, posterior_cov_matrix = posterior_cov_matrix, prior_mu_vector = np.array(self.UserInput.mu_prior), prior_cov_matrix = self.UserInput.covmat_prior, contour_settings_custom = contour_settings_custom)
         return figureObject_beta
 
