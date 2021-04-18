@@ -773,6 +773,8 @@ class parameter_estimation:
             #self.post_burn_in_log_posteriors_un_normed_vec = cumulative_post_burn_in_log_posteriors_un_normed_vec
             #implied return bestResultSoFar # [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec] 
         if (searchType == 'getLogP') or (searchType == 'doOptimizeNegLogP'):
+            if searchType == 'doOptimizeNegLogP':
+                self.permutation_and_doOptimizeNegLogP = True #turning on this flag for case of permutation_and_doOptimizeNegLogP. This is needed so that a warning can be put in the mcmc_log.
             #if it's getLogP gridsearch, we are going to convert it to samples if requested.
             if permutationsToSamples == True:
                 self.permutations_MAP_logP_and_parameters_values = np.vstack( self.permutations_MAP_logP_and_parameters_values) #Note that vstack actually requires a tuple with multiple elements as an argument. So this list or array like structure is being converted to a tuple of many elements and then being stacked.
