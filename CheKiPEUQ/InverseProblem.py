@@ -1633,7 +1633,7 @@ class parameter_estimation:
             if CheKiPEUQ.parallel_processing.currentProcessorNumber > 0:                
                 file_name_suffix = "_"+str(CheKiPEUQ.parallel_processing.currentProcessorNumber)
                 file_name_prefix = ""  
-                directory_name_suffix = "/mpi_log_files/" #TODO: FIX THIS, IT MAY NOT WORK ON EVERY OS. SHOULD USE 'os' MODULE TO FIND DIRECTION OF THE SLASH OR TO DO SOMETHING SIMILAR. CURRENTLY IT IS WORKING ON MY WINDOWS DESPITE BEING "/"
+                directory_name_suffix = "mpi_log_files/" #TODO: FIX THIS, IT MAY NOT WORK ON EVERY OS. SHOULD USE 'os' MODULE TO FIND DIRECTION OF THE SLASH OR TO DO SOMETHING SIMILAR. CURRENTLY IT IS WORKING ON MY WINDOWS DESPITE BEING "/"
         return file_name_prefix, file_name_suffix, directory_name_suffix
 
     def exportPostBurnInStatistics(self):
