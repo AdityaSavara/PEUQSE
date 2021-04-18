@@ -613,7 +613,7 @@ class parameter_estimation:
                 self.last_permutations_MAP_logP_and_parameters_values = copy.deepcopy(self.permutations_MAP_logP_and_parameters_values)
             else: #Else we need to read from the file.
                 self.last_permutations_MAP_logP_and_parameters_values_filename = filePrefix + "permutations_MAP_logP_and_parameters_values" + fileSuffix
-                self.last_permutations_MAP_logP_and_parameters_values = unpickleAnObject(self.last_permutations_MAP_logP_and_parameters_values_filename)
+                self.last_permutations_MAP_logP_and_parameters_values = unpickleAnObject(self.UserInput.directories['pickles']+self.last_permutations_MAP_logP_and_parameters_values_filename)
             #extract he last_listOfPermutations from the array object.
             self.last_listOfPermutations =   np.array(nestedObjectsFunctions.makeAtLeast_2dNested(self.last_permutations_MAP_logP_and_parameters_values[:,1:])) #later columns are the permutations.
             if np.shape(self.last_listOfPermutations)[0] == 1: #In this case, need to transpose.
@@ -791,7 +791,7 @@ class parameter_estimation:
         #This has to be below the later parts so that permutationsToSamples can occur first.
         if exportLog == True:
             pass #Later will do something with allPermutationsResults variable. It has one element for each result (that is, each permutation).
-        with open("permutations_log_file.txt", 'w') as out_file:
+        with open(self.UserInput.directories['logs_and_csvs'] + "permutations_log_file.txt", 'w') as out_file:
                 out_file.write("centerPoint: " + str(centerPoint) + "\n")
                 out_file.write("highest_MAP_logP: " + str(self.map_logP) + "\n")
                 out_file.write("highest_MAP_logP_parameter_set: " + str(self.map_parameter_set)+ "\n")
@@ -805,11 +805,11 @@ class parameter_estimation:
                     out_file.write("self.mu_AP_parameter_set : " + caveat + str( self.mu_AP_parameter_set)+ "\n")
                     out_file.write("self.stdap_parameter_set : " + caveat  + str( self.stdap_parameter_set)+ "\n")
         #do some exporting etc. This is at the end to avoid exporting every single time if parallelization is used.
-        np.savetxt('permutations_initial_points_parameters_values'+'.csv', self.listOfPermutations, delimiter=",")
-        np.savetxt('permutations_MAP_logP_and_parameters_values.csv',self.permutations_MAP_logP_and_parameters_values, delimiter=",")
-        pickleAnObject(self.permutations_MAP_logP_and_parameters_values, filePrefix+'permutations_MAP_logP_and_parameters_values'+fileSuffix)
+        np.savetxt(self.UserInput.directories['logs_and_csvs']+'permutations_initial_points_parameters_values'+'.csv', self.listOfPermutations, delimiter=",")
+        np.savetxt(self.UserInput.directories['logs_and_csvs']+'permutations_MAP_logP_and_parameters_values.csv',self.permutations_MAP_logP_and_parameters_values, delimiter=",")
+        pickleAnObject(self.UserInput.directories['pickles']+self.permutations_MAP_logP_and_parameters_values, filePrefix+'permutations_MAP_logP_and_parameters_values'+fileSuffix)
         if self.UserInput.parameter_estimation_settings['exportAllSimulatedOutputs'] == True:
-            np.savetxt('permutations_unfiltered_map_simulated_outputs'+'.csv', self.permutations_unfiltered_map_simulated_outputs, delimiter=",")       
+            np.savetxt(self.UserInput.directories['logs_and_csvs']+'permutations_unfiltered_map_simulated_outputs'+'.csv', self.permutations_unfiltered_map_simulated_outputs, delimiter=",")       
         print("Final map parameter results from PermutationSearch:", self.map_parameter_set,  " \nFinal map logP:", self.map_logP, "more details available in permutations_log_file.txt")        
         return bestResultSoFar# [self.map_parameter_set, self.map_logP, etc.]
 
@@ -906,13 +906,13 @@ class parameter_estimation:
                     simulationNumberString = str(simulationIndex+1)
                     #Getting the data out.    
                     current_conditionsPermutationAndInfoGain_filename = "conditionsPermutationAndInfoGain_mod"+str(parModulationNumber)+"_cond"+simulationNumberString
-                    current_conditionsPermutationAndInfoGain_data = unpickleAnObject(current_conditionsPermutationAndInfoGain_filename)
+                    current_conditionsPermutationAndInfoGain_data = unpickleAnObject(self.UserInput.directories['pickles']+current_conditionsPermutationAndInfoGain_filename)
                     #accumulating.
                     self.info_gain_matrix.append(current_conditionsPermutationAndInfoGain_data)                        
                 #Now we'll make this info_gain_matrix into an array and pickle it. It will be an implied return.
                 self.info_gain_matrix = np.array(self.info_gain_matrix)
                 current_parModulationInfoGainMatrix_filename = "parModulationInfoGainMatrix_mod"+str(parModulationNumber)
-                pickleAnObject(self.info_gain_matrix,current_parModulationInfoGainMatrix_filename)
+                pickleAnObject(self.info_gain_matrix,self.UserInput.directories['pickles']+current_parModulationInfoGainMatrix_filename)
                 #Change back to the regular directory since we are done.
                 os.chdir("..")
                 return True #so we know we're done.
@@ -929,7 +929,7 @@ class parameter_estimation:
             parModulationNumberString = str(parModulationIndex+1)
             #Getting the data out.    
             current_parModulationInfoGainMatrix_filename = "parModulationInfoGainMatrix_mod"+parModulationNumberString 
-            current_parModulationInfoGainMatrix_data = unpickleAnObject(current_parModulationInfoGainMatrix_filename)
+            current_parModulationInfoGainMatrix_data = unpickleAnObject(self.UserInput.directories['pickles']+current_parModulationInfoGainMatrix_filename)
             #accumulating.
             info_gains_matrices_list.append(current_parModulationInfoGainMatrix_data)                        
         #nothing more needs to be done except making it into an array: self.info_gains_matrices_array is an implied return.
@@ -955,20 +955,20 @@ class parameter_estimation:
                     #Get the data out.    
                     
                     current_post_map_logP_filename = "permutation_map_logP_"+simulationNumberString
-                    current_post_map_logP_data = unpickleAnObject(current_post_map_logP_filename)
+                    current_post_map_logP_data = unpickleAnObject(self.UserInput.directories['pickles']+current_post_map_logP_filename)
                     self.map_logP = current_post_map_logP_data
 
                     current_post_initial_parameters_filename = "permutation_initial_point_parameters_"+simulationNumberString
-                    current_post_initial_parameters_data = unpickleAnObject(current_post_initial_parameters_filename)
+                    current_post_initial_parameters_data = unpickleAnObject(self.UserInput.directories['pickles']+current_post_initial_parameters_filename)
                     self.UserInput.InputParameterInitialGuess = current_post_initial_parameters_data
 
                     current_post_map_parameter_set_filename = "permutation_map_parameter_set_"+simulationNumberString
-                    current_post_map_parameter_set_data = unpickleAnObject(current_post_map_parameter_set_filename)
+                    current_post_map_parameter_set_data = unpickleAnObject(self.UserInput.directories['pickles']+current_post_map_parameter_set_filename)
                     self.map_parameter_set = current_post_map_parameter_set_data
 
                     if (searchType == 'doEnsembleSliceSampling') or (searchType == 'doMetropolisHastings'):
                         current_post_burn_in_statistics_filename = "permutation_post_burn_in_statistics_"+simulationNumberString
-                        current_post_burn_in_statistics_data = unpickleAnObject(current_post_burn_in_statistics_filename)
+                        current_post_burn_in_statistics_data = unpickleAnObject(self.UserInput.directories['pickles']+current_post_burn_in_statistics_filename)
                         [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec] = current_post_burn_in_statistics_data
 
                     #Still accumulating.
@@ -1018,7 +1018,7 @@ class parameter_estimation:
                     simulationNumberString = str(simulationIndex+1)
                     #Get the dat aout.    
                     current_post_burn_in_statistics_filename = "mcmc_post_burn_in_statistics_"+simulationNumberString
-                    current_post_burn_in_statistics_data = unpickleAnObject(current_post_burn_in_statistics_filename)
+                    current_post_burn_in_statistics_data = unpickleAnObject(self.UserInput.directories['pickles']+current_post_burn_in_statistics_filename)
                     #Populate the class variables.
                     [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec] = current_post_burn_in_statistics_data
                     #Still accumulating.
@@ -1232,7 +1232,7 @@ class parameter_estimation:
             headerString = self.UserInput.stringOfParameterNames #This variable is a string, no brackets.
         else: #else no variable names have been provided.
             headerString = ''
-        np.savetxt("Info_gain__parModulationGridPermutations.csv", parModulationGridPermutations, delimiter=",", encoding =None, header=headerString)
+        np.savetxt(self.UserInput.directories['logs_and_csvs']+"Info_gain__parModulationGridPermutations.csv", parModulationGridPermutations, delimiter=",", encoding =None, header=headerString)
         #We will get a separate info gain matrix for each parModulationPermutation, we'll store that in this variable.
         info_gains_matrices_list = []
         if self.UserInput.doe_settings['info_gains_matrices_multiple_parameters'] == 'each': #just making analogous structure which exists for sum.
@@ -1538,8 +1538,8 @@ class parameter_estimation:
         if int(conditionsPermutationIndex+1) != int(file_name_suffix):
             print("line 1199: There is a problem in the parallel processing of conditions info gain matrix calculation!", conditionsPermutationIndex+1, file_name_suffix)
         #I am commenting out the below line because the savetxt was causing amysterious "no such file or directory" error.
-        np.savetxt(file_name_prefix+'conditionsPermutationAndInfoGain_'+'mod'+str(int(parameterPermutationNumber))+'_cond'+str(conditionsPermutationIndex+1)+'.csv',conditionsPermutationAndInfoGain, delimiter=",")
-        pickleAnObject(conditionsPermutationAndInfoGain, file_name_prefix+'conditionsPermutationAndInfoGain_'+'mod'+str(int(parameterPermutationNumber))+'_cond'+str(conditionsPermutationIndex+1))
+        np.savetxt(self.UserInput.directories['logs_and_csvs']+file_name_prefix+'conditionsPermutationAndInfoGain_'+'mod'+str(int(parameterPermutationNumber))+'_cond'+str(conditionsPermutationIndex+1)+'.csv',conditionsPermutationAndInfoGain, delimiter=",")
+        pickleAnObject(conditionsPermutationAndInfoGain, self.UserInput.directories['pickles']+file_name_prefix+'conditionsPermutationAndInfoGain_'+'mod'+str(int(parameterPermutationNumber))+'_cond'+str(conditionsPermutationIndex+1))
         
     #This function will calculate MAP and mu_AP, evidence, and related quantities.
     def calculatePostBurnInStatistics(self, calculate_post_burn_in_log_priors_vec = False):       
@@ -1623,17 +1623,17 @@ class parameter_estimation:
         #TODO: Consider to Make header for mcmc_samples_array. Also make exporting the mcmc_samples_array optional. 
         file_name_prefix, file_name_suffix = self.getParallelProcessingPrefixAndSuffix() #Rather self explanatory.
         mcmc_samples_array = np.hstack((self.post_burn_in_log_posteriors_un_normed_vec,self.post_burn_in_samples))
-        np.savetxt(file_name_prefix+'mcmc_logP_and_parameter_samples'+file_name_suffix+'.csv',mcmc_samples_array, delimiter=",")
-        pickleAnObject(mcmc_samples_array, file_name_prefix+'mcmc_logP_and_parameter_samples'+file_name_suffix)
+        np.savetxt(self.UserInput.directories['logs_and_csvs']+file_name_prefix+'mcmc_logP_and_parameter_samples'+file_name_suffix+'.csv',mcmc_samples_array, delimiter=",")
+        pickleAnObject(mcmc_samples_array, self.UserInput.directories['pickles']+file_name_prefix+'mcmc_logP_and_parameter_samples'+file_name_suffix)
         if self.UserInput.parameter_estimation_settings['exportAllSimulatedOutputs'] == True: #By default, we should not keep this, it's a little too large with large sampling.
             try: #The main reason to use a try and except is because this feature has not been implemented for ESS. With ESS, the mcmc_unfiltered_post_burn_in_simulated_outputs would not be retained and the program would crash.
-                np.savetxt(file_name_prefix+'mcmc_unfiltered_post_burn_in_simulated_outputs'+file_name_suffix+'.csv',self.post_burn_in_samples_simulatedOutputs, delimiter=",")         
-                np.savetxt(file_name_prefix+'mcmc_unfiltered_post_burn_in_parameter_samples'+file_name_suffix+'.csv',self.post_burn_in_samples_unfiltered, delimiter=",")            
-                np.savetxt(file_name_prefix+'mcmc_unfiltered_post_burn_in_log_priors_vec'+file_name_suffix+'.csv',self.post_burn_in_log_posteriors_un_normed_vec_unfiltered, delimiter=",")            
-                np.savetxt(file_name_prefix+'mcmc_unfiltered_post_burn_in_log_posteriors_un_normed_vec'+file_name_suffix+'.csv',self.post_burn_in_log_priors_vec_unfiltered, delimiter=",")                        
+                np.savetxt(self.UserInput.directories['logs_and_csvs']+file_name_prefix+'mcmc_unfiltered_post_burn_in_simulated_outputs'+file_name_suffix+'.csv',self.post_burn_in_samples_simulatedOutputs, delimiter=",")         
+                np.savetxt(self.UserInput.directories['logs_and_csvs']+file_name_prefix+'mcmc_unfiltered_post_burn_in_parameter_samples'+file_name_suffix+'.csv',self.post_burn_in_samples_unfiltered, delimiter=",")            
+                np.savetxt(self.UserInput.directories['logs_and_csvs']+file_name_prefix+'mcmc_unfiltered_post_burn_in_log_priors_vec'+file_name_suffix+'.csv',self.post_burn_in_log_posteriors_un_normed_vec_unfiltered, delimiter=",")            
+                np.savetxt(self.UserInput.directories['logs_and_csvs']+file_name_prefix+'mcmc_unfiltered_post_burn_in_log_posteriors_un_normed_vec'+file_name_suffix+'.csv',self.post_burn_in_log_priors_vec_unfiltered, delimiter=",")                        
             except:
                 pass
-        with open(file_name_prefix+'mcmc_log_file'+file_name_suffix+".txt", 'w') as out_file:
+        with open(self.UserInput.directories['logs_and_csvs']+file_name_prefix+'mcmc_log_file'+file_name_suffix+".txt", 'w') as out_file:
             out_file.write("self.initial_point_parameters:" + str( self.UserInput.InputParameterInitialGuess) + "\n")
             out_file.write("MAP_logP:" +  str(self.map_logP) + "\n")
             out_file.write("self.map_parameter_set:" + str( self.map_parameter_set) + "\n")
@@ -1648,13 +1648,13 @@ class parameter_estimation:
                 #out_file.write("Warning: The MAP parameter set and mu_AP parameter set differ by more than 10% of prior variance in at least one parameter. This may mean that you need to increase your mcmc_length, increase or decrease your mcmc_relative_step_length, or change what is used for the model response.  There is no general method for knowing the right  value for mcmc_relative_step_length since it depends on the sharpness and smoothness of the response. See for example https://www.sciencedirect.com/science/article/pii/S0039602816300632")
         postBurnInStatistics = [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec]
         if hasattr(self, 'during_burn_in_samples'):
-            pickleAnObject(np.hstack((self.during_burn_in_log_posteriors_un_normed_vec, self.during_burn_in_samples)), file_name_prefix+'mcmc_burn_in_logP_and_parameter_samples'+file_name_suffix)
-            np.savetxt(file_name_prefix+'mcmc_burn_in_logP_and_parameter_samples'+file_name_suffix+'.csv',np.hstack((self.during_burn_in_log_posteriors_un_normed_vec, self.during_burn_in_samples)), delimiter=",")
-        pickleAnObject(postBurnInStatistics, file_name_prefix+'mcmc_post_burn_in_statistics'+file_name_suffix)
-        pickleAnObject(self.map_logP, file_name_prefix+'mcmc_map_logP'+file_name_suffix)
-        pickleAnObject(self.UserInput.InputParameterInitialGuess, file_name_prefix+'mcmc_initial_point_parameters'+file_name_suffix)
+            pickleAnObject(np.hstack((self.during_burn_in_log_posteriors_un_normed_vec, self.during_burn_in_samples)),self.UserInput.directories['pickles']+ file_name_prefix+'mcmc_burn_in_logP_and_parameter_samples'+file_name_suffix)
+            np.savetxt(self.UserInput.directories['logs_and_csvs']+file_name_prefix+'mcmc_burn_in_logP_and_parameter_samples'+file_name_suffix+'.csv',np.hstack((self.during_burn_in_log_posteriors_un_normed_vec, self.during_burn_in_samples)), delimiter=",")
+        pickleAnObject(postBurnInStatistics,self.UserInput.directories['pickles']+ file_name_prefix+'mcmc_post_burn_in_statistics'+file_name_suffix)
+        pickleAnObject(self.map_logP,self.UserInput.directories['pickles']+ file_name_prefix+'mcmc_map_logP'+file_name_suffix)
+        pickleAnObject(self.UserInput.InputParameterInitialGuess,self.UserInput.directories['pickles']+ file_name_prefix+'mcmc_initial_point_parameters'+file_name_suffix)
         if hasattr(self, 'mcmc_last_point_sampled'):
-            pickleAnObject(self.mcmc_last_point_sampled, file_name_prefix+'mcmc_last_point_sampled'+file_name_suffix)
+            pickleAnObject(self.mcmc_last_point_sampled, self.UserInput.directories['pickles']+file_name_prefix+'mcmc_last_point_sampled'+file_name_suffix)
 
     #This function is modelled after exportPostBurnInStatistics. That is why it has the form that it does.
     def exportPostPermutationStatistics(self, searchType=''): #if it is an mcmc run, then we need to save the sampling as well.
@@ -1662,17 +1662,17 @@ class parameter_estimation:
         file_name_prefix, file_name_suffix = self.getParallelProcessingPrefixAndSuffix() #Rather self explanatory.
         if (searchType == 'doEnsembleSliceSampling') or (searchType == 'doMetropolisHastings'): #Note: this might be needed for parallel processing, not sure.
             mcmc_samples_array = np.hstack((self.post_burn_in_log_posteriors_un_normed_vec,self.post_burn_in_samples))
-            np.savetxt(file_name_prefix+'permutation_logP_and_parameter_samples'+file_name_suffix+'.csv',mcmc_samples_array, delimiter=",")
-            pickleAnObject(mcmc_samples_array, file_name_prefix+'permutation_logP_and_parameter_samples'+file_name_suffix)
+            np.savetxt(self.UserInput.directories['logs_and_csvs']+file_name_prefix+'permutation_logP_and_parameter_samples'+file_name_suffix+'.csv',mcmc_samples_array, delimiter=",")
+            pickleAnObject(mcmc_samples_array, self.UserInput.directories['pickles']+file_name_prefix+'permutation_logP_and_parameter_samples'+file_name_suffix)
         if self.UserInput.parameter_estimation_settings['exportAllSimulatedOutputs'] == True: #By default, we should not keep this, it's a little too large with large sampling.
             try: #The main reason to use a try and except is because this feature has not been implemented for ESS. With ESS, the mcmc_unfiltered_post_burn_in_simulated_outputs would not be retained and the program would crash.
-                np.savetxt(file_name_prefix+'permutation_unfiltered_post_burn_in_simulated_outputs'+file_name_suffix+'.csv',self.post_burn_in_samples_simulatedOutputs, delimiter=",")            
-                np.savetxt(file_name_prefix+'permutation_unfiltered_post_burn_in_parameter_samples'+file_name_suffix+'.csv',self.post_burn_in_samples_unfiltered, delimiter=",")            
-                np.savetxt(file_name_prefix+'permutation_unfiltered_post_burn_in_log_priors_vec'+file_name_suffix+'.csv',self.post_burn_in_log_posteriors_un_normed_vec_unfiltered, delimiter=",")            
-                np.savetxt(file_name_prefix+'permutation_unfiltered_post_burn_in_log_posteriors_un_normed_vec'+file_name_suffix+'.csv',self.post_burn_in_log_priors_vec_unfiltered, delimiter=",")                        
+                np.savetxt(self.UserInput.directories['logs_and_csvs']+file_name_prefix+'permutation_unfiltered_post_burn_in_simulated_outputs'+file_name_suffix+'.csv',self.post_burn_in_samples_simulatedOutputs, delimiter=",")            
+                np.savetxt(self.UserInput.directories['logs_and_csvs']+file_name_prefix+'permutation_unfiltered_post_burn_in_parameter_samples'+file_name_suffix+'.csv',self.post_burn_in_samples_unfiltered, delimiter=",")            
+                np.savetxt(self.UserInput.directories['logs_and_csvs']+file_name_prefix+'permutation_unfiltered_post_burn_in_log_priors_vec'+file_name_suffix+'.csv',self.post_burn_in_log_posteriors_un_normed_vec_unfiltered, delimiter=",")            
+                np.savetxt(self.UserInput.directories['logs_and_csvs']+file_name_prefix+'permutation_unfiltered_post_burn_in_log_posteriors_un_normed_vec'+file_name_suffix+'.csv',self.post_burn_in_log_priors_vec_unfiltered, delimiter=",")                        
             except:
                 pass
-        with open(file_name_prefix+'permutation_log_file'+file_name_suffix+".txt", 'w') as out_file:
+        with open(self.UserInput.directories['logs_and_csvs']+file_name_prefix+'permutation_log_file'+file_name_suffix+".txt", 'w') as out_file:
             out_file.write("self.initial_point_parameters:" + str( self.UserInput.InputParameterInitialGuess) + "\n")
             out_file.write("MAP_logP:" +  str(self.map_logP) + "\n")
             out_file.write("self.map_parameter_set:" + str( self.map_parameter_set) + "\n")
@@ -1688,10 +1688,10 @@ class parameter_estimation:
                     #out_file.write("Warning: The MAP parameter set and mu_AP parameter set differ by more than 10% of prior variance in at least one parameter. This may mean that you need to increase your mcmc_length, increase or decrease your mcmc_relative_step_length, or change what is used for the model response.  There is no general method for knowing the right  value for mcmc_relative_step_length since it depends on the sharpness and smoothness of the response. See for example https://www.sciencedirect.com/science/article/pii/S0039602816300632")
         if (searchType == 'doEnsembleSliceSampling') or (searchType == 'doMetropolisHastings'):
             postBurnInStatistics = [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec]
-            pickleAnObject(postBurnInStatistics, file_name_prefix+'permutation_post_burn_in_statistics'+file_name_suffix)
-        pickleAnObject(self.map_logP, file_name_prefix+'permutation_map_logP'+file_name_suffix)
-        pickleAnObject(self.map_parameter_set, file_name_prefix+'permutation_map_parameter_set'+file_name_suffix)
-        pickleAnObject(self.UserInput.InputParameterInitialGuess, file_name_prefix+'permutation_initial_point_parameters'+file_name_suffix)
+            pickleAnObject(postBurnInStatistics, self.UserInput.directories['pickles']+file_name_prefix+'permutation_post_burn_in_statistics'+file_name_suffix)
+        pickleAnObject(self.map_logP, self.UserInput.directories['pickles']+file_name_prefix+'permutation_map_logP'+file_name_suffix)
+        pickleAnObject(self.map_parameter_set, self.UserInput.directories['pickles']+file_name_prefix+'permutation_map_parameter_set'+file_name_suffix)
+        pickleAnObject(self.UserInput.InputParameterInitialGuess, self.UserInput.directories['pickles']+file_name_prefix+'permutation_initial_point_parameters'+file_name_suffix)
         
     #Our EnsembleSliceSampling is done by the Zeus back end. (pip install zeus-mcmc)
     software_name = "zeus"
@@ -1721,7 +1721,7 @@ class parameter_estimation:
                 #First check if we are doing some kind of parallel sampling, because in that case we need to read from the file for our correct process rank. We put that info into the prefix and suffix.
                 filePrefix,fileSuffix = self.getParallelProcessingPrefixAndSuffix()
                 self.last_logP_and_parameter_samples_filename = filePrefix + "mcmc_logP_and_parameter_samples" + fileSuffix
-                self.last_logP_and_parameter_samples_data = unpickleAnObject(self.last_logP_and_parameter_samples_filename)
+                self.last_logP_and_parameter_samples_data = unpickleAnObject(self.UserInput.directories['pickles']+self.last_logP_and_parameter_samples_filename)
                 self.last_post_burn_in_log_posteriors_un_normed_vec =  np.array(nestedObjectsFunctions.makeAtLeast_2dNested(self.last_logP_and_parameter_samples_data[:,0]))  #First column is the logP
                 if np.shape(self.last_post_burn_in_log_posteriors_un_normed_vec)[0] == 1: #In this case, need to transpose.
                     self.last_post_burn_in_log_posteriors_un_normed_vec = self.last_post_burn_in_log_posteriors_un_normed_vec.transpose()
@@ -1729,10 +1729,10 @@ class parameter_estimation:
                 if np.shape(self.last_post_burn_in_samples)[0] == 1: #In this case, need to transpose.
                     self.last_post_burn_in_samples = self.last_post_burn_in_samples.transpose()
                 self.mcmc_last_point_sampled_filename = filePrefix + "mcmc_last_point_sampled" + fileSuffix
-                self.mcmc_last_point_sampled_data = unpickleAnObject(self.mcmc_last_point_sampled_filename)
+                self.mcmc_last_point_sampled_data = unpickleAnObject(self.UserInput.directories['pickles']+self.mcmc_last_point_sampled_filename)
                 self.mcmc_last_point_sampled = self.mcmc_last_point_sampled_data
                 self.last_InputParameterInitialGuess_filename = filePrefix + "mcmc_initial_point_parameters" + fileSuffix
-                self.last_InputParameterInitialGuess_data = unpickleAnObject(self.last_InputParameterInitialGuess_filename)
+                self.last_InputParameterInitialGuess_data = unpickleAnObject(self.UserInput.directories['pickles']+self.last_InputParameterInitialGuess_filename)
                 self.UserInput.InputParameterInitialGuess = self.last_InputParameterInitialGuess_data #populating this because otherwise non-grid Multi-Start will get the wrong values exported. & Same for final plots.
         ####these variables need to be made part of userinput####
         numParameters = len(self.UserInput.InputParameterInitialGuess) #This is the number of parameters.
@@ -1828,7 +1828,7 @@ class parameter_estimation:
                 #First check if we are doing some kind of parallel sampling, because in that case we need to read from the file for our correct process rank. We put that info into the prefix and suffix.
                 filePrefix,fileSuffix = self.getParallelProcessingPrefixAndSuffix()
                 self.last_logP_and_parameter_samples_filename = filePrefix + "mcmc_logP_and_parameter_samples" + fileSuffix
-                self.last_logP_and_parameter_samples_data = unpickleAnObject(self.last_logP_and_parameter_samples_filename)
+                self.last_logP_and_parameter_samples_data = unpickleAnObject(self.UserInput.directories['pickles']+self.last_logP_and_parameter_samples_filename)
                 self.last_post_burn_in_log_posteriors_un_normed_vec =  np.array(nestedObjectsFunctions.makeAtLeast_2dNested(self.last_logP_and_parameter_samples_data[:,0]))  #First column is the logP
                 if np.shape(self.last_post_burn_in_log_posteriors_un_normed_vec)[0] == 1: #In this case, need to transpose.
                     self.last_post_burn_in_log_posteriors_un_normed_vec = self.last_post_burn_in_log_posteriors_un_normed_vec.transpose()
@@ -1837,7 +1837,7 @@ class parameter_estimation:
                     self.last_post_burn_in_samples = self.last_post_burn_in_samples.transpose()
                 self.mcmc_last_point_sampled = self.last_post_burn_in_samples[-1]        
                 self.last_InputParameterInitialGuess_filename = filePrefix + "mcmc_initial_point_parameters" + fileSuffix
-                self.last_InputParameterInitialGuess_data = unpickleAnObject(self.last_InputParameterInitialGuess_filename)
+                self.last_InputParameterInitialGuess_data = unpickleAnObject(self.UserInput.directories['pickles']+self.last_InputParameterInitialGuess_filename)
                 self.UserInput.InputParameterInitialGuess = self.last_InputParameterInitialGuess_data #populating this because otherwise non-grid Multi-Start will get the wrong values exported. & Same for final plots.
         #Setting burn_in_length in below few lines (including case for continued sampling).
         if str(self.UserInput.parameter_estimation_settings['mcmc_burn_in']).lower() == 'auto': self.mcmc_burn_in_length = int(self.UserInput.parameter_estimation_settings['mcmc_length']*0.1)
@@ -1943,7 +1943,7 @@ class parameter_estimation:
                         recent_mcmc_step_modulation_history = np.delete(recent_mcmc_step_modulation_history, not_finite_indices)
 #                        recent_stacked = np.vstack((recent_log_postereriors_drawn,recent_mcmc_step_modulation_history)).transpose()                                              
 #                        print(recent_stacked)
-#                        np.savetxt("recent_stacked.csv",recent_stacked, delimiter=',')
+#                        np.savetxt(self.UserInput.directories['logs_and_csvs']+"recent_stacked.csv",recent_stacked, delimiter=',')
                         #Numpy polyfit uses "x, y, degree" for nomenclature. We want posterior as function of modulation history.
                         linearFit = np.polynomial.polynomial.polyfit(recent_mcmc_step_modulation_history, recent_log_postereriors_drawn, 1) #In future, use multidimensional and numpy.gradient or something like that? 
                         #The slope is in the 2nd index of linearFit, despite what the documentation says.
@@ -2321,7 +2321,7 @@ class parameter_estimation:
             numberAbscissas = np.shape(allResponses_x_values)[0]
             #We have a separate abscissa for each response.              
             figureObject = plotting_functions.createSimulatedResponsesPlot(allResponses_x_values[responseDimIndex], allResponsesListsOfYArrays[responseDimIndex], individual_plot_settings, listOfYUncertaintiesArrays=allResponsesListsOfYUncertaintiesArrays[responseDimIndex], directory = self.UserInput.directories['graphs'])
-               # np.savetxt(individual_plot_settings['figure_name']+".csv", np.vstack((allResponses_x_values[responseDimIndex], allResponsesListsOfYArrays[responseDimIndex])).transpose(), delimiter=",", header='x_values, observed, sim_initial_guess, sim_MAP, sim_mu_AP', comments='')
+               # np.savetxt(self.UserInput.directories['logs_and_csvs']+individual_plot_settings['figure_name']+".csv", np.vstack((allResponses_x_values[responseDimIndex], allResponsesListsOfYArrays[responseDimIndex])).transpose(), delimiter=",", header='x_values, observed, sim_initial_guess, sim_MAP, sim_mu_AP', comments='')
             allResponsesFigureObjectsList.append(figureObject)
         return allResponsesFigureObjectsList  #This is a list of matplotlib.pyplot as plt objects.
 
