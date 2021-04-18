@@ -2463,7 +2463,7 @@ class parameter_estimation:
             print("Unable to make contour plots. This usually means your run is not an MCMC run.")
 
         try:
-            self.createSimulatedResponsesPlots()
+            self.createSimulatedResponsesPlots(allResponses_x_values=[], allResponsesListsOfYArrays =[], plot_settings={},allResponsesListsOfYUncertaintiesArrays=[]) #forcing the arguments to be blanks, because otherwise it might use some cached values.
         except:
             print("Unable to make simulated response plots. This is unusual and typically means your observed values and simulated values are not the same array shape. If so, that needs to be fixed.")
             pass
