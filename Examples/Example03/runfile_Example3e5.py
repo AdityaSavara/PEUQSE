@@ -49,7 +49,7 @@ if __name__ == "__main__":
     
     #PE_object.doGridSearch('doMetropolisHastings')
     UserInput.parameter_estimation_settings['multistart_checkPointFrequency'] = 100
-    PE_object.doMultiStart('getLogP', initialPointsDistributionType='grid',  gridsearchSamplingInterval=[ 1, 1, 3, 3, 0.1, 0.1], gridsearchSamplingRadii=[5,5,3,3,0,0], passThroughArgs={"method":"Nelder-Mead", "maxiter":5000, "verbose":False})
+    PE_object.doMultiStart('getLogP', initialPointsDistributionType='grid',  gridsearchSamplingInterval=[ 1, 1, 3, 3, 0.1, 0.1], gridsearchSamplingRadii=[5,5,3,3,0,0], passThroughArgs={"method":"Nelder-Mead", "maxiter":5000, "verbose":False}) #This is an old non-recommended syntax though it still works. The UserInput dictionaries should be used, as in other examples.
     
     #Below is the old and deprecated syntax that should not be used.
     #PE_object.doGridSearch('getLogP', gridSamplingAbsoluteIntervalSize=[ 1, 1, 3, 3, 0.1, 0.1], gridSamplingNumOfIntervals=[5,5,3,3,0,0], passThroughArgs={"method":"Nelder-Mead", "maxiter":5000, "verbose":False})  #The passThroughArgs are not necessary and are just provided here as an example of how to use them.
