@@ -33,6 +33,7 @@ if __name__ == "__main__":
     UserInput.parameter_estimation_settings['multistart_numStartPoints'] = 1000
     UserInput.parameter_estimation_settings['multistart_relativeInitialDistributionSpread'] = 2.0
     UserInput.parameter_estimation_settings['multistart_checkPointFrequency'] = 10
+    UserInput.parameter_estimation_settings['multistart_passThroughArgs'] = {'method':"Nelder-Mead", 'printOptimum':True, 'verbose':False}
     
     #After making the UserInput, now we make a 'parameter_estimation' object from it.
     PE_object = CKPQ.parameter_estimation(UserInput)
