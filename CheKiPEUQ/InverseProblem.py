@@ -783,9 +783,9 @@ class parameter_estimation:
             #self.post_burn_in_log_priors_vec = cumulative_post_burn_in_log_priors_vec
             #self.post_burn_in_log_posteriors_un_normed_vec = cumulative_post_burn_in_log_posteriors_un_normed_vec
             #implied return bestResultSoFar # [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec] 
-        if (searchType == 'getLogP') or (searchType == 'doOptimizeNegLogP'):
-            if searchType == 'doOptimizeNegLogP':
-                self.permutation_and_doOptimizeNegLogP = True #turning on this flag for case of permutation_and_doOptimizeNegLogP. This is needed so that a warning can be put in the mcmc_log.
+        if (searchType == 'getLogP') or (searchType == 'doOptimizeNegLogP') or (searchType == 'doOptimizeSSR'):
+            if (searchType == 'doOptimizeNegLogP') or (searchType == 'doOptimizeSSR'):
+                self.permutation_and_doOptimize = True #turning on this flag for case of permutation_and_doOptimize. This is needed so that a warning can be put in the mcmc_log.
             #if it's getLogP gridsearch, we are going to convert it to samples if requested.
             if permutationsToSamples == True:
                 self.permutations_MAP_logP_and_parameters_values = np.vstack( self.permutations_MAP_logP_and_parameters_values) #Note that vstack actually requires a tuple with multiple elements as an argument. So this list or array like structure is being converted to a tuple of many elements and then being stacked.
@@ -830,6 +830,8 @@ class parameter_estimation:
                         caveat = ''
                     out_file.write("self.mu_AP_parameter_set : " + caveat + str( self.mu_AP_parameter_set)+ "\n")
                     out_file.write("self.stdap_parameter_set : " + caveat  + str( self.stdap_parameter_set)+ "\n")
+            if self.permutation_and_doOptimize == True:
+                out_file.write("\n WARNING: It appears this run used a doOptimize with multi-start. In this case, the MAP_logP and map_parameter_set are the optima.  However, the mu_AP_parameter_set and stdap_parameter_set are not meaningful, since this was not an even weighted exploration of the posterior.")
         #do some exporting etc. This is at the end to avoid exporting every single time if parallelization is used.
         np.savetxt(self.UserInput.directories['logs_and_csvs']+'multistart_initial_points_parameters_values'+'.csv', self.listOfPermutations, delimiter=",")
         np.savetxt(self.UserInput.directories['logs_and_csvs']+'multistart_MAP_logP_and_parameters_values.csv',self.permutations_MAP_logP_and_parameters_values, delimiter=",")
@@ -1689,8 +1691,8 @@ class parameter_estimation:
             out_file.write("self.info_gain:" +  str(self.info_gain) + "\n")
             out_file.write("evidence:" + str(self.evidence) + "\n")
             out_file.write("posterior_cov_matrix:" + "\n" + str(np.cov(self.post_burn_in_samples.T)) + "\n")
-            if self.permutation_and_doOptimizeNegLogP == True:
-                out_file.write("\n WARNING: It appears this run used doOptimizeNegLogP with multi-start. In this case, the MAP_logP and map_parameter_set are as reported.  However, the mu_AP_parameter_set and stdap_parameter_set are not meaningful, since this was not an even weighted exploration of the posterior.")
+            if self.permutation_and_doOptimize == True:
+                out_file.write("\n WARNING: It appears this run used a doOptimize with multi-start. In this case, the MAP_logP and map_parameter_set are the optima.  However, the mu_AP_parameter_set and stdap_parameter_set are not meaningful, since this was not an even weighted exploration of the posterior.")
             if abs((self.map_parameter_set - self.mu_AP_parameter_set)/self.UserInput.std_prior).any() > 0.10:
                 pass #Disabling below warning until if statement is fixed. During mid-2020, it started printing every time. The if statement may be fixed now but not yet tested.
                 #out_file.write("Warning: The MAP parameter set and mu_AP parameter set differ by more than 10% of prior variance in at least one parameter. This may mean that you need to increase your mcmc_length, increase or decrease your mcmc_relative_step_length, or change what is used for the model response.  There is no general method for knowing the right  value for mcmc_relative_step_length since it depends on the sharpness and smoothness of the response. See for example https://www.sciencedirect.com/science/article/pii/S0039602816300632")
