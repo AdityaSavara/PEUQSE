@@ -1434,7 +1434,7 @@ class parameter_estimation:
         return neg_log_postererior
 
     #this is just a wrapper around doOptimizeNegLogP
-    def doOptimizLogP(self, simulationFunctionAdditionalArgs = (), method = None, optimizationAdditionalArgs = {}, printOptimum = True, verbose=True, maxiter=0):
+    def doOptimizeLogP(self, simulationFunctionAdditionalArgs = (), method = None, optimizationAdditionalArgs = {}, printOptimum = True, verbose=True, maxiter=0):
         [self.map_parameter_set, negLogP] = doOptimizeNegLogP(self, simulationFunctionAdditionalArgs = simulationFunctionAdditionalArgs, method = method, optimizationAdditionalArgs = optimizationAdditionalArgs, printOptimum = printOptimum, verbose=verbose, maxiter=maxiter)
         self.map_logP = -1.0*negLogP
         return [self.map_parameter_set, self.map_logP]
