@@ -34,3 +34,9 @@ if __name__ == "__main__":
 #    PE_object.makeHistogramsForEachParameter()    
 #    PE_object.makeSamplingScatterMatrixPlot()
 #    PE_object.createSimulatedResponsesPlots()
+
+    #to save a PE_object for later
+    PE_object.save_to_dill("PE_object_00a1")
+    
+    #to load a PE_object after some time, can be done from another file
+    PE_object.load_from_dill("PE_object_00a1")
