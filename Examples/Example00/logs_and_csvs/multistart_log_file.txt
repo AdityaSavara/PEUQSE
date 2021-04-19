@@ -1,7 +1,9 @@
 centerPoint: [200. 500.]
-highest_MAP_logP: [-42.6373872]
-highest_MAP_logP_parameter_set: [165.15368022 500.13540877]
-highest_MAP_initial_point_index: 43
-highest_MAP_initial_point_parameters: [ 225.77781584 1049.85797561]
-self.mu_AP_parameter_set : [165.15471135 500.09900452]
-self.stdap_parameter_set : [0.06148084 4.62689106]
+highest_MAP_logP: [45.67682917]
+highest_MAP_logP_parameter_set: [167.69477447   7.11809594]
+highest_MAP_initial_point_index: 255
+highest_MAP_initial_point_parameters: [447.18606526   1.13154034]
+self.mu_AP_parameter_set : [165.37425759 478.85058264]
+self.stdap_parameter_set : [ 1.1753032  99.46238406]
+
+ WARNING: It appears this run used a doOptimize with multi-start. In this case, the MAP_logP and map_parameter_set are the optima.  However, the mu_AP_parameter_set and stdap_parameter_set are not meaningful, since this was not an even weighted exploration of the posterior.

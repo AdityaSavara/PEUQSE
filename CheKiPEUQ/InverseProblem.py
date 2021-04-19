@@ -354,6 +354,7 @@ class parameter_estimation:
                     self.prepareResponsesForSplitLikelihood = True
         
         self.permutation_and_doOptimizeNegLogP = False #just initializing this flag with its default.
+        self.permutation_and_doOptimizeSSR = False #just initializing this flag with its default.
                 
     
     def reduceResponseSpace(self):
@@ -784,8 +785,10 @@ class parameter_estimation:
             #self.post_burn_in_log_posteriors_un_normed_vec = cumulative_post_burn_in_log_posteriors_un_normed_vec
             #implied return bestResultSoFar # [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec] 
         if (searchType == 'getLogP') or (searchType == 'doOptimizeNegLogP') or (searchType == 'doOptimizeSSR'):
-            if (searchType == 'doOptimizeNegLogP') or (searchType == 'doOptimizeSSR'):
-                self.permutation_and_doOptimize = True #turning on this flag for case of permutation_and_doOptimize. This is needed so that a warning can be put in the mcmc_log.
+            if (searchType == 'doOptimizeNegLogP'):
+                self.permutation_and_doOptimizeNegLogP = True #turning on this flag for case of permutation_and_doOptimize. This is needed so that a warning can be put in the mcmc_log.
+            if (searchType == 'doOptimizeSSR'): 
+                self.permutation_and_doOptimizeSSR = True
             #if it's getLogP gridsearch, we are going to convert it to samples if requested.
             if permutationsToSamples == True:
                 self.permutations_MAP_logP_and_parameters_values = np.vstack( self.permutations_MAP_logP_and_parameters_values) #Note that vstack actually requires a tuple with multiple elements as an argument. So this list or array like structure is being converted to a tuple of many elements and then being stacked.
@@ -820,21 +823,33 @@ class parameter_estimation:
         with open(self.UserInput.directories['logs_and_csvs'] + "multistart_log_file.txt", 'w') as out_file:
                 print("line 821")
                 out_file.write("centerPoint: " + str(centerPoint) + "\n")
-                out_file.write("highest_MAP_logP: " + str(self.map_logP) + "\n")
-                out_file.write("highest_MAP_logP_parameter_set: " + str(self.map_parameter_set)+ "\n")
-                out_file.write("highest_MAP_initial_point_index: " + str(highest_MAP_initial_point_index)+ "\n")
-                out_file.write("highest_MAP_initial_point_parameters: " + str( highest_MAP_initial_point_parameters)+ "\n")
-                if (searchType == 'doEnsembleSliceSampling') or (searchType == 'doMetropolisHastings') or (permutationsToSamples == True):
-                    if (searchType == 'doEnsembleSliceSampling') or (searchType == 'doMetropolisHastings'): 
-                        caveat = ' (for the above initial point) '
-                    elif permutationsToSamples == True:
-                        caveat = ''
-                    out_file.write("self.mu_AP_parameter_set : " + caveat + str( self.mu_AP_parameter_set)+ "\n")
-                    out_file.write("self.stdap_parameter_set : " + caveat  + str( self.stdap_parameter_set)+ "\n")
-                print("line 833", self.permutation_and_doOptimize)
-                if self.permutation_and_doOptimize == True:
-                    print("line 834"); sys.exit
-                    out_file.write("\n WARNING: It appears this run used a doOptimize with multi-start. In this case, the MAP_logP and map_parameter_set are the optima.  However, the mu_AP_parameter_set and stdap_parameter_set are not meaningful, since this was not an even weighted exploration of the posterior.")
+                if self.permutation_and_doOptimizeSSR == False:# In the normal case, we are not doing SSR.               
+                    out_file.write("highest_MAP_logP: " + str(self.map_logP) + "\n")
+                    out_file.write("highest_MAP_logP_parameter_set: " + str(self.map_parameter_set)+ "\n")
+                    out_file.write("highest_MAP_initial_point_index: " + str(highest_MAP_initial_point_index)+ "\n")
+                    out_file.write("highest_MAP_initial_point_parameters: " + str( highest_MAP_initial_point_parameters)+ "\n")
+                    if (searchType == 'doEnsembleSliceSampling') or (searchType == 'doMetropolisHastings') or (permutationsToSamples == True):
+                        if (searchType == 'doEnsembleSliceSampling') or (searchType == 'doMetropolisHastings'): 
+                            caveat = ' (for the above initial point) '
+                        elif permutationsToSamples == True:
+                            caveat = ''
+                        out_file.write("self.mu_AP_parameter_set : " + caveat + str( self.mu_AP_parameter_set)+ "\n")
+                        out_file.write("self.stdap_parameter_set : " + caveat  + str( self.stdap_parameter_set)+ "\n")
+                    if self.permutation_and_doOptimizeNegLogP == True:
+                        out_file.write("\n WARNING: It appears this run used a doOptimize with multi-start. In this case, the MAP_logP and map_parameter_set are the optimum from the run.  However, the mu_AP_parameter_set and stdap_parameter_set are not meaningful, since this was not an even weighted exploration of the posterior.")                        
+                if self.permutation_and_doOptimizeSSR == True: #special case where we are doing SSR.
+                    out_file.write("Below, negSSR means the SSR times -1. Essentially, it is the optimum.")
+                    out_file.write("highest_negSSR: " + str(self.map_logP) + "\n")
+                    out_file.write("highest_negSSR_parameter_set: " + str(self.map_parameter_set)+ "\n")
+                    out_file.write("highest_negSSR_initial_point_index: " + str(highest_MAP_initial_point_index)+ "\n")
+                    out_file.write("highest_negSSR_initial_point_parameters: " + str( highest_MAP_initial_point_parameters)+ "\n")
+                        caveat = ' (actually just an analogue) '
+                        out_file.write("self.mu_AP_parameter_set : " + caveat + str( self.mu_AP_parameter_set)+ "\n")
+                        out_file.write("self.stdap_parameter_set : " + caveat  + str( self.stdap_parameter_set)+ "\n")
+                    if self.permutation_and_doOptimizeNegLogP == True:
+                        out_file.write("\n WARNING: It appears this run used a doOptimize with multi-start. In this case, the highest_negSSR and highest_negSSR_parameter_set are at the optimum from the run.  However, the mu_AP_parameter_set and stdap_parameter_set are not meaningful, since this was not an even weighted exploration of the posterior. However, the values have been reported that are analogous if the negSSR is treated as a logP, and the posterior graphs have been made accordingly. ")                        
+
+                    
         #do some exporting etc. This is at the end to avoid exporting every single time if parallelization is used.
         np.savetxt(self.UserInput.directories['logs_and_csvs']+'multistart_initial_points_parameters_values'+'.csv', self.listOfPermutations, delimiter=",")
         np.savetxt(self.UserInput.directories['logs_and_csvs']+'multistart_MAP_logP_and_parameters_values.csv',self.permutations_MAP_logP_and_parameters_values, delimiter=",")
