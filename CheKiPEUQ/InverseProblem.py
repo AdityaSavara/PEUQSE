@@ -354,7 +354,8 @@ class parameter_estimation:
                     self.prepareResponsesForSplitLikelihood = True
         
         self.permutation_and_doOptimizeNegLogP = False #just initializing this flag with its default.
-                
+        self.permutation_and_doOptimizeSSR = False #just initializing this flag with its default.
+        self.permutation_and_doOptimizeLogP = False
     
     def reduceResponseSpace(self):
         #This function has no explicit arguments, but takes everything in self.UserInput as an implied argument.
@@ -606,7 +607,7 @@ class parameter_estimation:
         
     def doListOfPermutationsSearch(self, listOfPermutations, numPermutations = None, searchType='getLogP', exportLog = True, walkerInitialDistribution='UserChoice', passThroughArgs = {}, calculatePostBurnInStatistics=True,  keep_cumulative_post_burn_in_data = False, centerPoint=None, permutationsToSamples=False): #This is the 'engine' used by doGridSearch and  doMultiStartSearch
     #The listOfPermutations can also be another type of iterable.
-        #Possible searchTypes are: 'getLogP', 'doEnsembleSliceSampling', 'doMetropolisHastings', 'doOptimizeNegLogP', 'doOptimizeSSR'
+        #Possible searchTypes are: 'getLogP', 'doEnsembleSliceSampling', 'doMetropolisHastings', 'doOptimizeNegLogP', 'doOptimizeLogP' 'doOptimizeSSR'
         #permutationsToSamples should normally only be True if somebody is using gridsearch or uniform multistart with getLogP.
         self.listOfPermutations = listOfPermutations #This is being made into a class variable so that it can be used during parallelization
         if str(numPermutations).lower() == str(None).lower():
@@ -623,7 +624,7 @@ class parameter_estimation:
         if self.UserInput.parameter_estimation_settings['mcmc_continueSampling']  == 'auto':
             mcmc_continueSampling = False #need to set this variable to false if it's an auto. The only time mcmc_continue sampling should be on for multistart is if someone is doing it intentionally, which would normally only be during an MPI case.                                                                                            
         #Check if we need to do multistart_continueSampling, and prepare for it if we need to.
-        if ('multistart_continueSampling' not in self.UserInput.parameter_estimation_settings) or self.UserInput.parameter_estimation_settings['multistart_continueSampling']  == 'auto':
+        if ('multistart_continueSampling' not in self.UserInput.parameter_estimation_settings) or (self.UserInput.parameter_estimation_settings['multistart_continueSampling']  == 'auto'):
             if hasattr(self, 'multistart_MAP_logP_and_parameters_values'):
                 multistart_continueSampling = True
             else:
@@ -711,14 +712,19 @@ class parameter_estimation:
                         self.cumulative_post_burn_in_samples = np.vstack((self.cumulative_post_burn_in_samples, self.post_burn_in_samples))
                         self.cumulative_post_burn_in_log_priors_vec = np.vstack((self.cumulative_post_burn_in_log_priors_vec, self.post_burn_in_log_priors_vec))
                         self.cumulative_post_burn_in_log_posteriors_un_normed_vec = np.vstack((self.cumulative_post_burn_in_log_posteriors_un_normed_vec, self.post_burn_in_log_posteriors_un_normed_vec))                    
+            if searchType == 'doOptimizeLogP':
+                optimizationOutput = self.doOptimizeLogP(**passThroughArgs)
+                self.map_logP = optimizationOutput[1] 
+                self.map_parameter_set = optimizationOutput[0]
+                thisResult = [self.map_logP, self.map_parameter_set, None, None, None, None, None, None]
             if searchType == 'doOptimizeNegLogP':
                 optimizationOutput = self.doOptimizeNegLogP(**passThroughArgs)
-                self.map_logP = optimizationOutput[1]
+                self.map_logP = -1.0*optimizationOutput[1] #need to times by negative 1 to convert negLogP into P.
                 self.map_parameter_set = optimizationOutput[0]
                 thisResult = [self.map_logP, self.map_parameter_set, None, None, None, None, None, None]
             if searchType == 'doOptimizeSSR':
                 optimizationOutput = self.doOptimizeSSR(**passThroughArgs)
-                self.map_logP = optimizationOutput[1]
+                self.map_logP = -1.0*optimizationOutput[1]  #The SSR is a minimizing objective function, so we multiply by -1 to make it analagous to a log_P.
                 self.map_parameter_set = optimizationOutput[0]
                 thisResult = [self.map_logP, self.map_parameter_set, None, None, None, None, None, None]
             if (type(self.UserInput.parameter_estimation_settings['multistart_checkPointFrequency']) != type(None)) or (verbose == True):
@@ -783,9 +789,13 @@ class parameter_estimation:
             #self.post_burn_in_log_priors_vec = cumulative_post_burn_in_log_priors_vec
             #self.post_burn_in_log_posteriors_un_normed_vec = cumulative_post_burn_in_log_posteriors_un_normed_vec
             #implied return bestResultSoFar # [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec] 
-        if (searchType == 'getLogP') or (searchType == 'doOptimizeNegLogP'):
-            if searchType == 'doOptimizeNegLogP':
-                self.permutation_and_doOptimizeNegLogP = True #turning on this flag for case of permutation_and_doOptimizeNegLogP. This is needed so that a warning can be put in the mcmc_log.
+        if (searchType == 'getLogP') or (searchType == 'doOptimizeNegLogP') or (searchType == 'doOptimizeSSR') or (searchType == 'doOptimizeLogP'):
+            if (searchType == 'doOptimizeNegLogP'):
+                self.permutation_and_doOptimizeNegLogP = True #turning on this flag for case of permutation_and_doOptimize. This is needed so that a warning can be put in the mcmc_log.
+            if (searchType == 'doOptimizeSSR'): 
+                self.permutation_and_doOptimizeSSR = True
+            if (searchType == 'doOptimizeLogP'):
+                self.permutation_and_doOptimizeLogP = True                
             #if it's getLogP gridsearch, we are going to convert it to samples if requested.
             if permutationsToSamples == True:
                 self.permutations_MAP_logP_and_parameters_values = np.vstack( self.permutations_MAP_logP_and_parameters_values) #Note that vstack actually requires a tuple with multiple elements as an argument. So this list or array like structure is being converted to a tuple of many elements and then being stacked.
@@ -819,17 +829,33 @@ class parameter_estimation:
             pass #Later will do something with allPermutationsResults variable. It has one element for each result (that is, each permutation).
         with open(self.UserInput.directories['logs_and_csvs'] + "multistart_log_file.txt", 'w') as out_file:
                 out_file.write("centerPoint: " + str(centerPoint) + "\n")
-                out_file.write("highest_MAP_logP: " + str(self.map_logP) + "\n")
-                out_file.write("highest_MAP_logP_parameter_set: " + str(self.map_parameter_set)+ "\n")
-                out_file.write("highest_MAP_initial_point_index: " + str(highest_MAP_initial_point_index)+ "\n")
-                out_file.write("highest_MAP_initial_point_parameters: " + str( highest_MAP_initial_point_parameters)+ "\n")
-                if (searchType == 'doEnsembleSliceSampling') or (searchType == 'doMetropolisHastings') or (permutationsToSamples == True):
-                    if (searchType == 'doEnsembleSliceSampling') or (searchType == 'doMetropolisHastings'): 
-                        caveat = ' (for the above initial point) '
-                    elif permutationsToSamples == True:
-                        caveat = ''
+                if self.permutation_and_doOptimizeSSR == False:# In the normal case, we are not doing SSR.               
+                    out_file.write("highest_MAP_logP: " + str(self.map_logP) + "\n")
+                    out_file.write("highest_MAP_logP_parameter_set: " + str(self.map_parameter_set)+ "\n")
+                    out_file.write("highest_MAP_initial_point_index: " + str(highest_MAP_initial_point_index)+ "\n")
+                    out_file.write("highest_MAP_initial_point_parameters: " + str( highest_MAP_initial_point_parameters)+ "\n")
+                    if (searchType == 'doEnsembleSliceSampling') or (searchType == 'doMetropolisHastings') or (permutationsToSamples == True):
+                        if (searchType == 'doEnsembleSliceSampling') or (searchType == 'doMetropolisHastings'): 
+                            caveat = ' (for the above initial point) '
+                        elif permutationsToSamples == True:
+                            caveat = ''
+                        out_file.write("self.mu_AP_parameter_set : " + caveat + str( self.mu_AP_parameter_set)+ "\n")
+                        out_file.write("self.stdap_parameter_set : " + caveat  + str( self.stdap_parameter_set)+ "\n")
+                    if (self.permutation_and_doOptimizeNegLogP == True) or (self.permutation_and_doOptimizeLogP == True):
+                        out_file.write("\n WARNING: It appears this run used a doOptimize with multi-start. In this case, the MAP_logP and map_parameter_set are the optimum from the run.  However, the mu_AP_parameter_set and stdap_parameter_set are not meaningful, since this was not an even weighted exploration of the posterior. \n")                        
+                if self.permutation_and_doOptimizeSSR == True: #special case where we are doing SSR.
+                    out_file.write("Below, negSSR means the SSR times -1. This is the optimum from the run. \n")
+                    out_file.write("highest_negSSR: " + str(self.map_logP) + "\n")
+                    out_file.write("highest_negSSR_parameter_set: " + str(self.map_parameter_set)+ "\n")
+                    out_file.write("highest_negSSR_initial_point_index: " + str(highest_MAP_initial_point_index)+ "\n")
+                    out_file.write("highest_negSSR_initial_point_parameters: " + str( highest_MAP_initial_point_parameters)+ "\n")
+                    caveat = ' (actually just an analogue) '
                     out_file.write("self.mu_AP_parameter_set : " + caveat + str( self.mu_AP_parameter_set)+ "\n")
                     out_file.write("self.stdap_parameter_set : " + caveat  + str( self.stdap_parameter_set)+ "\n")
+                    if self.permutation_and_doOptimizeSSR == True:
+                        out_file.write("\n WARNING: It appears this run used a doOptimize with multi-start. In this case, the highest_negSSR and highest_negSSR_parameter_set are at the optimum from the run.  However, the mu_AP_parameter_set and stdap_parameter_set are not meaningful, since this was not an even weighted exploration of the posterior. However, the values have been reported that are analogous if the negSSR is treated as a logP, and the posterior graphs have been made accordingly. \n")                        
+
+                    
         #do some exporting etc. This is at the end to avoid exporting every single time if parallelization is used.
         np.savetxt(self.UserInput.directories['logs_and_csvs']+'multistart_initial_points_parameters_values'+'.csv', self.listOfPermutations, delimiter=",")
         np.savetxt(self.UserInput.directories['logs_and_csvs']+'multistart_MAP_logP_and_parameters_values.csv',self.permutations_MAP_logP_and_parameters_values, delimiter=",")
@@ -877,7 +903,7 @@ class parameter_estimation:
         permutationsToSamples = False#initialize with default
         if self.UserInput.parameter_estimation_settings['multistart_gridsearchToSamples'] == True:
             if initialPointsDistributionType == 'grid' or initialPointsDistributionType == 'uniform':
-                if (searchType == 'getLogP') or (searchType=='doOptimizeNegLogP'):
+                if (searchType == 'getLogP') or (searchType=='doOptimizeNegLogP') or (searchType=='doOptimizeLogP') or (searchType=='doOptimizeSSR'):
                     permutationsToSamples = True
                         
         #Look for the best result (highest map_logP) from among these permutations. Maybe later should add optional argument to allow searching for highest mu_AP to find HPD.
@@ -934,7 +960,6 @@ class parameter_estimation:
                 os.chdir(self.UserInput.directories['pickles'] + "mpi_cached_files")
                 self.info_gain_matrix = [] #Initializing this as a blank list, it will be made into an array after the loop.
                 for simulationIndex in range(0,numSimulations): #For each simulation, we need to grab the results.
-                    print("line 297", os.getcwd())
                     simulationNumberString = str(simulationIndex+1)
                     #Getting the data out.    
                     current_conditionsPermutationAndInfoGain_filename = "conditionsPermutationAndInfoGain_mod"+str(parModulationNumber)+"_cond"+simulationNumberString
@@ -1415,6 +1440,14 @@ class parameter_estimation:
         neg_log_postererior = -1*self.getLogP(proposal_sample)
         return neg_log_postererior
 
+    #this is just a wrapper around doOptimizeNegLogP
+    def doOptimizeLogP(self, simulationFunctionAdditionalArgs = (), method = None, optimizationAdditionalArgs = {}, printOptimum = True, verbose=True, maxiter=0):
+        if printOptimum == True:
+            print("doOptimizeLogP is a wrapper that calls doOptimizeNegLogP. The final results from doOptimizeNegLogP will be printed.")
+        [self.map_parameter_set, negLogP] = self.doOptimizeNegLogP(simulationFunctionAdditionalArgs = simulationFunctionAdditionalArgs, method = method, optimizationAdditionalArgs = optimizationAdditionalArgs, printOptimum = printOptimum, verbose=verbose, maxiter=maxiter)
+        self.map_logP = -1.0*negLogP
+        return [self.map_parameter_set, self.map_logP]
+
     def doOptimizeNegLogP(self, simulationFunctionAdditionalArgs = (), method = None, optimizationAdditionalArgs = {}, printOptimum = True, verbose=True, maxiter=0):
         #THe intention of the optional arguments is to pass them into the scipy.optimize.minimize function.
         # the 'method' argument is for Nelder-Mead, BFGS, SLSQP etc. https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html#scipy.optimize.minimize
@@ -1435,10 +1468,11 @@ class parameter_estimation:
             #print(f"Number of calls to Simulator instance {verbose_simulator.num_calls}") <-- this is the same as the "Function evaluations" field that gets printed.
             
         self.map_parameter_set = optimizeResult.x #This is the map location.
-        self.map_logP = -1.0*optimizeResult.fun #This is the map logP
+        negLogP = optimizeResult.fun
+        self.map_logP = -1.0*negLogP #This is the map logP
         if printOptimum == True:
-            print("Final results from doOptimizeNegLogP:", self.map_parameter_set, "final logP:", self.map_logP)
-        return [self.map_parameter_set, self.map_logP]
+            print("Final results from doOptimizeNegLogP:", self.map_parameter_set, "final negLogP:", negLogP, "final logP:", self.map_logP)
+        return [self.map_parameter_set, negLogP]
 
 
     def getSSR(self, discreteParameterVector): #The proposal sample is specific parameter vector. 
@@ -1479,7 +1513,7 @@ class parameter_estimation:
         self.opt_parameter_set = optimizeResult.x #This is the best fit parameter set.
         self.opt_SSR = optimizeResult.fun #This is the best fit SSR.
         if printOptimum == True:
-            print("Final results from doOptimizeSSR:", self.opt_parameter_set, "final SSR:", self.opt_SSR)
+            print("Final results from doOptimizeSSR:", self.opt_parameter_set, "final SSR:", self.opt_SSR, "final negSSR:", -1*self.opt_SSR)
         #FIXME: Right now, the createAllPlots command will not work unless we populate the map parameter set, so that is what we are doing. But a better longterm solution needs to be made. In which the graph says "opt" rather than "MAP" and uses the appropriate variables.
         #TODO: Also need to add things like WSSR based on magnitude and variance weightings.
         self.map_parameter_set = self.opt_parameter_set
@@ -1689,8 +1723,8 @@ class parameter_estimation:
             out_file.write("self.info_gain:" +  str(self.info_gain) + "\n")
             out_file.write("evidence:" + str(self.evidence) + "\n")
             out_file.write("posterior_cov_matrix:" + "\n" + str(np.cov(self.post_burn_in_samples.T)) + "\n")
-            if self.permutation_and_doOptimizeNegLogP == True:
-                out_file.write("\n WARNING: It appears this run used doOptimizeNegLogP with multi-start. In this case, the MAP_logP and map_parameter_set are as reported.  However, the mu_AP_parameter_set and stdap_parameter_set are not meaningful, since this was not an even weighted exploration of the posterior.")
+            if (self.permutation_and_doOptimizeNegLogP == True) or (self.permutation_and_doOptimizeLogP == True):
+                out_file.write("\n WARNING: It appears this run used a doOptimize with multi-start. In this case, the MAP_logP and map_parameter_set are the optima.  However, the mu_AP_parameter_set and stdap_parameter_set are not meaningful, since this was not an even weighted exploration of the posterior.")
             if abs((self.map_parameter_set - self.mu_AP_parameter_set)/self.UserInput.std_prior).any() > 0.10:
                 pass #Disabling below warning until if statement is fixed. During mid-2020, it started printing every time. The if statement may be fixed now but not yet tested.
                 #out_file.write("Warning: The MAP parameter set and mu_AP parameter set differ by more than 10% of prior variance in at least one parameter. This may mean that you need to increase your mcmc_length, increase or decrease your mcmc_relative_step_length, or change what is used for the model response.  There is no general method for knowing the right  value for mcmc_relative_step_length since it depends on the sharpness and smoothness of the response. See for example https://www.sciencedirect.com/science/article/pii/S0039602816300632")
@@ -2465,7 +2499,7 @@ class parameter_estimation:
         try:        
             self.createMumpcePlots()
         except:
-            print("Unable to make contour plots. This usually means your run is not an MCMC run.")
+            print("Unable to make contour plots. This usually means your run is not an MCMC run. However, it could mean that your prior and posterior are too far from each other for plotting.  You can change contour_plot_settings['colobars'] to false and can also change the contour_plot_settings['axis_limits'] if you know which region you wish to have plotted.")
 
         try:
             self.createSimulatedResponsesPlots(allResponses_x_values=[], allResponsesListsOfYArrays =[], plot_settings={},allResponsesListsOfYUncertaintiesArrays=[]) #forcing the arguments to be blanks, because otherwise it might use some cached values.

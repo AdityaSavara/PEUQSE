@@ -47,7 +47,7 @@ if __name__ == "__main__":
     
 #    #Now we do parameter estimation.
 #    PE_object.doMetropolisHastings()
-    PE_object.doOptimizeNegLogP(method="BFGS", printOptimum=True, verbose=True)
+    PE_object.doOptimizeLogP(method="BFGS", printOptimum=True, verbose=True)
     print(PE_object.map_parameter_set, PE_object.map_logP)
     #PE_object.doGridSearch('doMetropolisHastings')
     #PE_object.doGridSearch('doOptimizeNegLogP', verbose = True,gridSamplingNumOfIntervals = [1,1,1,1,0,0], passThroughArgs={'method':'BFGS'})

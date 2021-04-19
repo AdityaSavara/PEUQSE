@@ -27,15 +27,15 @@ if __name__ == "__main__":
     UserInput.parameter_estimation_settings['mcmc_threshold_filter_samples'] = True
 
     UserInput.parameter_estimation_settings['mcmc_random_seed'] = 0
-    UserInput.parameter_estimation_settings['multistart_searchType'] = 'doOptimizeNegLogP'
-    UserInput.parameter_estimation_settings['multistart_passThroughArgs'] = {'method':'BFGS'}
+    UserInput.parameter_estimation_settings['multistart_searchType'] = 'doOptimizeLogP'
+    UserInput.parameter_estimation_settings['multistart_passThroughArgs'] = {'method':'BFGS'} #Here, BFGS is used. However, Nelder-Mead is usually what is recommended.
     UserInput.parameter_estimation_settings['multistart_initialPointsDistributionType'] = 'grid'
     UserInput.parameter_estimation_settings['multistart_exportLog'] = True
     
     #After making the UserInput, now we make a 'parameter_estimation' object from it.
     PE_object = CKPQ.parameter_estimation(UserInput)
     #PE_object.doMetropolisHastings()
-    #PE_object.doOptimizeNegLogP(method="BFGS", printOptimum=True, verbose=True) #method can also be Nelder-Meade.
+    #PE_object.doOptimizeNegLogP(method="BFGS", printOptimum=True, verbose=True) #method can also be Nelder-Mead.
     PE_object.doMultiStart()
     PE_object.createAllPlots() #This function calls each of the below functions so that the user does not have to.
 #    PE_object.makeHistogramsForEachParameter()    
