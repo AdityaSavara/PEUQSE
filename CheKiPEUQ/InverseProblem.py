@@ -624,7 +624,7 @@ class parameter_estimation:
         if self.UserInput.parameter_estimation_settings['mcmc_continueSampling']  == 'auto':
             mcmc_continueSampling = False #need to set this variable to false if it's an auto. The only time mcmc_continue sampling should be on for multistart is if someone is doing it intentionally, which would normally only be during an MPI case.                                                                                            
         #Check if we need to do multistart_continueSampling, and prepare for it if we need to.
-        if ('multistart_continueSampling' not in self.UserInput.parameter_estimation_settings) or self.UserInput.parameter_estimation_settings['multistart_continueSampling']  == 'auto':
+        if ('multistart_continueSampling' not in self.UserInput.parameter_estimation_settings) or (self.UserInput.parameter_estimation_settings['multistart_continueSampling']  == 'auto'):
             if hasattr(self, 'multistart_MAP_logP_and_parameters_values'):
                 multistart_continueSampling = True
             else:
@@ -1723,7 +1723,7 @@ class parameter_estimation:
             out_file.write("self.info_gain:" +  str(self.info_gain) + "\n")
             out_file.write("evidence:" + str(self.evidence) + "\n")
             out_file.write("posterior_cov_matrix:" + "\n" + str(np.cov(self.post_burn_in_samples.T)) + "\n")
-            if self.permutation_and_doOptimize == True:
+            if (self.permutation_and_doOptimizeNegLogP == True) or (self.permutation_and_doOptimizeLogP == True):
                 out_file.write("\n WARNING: It appears this run used a doOptimize with multi-start. In this case, the MAP_logP and map_parameter_set are the optima.  However, the mu_AP_parameter_set and stdap_parameter_set are not meaningful, since this was not an even weighted exploration of the posterior.")
             if abs((self.map_parameter_set - self.mu_AP_parameter_set)/self.UserInput.std_prior).any() > 0.10:
                 pass #Disabling below warning until if statement is fixed. During mid-2020, it started printing every time. The if statement may be fixed now but not yet tested.
