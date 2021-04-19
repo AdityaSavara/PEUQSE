@@ -713,12 +713,12 @@ class parameter_estimation:
                         self.cumulative_post_burn_in_log_posteriors_un_normed_vec = np.vstack((self.cumulative_post_burn_in_log_posteriors_un_normed_vec, self.post_burn_in_log_posteriors_un_normed_vec))                    
             if searchType == 'doOptimizeNegLogP':
                 optimizationOutput = self.doOptimizeNegLogP(**passThroughArgs)
-                self.map_logP = optimizationOutput[1]
+                self.map_logP = -1*optimizationOutput[1]* #need to times by negative 1 to convert negLogP into P.
                 self.map_parameter_set = optimizationOutput[0]
                 thisResult = [self.map_logP, self.map_parameter_set, None, None, None, None, None, None]
             if searchType == 'doOptimizeSSR':
                 optimizationOutput = self.doOptimizeSSR(**passThroughArgs)
-                self.map_logP = optimizationOutput[1]
+                self.map_logP = -1*optimizationOutput[1]  #The SSR is a minimizing objective function, so we multiply by -1 to make it analagous to a log_P.
                 self.map_parameter_set = optimizationOutput[0]
                 thisResult = [self.map_logP, self.map_parameter_set, None, None, None, None, None, None]
             if (type(self.UserInput.parameter_estimation_settings['multistart_checkPointFrequency']) != type(None)) or (verbose == True):
