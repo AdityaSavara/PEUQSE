@@ -843,9 +843,9 @@ class parameter_estimation:
                     out_file.write("highest_negSSR_parameter_set: " + str(self.map_parameter_set)+ "\n")
                     out_file.write("highest_negSSR_initial_point_index: " + str(highest_MAP_initial_point_index)+ "\n")
                     out_file.write("highest_negSSR_initial_point_parameters: " + str( highest_MAP_initial_point_parameters)+ "\n")
-                        caveat = ' (actually just an analogue) '
-                        out_file.write("self.mu_AP_parameter_set : " + caveat + str( self.mu_AP_parameter_set)+ "\n")
-                        out_file.write("self.stdap_parameter_set : " + caveat  + str( self.stdap_parameter_set)+ "\n")
+                    caveat = ' (actually just an analogue) '
+                    out_file.write("self.mu_AP_parameter_set : " + caveat + str( self.mu_AP_parameter_set)+ "\n")
+                    out_file.write("self.stdap_parameter_set : " + caveat  + str( self.stdap_parameter_set)+ "\n")
                     if self.permutation_and_doOptimizeNegLogP == True:
                         out_file.write("\n WARNING: It appears this run used a doOptimize with multi-start. In this case, the highest_negSSR and highest_negSSR_parameter_set are at the optimum from the run.  However, the mu_AP_parameter_set and stdap_parameter_set are not meaningful, since this was not an even weighted exploration of the posterior. However, the values have been reported that are analogous if the negSSR is treated as a logP, and the posterior graphs have been made accordingly. ")                        
 
