@@ -712,6 +712,11 @@ class parameter_estimation:
                         self.cumulative_post_burn_in_samples = np.vstack((self.cumulative_post_burn_in_samples, self.post_burn_in_samples))
                         self.cumulative_post_burn_in_log_priors_vec = np.vstack((self.cumulative_post_burn_in_log_priors_vec, self.post_burn_in_log_priors_vec))
                         self.cumulative_post_burn_in_log_posteriors_un_normed_vec = np.vstack((self.cumulative_post_burn_in_log_posteriors_un_normed_vec, self.post_burn_in_log_posteriors_un_normed_vec))                    
+            if searchType == 'doOptimizeLogP':
+                optimizationOutput = self.doOptimizeLogP(**passThroughArgs)
+                self.map_logP = optimizationOutput[1] 
+                self.map_parameter_set = optimizationOutput[0]
+                thisResult = [self.map_logP, self.map_parameter_set, None, None, None, None, None, None]
             if searchType == 'doOptimizeNegLogP':
                 optimizationOutput = self.doOptimizeNegLogP(**passThroughArgs)
                 self.map_logP = -1.0*optimizationOutput[1] #need to times by negative 1 to convert negLogP into P.
