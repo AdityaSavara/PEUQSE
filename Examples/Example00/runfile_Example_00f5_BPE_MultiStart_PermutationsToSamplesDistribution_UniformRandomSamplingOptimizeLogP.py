@@ -28,7 +28,7 @@ if __name__ == "__main__":
 
     UserInput.parameter_estimation_settings['mcmc_random_seed'] = 0
     
-    UserInput.parameter_estimation_settings['multistart_searchType'] = 'doOptimizeNegLogP'
+    UserInput.parameter_estimation_settings['multistart_searchType'] = 'doOptimizeLogP'
     UserInput.parameter_estimation_settings['multistart_initialPointsDistributionType'] = 'uniform'
     UserInput.parameter_estimation_settings['multistart_exportLog'] = True
     UserInput.parameter_estimation_settings['multistart_gridsearch_threshold_filter_coefficient'] = 2.0 #The lower this is, the more the points become filtered. It is not recommended to go below 2.0.

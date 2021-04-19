@@ -81,7 +81,7 @@ parameter_estimation_settings['mcmc_continueSampling']  = 'auto' #This can be se
 ######multistart (including gridsearch)##### 
 #To do a gridsearch, make multistart_initialPointsDistributionType into 'grid' and then set the two 'gridsearchSampling' variables.
 #The multistart feature exports the best values to permutations_log_file.txt, and relevant outputs to permutations_initial_points_parameters_values.csv and permutations_MAP_logP_and_parameters_values.csv
-parameter_estimation_settings['multistart_searchType'] = 'getLogP' #Possible searchTypes are: 'getLogP', 'doEnsembleSliceSampling', 'doMetropolisHastings', 'doOptimizeNegLogP', 'doOptimizeSSR'.  These can also be called by syntax like PE_object.doMultiStart('doEnsembleSliceSampling') in the runfile
+parameter_estimation_settings['multistart_searchType'] = 'getLogP' #Possible searchTypes are: 'getLogP', 'doEnsembleSliceSampling', 'doMetropolisHastings', 'doOptimizeLogP', 'doOptimizeNegLogP', 'doOptimizeSSR'.  These can also be called by syntax like PE_object.doMultiStart('doEnsembleSliceSampling') in the runfile
 parameter_estimation_settings['multistart_checkPointFrequency'] = None #Note: this setting does not work perfectly with ESS.
 parameter_estimation_settings['multistart_parallel_sampling'] = False
 parameter_estimation_settings['multistart_centerPoint'] = None #With None the centerPoint will be taken as model['InputParameterInitialGuess'] 

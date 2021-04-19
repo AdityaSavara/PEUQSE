@@ -1443,8 +1443,8 @@ class parameter_estimation:
     #this is just a wrapper around doOptimizeNegLogP
     def doOptimizeLogP(self, simulationFunctionAdditionalArgs = (), method = None, optimizationAdditionalArgs = {}, printOptimum = True, verbose=True, maxiter=0):
         if printOptimum == True:
-            print("doOptimizeLogP is a wrapper that calls doOptimizeNegLogP. The final results from doOptimizeNegLogP will be printed below.")
-        [self.map_parameter_set, negLogP] = doOptimizeNegLogP(self, simulationFunctionAdditionalArgs = simulationFunctionAdditionalArgs, method = method, optimizationAdditionalArgs = optimizationAdditionalArgs, printOptimum = printOptimum, verbose=verbose, maxiter=maxiter)
+            print("doOptimizeLogP is a wrapper that calls doOptimizeNegLogP. The final results from doOptimizeNegLogP will be printed.")
+        [self.map_parameter_set, negLogP] = self.doOptimizeNegLogP(simulationFunctionAdditionalArgs = simulationFunctionAdditionalArgs, method = method, optimizationAdditionalArgs = optimizationAdditionalArgs, printOptimum = printOptimum, verbose=verbose, maxiter=maxiter)
         self.map_logP = -1.0*negLogP
         return [self.map_parameter_set, self.map_logP]
 
