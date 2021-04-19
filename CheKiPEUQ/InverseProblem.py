@@ -830,8 +830,8 @@ class parameter_estimation:
                         caveat = ''
                     out_file.write("self.mu_AP_parameter_set : " + caveat + str( self.mu_AP_parameter_set)+ "\n")
                     out_file.write("self.stdap_parameter_set : " + caveat  + str( self.stdap_parameter_set)+ "\n")
-            if self.permutation_and_doOptimize == True:
-                out_file.write("\n WARNING: It appears this run used a doOptimize with multi-start. In this case, the MAP_logP and map_parameter_set are the optima.  However, the mu_AP_parameter_set and stdap_parameter_set are not meaningful, since this was not an even weighted exploration of the posterior.")
+                if self.permutation_and_doOptimize == True:
+                    out_file.write("\n WARNING: It appears this run used a doOptimize with multi-start. In this case, the MAP_logP and map_parameter_set are the optima.  However, the mu_AP_parameter_set and stdap_parameter_set are not meaningful, since this was not an even weighted exploration of the posterior.")
         #do some exporting etc. This is at the end to avoid exporting every single time if parallelization is used.
         np.savetxt(self.UserInput.directories['logs_and_csvs']+'multistart_initial_points_parameters_values'+'.csv', self.listOfPermutations, delimiter=",")
         np.savetxt(self.UserInput.directories['logs_and_csvs']+'multistart_MAP_logP_and_parameters_values.csv',self.permutations_MAP_logP_and_parameters_values, delimiter=",")
