@@ -713,7 +713,7 @@ class parameter_estimation:
                         self.cumulative_post_burn_in_log_posteriors_un_normed_vec = np.vstack((self.cumulative_post_burn_in_log_posteriors_un_normed_vec, self.post_burn_in_log_posteriors_un_normed_vec))                    
             if searchType == 'doOptimizeNegLogP':
                 optimizationOutput = self.doOptimizeNegLogP(**passThroughArgs)
-                self.map_logP = -1*optimizationOutput[1]* #need to times by negative 1 to convert negLogP into P.
+                self.map_logP = -1*optimizationOutput[1] #need to times by negative 1 to convert negLogP into P.
                 self.map_parameter_set = optimizationOutput[0]
                 thisResult = [self.map_logP, self.map_parameter_set, None, None, None, None, None, None]
             if searchType == 'doOptimizeSSR':
@@ -818,6 +818,7 @@ class parameter_estimation:
         if exportLog == True:
             pass #Later will do something with allPermutationsResults variable. It has one element for each result (that is, each permutation).
         with open(self.UserInput.directories['logs_and_csvs'] + "multistart_log_file.txt", 'w') as out_file:
+                print("line 821")
                 out_file.write("centerPoint: " + str(centerPoint) + "\n")
                 out_file.write("highest_MAP_logP: " + str(self.map_logP) + "\n")
                 out_file.write("highest_MAP_logP_parameter_set: " + str(self.map_parameter_set)+ "\n")
@@ -830,7 +831,9 @@ class parameter_estimation:
                         caveat = ''
                     out_file.write("self.mu_AP_parameter_set : " + caveat + str( self.mu_AP_parameter_set)+ "\n")
                     out_file.write("self.stdap_parameter_set : " + caveat  + str( self.stdap_parameter_set)+ "\n")
+                print("line 833", self.permutation_and_doOptimize)
                 if self.permutation_and_doOptimize == True:
+                    print("line 834"); sys.exit
                     out_file.write("\n WARNING: It appears this run used a doOptimize with multi-start. In this case, the MAP_logP and map_parameter_set are the optima.  However, the mu_AP_parameter_set and stdap_parameter_set are not meaningful, since this was not an even weighted exploration of the posterior.")
         #do some exporting etc. This is at the end to avoid exporting every single time if parallelization is used.
         np.savetxt(self.UserInput.directories['logs_and_csvs']+'multistart_initial_points_parameters_values'+'.csv', self.listOfPermutations, delimiter=",")
