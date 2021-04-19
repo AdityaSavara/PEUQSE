@@ -355,7 +355,7 @@ class parameter_estimation:
         
         self.permutation_and_doOptimizeNegLogP = False #just initializing this flag with its default.
         self.permutation_and_doOptimizeSSR = False #just initializing this flag with its default.
-                
+        self.permutation_and_doOptimizeLogP = False
     
     def reduceResponseSpace(self):
         #This function has no explicit arguments, but takes everything in self.UserInput as an implied argument.
@@ -607,7 +607,7 @@ class parameter_estimation:
         
     def doListOfPermutationsSearch(self, listOfPermutations, numPermutations = None, searchType='getLogP', exportLog = True, walkerInitialDistribution='UserChoice', passThroughArgs = {}, calculatePostBurnInStatistics=True,  keep_cumulative_post_burn_in_data = False, centerPoint=None, permutationsToSamples=False): #This is the 'engine' used by doGridSearch and  doMultiStartSearch
     #The listOfPermutations can also be another type of iterable.
-        #Possible searchTypes are: 'getLogP', 'doEnsembleSliceSampling', 'doMetropolisHastings', 'doOptimizeNegLogP', 'doOptimizeSSR'
+        #Possible searchTypes are: 'getLogP', 'doEnsembleSliceSampling', 'doMetropolisHastings', 'doOptimizeNegLogP', 'doOptimizeLogP' 'doOptimizeSSR'
         #permutationsToSamples should normally only be True if somebody is using gridsearch or uniform multistart with getLogP.
         self.listOfPermutations = listOfPermutations #This is being made into a class variable so that it can be used during parallelization
         if str(numPermutations).lower() == str(None).lower():
@@ -789,11 +789,13 @@ class parameter_estimation:
             #self.post_burn_in_log_priors_vec = cumulative_post_burn_in_log_priors_vec
             #self.post_burn_in_log_posteriors_un_normed_vec = cumulative_post_burn_in_log_posteriors_un_normed_vec
             #implied return bestResultSoFar # [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec] 
-        if (searchType == 'getLogP') or (searchType == 'doOptimizeNegLogP') or (searchType == 'doOptimizeSSR'):
+        if (searchType == 'getLogP') or (searchType == 'doOptimizeNegLogP') or (searchType == 'doOptimizeSSR') or (searchType == 'doOptimizeLogP'):
             if (searchType == 'doOptimizeNegLogP'):
                 self.permutation_and_doOptimizeNegLogP = True #turning on this flag for case of permutation_and_doOptimize. This is needed so that a warning can be put in the mcmc_log.
             if (searchType == 'doOptimizeSSR'): 
                 self.permutation_and_doOptimizeSSR = True
+            if (searchType == 'doOptimizeLogP'):
+                self.permutation_and_doOptimizeLogP = True                
             #if it's getLogP gridsearch, we are going to convert it to samples if requested.
             if permutationsToSamples == True:
                 self.permutations_MAP_logP_and_parameters_values = np.vstack( self.permutations_MAP_logP_and_parameters_values) #Note that vstack actually requires a tuple with multiple elements as an argument. So this list or array like structure is being converted to a tuple of many elements and then being stacked.
@@ -839,7 +841,7 @@ class parameter_estimation:
                             caveat = ''
                         out_file.write("self.mu_AP_parameter_set : " + caveat + str( self.mu_AP_parameter_set)+ "\n")
                         out_file.write("self.stdap_parameter_set : " + caveat  + str( self.stdap_parameter_set)+ "\n")
-                    if self.permutation_and_doOptimizeNegLogP == True:
+                    if (self.permutation_and_doOptimizeNegLogP == True) or (self.permutation_and_doOptimizeLogP == True):
                         out_file.write("\n WARNING: It appears this run used a doOptimize with multi-start. In this case, the MAP_logP and map_parameter_set are the optimum from the run.  However, the mu_AP_parameter_set and stdap_parameter_set are not meaningful, since this was not an even weighted exploration of the posterior. \n")                        
                 if self.permutation_and_doOptimizeSSR == True: #special case where we are doing SSR.
                     out_file.write("Below, negSSR means the SSR times -1. This is the optimum from the run. \n")
@@ -901,7 +903,7 @@ class parameter_estimation:
         permutationsToSamples = False#initialize with default
         if self.UserInput.parameter_estimation_settings['multistart_gridsearchToSamples'] == True:
             if initialPointsDistributionType == 'grid' or initialPointsDistributionType == 'uniform':
-                if (searchType == 'getLogP') or (searchType=='doOptimizeNegLogP') or (searchType=='doOptimizeSSR'):
+                if (searchType == 'getLogP') or (searchType=='doOptimizeNegLogP') or (searchType=='doOptimizeLogP') or (searchType=='doOptimizeSSR'):
                     permutationsToSamples = True
                         
         #Look for the best result (highest map_logP) from among these permutations. Maybe later should add optional argument to allow searching for highest mu_AP to find HPD.
@@ -1440,6 +1442,8 @@ class parameter_estimation:
 
     #this is just a wrapper around doOptimizeNegLogP
     def doOptimizeLogP(self, simulationFunctionAdditionalArgs = (), method = None, optimizationAdditionalArgs = {}, printOptimum = True, verbose=True, maxiter=0):
+        if printOptimum == True:
+            print("doOptimizeLogP is a wrapper that calls doOptimizeNegLogP. The final results from doOptimizeNegLogP will be printed below.")
         [self.map_parameter_set, negLogP] = doOptimizeNegLogP(self, simulationFunctionAdditionalArgs = simulationFunctionAdditionalArgs, method = method, optimizationAdditionalArgs = optimizationAdditionalArgs, printOptimum = printOptimum, verbose=verbose, maxiter=maxiter)
         self.map_logP = -1.0*negLogP
         return [self.map_parameter_set, self.map_logP]
