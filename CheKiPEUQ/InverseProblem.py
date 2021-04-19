@@ -1433,6 +1433,12 @@ class parameter_estimation:
         neg_log_postererior = -1*self.getLogP(proposal_sample)
         return neg_log_postererior
 
+    #this is just a wrapper around doOptimizeNegLogP
+    def doOptimizLogP(self, simulationFunctionAdditionalArgs = (), method = None, optimizationAdditionalArgs = {}, printOptimum = True, verbose=True, maxiter=0):
+        [self.map_parameter_set, negLogP] = doOptimizeNegLogP(self, simulationFunctionAdditionalArgs = simulationFunctionAdditionalArgs, method = method, optimizationAdditionalArgs = optimizationAdditionalArgs, printOptimum = printOptimum, verbose=verbose, maxiter=maxiter)
+        self.map_logP = -1.0*negLogP
+        return [self.map_parameter_set, self.map_logP]
+
     def doOptimizeNegLogP(self, simulationFunctionAdditionalArgs = (), method = None, optimizationAdditionalArgs = {}, printOptimum = True, verbose=True, maxiter=0):
         #THe intention of the optional arguments is to pass them into the scipy.optimize.minimize function.
         # the 'method' argument is for Nelder-Mead, BFGS, SLSQP etc. https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html#scipy.optimize.minimize
