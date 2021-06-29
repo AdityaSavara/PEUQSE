@@ -6,6 +6,9 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib import cm #EAW 2020/01/07
+import platform
+if platform.system() == 'posix':
+    matplotlib.use('Agg') #added by A. Savara June 29th, 2021.
 import copy
 
 class plotting_functions_class():
