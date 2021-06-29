@@ -100,6 +100,9 @@ parameter_estimation_settings['multistart_keep_cumulative_post_burn_in_data'] = 
 parameter_estimation_settings['multistart_exportLog'] = False #In the future, this will cause more information to be exported.
 
 #####Plot Settings#####
+plotting_ouput_settings={}
+plotting_ouput_settings['setMatPlotLibAgg'] = 'auto' #This setting controls whether the matplot lib aggregator is turned on. #by default, on Windows machines this setting will become False during runtime and the plots will be generated 'normally'. By default, on Linux machines, this setting well be set to True during run time, and the matplotlib plot aggregator will be turned on.  The reason this setting exists is that on most supercomputers and clusters, which are usally linux based, the graphs will not be generated unless the aggregator is turned on.
+
 #Response Plot Settings
 simulated_response_plot_settings = {}
 simulated_response_plot_settings['x_label'] = ''

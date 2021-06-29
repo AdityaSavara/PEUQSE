@@ -1385,6 +1385,7 @@ class parameter_estimation:
         #self.meshGrid_independentVariable1ValuesArray will remain unchanged.      
         
         import CheKiPEUQ.plotting_functions as plotting_functions
+        setMatPlotLibAgg(self.UserInput.plotting_ouput_settings['setMatPlotLibAgg'])
         #assess whether the function is called for the overall info_gain matrices or for a particular parameter.
         if parameterIndex==None:  #this means we're using the regular info gain, not the parameter specific case.
             #Normally, the info gain plots should be stored in self.info_gains_matrices_array.
@@ -2259,6 +2260,7 @@ class parameter_estimation:
 
     def makeHistogramsForEachParameter(self):
         import CheKiPEUQ.plotting_functions as plotting_functions 
+        setMatPlotLibAgg(self.UserInput.plotting_ouput_settings['setMatPlotLibAgg'])
         parameterSamples = self.post_burn_in_samples
         parameterNamesAndMathTypeExpressionsDict = self.UserInput.parameterNamesAndMathTypeExpressionsDict
         plotting_functions.makeHistogramsForEachParameter(parameterSamples,parameterNamesAndMathTypeExpressionsDict, directory = self.UserInput.directories['graphs'])
@@ -2384,6 +2386,7 @@ class parameter_estimation:
         if 'figure_name' not in plot_settings:
             plot_settings['figurename'] = 'Posterior'
         import CheKiPEUQ.plotting_functions as plotting_functions
+        setMatPlotLibAgg(self.UserInput.plotting_ouput_settings['setMatPlotLibAgg'])
         allResponsesFigureObjectsList = []
         for responseDimIndex in range(self.UserInput.num_response_dimensions): #TODO: Move the exporting out of the plot creation and/or rename the function and possibly have options about whether exporting graph, data, or both.
             #Some code for setting up individual plot settings in case there are multiple response dimensions.
@@ -2409,6 +2412,7 @@ class parameter_estimation:
 
     def createMumpcePlots(self):
         import CheKiPEUQ.plotting_functions as plotting_functions
+        setMatPlotLibAgg(self.UserInput.plotting_ouput_settings['setMatPlotLibAgg'])
         from CheKiPEUQ.plotting_functions import plotting_functions_class
         figureObject_beta = plotting_functions_class(self.UserInput) # The "beta" is only to prevent namespace conflicts with 'figureObject'.
         parameterSamples = self.post_burn_in_samples
@@ -2757,6 +2761,21 @@ def arrayThresholdFilter(inputArray, filterKey=[], thresholdValue=0, removeValue
 @CiteSoft.after_call_compile_consolidated_log(compile_checkpoints=True)
 def exportCitations():
     pass
+
+def setMatPlotLibAgg(matPlotLibAggSetting = 'auto'):
+    #choice can be 'auto', True, or Fales.
+    if matPlotLibAggSetting == 'auto':
+        import platform #check if the system is Linux.
+        if platform.system() == "Linux":
+            matPlotLibAggSetting = True
+        else:
+            matPlotLibAggSetting = False
+    if matPlotLibAggSetting == False:
+        return #do nothing.
+    if matPlotLibAggSetting == True:
+        import CheKiPEUQ.plotting_functions as plotting_functions
+        plotting_functions.matplotlib.use('Agg') #added by A. Savara June 29th, 2021.
+        #no return needed.
 
 def pickleAnObject(objectToPickle, base_file_name, file_name_prefix ='',  file_name_suffix='', file_name_extension='.pkl'):
     import pickle
