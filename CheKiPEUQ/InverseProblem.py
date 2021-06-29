@@ -2276,11 +2276,16 @@ class parameter_estimation:
         if parameterMAPValue == []: parameterMAPValue = self.map_parameter_set
         if parameterMuAPValue == []: parameterMuAPValue = self.mu_AP_parameter_set
         combined_plots = plot_settings['combined_plots']
+        individual_plots = plot_settings['individual_plots']
         posterior_df = pd.DataFrame(parameterSamples,columns=[parameterNamesAndMathTypeExpressionsDict[x] for x in parameterNamesList])
         if combined_plots == 'auto': #by default, we will not make the scatter matrix when there are more than 5 parameters.
             if (len(parameterNamesList) > 5) or (len(parameterNamesAndMathTypeExpressionsDict) > 5):
-                combined_plots = False
-        if combined_plots == False: #This means we will return individual plots.
+                #For the case of 'auto' when the parameters is too large in number, we will turn of the combined plots.
+                combined_plots = False 
+                #For the case of 'auto' we will then turn on the individual plots.
+                if self.UserInput.scatter_matrix_plots_settings['individual_plots'] == 'auto':
+                    individual_plots = True
+        if individual_plots == True: #This means we will return individual plots.
             #The below code was added by Troy Gustke and merged in to CheKiPEUQ at end of June 2021.
             for i, (a, a_name, a_MAP, a_mu_AP) in enumerate(zip(posterior_df.columns, parameterNamesAndMathTypeExpressionsDict.keys(), parameterMAPValue, parameterMuAPValue)):
                 for j, (b, b_name, b_MAP, b_mu_AP) in enumerate(zip(posterior_df.columns, parameterNamesAndMathTypeExpressionsDict.keys(), parameterMAPValue, parameterMuAPValue)):
@@ -2294,7 +2299,6 @@ class parameter_estimation:
                         fig.savefig(self.UserInput.directories['graphs']+f'Scatter_{a_name}_{b_name}',dpi=plot_settings['dpi'])
                         plt.close(fig)
             return 
-
         pd.plotting.scatter_matrix(posterior_df)
         plt.savefig(self.UserInput.directories['graphs']+plot_settings['figure_name'],dpi=plot_settings['dpi'])
         

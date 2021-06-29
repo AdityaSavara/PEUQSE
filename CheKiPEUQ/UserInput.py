@@ -117,8 +117,8 @@ simulated_response_plot_settings['fontdict']= {'size':16} #A font dictionary can
 #Scatter Matrix Plot Settings
 #possible dictionary fields include: dpi, figure_name, fontsize, x_label, y_label, figure_name, x_range, y_range
 scatter_matrix_plots_settings ={}
-scatter_matrix_plots_settings['individual_plots'] = 'auto' #presently does nothing. #True, False, or 'auto'. With 'auto', the individual_plots will always be created. 
 scatter_matrix_plots_settings['combined_plots'] = 'auto' #True, False, or  'auto'. With 'auto', the combined plots are only created if there are 5 parameters or less.
+scatter_matrix_plots_settings['individual_plots'] = 'auto' #True, False, or 'auto'. With 'auto', the individual_plots will only be created when there are more than 5 parameters.
 scatter_matrix_plots_settings['dpi'] = 220
 scatter_matrix_plots_settings['figure_name'] = 'scatter_matrix_posterior'
 
