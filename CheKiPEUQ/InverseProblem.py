@@ -2263,9 +2263,9 @@ class parameter_estimation:
         setMatPlotLibAgg(self.UserInput.plotting_ouput_settings['setMatPlotLibAgg'])
         parameterSamples = self.post_burn_in_samples
         parameterNamesAndMathTypeExpressionsDict = self.UserInput.parameterNamesAndMathTypeExpressionsDict
-        plotting_functions.makeHistogramsForEachParameter(parameterSamples,parameterNamesAndMathTypeExpressionsDict, directory = self.UserInput.directories['graphs'])
+        plotting_functions.makeHistogramsForEachParameter(parameterSamples,parameterNamesAndMathTypeExpressionsDict, directory = self.UserInput.directories['graphs'], parameterInitialValue=self.UserInput.model['InputParameterPriorValues'], parameterMAPValue=self.map_parameter_set, parameterMuAPValue=self.mu_AP_parameter_set)
 
-    def makeSamplingScatterMatrixPlot(self, parameterSamples = [], parameterNamesAndMathTypeExpressionsDict={}, parameterNamesList =[], plot_settings={'combined_plots':'auto'}):
+    def makeSamplingScatterMatrixPlot(self, parameterSamples = [], parameterNamesAndMathTypeExpressionsDict={}, parameterNamesList =[], parameterMAPValue=[], parameterMuAPValue=[], plot_settings={'combined_plots':'auto'}):
         import pandas as pd #This is the only function that needs pandas.
         import matplotlib.pyplot as plt
         if 'dpi' not in  plot_settings:  plot_settings['dpi'] = 220
@@ -2273,13 +2273,28 @@ class parameter_estimation:
         if parameterSamples  ==[] : parameterSamples = self.post_burn_in_samples
         if parameterNamesAndMathTypeExpressionsDict == {}: parameterNamesAndMathTypeExpressionsDict = self.UserInput.parameterNamesAndMathTypeExpressionsDict
         if parameterNamesList == []: parameterNamesList = self.UserInput.parameterNamesList #This is created when the parameter_estimation object is initialized.        
+        if parameterMAPValue == []: parameterMAPValue = self.map_parameter_set
+        if parameterMuAPValue == []: parameterMuAPValue = self.mu_AP_parameter_set
         combined_plots = plot_settings['combined_plots']
+        posterior_df = pd.DataFrame(parameterSamples,columns=[parameterNamesAndMathTypeExpressionsDict[x] for x in parameterNamesList])
         if combined_plots == 'auto': #by default, we will not make the scatter matrix when there are more than 5 parameters.
             if (len(parameterNamesList) > 5) or (len(parameterNamesAndMathTypeExpressionsDict) > 5):
                 combined_plots = False
-        if combined_plots == False: #This means no figure will be made so we just return.
+        if combined_plots == False: #This means we will return individual plots.
+            #The below code was added by Troy Gustke and merged in to CheKiPEUQ at end of June 2021.
+            for i, (a, a_name, a_MAP, a_mu_AP) in enumerate(zip(posterior_df.columns, parameterNamesAndMathTypeExpressionsDict.keys(), parameterMAPValue, parameterMuAPValue)):
+                for j, (b, b_name, b_MAP, b_mu_AP) in enumerate(zip(posterior_df.columns, parameterNamesAndMathTypeExpressionsDict.keys(), parameterMAPValue, parameterMuAPValue)):
+                    if i != j:
+                        fig = plt.figure()
+                        plt.scatter(posterior_df[a], posterior_df[b], s=1, alpha=0.5)
+                        plt.scatter(a_MAP, b_MAP, s=10, alpha=0.8, c='r') 
+                        plt.scatter(a_mu_AP, b_mu_AP, s=10, alpha=0.8, c='k') 
+                        plt.xlabel(a)
+                        plt.ylabel(b)
+                        fig.savefig(self.UserInput.directories['graphs']+f'Scatter_{a_name}_{b_name}',dpi=plot_settings['dpi'])
+                        plt.close(fig)
             return 
-        posterior_df = pd.DataFrame(parameterSamples,columns=[parameterNamesAndMathTypeExpressionsDict[x] for x in parameterNamesList])
+
         pd.plotting.scatter_matrix(posterior_df)
         plt.savefig(self.UserInput.directories['graphs']+plot_settings['figure_name'],dpi=plot_settings['dpi'])
         
