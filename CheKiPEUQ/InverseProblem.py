@@ -1655,11 +1655,30 @@ class parameter_estimation:
             #Now need to find cases where the probability is too low and filter them out.
             #Filtering Step 1: Find average and Stdev of log(-logP)
             logNegLogP = np.log(-1*self.post_burn_in_log_posteriors_un_normed_vec)
-            meanLogNegLogP = np.mean(logNegLogP)
+            meanLogNegLogP = np.mean(logNegLogP) 
             stdLogNegLogP = np.std(logNegLogP)
-            filteringThreshold = meanLogNegLogP+filterCoeffient*stdLogNegLogP #Threshold.
-            #Now, call the function I have made for filtering by deleting the rows above/below a certain value
-            truncatedMergedArray = arrayThresholdFilter(mergedArray, filterKey=logNegLogP, thresholdValue=filteringThreshold, removeValues = 'above', transpose=False)
+            maxLogP = np.max(self.post_burn_in_log_posteriors_un_normed_vec) #this is the MAP logP.
+            #getting the mu_AP probability for filtering requires a couple of steps. We name it carefully because the mu_AP willl change after filtering.
+            mu_AP_parameter_set_unfiltered_data = np.mean(self.post_burn_in_samples, axis=0) #now we are going to get the mu_AP of the unfiltered data.
+            mu_AP_log_P_unfiltered_data = self.getLogP(mu_AP_parameter_set_unfiltered_data) #this is the mu_AP logP
+            if self.UserInput.parameter_estimation_settings['mcmc_threshold_filter_benchmark'] == 'mu_AP':
+                #This benchmark is relative to the LogP values themselves
+                filteringThreshold = mu_AP_log_P_unfiltered_data - filterCoeffient # filter values below threshold starting at the mu_AP or mu_AP proxy.
+                removeValuesDirection = 'below'
+                #Now, call the function I have made for filtering by deleting the rows above/below a certain value
+                truncatedMergedArray = arrayThresholdFilter(mergedArray, filterKey=self.post_burn_in_log_posteriors_un_normed_vec, thresholdValue=filteringThreshold, removeValues = removeValuesDirection, transpose=False)
+            elif self.UserInput.parameter_estimation_settings['mcmc_threshold_filter_benchmark'] == 'MAP':
+                #This benchmark is relative to the LogP values themselves
+                filteringThreshold = maxLogP - filterCoeffient # filter values below threshold starting at the MAP
+                removeValuesDirection = 'below'
+                #Now, call the function I have made for filtering by deleting the rows above/below a certain value
+                truncatedMergedArray = arrayThresholdFilter(mergedArray, filterKey=self.post_burn_in_log_posteriors_un_normed_vec, thresholdValue=filteringThreshold, removeValues = removeValuesDirection, transpose=False)
+            elif self.UserInput.parameter_estimation_settings['mcmc_threshold_filter_benchmark'] == 'auto':
+                #This benchmark is unusual be cause it it is related to logNegLogP
+                filteringThreshold = meanLogNegLogP+filterCoeffient*stdLogNegLogP #Threshold. 
+                removeValuesDirection = 'above'
+                #Now, call the function I have made for filtering by deleting the rows above/below a certain value
+                truncatedMergedArray = arrayThresholdFilter(mergedArray, filterKey=logNegLogP, thresholdValue=filteringThreshold, removeValues = removeValuesDirection, transpose=False)
             self.post_burn_in_log_posteriors_un_normed_vec = np.atleast_2d(truncatedMergedArray[:,0]).transpose()
             self.post_burn_in_log_priors_vec = np.atleast_2d(truncatedMergedArray[:,1]).transpose()
             self.post_burn_in_samples = truncatedMergedArray[:,2:]
@@ -1682,6 +1701,21 @@ class parameter_estimation:
             print("mu_AP_parameter_set ", self.mu_AP_parameter_set)
             print("stdap_parameter_set ",self.stdap_parameter_set)
         return [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec]
+
+                                                                                            
+                                            
+                                                                                                      
+                                                                                           
+                                                                                                
+                                                                                                                                                         
+                                                                            
+                                                                                                                                
+                       
+                                                                                                             
+                                                                                               
+                                                              
+                          
+
 
     #This function gets the prefix and suffix for saving files when doing ParallelProcessing with MPI.
     #Importantly, the **directory** of the parallel processing is included as part of the prefix.
@@ -2057,7 +2091,7 @@ class parameter_estimation:
         if self.UserInput.parameter_estimation_settings['mcmc_parallel_sampling']: #mcmc_exportLog == True is needed for mcmc_parallel_sampling, but not for multistart_parallel_sampling
             mcmc_exportLog=True
         if calculatePostBurnInStatistics == True:
-            #FIXME: Below, calculate_post_burn_in_log_priors_vec=True should be false unless we are using continue sampling. For now, will leave it since I am not sure why it is currently set to False.
+            #FIXME: I think Below, calculate_post_burn_in_log_priors_vec=True should be false unless we are using continue sampling. For now, will leave it since I am not sure why it is currently set to True/False.
             self.calculatePostBurnInStatistics(calculate_post_burn_in_log_priors_vec = True) #This function call will also filter the lowest probability samples out, when using default settings.
             if str(mcmc_exportLog) == 'UserChoice':
                 mcmc_exportLog = bool(self.UserInput.parameter_estimation_settings['mcmc_exportLog'])
