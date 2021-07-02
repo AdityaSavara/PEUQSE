@@ -8,6 +8,7 @@ if __name__ == "__main__":
     UserInput.responses['responses_abscissa'] = observed_values_00.observed_data_x_values
     UserInput.responses['responses_observed'] = observed_values_00.observed_data_y_values
     UserInput.responses['responses_observed_uncertainties'] = observed_values_00.observed_data_y_values_uncertainties
+    UserInput.scatter_matrix_plots_settings['individual_plots'] = True
 
     
     UserInput.simulated_response_plot_settings['x_label'] = 'distance (m)'

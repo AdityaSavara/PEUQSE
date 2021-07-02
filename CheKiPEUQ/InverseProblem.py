@@ -2302,6 +2302,34 @@ class parameter_estimation:
         pd.plotting.scatter_matrix(posterior_df)
         plt.savefig(self.UserInput.directories['graphs']+plot_settings['figure_name'],dpi=plot_settings['dpi'])
         
+    def makeScatterHeatMapPlots(self, parameterSamples = [], parameterNamesAndMathTypeExpressionsDict={}, parameterNamesList =[], parameterMAPValue=[], parameterMuAPValue=[], parameterInitialValue = [], plot_settings={'combined_plots':'auto'}):
+        import pandas as pd #This is the only function that needs pandas.
+        import matplotlib.pyplot as plt
+        import CheKiPEUQ.plotting_functions as plotting_functions
+        if 'dpi' not in  plot_settings:  plot_settings['dpi'] = 220
+        if 'figure_name' not in  plot_settings:  plot_settings['figure_name'] = 'scatter_matrix_posterior'
+        if parameterSamples  ==[] : parameterSamples = self.post_burn_in_samples
+        if parameterNamesAndMathTypeExpressionsDict == {}: parameterNamesAndMathTypeExpressionsDict = self.UserInput.parameterNamesAndMathTypeExpressionsDict
+        if parameterNamesList == []: parameterNamesList = self.UserInput.parameterNamesList #This is created when the parameter_estimation object is initialized.        
+        if parameterMAPValue == []: parameterMAPValue = self.map_parameter_set
+        if parameterMuAPValue == []: parameterMuAPValue = self.mu_AP_parameter_set
+        if parameterInitialValue == []: parameterInitialValue = self.UserInput.model['InputParameterPriorValues']
+        # will always be seperate plots
+        posterior_df = pd.DataFrame(parameterSamples,columns=[parameterNamesAndMathTypeExpressionsDict[x] for x in parameterNamesList])
+        for i, (a, a_name, a_MAP, a_mu_AP, a_initial) in enumerate(zip(posterior_df.columns, parameterNamesAndMathTypeExpressionsDict.keys(), parameterMAPValue, parameterMuAPValue, parameterInitialValue)):
+            for j, (b, b_name, b_MAP, b_mu_AP, b_initial) in enumerate(zip(posterior_df.columns, parameterNamesAndMathTypeExpressionsDict.keys(), parameterMAPValue, parameterMuAPValue, parameterInitialValue)):
+                if i != j:
+                    # plt.scatter(posterior_df[a], posterior_df[b], s=1, alpha=0.5)
+                    fig, ax = plotting_functions.density_scatter(posterior_df[a], posterior_df[b], s=1, alpha=0.5)
+                    ax.scatter(a_MAP, b_MAP, s=10, alpha=0.8, c='r', marker='x') 
+                    ax.scatter(a_mu_AP, b_mu_AP, s=10, alpha=0.8, c='k', marker='x') 
+                    ax.scatter(a_initial, b_initial, s=10, alpha=0.8, c='#00A5DF', marker='x')
+                    ax.set_xlabel(a)
+                    ax.set_ylabel(b)
+                    fig.savefig(self.UserInput.directories['graphs']+f'Heat_Scatter_{a_name}_{b_name}',dpi=plot_settings['dpi'])
+                    plt.close(fig)
+        return 
+
     def createSimulatedResponsesPlots(self, allResponses_x_values=[], allResponsesListsOfYArrays =[], plot_settings={},allResponsesListsOfYUncertaintiesArrays=[] ): 
         #allResponsesListsOfYArrays  is to have 3 layers of lists: Response > Responses Observed, mu_guess Simulated Responses, map_Simulated Responses, (mu_AP_simulatedResponses) > Values
         if allResponses_x_values == []: 
@@ -2515,9 +2543,21 @@ class parameter_estimation:
 
         try:
             self.makeHistogramsForEachParameter()               
-            self.makeSamplingScatterMatrixPlot(plot_settings=self.UserInput.scatter_matrix_plots_settings)
         except:
-            print("Unable to make histograms and/or scatter matrix plots. This usually means your run is not an MCMC run, or that the sampling did not work well. If you are using Metropolis-Hastings, try EnsembleSliceSampling or try a uniform distribution multistart.")
+            print("Unable to make histograms plots. This usually means your model is not returning simulated results for most of the sampled parameter possibilities.")
+
+        try:
+            self.makeSamplingScatterMatrixPlot(plot_settings=self.UserInput.scatter_matrix_plots_settings)             
+        except:
+            print("Unable to make scatter matrix plot. This usually means your run is not an MCMC run, or that the sampling did not work well. If you are using Metropolis-Hastings, try EnsembleSliceSampling or try a uniform distribution multistart.")
+
+
+        try:
+            print("line 2556!")
+            self.makeScatterHeatMapPlots(plot_settings=self.UserInput.scatter_matrix_plots_settings)
+            print("line 2558!")
+        except:
+            print("Unable to make scatter heatmap plots. This usually means your run is not an MCMC run, or that the sampling did not work well. If you are using Metropolis-Hastings, try EnsembleSliceSampling or try a uniform distribution multistart.")
 
         try:        
             self.createMumpcePlots()

@@ -45,6 +45,7 @@ model['InputParameterPriorValues_upperBounds'] = [] #Optional. This should be a 
 model['InputParameterPriorValues_lowerBounds'] = []#Optional. This should be a list/array of the same shape as InputParameterPriorValues. Use a value of "None" for any parameter that should not be bounded in this direction.  The code then truncates any distribution to have a probability of ~0 when any of the parameters go outside of their bounds. ##As of May 4th 2020, this only has been checked for scaling_uncertainties_type = 'off'
 model['simulatedResponses_upperBounds'] = [] #Optional. Disallows responses outside of provided bounds. This should be a list/array of the same shape as responses_observed. Use a value of "None" for any parameter that should not be bounded in this direction.  The code then sets the likelihood (and posterior) to ~0 when any of the responses go outside of their bounds.  Not compatible with data_overcategory feature.
 model['simulatedResponses_lowerBounds'] = [] #Optional. Disallows responses outside of provided bounds. This should be a list/array of the same shape as responses_observed. Use a value of "None" for any parameter that should not be bounded in this direction.  The code then sets the likelihood (and posterior) to ~0 when any of the responses go outside of their bounds.  Not compatible with data_overcategory feature.
+model['PosteriorParameterBounds'] = {} #Optional. Allows user to alter the parameter space after sampling has occurred. This should be a dictionary with the parameter name and a tuple with the lower bound first. 
 
 
 #####Parameter Estimation Inputs#####
@@ -68,6 +69,7 @@ parameter_estimation_settings['mcmc_info_gain_cutoff'] = 0  #A typical value is 
 parameter_estimation_settings['mcmc_info_gain_returned'] = 'KL_divergence' # #current options are 'log_ratio' and 'KL_divergence' where 'KL' stands for Kullback-Leibler
 parameter_estimation_settings['mcmc_threshold_filter_samples'] = True #This feature removes low probability tails from the posterior. This can be important for getting mu_AP, especially when using ESS. Default is true.
 parameter_estimation_settings['mcmc_threshold_filter_coefficient'] = 'auto' #This can be a float or the string 'auto'. Currently (Oct 2020), 'auto' sets the value is 2.0.  The smaller the value the more aggressive the filtering.
+parameter_estimation_settings['mcmc_threshold_filter_benchmark'] = 'auto' # can be MAP, mu_AP, or auto to determine the filtering mechanism. The filtering with kw MAP will filtering starting at the MAP while mu_AP will start at the mean. The kw auto will filter samples that fall outside 2 std from the posterior mu_AP. 
 ##The below settings are for ESS and/or parallel sampling##
 parameter_estimation_settings['mcmc_nwalkers'] = 'auto'  #The number of walkers to use.  By default, if doing ESS, this is 4*numParameters. As of Oct 2020, this has no effect for MetropolisHastings.
 parameter_estimation_settings['mcmc_maxiter'] = 1E6 #This is related to the expansions and contractions in ESS. It has a role similar to limiting the number of iterations in conventional regression. The ESS backend has a default value of 1E4, but in initial testing that was violated too often so 1E6 has been used now.
@@ -122,6 +124,9 @@ scatter_matrix_plots_settings['individual_plots'] = 'auto' #True, False, or 'aut
 scatter_matrix_plots_settings['dpi'] = 220
 scatter_matrix_plots_settings['figure_name'] = 'scatter_matrix_posterior'
 
+#Scatter Heatmap Plot Settings
+scatter_heatmap_plots_settings ={}
+scatter_heatmap_plots_settings['figure_name'] = 'scatter_heatmap_posterior'
 
 #contour plots# / #mumpce plots#
 #model_parameter_info = np.array([{'parameter_number': 0, 'parameter_name': r'$E_{a1}$'},
