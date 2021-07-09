@@ -1655,11 +1655,30 @@ class parameter_estimation:
             #Now need to find cases where the probability is too low and filter them out.
             #Filtering Step 1: Find average and Stdev of log(-logP)
             logNegLogP = np.log(-1*self.post_burn_in_log_posteriors_un_normed_vec)
-            meanLogNegLogP = np.mean(logNegLogP)
+            meanLogNegLogP = np.mean(logNegLogP) 
             stdLogNegLogP = np.std(logNegLogP)
-            filteringThreshold = meanLogNegLogP+filterCoeffient*stdLogNegLogP #Threshold.
-            #Now, call the function I have made for filtering by deleting the rows above/below a certain value
-            truncatedMergedArray = arrayThresholdFilter(mergedArray, filterKey=logNegLogP, thresholdValue=filteringThreshold, removeValues = 'above', transpose=False)
+            maxLogP = np.max(self.post_burn_in_log_posteriors_un_normed_vec) #this is the MAP logP.
+            #getting the mu_AP probability for filtering requires a couple of steps. We name it carefully because the mu_AP willl change after filtering.
+            mu_AP_parameter_set_unfiltered_data = np.mean(self.post_burn_in_samples, axis=0) #now we are going to get the mu_AP of the unfiltered data.
+            mu_AP_log_P_unfiltered_data = self.getLogP(mu_AP_parameter_set_unfiltered_data) #this is the mu_AP logP
+            if self.UserInput.parameter_estimation_settings['mcmc_threshold_filter_benchmark'] == 'mu_AP':
+                #This benchmark is relative to the LogP values themselves
+                filteringThreshold = mu_AP_log_P_unfiltered_data - filterCoeffient # filter values below threshold starting at the mu_AP or mu_AP proxy.
+                removeValuesDirection = 'below'
+                #Now, call the function I have made for filtering by deleting the rows above/below a certain value
+                truncatedMergedArray = arrayThresholdFilter(mergedArray, filterKey=self.post_burn_in_log_posteriors_un_normed_vec, thresholdValue=filteringThreshold, removeValues = removeValuesDirection, transpose=False)
+            elif self.UserInput.parameter_estimation_settings['mcmc_threshold_filter_benchmark'] == 'MAP':
+                #This benchmark is relative to the LogP values themselves
+                filteringThreshold = maxLogP - filterCoeffient # filter values below threshold starting at the MAP
+                removeValuesDirection = 'below'
+                #Now, call the function I have made for filtering by deleting the rows above/below a certain value
+                truncatedMergedArray = arrayThresholdFilter(mergedArray, filterKey=self.post_burn_in_log_posteriors_un_normed_vec, thresholdValue=filteringThreshold, removeValues = removeValuesDirection, transpose=False)
+            elif self.UserInput.parameter_estimation_settings['mcmc_threshold_filter_benchmark'] == 'auto':
+                #This benchmark is unusual be cause it it is related to logNegLogP
+                filteringThreshold = meanLogNegLogP+filterCoeffient*stdLogNegLogP #Threshold. 
+                removeValuesDirection = 'above'
+                #Now, call the function I have made for filtering by deleting the rows above/below a certain value
+                truncatedMergedArray = arrayThresholdFilter(mergedArray, filterKey=logNegLogP, thresholdValue=filteringThreshold, removeValues = removeValuesDirection, transpose=False)
             self.post_burn_in_log_posteriors_un_normed_vec = np.atleast_2d(truncatedMergedArray[:,0]).transpose()
             self.post_burn_in_log_priors_vec = np.atleast_2d(truncatedMergedArray[:,1]).transpose()
             self.post_burn_in_samples = truncatedMergedArray[:,2:]
@@ -1682,6 +1701,21 @@ class parameter_estimation:
             print("mu_AP_parameter_set ", self.mu_AP_parameter_set)
             print("stdap_parameter_set ",self.stdap_parameter_set)
         return [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec]
+
+                                                                                            
+                                            
+                                                                                                      
+                                                                                           
+                                                                                                
+                                                                                                                                                         
+                                                                            
+                                                                                                                                
+                       
+                                                                                                             
+                                                                                               
+                                                              
+                          
+
 
     #This function gets the prefix and suffix for saving files when doing ParallelProcessing with MPI.
     #Importantly, the **directory** of the parallel processing is included as part of the prefix.
@@ -2057,7 +2091,7 @@ class parameter_estimation:
         if self.UserInput.parameter_estimation_settings['mcmc_parallel_sampling']: #mcmc_exportLog == True is needed for mcmc_parallel_sampling, but not for multistart_parallel_sampling
             mcmc_exportLog=True
         if calculatePostBurnInStatistics == True:
-            #FIXME: Below, calculate_post_burn_in_log_priors_vec=True should be false unless we are using continue sampling. For now, will leave it since I am not sure why it is currently set to False.
+            #FIXME: I think Below, calculate_post_burn_in_log_priors_vec=True should be false unless we are using continue sampling. For now, will leave it since I am not sure why it is currently set to True/False.
             self.calculatePostBurnInStatistics(calculate_post_burn_in_log_priors_vec = True) #This function call will also filter the lowest probability samples out, when using default settings.
             if str(mcmc_exportLog) == 'UserChoice':
                 mcmc_exportLog = bool(self.UserInput.parameter_estimation_settings['mcmc_exportLog'])
@@ -2263,9 +2297,9 @@ class parameter_estimation:
         setMatPlotLibAgg(self.UserInput.plotting_ouput_settings['setMatPlotLibAgg'])
         parameterSamples = self.post_burn_in_samples
         parameterNamesAndMathTypeExpressionsDict = self.UserInput.parameterNamesAndMathTypeExpressionsDict
-        plotting_functions.makeHistogramsForEachParameter(parameterSamples,parameterNamesAndMathTypeExpressionsDict, directory = self.UserInput.directories['graphs'])
+        plotting_functions.makeHistogramsForEachParameter(parameterSamples,parameterNamesAndMathTypeExpressionsDict, directory = self.UserInput.directories['graphs'], parameterInitialValue=self.UserInput.model['InputParameterPriorValues'], parameterMAPValue=self.map_parameter_set, parameterMuAPValue=self.mu_AP_parameter_set)
 
-    def makeSamplingScatterMatrixPlot(self, parameterSamples = [], parameterNamesAndMathTypeExpressionsDict={}, parameterNamesList =[], plot_settings={'combined_plots':'auto'}):
+    def makeSamplingScatterMatrixPlot(self, parameterSamples = [], parameterNamesAndMathTypeExpressionsDict={}, parameterNamesList =[], parameterMAPValue=[], parameterMuAPValue=[], plot_settings={'combined_plots':'auto'}):
         import pandas as pd #This is the only function that needs pandas.
         import matplotlib.pyplot as plt
         if 'dpi' not in  plot_settings:  plot_settings['dpi'] = 220
@@ -2273,16 +2307,63 @@ class parameter_estimation:
         if parameterSamples  ==[] : parameterSamples = self.post_burn_in_samples
         if parameterNamesAndMathTypeExpressionsDict == {}: parameterNamesAndMathTypeExpressionsDict = self.UserInput.parameterNamesAndMathTypeExpressionsDict
         if parameterNamesList == []: parameterNamesList = self.UserInput.parameterNamesList #This is created when the parameter_estimation object is initialized.        
+        if parameterMAPValue == []: parameterMAPValue = self.map_parameter_set
+        if parameterMuAPValue == []: parameterMuAPValue = self.mu_AP_parameter_set
         combined_plots = plot_settings['combined_plots']
+        individual_plots = plot_settings['individual_plots']
+        posterior_df = pd.DataFrame(parameterSamples,columns=[parameterNamesAndMathTypeExpressionsDict[x] for x in parameterNamesList])
         if combined_plots == 'auto': #by default, we will not make the scatter matrix when there are more than 5 parameters.
             if (len(parameterNamesList) > 5) or (len(parameterNamesAndMathTypeExpressionsDict) > 5):
-                combined_plots = False
-        if combined_plots == False: #This means no figure will be made so we just return.
+                #For the case of 'auto' when the parameters is too large in number, we will turn of the combined plots.
+                combined_plots = False 
+                #For the case of 'auto' we will then turn on the individual plots.
+                if self.UserInput.scatter_matrix_plots_settings['individual_plots'] == 'auto':
+                    individual_plots = True
+        if individual_plots == True: #This means we will return individual plots.
+            #The below code was added by Troy Gustke and merged in to CheKiPEUQ at end of June 2021.
+            for i, (a, a_name, a_MAP, a_mu_AP) in enumerate(zip(posterior_df.columns, parameterNamesAndMathTypeExpressionsDict.keys(), parameterMAPValue, parameterMuAPValue)):
+                for j, (b, b_name, b_MAP, b_mu_AP) in enumerate(zip(posterior_df.columns, parameterNamesAndMathTypeExpressionsDict.keys(), parameterMAPValue, parameterMuAPValue)):
+                    if i != j:
+                        fig = plt.figure()
+                        plt.scatter(posterior_df[a], posterior_df[b], s=1, alpha=0.5)
+                        plt.scatter(a_MAP, b_MAP, s=10, alpha=0.8, c='r') 
+                        plt.scatter(a_mu_AP, b_mu_AP, s=10, alpha=0.8, c='k') 
+                        plt.xlabel(a)
+                        plt.ylabel(b)
+                        fig.savefig(self.UserInput.directories['graphs']+f'Scatter_{a_name}_{b_name}',dpi=plot_settings['dpi'])
+                        plt.close(fig)
             return 
-        posterior_df = pd.DataFrame(parameterSamples,columns=[parameterNamesAndMathTypeExpressionsDict[x] for x in parameterNamesList])
         pd.plotting.scatter_matrix(posterior_df)
         plt.savefig(self.UserInput.directories['graphs']+plot_settings['figure_name'],dpi=plot_settings['dpi'])
         
+    def makeScatterHeatMapPlots(self, parameterSamples = [], parameterNamesAndMathTypeExpressionsDict={}, parameterNamesList =[], parameterMAPValue=[], parameterMuAPValue=[], parameterInitialValue = [], plot_settings={'combined_plots':'auto'}):
+        import pandas as pd #This is the only function that needs pandas.
+        import matplotlib.pyplot as plt
+        import CheKiPEUQ.plotting_functions as plotting_functions
+        if 'dpi' not in  plot_settings:  plot_settings['dpi'] = 220
+        if 'figure_name' not in  plot_settings:  plot_settings['figure_name'] = 'scatter_matrix_posterior'
+        if parameterSamples  ==[] : parameterSamples = self.post_burn_in_samples
+        if parameterNamesAndMathTypeExpressionsDict == {}: parameterNamesAndMathTypeExpressionsDict = self.UserInput.parameterNamesAndMathTypeExpressionsDict
+        if parameterNamesList == []: parameterNamesList = self.UserInput.parameterNamesList #This is created when the parameter_estimation object is initialized.        
+        if parameterMAPValue == []: parameterMAPValue = self.map_parameter_set
+        if parameterMuAPValue == []: parameterMuAPValue = self.mu_AP_parameter_set
+        if parameterInitialValue == []: parameterInitialValue = self.UserInput.model['InputParameterPriorValues']
+        # will always be seperate plots
+        posterior_df = pd.DataFrame(parameterSamples,columns=[parameterNamesAndMathTypeExpressionsDict[x] for x in parameterNamesList])
+        for i, (a, a_name, a_MAP, a_mu_AP, a_initial) in enumerate(zip(posterior_df.columns, parameterNamesAndMathTypeExpressionsDict.keys(), parameterMAPValue, parameterMuAPValue, parameterInitialValue)):
+            for j, (b, b_name, b_MAP, b_mu_AP, b_initial) in enumerate(zip(posterior_df.columns, parameterNamesAndMathTypeExpressionsDict.keys(), parameterMAPValue, parameterMuAPValue, parameterInitialValue)):
+                if i != j:
+                    # plt.scatter(posterior_df[a], posterior_df[b], s=1, alpha=0.5)
+                    fig, ax = plotting_functions.density_scatter(posterior_df[a], posterior_df[b], s=1, alpha=0.5)
+                    ax.scatter(a_MAP, b_MAP, s=10, alpha=0.8, c='r', marker='x') 
+                    ax.scatter(a_mu_AP, b_mu_AP, s=10, alpha=0.8, c='k', marker='x') 
+                    ax.scatter(a_initial, b_initial, s=10, alpha=0.8, c='#00A5DF', marker='x')
+                    ax.set_xlabel(a)
+                    ax.set_ylabel(b)
+                    fig.savefig(self.UserInput.directories['graphs']+f'Heat_Scatter_{a_name}_{b_name}',dpi=plot_settings['dpi'])
+                    plt.close(fig)
+        return 
+
     def createSimulatedResponsesPlots(self, allResponses_x_values=[], allResponsesListsOfYArrays =[], plot_settings={},allResponsesListsOfYUncertaintiesArrays=[] ): 
         #allResponsesListsOfYArrays  is to have 3 layers of lists: Response > Responses Observed, mu_guess Simulated Responses, map_Simulated Responses, (mu_AP_simulatedResponses) > Values
         if allResponses_x_values == []: 
@@ -2496,9 +2577,21 @@ class parameter_estimation:
 
         try:
             self.makeHistogramsForEachParameter()               
-            self.makeSamplingScatterMatrixPlot(plot_settings=self.UserInput.scatter_matrix_plots_settings)
         except:
-            print("Unable to make histograms and/or scatter matrix plots. This usually means your run is not an MCMC run, or that the sampling did not work well. If you are using Metropolis-Hastings, try EnsembleSliceSampling or try a uniform distribution multistart.")
+            print("Unable to make histograms plots. This usually means your model is not returning simulated results for most of the sampled parameter possibilities.")
+
+        try:
+            self.makeSamplingScatterMatrixPlot(plot_settings=self.UserInput.scatter_matrix_plots_settings)             
+        except:
+            print("Unable to make scatter matrix plot. This usually means your run is not an MCMC run, or that the sampling did not work well. If you are using Metropolis-Hastings, try EnsembleSliceSampling or try a uniform distribution multistart.")
+
+
+        try:
+            print("line 2556!")
+            self.makeScatterHeatMapPlots(plot_settings=self.UserInput.scatter_matrix_plots_settings)
+            print("line 2558!")
+        except:
+            print("Unable to make scatter heatmap plots. This usually means your run is not an MCMC run, or that the sampling did not work well. If you are using Metropolis-Hastings, try EnsembleSliceSampling or try a uniform distribution multistart.")
 
         try:        
             self.createMumpcePlots()

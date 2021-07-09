@@ -19,14 +19,14 @@ UserInput.model['parameterNamesAndMathTypeExpressionsDict'] = {'a':'a','b':'b'}
 UserInput.model['InputParameterPriorValues'] = [200, 500] #prior expected values for a and b
 UserInput.model['InputParametersPriorValuesUncertainties'] = [100, 200] #required. #If user wants to use a prior with covariance, then this must be a 2D array/ list. To assume no covariance, a 1D
 #UserInput.model['InputParameterInitialGuess'] = [150,400] #Can optionally change the initial guess to be different from prior means.
-
+UserInput.scatter_matrix_plots_settings['individual_plots'] = True
 
 UserInput.model['simulateByInputParametersOnlyFunction'] = simulation_model_00.simulation_function_wrapper #This must simulate with *only* the parameters listed above, and no other arguments.
 
 
-UserInput.parameter_estimation_settings['mcmc_threshold_filter_samples'] = True
+#UserInput.parameter_estimation_settings['mcmc_threshold_filter_samples'] = True
 
-UserInput.parameter_estimation_settings['mcmc_random_seed'] = 0
+#UserInput.parameter_estimation_settings['mcmc_random_seed'] = 0
 UserInput.parameter_estimation_settings['multistart_initialPointsDistributionType'] = 'grid'
 UserInput.parameter_estimation_settings['multistart_exportLog'] = True
 

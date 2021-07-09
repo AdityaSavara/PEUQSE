@@ -110,7 +110,7 @@ class plotting_functions_class():
     def rate_tot_plot(self):
         return
 
-def sampledParameterHistogramMaker(parameterSamples, parameterName,parameterNamesAndMathTypeExpressionsDict, sampledParameterFiguresDictionary, sampledParameterAxesDictionary, directory=''):
+def sampledParameterHistogramMaker(parameterSamples, parameterName, parameterNamesAndMathTypeExpressionsDict, sampledParameterFiguresDictionary, sampledParameterAxesDictionary, directory='', parameterInitialValue=None, parameterMAPValue=None, parameterMuAPValue=None):
         parameterIndex = list(parameterNamesAndMathTypeExpressionsDict).index(parameterName)
         sampledParameterFiguresDictionary[parameterName], sampledParameterAxesDictionary[parameterName] = plt.subplots()   #making plt objects    
         sampledParameterAxesDictionary[parameterName].hist(parameterSamples[:,parameterIndex]) #filling the object with data
@@ -118,6 +118,12 @@ def sampledParameterHistogramMaker(parameterSamples, parameterName,parameterName
         axis_font = {'size':'16'} #TODO: Make this size a setting that can be changed. #Code was made following answer by "binaryfunt" here https://stackoverflow.com/questions/3899980/how-to-change-the-font-size-on-a-matplotlib-plot
         sampledParameterAxesDictionary[parameterName].set_ylabel('frequency', **axis_font)
         sampledParameterAxesDictionary[parameterName].set_xlabel(parameterNamesAndMathTypeExpressionsDict[parameterName], **axis_font)
+        if parameterInitialValue!=None:
+            sampledParameterAxesDictionary[parameterName].axvline(x=parameterInitialValue, color='#00A5DF', linestyle='--')
+        if parameterMAPValue!=None:
+            sampledParameterAxesDictionary[parameterName].axvline(x=parameterMAPValue, color='r', linestyle='--')
+        if parameterMuAPValue!=None:
+            sampledParameterAxesDictionary[parameterName].axvline(x=parameterMuAPValue, color='k', linestyle='--')
 
         sampledParameterAxesDictionary[parameterName].tick_params(axis='x', labelsize=16) #TODO: make these labels sizes a setting that can be changed.
         sampledParameterAxesDictionary[parameterName].tick_params(axis='y', labelsize=16)
@@ -135,12 +141,16 @@ def sampledParameterHistogramMaker(parameterSamples, parameterName,parameterName
         # fig2.savefig('Ea2.png', dpi=220)
 
     #Make histograms for each parameter. Need to make some dictionaries where relevant objects will be stored.
-def makeHistogramsForEachParameter(parameterSamples,parameterNamesAndMathTypeExpressionsDict, directory=''):
+def makeHistogramsForEachParameter(parameterSamples,parameterNamesAndMathTypeExpressionsDict, directory='', parameterInitialValue=None, parameterMAPValue=None, parameterMuAPValue=None):
     sampledParameterFiguresDictionary = copy.deepcopy(parameterNamesAndMathTypeExpressionsDict) #This must be a deep copy to perserve original.
     sampledParameterAxesDictionary = copy.deepcopy(parameterNamesAndMathTypeExpressionsDict) #This must be a deep copy to preserve original.
-    for key in parameterNamesAndMathTypeExpressionsDict:
+    #The below code was originally added by Eric Walker, then modified by Troy Gustke to add in the initialValue, MAPvalue, and mu_apvALUE in June 2021, and merged in by A. Savara.    
+    for key, iv, mp, mup in zip(parameterNamesAndMathTypeExpressionsDict,parameterInitialValue,parameterMAPValue,parameterMuAPValue):
         parameterName = key
-        sampledParameterHistogramMaker(parameterSamples, parameterName,parameterNamesAndMathTypeExpressionsDict, sampledParameterFiguresDictionary, sampledParameterAxesDictionary, directory=directory)        
+        initialValue = iv
+        MAPValue = mp
+        Mu_APValue = mup
+        sampledParameterHistogramMaker(parameterSamples, parameterName, parameterNamesAndMathTypeExpressionsDict, sampledParameterFiguresDictionary, sampledParameterAxesDictionary, directory=directory, parameterInitialValue=initialValue, parameterMAPValue=MAPValue, parameterMuAPValue=Mu_APValue)        
 
 def createSimulatedResponsesPlot(x_values, listOfYArrays, plot_settings={}, listOfYUncertaintiesArrays=[], showFigure=True, directory=''):
     exportFigure = True #This variable should be moved to an argument or something in plot_settings.
@@ -274,3 +284,29 @@ def makeMeshGridSurfacePlot(XX, YY, ZZ,  plot_settings = {}, exportFigure = True
         plt.close(fig1)
     return fig1, ax1#, image
     
+
+def density_scatter( x , y, ax = None, sort = True, bins = 20, **kwargs )   :
+    """
+    Scatter plot colored by 2d histogram
+    Sampled from Guillaume post on https://stackoverflow.com/questions/20105364/how-can-i-make-a-scatter-plot-colored-by-density-in-matplotlib/53865762#53865762
+    """
+    from matplotlib import cm
+    from matplotlib.colors import Normalize 
+    from scipy.interpolate import interpn
+    if ax is None:
+        fig , ax = plt.subplots()
+    data , x_e, y_e = np.histogram2d( x, y, bins = bins, density = True )
+    z = interpn( ( 0.5*(x_e[1:] + x_e[:-1]) , 0.5*(y_e[1:]+y_e[:-1]) ) , data , np.vstack([x,y]).T , method = "splinef2d", bounds_error = False)
+    #To be sure to plot all data
+    z[np.where(np.isnan(z))] = 0.0
+
+    # Sort the points by density, so that the densest points are plotted last
+    if sort:
+        idx = z.argsort()
+        x, y, z = x[idx], y[idx], z[idx]
+
+    ax.scatter( x, y, c=z, **kwargs )
+    norm = Normalize(vmin = np.min(z), vmax = np.max(z))
+    cbar = fig.colorbar(cm.ScalarMappable(norm = norm), ax=ax)
+    cbar.ax.set_ylabel('Density')
+    return fig, ax                                                                             
