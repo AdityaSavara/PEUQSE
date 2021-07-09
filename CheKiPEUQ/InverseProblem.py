@@ -1,3 +1,4 @@
+from pyexpat import model
 import numpy as np
 #from mpl_toolkits.mplot3d import Axes3D
 #import scipy
@@ -575,14 +576,14 @@ class parameter_estimation:
         if numStartPoints == 0: #This is a deprecated line. The function was originally designed for making mcmc walkers and then was generalized.
             numStartPoints = self.mcmc_nwalkers
         if initialPointsDistributionType.lower() =='uniform':
-            initialPointsFirstTerm = np.random.uniform(-2,2, [numStartPoints,numParameters]) #<-- this is from me, trying to remove bias. This way we get sampling from a uniform distribution from -2 standard deviations to +2 standard deviations.
+            initialPointsFirstTerm = 4*(np.random.rand(numStartPoints, numParameters)-0.5) #<-- this is from me, trying to remove bias. This way we get sampling from a uniform distribution from -2 standard deviations to +2 standard deviations.
         elif initialPointsDistributionType.lower()  == 'identical':
             initialPointsFirstTerm = np.zeros((numStartPoints, numParameters)) #Make the first term all zeros.
         elif initialPointsDistributionType.lower() =='gaussian':
-            initialPointsFirstTerm = np.random.randn(numStartPoints, numParameters) #<--- this was from the zeus example. TODO: change this to rng.standard_normal
+            initialPointsFirstTerm = np.random.randn(numStartPoints, numParameters) #<--- this was from the zeus example.
         if initialPointsDistributionType !='grid':
             #Now we add to centerPoint, usually self.UserInput.InputParameterInitialGuess. We don't use the UserInput initial guess directly because gridsearch and other things can change it -- so we need to use this one.
-            initialPoints = relativeInitialDistributionSpread*initialPointsFirstTerm*self.UserInput.std_prior + centerPoint
+            initialPoints = initialPointsFirstTerm*self.UserInput.std_prior*relativeInitialDistributionSpread + centerPoint
         return initialPoints
 
     #This helper function has been made so that gridSearch and design of experiments can call it.
@@ -1385,7 +1386,6 @@ class parameter_estimation:
         #self.meshGrid_independentVariable1ValuesArray will remain unchanged.      
         
         import CheKiPEUQ.plotting_functions as plotting_functions
-        setMatPlotLibAgg(self.UserInput.plotting_ouput_settings['setMatPlotLibAgg'])
         #assess whether the function is called for the overall info_gain matrices or for a particular parameter.
         if parameterIndex==None:  #this means we're using the regular info gain, not the parameter specific case.
             #Normally, the info gain plots should be stored in self.info_gains_matrices_array.
@@ -1655,30 +1655,21 @@ class parameter_estimation:
             #Now need to find cases where the probability is too low and filter them out.
             #Filtering Step 1: Find average and Stdev of log(-logP)
             logNegLogP = np.log(-1*self.post_burn_in_log_posteriors_un_normed_vec)
-            meanLogNegLogP = np.mean(logNegLogP) 
+            meanLogNegLogP = np.mean(logNegLogP)
             stdLogNegLogP = np.std(logNegLogP)
-            maxLogP = np.max(self.post_burn_in_log_posteriors_un_normed_vec) #this is the MAP logP.
-            #getting the mu_AP probability for filtering requires a couple of steps. We name it carefully because the mu_AP willl change after filtering.
-            mu_AP_parameter_set_unfiltered_data = np.mean(self.post_burn_in_samples, axis=0) #now we are going to get the mu_AP of the unfiltered data.
-            mu_AP_log_P_unfiltered_data = self.getLogP(mu_AP_parameter_set_unfiltered_data) #this is the mu_AP logP
-            if self.UserInput.parameter_estimation_settings['mcmc_threshold_filter_benchmark'] == 'mu_AP':
-                #This benchmark is relative to the LogP values themselves
-                filteringThreshold = mu_AP_log_P_unfiltered_data - filterCoeffient # filter values below threshold starting at the mu_AP or mu_AP proxy.
-                removeValuesDirection = 'below'
+            maxNegLogP = np.max(self.post_burn_in_log_posteriors_un_normed_vec)
+            if self.UserInput.parameter_estimation_settings['mcmc_threshold_filter_benchmark'] == 'MAP':
+                filteringThreshold = maxNegLogP - filterCoeffient # filter values below threshold starting at the MAP
+                removeValues = 'below'
                 #Now, call the function I have made for filtering by deleting the rows above/below a certain value
-                truncatedMergedArray = arrayThresholdFilter(mergedArray, filterKey=self.post_burn_in_log_posteriors_un_normed_vec, thresholdValue=filteringThreshold, removeValues = removeValuesDirection, transpose=False)
-            elif self.UserInput.parameter_estimation_settings['mcmc_threshold_filter_benchmark'] == 'MAP':
-                #This benchmark is relative to the LogP values themselves
-                filteringThreshold = maxLogP - filterCoeffient # filter values below threshold starting at the MAP
-                removeValuesDirection = 'below'
-                #Now, call the function I have made for filtering by deleting the rows above/below a certain value
-                truncatedMergedArray = arrayThresholdFilter(mergedArray, filterKey=self.post_burn_in_log_posteriors_un_normed_vec, thresholdValue=filteringThreshold, removeValues = removeValuesDirection, transpose=False)
+                # Is not relative to the logNegLogP values but rather the LogP values themselves
+                truncatedMergedArray = arrayThresholdFilter(mergedArray, filterKey=self.post_burn_in_log_posteriors_un_normed_vec, thresholdValue=filteringThreshold, removeValues = removeValues, transpose=False)
             elif self.UserInput.parameter_estimation_settings['mcmc_threshold_filter_benchmark'] == 'auto':
-                #This benchmark is unusual be cause it it is related to logNegLogP
                 filteringThreshold = meanLogNegLogP+filterCoeffient*stdLogNegLogP #Threshold. 
-                removeValuesDirection = 'above'
+                removeValues = 'above'
                 #Now, call the function I have made for filtering by deleting the rows above/below a certain value
-                truncatedMergedArray = arrayThresholdFilter(mergedArray, filterKey=logNegLogP, thresholdValue=filteringThreshold, removeValues = removeValuesDirection, transpose=False)
+                truncatedMergedArray = arrayThresholdFilter(mergedArray, filterKey=logNegLogP, thresholdValue=filteringThreshold, removeValues = removeValues, transpose=False)
+            
             self.post_burn_in_log_posteriors_un_normed_vec = np.atleast_2d(truncatedMergedArray[:,0]).transpose()
             self.post_burn_in_log_priors_vec = np.atleast_2d(truncatedMergedArray[:,1]).transpose()
             self.post_burn_in_samples = truncatedMergedArray[:,2:]
@@ -1702,19 +1693,19 @@ class parameter_estimation:
             print("stdap_parameter_set ",self.stdap_parameter_set)
         return [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec]
 
-                                                                                            
-                                            
-                                                                                                      
-                                                                                           
-                                                                                                
-                                                                                                                                                         
-                                                                            
-                                                                                                                                
-                       
-                                                                                                             
-                                                                                               
-                                                              
-                          
+    def posterior_parameter_filtering(self, parameter_bounds = {}, parameterNamesList = []):
+        self.calculatePostBurnInStatistics()
+        if parameter_bounds == {}: parameter_bounds = self.UserInput.model['PosteriorParameterBounds']
+        if parameterNamesList == []: parameterNamesList = self.UserInput.parameterNamesList
+        parameter_changed_index = [parameterNamesList.index(a) for a in parameter_bounds.keys()]
+        truncatedMergedArray = np.hstack( (self.post_burn_in_log_posteriors_un_normed_vec, self.post_burn_in_log_priors_vec, self.post_burn_in_samples) )
+        for a, b in zip(parameter_changed_index, parameter_bounds.values()):
+            truncatedMergedArray = truncatedMergedArray[(truncatedMergedArray[:,a+2]>=b[0])&(truncatedMergedArray[:,a+2]<=b[1])]
+        print('Here 1')
+        self.post_burn_in_log_posteriors_un_normed_vec = np.atleast_2d(truncatedMergedArray[:,0]).transpose()
+        self.post_burn_in_log_priors_vec = np.atleast_2d(truncatedMergedArray[:,1]).transpose()
+        self.post_burn_in_samples = truncatedMergedArray[:,2:]
+        print('We did it')
 
 
     #This function gets the prefix and suffix for saving files when doing ParallelProcessing with MPI.
@@ -2091,7 +2082,7 @@ class parameter_estimation:
         if self.UserInput.parameter_estimation_settings['mcmc_parallel_sampling']: #mcmc_exportLog == True is needed for mcmc_parallel_sampling, but not for multistart_parallel_sampling
             mcmc_exportLog=True
         if calculatePostBurnInStatistics == True:
-            #FIXME: I think Below, calculate_post_burn_in_log_priors_vec=True should be false unless we are using continue sampling. For now, will leave it since I am not sure why it is currently set to True/False.
+            #FIXME: Below, calculate_post_burn_in_log_priors_vec=True should be false unless we are using continue sampling. For now, will leave it since I am not sure why it is currently set to False.
             self.calculatePostBurnInStatistics(calculate_post_burn_in_log_priors_vec = True) #This function call will also filter the lowest probability samples out, when using default settings.
             if str(mcmc_exportLog) == 'UserChoice':
                 mcmc_exportLog = bool(self.UserInput.parameter_estimation_settings['mcmc_exportLog'])
@@ -2294,7 +2285,6 @@ class parameter_estimation:
 
     def makeHistogramsForEachParameter(self):
         import CheKiPEUQ.plotting_functions as plotting_functions 
-        setMatPlotLibAgg(self.UserInput.plotting_ouput_settings['setMatPlotLibAgg'])
         parameterSamples = self.post_burn_in_samples
         parameterNamesAndMathTypeExpressionsDict = self.UserInput.parameterNamesAndMathTypeExpressionsDict
         plotting_functions.makeHistogramsForEachParameter(parameterSamples,parameterNamesAndMathTypeExpressionsDict, directory = self.UserInput.directories['graphs'], parameterInitialValue=self.UserInput.model['InputParameterPriorValues'], parameterMAPValue=self.map_parameter_set, parameterMuAPValue=self.mu_AP_parameter_set)
@@ -2310,17 +2300,11 @@ class parameter_estimation:
         if parameterMAPValue == []: parameterMAPValue = self.map_parameter_set
         if parameterMuAPValue == []: parameterMuAPValue = self.mu_AP_parameter_set
         combined_plots = plot_settings['combined_plots']
-        individual_plots = plot_settings['individual_plots']
         posterior_df = pd.DataFrame(parameterSamples,columns=[parameterNamesAndMathTypeExpressionsDict[x] for x in parameterNamesList])
         if combined_plots == 'auto': #by default, we will not make the scatter matrix when there are more than 5 parameters.
             if (len(parameterNamesList) > 5) or (len(parameterNamesAndMathTypeExpressionsDict) > 5):
-                #For the case of 'auto' when the parameters is too large in number, we will turn of the combined plots.
-                combined_plots = False 
-                #For the case of 'auto' we will then turn on the individual plots.
-                if self.UserInput.scatter_matrix_plots_settings['individual_plots'] == 'auto':
-                    individual_plots = True
-        if individual_plots == True: #This means we will return individual plots.
-            #The below code was added by Troy Gustke and merged in to CheKiPEUQ at end of June 2021.
+                combined_plots = False
+        if combined_plots == False: #This means no figure will be made so we just return.
             for i, (a, a_name, a_MAP, a_mu_AP) in enumerate(zip(posterior_df.columns, parameterNamesAndMathTypeExpressionsDict.keys(), parameterMAPValue, parameterMuAPValue)):
                 for j, (b, b_name, b_MAP, b_mu_AP) in enumerate(zip(posterior_df.columns, parameterNamesAndMathTypeExpressionsDict.keys(), parameterMAPValue, parameterMuAPValue)):
                     if i != j:
@@ -2333,10 +2317,12 @@ class parameter_estimation:
                         fig.savefig(self.UserInput.directories['graphs']+f'Scatter_{a_name}_{b_name}',dpi=plot_settings['dpi'])
                         plt.close(fig)
             return 
+        # posterior_df = pd.DataFrame(parameterSamples,columns=[parameterNamesAndMathTypeExpressionsDict[x] for x in parameterNamesList])
         pd.plotting.scatter_matrix(posterior_df)
         plt.savefig(self.UserInput.directories['graphs']+plot_settings['figure_name'],dpi=plot_settings['dpi'])
         
-    def makeScatterHeatMapPlots(self, parameterSamples = [], parameterNamesAndMathTypeExpressionsDict={}, parameterNamesList =[], parameterMAPValue=[], parameterMuAPValue=[], parameterInitialValue = [], plot_settings={'combined_plots':'auto'}):
+
+    def makeSamplingHeatMapPlot(self, parameterSamples = [], parameterNamesAndMathTypeExpressionsDict={}, parameterNamesList =[], parameterMAPValue=[], parameterMuAPValue=[], parameterInitialValue = [], plot_settings={'combined_plots':'auto'}):
         import pandas as pd #This is the only function that needs pandas.
         import matplotlib.pyplot as plt
         import CheKiPEUQ.plotting_functions as plotting_functions
@@ -2467,7 +2453,6 @@ class parameter_estimation:
         if 'figure_name' not in plot_settings:
             plot_settings['figurename'] = 'Posterior'
         import CheKiPEUQ.plotting_functions as plotting_functions
-        setMatPlotLibAgg(self.UserInput.plotting_ouput_settings['setMatPlotLibAgg'])
         allResponsesFigureObjectsList = []
         for responseDimIndex in range(self.UserInput.num_response_dimensions): #TODO: Move the exporting out of the plot creation and/or rename the function and possibly have options about whether exporting graph, data, or both.
             #Some code for setting up individual plot settings in case there are multiple response dimensions.
@@ -2493,7 +2478,6 @@ class parameter_estimation:
 
     def createMumpcePlots(self):
         import CheKiPEUQ.plotting_functions as plotting_functions
-        setMatPlotLibAgg(self.UserInput.plotting_ouput_settings['setMatPlotLibAgg'])
         from CheKiPEUQ.plotting_functions import plotting_functions_class
         figureObject_beta = plotting_functions_class(self.UserInput) # The "beta" is only to prevent namespace conflicts with 'figureObject'.
         parameterSamples = self.post_burn_in_samples
@@ -2574,24 +2558,18 @@ class parameter_estimation:
                 pass#This will proceed as normal.
             elif CheKiPEUQ.parallel_processing.finalProcess == False:
                 return False #this will stop the plots creation.
+        # try:
+        #     self.calculatePostBurnInStatistics()
+        # except:
+        #     print('Post Burn In statistics Failed')
 
         try:
             self.makeHistogramsForEachParameter()               
+            # self.makeSamplingScatterMatrixPlot(plot_settings=self.UserInput.scatter_matrix_plots_settings)
+            self.makeSamplingHeatMapPlot(plot_settings=self.UserInput.scatter_matrix_plots_settings)
+            return
         except:
-            print("Unable to make histograms plots. This usually means your model is not returning simulated results for most of the sampled parameter possibilities.")
-
-        try:
-            self.makeSamplingScatterMatrixPlot(plot_settings=self.UserInput.scatter_matrix_plots_settings)             
-        except:
-            print("Unable to make scatter matrix plot. This usually means your run is not an MCMC run, or that the sampling did not work well. If you are using Metropolis-Hastings, try EnsembleSliceSampling or try a uniform distribution multistart.")
-
-
-        try:
-            print("line 2556!")
-            self.makeScatterHeatMapPlots(plot_settings=self.UserInput.scatter_matrix_plots_settings)
-            print("line 2558!")
-        except:
-            print("Unable to make scatter heatmap plots. This usually means your run is not an MCMC run, or that the sampling did not work well. If you are using Metropolis-Hastings, try EnsembleSliceSampling or try a uniform distribution multistart.")
+            print("Unable to make histograms and/or scatter matrix plots. This usually means your run is not an MCMC run, or that the sampling did not work well. If you are using Metropolis-Hastings, try EnsembleSliceSampling or try a uniform distribution multistart.")
 
         try:        
             self.createMumpcePlots()
@@ -2854,21 +2832,6 @@ def arrayThresholdFilter(inputArray, filterKey=[], thresholdValue=0, removeValue
 @CiteSoft.after_call_compile_consolidated_log(compile_checkpoints=True)
 def exportCitations():
     pass
-
-def setMatPlotLibAgg(matPlotLibAggSetting = 'auto'):
-    #choice can be 'auto', True, or Fales.
-    if matPlotLibAggSetting == 'auto':
-        import platform #check if the system is Linux.
-        if platform.system() == "Linux":
-            matPlotLibAggSetting = True
-        else:
-            matPlotLibAggSetting = False
-    if matPlotLibAggSetting == False:
-        return #do nothing.
-    if matPlotLibAggSetting == True:
-        import CheKiPEUQ.plotting_functions as plotting_functions
-        plotting_functions.matplotlib.use('Agg') #added by A. Savara June 29th, 2021.
-        #no return needed.
 
 def pickleAnObject(objectToPickle, base_file_name, file_name_prefix ='',  file_name_suffix='', file_name_extension='.pkl'):
     import pickle
