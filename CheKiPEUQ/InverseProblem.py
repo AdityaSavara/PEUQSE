@@ -2192,27 +2192,29 @@ class parameter_estimation:
         return simulatedResponses
     
     def getLogLikelihood(self,discreteParameterVector): #The variable discreteParameterVector represents a vector of values for the parameters being sampled. So it represents a single point in the multidimensional parameter space.
+        discreteParameterVectorTuple = np.ndarray.copy(discreteParameterVector) #we use a tuple in case any of the functions try to change the parameters.
+        
         #First do upper and lower bounds checks, if such bounds have been provided.
-        boundsChecksPassed = self.doInputParameterBoundsChecks(discreteParameterVector)
+        boundsChecksPassed = self.doInputParameterBoundsChecks(discreteParameterVectorTuple)
         if boundsChecksPassed == False: #If false, return a 'zero probability' type result. Else, continue getting log likelihood.
             return float('-inf'), None #This approximates zero probability.
 
         #Check if user has provided a custom log likelihood function.
         if type(self.UserInput.model['custom_logLikelihood']) != type(None):
-            logLikelihood, simulatedResponses = self.UserInput.model['custom_logLikelihood'](discreteParameterVector)
+            logLikelihood, simulatedResponses = self.UserInput.model['custom_logLikelihood'](discreteParameterVectorTuple)
             simulatedResponses = np.array(simulatedResponses).flatten()
             return logLikelihood, simulatedResponses
         #else pass is implied.
 
         #Now get the simulated responses.
-        simulatedResponses = self.getSimulatedResponses(discreteParameterVector)
+        simulatedResponses = self.getSimulatedResponses(discreteParameterVectorTuple)
         if type(simulatedResponses) == type(None):
             return float('-inf'), None #This is intended for the case that the simulation fails, indicated by receiving an 'nan' or None type from user's simulation function.
         #need to check if there are any 'responses_simulation_uncertainties'.
         if type(self.UserInput.responses_simulation_uncertainties) == type(None): #if it's a None type, we keep it as a None type
             responses_simulation_uncertainties = None
-        else:  #Else we get it based on the the discreteParameterVector
-            responses_simulation_uncertainties = self.get_responses_simulation_uncertainties(discreteParameterVector)
+        else:  #Else we get it based on the the discreteParameterVectorTuple
+            responses_simulation_uncertainties = self.get_responses_simulation_uncertainties(discreteParameterVectorTuple)
 
         #Now need to do transforms. Transforms are only for calculating log likelihood. If responses_simulation_uncertainties is "None", then we need to have one less argument passed in and a blank list is returned along with the transformed simulated responses.
         if type(responses_simulation_uncertainties) == type(None):
@@ -2286,7 +2288,7 @@ class parameter_estimation:
                         current_log_probability_metric = float('-inf')
                     #response_log_probability_metric = current_log_probability_metric + response_log_probability_metric
                     if float(current_log_probability_metric) == float('-inf'):
-                        print("Warning: There are posterior points that have zero probability. If there are too many points like this, the MAP and mu_AP returned will not be meaningful. Parameters:", discreteParameterVector)
+                        print("Warning: There are posterior points that have zero probability. If there are too many points like this, the MAP and mu_AP returned will not be meaningful. Parameters:", discreteParameterVectorTuple)
                         current_log_probability_metric = -1E100 #Just choosing an arbitrarily very severe penalty. I know that I have seen 1E-48 to -303 from the multivariate pdf, and values inbetween like -171, -217, -272. I found that -1000 seems to be worse, but I don't have a systematic testing. I think -1000 was causing numerical errors.
                     response_log_probability_metric = current_log_probability_metric + response_log_probability_metric
             log_probability_metric = log_probability_metric + response_log_probability_metric
