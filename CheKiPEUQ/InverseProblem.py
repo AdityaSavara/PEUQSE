@@ -44,6 +44,13 @@ class parameter_estimation:
         for directoryName in UserInput.directories:
             if not os.path.exists(directoryName):
                 os.makedirs(directoryName)
+
+        #Check for incompatible choices.
+        parameterBoundsOn = bool(len(UserInput.model['InputParameterPriorValues_upperBounds']) + len(UserInput.model['InputParameterPriorValues_lowerBounds']))
+        reducedParameterSpaceOn = bool(len(UserInput.model['reducedParameterSpace']))
+        if (reducedParameterSpaceOn and parameterBoundsOn) == True:
+            print("CheKiPEUQ Error: The reduced parameter space and parameter bounds check features are currently not compatible with each other. Implementing their compatibility is planned and simply requires the parameter bounds to become reduced to the reduced parameter space. It is only a few lines of code that will probably take A. Savara about 30 minutes to implement. Contact A. Savara if you need to use both features simultaneiously."); import sys; sys.exit()
+
         #Check if there are parameterNames provided. If not, we will make some.
         if len(UserInput.model['parameterNamesAndMathTypeExpressionsDict']) == 0:
             numParameters = len(UserInput.model['InputParameterPriorValues'])
@@ -2589,9 +2596,7 @@ class parameter_estimation:
 
 
         try:
-            print("line 2556!")
             self.makeScatterHeatMapPlots(plot_settings=self.UserInput.scatter_matrix_plots_settings)
-            print("line 2558!")
         except:
             print("Unable to make scatter heatmap plots. This usually means your run is not an MCMC run, or that the sampling did not work well. If you are using Metropolis-Hastings, try EnsembleSliceSampling or try a uniform distribution multistart.")
 
