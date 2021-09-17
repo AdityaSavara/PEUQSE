@@ -2182,9 +2182,12 @@ class parameter_estimation:
         simulationOutput =simulationFunction(discreteParameterVector) 
         if type(simulationOutput)==type(None):
             return None #This is intended for the case that the simulation fails. User can return "None" for the simulation output.
-        if np.array(simulationOutput).any()==float('nan'):
-            print("WARNING: Your simulation output returned a 'nan' for parameter values " +str(discreteParameterVector) + ". 'nan' values cannot be processed by the CheKiPEUQ software and this set of Parameter Values is being assigned a probability of 0.")
-            return None #This is intended for the case that the simulation fails in some way without returning "None". 
+        try:#This warning will not always work if there are multiple responses. #TODO: make this a loop across the number of responses. For now, just making it a "try" and "except" statement.
+            if np.array(simulationOutput).any()==float('nan'):
+                print("WARNING: Your simulation output returned a 'nan' for parameter values " +str(discreteParameterVector) + ". 'nan' values cannot be processed by the CheKiPEUQ software and this set of Parameter Values is being assigned a probability of 0.")
+                return None #This is intended for the case that the simulation fails in some way without returning "None". 
+        except:
+            pass
         if type(simulationOutputProcessingFunction) == type(None):
             simulatedResponses = simulationOutput 
         elif type(simulationOutputProcessingFunction) != type(None):
