@@ -2024,7 +2024,7 @@ class parameter_estimation:
                 samples[i,:] = proposal_sample
                 samples_drawn[i,:] = proposal_sample
                 log_postereriors_drawn[i] = (log_likelihood_proposal+log_prior_proposal) #FIXME: should be using getlogP
-                samples_simulatedOutputs[i,:] = nestedObjectsFunctions.flatten_2dNested(simulationOutput_proposal)
+                #samples_simulatedOutputs[i,:] = nestedObjectsFunctions.flatten_2dNested(simulationOutput_proposal)
                 log_posteriors_un_normed_vec[i] = log_likelihood_proposal+log_prior_proposal 
                 log_likelihoods_vec[i] = log_likelihood_proposal
                 log_priors_vec[i] = log_prior_proposal
@@ -2036,7 +2036,7 @@ class parameter_estimation:
                 samples[i,:] = samples[i-1,:] #the sample is not kept if it is rejected, though we still store it in the samples_drawn.
                 samples_drawn[i,:] = proposal_sample
                 log_postereriors_drawn[i] = (log_likelihood_proposal+log_prior_proposal)
-                samples_simulatedOutputs[i,:] = nestedObjectsFunctions.flatten_2dNested(simulationOutput_current_location)
+                #samples_simulatedOutputs[i,:] = nestedObjectsFunctions.flatten_2dNested(simulationOutput_current_location)
                 log_posteriors_un_normed_vec[i] = log_likelihood_current_location+log_prior_current_location
                 log_likelihoods_vec[i] = log_likelihood_current_location
                 log_priors_vec[i] = log_prior_current_location
@@ -2083,8 +2083,8 @@ class parameter_estimation:
             self.during_burn_in_samples = samples[0:self.mcmc_burn_in_length] 
             self.during_burn_in_log_posteriors_un_normed_vec = log_posteriors_un_normed_vec[0:self.mcmc_burn_in_length]
         self.post_burn_in_samples = samples[self.mcmc_burn_in_length:] 
-        self.post_burn_in_samples_simulatedOutputs = copy.deepcopy(samples_simulatedOutputs)
-        self.post_burn_in_samples_simulatedOutputs[self.mcmc_burn_in_length:0] #Note: this feature is presently not compatible with continueSampling.
+        #self.post_burn_in_samples_simulatedOutputs = copy.deepcopy(samples_simulatedOutputs)
+        #self.post_burn_in_samples_simulatedOutputs[self.mcmc_burn_in_length:0] #Note: this feature is presently not compatible with continueSampling.
         self.post_burn_in_log_posteriors_un_normed_vec = log_posteriors_un_normed_vec[self.mcmc_burn_in_length:]
         self.mcmc_last_point_sampled = self.post_burn_in_samples[-1]
         self.post_burn_in_log_likelihoods_vec = log_likelihoods_vec[self.mcmc_burn_in_length:]
