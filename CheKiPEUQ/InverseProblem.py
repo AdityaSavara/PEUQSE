@@ -364,6 +364,11 @@ class parameter_estimation:
         self.permutation_and_doOptimizeSSR = False #just initializing this flag with its default.
         self.permutation_and_doOptimizeLogP = False
     
+    def reload_samples(self, sampling_type='', filepath = ''):
+        if sampling_type = '':
+            print("ERROR: reload_samples requires specifying either 'multistart' or 'mcmc' as the first argument"); sys.exit()
+        
+    
     def reduceResponseSpace(self):
         #This function has no explicit arguments, but takes everything in self.UserInput as an implied argument.
         #In particular, self.UserInput.responses['reducedResponseSpace']
