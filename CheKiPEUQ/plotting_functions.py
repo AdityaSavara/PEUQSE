@@ -110,10 +110,10 @@ class plotting_functions_class():
     def rate_tot_plot(self):
         return
 
-def sampledParameterHistogramMaker(parameterSamples, parameterName, parameterNamesAndMathTypeExpressionsDict, sampledParameterFiguresDictionary, sampledParameterAxesDictionary, directory='', parameterInitialValue=None, parameterMAPValue=None, parameterMuAPValue=None):
+def sampledParameterHistogramMaker(parameterSamples, parameterName, parameterNamesAndMathTypeExpressionsDict, sampledParameterFiguresDictionary, sampledParameterAxesDictionary, directory='', parameterInitialValue=None, parameterMAPValue=None, parameterMuAPValue=None, histograms_as_density=False):
         parameterIndex = list(parameterNamesAndMathTypeExpressionsDict).index(parameterName)
         sampledParameterFiguresDictionary[parameterName], sampledParameterAxesDictionary[parameterName] = plt.subplots()   #making plt objects    
-        sampledParameterAxesDictionary[parameterName].hist(parameterSamples[:,parameterIndex]) #filling the object with data
+        sampledParameterAxesDictionary[parameterName].hist(parameterSamples[:,parameterIndex], density=histograms_as_density) #filling the object with data
         #setting the labels etc. and then exporting.
         axis_font = {'size':'16'} #TODO: Make this size a setting that can be changed. #Code was made following answer by "binaryfunt" here https://stackoverflow.com/questions/3899980/how-to-change-the-font-size-on-a-matplotlib-plot
         sampledParameterAxesDictionary[parameterName].set_ylabel('frequency', **axis_font)
@@ -141,7 +141,7 @@ def sampledParameterHistogramMaker(parameterSamples, parameterName, parameterNam
         # fig2.savefig('Ea2.png', dpi=220)
 
     #Make histograms for each parameter. Need to make some dictionaries where relevant objects will be stored.
-def makeHistogramsForEachParameter(parameterSamples,parameterNamesAndMathTypeExpressionsDict, directory='', parameterInitialValue=None, parameterMAPValue=None, parameterMuAPValue=None):
+def makeHistogramsForEachParameter(parameterSamples,parameterNamesAndMathTypeExpressionsDict, directory='', parameterInitialValue=None, parameterMAPValue=None, parameterMuAPValue=None, histograms_as_density=False):
     sampledParameterFiguresDictionary = copy.deepcopy(parameterNamesAndMathTypeExpressionsDict) #This must be a deep copy to perserve original.
     sampledParameterAxesDictionary = copy.deepcopy(parameterNamesAndMathTypeExpressionsDict) #This must be a deep copy to preserve original.
     #The below code was originally added by Eric Walker, then modified by Troy Gustke to add in the initialValue, MAPvalue, and mu_apvALUE in June 2021, and merged in by A. Savara.    
@@ -150,7 +150,7 @@ def makeHistogramsForEachParameter(parameterSamples,parameterNamesAndMathTypeExp
         initialValue = iv
         MAPValue = mp
         Mu_APValue = mup
-        sampledParameterHistogramMaker(parameterSamples, parameterName, parameterNamesAndMathTypeExpressionsDict, sampledParameterFiguresDictionary, sampledParameterAxesDictionary, directory=directory, parameterInitialValue=initialValue, parameterMAPValue=MAPValue, parameterMuAPValue=Mu_APValue)        
+        sampledParameterHistogramMaker(parameterSamples, parameterName, parameterNamesAndMathTypeExpressionsDict, sampledParameterFiguresDictionary, sampledParameterAxesDictionary, directory=directory, parameterInitialValue=initialValue, parameterMAPValue=MAPValue, parameterMuAPValue=Mu_APValue, histograms_as_density=histograms_as_density)        
 
 def createSimulatedResponsesPlot(x_values, listOfYArrays, plot_settings={}, listOfYUncertaintiesArrays=[], showFigure=True, directory=''):
     exportFigure = True #This variable should be moved to an argument or something in plot_settings.
