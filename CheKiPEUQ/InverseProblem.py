@@ -2309,7 +2309,7 @@ class parameter_estimation:
         setMatPlotLibAgg(self.UserInput.plotting_ouput_settings['setMatPlotLibAgg'])
         parameterSamples = self.post_burn_in_samples
         parameterNamesAndMathTypeExpressionsDict = self.UserInput.parameterNamesAndMathTypeExpressionsDict
-        if hasattr(self.userInput, 'histogram_plot_settings') = False:
+        if hasattr(self.userInput, 'histogram_plot_settings') == False:
             self.userInput.histogram_plot_settings={}
             self.userInput.histogram_plot_settings['histograms_as_density'] = False
         plotting_functions.makeHistogramsForEachParameter(parameterSamples,parameterNamesAndMathTypeExpressionsDict, directory = self.UserInput.directories['graphs'], parameterInitialValue=self.UserInput.model['InputParameterPriorValues'], parameterMAPValue=self.map_parameter_set, parameterMuAPValue=self.mu_AP_parameter_set, histograms_as_density=histogram_plot_settings['histograms_as_density'])
