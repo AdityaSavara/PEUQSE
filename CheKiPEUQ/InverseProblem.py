@@ -2195,7 +2195,7 @@ class parameter_estimation:
         simulatedResponses = nestedObjectsFunctions.makeAtLeast_2dNested(simulatedResponses)
         if self.doSimulatedResponsesBoundsChecks(simulatedResponses) == False:
             simulatedResponses = None
-        #if self.userInput.parameter_estimation_settings['exportAllSimulatedOutputs' == True: 
+        #if self.UserInput.parameter_estimation_settings['exportAllSimulatedOutputs' == True: 
         #decided to always keep the lastSimulatedResponses in memory. Should be okay because only the most recent should be kept.
         #At least, that is my understanding after searching for "garbage" here and then reading: http://www.digi.com/wiki/developer/index.php/Python_Garbage_Collection
         self.lastSimulatedResponses = copy.deepcopy(simulatedResponses)
@@ -2309,10 +2309,10 @@ class parameter_estimation:
         setMatPlotLibAgg(self.UserInput.plotting_ouput_settings['setMatPlotLibAgg'])
         parameterSamples = self.post_burn_in_samples
         parameterNamesAndMathTypeExpressionsDict = self.UserInput.parameterNamesAndMathTypeExpressionsDict
-        if hasattr(self.userInput, 'histogram_plot_settings') == False:
-            self.userInput.histogram_plot_settings={}
-            self.userInput.histogram_plot_settings['histograms_as_density'] = False
-        plotting_functions.makeHistogramsForEachParameter(parameterSamples,parameterNamesAndMathTypeExpressionsDict, directory = self.UserInput.directories['graphs'], parameterInitialValue=self.UserInput.model['InputParameterPriorValues'], parameterMAPValue=self.map_parameter_set, parameterMuAPValue=self.mu_AP_parameter_set, histograms_as_density=histogram_plot_settings['histograms_as_density'])
+        if hasattr(self.UserInput, 'histogram_plot_settings') == False:
+            self.UserInput.histogram_plot_settings={}
+            self.UserInput.histogram_plot_settings['histograms_as_density'] = False
+        plotting_functions.makeHistogramsForEachParameter(parameterSamples,parameterNamesAndMathTypeExpressionsDict, directory = self.UserInput.directories['graphs'], parameterInitialValue=self.UserInput.model['InputParameterPriorValues'], parameterMAPValue=self.map_parameter_set, parameterMuAPValue=self.mu_AP_parameter_set, histograms_as_density=self.UserInput.histogram_plot_settings['histograms_as_density'])
 
     def makeSamplingScatterMatrixPlot(self, parameterSamples = [], parameterNamesAndMathTypeExpressionsDict={}, parameterNamesList =[], parameterMAPValue=[], parameterMuAPValue=[], plot_settings={'combined_plots':'auto'}):
         import pandas as pd #This is the only function that needs pandas.
