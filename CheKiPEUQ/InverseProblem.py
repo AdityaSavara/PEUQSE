@@ -2309,10 +2309,9 @@ class parameter_estimation:
         setMatPlotLibAgg(self.UserInput.plotting_ouput_settings['setMatPlotLibAgg'])
         parameterSamples = self.post_burn_in_samples
         parameterNamesAndMathTypeExpressionsDict = self.UserInput.parameterNamesAndMathTypeExpressionsDict
-        if hasattr(self.UserInput, 'histogram_plot_settings') == False:
+        if hasattr(self.UserInput, 'histogram_plot_settings') == False: #put some defaults for backwards compatibility.
             self.UserInput.histogram_plot_settings={}
-            self.UserInput.histogram_plot_settings['histograms_as_density'] = False
-        plotting_functions.makeHistogramsForEachParameter(parameterSamples,parameterNamesAndMathTypeExpressionsDict, directory = self.UserInput.directories['graphs'], parameterInitialValue=self.UserInput.model['InputParameterPriorValues'], parameterMAPValue=self.map_parameter_set, parameterMuAPValue=self.mu_AP_parameter_set, histograms_as_density=self.UserInput.histogram_plot_settings['histograms_as_density'])
+        plotting_functions.makeHistogramsForEachParameter(parameterSamples,parameterNamesAndMathTypeExpressionsDict, directory = self.UserInput.directories['graphs'], parameterInitialValue=self.UserInput.model['InputParameterPriorValues'], parameterMAPValue=self.map_parameter_set, parameterMuAPValue=self.mu_AP_parameter_set, histogram_plot_settings=self.UserInput.histogram_plot_settings)
 
     def makeSamplingScatterMatrixPlot(self, parameterSamples = [], parameterNamesAndMathTypeExpressionsDict={}, parameterNamesList =[], parameterMAPValue=[], parameterMuAPValue=[], plot_settings={'combined_plots':'auto'}):
         import pandas as pd #This is the only function that needs pandas.
