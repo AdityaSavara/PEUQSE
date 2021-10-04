@@ -50,6 +50,17 @@ class parameter_estimation:
         reducedParameterSpaceOn = bool(len(UserInput.model['reducedParameterSpace']))
         if (reducedParameterSpaceOn and parameterBoundsOn) == True:
             print("CheKiPEUQ Error: The reduced parameter space and parameter bounds check features are currently not compatible with each other. Implementing their compatibility is planned and simply requires the parameter bounds to become reduced to the reduced parameter space. It is only a few lines of code that will probably take A. Savara about 30 minutes to implement. Contact A. Savara if you need to use both features simultaneiously."); import sys; sys.exit()
+        
+        #Check for deprecated UserInput choices.
+        if hasattr(UserInput.parameter_estimation_settings, 'multistart_gridsearchToSamples'):
+            print("The UserInput feature parameter_estimation_settings['multistart_gridsearchToSamples'] has been renamed. Use parameter_estimation_settings['multistart_permutationsToSamples'].")
+            if hasattr(UserInput.parameter_estimation_settings, 'multistart_permutationsToSamples') == False:    
+                UserInput.parameter_estimation_settings['multistart_permutationsToSamples']= UserInput.parameter_estimation_settings['multistart_gridsearchToSamples']
+        if hasattr(UserInput.parameter_estimation_settings, 'multistart_gridsearch_threshold_filter_coefficient'):
+            print("The UserInput feature parameter_estimation_settings['multistart_gridsearch_threshold_filter_coefficient'] has been renamed. Use parameter_estimation_settings['multistart_permutationsToSamples_threshold_filter_coefficient'].")
+            if hasattr(UserInput.parameter_estimation_settings, 'multistart_permutationsToSamples_threshold_filter_coefficient') == False:    
+                UserInput.parameter_estimation_settings['multistart_permutationsToSamples_threshold_filter_coefficient']= UserInput.parameter_estimation_settings['multistart_gridsearch_threshold_filter_coefficient']
+
 
         #Check if there are parameterNames provided. If not, we will make some.
         if len(UserInput.model['parameterNamesAndMathTypeExpressionsDict']) == 0:
@@ -125,7 +136,7 @@ class parameter_estimation:
                         sys.exit()
                     
         
-        #Setting this object so that we can make changes to it below without changing userinput dictionaries.
+        #Setting this object so that we can make changes to it below without changing UserInput dictionaries.
         self.UserInput.mu_prior = np.array(UserInput.model['InputParameterPriorValues'], dtype='float')
         #Below code is mainly for allowing uniform distributions in priors.
         UserInput.InputParametersPriorValuesUncertainties = np.array(UserInput.model['InputParametersPriorValuesUncertainties'],dtype='float') #Doing this so that the -1.0 check below should work.
@@ -372,8 +383,8 @@ class parameter_estimation:
         #in both cases, multstart or mcmc, it's really an array of logP_and_parameter_values, just slightly different meanings.
         if sampling_type == 'multistart':  #load from the unfiltered values.
             self.permutations_MAP_logP_and_parameters_values = np.genfromtxt(filepath + "\multistart_MAP_logP_and_parameters_values.csv", delimiter=",")
-            multistart_gridsearch_threshold_filter_coefficient = self.UserInput.parameter_estimation_settings['multistart_gridsearch_threshold_filter_coefficient']
-            permutations_to_samples_with_logP = convertPermutationsToSamples(self.permutations_MAP_logP_and_parameters_values, relativeFilteringThreshold = 10**(-1*multistart_gridsearch_threshold_filter_coefficient))
+            multistart_permutationsToSamples_threshold_filter_coefficient = self.UserInput.parameter_estimation_settings['multistart_permutationsToSamples_threshold_filter_coefficient']
+            permutations_to_samples_with_logP = convertPermutationsToSamples(self.permutations_MAP_logP_and_parameters_values, relativeFilteringThreshold = 10**(-1*multistart_permutationsToSamples_threshold_filter_coefficient))
             self.post_burn_in_samples = permutations_to_samples_with_logP[:,1:] #drop the first column which is logP.
             logP_and_parameter_values = np.array(permutations_to_samples_with_logP)
             self.post_burn_in_log_posteriors_un_normed_vec = permutations_to_samples_with_logP[:,0]
@@ -844,13 +855,13 @@ class parameter_estimation:
                         self.permutations_MAP_logP_and_parameters_values = np.vstack((self.last_permutations_MAP_logP_and_parameters_values,self.permutations_MAP_logP_and_parameters_values))                        
                         self.listOfPermutations = np.vstack((self.last_listOfPermutations, self.listOfPermutations))
                         highest_MAP_initial_point_index = "Not provided with continueSampling." #TODO: take self.map_parameter_set from after calculatePostBurnIn Statistics highest_MAP_initial_point_index and search for the right row in listOfPermutations.
-                #First set the multistart_gridsearch_threshold_filter_coefficient. We will take 10**-(thisnumber) later.
-                if str(self.UserInput.parameter_estimation_settings['multistart_gridsearch_threshold_filter_coefficient']).lower() == 'auto':
-                    multistart_gridsearch_threshold_filter_coefficient = 2.0
+                #First set the multistart_permutationsToSamples_threshold_filter_coefficient. We will take 10**-(thisnumber) later.
+                if str(self.UserInput.parameter_estimation_settings['multistart_permutationsToSamples_threshold_filter_coefficient']).lower() == 'auto':
+                    multistart_permutationsToSamples_threshold_filter_coefficient = 2.0
                 else:
-                    multistart_gridsearch_threshold_filter_coefficient = self.UserInput.parameter_estimation_settings['multistart_gridsearch_threshold_filter_coefficient']
+                    multistart_permutationsToSamples_threshold_filter_coefficient = self.UserInput.parameter_estimation_settings['multistart_permutationsToSamples_threshold_filter_coefficient']
                 try:
-                    logP_values_and_samples = convertPermutationsToSamples(self.permutations_MAP_logP_and_parameters_values, maxLogP=float(bestResultSoFar[0]), relativeFilteringThreshold = 10**(-1*multistart_gridsearch_threshold_filter_coefficient))
+                    logP_values_and_samples = convertPermutationsToSamples(self.permutations_MAP_logP_and_parameters_values, maxLogP=float(bestResultSoFar[0]), relativeFilteringThreshold = 10**(-1*multistart_permutationsToSamples_threshold_filter_coefficient))
                     self.post_burn_in_log_posteriors_un_normed_vec = logP_values_and_samples[:,0]
                     self.post_burn_in_log_posteriors_un_normed_vec = np.array(nestedObjectsFunctions.makeAtLeast_2dNested(self.post_burn_in_log_posteriors_un_normed_vec)).transpose()
                     self.post_burn_in_samples = logP_values_and_samples[:,1:]
@@ -941,7 +952,7 @@ class parameter_estimation:
         
         #we normally only turn on permutationsToSamples if grid or uniform and if getLogP or doOptimizeNegLogP.
         permutationsToSamples = False#initialize with default
-        if self.UserInput.parameter_estimation_settings['multistart_gridsearchToSamples'] == True:
+        if self.UserInput.parameter_estimation_settings['multistart_permutationsToSamples'] == True:
             if initialPointsDistributionType == 'grid' or initialPointsDistributionType == 'uniform':
                 if (searchType == 'getLogP') or (searchType=='doOptimizeNegLogP') or (searchType=='doOptimizeLogP') or (searchType=='doOptimizeSSR'):
                     permutationsToSamples = True
@@ -1181,7 +1192,7 @@ class parameter_estimation:
         
         synthetic_data  = simulatedResponses
         synthetic_data_uncertainties = responses_simulation_uncertainties
-        #We need to populate the "observed" responses in userinput with the synthetic data.
+        #We need to populate the "observed" responses in UserInput with the synthetic data.
         self.UserInput.responses['responses_observed'] = simulatedResponses
         self.UserInput.responses['responses_observed_uncertainties'] = responses_simulation_uncertainties
         #Now need to do something unusual: Need to call the __init__ function again so that the arrays get reshaped as needed etc.
@@ -1891,7 +1902,7 @@ class parameter_estimation:
                 self.last_InputParameterInitialGuess_filename = file_name_prefix + "mcmc_initial_point_parameters" + file_name_suffix
                 self.last_InputParameterInitialGuess_data = unpickleAnObject(self.UserInput.directories['pickles']+self.last_InputParameterInitialGuess_filename)
                 self.UserInput.InputParameterInitialGuess = self.last_InputParameterInitialGuess_data #populating this because otherwise non-grid Multi-Start will get the wrong values exported. & Same for final plots.
-        ####these variables need to be made part of userinput####
+        ####these variables need to be made part of UserInput####
         numParameters = len(self.UserInput.InputParameterInitialGuess) #This is the number of parameters.
         if 'mcmc_random_seed' in self.UserInput.parameter_estimation_settings:
             if type(self.UserInput.parameter_estimation_settings['mcmc_random_seed']) == type(1): #if it's an integer, then it's not a "None" type or string, and we will use it.
@@ -1923,7 +1934,7 @@ class parameter_estimation:
             walkerStartPoints = self.generateInitialPoints(initialPointsDistributionType=walkerInitialDistribution, numStartPoints = self.mcmc_nwalkers,relativeInitialDistributionSpread=walkerInitialDistributionSpread) #making the first set of starting points.
         elif continueSampling == True:
             walkerStartPoints = self.mcmc_last_point_sampled
-        zeus_sampler = zeus.EnsembleSampler(self.mcmc_nwalkers, numParameters, logprob_fn=self.getLogP, maxiter=mcmc_maxiter) #maxiter=1E4 is the typical number, but we may want to increase it based on some userInput variable.        
+        zeus_sampler = zeus.EnsembleSampler(self.mcmc_nwalkers, numParameters, logprob_fn=self.getLogP, maxiter=mcmc_maxiter) #maxiter=1E4 is the typical number, but we may want to increase it based on some UserInput variable.        
         for trialN in range(0,1000):#Todo: This number of this range is hardcoded but should probably be a user selection.
             try:
                 zeus_sampler.run_mcmc(walkerStartPoints, nEnsembleSteps)
@@ -1933,7 +1944,7 @@ class parameter_estimation:
                     print("One of the starting points has a non-finite probability. Picking new starting points. If you see this message like an infinite loop, consider trying the doEnsembleSliceSampling optional argument of walkerInitialDistributionSpread. It has a default value of 1.0. Reducing this value to 0.25, for example, may work if your initial guess is near the maximum of the posterior distribution.")
                     #Need to make the sampler again, in this case, to throw away anything that has happened so far
                     walkerStartPoints = self.generateInitialPoints(initialPointsDistributionType=walkerInitialDistribution, numStartPoints = self.mcmc_nwalkers, relativeInitialDistributionSpread=walkerInitialDistributionSpread) 
-                    zeus_sampler = zeus.EnsembleSampler(self.mcmc_nwalkers, numParameters, logprob_fn=self.getLogP, maxiter=mcmc_maxiter) #maxiter=1E4 is the typical number, but we may want to increase it based on some userInput variable.        
+                    zeus_sampler = zeus.EnsembleSampler(self.mcmc_nwalkers, numParameters, logprob_fn=self.getLogP, maxiter=mcmc_maxiter) #maxiter=1E4 is the typical number, but we may want to increase it based on some UserInput variable.        
                 elif "maxiter" in str(exceptionObject): #This means there is an error message from zeus that the max iterations have been reached.
                     print("WARNING: One or more of the Ensemble Slice Sampling walkers encountered an error. The value of mcmc_maxiter is currently", mcmc_maxiter, "you should increase it, perhaps by a factor of 1E2.")
                 else:
