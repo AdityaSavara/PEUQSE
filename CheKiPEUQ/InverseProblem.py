@@ -44,6 +44,24 @@ class parameter_estimation:
         for directoryName in UserInput.directories:
             if not os.path.exists(directoryName):
                 os.makedirs(directoryName)
+
+        #Check for incompatible choices.
+        parameterBoundsOn = bool(len(UserInput.model['InputParameterPriorValues_upperBounds']) + len(UserInput.model['InputParameterPriorValues_lowerBounds']))
+        reducedParameterSpaceOn = bool(len(UserInput.model['reducedParameterSpace']))
+        if (reducedParameterSpaceOn and parameterBoundsOn) == True:
+            print("CheKiPEUQ Error: The reduced parameter space and parameter bounds check features are currently not compatible with each other. Implementing their compatibility is planned and simply requires the parameter bounds to become reduced to the reduced parameter space. It is only a few lines of code that will probably take A. Savara about 30 minutes to implement. Contact A. Savara if you need to use both features simultaneiously."); import sys; sys.exit()
+        
+        #Check for deprecated UserInput choices.
+        if hasattr(UserInput.parameter_estimation_settings, 'multistart_gridsearchToSamples'):
+            print("The UserInput feature parameter_estimation_settings['multistart_gridsearchToSamples'] has been renamed. Use parameter_estimation_settings['multistart_permutationsToSamples'].")
+            if hasattr(UserInput.parameter_estimation_settings, 'multistart_permutationsToSamples') == False:    
+                UserInput.parameter_estimation_settings['multistart_permutationsToSamples']= UserInput.parameter_estimation_settings['multistart_gridsearchToSamples']
+        if hasattr(UserInput.parameter_estimation_settings, 'multistart_gridsearch_threshold_filter_coefficient'):
+            print("The UserInput feature parameter_estimation_settings['multistart_gridsearch_threshold_filter_coefficient'] has been renamed. Use parameter_estimation_settings['multistart_permutationsToSamples_threshold_filter_coefficient'].")
+            if hasattr(UserInput.parameter_estimation_settings, 'multistart_permutationsToSamples_threshold_filter_coefficient') == False:    
+                UserInput.parameter_estimation_settings['multistart_permutationsToSamples_threshold_filter_coefficient']= UserInput.parameter_estimation_settings['multistart_gridsearch_threshold_filter_coefficient']
+
+
         #Check if there are parameterNames provided. If not, we will make some.
         if len(UserInput.model['parameterNamesAndMathTypeExpressionsDict']) == 0:
             numParameters = len(UserInput.model['InputParameterPriorValues'])
@@ -118,7 +136,7 @@ class parameter_estimation:
                         sys.exit()
                     
         
-        #Setting this object so that we can make changes to it below without changing userinput dictionaries.
+        #Setting this object so that we can make changes to it below without changing UserInput dictionaries.
         self.UserInput.mu_prior = np.array(UserInput.model['InputParameterPriorValues'], dtype='float')
         #Below code is mainly for allowing uniform distributions in priors.
         UserInput.InputParametersPriorValuesUncertainties = np.array(UserInput.model['InputParametersPriorValuesUncertainties'],dtype='float') #Doing this so that the -1.0 check below should work.
@@ -356,6 +374,39 @@ class parameter_estimation:
         self.permutation_and_doOptimizeNegLogP = False #just initializing this flag with its default.
         self.permutation_and_doOptimizeSSR = False #just initializing this flag with its default.
         self.permutation_and_doOptimizeLogP = False
+    
+    #fills the samples etc. By default, for multistart, it will also perform filtering and then create the post_burn_in_samples.
+    def reload_samples(self, sampling_type='', filepath = '.'):
+        if (sampling_type != 'multistart') and (sampling_type != 'mcmc'):
+            print("ERROR: reload_samples requires specifying either 'multistart' or 'mcmc' as the first argument"); sys.exit()
+        filepath = filepath + '\logs_and_csvs\ '[:-1]  #can't end a string with a backslash without tricks. Using this discouraged trick because it's reasonably easy to read.
+        #in both cases, multstart or mcmc, it's really an array of logP_and_parameter_values, just slightly different meanings.
+        if sampling_type == 'multistart':  #load from the unfiltered values.
+            self.permutations_MAP_logP_and_parameters_values = np.genfromtxt(filepath + "\multistart_MAP_logP_and_parameters_values.csv", delimiter=",")
+            multistart_permutationsToSamples_threshold_filter_coefficient = self.UserInput.parameter_estimation_settings['multistart_permutationsToSamples_threshold_filter_coefficient']
+            permutations_to_samples_with_logP = convertPermutationsToSamples(self.permutations_MAP_logP_and_parameters_values, relativeFilteringThreshold = 10**(-1*multistart_permutationsToSamples_threshold_filter_coefficient))
+            self.post_burn_in_samples = permutations_to_samples_with_logP[:,1:] #drop the first column which is logP.
+            logP_and_parameter_values = np.array(permutations_to_samples_with_logP)
+            self.post_burn_in_log_posteriors_un_normed_vec = permutations_to_samples_with_logP[:,0]
+            self.post_burn_in_log_posteriors_un_normed_vec = np.array(nestedObjectsFunctions.makeAtLeast_2dNested(self.post_burn_in_log_posteriors_un_normed_vec)).transpose()
+            #need to populate post_burn_in_log_priors_vec this with an object, otherwise calculatePostBurnInStatistics will try to calculate all the priors.
+            self.post_burn_in_log_priors_vec = None
+            #Below is needed to avoid causing an error in the calculatePostBurnInStatistics since we don't have a real priors vec.
+            self.UserInput.parameter_estimation_settings['mcmc_threshold_filter_samples'] = False
+            self.calculatePostBurnInStatistics(calculate_post_burn_in_log_priors_vec = False)    
+        if sampling_type == 'mcmc':
+            mcmc_logP_and_parameters_values = np.genfromtxt(filepath + "\mcmc_logP_and_parameter_samples.csv", delimiter=",")
+            logP_and_parameter_values = np.array(mcmc_logP_and_parameters_values)
+            try:
+                self.calculatePostBurnInStatistics(calculate_post_burn_in_log_priors_vec = True)
+            except:
+                self.calculatePostBurnInStatistics(calculate_post_burn_in_log_priors_vec = False)
+        # below are not needed because they occur in self.calculatePostBurnInStatistics
+        # self.map_logP = max(np.array(logP_and_parameter_values[:,0]))
+        # index_of_map_logP = np.where(logP_and_parameter_values[:,0] == self.map_logP)
+        # self.map_parameter_set = logP_and_parameter_values[index_of_map_logP,1:]
+        
+        
     
     def reduceResponseSpace(self):
         #This function has no explicit arguments, but takes everything in self.UserInput as an implied argument.
@@ -804,13 +855,13 @@ class parameter_estimation:
                         self.permutations_MAP_logP_and_parameters_values = np.vstack((self.last_permutations_MAP_logP_and_parameters_values,self.permutations_MAP_logP_and_parameters_values))                        
                         self.listOfPermutations = np.vstack((self.last_listOfPermutations, self.listOfPermutations))
                         highest_MAP_initial_point_index = "Not provided with continueSampling." #TODO: take self.map_parameter_set from after calculatePostBurnIn Statistics highest_MAP_initial_point_index and search for the right row in listOfPermutations.
-                #First set the multistart_gridsearch_threshold_filter_coefficient. We will take 10**-(thisnumber) later.
-                if str(self.UserInput.parameter_estimation_settings['multistart_gridsearch_threshold_filter_coefficient']).lower() == 'auto':
-                    multistart_gridsearch_threshold_filter_coefficient = 2.0
+                #First set the multistart_permutationsToSamples_threshold_filter_coefficient. We will take 10**-(thisnumber) later.
+                if str(self.UserInput.parameter_estimation_settings['multistart_permutationsToSamples_threshold_filter_coefficient']).lower() == 'auto':
+                    multistart_permutationsToSamples_threshold_filter_coefficient = 2.0
                 else:
-                    multistart_gridsearch_threshold_filter_coefficient = self.UserInput.parameter_estimation_settings['multistart_gridsearch_threshold_filter_coefficient']
+                    multistart_permutationsToSamples_threshold_filter_coefficient = self.UserInput.parameter_estimation_settings['multistart_permutationsToSamples_threshold_filter_coefficient']
                 try:
-                    logP_values_and_samples = convertPermutationsToSamples(self.permutations_MAP_logP_and_parameters_values, maxLogP=float(bestResultSoFar[0]), relativeFilteringThreshold = 10**(-1*multistart_gridsearch_threshold_filter_coefficient))
+                    logP_values_and_samples = convertPermutationsToSamples(self.permutations_MAP_logP_and_parameters_values, maxLogP=float(bestResultSoFar[0]), relativeFilteringThreshold = 10**(-1*multistart_permutationsToSamples_threshold_filter_coefficient))
                     self.post_burn_in_log_posteriors_un_normed_vec = logP_values_and_samples[:,0]
                     self.post_burn_in_log_posteriors_un_normed_vec = np.array(nestedObjectsFunctions.makeAtLeast_2dNested(self.post_burn_in_log_posteriors_un_normed_vec)).transpose()
                     self.post_burn_in_samples = logP_values_and_samples[:,1:]
@@ -901,7 +952,7 @@ class parameter_estimation:
         
         #we normally only turn on permutationsToSamples if grid or uniform and if getLogP or doOptimizeNegLogP.
         permutationsToSamples = False#initialize with default
-        if self.UserInput.parameter_estimation_settings['multistart_gridsearchToSamples'] == True:
+        if self.UserInput.parameter_estimation_settings['multistart_permutationsToSamples'] == True:
             if initialPointsDistributionType == 'grid' or initialPointsDistributionType == 'uniform':
                 if (searchType == 'getLogP') or (searchType=='doOptimizeNegLogP') or (searchType=='doOptimizeLogP') or (searchType=='doOptimizeSSR'):
                     permutationsToSamples = True
@@ -1141,7 +1192,7 @@ class parameter_estimation:
         
         synthetic_data  = simulatedResponses
         synthetic_data_uncertainties = responses_simulation_uncertainties
-        #We need to populate the "observed" responses in userinput with the synthetic data.
+        #We need to populate the "observed" responses in UserInput with the synthetic data.
         self.UserInput.responses['responses_observed'] = simulatedResponses
         self.UserInput.responses['responses_observed_uncertainties'] = responses_simulation_uncertainties
         #Now need to do something unusual: Need to call the __init__ function again so that the arrays get reshaped as needed etc.
@@ -1851,7 +1902,7 @@ class parameter_estimation:
                 self.last_InputParameterInitialGuess_filename = file_name_prefix + "mcmc_initial_point_parameters" + file_name_suffix
                 self.last_InputParameterInitialGuess_data = unpickleAnObject(self.UserInput.directories['pickles']+self.last_InputParameterInitialGuess_filename)
                 self.UserInput.InputParameterInitialGuess = self.last_InputParameterInitialGuess_data #populating this because otherwise non-grid Multi-Start will get the wrong values exported. & Same for final plots.
-        ####these variables need to be made part of userinput####
+        ####these variables need to be made part of UserInput####
         numParameters = len(self.UserInput.InputParameterInitialGuess) #This is the number of parameters.
         if 'mcmc_random_seed' in self.UserInput.parameter_estimation_settings:
             if type(self.UserInput.parameter_estimation_settings['mcmc_random_seed']) == type(1): #if it's an integer, then it's not a "None" type or string, and we will use it.
@@ -1883,7 +1934,7 @@ class parameter_estimation:
             walkerStartPoints = self.generateInitialPoints(initialPointsDistributionType=walkerInitialDistribution, numStartPoints = self.mcmc_nwalkers,relativeInitialDistributionSpread=walkerInitialDistributionSpread) #making the first set of starting points.
         elif continueSampling == True:
             walkerStartPoints = self.mcmc_last_point_sampled
-        zeus_sampler = zeus.EnsembleSampler(self.mcmc_nwalkers, numParameters, logprob_fn=self.getLogP, maxiter=mcmc_maxiter) #maxiter=1E4 is the typical number, but we may want to increase it based on some userInput variable.        
+        zeus_sampler = zeus.EnsembleSampler(self.mcmc_nwalkers, numParameters, logprob_fn=self.getLogP, maxiter=mcmc_maxiter) #maxiter=1E4 is the typical number, but we may want to increase it based on some UserInput variable.        
         for trialN in range(0,1000):#Todo: This number of this range is hardcoded but should probably be a user selection.
             try:
                 zeus_sampler.run_mcmc(walkerStartPoints, nEnsembleSteps)
@@ -1893,7 +1944,7 @@ class parameter_estimation:
                     print("One of the starting points has a non-finite probability. Picking new starting points. If you see this message like an infinite loop, consider trying the doEnsembleSliceSampling optional argument of walkerInitialDistributionSpread. It has a default value of 1.0. Reducing this value to 0.25, for example, may work if your initial guess is near the maximum of the posterior distribution.")
                     #Need to make the sampler again, in this case, to throw away anything that has happened so far
                     walkerStartPoints = self.generateInitialPoints(initialPointsDistributionType=walkerInitialDistribution, numStartPoints = self.mcmc_nwalkers, relativeInitialDistributionSpread=walkerInitialDistributionSpread) 
-                    zeus_sampler = zeus.EnsembleSampler(self.mcmc_nwalkers, numParameters, logprob_fn=self.getLogP, maxiter=mcmc_maxiter) #maxiter=1E4 is the typical number, but we may want to increase it based on some userInput variable.        
+                    zeus_sampler = zeus.EnsembleSampler(self.mcmc_nwalkers, numParameters, logprob_fn=self.getLogP, maxiter=mcmc_maxiter) #maxiter=1E4 is the typical number, but we may want to increase it based on some UserInput variable.        
                 elif "maxiter" in str(exceptionObject): #This means there is an error message from zeus that the max iterations have been reached.
                     print("WARNING: One or more of the Ensemble Slice Sampling walkers encountered an error. The value of mcmc_maxiter is currently", mcmc_maxiter, "you should increase it, perhaps by a factor of 1E2.")
                 else:
@@ -2017,7 +2068,7 @@ class parameter_estimation:
                 samples[i,:] = proposal_sample
                 samples_drawn[i,:] = proposal_sample
                 log_postereriors_drawn[i] = (log_likelihood_proposal+log_prior_proposal) #FIXME: should be using getlogP
-                samples_simulatedOutputs[i,:] = nestedObjectsFunctions.flatten_2dNested(simulationOutput_proposal)
+                #samples_simulatedOutputs[i,:] = nestedObjectsFunctions.flatten_2dNested(simulationOutput_proposal)
                 log_posteriors_un_normed_vec[i] = log_likelihood_proposal+log_prior_proposal 
                 log_likelihoods_vec[i] = log_likelihood_proposal
                 log_priors_vec[i] = log_prior_proposal
@@ -2029,7 +2080,7 @@ class parameter_estimation:
                 samples[i,:] = samples[i-1,:] #the sample is not kept if it is rejected, though we still store it in the samples_drawn.
                 samples_drawn[i,:] = proposal_sample
                 log_postereriors_drawn[i] = (log_likelihood_proposal+log_prior_proposal)
-                samples_simulatedOutputs[i,:] = nestedObjectsFunctions.flatten_2dNested(simulationOutput_current_location)
+                #samples_simulatedOutputs[i,:] = nestedObjectsFunctions.flatten_2dNested(simulationOutput_current_location)
                 log_posteriors_un_normed_vec[i] = log_likelihood_current_location+log_prior_current_location
                 log_likelihoods_vec[i] = log_likelihood_current_location
                 log_priors_vec[i] = log_prior_current_location
@@ -2076,8 +2127,8 @@ class parameter_estimation:
             self.during_burn_in_samples = samples[0:self.mcmc_burn_in_length] 
             self.during_burn_in_log_posteriors_un_normed_vec = log_posteriors_un_normed_vec[0:self.mcmc_burn_in_length]
         self.post_burn_in_samples = samples[self.mcmc_burn_in_length:] 
-        self.post_burn_in_samples_simulatedOutputs = copy.deepcopy(samples_simulatedOutputs)
-        self.post_burn_in_samples_simulatedOutputs[self.mcmc_burn_in_length:0] #Note: this feature is presently not compatible with continueSampling.
+        #self.post_burn_in_samples_simulatedOutputs = copy.deepcopy(samples_simulatedOutputs)
+        #self.post_burn_in_samples_simulatedOutputs[self.mcmc_burn_in_length:0] #Note: this feature is presently not compatible with continueSampling.
         self.post_burn_in_log_posteriors_un_normed_vec = log_posteriors_un_normed_vec[self.mcmc_burn_in_length:]
         self.mcmc_last_point_sampled = self.post_burn_in_samples[-1]
         self.post_burn_in_log_likelihoods_vec = log_likelihoods_vec[self.mcmc_burn_in_length:]
@@ -2175,9 +2226,12 @@ class parameter_estimation:
         simulationOutput =simulationFunction(discreteParameterVector) 
         if type(simulationOutput)==type(None):
             return None #This is intended for the case that the simulation fails. User can return "None" for the simulation output.
-        if np.array(simulationOutput).any()==float('nan'):
-            print("WARNING: Your simulation output returned a 'nan' for parameter values " +str(discreteParameterVector) + ". 'nan' values cannot be processed by the CheKiPEUQ software and this set of Parameter Values is being assigned a probability of 0.")
-            return None #This is intended for the case that the simulation fails in some way without returning "None". 
+        try:#This warning will not always work if there are multiple responses. #TODO: make this a loop across the number of responses. For now, just making it a "try" and "except" statement.
+            if np.array(simulationOutput).any()==float('nan'):
+                print("WARNING: Your simulation output returned a 'nan' for parameter values " +str(discreteParameterVector) + ". 'nan' values cannot be processed by the CheKiPEUQ software and this set of Parameter Values is being assigned a probability of 0.")
+                return None #This is intended for the case that the simulation fails in some way without returning "None". 
+        except:
+            pass
         if type(simulationOutputProcessingFunction) == type(None):
             simulatedResponses = simulationOutput 
         elif type(simulationOutputProcessingFunction) != type(None):
@@ -2185,34 +2239,36 @@ class parameter_estimation:
         simulatedResponses = nestedObjectsFunctions.makeAtLeast_2dNested(simulatedResponses)
         if self.doSimulatedResponsesBoundsChecks(simulatedResponses) == False:
             simulatedResponses = None
-        #if self.userInput.parameter_estimation_settings['exportAllSimulatedOutputs' == True: 
+        #if self.UserInput.parameter_estimation_settings['exportAllSimulatedOutputs' == True: 
         #decided to always keep the lastSimulatedResponses in memory. Should be okay because only the most recent should be kept.
         #At least, that is my understanding after searching for "garbage" here and then reading: http://www.digi.com/wiki/developer/index.php/Python_Garbage_Collection
         self.lastSimulatedResponses = copy.deepcopy(simulatedResponses)
         return simulatedResponses
     
     def getLogLikelihood(self,discreteParameterVector): #The variable discreteParameterVector represents a vector of values for the parameters being sampled. So it represents a single point in the multidimensional parameter space.
+        discreteParameterVectorTuple = np.ndarray.copy(discreteParameterVector) #we use a tuple in case any of the functions try to change the parameters.
+        
         #First do upper and lower bounds checks, if such bounds have been provided.
-        boundsChecksPassed = self.doInputParameterBoundsChecks(discreteParameterVector)
+        boundsChecksPassed = self.doInputParameterBoundsChecks(discreteParameterVectorTuple)
         if boundsChecksPassed == False: #If false, return a 'zero probability' type result. Else, continue getting log likelihood.
             return float('-inf'), None #This approximates zero probability.
 
         #Check if user has provided a custom log likelihood function.
         if type(self.UserInput.model['custom_logLikelihood']) != type(None):
-            logLikelihood, simulatedResponses = self.UserInput.model['custom_logLikelihood'](discreteParameterVector)
+            logLikelihood, simulatedResponses = self.UserInput.model['custom_logLikelihood'](discreteParameterVectorTuple)
             simulatedResponses = np.array(simulatedResponses).flatten()
             return logLikelihood, simulatedResponses
         #else pass is implied.
 
         #Now get the simulated responses.
-        simulatedResponses = self.getSimulatedResponses(discreteParameterVector)
+        simulatedResponses = self.getSimulatedResponses(discreteParameterVectorTuple)
         if type(simulatedResponses) == type(None):
             return float('-inf'), None #This is intended for the case that the simulation fails, indicated by receiving an 'nan' or None type from user's simulation function.
         #need to check if there are any 'responses_simulation_uncertainties'.
         if type(self.UserInput.responses_simulation_uncertainties) == type(None): #if it's a None type, we keep it as a None type
             responses_simulation_uncertainties = None
-        else:  #Else we get it based on the the discreteParameterVector
-            responses_simulation_uncertainties = self.get_responses_simulation_uncertainties(discreteParameterVector)
+        else:  #Else we get it based on the the discreteParameterVectorTuple
+            responses_simulation_uncertainties = self.get_responses_simulation_uncertainties(discreteParameterVectorTuple)
 
         #Now need to do transforms. Transforms are only for calculating log likelihood. If responses_simulation_uncertainties is "None", then we need to have one less argument passed in and a blank list is returned along with the transformed simulated responses.
         if type(responses_simulation_uncertainties) == type(None):
@@ -2286,7 +2342,7 @@ class parameter_estimation:
                         current_log_probability_metric = float('-inf')
                     #response_log_probability_metric = current_log_probability_metric + response_log_probability_metric
                     if float(current_log_probability_metric) == float('-inf'):
-                        print("Warning: There are posterior points that have zero probability. If there are too many points like this, the MAP and mu_AP returned will not be meaningful. Parameters:", discreteParameterVector)
+                        print("Warning: There are posterior points that have zero probability. If there are too many points like this, the MAP and mu_AP returned will not be meaningful. Parameters:", discreteParameterVectorTuple)
                         current_log_probability_metric = -1E100 #Just choosing an arbitrarily very severe penalty. I know that I have seen 1E-48 to -303 from the multivariate pdf, and values inbetween like -171, -217, -272. I found that -1000 seems to be worse, but I don't have a systematic testing. I think -1000 was causing numerical errors.
                     response_log_probability_metric = current_log_probability_metric + response_log_probability_metric
             log_probability_metric = log_probability_metric + response_log_probability_metric
@@ -2297,7 +2353,9 @@ class parameter_estimation:
         setMatPlotLibAgg(self.UserInput.plotting_ouput_settings['setMatPlotLibAgg'])
         parameterSamples = self.post_burn_in_samples
         parameterNamesAndMathTypeExpressionsDict = self.UserInput.parameterNamesAndMathTypeExpressionsDict
-        plotting_functions.makeHistogramsForEachParameter(parameterSamples,parameterNamesAndMathTypeExpressionsDict, directory = self.UserInput.directories['graphs'], parameterInitialValue=self.UserInput.model['InputParameterPriorValues'], parameterMAPValue=self.map_parameter_set, parameterMuAPValue=self.mu_AP_parameter_set)
+        if hasattr(self.UserInput, 'histogram_plot_settings') == False: #put some defaults for backwards compatibility.
+            self.UserInput.histogram_plot_settings={}
+        plotting_functions.makeHistogramsForEachParameter(parameterSamples,parameterNamesAndMathTypeExpressionsDict, directory = self.UserInput.directories['graphs'], parameterInitialValue=self.UserInput.model['InputParameterPriorValues'], parameterMAPValue=self.map_parameter_set, parameterMuAPValue=self.mu_AP_parameter_set, histogram_plot_settings=self.UserInput.histogram_plot_settings)
 
     def makeSamplingScatterMatrixPlot(self, parameterSamples = [], parameterNamesAndMathTypeExpressionsDict={}, parameterNamesList =[], parameterMAPValue=[], parameterMuAPValue=[], plot_settings={'combined_plots':'auto'}):
         import pandas as pd #This is the only function that needs pandas.
@@ -2587,9 +2645,7 @@ class parameter_estimation:
 
 
         try:
-            print("line 2556!")
             self.makeScatterHeatMapPlots(plot_settings=self.UserInput.scatter_matrix_plots_settings)
-            print("line 2558!")
         except:
             print("Unable to make scatter heatmap plots. This usually means your run is not an MCMC run, or that the sampling did not work well. If you are using Metropolis-Hastings, try EnsembleSliceSampling or try a uniform distribution multistart.")
 

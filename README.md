@@ -100,3 +100,10 @@ The file structure is such that the file `./CheKiPEUQ/__init__.py` is where the 
 At present, the Examples directory contains various examples and a file named  ExamplesAndTutorialAndGettingStarted which provides some explanation.
 
 In the relatively near future, the Examples may be separated into a complementary repository, and/or may be tucked away into the installation directory.
+
+* * *
+# Authors and Contributors
+
+Authors: Aditya "Ashi" Savara and Eric A. Walker
+
+Contributors: Troy Gustke

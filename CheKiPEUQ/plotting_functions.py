@@ -110,23 +110,48 @@ class plotting_functions_class():
     def rate_tot_plot(self):
         return
 
-def sampledParameterHistogramMaker(parameterSamples, parameterName, parameterNamesAndMathTypeExpressionsDict, sampledParameterFiguresDictionary, sampledParameterAxesDictionary, directory='', parameterInitialValue=None, parameterMAPValue=None, parameterMuAPValue=None):
+def sampledParameterHistogramMaker(parameterSamples, parameterName, parameterNamesAndMathTypeExpressionsDict, sampledParameterFiguresDictionary, sampledParameterAxesDictionary, directory='', parameterInitialValue=None, parameterMAPValue=None, parameterMuAPValue=None, histogram_plot_settings={}):
+
+        if len(histogram_plot_settings) == 0: #this means histogram_plot_settings was not provided, or was blank, in which case we will populate variables with defaults.
+            histogram_plot_settings = copy.deepcopy(histogram_plot_settings) #first make a fresh copy so the original dictionary is not changed.
+            histogram_plot_settings['histograms_as_density'] = False
+            histogram_plot_settings['y_label'] = ''
+            histogram_plot_settings['show_initial_value'] = True
+            histogram_plot_settings['show_MAP_value'] = True
+            histogram_plot_settings['show_muAP_value'] = True
+            histogram_plot_settings['x_label_size'] = 16
+            histogram_plot_settings['y_label_size'] = 16
+            histogram_plot_settings['axis_font_size'] = 16
+
+
+        #The axis font size argument needs to be parsed into another form. #Code was made following answer by "binaryfunt" here https://stackoverflow.com/questions/3899980/how-to-change-the-font-size-on-a-matplotlib-plot
+        axis_font = {'size':str(histogram_plot_settings['axis_font_size'])}
+        
+        #Now to get some more strings needed and then make the plot object.
         parameterIndex = list(parameterNamesAndMathTypeExpressionsDict).index(parameterName)
         sampledParameterFiguresDictionary[parameterName], sampledParameterAxesDictionary[parameterName] = plt.subplots()   #making plt objects    
-        sampledParameterAxesDictionary[parameterName].hist(parameterSamples[:,parameterIndex]) #filling the object with data
+        sampledParameterAxesDictionary[parameterName].hist(parameterSamples[:,parameterIndex], density=histogram_plot_settings['histograms_as_density']) #filling the object with data
         #setting the labels etc. and then exporting.
-        axis_font = {'size':'16'} #TODO: Make this size a setting that can be changed. #Code was made following answer by "binaryfunt" here https://stackoverflow.com/questions/3899980/how-to-change-the-font-size-on-a-matplotlib-plot
-        sampledParameterAxesDictionary[parameterName].set_ylabel('frequency', **axis_font)
-        sampledParameterAxesDictionary[parameterName].set_xlabel(parameterNamesAndMathTypeExpressionsDict[parameterName], **axis_font)
-        if parameterInitialValue!=None:
-            sampledParameterAxesDictionary[parameterName].axvline(x=parameterInitialValue, color='#00A5DF', linestyle='--')
-        if parameterMAPValue!=None:
-            sampledParameterAxesDictionary[parameterName].axvline(x=parameterMAPValue, color='r', linestyle='--')
-        if parameterMuAPValue!=None:
-            sampledParameterAxesDictionary[parameterName].axvline(x=parameterMuAPValue, color='k', linestyle='--')
 
-        sampledParameterAxesDictionary[parameterName].tick_params(axis='x', labelsize=16) #TODO: make these labels sizes a setting that can be changed.
-        sampledParameterAxesDictionary[parameterName].tick_params(axis='y', labelsize=16)
+        if histogram_plot_settings['y_label'] == '': #will use defaults if ''        
+            if histogram_plot_settings['histograms_as_density'] == False:
+                sampledParameterAxesDictionary[parameterName].set_ylabel('Frequency', **axis_font)
+            if histogram_plot_settings['histograms_as_density'] == True:
+                sampledParameterAxesDictionary[parameterName].set_ylabel('Probability Density', **axis_font)
+        sampledParameterAxesDictionary[parameterName].set_xlabel(parameterNamesAndMathTypeExpressionsDict[parameterName], **axis_font)
+
+        if histogram_plot_settings['show_initial_value'] == True:
+            if parameterInitialValue!=None:
+                sampledParameterAxesDictionary[parameterName].axvline(x=parameterInitialValue, color='#00A5DF', linestyle='--')
+        if histogram_plot_settings['show_MAP_value'] == True:
+            if parameterMAPValue!=None:
+                sampledParameterAxesDictionary[parameterName].axvline(x=parameterMAPValue, color='r', linestyle='--')
+        if histogram_plot_settings['show_muAP_value'] == True:
+            if parameterMuAPValue!=None:
+                sampledParameterAxesDictionary[parameterName].axvline(x=parameterMuAPValue, color='k', linestyle='--')
+
+        sampledParameterAxesDictionary[parameterName].tick_params(axis='x', labelsize=histogram_plot_settings['x_label_size']) #TODO: make these labels sizes a setting that can be changed.
+        sampledParameterAxesDictionary[parameterName].tick_params(axis='y', labelsize=histogram_plot_settings['y_label_size'])
         sampledParameterFiguresDictionary[parameterName].tight_layout()
         sampledParameterFiguresDictionary[parameterName].savefig(directory+'Histogram_sampling_'+str(parameterIndex)+'_'+parameterName+'.png', dpi=220)
 
@@ -141,7 +166,7 @@ def sampledParameterHistogramMaker(parameterSamples, parameterName, parameterNam
         # fig2.savefig('Ea2.png', dpi=220)
 
     #Make histograms for each parameter. Need to make some dictionaries where relevant objects will be stored.
-def makeHistogramsForEachParameter(parameterSamples,parameterNamesAndMathTypeExpressionsDict, directory='', parameterInitialValue=None, parameterMAPValue=None, parameterMuAPValue=None):
+def makeHistogramsForEachParameter(parameterSamples,parameterNamesAndMathTypeExpressionsDict, directory='', parameterInitialValue=None, parameterMAPValue=None, parameterMuAPValue=None, histogram_plot_settings={}):
     sampledParameterFiguresDictionary = copy.deepcopy(parameterNamesAndMathTypeExpressionsDict) #This must be a deep copy to perserve original.
     sampledParameterAxesDictionary = copy.deepcopy(parameterNamesAndMathTypeExpressionsDict) #This must be a deep copy to preserve original.
     #The below code was originally added by Eric Walker, then modified by Troy Gustke to add in the initialValue, MAPvalue, and mu_apvALUE in June 2021, and merged in by A. Savara.    
@@ -150,7 +175,7 @@ def makeHistogramsForEachParameter(parameterSamples,parameterNamesAndMathTypeExp
         initialValue = iv
         MAPValue = mp
         Mu_APValue = mup
-        sampledParameterHistogramMaker(parameterSamples, parameterName, parameterNamesAndMathTypeExpressionsDict, sampledParameterFiguresDictionary, sampledParameterAxesDictionary, directory=directory, parameterInitialValue=initialValue, parameterMAPValue=MAPValue, parameterMuAPValue=Mu_APValue)        
+        sampledParameterHistogramMaker(parameterSamples, parameterName, parameterNamesAndMathTypeExpressionsDict, sampledParameterFiguresDictionary, sampledParameterAxesDictionary, directory=directory, parameterInitialValue=initialValue, parameterMAPValue=MAPValue, parameterMuAPValue=Mu_APValue, histogram_plot_settings=histogram_plot_settings)        
 
 def createSimulatedResponsesPlot(x_values, listOfYArrays, plot_settings={}, listOfYUncertaintiesArrays=[], showFigure=True, directory=''):
     exportFigure = True #This variable should be moved to an argument or something in plot_settings.

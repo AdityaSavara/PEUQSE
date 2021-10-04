@@ -9,6 +9,7 @@ if __name__ == "__main__":
     UserInput.responses['responses_observed'] = observed_values_00.observed_data_y_values
     UserInput.responses['responses_observed_uncertainties'] = observed_values_00.observed_data_y_values_uncertainties
 
+    UserInput.histogram_plot_settings['histograms_as_density'] = False #False is the default, so this line is not needed. Histograms will show sampling frequency.
     
     UserInput.simulated_response_plot_settings['x_label'] = 'distance (m)'
     UserInput.simulated_response_plot_settings['y_label'] = r'$time (s)$'
