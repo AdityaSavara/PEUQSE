@@ -364,6 +364,39 @@ class parameter_estimation:
         self.permutation_and_doOptimizeSSR = False #just initializing this flag with its default.
         self.permutation_and_doOptimizeLogP = False
     
+    #fills the samples etc. By default, for multistart, it will also perform filtering and then create the post_burn_in_samples.
+    def reload_samples(self, sampling_type='', filepath = '.'):
+        if (sampling_type != 'multistart') and (sampling_type != 'mcmc'):
+            print("ERROR: reload_samples requires specifying either 'multistart' or 'mcmc' as the first argument"); sys.exit()
+        filepath = filepath + '\logs_and_csvs\ '[:-1]  #can't end a string with a backslash without tricks. Using this discouraged trick because it's reasonably easy to read.
+        #in both cases, multstart or mcmc, it's really an array of logP_and_parameter_values, just slightly different meanings.
+        if sampling_type == 'multistart':  #load from the unfiltered values.
+            self.permutations_MAP_logP_and_parameters_values = np.genfromtxt(filepath + "\multistart_MAP_logP_and_parameters_values.csv", delimiter=",")
+            multistart_gridsearch_threshold_filter_coefficient = self.UserInput.parameter_estimation_settings['multistart_gridsearch_threshold_filter_coefficient']
+            permutations_to_samples_with_logP = convertPermutationsToSamples(self.permutations_MAP_logP_and_parameters_values, relativeFilteringThreshold = 10**(-1*multistart_gridsearch_threshold_filter_coefficient))
+            self.post_burn_in_samples = permutations_to_samples_with_logP[:,1:] #drop the first column which is logP.
+            logP_and_parameter_values = np.array(permutations_to_samples_with_logP)
+            self.post_burn_in_log_posteriors_un_normed_vec = permutations_to_samples_with_logP[:,0]
+            self.post_burn_in_log_posteriors_un_normed_vec = np.array(nestedObjectsFunctions.makeAtLeast_2dNested(self.post_burn_in_log_posteriors_un_normed_vec)).transpose()
+            #need to populate post_burn_in_log_priors_vec this with an object, otherwise calculatePostBurnInStatistics will try to calculate all the priors.
+            self.post_burn_in_log_priors_vec = None
+            #Below is needed to avoid causing an error in the calculatePostBurnInStatistics since we don't have a real priors vec.
+            self.UserInput.parameter_estimation_settings['mcmc_threshold_filter_samples'] = False
+            self.calculatePostBurnInStatistics(calculate_post_burn_in_log_priors_vec = False)    
+        if sampling_type == 'mcmc':
+            mcmc_logP_and_parameters_values = np.genfromtxt(filepath + "\mcmc_logP_and_parameter_samples.csv", delimiter=",")
+            logP_and_parameter_values = np.array(mcmc_logP_and_parameters_values)
+            try:
+                self.calculatePostBurnInStatistics(calculate_post_burn_in_log_priors_vec = True)
+            except:
+                self.calculatePostBurnInStatistics(calculate_post_burn_in_log_priors_vec = False)
+        # below are not needed because they occur in self.calculatePostBurnInStatistics
+        # self.map_logP = max(np.array(logP_and_parameter_values[:,0]))
+        # index_of_map_logP = np.where(logP_and_parameter_values[:,0] == self.map_logP)
+        # self.map_parameter_set = logP_and_parameter_values[index_of_map_logP,1:]
+        
+        
+    
     def reduceResponseSpace(self):
         #This function has no explicit arguments, but takes everything in self.UserInput as an implied argument.
         #In particular, self.UserInput.responses['reducedResponseSpace']
@@ -2195,7 +2228,7 @@ class parameter_estimation:
         simulatedResponses = nestedObjectsFunctions.makeAtLeast_2dNested(simulatedResponses)
         if self.doSimulatedResponsesBoundsChecks(simulatedResponses) == False:
             simulatedResponses = None
-        #if self.userInput.parameter_estimation_settings['exportAllSimulatedOutputs' == True: 
+        #if self.UserInput.parameter_estimation_settings['exportAllSimulatedOutputs' == True: 
         #decided to always keep the lastSimulatedResponses in memory. Should be okay because only the most recent should be kept.
         #At least, that is my understanding after searching for "garbage" here and then reading: http://www.digi.com/wiki/developer/index.php/Python_Garbage_Collection
         self.lastSimulatedResponses = copy.deepcopy(simulatedResponses)
@@ -2309,7 +2342,9 @@ class parameter_estimation:
         setMatPlotLibAgg(self.UserInput.plotting_ouput_settings['setMatPlotLibAgg'])
         parameterSamples = self.post_burn_in_samples
         parameterNamesAndMathTypeExpressionsDict = self.UserInput.parameterNamesAndMathTypeExpressionsDict
-        plotting_functions.makeHistogramsForEachParameter(parameterSamples,parameterNamesAndMathTypeExpressionsDict, directory = self.UserInput.directories['graphs'], parameterInitialValue=self.UserInput.model['InputParameterPriorValues'], parameterMAPValue=self.map_parameter_set, parameterMuAPValue=self.mu_AP_parameter_set)
+        if hasattr(self.UserInput, 'histogram_plot_settings') == False: #put some defaults for backwards compatibility.
+            self.UserInput.histogram_plot_settings={}
+        plotting_functions.makeHistogramsForEachParameter(parameterSamples,parameterNamesAndMathTypeExpressionsDict, directory = self.UserInput.directories['graphs'], parameterInitialValue=self.UserInput.model['InputParameterPriorValues'], parameterMAPValue=self.map_parameter_set, parameterMuAPValue=self.mu_AP_parameter_set, histogram_plot_settings=self.UserInput.histogram_plot_settings)
 
     def makeSamplingScatterMatrixPlot(self, parameterSamples = [], parameterNamesAndMathTypeExpressionsDict={}, parameterNamesList =[], parameterMAPValue=[], parameterMuAPValue=[], plot_settings={'combined_plots':'auto'}):
         import pandas as pd #This is the only function that needs pandas.

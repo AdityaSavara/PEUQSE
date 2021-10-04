@@ -94,7 +94,7 @@ parameter_estimation_settings['multistart_gridsearchSamplingInterval'] = [] #Thi
 parameter_estimation_settings['multistart_gridsearchSamplingRadii'] = [] #This is for gridsearches and refers to the number of points (or intervals) in each direction to check from the center. For example, 3 would check 3 points in each direction plus the centerpointn for a total of 7 points along that dimension. For a 3 parameter problem, [3,7,2] would check radii of 3, 7, and 2 for those parameters.
 parameter_estimation_settings['multistart_gridsearchToSamples'] = True #if this is set to True, then when 'getLogP' is selected then the sampling results will be converted into a statistical sampling distribution so that posterior distribution plots and statistics can be generated. It is presently only for use with gridsearch or uniform distribution search. It will be ignored for other multistart searches.
 parameter_estimation_settings['multistart_gridsearch_threshold_filter_samples'] = True #This feature removes low probability tails from the posterior. This can be important for getting mu_AP, especially when using ESS. Default is true. This only has an effect if multistart_gridsearchToSamples is set to True.
-parameter_estimation_settings['multistart_gridsearch_threshold_filter_coefficient'] = 'auto' #This can be a float or the string 'auto'. Currently (Oct 2020), 'auto' sets the value at 2.0.  The smaller the value the more aggressive the filtering. This only has an effect if multistart_gridsearchToSamples is set to True.
+parameter_estimation_settings['multistart_gridsearch_threshold_filter_coefficient'] = 'auto' #This can be a float or the string 'auto'. Currently (Oct 2020), 'auto' sets the value at 2.0.  The smaller the value the more aggressive the filtering. This only has an effect if multistart_gridsearchToSamples is set to True. Not recommended to set this higher than 4 or 5 as the computer may run out of memory.
 parameter_estimation_settings['multistart_continueSampling']  = 'auto' #This only works with multistart_gridsearchToSamples. This can be set to True if user would like to continue sampling from a previous result in the directory.  The permutations_MAP_logP_and_parameters_values.pkl file will be used.  Note that if one calls the same PE_object after multistart_gridsearchToSamples sampling within a given python instance then continued sampling will also occur in that situation.
 parameter_estimation_settings['multistart_passThroughArgs'] = {}  #Typically, one would put here the arguments for doOptimizeNegLogP:  {'method':"Nelder-Mead", 'printOptimum':True, 'verbose':False}  To find additional details of which arguments can be used with doOptimizeNegLogP, see the function doOptimizeNegLogP in CheKiPEUQ\InverseProblem.py
 parameter_estimation_settings['multistart_calculatePostBurnInStatistics'] = True
@@ -105,10 +105,24 @@ parameter_estimation_settings['multistart_exportLog'] = False #In the future, th
 plotting_ouput_settings={}
 plotting_ouput_settings['setMatPlotLibAgg'] = 'auto' #This setting controls whether the matplot lib aggregator is turned on. #by default, on Windows machines this setting will become False during runtime and the plots will be generated 'normally'. By default, on Linux machines, this setting well be set to True during run time, and the matplotlib plot aggregator will be turned on.  The reason this setting exists is that on most supercomputers and clusters, which are usally linux based, the graphs will not be generated unless the aggregator is turned on.
 
+
+#####Histogram Plot Settings#####
+histogram_plot_settings = {}
+histogram_plot_settings['histograms_as_density']= False # When true, the histograms will be shown as density with integral normalized to 1. It's good to keep this as False during analysis, then to set to True to make final graphs for presentations.  By default this is False. When this is False, for ESS or MH the histograms will show sampling frequency. When this is False, for uniform or random samplings, the histograms show a pseudo-sampling frequency with an order of magnitude proportional to multistart_gridsearch_threshold_filter_coefficient.
+histogram_plot_settings['y_label'] = '' #will use defaults if ''
+histogram_plot_settings['show_initial_value'] = True
+histogram_plot_settings['show_MAP_value'] = True
+histogram_plot_settings['show_muAP_value'] = True
+histogram_plot_settings['x_label_size'] = 16
+histogram_plot_settings['y_label_size'] = 16
+histogram_plot_settings['axis_font_size'] = 16
+
+
+
 #Response Plot Settings
 simulated_response_plot_settings = {}
-simulated_response_plot_settings['x_label'] = ''
-simulated_response_plot_settings['y_label'] = ''
+simulated_response_plot_settings['x_label'] = '' #will use defaults if ''
+simulated_response_plot_settings['y_label'] = '' #will use defaults if ''
 #simulated_response_plot_settings['y_range'] = [0.00, 0.025] #optional.
 simulated_response_plot_settings['figure_name'] = 'Posterior_Simulated' #This is the default name for simulated response plots.
 simulated_response_plot_settings['legend'] = True #Can be changed to false to turn off the legend.
