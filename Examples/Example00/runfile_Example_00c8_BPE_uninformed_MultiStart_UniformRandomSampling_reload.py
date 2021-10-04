@@ -39,14 +39,15 @@ if __name__ == "__main__":
     #After making the UserInput, now we make a 'parameter_estimation' object from it.
     #####IN THIS EXAMPLE, WE WILL ADD A NEW USER INPUT LINE BELOW, THEN USE A RELOAD INSTEAD OF DOING THE SAMPLING CALL, BECAUSE WE WANT TO CHANGE THE FILTER COEFFICIENT#####
     #####LOADING FROM A DILL WOULD NOT FULFILL THIS PURPOSE###
-    UserInput.parameter_estimation_settings['multistart_gridsearch_threshold_filter_coefficient'] = 2.0
+    UserInput.parameter_estimation_settings['multistart_gridsearch_threshold_filter_coefficient'] = 4.0
     PE_object = CKPQ.parameter_estimation(UserInput)
      
     ####SKIP DOING THE SAMPLING####
     #PE_object.doMultiStart()
     
-    ###RELOAD THE SAMPPLES###
+    ###RELOAD THE SAMPLES###
     PE_object.reload_samples('multistart') #the reload_samples command needs to know whether the samples are coming from a multi-start or from a an mcmc run.
+    #Filter them again.
     
     
     PE_object.createAllPlots() #This function calls each of the below functions so that the user does not have to.
