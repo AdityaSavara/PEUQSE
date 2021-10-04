@@ -57,7 +57,7 @@ class parameter_estimation:
             if hasattr(UserInput.parameter_estimation_settings, 'multistart_permutationsToSamples') == False:    
                 UserInput.parameter_estimation_settings['multistart_permutationsToSamples']= UserInput.parameter_estimation_settings['multistart_gridsearchToSamples']
         if hasattr(UserInput.parameter_estimation_settings, 'multistart_gridsearch_threshold_filter_coefficient'):
-            print("The UserInput feature parameter_estimation_settings['multistart_gridsearchToSamples'] has been renamed. Use parameter_estimation_settings['multistart_permutationsToSamples_threshold_filter_coefficient'].")
+            print("The UserInput feature parameter_estimation_settings['multistart_gridsearch_threshold_filter_coefficient'] has been renamed. Use parameter_estimation_settings['multistart_permutationsToSamples_threshold_filter_coefficient'].")
             if hasattr(UserInput.parameter_estimation_settings, 'multistart_permutationsToSamples_threshold_filter_coefficient') == False:    
                 UserInput.parameter_estimation_settings['multistart_permutationsToSamples_threshold_filter_coefficient']= UserInput.parameter_estimation_settings['multistart_gridsearch_threshold_filter_coefficient']
 
