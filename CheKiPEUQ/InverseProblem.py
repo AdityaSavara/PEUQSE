@@ -52,8 +52,14 @@ class parameter_estimation:
             print("CheKiPEUQ Error: The reduced parameter space and parameter bounds check features are currently not compatible with each other. Implementing their compatibility is planned and simply requires the parameter bounds to become reduced to the reduced parameter space. It is only a few lines of code that will probably take A. Savara about 30 minutes to implement. Contact A. Savara if you need to use both features simultaneiously."); import sys; sys.exit()
         
         #Check for deprecated UserInput choices.
-        if hasattr(UserInput, 'multistart_gridsearchToSamples']):
+        if hasattr(UserInput.parameter_estimation_settings, 'multistart_gridsearchToSamples'):
             print("The UserInput feature parameter_estimation_settings['multistart_gridsearchToSamples'] has been renamed. Use parameter_estimation_settings['multistart_permutationsToSamples'].")
+            if hasattr(UserInput.parameter_estimation_settings, 'multistart_permutationsToSamples') == False:    
+                UserInput.parameter_estimation_settings['multistart_permutationsToSamples']= UserInput.parameter_estimation_settings['multistart_gridsearchToSamples']
+        if hasattr(UserInput.parameter_estimation_settings, 'multistart_gridsearch_threshold_filter_coefficient'):
+            print("The UserInput feature parameter_estimation_settings['multistart_gridsearchToSamples'] has been renamed. Use parameter_estimation_settings['multistart_permutationsToSamples_threshold_filter_coefficient'].")
+            if hasattr(UserInput.parameter_estimation_settings, 'multistart_permutationsToSamples_threshold_filter_coefficient') == False:    
+                UserInput.parameter_estimation_settings['multistart_permutationsToSamples_threshold_filter_coefficient']= UserInput.parameter_estimation_settings['multistart_gridsearch_threshold_filter_coefficient']
 
 
         #Check if there are parameterNames provided. If not, we will make some.
@@ -377,8 +383,8 @@ class parameter_estimation:
         #in both cases, multstart or mcmc, it's really an array of logP_and_parameter_values, just slightly different meanings.
         if sampling_type == 'multistart':  #load from the unfiltered values.
             self.permutations_MAP_logP_and_parameters_values = np.genfromtxt(filepath + "\multistart_MAP_logP_and_parameters_values.csv", delimiter=",")
-            multistart_gridsearch_threshold_filter_coefficient = self.UserInput.parameter_estimation_settings['multistart_gridsearch_threshold_filter_coefficient']
-            permutations_to_samples_with_logP = convertPermutationsToSamples(self.permutations_MAP_logP_and_parameters_values, relativeFilteringThreshold = 10**(-1*multistart_gridsearch_threshold_filter_coefficient))
+            multistart_permutationsToSamples_threshold_filter_coefficient = self.UserInput.parameter_estimation_settings['multistart_permutationsToSamples_threshold_filter_coefficient']
+            permutations_to_samples_with_logP = convertPermutationsToSamples(self.permutations_MAP_logP_and_parameters_values, relativeFilteringThreshold = 10**(-1*multistart_permutationsToSamples_threshold_filter_coefficient))
             self.post_burn_in_samples = permutations_to_samples_with_logP[:,1:] #drop the first column which is logP.
             logP_and_parameter_values = np.array(permutations_to_samples_with_logP)
             self.post_burn_in_log_posteriors_un_normed_vec = permutations_to_samples_with_logP[:,0]
@@ -849,13 +855,13 @@ class parameter_estimation:
                         self.permutations_MAP_logP_and_parameters_values = np.vstack((self.last_permutations_MAP_logP_and_parameters_values,self.permutations_MAP_logP_and_parameters_values))                        
                         self.listOfPermutations = np.vstack((self.last_listOfPermutations, self.listOfPermutations))
                         highest_MAP_initial_point_index = "Not provided with continueSampling." #TODO: take self.map_parameter_set from after calculatePostBurnIn Statistics highest_MAP_initial_point_index and search for the right row in listOfPermutations.
-                #First set the multistart_gridsearch_threshold_filter_coefficient. We will take 10**-(thisnumber) later.
-                if str(self.UserInput.parameter_estimation_settings['multistart_gridsearch_threshold_filter_coefficient']).lower() == 'auto':
-                    multistart_gridsearch_threshold_filter_coefficient = 2.0
+                #First set the multistart_permutationsToSamples_threshold_filter_coefficient. We will take 10**-(thisnumber) later.
+                if str(self.UserInput.parameter_estimation_settings['multistart_permutationsToSamples_threshold_filter_coefficient']).lower() == 'auto':
+                    multistart_permutationsToSamples_threshold_filter_coefficient = 2.0
                 else:
-                    multistart_gridsearch_threshold_filter_coefficient = self.UserInput.parameter_estimation_settings['multistart_gridsearch_threshold_filter_coefficient']
+                    multistart_permutationsToSamples_threshold_filter_coefficient = self.UserInput.parameter_estimation_settings['multistart_permutationsToSamples_threshold_filter_coefficient']
                 try:
-                    logP_values_and_samples = convertPermutationsToSamples(self.permutations_MAP_logP_and_parameters_values, maxLogP=float(bestResultSoFar[0]), relativeFilteringThreshold = 10**(-1*multistart_gridsearch_threshold_filter_coefficient))
+                    logP_values_and_samples = convertPermutationsToSamples(self.permutations_MAP_logP_and_parameters_values, maxLogP=float(bestResultSoFar[0]), relativeFilteringThreshold = 10**(-1*multistart_permutationsToSamples_threshold_filter_coefficient))
                     self.post_burn_in_log_posteriors_un_normed_vec = logP_values_and_samples[:,0]
                     self.post_burn_in_log_posteriors_un_normed_vec = np.array(nestedObjectsFunctions.makeAtLeast_2dNested(self.post_burn_in_log_posteriors_un_normed_vec)).transpose()
                     self.post_burn_in_samples = logP_values_and_samples[:,1:]
