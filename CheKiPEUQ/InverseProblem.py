@@ -376,10 +376,11 @@ class parameter_estimation:
         self.permutation_and_doOptimizeLogP = False
     
     #fills the samples etc. By default, for multistart, it will also perform filtering and then create the post_burn_in_samples.
-    def reload_samples(self, sampling_type='', filepath = '.'):
+    def reload_samples(self, sampling_type='', filepath = ''):
         if (sampling_type != 'multistart') and (sampling_type != 'mcmc'):
             print("ERROR: reload_samples requires specifying either 'multistart' or 'mcmc' as the first argument"); sys.exit()
-        filepath = filepath + '\logs_and_csvs\ '[:-1]  #can't end a string with a backslash without tricks. Using this discouraged trick because it's reasonably easy to read.
+        if filepath == '':
+            filepath = self.UserInput.directories['logs_and_csvs'] #take the default.
         #in both cases, multstart or mcmc, it's really an array of logP_and_parameter_values, just slightly different meanings.
         if sampling_type == 'multistart':  #load from the unfiltered values.
             self.permutations_MAP_logP_and_parameters_values = np.genfromtxt(filepath + "\multistart_MAP_logP_and_parameters_values.csv", delimiter=",")
