@@ -45,11 +45,11 @@ class parameter_estimation:
             if not os.path.exists(directoryName):
                 os.makedirs(directoryName)
 
-        #Check for incompatible choices.
-        parameterBoundsOn = bool(len(UserInput.model['InputParameterPriorValues_upperBounds']) + len(UserInput.model['InputParameterPriorValues_lowerBounds']))
-        reducedParameterSpaceOn = bool(len(UserInput.model['reducedParameterSpace']))
-        if (reducedParameterSpaceOn and parameterBoundsOn) == True:
-            print("CheKiPEUQ Error: The reduced parameter space and parameter bounds check features are currently not compatible with each other. Implementing their compatibility is planned and simply requires the parameter bounds to become reduced to the reduced parameter space. It is only a few lines of code that will probably take A. Savara about 30 minutes to implement. Contact A. Savara if you need to use both features simultaneiously."); import sys; sys.exit()
+        #Populate variables for bounds and reduced parameter space.
+        self.parameterBoundsOn = bool(len(UserInput.model['InputParameterPriorValues_upperBounds']) + len(UserInput.model['InputParameterPriorValues_lowerBounds']))
+        UserInput.InputParameterPriorValues_lowerBounds = UserInput.model['InputParameterPriorValues_lowerBounds']
+        UserInput.InputParameterPriorValues_upperBounds = UserInput.model['InputParameterPriorValues_upperBounds']
+        self.reducedParameterSpaceOn = bool(len(UserInput.model['reducedParameterSpace']))
         
         #Check for deprecated UserInput choices.
         if hasattr(UserInput.parameter_estimation_settings, 'multistart_gridsearchToSamples'):
@@ -155,10 +155,12 @@ class parameter_estimation:
                     UserInput.InputParametersPriorValuesUniformDistributionsIndices.append(parameterIndex)
                     #In the case of a uniform distribution, the standard deviation and variance are given by sigma = (b−a)/ √12 :   
                     #See for example  https://www.quora.com/What-is-the-standard-deviation-of-a-uniform-distribution-How-is-this-formula-determined
-                    std_prior_single_parameter = (UserInput.model['InputParameterPriorValues_upperBounds'][parameterIndex] - UserInput.model['InputParameterPriorValues_lowerBounds'][parameterIndex])/(12**0.5)
+                    if self.parameterBoundsOn == False:
+                        print("ERROR: An uncertaintyValue of -1.0 has been provided which indicates a Uniform distribution. Uniform distributions require both upper and lower bounds, but these have not been provided. CheKiPUEQ is exiting the program."); sys.exit()
+                    std_prior_single_parameter = (UserInput.InputParameterPriorValues_upperBounds[parameterIndex] - UserInput.InputParameterPriorValues_lowerBounds[parameterIndex])/(12**0.5)
                     UserInput.InputParametersPriorValuesUncertainties[parameterIndex] = std_prior_single_parameter #Note that going forward the array InputParametersPriorValuesUncertainties cannot be checked to see if the parameter is from a uniform distribution. Instead, InputParametersPriorValuesUniformDistributionsKey must be checked. 
                     #We will also fill the model['InputParameterPriorValues'] to have the mean of the two bounds. This can matter for some of the scaling that occurs later.
-                    self.UserInput.mu_prior[parameterIndex] = (UserInput.model['InputParameterPriorValues_upperBounds'][parameterIndex] + UserInput.model['InputParameterPriorValues_lowerBounds'][parameterIndex])/2
+                    self.UserInput.mu_prior[parameterIndex] = (UserInput.InputParameterPriorValues_upperBounds[parameterIndex] + UserInput.InputParameterPriorValues_lowerBounds[parameterIndex])/2
         
         #Now to make covmat. Leaving the original dictionary object intact, but making a new object to make covmat_prior.
         if len(np.shape(UserInput.InputParametersPriorValuesUncertainties)) == 1 and (len(UserInput.InputParametersPriorValuesUncertainties) > 0): #If it's a 1D array/list that is filled, we'll diagonalize it.
@@ -351,7 +353,7 @@ class parameter_estimation:
 
         #Now reduce the parameter space if requested by the user. #Considered having this if statement as a function called outside of init.  However, using it in init is the best practice since it forces correct ordering of reduceParameterSpace and reduceResponseSpace
         if len(self.UserInput.model['reducedParameterSpace']) > 0:
-            print("Important: the UserInput.model['reducedParameterSpace'] is not blank. That means the only parameters allowed to change will be the ones in the indices inside 'reducedParameterSpace'.   All others will be held constant.  The values inside  'InputParameterInitialGuess will be used', and 'InputParameterPriorValues' if an initial guess was not provided.")
+            print("Notification: the UserInput.model['reducedParameterSpace'] is not blank. That means the only parameters allowed to change will be the ones in the indices inside 'reducedParameterSpace'.   All others will be held constant.  The values inside  'InputParameterInitialGuess will be used', and 'InputParameterPriorValues' if an initial guess was not provided.")
             self.reduceParameterSpace()
     
         #Now reduce the parameter space if requested by the user. #Considered having this if statement as a function called outside of init.  However, using it in init is the best practice since it forces correct ordering of reduceParameterSpace and reduceResponseSpace
@@ -376,10 +378,11 @@ class parameter_estimation:
         self.permutation_and_doOptimizeLogP = False
     
     #fills the samples etc. By default, for multistart, it will also perform filtering and then create the post_burn_in_samples.
-    def reload_samples(self, sampling_type='', filepath = '.'):
+    def reload_samples(self, sampling_type='', filepath = ''):
         if (sampling_type != 'multistart') and (sampling_type != 'mcmc'):
             print("ERROR: reload_samples requires specifying either 'multistart' or 'mcmc' as the first argument"); sys.exit()
-        filepath = filepath + '\logs_and_csvs\ '[:-1]  #can't end a string with a backslash without tricks. Using this discouraged trick because it's reasonably easy to read.
+        if filepath == '':
+            filepath = self.UserInput.directories['logs_and_csvs'] #take the default.
         #in both cases, multstart or mcmc, it's really an array of logP_and_parameter_values, just slightly different meanings.
         if sampling_type == 'multistart':  #load from the unfiltered values.
             self.permutations_MAP_logP_and_parameters_values = np.genfromtxt(filepath + "\multistart_MAP_logP_and_parameters_values.csv", delimiter=",")
@@ -473,6 +476,9 @@ class parameter_estimation:
                 del parameterNamesAndMathTypeExpressionsDict[key] #Remove any parameters that were not in reduced parameter space.
         UserInput.parameterNamesAndMathTypeExpressionsDict = parameterNamesAndMathTypeExpressionsDict
         UserInput.InputParametersPriorValuesUncertainties = returnReducedIterable(UserInput.InputParametersPriorValuesUncertainties, reducedIndices)
+        if self.parameterBoundsOn: #only need to reduce the iterables for the parameter bounds if they exist.
+            UserInput.InputParameterPriorValues_lowerBounds = returnReducedIterable( UserInput.InputParameterPriorValues_lowerBounds    , reducedIndices )
+            UserInput.InputParameterPriorValues_upperBounds = returnReducedIterable( UserInput.InputParameterPriorValues_upperBounds    , reducedIndices )
         UserInput.std_prior     = returnReducedIterable( UserInput.std_prior    , reducedIndices )
         UserInput.var_prior     = returnReducedIterable( UserInput.var_prior   , reducedIndices  )
         UserInput.covmat_prior     = returnReducedIterable( UserInput.covmat_prior    , reducedIndices )
@@ -1547,19 +1553,27 @@ class parameter_estimation:
         #THe intention of the optional arguments is to pass them into the scipy.optimize.minimize function.
         # the 'method' argument is for Nelder-Mead, BFGS, SLSQP etc. https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html#scipy.optimize.minimize
         #Note that "maxiter=0" just means to use the default.
+        if self.parameterBoundsOn:#Will force L-BFGS-B because it has bounds.
+            if method != 'L-BFGS-B':
+                print("Notification: Parameter bounds are on and doOptimizeSSR is being called. Forcing the optimization method to be L-BFGS-B because this it the only SSR method presently allowed for bounds with CheKiPEUQ.")
+                method = 'L-BFGS-B'
+                zippedBounds = list(zip(self.UserInput.InputParameterPriorValues_lowerBounds, self.UserInput.InputParameterPriorValues_upperBounds))
+                print("line 1561", zippedBounds)
+                optimizationAdditionalArgs['bounds'] = zippedBounds
+        
         initialGuess = self.UserInput.InputParameterInitialGuess
         import scipy.optimize
         if verbose == False:
             if maxiter == 0:
-                optimizeResult = scipy.optimize.minimize(self.getSSR, initialGuess, method = method)
+                optimizeResult = scipy.optimize.minimize(self.getSSR, initialGuess, method = method, **optimizationAdditionalArgs)
             if maxiter != 0:    
-                optimizeResult = scipy.optimize.minimize(self.getSSR, initialGuess, method = method, options={"maxiter": maxiter})
+                optimizeResult = scipy.optimize.minimize(self.getSSR, initialGuess, method = method, options={"maxiter": maxiter}, **optimizationAdditionalArgs)
         if verbose == True:
             verbose_simulator = verbose_optimization_wrapper(self.getSSR)
             if maxiter == 0:
-                optimizeResult = scipy.optimize.minimize(verbose_simulator.simulateAndStoreObjectiveFunction, initialGuess, method=method, callback=verbose_simulator.callback, options={"disp": True})
+                optimizeResult = scipy.optimize.minimize(verbose_simulator.simulateAndStoreObjectiveFunction, initialGuess, method=method, callback=verbose_simulator.callback, options={"disp": True}, **optimizationAdditionalArgs)
             if maxiter != 0:    
-                optimizeResult = scipy.optimize.minimize(verbose_simulator.simulateAndStoreObjectiveFunction, initialGuess, method=method, callback=verbose_simulator.callback, options={"maxiter": maxiter})
+                optimizeResult = scipy.optimize.minimize(verbose_simulator.simulateAndStoreObjectiveFunction, initialGuess, method=method, callback=verbose_simulator.callback, options={"maxiter": maxiter}, **optimizationAdditionalArgs)
             #print(f"Number of calls to Simulator instance {verbose_simulator.num_calls}") <-- this is the same as the "Function evaluations" field that gets printed.
             
         self.opt_parameter_set = optimizeResult.x #This is the best fit parameter set.
@@ -2198,22 +2212,22 @@ class parameter_estimation:
         return logPrior
         
     def doInputParameterBoundsChecks(self, discreteParameterVector): #Bounds are considered part of the prior, so are set in InputParameterPriorValues_upperBounds & InputParameterPriorValues_lowerBounds
-        if len(self.UserInput.model['InputParameterPriorValues_upperBounds']) > 0:
-            upperCheck = boundsCheck(discreteParameterVector, self.UserInput.model['InputParameterPriorValues_upperBounds'], 'upper')
+        if len(self.UserInput.InputParameterPriorValues_upperBounds) > 0:
+            upperCheck = boundsCheck(discreteParameterVector, self.UserInput.InputParameterPriorValues_upperBounds, 'upper')
             if upperCheck == False:
                 return False
-        if len(self.UserInput.model['InputParameterPriorValues_lowerBounds']) > 0:
-            lowerCheck = boundsCheck(discreteParameterVector, self.UserInput.model['InputParameterPriorValues_lowerBounds'], 'lower')
+        if len(self.UserInput.InputParameterPriorValues_lowerBounds) > 0:
+            lowerCheck = boundsCheck(discreteParameterVector, self.UserInput.InputParameterPriorValues_lowerBounds, 'lower')
             if lowerCheck == False:
                 return False
         return True #If the test has gotten here without failing any of the tests, we return true.
 
     def doSimulatedResponsesBoundsChecks(self, simulatedResponses): #Bounds intended for the likelihood.
-        if len(self.UserInput.model['InputParameterPriorValues_upperBounds']) > 0:
+        if len(self.UserInput.InputParameterPriorValues_upperBounds) > 0:
             upperCheck = boundsCheck(simulatedResponses, self.UserInput.model['simulatedResponses_upperBounds'], 'upper')
             if upperCheck == False:
                 return False
-        if len(self.UserInput.model['InputParameterPriorValues_lowerBounds']) > 0:
+        if len(self.UserInput.InputParameterPriorValues_lowerBounds) > 0:
             lowerCheck = boundsCheck(simulatedResponses, self.UserInput.model['simulatedResponses_lowerBounds'], 'lower')
             if lowerCheck == False:
                 return False
