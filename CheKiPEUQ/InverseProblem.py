@@ -2941,10 +2941,13 @@ def setMatPlotLibAgg(matPlotLibAggSetting = 'auto'):
         #no return needed.
 
 def pickleAnObject(objectToPickle, base_file_name, file_name_prefix ='',  file_name_suffix='', file_name_extension='.pkl'):
-    import pickle
-    data_filename = file_name_prefix + base_file_name + file_name_prefix + file_name_extension
-    with open(data_filename, 'wb') as picklefile:
-        pickle.dump(objectToPickle, picklefile)
+    try:
+        import pickle
+        data_filename = file_name_prefix + base_file_name + file_name_prefix + file_name_extension
+        with open(data_filename, 'wb') as picklefile:
+            pickle.dump(objectToPickle, picklefile)
+    except Exception as theError:
+        print("pickleAnObject was unable to perform pickling. The error was:", theError)
 
 def unpickleAnObject(base_file_name, file_name_prefix ='',  file_name_suffix='', file_name_extension='.pkl'):
     import pickle
@@ -2961,8 +2964,12 @@ def dillpickleAnObject(objectToPickle, base_file_name, file_name_prefix ='',  fi
     except:
         print("To use this feature requires dill. If you don't have it, open an anaconda prompt and type 'pip install dill' or use conda install. https://anaconda.org/anaconda/dill")
     data_filename = file_name_prefix + base_file_name + file_name_prefix + file_name_extension
-    with open(data_filename, 'wb') as picklefile:
-        dill.dump(objectToPickle, picklefile)
+    try:
+        with open(data_filename, 'wb') as picklefile:
+            dill.dump(objectToPickle, picklefile)
+    except Exception as theError:
+        print("dillpickleAnObject was unable to perform dill pickling. The error was:", theError)
+        
 
 def unDillpickleAnObject(base_file_name, file_name_prefix ='',  file_name_suffix='', file_name_extension='.dill'):
     try:
