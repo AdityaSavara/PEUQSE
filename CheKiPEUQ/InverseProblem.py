@@ -2222,15 +2222,18 @@ class parameter_estimation:
                 return False
         return True #If the test has gotten here without failing any of the tests, we return true.
 
+    #The responses bounds check is different from the parmeter bounds check because responses are nested.
     def doSimulatedResponsesBoundsChecks(self, simulatedResponses): #Bounds intended for the likelihood.
         if len(self.UserInput.InputParameterPriorValues_upperBounds) > 0:
-            upperCheck = boundsCheck(simulatedResponses, self.UserInput.model['simulatedResponses_upperBounds'], 'upper')
-            if upperCheck == False:
-                return False
+            for responseIndex in self.UserInput.model['simulatedResponses_upperBounds']:
+                upperCheck = boundsCheck(simulatedResponses[responseIndex], self.UserInput.model['simulatedResponses_upperBounds'][responseIndex], 'upper')
+                if upperCheck == False:
+                    return False
         if len(self.UserInput.InputParameterPriorValues_lowerBounds) > 0:
-            lowerCheck = boundsCheck(simulatedResponses, self.UserInput.model['simulatedResponses_lowerBounds'], 'lower')
-            if lowerCheck == False:
-                return False
+            for responseIndex in self.UserInput.model['simulatedResponses_lowerBounds']:
+                lowerCheck = boundsCheck(simulatedResponses[responseIndex], self.UserInput.model['simulatedResponses_lowerBounds'][responseIndex], 'lower')
+                if lowerCheck == False:
+                    return False
         return True #If the test has gotten here without failing any of the tests, we return true.
 
     #This helper function must be used because it allows for the output processing function etc. It has been separated from getLogLikelihood so that it can be used by doOptimizeSSR etc.
@@ -2863,19 +2866,19 @@ def returnShapedResponseCovMat(numResponseDimensions, uncertainties):
                 shapedUncertainties[responseIndex] = shapedUncertainties[responseIndex]
     return shapedUncertainties
 
-def boundsCheck(parameters, parametersBounds, boundsType):
+def boundsCheck(values, valuesBounds, boundsType):
     #Expects three arguments.
-    #the first two are 1D array like arguments (parameters and a set of *either* upper bounds or lower bounds)
+    #the first two are 1D array like arguments (values and a set of *either* upper bounds or lower bounds)
     #The third argumment is the type of bounds, either 'upper' or 'lower'
     #In practice, this means the function usually needs to be called twice.
     #A "None" type is expected for something that is not bounded in that direction. 
     
     #We first need to make arrays and remove anything that is None in the bounds.
-    parameters = np.array(parameters).flatten()
-    parametersBounds = np.array(parametersBounds).flatten()
+    values = np.array(values).flatten()
+    valuesBounds = np.array(valuesBounds).flatten()
     #to remove, we use brackets that pull out the indices where the comparison is not None. This is special numpy array syntax.
-    parametersTruncated = parameters[parametersBounds != None] #TODO: this might need to be changed to type(parametersBounds) != type(None)
-    parametersBoundsTruncated = parametersBounds[parametersBounds != None] #TODO: this might need to be changed to type(parametersBounds) != type(None)
+    parametersTruncated = values[type(valuesBounds) != type(None)].flatten() #flattening because becomes mysteriously nested.
+    parametersBoundsTruncated = valuesBounds[type(valuesBounds) != type(None)].flatten() #flattening because becomes mysteriously nested.
     if boundsType.lower() == 'upper': #we make the input into lower case before proceeding.
         upperCheck = parametersTruncated < parametersBoundsTruncated #Check if all are smaller.
         if False in upperCheck: #If any of them failed, we return False.
