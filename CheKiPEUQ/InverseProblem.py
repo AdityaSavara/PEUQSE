@@ -45,12 +45,11 @@ class parameter_estimation:
             if not os.path.exists(directoryName):
                 os.makedirs(directoryName)
 
-        #Check for incompatible choices.
+        #Populate variables for bounds and reduced parameter space.
         self.parameterBoundsOn = bool(len(UserInput.model['InputParameterPriorValues_upperBounds']) + len(UserInput.model['InputParameterPriorValues_lowerBounds']))
         UserInput.InputParameterPriorValues_lowerBounds = UserInput.model['InputParameterPriorValues_lowerBounds']
-        UserInput.InputParameterPriorValues_upperBounds = UserInput.model['InputParameterPriorValues_upperBounds']        
+        UserInput.InputParameterPriorValues_upperBounds = UserInput.model['InputParameterPriorValues_upperBounds']
         self.reducedParameterSpaceOn = bool(len(UserInput.model['reducedParameterSpace']))
-
         
         #Check for deprecated UserInput choices.
         if hasattr(UserInput.parameter_estimation_settings, 'multistart_gridsearchToSamples'):
@@ -354,7 +353,7 @@ class parameter_estimation:
 
         #Now reduce the parameter space if requested by the user. #Considered having this if statement as a function called outside of init.  However, using it in init is the best practice since it forces correct ordering of reduceParameterSpace and reduceResponseSpace
         if len(self.UserInput.model['reducedParameterSpace']) > 0:
-            print("Important: the UserInput.model['reducedParameterSpace'] is not blank. That means the only parameters allowed to change will be the ones in the indices inside 'reducedParameterSpace'.   All others will be held constant.  The values inside  'InputParameterInitialGuess will be used', and 'InputParameterPriorValues' if an initial guess was not provided.")
+            print("Notification: the UserInput.model['reducedParameterSpace'] is not blank. That means the only parameters allowed to change will be the ones in the indices inside 'reducedParameterSpace'.   All others will be held constant.  The values inside  'InputParameterInitialGuess will be used', and 'InputParameterPriorValues' if an initial guess was not provided.")
             self.reduceParameterSpace()
     
         #Now reduce the parameter space if requested by the user. #Considered having this if statement as a function called outside of init.  However, using it in init is the best practice since it forces correct ordering of reduceParameterSpace and reduceResponseSpace
@@ -1554,19 +1553,27 @@ class parameter_estimation:
         #THe intention of the optional arguments is to pass them into the scipy.optimize.minimize function.
         # the 'method' argument is for Nelder-Mead, BFGS, SLSQP etc. https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html#scipy.optimize.minimize
         #Note that "maxiter=0" just means to use the default.
+        if self.parameterBoundsOn:#Will force L-BFGS-B because it has bounds.
+            if method != 'L-BFGS-B':
+                print("Notification: Parameter bounds are on and doOptimizeSSR is being called. Forcing the optimization method to be L-BFGS-B because this it the only SSR method presently allowed for bounds with CheKiPEUQ.")
+                method = 'L-BFGS-B'
+                zippedBounds = list(zip(self.UserInput.InputParameterPriorValues_lowerBounds, self.UserInput.InputParameterPriorValues_upperBounds))
+                print("line 1561", zippedBounds)
+                optimizationAdditionalArgs['bounds'] = zippedBounds
+        
         initialGuess = self.UserInput.InputParameterInitialGuess
         import scipy.optimize
         if verbose == False:
             if maxiter == 0:
-                optimizeResult = scipy.optimize.minimize(self.getSSR, initialGuess, method = method)
+                optimizeResult = scipy.optimize.minimize(self.getSSR, initialGuess, method = method, **optimizationAdditionalArgs)
             if maxiter != 0:    
-                optimizeResult = scipy.optimize.minimize(self.getSSR, initialGuess, method = method, options={"maxiter": maxiter})
+                optimizeResult = scipy.optimize.minimize(self.getSSR, initialGuess, method = method, options={"maxiter": maxiter}, **optimizationAdditionalArgs)
         if verbose == True:
             verbose_simulator = verbose_optimization_wrapper(self.getSSR)
             if maxiter == 0:
-                optimizeResult = scipy.optimize.minimize(verbose_simulator.simulateAndStoreObjectiveFunction, initialGuess, method=method, callback=verbose_simulator.callback, options={"disp": True})
+                optimizeResult = scipy.optimize.minimize(verbose_simulator.simulateAndStoreObjectiveFunction, initialGuess, method=method, callback=verbose_simulator.callback, options={"disp": True}, **optimizationAdditionalArgs)
             if maxiter != 0:    
-                optimizeResult = scipy.optimize.minimize(verbose_simulator.simulateAndStoreObjectiveFunction, initialGuess, method=method, callback=verbose_simulator.callback, options={"maxiter": maxiter})
+                optimizeResult = scipy.optimize.minimize(verbose_simulator.simulateAndStoreObjectiveFunction, initialGuess, method=method, callback=verbose_simulator.callback, options={"maxiter": maxiter}, **optimizationAdditionalArgs)
             #print(f"Number of calls to Simulator instance {verbose_simulator.num_calls}") <-- this is the same as the "Function evaluations" field that gets printed.
             
         self.opt_parameter_set = optimizeResult.x #This is the best fit parameter set.
