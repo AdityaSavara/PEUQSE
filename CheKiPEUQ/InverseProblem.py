@@ -46,13 +46,11 @@ class parameter_estimation:
                 os.makedirs(directoryName)
 
         #Check for incompatible choices.
-        parameterBoundsOn = bool(len(UserInput.model['InputParameterPriorValues_upperBounds']) + len(UserInput.model['InputParameterPriorValues_lowerBounds']))
+        self.parameterBoundsOn = bool(len(UserInput.model['InputParameterPriorValues_upperBounds']) + len(UserInput.model['InputParameterPriorValues_lowerBounds']))
         UserInput.InputParameterPriorValues_lowerBounds = UserInput.model['InputParameterPriorValues_lowerBounds']
-        UserInput.InputParameterPriorValues_upperBounds = UserInput.model['InputParameterPriorValues_upperBounds']
-        
-        reducedParameterSpaceOn = bool(len(UserInput.model['reducedParameterSpace']))
-        if (reducedParameterSpaceOn and parameterBoundsOn) == True:
-            print("CheKiPEUQ Error: The reduced parameter space and parameter bounds check features are currently not compatible with each other. Implementing their compatibility is planned and simply requires the parameter bounds to become reduced to the reduced parameter space. It is only a few lines of code that will probably take A. Savara about 30 minutes to implement. Contact A. Savara if you need to use both features simultaneiously."); import sys; sys.exit()
+        UserInput.InputParameterPriorValues_upperBounds = UserInput.model['InputParameterPriorValues_upperBounds']        
+        self.reducedParameterSpaceOn = bool(len(UserInput.model['reducedParameterSpace']))
+
         
         #Check for deprecated UserInput choices.
         if hasattr(UserInput.parameter_estimation_settings, 'multistart_gridsearchToSamples'):
@@ -158,7 +156,7 @@ class parameter_estimation:
                     UserInput.InputParametersPriorValuesUniformDistributionsIndices.append(parameterIndex)
                     #In the case of a uniform distribution, the standard deviation and variance are given by sigma = (b−a)/ √12 :   
                     #See for example  https://www.quora.com/What-is-the-standard-deviation-of-a-uniform-distribution-How-is-this-formula-determined
-                    if parameterBoundsOn == False:
+                    if self.parameterBoundsOn == False:
                         print("ERROR: An uncertaintyValue of -1.0 has been provided which indicates a Uniform distribution. Uniform distributions require both upper and lower bounds, but these have not been provided. CheKiPUEQ is exiting the program."); sys.exit()
                     std_prior_single_parameter = (UserInput.InputParameterPriorValues_upperBounds[parameterIndex] - UserInput.InputParameterPriorValues_lowerBounds[parameterIndex])/(12**0.5)
                     UserInput.InputParametersPriorValuesUncertainties[parameterIndex] = std_prior_single_parameter #Note that going forward the array InputParametersPriorValuesUncertainties cannot be checked to see if the parameter is from a uniform distribution. Instead, InputParametersPriorValuesUniformDistributionsKey must be checked. 
@@ -479,6 +477,9 @@ class parameter_estimation:
                 del parameterNamesAndMathTypeExpressionsDict[key] #Remove any parameters that were not in reduced parameter space.
         UserInput.parameterNamesAndMathTypeExpressionsDict = parameterNamesAndMathTypeExpressionsDict
         UserInput.InputParametersPriorValuesUncertainties = returnReducedIterable(UserInput.InputParametersPriorValuesUncertainties, reducedIndices)
+        if self.parameterBoundsOn: #only need to reduce the iterables for the parameter bounds if they exist.
+            UserInput.InputParameterPriorValues_lowerBounds = returnReducedIterable( UserInput.InputParameterPriorValues_lowerBounds    , reducedIndices )
+            UserInput.InputParameterPriorValues_upperBounds = returnReducedIterable( UserInput.InputParameterPriorValues_upperBounds    , reducedIndices )
         UserInput.std_prior     = returnReducedIterable( UserInput.std_prior    , reducedIndices )
         UserInput.var_prior     = returnReducedIterable( UserInput.var_prior   , reducedIndices  )
         UserInput.covmat_prior     = returnReducedIterable( UserInput.covmat_prior    , reducedIndices )
