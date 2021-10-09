@@ -47,6 +47,9 @@ class parameter_estimation:
 
         #Check for incompatible choices.
         parameterBoundsOn = bool(len(UserInput.model['InputParameterPriorValues_upperBounds']) + len(UserInput.model['InputParameterPriorValues_lowerBounds']))
+        UserInput.InputParameterPriorValues_lowerBounds = UserInput.model['InputParameterPriorValues_lowerBounds']
+        UserInput.InputParameterPriorValues_upperBounds = UserInput.model['InputParameterPriorValues_upperBounds']
+        
         reducedParameterSpaceOn = bool(len(UserInput.model['reducedParameterSpace']))
         if (reducedParameterSpaceOn and parameterBoundsOn) == True:
             print("CheKiPEUQ Error: The reduced parameter space and parameter bounds check features are currently not compatible with each other. Implementing their compatibility is planned and simply requires the parameter bounds to become reduced to the reduced parameter space. It is only a few lines of code that will probably take A. Savara about 30 minutes to implement. Contact A. Savara if you need to use both features simultaneiously."); import sys; sys.exit()
@@ -155,10 +158,12 @@ class parameter_estimation:
                     UserInput.InputParametersPriorValuesUniformDistributionsIndices.append(parameterIndex)
                     #In the case of a uniform distribution, the standard deviation and variance are given by sigma = (b−a)/ √12 :   
                     #See for example  https://www.quora.com/What-is-the-standard-deviation-of-a-uniform-distribution-How-is-this-formula-determined
-                    std_prior_single_parameter = (UserInput.model['InputParameterPriorValues_upperBounds'][parameterIndex] - UserInput.model['InputParameterPriorValues_lowerBounds'][parameterIndex])/(12**0.5)
+                    if parameterBoundsOn == False:
+                        print("ERROR: An uncertaintyValue of -1.0 has been provided which indicates a Uniform distribution. Uniform distributions require both upper and lower bounds, but these have not been provided. CheKiPUEQ is exiting the program."); sys.exit()
+                    std_prior_single_parameter = (UserInput.InputParameterPriorValues_upperBounds[parameterIndex] - UserInput.InputParameterPriorValues_lowerBounds[parameterIndex])/(12**0.5)
                     UserInput.InputParametersPriorValuesUncertainties[parameterIndex] = std_prior_single_parameter #Note that going forward the array InputParametersPriorValuesUncertainties cannot be checked to see if the parameter is from a uniform distribution. Instead, InputParametersPriorValuesUniformDistributionsKey must be checked. 
                     #We will also fill the model['InputParameterPriorValues'] to have the mean of the two bounds. This can matter for some of the scaling that occurs later.
-                    self.UserInput.mu_prior[parameterIndex] = (UserInput.model['InputParameterPriorValues_upperBounds'][parameterIndex] + UserInput.model['InputParameterPriorValues_lowerBounds'][parameterIndex])/2
+                    self.UserInput.mu_prior[parameterIndex] = (UserInput.InputParameterPriorValues_upperBounds[parameterIndex] + UserInput.InputParameterPriorValues_lowerBounds[parameterIndex])/2
         
         #Now to make covmat. Leaving the original dictionary object intact, but making a new object to make covmat_prior.
         if len(np.shape(UserInput.InputParametersPriorValuesUncertainties)) == 1 and (len(UserInput.InputParametersPriorValuesUncertainties) > 0): #If it's a 1D array/list that is filled, we'll diagonalize it.
@@ -2199,22 +2204,22 @@ class parameter_estimation:
         return logPrior
         
     def doInputParameterBoundsChecks(self, discreteParameterVector): #Bounds are considered part of the prior, so are set in InputParameterPriorValues_upperBounds & InputParameterPriorValues_lowerBounds
-        if len(self.UserInput.model['InputParameterPriorValues_upperBounds']) > 0:
-            upperCheck = boundsCheck(discreteParameterVector, self.UserInput.model['InputParameterPriorValues_upperBounds'], 'upper')
+        if len(self.UserInput.InputParameterPriorValues_upperBounds) > 0:
+            upperCheck = boundsCheck(discreteParameterVector, self.UserInput.InputParameterPriorValues_upperBounds, 'upper')
             if upperCheck == False:
                 return False
-        if len(self.UserInput.model['InputParameterPriorValues_lowerBounds']) > 0:
-            lowerCheck = boundsCheck(discreteParameterVector, self.UserInput.model['InputParameterPriorValues_lowerBounds'], 'lower')
+        if len(self.UserInput.InputParameterPriorValues_lowerBounds) > 0:
+            lowerCheck = boundsCheck(discreteParameterVector, self.UserInput.InputParameterPriorValues_lowerBounds, 'lower')
             if lowerCheck == False:
                 return False
         return True #If the test has gotten here without failing any of the tests, we return true.
 
     def doSimulatedResponsesBoundsChecks(self, simulatedResponses): #Bounds intended for the likelihood.
-        if len(self.UserInput.model['InputParameterPriorValues_upperBounds']) > 0:
+        if len(self.UserInput.InputParameterPriorValues_upperBounds) > 0:
             upperCheck = boundsCheck(simulatedResponses, self.UserInput.model['simulatedResponses_upperBounds'], 'upper')
             if upperCheck == False:
                 return False
-        if len(self.UserInput.model['InputParameterPriorValues_lowerBounds']) > 0:
+        if len(self.UserInput.InputParameterPriorValues_lowerBounds) > 0:
             lowerCheck = boundsCheck(simulatedResponses, self.UserInput.model['simulatedResponses_lowerBounds'], 'lower')
             if lowerCheck == False:
                 return False
