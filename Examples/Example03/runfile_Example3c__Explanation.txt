@@ -1,0 +1,9 @@
+Example_3c was made for reduced parameter space BPE
+
+Example_3c_SSR was made for reduced parameter space SSR
+
+
+Example_3c_bounds was made for reduced parameter space BPE with bounds (the "20" on the 4th parameter restricts it to becoming slightly less than 20.)
+
+
+Example_3c_SSR_bounds was made for reduced parameter space SSR with bounds (the "15" on the 4th parameter restricts it to becoming slightly less than 15.)
