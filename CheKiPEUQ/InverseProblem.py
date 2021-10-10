@@ -479,6 +479,14 @@ class parameter_estimation:
         if self.parameterBoundsOn: #only need to reduce the iterables for the parameter bounds if they exist.
             UserInput.InputParameterPriorValues_lowerBounds = returnReducedIterable( UserInput.InputParameterPriorValues_lowerBounds    , reducedIndices )
             UserInput.InputParameterPriorValues_upperBounds = returnReducedIterable( UserInput.InputParameterPriorValues_upperBounds    , reducedIndices )
+        #We have a list that keeps track of InputParameters which have Uniform Prior distributions. The logic for how to update that is a bit different.
+        if hasattr(self.UserInput, 'InputParametersPriorValuesUniformDistributionsIndices') == True:
+            NewInputParametersPriorValuesUniformDistributionsIndices = []
+            for indexNumber, indexValue in enumerate(reducedIndices): #we need to know which position it has in the reducedIndices, and we'll append **that** position if the item is a uniform distribution.
+                if indexValue in UserInput.InputParametersPriorValuesUniformDistributionsIndices:
+                    NewInputParametersPriorValuesUniformDistributionsIndices.append(indexNumber)
+                #else pass.
+            UserInput.InputParametersPriorValuesUniformDistributionsIndices = NewInputParametersPriorValuesUniformDistributionsIndices
         UserInput.std_prior     = returnReducedIterable( UserInput.std_prior    , reducedIndices )
         UserInput.var_prior     = returnReducedIterable( UserInput.var_prior   , reducedIndices  )
         UserInput.covmat_prior     = returnReducedIterable( UserInput.covmat_prior    , reducedIndices )
