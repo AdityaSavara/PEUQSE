@@ -80,6 +80,10 @@ def descendingLinearEWithPiecewiseOffsetCheckOneReaction(E_0, g_slope,piecewise_
         return True
 
 def makeCanteraReactionObjectsListFromFile(FileName):
+    #Creates a list of Reaction objects from all of the reactions defined in a YAML, CTI, or XML file.
+    #The CTI and XML input formats are deprecated since Cantera 2.5 and will be removed in Cantera 3.0.
+    #There is utility to convert old CTI files to the new YAML. https://cantera.org/tutorials/legacy2yaml.html
+    #inside cti2yaml is a function called convert: convert(filename=None, output_name=None, text=None) so can be used to convert.
     canteraReactionObjectsList = ct.Reaction.listFromFile(FileName)
     return canteraReactionObjectsList
 
