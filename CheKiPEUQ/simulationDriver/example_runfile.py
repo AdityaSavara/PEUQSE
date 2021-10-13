@@ -120,7 +120,7 @@ def main():
         print("sampling case ModifyReactionssamplingCase", caseIndex, "Simulation Finished")
         
     print("####EXAMPLE 5b#####")
-    #This is like example 4, only now we are going to use the applyPieceWiseCoverageDependence feature, which requires us to fill ceO2_input_simulation_settings.piecewise_coverage_dependences
+    #This is like example 4, only now we are going to use the applyPieceWiseconcentrationDependence feature, which requires us to fill ceO2_input_simulation_settings.piecewise_coverage_dependences
     model_name = "ceO2"
     import ceO2_input_simulation_settings #The user may change settings in the python file with the same name.
     reactions_parameters_array = np.genfromtxt(model_name + "_input_reactions_parameters.csv", delimiter=",", dtype="str", skip_header=1)
@@ -138,14 +138,14 @@ def main():
     species_name = "Acetaldehyde1-Ce(S)" #In this example we make the parameters depend only on the coverage of species Acetaldehyde1-Ce(S).
     kineticParameterName = "A"
     modifiers_A = ( [0,0,0,0,0,0,0], [-1,-1,-1,-1,-1,-1,0], [0,0,0,0,0,0,0], [0,0,0,0,0,0,0])
-    canteraKineticsParametersParser.populatePiecewiseCoverageDependence(ceO2_input_simulation_settings, reactions_parameters_array, species_name, kineticParameterName, piecewise_coverage_intervals, modifiers_A )
+    canteraKineticsParametersParser.populatePiecewiseconcentrationDependence(ceO2_input_simulation_settings, reactions_parameters_array, species_name, kineticParameterName, piecewise_coverage_intervals, modifiers_A )
     kineticParameterName = "E" 
     modifiers_E = ( [60000,50000,40000,30000,20000,10000,0], [60000,50000,40000,30000,20000,10000,0], [0,0,0,0,0,0,0], [60000,50000,40000,30000,20000,10000,0])
     
     #Now we call a helper function to make sure the activation energy is decreasing with coverage. It returns true if the final activation energy will decrease with coverage.
     checkResult = canteraKineticsParametersParser.descendingLinearEWithPiecewiseOffsetCheckOneReactionAllReactions(reactions_parameters_array=reactions_parameters_array, piecewise_coverage_intervals_all_reactions=piecewise_coverage_intervals, E_offsets_array_all_reactions=modifiers_E, verbose = False)
     if checkResult == True: #In this example, we are only proceeding if the coverage dependance is always decreasing with coverage.
-        canteraKineticsParametersParser.populatePiecewiseCoverageDependence(ceO2_input_simulation_settings, reactions_parameters_array, species_name, kineticParameterName, piecewise_coverage_intervals, modifiers_E)
+        canteraKineticsParametersParser.populatePiecewiseconcentrationDependence(ceO2_input_simulation_settings, reactions_parameters_array, species_name, kineticParameterName, piecewise_coverage_intervals, modifiers_E)
         #Now simulate!
         concentrationsArray, concentrationsArrayHeader, rates_all_array, rates_all_array_header, cantera_phase_rates, canteraPhases, cantera_phase_rates_headers, canteraSimulationsObject = \
         canteraSimulate.modify_reactions_and_SimulatePFRorTPRwithCantera(model_name, adjustedModifiableParametersCase, ceO2_input_simulation_settings, canteraPhases=canteraPhases)

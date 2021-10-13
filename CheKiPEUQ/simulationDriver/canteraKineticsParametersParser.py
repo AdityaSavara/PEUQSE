@@ -10,7 +10,7 @@ import numpy as np
 import cantera as ct 
 import copy
 #This module is written for reactions_parameters_arrays in the following format:
-#headerString = "reactionID,canteraReactionType,reactionEquation,A,b,E,a,m,e,coverageDependenceSpecies, is_sticking_coefficient"
+#headerString = "reactionID,canteraReactionType,reactionEquation,A,b,E,a,m,e,concentrationDependenceSpecies, is_sticking_coefficient"
 #The csv files are comma separated, and have 1 header string as noted above.
 
 
@@ -50,7 +50,7 @@ def descendingLinearEWithPiecewiseOffsetCheckOneReactionAllReactions(reactions_p
 #        a = str(individualreactions_parameters_array[6])
 #        m = str(individualreactions_parameters_array[7])
         e = str(individualreactions_parameters_array[8])
-        coverageDependenceSpecies = str(individualreactions_parameters_array[9])
+        concentrationDependenceSpecies = str(individualreactions_parameters_array[9])
 
         #Get the numbers that we need out.
         E_0 = float(E)
@@ -86,20 +86,20 @@ def makeCanteraReactionObjectsListFromFile(FileName):
 
 def extractReactionParametersFromFile(InputFileName, OutputFilename = ""): #The input fileName must point to a cti file or an xml file. An optional argument of OutputFilename will export the reactionParamtersArray
     canteraReactionObjectsList = makeCanteraReactionObjectsListFromFile(InputFileName)
-    reactionIDsList, reactionTypesList, reactionEquationsList, ArrheniusParametersArray, coverageDependencesArray, coverageDependencesSpeciesList, is_sticking_coefficientList = getReactionParametersFromCanteraReactionObjectsList(canteraReactionObjectsList)
-    outputAsNumpyArray = stackListsAndArrays([reactionIDsList, reactionTypesList, reactionEquationsList, ArrheniusParametersArray, coverageDependencesArray, coverageDependencesSpeciesList, is_sticking_coefficientList])
+    reactionIDsList, reactionTypesList, reactionEquationsList, ArrheniusParametersArray, concentrationDependencesArray, concentrationDependencesSpeciesList, is_sticking_coefficientList = getReactionParametersFromCanteraReactionObjectsList(canteraReactionObjectsList)
+    outputAsNumpyArray = stackListsAndArrays([reactionIDsList, reactionTypesList, reactionEquationsList, ArrheniusParametersArray, concentrationDependencesArray, concentrationDependencesSpeciesList, is_sticking_coefficientList])
     if OutputFilename != "":
-        headerString = "reactionID,canteraReactionType,reactionEquation,A,b,E,a,m,e,coverageDependenceSpecies, is_sticking_coefficient"
+        headerString = "reactionID,canteraReactionType,reactionEquation,A,b,E,a,m,e,concentrationDependenceSpecies, is_sticking_coefficient"
         np.savetxt(OutputFilename,outputAsNumpyArray, fmt="%s", delimiter=",", comments='', header=headerString)
-    return reactionIDsList, reactionTypesList, reactionEquationsList, ArrheniusParametersArray, coverageDependencesArray, coverageDependencesSpeciesList, is_sticking_coefficientList
+    return reactionIDsList, reactionTypesList, reactionEquationsList, ArrheniusParametersArray, concentrationDependencesArray, concentrationDependencesSpeciesList, is_sticking_coefficientList
 
 def getReactionParametersFromCanteraReactionObjectsList(reactionObjectList):
     reactionIDsList = []
     reactionTypesList = []
     reactionEquationsList = []
     ArrheniusParametersList =[] #List of numpy arrays with A,b,E for each reaction.
-    coverageDependencesList =[]
-    coverageDependencesSpeciesList = []
+    concentrationDependencesList =[]
+    concentrationDependencesSpeciesList = []
     is_sticking_coefficientList =[]
     for reactionObject in reactionObjectList:
         reactionIDsList.append(reactionObject.ID)
@@ -123,40 +123,40 @@ def getReactionParametersFromCanteraReactionObjectsList(reactionObjectList):
         ArrheniusParametersList.append(singleReactionArrheniusParametersArray)
         #Now check for coverage parameters.
         try:
-            if len(reactionObject.coverage_deps) > 0:
-                coverage_deps = True
+            if len(reactionObject.concentration_deps) > 0:
+                concentration_deps = True
             else:
-                coverage_deps = False
+                concentration_deps = False
         except:
-                coverage_deps = False
-        if coverage_deps == True:
-            singleReactionCoverageDependencesDict = reactionObject.coverage_deps
-            temporaryCoverageDependenceSpeciesList = list(reactionObject.coverage_deps.keys())
-            if len(temporaryCoverageDependenceSpeciesList) > 0:
-                coverageDependenceExists = True
-                coverageDependenceSpecies = temporaryCoverageDependenceSpeciesList[0]
-                a = reactionObject.coverage_deps[coverageDependenceSpecies][0]
-                m = reactionObject.coverage_deps[coverageDependenceSpecies][1]
-                e = float(reactionObject.coverage_deps[coverageDependenceSpecies][2])/1000 #Annoyingly, Cantera puts Energies out in J/kmol.   
+                concentration_deps = False
+        if concentration_deps == True:
+            singleReactionconcentrationDependencesDict = reactionObject.concentration_deps
+            temporaryconcentrationDependenceSpeciesList = list(reactionObject.concentration_deps.keys())
+            if len(temporaryconcentrationDependenceSpeciesList) > 0:
+                concentrationDependenceExists = True
+                concentrationDependenceSpecies = temporaryconcentrationDependenceSpeciesList[0]
+                a = reactionObject.concentration_deps[concentrationDependenceSpecies][0]
+                m = reactionObject.concentration_deps[concentrationDependenceSpecies][1]
+                e = float(reactionObject.concentration_deps[concentrationDependenceSpecies][2])/1000 #Annoyingly, Cantera puts Energies out in J/kmol.   
         else:#There is no coverage dependence, so will put 'NaN')
              a = float('nan')
              m = float('nan')
              e = float('nan')
-             coverageDependenceSpecies = 'None'
-        coverageDependencesList.append(np.array([a,m,e]))
-        coverageDependencesSpeciesList.append(coverageDependenceSpecies)
+             concentrationDependenceSpecies = 'None'
+        concentrationDependencesList.append(np.array([a,m,e]))
+        concentrationDependencesSpeciesList.append(concentrationDependenceSpecies)
         is_sticking_coefficientList.append(reactionObject.is_sticking_coefficient)
     reactionIDsList = reactionIDsList
     reactionTypesList = reactionTypesList
     ArrheniusParametersArray = np.array(ArrheniusParametersList)
-    coverageDependencesArray = np.array(coverageDependencesList)
-    coverageDependencesSpeciesList = coverageDependencesSpeciesList
+    concentrationDependencesArray = np.array(concentrationDependencesList)
+    concentrationDependencesSpeciesList = concentrationDependencesSpeciesList
     is_sticking_coefficientList = is_sticking_coefficientList
-    return reactionIDsList, reactionTypesList, reactionEquationsList, ArrheniusParametersArray, coverageDependencesArray, coverageDependencesSpeciesList, is_sticking_coefficientList
+    return reactionIDsList, reactionTypesList, reactionEquationsList, ArrheniusParametersArray, concentrationDependencesArray, concentrationDependencesSpeciesList, is_sticking_coefficientList
     
 def make_reaction_cti_string(individualreactions_parameters_array):
     #input should be a an array of strings: 
-    #reactionID	canteraReactionType	reactionEquation	A	b	E	a	m	e	coverageDependenceSpecies	 is_sticking_coefficient
+    #reactionID	canteraReactionType	reactionEquation	A	b	E	a	m	e	concentrationDependenceSpecies	 is_sticking_coefficient
     # 1	20	H2 + 2 PT(S) => 2 H(S)	0.046	0	0	0	-1	0	PT(S)	TRUE
     #canteraReactionType is typically "surface_reaction" or "reaction". THe falloff and three_body reactions are not yet supported at this time.
     reaction_cti_string = None #This is to help diagnose errors.
@@ -169,7 +169,7 @@ def make_reaction_cti_string(individualreactions_parameters_array):
     a = str(individualreactions_parameters_array[6])
     m = str(individualreactions_parameters_array[7])
     e = str(individualreactions_parameters_array[8])
-    coverageDependenceSpecies = str(individualreactions_parameters_array[9])
+    concentrationDependenceSpecies = str(individualreactions_parameters_array[9])
     is_sticking = str(individualreactions_parameters_array[10])
     if is_sticking.capitalize() == "False": #considered using distutils.util.strtobool(is_sticking) but decided that would slow the program down.
         ArrheniusString = "Arrhenius"
@@ -181,16 +181,16 @@ def make_reaction_cti_string(individualreactions_parameters_array):
         reaction_cti_string = '''reaction('{0}',
         {1}({2}, {3}, {4}])'''.format(reactionEquation, ArrheniusString, A,b,E)
     if individualReactionTypeReceived.lower() == "surface_reaction":
-        if coverageDependenceSpecies.capitalize() == "None": #FIXME: Not working yet (because of Cantera side, not because of this script.)
+        if concentrationDependenceSpecies.capitalize() == "None": #FIXME: Not working yet (because of Cantera side, not because of this script.)
             reaction_cti_string= '''surface_reaction("{0}",
             {1}({2}, {3}, {4}))'''.format(reactionEquation,ArrheniusString,A,b,E) 
                 #Like the below example.
                 #        R3 = ct.InterfaceReaction.fromCti('''surface_reaction('O + H2 <=> H + OH',
                 #        [3.87e1, 2.7, 2.619184e7])''')                      
-        if coverageDependenceSpecies.capitalize() != "None": #FIXME: Not working yet (because of Cantera side, not because of this script.)
+        if concentrationDependenceSpecies.capitalize() != "None": #FIXME: Not working yet (because of Cantera side, not because of this script.)
             reaction_cti_string = '''surface_reaction("{0}",
             {1}({2}, {3}, {4},
-            coverage = ['{5}', {6}, {7}, {8}]))'''.format(reactionEquation,ArrheniusString,A,b,E,coverageDependenceSpecies,a,m,e)
+            coverage = ['{5}', {6}, {7}, {8}]))'''.format(reactionEquation,ArrheniusString,A,b,E,concentrationDependenceSpecies,a,m,e)
                 #Like the below example.
                 #        R5 = ct.InterfaceReaction.fromCti('''surface_reaction( "CH4 + PT(S) + O(S) => CH3(S) + OH(S)",
                 #                  Arrhenius(5.0e18, 0.7, 2000.0,
@@ -209,7 +209,7 @@ def create_full_cti(model_name, reactions_parameters_array = [], cti_top_info_st
            cti_top_info_string = cti_top_info_file.read() 
     #Normally, somebody will have to fill out the reaction parameters file ahead of time.
     #This time, it was made through the following line:
-    #reactionIDsList, reactionTypesList, reactionEquationsList, ArrheniusParametersArray, coverageDependencesArray, coverageDependencesSpeciesList, is_sticking_coefficientList = exportReactionParametersFromFile("ceO2_cti_full_existing.cti", "ceO2_input_reactions_parameters.csv")
+    #reactionIDsList, reactionTypesList, reactionEquationsList, ArrheniusParametersArray, concentrationDependencesArray, concentrationDependencesSpeciesList, is_sticking_coefficientList = exportReactionParametersFromFile("ceO2_cti_full_existing.cti", "ceO2_input_reactions_parameters.csv")
     if len(reactions_parameters_array) == len([]):
        reaction_parameters_filename = model_name+"_input_reactions_parameters.csv"
        reactions_parameters_array = np.genfromtxt(reaction_parameters_filename, delimiter=",", skip_header=1, dtype="str")
@@ -247,16 +247,16 @@ def findModifiableParameterIndices(reactions_parameters_array):
         a = str(individualreactions_parameters_array[6])
         m = str(individualreactions_parameters_array[7])
         e = str(individualreactions_parameters_array[8])
-        coverageDependenceSpecies = str(individualreactions_parameters_array[9])
+        concentrationDependenceSpecies = str(individualreactions_parameters_array[9])
         is_sticking = str(individualreactions_parameters_array[10])
 
         #For all reactions, we can modify the A,b,E parameters.
         listOfModifiableParameterIndices = listOfModifiableParameterIndices + [ [reactionIndex,3],[reactionIndex,4],[reactionIndex,5] ]
         #Now check for other parameters...
         if individualReactionTypeReceived == 'surface_reaction': #This can include adsorption, desorption, and surface reactions.
-            if coverageDependenceSpecies != 'None': #If this is not none, then that means the a, m, and e can also be modified.
+            if concentrationDependenceSpecies != 'None': #If this is not none, then that means the a, m, and e can also be modified.
                 listOfModifiableParameterIndices = listOfModifiableParameterIndices + [ [reactionIndex,6],[reactionIndex,7],[reactionIndex,8] ]
-                #Currently, we cannot modify the coverageDependenceSpecies.
+                #Currently, we cannot modify the concentrationDependenceSpecies.
         #Other reaction types are not yet supported, but can be added in the future.                
 
     return listOfModifiableParameterIndices
@@ -305,8 +305,8 @@ def getReactionParametersFromReactionObjectsList(reactionObjectList):
     reactionTypesList = []
     reactionEquationsList = []
     ArrheniusParametersList =[] #List of numpy arrays with A,b,E for each reaction.
-    coverageDependencesList =[]
-    coverageDependencesSpeciesList = []
+    concentrationDependencesList =[]
+    concentrationDependencesSpeciesList = []
     for reactionObject in reactionObjectList:
         reactionIDsList.append(reactionObject["@id"])
         try:
@@ -331,12 +331,12 @@ def getReactionParametersFromReactionObjectsList(reactionObjectList):
         ArrheniusParametersList.append(singleReactionArrheniusParametersArray)
         #Now check for coverage parameters.
         if "coverage" in reactionObject['rateCoeff']['Arrhenius']:
-            singleReactionCoverageDependencesDict = reactionObject['rateCoeff']['Arrhenius']['coverage']
-            speciesDependence = singleReactionCoverageDependencesDict['@species']
-            a = float(singleReactionCoverageDependencesDict['a'])
-            m = float(singleReactionCoverageDependencesDict['m'])
-            if singleReactionCoverageDependencesDict['e']['@units']=="J/mol":
-                e = float(singleReactionCoverageDependencesDict['e']['#text']) #the xml is written in a way that this is necessary.
+            singleReactionconcentrationDependencesDict = reactionObject['rateCoeff']['Arrhenius']['coverage']
+            speciesDependence = singleReactionconcentrationDependencesDict['@species']
+            a = float(singleReactionconcentrationDependencesDict['a'])
+            m = float(singleReactionconcentrationDependencesDict['m'])
+            if singleReactionconcentrationDependencesDict['e']['@units']=="J/mol":
+                e = float(singleReactionconcentrationDependencesDict['e']['#text']) #the xml is written in a way that this is necessary.
             else:
                 e = 0.0
                 print("Error: Currently, ony J/mol is supported for units of e. Fix coverage parameters for this reaction: " + reactionObject['equation'])
@@ -345,14 +345,14 @@ def getReactionParametersFromReactionObjectsList(reactionObjectList):
              m = float('nan')
              e = float('nan')
              speciesDependence = 'None'
-        coverageDependencesList.append(np.array([a,m,e]))
-        coverageDependencesSpeciesList.append(speciesDependence)
+        concentrationDependencesList.append(np.array([a,m,e]))
+        concentrationDependencesSpeciesList.append(speciesDependence)
     reactionIDsList = reactionIDsList
     reactionTypesList = reactionTypesList
     ArrheniusParametersArray = np.array(ArrheniusParametersList)
-    coverageDependencesArray = np.array(coverageDependencesList)
-    coverageDependencesSpeciesList = coverageDependencesSpeciesList
-    return reactionIDsList, reactionTypesList, reactionEquationsList, ArrheniusParametersArray, coverageDependencesArray, coverageDependencesSpeciesList
+    concentrationDependencesArray = np.array(concentrationDependencesList)
+    concentrationDependencesSpeciesList = concentrationDependencesSpeciesList
+    return reactionIDsList, reactionTypesList, reactionEquationsList, ArrheniusParametersArray, concentrationDependencesArray, concentrationDependencesSpeciesList
 '''
 
 
@@ -372,7 +372,7 @@ def ArrheniusParameterAddedToInOnePhase(canteraModule, canteraPhaseObject, Arrhe
         a_operand = float(individualreactions_parameters_array[6])
         m_operand = float(individualreactions_parameters_array[7])
         e_operand = float(individualreactions_parameters_array[8])
-        coverageDependenceSpecies = str(individualreactions_parameters_array[9])
+        concentrationDependenceSpecies = str(individualreactions_parameters_array[9])
 
         if byProvidedReactionID == False: #optional.... 
                 #byProvidedReactionID is set to False, but this only works if the cantera model has the equation written exactly the same.
@@ -383,20 +383,20 @@ def ArrheniusParameterAddedToInOnePhase(canteraModule, canteraPhaseObject, Arrhe
         existingA = float(existingReactionObject.rate.pre_exponential_factor)
         existingb = float(existingReactionObject.rate.temperature_exponent)
         existingE = float(existingReactionObject.rate.activation_energy)
-        temporaryCoverageDependenceSpeciesList = list(existingReactionObject.coverage_deps.keys())
-        if len(temporaryCoverageDependenceSpeciesList) > 0:
-            coverageDependenceExists = True
-            coverageDependenceSpecies = temporaryCoverageDependenceSpeciesList[0]
-            existinga = existingReactionObject.coverage_deps[coverageDependenceSpecies][0]
-            existingm = existingReactionObject.coverage_deps[coverageDependenceSpecies][1]
-            existinge = existingReactionObject.coverage_deps[coverageDependenceSpecies][2]
+        temporaryconcentrationDependenceSpeciesList = list(existingReactionObject.concentration_deps.keys())
+        if len(temporaryconcentrationDependenceSpeciesList) > 0:
+            concentrationDependenceExists = True
+            concentrationDependenceSpecies = temporaryconcentrationDependenceSpeciesList[0]
+            existinga = existingReactionObject.concentration_deps[concentrationDependenceSpecies][0]
+            existingm = existingReactionObject.concentration_deps[concentrationDependenceSpecies][1]
+            existinge = existingReactionObject.concentration_deps[concentrationDependenceSpecies][2]
         existingReactionObject.rate = ct.Arrhenius(float(existingA+A_operand), float(existingb+b_operand), float(existingE+E_operand))
-        if coverageDependenceExists == True:
+        if concentrationDependenceExists == True:
             print("Warning: Coverage dependence modifiers not working yet")
             try:
                 if a_operand+m_operand+e_operand != 0.0: #FIXME: Not working yet (because of Cantera side, not because of this script.)
-                    tupleForCoverageDependence = (existinga+a_operand ,existingm+m_operand , existinge+e_operand)
-                    existingReactionObject.coverage_deps[coverageDependenceSpecies]=tupleForCoverageDependence
+                    tupleForconcentrationDependence = (existinga+a_operand ,existingm+m_operand , existinge+e_operand)
+                    existingReactionObject.concentration_deps[concentrationDependenceSpecies]=tupleForconcentrationDependence
             except:
                 pass
         canteraPhaseObject.modify_reaction(int(reactionID), existingReactionObject)           
@@ -415,7 +415,7 @@ def ArrheniusParametersMultiplierInOnePhase(canteraModule, canteraPhaseObject, A
         a_multiplier = float(individualreactions_parameters_array[6])
         m_multiplier = float(individualreactions_parameters_array[7])
         e_multiplier = float(individualreactions_parameters_array[8])
-        coverageDependenceSpecies = str(individualreactions_parameters_array[9])
+        concentrationDependenceSpecies = str(individualreactions_parameters_array[9])
 
         if byProvidedReactionID == False: #optional.... 
                 #byProvidedReactionID is set to False, but this only works if the cantera model has the equation written exactly the same.
@@ -426,25 +426,25 @@ def ArrheniusParametersMultiplierInOnePhase(canteraModule, canteraPhaseObject, A
         existingA = float(existingReactionObject.rate.pre_exponential_factor)
         existingb = float(existingReactionObject.rate.temperature_exponent)
         existingE = float(existingReactionObject.rate.activation_energy)
-        temporaryCoverageDependenceSpeciesList = list(existingReactionObject.coverage_deps.keys())
-        if len(temporaryCoverageDependenceSpeciesList) > 0:
-            coverageDependenceExists = True
-            coverageDependenceSpecies = temporaryCoverageDependenceSpeciesList[0]
-            existinga = existingReactionObject.coverage_deps[coverageDependenceSpecies][0]
-            existingm = existingReactionObject.coverage_deps[coverageDependenceSpecies][1]
-            existinge = existingReactionObject.coverage_deps[coverageDependenceSpecies][2]
+        temporaryconcentrationDependenceSpeciesList = list(existingReactionObject.concentration_deps.keys())
+        if len(temporaryconcentrationDependenceSpeciesList) > 0:
+            concentrationDependenceExists = True
+            concentrationDependenceSpecies = temporaryconcentrationDependenceSpeciesList[0]
+            existinga = existingReactionObject.concentration_deps[concentrationDependenceSpecies][0]
+            existingm = existingReactionObject.concentration_deps[concentrationDependenceSpecies][1]
+            existinge = existingReactionObject.concentration_deps[concentrationDependenceSpecies][2]
         existingReactionObject.rate = ct.Arrhenius(float(existingA*A_multiplier), float(existingb*b_multiplier), float(existingE*E_multiplier))
-        if coverageDependenceExists == True:
+        if concentrationDependenceExists == True:
             print("Warning: Coverage dependence modifiers not working yet")
             try:
                 if a_multiplier*m_multiplier*e_multiplier != 1.0: #FIXME: Not working yet (because of Cantera side, not because of this script.)
-                    tupleForCoverageDependence = (existinga*a_multiplier ,existingm*m_multiplier , existinge*e_multiplier)
-                    existingReactionObject.coverage_deps[coverageDependenceSpecies]=tupleForCoverageDependence
+                    tupleForconcentrationDependence = (existinga*a_multiplier ,existingm*m_multiplier , existinge*e_multiplier)
+                    existingReactionObject.concentration_deps[concentrationDependenceSpecies]=tupleForconcentrationDependence
             except:
                 pass
         canteraPhaseObject.modify_reaction(int(reactionID), existingReactionObject)           
 
-def populatePiecewiseCoverageDependence(simulation_settings_module, original_reactions_parameters_array, species_name, kineticParameterName, piecewise_coverage_intervals, modifiers_array):
+def populatePiecewiseconcentrationDependence(simulation_settings_module, original_reactions_parameters_array, species_name, kineticParameterName, piecewise_coverage_intervals, modifiers_array):
     try:
         len(simulation_settings_module.piecewise_coverage_dependences)
     except: #if it has no length, then dictionary has not been created yet.
@@ -561,7 +561,7 @@ def modifyReactionsInOnePhase(canteraPhaseObject, reactions_parameters_array, Ar
         a = str(individualreactions_parameters_array[6])
         m = str(individualreactions_parameters_array[7])
         e = str(individualreactions_parameters_array[8])
-        coverageDependenceSpecies = str(individualreactions_parameters_array[9])
+        concentrationDependenceSpecies = str(individualreactions_parameters_array[9])
 
         if byProvidedReactionID == False: #optional.... 
                 #byProvidedReactionID is set to False, but this only works if the cantera model has the equation written exactly the same.
@@ -578,17 +578,17 @@ def modifyReactionsInOnePhase(canteraPhaseObject, reactions_parameters_array, Ar
                     cti_string = '''reaction('{0}', [{1}, {2}, {3}])'''.format(reactionEquation, A,b,E)
                     modifiedReactionObject = ct.Reaction.fromCti(cti_string)
                 if phaseType == "Interface":
-                    if coverageDependenceSpecies == "None": #FIXME: Not working yet (because of Cantera side, not because of this script.)
+                    if concentrationDependenceSpecies == "None": #FIXME: Not working yet (because of Cantera side, not because of this script.)
                         cti_string= '''surface_reaction("{0}",
                             [{1}, {2}, {3}])'''.format(reactionEquation,A,b,E) 
                         modifiedReactionObject = ct.InterfaceReaction.fromCti(cti_string)
                             #Like the below example.
                             #        R3 = ct.InterfaceReaction.fromCti('''surface_reaction('O + H2 <=> H + OH',
                             #        [3.87e1, 2.7, 2.619184e7])''')                      
-                    if coverageDependenceSpecies != "None": #FIXME: Not working yet (because of Cantera side, not because of this script.)
+                    if concentrationDependenceSpecies != "None": #FIXME: Not working yet (because of Cantera side, not because of this script.)
                         print("Warning: Coverage dependence modifiers not working yet")
                         cti_string = '''surface_reaction("{0}",Arrhenius({1}, {2}, {3},
-                                            coverage = ['{4}', {5}, {6}, {7}]))'''.format(reactionEquation,A,b,E,coverageDependenceSpecies,a,m,e)
+                                            coverage = ['{4}', {5}, {6}, {7}]))'''.format(reactionEquation,A,b,E,concentrationDependenceSpecies,a,m,e)
                         modifiedReactionObject = ct.InterfaceReaction.fromCti(cti_string)                    
                             #Like the below example.
                             #        R5 = ct.InterfaceReaction.fromCti('''surface_reaction( "CH4 + PT(S) + O(S) => CH3(S) + OH(S)",
