@@ -448,7 +448,7 @@ def ArrheniusParametersMultiplierInOnePhase(canteraModule, canteraPhaseObject, A
                 pass
         canteraPhaseObject.modify_reaction(int(reactionID), existingReactionObject)           
 
-def populatePiecewiseconcentrationDependence(simulation_settings_module, original_reactions_parameters_array, species_name, kineticParameterName, piecewise_coverage_intervals, modifiers_array):
+def populatePiecewiseConcentrationDependence(simulation_settings_module, original_reactions_parameters_array, species_name, kineticParameterName, piecewise_coverage_intervals, modifiers_array):
     try:
         len(simulation_settings_module.piecewise_coverage_dependences)
     except: #if it has no length, then dictionary has not been created yet.

@@ -24,7 +24,7 @@ piecewise_coverage_intervals = np.array([0,0.1,0.2,0.3,0.4,0.5,1.0])
 species_name = "Acetaldehyde1-Ce(S)" #In this example we make the parameters depend only on the coverage of species Acetaldehyde1-Ce(S).
 kineticParameterName = "A"
 modifiers_A = ([0,0,0,0,0,0,0], [-1,1,-1,-1,-1,-1,0], [0,0,0,0,0,0,0], [0,0,0,0,0,0,0])
-canteraKineticsParametersParser.populatePiecewiseCoverageDependence(ceO2_input_simulation_settings, reactions_parameters_array, species_name, kineticParameterName, piecewise_coverage_intervals, modifiers_A )
+canteraKineticsParametersParser.populatePiecewiseConcentrationDependence(ceO2_input_simulation_settings, reactions_parameters_array, species_name, kineticParameterName, piecewise_coverage_intervals, modifiers_A )
 kineticParameterName = "E" 
 modifiers_E = ( [60000,50000,40000,30000,20000,10000,0], [60000,50000,40000,30000,20000,10000,0], [0,0,0,0,0,0,0], [60000,50000,40000,30000,20000,10000,0])
 
@@ -95,11 +95,11 @@ def cantera_simulation_wrapper_example5(parametersArray): #This takes in *only* 
     species_name = "Acetaldehyde1-Ce(S)" #In this example we make the parameters depend only on the coverage of species Acetaldehyde1-Ce(S).
     kineticParameterName = "A"
     modifiers_A = tuple(modifiers_A_list)
-    canteraKineticsParametersParser.populatePiecewiseCoverageDependence(ceO2_input_simulation_settings, reactions_parameters_array, species_name, kineticParameterName, piecewise_coverage_intervals, modifiers_A )
+    canteraKineticsParametersParser.populatePiecewiseConcentrationDependence(ceO2_input_simulation_settings, reactions_parameters_array, species_name, kineticParameterName, piecewise_coverage_intervals, modifiers_A )
     species_name = "Acetaldehyde1-Ce(S)" #In this example we make the parameters depend only on the coverage of species Acetaldehyde1-Ce(S).
     kineticParameterName = "E"    
     modifiers_E = tuple(modifiers_E_list)
-    canteraKineticsParametersParser.populatePiecewiseCoverageDependence(ceO2_input_simulation_settings, modified_reactions_parameters_array, species_name, kineticParameterName, piecewise_coverage_intervals, modifiers_E)
+    canteraKineticsParametersParser.populatePiecewiseConcentrationDependence(ceO2_input_simulation_settings, modified_reactions_parameters_array, species_name, kineticParameterName, piecewise_coverage_intervals, modifiers_E)
     
     
     
@@ -162,7 +162,7 @@ if __name__ == "__main__":
     species_name = "Acetaldehyde1-Ce(S)" #In this example we make the parameters depend only on the coverage of species Acetaldehyde1-Ce(S).
     kineticParameterName = "A"
     modifiers_A = ([0,0,0,0,0,0,0], [-1,1,-1,-1,-1,-1,0], [0,0,0,0,0,0,0], [0,0,0,0,0,0,0])
-    canteraKineticsParametersParser.populatePiecewiseCoverageDependence(ceO2_input_simulation_settings, reactions_parameters_array, species_name, kineticParameterName, piecewise_coverage_intervals, modifiers_A )
+    canteraKineticsParametersParser.populatePiecewiseConcentrationDependence(ceO2_input_simulation_settings, reactions_parameters_array, species_name, kineticParameterName, piecewise_coverage_intervals, modifiers_A )
     kineticParameterName = "E" 
     modifiers_E = ( [60000,50000,40000,30000,20000,10000,0], [60000,50000,40000,30000,20000,10000,0], [0,0,0,0,0,0,0], [60000,50000,40000,30000,20000,10000,0])
     
@@ -173,7 +173,7 @@ if __name__ == "__main__":
 #    print(reactions_parameters_array)
 #    
     if checkResult == True: #In this example, we are only proceeding if the coverage dependance is always decreasing with coverage.
-        canteraKineticsParametersParser.populatePiecewiseCoverageDependence(ceO2_input_simulation_settings, reactions_parameters_array, species_name, kineticParameterName, piecewise_coverage_intervals, modifiers_E)
+        canteraKineticsParametersParser.populatePiecewiseConcentrationDependence(ceO2_input_simulation_settings, reactions_parameters_array, species_name, kineticParameterName, piecewise_coverage_intervals, modifiers_E)
         
         cti_top_info_filename =model_location+ model_name + "_cti_top_info.cti"
         with open(cti_top_info_filename, "r") as cti_top_info_file:
