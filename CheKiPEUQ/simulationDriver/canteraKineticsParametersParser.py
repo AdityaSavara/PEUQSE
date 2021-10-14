@@ -2,7 +2,7 @@
 """
 Created on Thu Nov 28 14:44:31 2019
 
-@author: Yurik
+#originally made for Cantera 2.4.  Not upgraded to work with later versions of Cantera, as of Oct 2021
 """
 
 import xmltodict
