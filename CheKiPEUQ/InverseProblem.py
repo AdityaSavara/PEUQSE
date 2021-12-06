@@ -1499,10 +1499,13 @@ class parameter_estimation:
         else:
             print("At present, createInfoGainPlots and createInfoGainModulationPlots only create plots when the length of  independent_variable_grid_center is 2. We don't currently support creation of other dimensional plots. The infogain data is being exported into the file _____.csv")
     def getLogP(self, proposal_sample): #The proposal sample is specific parameter vector.
-        [log_likelihood_proposal, simulationOutput_proposal] = self.getLogLikelihood(proposal_sample)
         log_prior_proposal = self.getLogPrior(proposal_sample)
-        log_numerator_or_denominator = log_likelihood_proposal+log_prior_proposal #Of the Metropolis-Hastings accept/reject ratio
-        return log_numerator_or_denominator
+        if log_prior_proposal == float('-inf'): #due to the bounds check or other reasons, log_prior_proposal could be '-inf'.
+            return float('-inf')
+        #else continue as normal.
+        log_likelihood_proposal, simulationOutput_proposal = self.getLogLikelihood(proposal_sample)
+        logP = log_likelihood_proposal+log_prior_proposal #Of the Metropolis-Hastings accept/reject ratio
+        return logP
         
     def getNegLogP(self, proposal_sample): #The proposal sample is specific parameter vector. We are using negative of log P because scipy optimize doesn't do maximizing. It's recommended minimize the negative in this situation.
         neg_log_postererior = -1*self.getLogP(proposal_sample)
