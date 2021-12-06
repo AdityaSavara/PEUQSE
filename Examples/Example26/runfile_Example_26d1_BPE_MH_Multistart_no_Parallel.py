@@ -24,6 +24,7 @@ if __name__ == "__main__":
     simulation_model_00.x_values_for_data = UserInput.responses['responses_abscissa']  #Setting the x_values_for_data inthe simulation module.
 
     UserInput.parameter_estimation_settings['mcmc_length'] = 100
+    #UserInput.parameter_estimation_settings['mcmc_threshold_filter_samples'] = False
 
     UserInput.parameter_estimation_settings['mcmc_random_seed'] = 50
     UserInput.parameter_estimation_settings['mcmc_parallel_sampling'] = False

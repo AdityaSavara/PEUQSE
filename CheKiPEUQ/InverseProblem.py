@@ -752,6 +752,7 @@ class parameter_estimation:
                 thisResult = [self.map_logP, self.map_parameter_set, None, None, None, None, None, None]
                 #thisResultStr = [self.map_logP, str(self.map_parameter_set).replace(",","|").replace("[","").replace('(','').replace(')',''), 'None', 'None', 'None', 'None', 'None', 'None']
             if searchType == 'doMetropolisHastings':
+                self.map_logP = np.float('-inf') #initializing as -inf to have a 'pure' mcmc sampling.
                 thisResult = self.doMetropolisHastings(calculatePostBurnInStatistics=calculatePostBurnInStatistics, continueSampling=mcmc_continueSampling)
                 #self.map_logP gets done by itself in doMetropolisHastings
                 #Note that "thisResult" has the form: [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec]
@@ -765,6 +766,7 @@ class parameter_estimation:
                         self.cumulative_post_burn_in_log_priors_vec = np.vstack((self.cumulative_post_burn_in_log_priors_vec, self.post_burn_in_log_priors_vec))
                         self.cumulative_post_burn_in_log_posteriors_un_normed_vec = np.vstack((self.cumulative_post_burn_in_log_posteriors_un_normed_vec, self.post_burn_in_log_posteriors_un_normed_vec))
             if searchType == 'doEnsembleSliceSampling':
+                self.map_logP = np.float('-inf') #initializing as -inf to have a 'pure' mcmc sampling.
                 thisResult = self.doEnsembleSliceSampling(mcmc_nwalkers_direct_input=permutationSearch_mcmc_nwalkers, calculatePostBurnInStatistics=calculatePostBurnInStatistics, walkerInitialDistribution=walkerInitialDistribution, continueSampling=mcmc_continueSampling) 
                 #Note that "thisResult" has the form: [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec]
                 #self.map_logP gets done by itself in doEnsembleSliceSampling
@@ -800,8 +802,8 @@ class parameter_estimation:
                 timeAtLastPermutation = timeAtThisPermutation #Updating.
             if self.map_logP > self.highest_logP: #This is the grid point in space with the highest value found so far and will be kept.
                 bestResultSoFar = thisResult #for mcmc: [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec]
-                self.highest_logP = self.map_logP
-                highest_logP_parameter_set = self.map_parameter_set
+                self.highest_logP = np.copy(self.map_logP)
+                highest_logP_parameter_set = np.copy(self.map_parameter_set)
                 highest_MAP_initial_point_index = permutationIndex
                 highest_MAP_initial_point_parameters = permutation
             allPermutationsResults.append(thisResult)
@@ -842,7 +844,7 @@ class parameter_estimation:
         if (searchType == 'doEnsembleSliceSampling') or (searchType == 'doMetropolisHastings'):
             #For MCMC, we can now calculate the post_burn_in statistics for the best sampling from the full samplings done. We don't want to lump all together because that would not be unbiased.
             #Note that "thisResult" and thus "bestResultSoFar" has the form: [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec]
-            [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec] = bestResultSoFar
+            self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec = bestResultSoFar
             if calculatePostBurnInStatistics == True:
                 #self.post_burn_in_samples = bestResultSoFar[5] #Setting the global variable will allow calculating the info gain and priors also.
                 #self.post_burn_in_log_posteriors_un_normed_vec = bestResultSoFar[6]
@@ -1566,7 +1568,6 @@ class parameter_estimation:
                 print("Notification: Parameter bounds are on and doOptimizeSSR is being called. Forcing the optimization method to be L-BFGS-B because this it the only SSR method presently allowed for bounds with CheKiPEUQ.")
                 method = 'L-BFGS-B'
                 zippedBounds = list(zip(self.UserInput.InputParameterPriorValues_lowerBounds, self.UserInput.InputParameterPriorValues_upperBounds))
-                print("line 1561", zippedBounds)
                 optimizationAdditionalArgs['bounds'] = zippedBounds
         
         initialGuess = self.UserInput.InputParameterInitialGuess
