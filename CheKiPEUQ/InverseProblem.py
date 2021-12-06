@@ -799,7 +799,7 @@ class parameter_estimation:
                 numRemainingPermutations = numPermutations - permutationIndex+1
                 timeAtLastPermutation = timeAtThisPermutation #Updating.
             if self.map_logP > self.highest_logP: #This is the grid point in space with the highest value found so far and will be kept.
-                bestResultSoFar = thisResult
+                bestResultSoFar = thisResult #for mcmc: [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec]
                 self.highest_logP = self.map_logP
                 highest_logP_parameter_set = self.map_parameter_set
                 highest_MAP_initial_point_index = permutationIndex
@@ -896,7 +896,7 @@ class parameter_estimation:
                 out_file.write("centerPoint: " + str(centerPoint) + "\n")
                 if self.permutation_and_doOptimizeSSR == False:# In the normal case, we are not doing SSR.               
                     out_file.write("highest_MAP_logP: " + str(self.map_logP) + "\n")
-                    out_file.write("highest_MAP_logP_parameter_set: " + str(self.map_parameter_set)+ "\n")
+                    out_file.write("highest_MAP_logP_parameter_set: " + str(bestResultSoFar[0])+ "\n")
                     out_file.write("highest_MAP_initial_point_index: " + str(highest_MAP_initial_point_index)+ "\n")
                     out_file.write("highest_MAP_initial_point_parameters: " + str( highest_MAP_initial_point_parameters)+ "\n")
                     if (searchType == 'doEnsembleSliceSampling') or (searchType == 'doMetropolisHastings') or (permutationsToSamples == True):
@@ -904,8 +904,8 @@ class parameter_estimation:
                             caveat = ' (for the above initial point) '
                         elif permutationsToSamples == True:
                             caveat = ''
-                        out_file.write("self.mu_AP_parameter_set : " + caveat + str( self.mu_AP_parameter_set)+ "\n")
-                        out_file.write("self.stdap_parameter_set : " + caveat  + str( self.stdap_parameter_set)+ "\n")
+                        out_file.write("self.mu_AP_parameter_set : " + caveat + str( bestResultSoFar[1])+ "\n")
+                        out_file.write("self.stdap_parameter_set : " + caveat  + str( bestResultSoFar[2])+ "\n")
                     if (self.permutation_and_doOptimizeNegLogP == True) or (self.permutation_and_doOptimizeLogP == True):
                         out_file.write("\n WARNING: It appears this run used a doOptimize with multi-start. In this case, the MAP_logP and map_parameter_set are the optimum from the run.  However, the mu_AP_parameter_set and stdap_parameter_set are not meaningful, since this was not an even weighted exploration of the posterior. \n")                        
                 if self.permutation_and_doOptimizeSSR == True: #special case where we are doing SSR.
