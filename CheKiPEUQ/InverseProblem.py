@@ -1764,31 +1764,13 @@ class parameter_estimation:
         self.map_parameter_set = self.post_burn_in_samples[self.map_index] #This  is the point with the highest probability in the posterior.            
         #TODO: Probably should return the variance of each sample in the post_burn_in
         #posterior probabilites are transformed to a standard normal (std=1) for obtaining the evidence:
-        self.evidence = np.mean(np.exp(self.post_burn_in_log_posteriors_un_normed_vec))/np.linalg.norm(self.post_burn_in_samples)    
-        if abs((self.map_parameter_set - self.mu_AP_parameter_set)/self.UserInput.var_prior).any() > 0.10:  
-            pass #Disabling below warning until if statement it is fixed.
-            #print("Warning: The MAP parameter set and mu_AP parameter set differ by more than 10% of prior variance in at least one parameter. This may mean that you need to increase your mcmc_length, increase or decrease your mcmc_relative_step_length, or change what is used for the model response.  There is no general method for knowing the right  value for mcmc_relative_step_length since it depends on the sharpness and smoothness of the response. See for example https://www.sciencedirect.com/science/article/pii/S0039602816300632  ")
+        self.evidence = np.mean(np.exp(self.post_burn_in_log_posteriors_un_normed_vec))/np.linalg.norm(self.post_burn_in_samples)
         self.info_gain = self.calculateInfoGain()
         if self.UserInput.parameter_estimation_settings['verbose'] == True:
             print("map_parameter_set ", self.map_parameter_set)
             print("mu_AP_parameter_set ", self.mu_AP_parameter_set)
             print("stdap_parameter_set ",self.stdap_parameter_set)
         return [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec]
-
-                                                                                            
-                                            
-                                                                                                      
-                                                                                           
-                                                                                                
-                                                                                                                                                         
-                                                                            
-                                                                                                                                
-                       
-                                                                                                             
-                                                                                               
-                                                              
-                          
-
 
     #This function gets the prefix and suffix for saving files when doing ParallelProcessing with MPI.
     #Importantly, the **directory** of the parallel processing is included as part of the prefix.
@@ -1833,9 +1815,11 @@ class parameter_estimation:
             out_file.write("posterior_cov_matrix:" + "\n" + str(np.cov(self.post_burn_in_samples.T)) + "\n")
             if (self.permutation_and_doOptimizeNegLogP == True) or (self.permutation_and_doOptimizeLogP == True):
                 out_file.write("\n WARNING: It appears this run used a doOptimize with multi-start. In this case, the MAP_logP and map_parameter_set are the optima.  However, the mu_AP_parameter_set and stdap_parameter_set are not meaningful, since this was not an even weighted exploration of the posterior.")
-            if abs((self.map_parameter_set - self.mu_AP_parameter_set)/self.UserInput.std_prior).any() > 0.10:
-                pass #Disabling below warning until if statement is fixed. During mid-2020, it started printing every time. The if statement may be fixed now but not yet tested.
-                #out_file.write("Warning: The MAP parameter set and mu_AP parameter set differ by more than 10% of prior variance in at least one parameter. This may mean that you need to increase your mcmc_length, increase or decrease your mcmc_relative_step_length, or change what is used for the model response.  There is no general method for knowing the right  value for mcmc_relative_step_length since it depends on the sharpness and smoothness of the response. See for example https://www.sciencedirect.com/science/article/pii/S0039602816300632")
+            relativeDifferenceArray = abs((self.map_parameter_set - self.mu_AP_parameter_set)/self.UserInput.std_prior)
+            if np.array(relativeDifferenceArray > 0.10).any() == True:
+                out_file.write("Convergence Status: Warning - The difference between the MAP parameter set and mu_AP parameter set is greater than 10% of the prior standard deviations in at least one parameter. This may mean that you need to increase your mcmc_length, increase or decrease your mcmc_relative_step_length, or change what is used for the model response.  There is no general method for knowing the right  value for mcmc_relative_step_length since it depends on the sharpness and smoothness of the response. See for example https://www.sciencedirect.com/science/article/pii/S0039602816300632")
+            else:
+                out_file.write("Convergence Status: The difference between the MAP parameter set and mu_AP parameter set is less than 10% of the prior standard deviations for each parameter. There is no general method for knowing when the correct solution has been obtained, but this small difference is one sign of a converged solution.")
         postBurnInStatistics = [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec]
         if hasattr(self, 'during_burn_in_samples'):
             pickleAnObject(np.hstack((self.during_burn_in_log_posteriors_un_normed_vec, self.during_burn_in_samples)),self.UserInput.directories['pickles']+directory_name_suffix+file_name_prefix+'mcmc_burn_in_logP_and_parameter_samples'+file_name_suffix)
@@ -1873,9 +1857,11 @@ class parameter_estimation:
                 out_file.write("self.info_gain:" +  str(self.info_gain) + "\n")
                 out_file.write("evidence:" + str(self.evidence) + "\n")
                 out_file.write("posterior_cov_matrix:" + "\n" + str(np.cov(self.post_burn_in_samples.T)) + "\n")
-                if abs((self.map_parameter_set - self.mu_AP_parameter_set)/self.UserInput.std_prior).any() > 0.10:
-                    pass #Disabling below warning until if statement is fixed. During mid-2020, it started printing every time. The if statement may be fixed now but not yet tested.
-                    #out_file.write("Warning: The MAP parameter set and mu_AP parameter set differ by more than 10% of prior variance in at least one parameter. This may mean that you need to increase your mcmc_length, increase or decrease your mcmc_relative_step_length, or change what is used for the model response.  There is no general method for knowing the right  value for mcmc_relative_step_length since it depends on the sharpness and smoothness of the response. See for example https://www.sciencedirect.com/science/article/pii/S0039602816300632")
+                relativeDifferenceArray = abs((self.map_parameter_set - self.mu_AP_parameter_set)/self.UserInput.std_prior)
+                if np.array(relativeDifferenceArray > 0.10).any() == True:
+                    out_file.write("Convergence Status: Warning - The difference between the MAP parameter set and mu_AP parameter set is greater than 10% of the prior standard deviations in at least one parameter. This may mean that you need to increase your mcmc_length, increase or decrease your mcmc_relative_step_length, or change what is used for the model response.  There is no general method for knowing the right  value for mcmc_relative_step_length since it depends on the sharpness and smoothness of the response. See for example https://www.sciencedirect.com/science/article/pii/S0039602816300632")
+                else:
+                    out_file.write("Convergence Status: The difference between the MAP parameter set and mu_AP parameter set is less than 10% of the prior standard deviations for each parameter. There is no general method for knowing when the correct solution has been obtained, but this small difference is one sign of a converged solution.")
         if (searchType == 'doEnsembleSliceSampling') or (searchType == 'doMetropolisHastings'):
             postBurnInStatistics = [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec]
             pickleAnObject(postBurnInStatistics, self.UserInput.directories['pickles']+directory_name_suffix+file_name_prefix+'permutation_post_burn_in_statistics'+file_name_suffix)
