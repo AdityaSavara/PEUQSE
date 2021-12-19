@@ -1,14 +1,14 @@
 import cantera as ct
 import cantera.ck2cti as ck2cti
 import numpy as np
-from CheKiPEUQ.simulationDriver import canteraSimulate
-from CheKiPEUQ.simulationDriver import canteraKineticsParametersParser
+from PEUQSE.simulationDriver import canteraSimulate
+from PEUQSE.simulationDriver import canteraKineticsParametersParser
 import copy
 
 #First made a 'test' in main, then made a simulation wrapper to do the same thing.
 
 #We will define some things *outside* of the function to load the model.
-model_location = "..\\..\\CheKiPEUQ\\simulationDriver\\"
+model_location = "..\\..\\PEUQSE\\simulationDriver\\"
 model_name = "ceO2"
 import ceO2_input_simulation_settings #The user may change settings in the python file with the same name.
 ceO2_input_simulation_settings.print_frequency = None #This makes the simulation not print things out during checkpoints.
@@ -143,7 +143,7 @@ def integrated_cantera_simulation_wrapper_example6(discreteParameterVector):
     rate = simulationOutput #This has already been interpolated to observed x values.
     global times
     global observed_x_values
-    from CheKiPEUQ import littleEulerGivenArray
+    from PEUQSE import littleEulerGivenArray
     times, integrated_desorption, rate = littleEulerGivenArray(0, observed_x_values, rate)
     return integrated_desorption
 
@@ -164,7 +164,7 @@ plt.show()
 
 
 if __name__ == "__main__":
-    model_location = "..\\..\\CheKiPEUQ\\simulationDriver\\"
+    model_location = "..\\..\\PEUQSE\\simulationDriver\\"
     model_name = "ceO2"
     
     import ceO2_input_simulation_settings #The user may change settings in the python file with the same name.

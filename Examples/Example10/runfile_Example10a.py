@@ -1,9 +1,9 @@
 import sys
 sys.path.append('../../')
-import CheKiPEUQ as CKPQ
+import PEUQSE as CKPQ
 
 if __name__ == "__main__":
-    import CheKiPEUQ.UserInput as UserInput
+    import PEUQSE.UserInput as UserInput
     import processing_function_two_response as fun
     import numpy as np
     

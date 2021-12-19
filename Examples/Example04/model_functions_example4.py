@@ -1,14 +1,14 @@
 import cantera as ct
 import cantera.ck2cti as ck2cti
 import numpy as np
-from CheKiPEUQ.simulationDriver import canteraSimulate
-from CheKiPEUQ.simulationDriver import canteraKineticsParametersParser
+from PEUQSE.simulationDriver import canteraSimulate
+from PEUQSE.simulationDriver import canteraKineticsParametersParser
 import copy
 
 #First made a 'test' in main, then made a simulation wrapper to do the same thing.
 
 #We will define some things *outside* of the function to load the model.
-model_location = ".\\CheKiPEUQ\\simulationDriver\\"
+model_location = ".\\PEUQSE\\simulationDriver\\"
 model_name = "ceO2"
 import ceO2_input_simulation_settings #The user may change settings in the python file with the same name.
 ceO2_input_simulation_settings.print_frequency = None #This makes the simulation not print things out during checkpoints.

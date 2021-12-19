@@ -1,6 +1,6 @@
 import sys; sys.path.append('../../');
-import CheKiPEUQ as CKPQ
-import CheKiPEUQ.UserInput as UserInput
+import PEUQSE as CKPQ
+import PEUQSE.UserInput as UserInput
 import numpy as np
 from multiprocessing import Pool
 import os

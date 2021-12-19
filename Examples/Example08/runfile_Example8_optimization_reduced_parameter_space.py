@@ -1,9 +1,9 @@
-import sys; sys.path.append('../../');  import CheKiPEUQ as CKPQ
+import sys; sys.path.append('../../');  import PEUQSE as CKPQ
 import processing_functions_tpd_odeint
 import pandas as pd
 
 if __name__ == "__main__":
-    import CheKiPEUQ.UserInput as UserInput
+    import PEUQSE.UserInput as UserInput
     observed_data_Filename = 'ExperimentalDataAcetaldehydeTPDCeO2111MullinsTruncatedConstantErrors.csv'
     times, responses_observed, observedResponses_uncertainties = processing_functions_tpd_odeint.import_experimental_settings_single(observed_data_Filename)
     #experiments_datarame = pd.read_csv(observed_data_Filename)    

@@ -1,5 +1,5 @@
-import sys; sys.path.append('../../');  import CheKiPEUQ as CKPQ
-import CheKiPEUQ.UserInput as UserInput
+import sys; sys.path.append('../../');  import PEUQSE as CKPQ
+import PEUQSE.UserInput as UserInput
 
 if __name__ == "__main__":
     #####This file is like the other Example 15 runfiles, and has the two_site_ratio as giving the percent of sites that is site 2 (as a decimal) and this is the first parameter in the parameter vector.

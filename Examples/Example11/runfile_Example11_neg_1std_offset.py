@@ -1,8 +1,8 @@
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
-import sys; sys.path.append('../../');  import CheKiPEUQ as CKPQ
-import CheKiPEUQ.UserInput as UserInput
+import sys; sys.path.append('../../');  import PEUQSE as CKPQ
+import PEUQSE.UserInput as UserInput
 
 if __name__ == "__main__":
     

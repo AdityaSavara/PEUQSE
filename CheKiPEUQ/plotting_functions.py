@@ -1,7 +1,7 @@
 import sys
 #sys.path.insert(0, '/mumpce/')
-import CheKiPEUQ.mumpce.Project as mumpceProject
-import CheKiPEUQ.mumpce.solution as mumpceSolution
+import PEUQSE.mumpce.Project as mumpceProject
+import PEUQSE.mumpce.solution as mumpceSolution
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt

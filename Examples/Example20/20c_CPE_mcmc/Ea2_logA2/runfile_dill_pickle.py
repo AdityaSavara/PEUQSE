@@ -1,6 +1,6 @@
 import sys; sys.path.append('../../')
-sys.path.append('../../../../');  import CheKiPEUQ as CKPQ                                                               
-#import CheKiPEUQ.UserInput as UserInput
+sys.path.append('../../../../');  import PEUQSE as CKPQ                                                               
+#import PEUQSE.UserInput as UserInput
 
 
 import dill

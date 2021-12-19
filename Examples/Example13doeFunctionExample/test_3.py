@@ -32,11 +32,11 @@ prefix = ''
 #We know the function is working during template distribution because we are just using the test 12 example.
 In this template, we ***will not*** use the "set_expected_result" command. So we are commenting out the below lines, and will go directly to using the function to create an actual output.
 """
-import sys; sys.path.append('../../');  import CheKiPEUQ as CKPQ
-import CheKiPEUQ
+import sys; sys.path.append('../../');  import PEUQSE as CKPQ
+import PEUQSE
 import numpy as np
 import runfile_for_unit_test_parallel_doe_control #This will run the file, given how it's structured.
-expectedResult = CheKiPEUQ.unpickleAnObject("runfile_for_unit_test_parallel_doe_control")
+expectedResult = PEUQSE.unpickleAnObject("runfile_for_unit_test_parallel_doe_control")
 
 # # # #input for the unit that will be tested
 # # # input = 4
@@ -56,7 +56,7 @@ try:
 except:
     pass
 os.system("mpiexec -n 10 python runfile_for_unit_test_parallel_doe_conditions_exploration.py")  #This will run the file, given how it's structured.
-actualResult = CheKiPEUQ.unpickleAnObject("runfile_for_unit_test_parallel_doe_conditions_exploration")
+actualResult = PEUQSE.unpickleAnObject("runfile_for_unit_test_parallel_doe_conditions_exploration")
 
 input = None
 #outputs with the function being tested using the input

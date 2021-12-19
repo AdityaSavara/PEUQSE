@@ -20,7 +20,7 @@ except:
 try:
     import UnitTesterSG.nestedObjectsFunctions as nestedObjectsFunctions
 except:
-    import CheKiPEUQ.nestedObjectsFunctionsLocal as nestedObjectsFunctions
+    import PEUQSE.nestedObjectsFunctionsLocal as nestedObjectsFunctions
 
 class parameter_estimation:
     #Inside this class, a UserInput namespace is provided. This has dictionaries of UserInput choices.
@@ -29,10 +29,10 @@ class parameter_estimation:
     #'inverse problem'. Initialize chain with initial guess (prior if not provided) as starting point, chain burn-in length and total length, and Q (for proposal samples).  Initialize experimental data.  Theta is initialized as the starting point of the chain.  
     
     
-    software_name = "CheKiPEUQ Bayesian Parameter Estimation"
+    software_name = "PEUQSE Bayesian Parameter Estimation"
     software_version = "1.0.0"
     software_unique_id = "https://doi.org/10.1002/cctc.202000953"
-    software_kwargs = {"version": software_version, "author": ["Aditya Savara", "Eric A. Walker"], "doi": "https://doi.org/10.1002/cctc.202000953", "cite": "Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953"} 
+    software_kwargs = {"version": software_version, "author": ["Aditya Savara", "Eric A. Walker"], "doi": "https://doi.org/10.1002/cctc.202000953", "cite": "Savara, A. and Walker, E.A. (2020), PEUQSE Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953"} 
     @CiteSoft.after_call_compile_consolidated_log()
     @CiteSoft.module_call_cite(unique_id=software_unique_id, software_name=software_name, **software_kwargs)
     def __init__(self, UserInput = None):
@@ -98,8 +98,8 @@ class parameter_estimation:
                 
         if UserInput.request_mpi == True: #Rank zero needs to clear out the mpi_cached_files directory (unless we are continuing sampling), so check if we are using rank 0.
             import os; import sys
-            import CheKiPEUQ.parallel_processing
-            if CheKiPEUQ.parallel_processing.currentProcessorNumber == 0:
+            import PEUQSE.parallel_processing
+            if PEUQSE.parallel_processing.currentProcessorNumber == 0:
                 if not os.path.exists('./mpi_cached_files'):
                     os.makedirs('./mpi_cached_files')
                 if not os.path.exists(UserInput.directories['graphs']+"mpi_cached_files"):
@@ -126,9 +126,9 @@ class parameter_estimation:
                         os.chdir("./../..")
                 
                 #Now check the number of processor ranks to see if the person really is using parallel processing.
-                if CheKiPEUQ.parallel_processing.numProcessors > 1:    #This is the normal case.
+                if PEUQSE.parallel_processing.numProcessors > 1:    #This is the normal case.
                     sys.exit() #TODO: right now, processor zero just exits after making and emptying the directory. In the future, things will be more complex for the processor zero.
-                elif CheKiPEUQ.parallel_processing.numProcessors == 1: #This is the case where the person has only one process rank, so probably does not want code execution to stop just yet. (This is an intentional case for gridsearch for example, where running without mpi will print the number of grid Permutations).
+                elif PEUQSE.parallel_processing.numProcessors == 1: #This is the case where the person has only one process rank, so probably does not want code execution to stop just yet. (This is an intentional case for gridsearch for example, where running without mpi will print the number of grid Permutations).
                     print("Notice: you have requested parallel processing by MPI but have only 1 processor rank enabled or are not using mpi for this run. Parallel processing is being disabled for this run. If you are running to find the number of process ranks to use, another message will be printed out with the number of processor ranks to provide to mpi.")
                     UserInput.request_mpi = False
                     if UserInput.parameter_estimation_settings['mcmc_parallel_sampling']:
@@ -143,7 +143,7 @@ class parameter_estimation:
         if -1.0 in UserInput.InputParametersPriorValuesUncertainties: #This means that at least one of the uncertainties has been set to "-1" which means a uniform distribution. 
             UserInput.InputParametersPriorValuesUniformDistributionsIndices = [] #intializing.
             if len(np.shape(UserInput.InputParametersPriorValuesUncertainties)) != 1:
-                print("A value of '-1' in the uncertainties signifies a uniform distribution for CheKiPEUQ. As of July 1st 2020, the uniform distribution feature is only compatible with a 1D of array for uncertainties and not compatible with providing a full covariance matrix. If you need such a feature, contact the developers because it could be implemented. Eventually, a more sophisiticated back end may be used which would allow such a feature.")
+                print("A value of '-1' in the uncertainties signifies a uniform distribution for PEUQSE. As of July 1st 2020, the uniform distribution feature is only compatible with a 1D of array for uncertainties and not compatible with providing a full covariance matrix. If you need such a feature, contact the developers because it could be implemented. Eventually, a more sophisiticated back end may be used which would allow such a feature.")
             # If there is a uniform distribution, that means two actions need to be taken:
              #First, we will populate InputParametersPriorValuesUncertainties with the standard deviation of a uniform distribution. This is so that the MCMC steps can be taken of the right size.
              #Second, that we will need to make a custom calculation when calculating the prior probability that effectively excludes this variable.  So we'll create an array of indices to help us with that.        
@@ -349,7 +349,7 @@ class parameter_estimation:
         #Check the shapes of the arrays for UserInput.responses_observed and UserInput.responses_observed_uncertainties by doing a simulation. Warn the user if the shapes don't match.
         initialGuessSimulatedResponses = self.getSimulatedResponses(self.UserInput.InputParameterInitialGuess)
         if np.shape(initialGuessSimulatedResponses) != np.shape(UserInput.responses_observed):
-            print("CheKiPEUQ Warning: the shape of the responses_observed is", np.shape(UserInput.responses_observed), ", but the shape using your provided simulation function is", np.shape(initialGuessSimulatedResponses), " .  CheKiPEUQ is probably going to crash when trying to calculate the likelihood.")
+            print("PEUQSE Warning: the shape of the responses_observed is", np.shape(UserInput.responses_observed), ", but the shape using your provided simulation function is", np.shape(initialGuessSimulatedResponses), " .  PEUQSE is probably going to crash when trying to calculate the likelihood.")
 
         #Now reduce the parameter space if requested by the user. #Considered having this if statement as a function called outside of init.  However, using it in init is the best practice since it forces correct ordering of reduceParameterSpace and reduceResponseSpace
         if len(self.UserInput.model['reducedParameterSpace']) > 0:
@@ -654,7 +654,7 @@ class parameter_estimation:
     #Although at first glance it may seem like it should be in the CombinationsGeneratorModule, that is a misconception. This is just a wrapper setting defaults for calling that module, such as using the prior for the grid interval when none is provided.
     #note that a blank list is okay for gridsearchSamplingInterval if doing a parameter grid, but not for other types of grids.
     def getGridPermutations(self, gridCenterVector, gridsearchSamplingInterval, gridsearchSamplingRadii, SpreadType="Addition",toFile=False):
-        import CheKiPEUQ.CombinationGeneratorModule as CombinationGeneratorModule
+        import PEUQSE.CombinationGeneratorModule as CombinationGeneratorModule
         numParameters = len(gridCenterVector)
         if len(gridsearchSamplingRadii) == 0:
             gridsearchSamplingRadii = np.ones(numParameters, dtype='int') #By default, will make ones.
@@ -732,19 +732,19 @@ class parameter_estimation:
                 if walkerInitialDistribution.lower() == 'auto':
                     walkerInitialDistribution = 'uniform'
         for permutationIndex,permutation in enumerate(self.listOfPermutations):
-            #####Begin ChekIPEUQ Parallel Processing During Loop Block####
+            #####Begin PEUQSE Parallel Processing During Loop Block####
             if (self.UserInput.parameter_estimation_settings['multistart_parallel_sampling'])== True:
                 #We will only execute the sampling the permutationIndex matches the processor rank.
                 #Additionally, if the rank is 0 and the simulation got here, it will be assumed the person is running this just to find the number of Permutations, so that will be spit out and the simulation ended.
-                import CheKiPEUQ.parallel_processing
-                if CheKiPEUQ.parallel_processing.currentProcessorNumber == 0:
-                    print("For the user input settings provided, the number of Permutations+1 will be",  numPermutations+1, ". Please use mpiexec or mpirun with this number for N. If you are not expecting to see this message, change your UserInput choices. You have chosen parallel processing for gridsearch and have run CheKiPEUQ without mpi, which is a procedure to retrieve the number of processor ranks to use for parallelized gridsearch. A typical syntax now would be: mpiexec -n ",  numPermutations+1, " python runfile_for_your_analysis.py" )
+                import PEUQSE.parallel_processing
+                if PEUQSE.parallel_processing.currentProcessorNumber == 0:
+                    print("For the user input settings provided, the number of Permutations+1 will be",  numPermutations+1, ". Please use mpiexec or mpirun with this number for N. If you are not expecting to see this message, change your UserInput choices. You have chosen parallel processing for gridsearch and have run PEUQSE without mpi, which is a procedure to retrieve the number of processor ranks to use for parallelized gridsearch. A typical syntax now would be: mpiexec -n ",  numPermutations+1, " python runfile_for_your_analysis.py" )
                     sys.exit()
-                elif CheKiPEUQ.parallel_processing.currentProcessorNumber != permutationIndex+1:
+                elif PEUQSE.parallel_processing.currentProcessorNumber != permutationIndex+1:
                     continue #This means the permutation index does not match the processor rank so nothing should be executed.
-                #elif CheKiPEUQ.parallel_processing.currentProcessorNumber == permutationIndex+1:
+                #elif PEUQSE.parallel_processing.currentProcessorNumber == permutationIndex+1:
                 #    pass  #This is the "normal" case and is implied, so is commented out.
-            #####End ChekIPEUQ Parallel Processing During Loop Block####
+            #####End PEUQSE Parallel Processing During Loop Block####
             self.UserInput.InputParameterInitialGuess = permutation #We need to fill the variable InputParameterInitialGuess with the permutation being checked.
             if (searchType == 'getLogP'):
                 self.map_logP = self.getLogP(permutation) #The getLogP function does not fill map_logP by itself.
@@ -827,9 +827,9 @@ class parameter_estimation:
             #We are going to export all of the relevant statistics for each permutation.
             self.exportPostPermutationStatistics(searchType = searchType) #this is needed for **each** permutation if parallel sampling is being done.
             self.checkIfAllParallelSimulationsDone("permutation"+"_map_logP_") #This checks if we are on the final process and also sets the global variable for it accordingly.
-            if CheKiPEUQ.parallel_processing.finalProcess == False:
+            if PEUQSE.parallel_processing.finalProcess == False:
                 return self.map_logP #This is sortof like a sys.exit(), we are just ending the PermutationSearch function here if we are not on the finalProcess. 
-            if CheKiPEUQ.parallel_processing.finalProcess == True:
+            if PEUQSE.parallel_processing.finalProcess == True:
                 self.UserInput.parameter_estimation_settings['multistart_parallel_sampling'] = False ##We are turning off the parallel sampling variable because the parallel sampling is over now. The export log will become export extra things if we keep this on for the next step.
                 self.consolidate_parallel_sampling_data(parallelizationType="permutation", mpi_cached_files_prefix='permutation') #this parallelizationType means "keep only the best, don't average"
                 
@@ -989,9 +989,9 @@ class parameter_estimation:
         return bestResultSoFar
 
     def checkIfAllParallelSimulationsDone(self, fileNameBase, fileNamePrefix='', fileNameSuffix=''):
-        import CheKiPEUQ.parallel_processing
-        #CheKiPEUQ.parallel_processing.currentProcessorNumber
-        numSimulations = CheKiPEUQ.parallel_processing.numSimulations
+        import PEUQSE.parallel_processing
+        #PEUQSE.parallel_processing.currentProcessorNumber
+        numSimulations = PEUQSE.parallel_processing.numSimulations
         import os
         os.chdir(self.UserInput.directories['pickles']+"mpi_cached_files")
         #now make a list of what we expect.
@@ -1009,16 +1009,16 @@ class parameter_estimation:
         else:
             os.chdir("../..") #change directory back regardless.
         if np.sum(simulationsKey) == 0:
-            CheKiPEUQ.parallel_processing.finalProcess = True
+            PEUQSE.parallel_processing.finalProcess = True
             return True
         else: #if simulationsKey is not zero, then we return False b/c not yet finsihed.
-            CheKiPEUQ.parallel_processing.finalProcess = False
+            PEUQSE.parallel_processing.finalProcess = False
             return False
 
     def consolidate_parallel_doe_data(self, parallelizationType='conditions'):
-        import CheKiPEUQ.parallel_processing
-        #CheKiPEUQ.parallel_processing.currentProcessorNumber
-        numSimulations = CheKiPEUQ.parallel_processing.numSimulations
+        import PEUQSE.parallel_processing
+        #PEUQSE.parallel_processing.currentProcessorNumber
+        numSimulations = PEUQSE.parallel_processing.numSimulations
         parModulationNumber = int(self.parModulationPermutationIndex + 1)
         #We will check **only** for this parModulationNumber. That way, it this processor is the last to finish this parModulation, it will do the infoGainMatrix stacking.
         if self.checkIfAllParallelSimulationsDone("conditionsPermutationAndInfoGain_mod"+str(parModulationNumber)+"_cond") == True:
@@ -1047,8 +1047,8 @@ class parameter_estimation:
             return False #this means we weren't done.
             
     def consolidate_parallel_doe_info_gain_matrices(self):
-        import CheKiPEUQ.parallel_processing
-        numSimulations = CheKiPEUQ.parallel_processing.numSimulations        
+        import PEUQSE.parallel_processing
+        numSimulations = PEUQSE.parallel_processing.numSimulations        
         import os
         os.chdir(self.UserInput.directories['pickles'] + "mpi_cached_files")
         info_gains_matrices_list = [] #Initializing this as a blank list, it will be made into an array after the loop.
@@ -1070,9 +1070,9 @@ class parameter_estimation:
     def consolidate_parallel_sampling_data(self, parallelizationType='equal', mpi_cached_files_prefix=''):
         #parallelizationType='equal' means everything will get averaged together. parallelizationType='permutation' will be treated differently, keeps only the best.
         #mpi_cached_files_prefix can be 'mcmc' or 'permutation' or '' and looks for a prefix before 'map_logP_6.pkl' where '6' would be the processor rank.
-        import CheKiPEUQ.parallel_processing
-        #CheKiPEUQ.parallel_processing.currentProcessorNumber
-        numSimulations = CheKiPEUQ.parallel_processing.numSimulations
+        import PEUQSE.parallel_processing
+        #PEUQSE.parallel_processing.currentProcessorNumber
+        numSimulations = PEUQSE.parallel_processing.numSimulations
         if self.checkIfAllParallelSimulationsDone(mpi_cached_files_prefix+"_map_logP_") == True: #FIXME: Need to make parallelization work even for non-mcmc
             if parallelizationType.lower() == 'permutation':
                 searchType = self.permutation_searchType
@@ -1215,10 +1215,10 @@ class parameter_estimation:
         self.__init__(self.UserInput)
     
     #This function requires first populating the doe_settings dictionary in UserInput in order to know which conditions to explore.
-    software_name = "CheKiPEUQ Bayesian Design of Experiments"
+    software_name = "PEUQSE Bayesian Design of Experiments"
     software_version = "1.0.2"
     software_unique_id = "https://doi.org/10.1002/cctc.202000976"
-    software_kwargs = {"version": software_version, "author": ["Eric A. Walker", "Kishore Ravisankar", "Aditya Savara"], "doi": "https://doi.org/10.1002/cctc.202000976", "cite": "Eric Alan Walker, Kishore Ravisankar, Aditya Savara. CheKiPEUQ Intro 2: Harnessing Uncertainties from Data Sets, Bayesian Design of Experiments in Chemical Kinetics. ChemCatChem. Accepted. doi:10.1002/cctc.202000976"} 
+    software_kwargs = {"version": software_version, "author": ["Eric A. Walker", "Kishore Ravisankar", "Aditya Savara"], "doi": "https://doi.org/10.1002/cctc.202000976", "cite": "Eric Alan Walker, Kishore Ravisankar, Aditya Savara. PEUQSE Intro 2: Harnessing Uncertainties from Data Sets, Bayesian Design of Experiments in Chemical Kinetics. ChemCatChem. Accepted. doi:10.1002/cctc.202000976"} 
     #@CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
     @CiteSoft.module_call_cite(unique_id=software_unique_id, software_name=software_name, **software_kwargs)
     def doeGetInfoGainMatrix(self, parameterPermutation, searchType='doMetropolisHastings'):#Note: There is an implied argument of info_gains_matrices_array_format being 'xyz' or 'meshgrid'
@@ -1241,19 +1241,19 @@ class parameter_estimation:
                 conditionsGridPermutations, numPermutations = self.getGridPermutations(doe_settings['independent_variable_grid_center'], doe_settings['independent_variable_grid_interval_size'], doe_settings['independent_variable_grid_num_intervals'])
             #Here is the loop across conditions.                
             for conditionsPermutationIndex,conditionsPermutation in enumerate(conditionsGridPermutations):    
-                #####Begin ChekIPEUQ Parallel Processing During Loop Block####
+                #####Begin PEUQSE Parallel Processing During Loop Block####
                 if (self.UserInput.doe_settings['parallel_conditions_exploration'])== True:
                     #We will only execute the sampling the permutationIndex matches the processor rank.
                     #Additionally, if the rank is 0 and the simulation got here, it will be assumed the person is running this just to find the number of Permutations, so that will be spit out and the simulation ended.
-                    import CheKiPEUQ.parallel_processing
-                    if CheKiPEUQ.parallel_processing.currentProcessorNumber == 0:
-                        print("For the user input settings provided, the number of Permutations+1 will be",  numPermutations+1, ". Please use mpiexec or mpirun with this number for N. If you are not expecting to see this message, change your UserInput choices. You have chosen parallel processing for gridsearch and have run CheKiPEUQ without mpi, which is a procedure to retrieve the number of processor ranks to use for parallelized gridsearch. A typical syntax now would be: mpiexec -n ",  numPermutations+1, " python runfile_for_your_analysis.py" )
+                    import PEUQSE.parallel_processing
+                    if PEUQSE.parallel_processing.currentProcessorNumber == 0:
+                        print("For the user input settings provided, the number of Permutations+1 will be",  numPermutations+1, ". Please use mpiexec or mpirun with this number for N. If you are not expecting to see this message, change your UserInput choices. You have chosen parallel processing for gridsearch and have run PEUQSE without mpi, which is a procedure to retrieve the number of processor ranks to use for parallelized gridsearch. A typical syntax now would be: mpiexec -n ",  numPermutations+1, " python runfile_for_your_analysis.py" )
                         sys.exit()
-                    elif CheKiPEUQ.parallel_processing.currentProcessorNumber != conditionsPermutationIndex+1:
+                    elif PEUQSE.parallel_processing.currentProcessorNumber != conditionsPermutationIndex+1:
                         continue #This means the permutation index does not match the processor rank so nothing should be executed.
-                    #elif CheKiPEUQ.parallel_processing.currentProcessorNumber == permutationIndex+1:
+                    #elif PEUQSE.parallel_processing.currentProcessorNumber == permutationIndex+1:
                     #    pass  #This is the "normal" case and is implied, so is commented out.
-                #####End ChekIPEUQ Parallel Processing During Loop Block####
+                #####End PEUQSE Parallel Processing During Loop Block####
                 #It is absolutely critical that we *do not* use syntax like self.UserInput.responses['independent_variables_values'] = xxxx
                 #Because that would move where the pointer is going to. We need to instead populate the individual values in the simulation module's namespace.
                 #This population Must occur here. It has to be after the indpendent variables have changed, before synthetic data is made, and before the MCMC is performed.
@@ -1309,21 +1309,21 @@ class parameter_estimation:
                         #It is absolutely critical that we *do not* use syntax like self.UserInput.responses['independent_variables_values'] = xxxx
                         #Because that would move where the pointer is going to. We need to instead populate the individual values in the simulation module's namespace.
                         #This population Must occur here. It has to be after the indpendent variables have changed, before synthetic data is made, and before the MCMC is performed.
-                        #####Begin ChekIPEUQ Parallel Processing During Loop Block -- This block is custom for meshgrid since the loop is different.####
+                        #####Begin PEUQSE Parallel Processing During Loop Block -- This block is custom for meshgrid since the loop is different.####
                         if (self.UserInput.doe_settings['parallel_conditions_exploration'])== True:
                             numPermutations = len(independentVariable2ValuesArray)*len(independentVariable1ValuesArray)
                             permutationIndex = conditionsPermutationIndex
                             #We will only execute the sampling the permutationIndex matches the processor rank.
                             #Additionally, if the rank is 0 and the simulation got here, it will be assumed the person is running this just to find the number of Permutations, so that will be spit out and the simulation ended.
-                            import CheKiPEUQ.parallel_processing
-                            if CheKiPEUQ.parallel_processing.currentProcessorNumber == 0:
-                                print("For the user input settings provided, the number of Permutations+1 will be",  numPermutations+1, ". Please use mpiexec or mpirun with this number for N. If you are not expecting to see this message, change your UserInput choices. You have chosen parallel processing for gridsearch and have run CheKiPEUQ without mpi, which is a procedure to retrieve the number of processor ranks to use for parallelized gridsearch. A typical syntax now would be: mpiexec -n ",  numPermutations+1, " python runfile_for_your_analysis.py" )
+                            import PEUQSE.parallel_processing
+                            if PEUQSE.parallel_processing.currentProcessorNumber == 0:
+                                print("For the user input settings provided, the number of Permutations+1 will be",  numPermutations+1, ". Please use mpiexec or mpirun with this number for N. If you are not expecting to see this message, change your UserInput choices. You have chosen parallel processing for gridsearch and have run PEUQSE without mpi, which is a procedure to retrieve the number of processor ranks to use for parallelized gridsearch. A typical syntax now would be: mpiexec -n ",  numPermutations+1, " python runfile_for_your_analysis.py" )
                                 sys.exit()
-                            elif CheKiPEUQ.parallel_processing.currentProcessorNumber != conditionsPermutationIndex+1:
+                            elif PEUQSE.parallel_processing.currentProcessorNumber != conditionsPermutationIndex+1:
                                 doSimulation = False #This means the permutation index does not match the processor rank so nothing should be executed.
-                            elif CheKiPEUQ.parallel_processing.currentProcessorNumber == permutationIndex+1:
+                            elif PEUQSE.parallel_processing.currentProcessorNumber == permutationIndex+1:
                                 doSimulation = True  #This is the "normal" case.
-                        #####End ChekIPEUQ Parallel Processing During Loop Block####
+                        #####End PEUQSE Parallel Processing During Loop Block####
                         if doSimulation == True:
                             self.UserInput.model['populateIndependentVariablesFunction']([indValue1,indValue2])
                             self.populateResponsesWithSyntheticData(parameterPermutation)
@@ -1353,7 +1353,7 @@ class parameter_estimation:
     
     #This function requires population of the UserInput doe_settings dictionary. It automatically scans many parameter modulation Permutations.
     def doeParameterModulationPermutationsScanner(self, searchType='doMetropolisHastings'):
-        import CheKiPEUQ.CombinationGeneratorModule as CombinationGeneratorModule
+        import PEUQSE.CombinationGeneratorModule as CombinationGeneratorModule
         doe_settings = self.UserInput.doe_settings 
         #For the parameters, we are able to use a default one standard deviation grid if gridSamplingAbsoluteIntervalSize is a blank list.
         #doe_settings['parameter_modulation_grid_center'] #We do NOT create such a variable in user input. The initial guess variable is used, which is the center of the prior if no guess has been provided.
@@ -1378,19 +1378,19 @@ class parameter_estimation:
             for parameterIndex in range(0,numParameters):#looping across number of parameters...
                 info_gains_matrices_lists_one_for_each_parameter.append([]) #These are empty lists create to indices and initialize each parameter's info_gain_matrix. They will be appended to later.
         for parModulationPermutationIndex,parModulationPermutation in enumerate(parModulationGridPermutations):                
-            #####Begin ChekIPEUQ Parallel Processing During Loop Block####
+            #####Begin PEUQSE Parallel Processing During Loop Block####
             if (self.UserInput.doe_settings['parallel_parameter_modulation'])== True:
                 #We will only execute the sampling the permutationIndex matches the processor rank.
                 #Additionally, if the rank is 0 and the simulation got here, it will be assumed the person is running this just to find the number of Permutations, so that will be spit out and the simulation ended.
-                import CheKiPEUQ.parallel_processing
-                if CheKiPEUQ.parallel_processing.currentProcessorNumber == 0:
-                    print("For the user input settings provided, the number of Permutations+1 will be",  numPermutations+1, ". Please use mpiexec or mpirun with this number for N. If you are not expecting to see this message, change your UserInput choices. You have chosen parallel processing for gridsearch and have run CheKiPEUQ without mpi, which is a procedure to retrieve the number of processor ranks to use for parallelized gridsearch. A typical syntax now would be: mpiexec -n ",  numPermutations+1, " python runfile_for_your_analysis.py" )
+                import PEUQSE.parallel_processing
+                if PEUQSE.parallel_processing.currentProcessorNumber == 0:
+                    print("For the user input settings provided, the number of Permutations+1 will be",  numPermutations+1, ". Please use mpiexec or mpirun with this number for N. If you are not expecting to see this message, change your UserInput choices. You have chosen parallel processing for gridsearch and have run PEUQSE without mpi, which is a procedure to retrieve the number of processor ranks to use for parallelized gridsearch. A typical syntax now would be: mpiexec -n ",  numPermutations+1, " python runfile_for_your_analysis.py" )
                     sys.exit()
-                elif CheKiPEUQ.parallel_processing.currentProcessorNumber != parModulationPermutationIndex+1:
+                elif PEUQSE.parallel_processing.currentProcessorNumber != parModulationPermutationIndex+1:
                     continue #This means the permutation index does not match the processor rank so nothing should be executed.
-                #elif CheKiPEUQ.parallel_processing.currentProcessorNumber == permutationIndex+1:
+                #elif PEUQSE.parallel_processing.currentProcessorNumber == permutationIndex+1:
                 #    pass  #This is the "normal" case and is implied, so is commented out.
-            #####End ChekIPEUQ Parallel Processing During Loop Block####
+            #####End PEUQSE Parallel Processing During Loop Block####
             #We will get separate info gain matrix for each parameter modulation combination.
             self.parModulationPermutationIndex = parModulationPermutationIndex #This variable is being created for parallel processing of conditions.
             info_gain_matrix = self.doeGetInfoGainMatrix(parModulationPermutation, searchType=searchType)
@@ -1416,10 +1416,10 @@ class parameter_estimation:
           if self.parModulationPermutationIndex+1 != self.numParModulationPermutations:
             return #this means we do nothing because it's not the final parModulation.
           elif self.parModulationPermutationIndex+1 == self.numParModulationPermutations:
-            import CheKiPEUQ.parallel_processing #Even if it's the final parModulation, need to check if it's final combination.
-            if CheKiPEUQ.parallel_processing.finalProcess == False: #not final combination.
+            import PEUQSE.parallel_processing #Even if it's the final parModulation, need to check if it's final combination.
+            if PEUQSE.parallel_processing.finalProcess == False: #not final combination.
                 return
-            elif CheKiPEUQ.parallel_processing.finalProcess == True: 
+            elif PEUQSE.parallel_processing.finalProcess == True: 
                 #If final parModulation and final combination, we populate self.info_gain_matrices_array
                 self.consolidate_parallel_doe_info_gain_matrices() #And now we continue on with the plotting.
         ####End block for parallel_conditions_exploration #####        
@@ -1451,7 +1451,7 @@ class parameter_estimation:
         #xValues = self.info_gains_matrices_array[modulationIndex][:,0] will become xValues = self.info_gains_matrices_array[modulationIndex][parameterInfoGainIndex][:,0]
         #self.meshGrid_independentVariable1ValuesArray will remain unchanged.      
         
-        import CheKiPEUQ.plotting_functions as plotting_functions
+        import PEUQSE.plotting_functions as plotting_functions
         setMatPlotLibAgg(self.UserInput.plotting_ouput_settings['setMatPlotLibAgg'])
         #assess whether the function is called for the overall info_gain matrices or for a particular parameter.
         if parameterIndex==None:  #this means we're using the regular info gain, not the parameter specific case.
@@ -1480,8 +1480,8 @@ class parameter_estimation:
                     if self.UserInput.doe_settings['parallel_parameter_modulation'] == False: #This is the normal case.
                         plotting_functions.makeTrisurfacePlot(xValues, yValues, zValues, figure_name = "Info_gain_TrisurfacePlot_modulation_"+str(modulationIndex+1)+plot_suffix, directory = self.UserInput.directories['graphs'])
                     if self.UserInput.doe_settings['parallel_parameter_modulation'] == True: #This is the parallel case. In this case, the actual modulationIndex to attach to the filename is given by the processor rank.
-                        import CheKiPEUQ.parallel_processing
-                        plotting_functions.makeTrisurfacePlot(xValues, yValues, zValues, figure_name = "Info_gain_TrisurfacePlot_modulation_"+str(CheKiPEUQ.parallel_processing.currentProcessorNumber)+plot_suffix, directory = self.UserInput.directories['graphs'])
+                        import PEUQSE.parallel_processing
+                        plotting_functions.makeTrisurfacePlot(xValues, yValues, zValues, figure_name = "Info_gain_TrisurfacePlot_modulation_"+str(PEUQSE.parallel_processing.currentProcessorNumber)+plot_suffix, directory = self.UserInput.directories['graphs'])
             if self.info_gains_matrices_array_format == 'meshgrid':        
                 for modulationIndex in range(len(local_info_gains_matrices_array)):
                     #Now need to get things prepared for the meshgrid.
@@ -1494,8 +1494,8 @@ class parameter_estimation:
                     if self.UserInput.doe_settings['parallel_parameter_modulation'] == False: #This is the normal case.
                         plotting_functions.makeMeshGridSurfacePlot(XX, YY, ZZ, figure_name = "Info_gain_Meshgrid_modulation_"+str(modulationIndex+1)+plot_suffix, directory = self.UserInput.directories['graphs'])
                     if self.UserInput.doe_settings['parallel_parameter_modulation'] == True: #This is the parallel case. In this case, the actual modulationIndex to attach to the filename is given by the processor rank.
-                        import CheKiPEUQ.parallel_processing
-                        plotting_functions.makeMeshGridSurfacePlot(XX, YY, ZZ, figure_name = "Info_gain_Meshgrid_modulation_"+str(CheKiPEUQ.parallel_processing.currentProcessorNumber)+plot_suffix, directory = self.UserInput.directories['graphs'])
+                        import PEUQSE.parallel_processing
+                        plotting_functions.makeMeshGridSurfacePlot(XX, YY, ZZ, figure_name = "Info_gain_Meshgrid_modulation_"+str(PEUQSE.parallel_processing.currentProcessorNumber)+plot_suffix, directory = self.UserInput.directories['graphs'])
         else:
             print("At present, createInfoGainPlots and createInfoGainModulationPlots only create plots when the length of  independent_variable_grid_center is 2. We don't currently support creation of other dimensional plots. The infogain data is being exported into the file _____.csv")
     def getLogP(self, proposal_sample): #The proposal sample is specific parameter vector.
@@ -1568,7 +1568,7 @@ class parameter_estimation:
         #Note that "maxiter=0" just means to use the default.
         if self.parameterBoundsOn:#Will force L-BFGS-B because it has bounds.
             if method != 'L-BFGS-B':
-                print("Notification: Parameter bounds are on and doOptimizeSSR is being called. Forcing the optimization method to be L-BFGS-B because this it the only SSR method presently allowed for bounds with CheKiPEUQ.")
+                print("Notification: Parameter bounds are on and doOptimizeSSR is being called. Forcing the optimization method to be L-BFGS-B because this it the only SSR method presently allowed for bounds with PEUQSE.")
                 method = 'L-BFGS-B'
                 zippedBounds = list(zip(self.UserInput.InputParameterPriorValues_lowerBounds, self.UserInput.InputParameterPriorValues_upperBounds))
                 optimizationAdditionalArgs['bounds'] = zippedBounds
@@ -1783,12 +1783,12 @@ class parameter_estimation:
         file_name_suffix = ''
         directory_name_suffix = ''
         if (self.UserInput.parameter_estimation_settings['mcmc_parallel_sampling'] or self.UserInput.parameter_estimation_settings['multistart_parallel_sampling'] or self.UserInput.doe_settings['parallel_conditions_exploration']) == True: 
-            import CheKiPEUQ.parallel_processing
+            import PEUQSE.parallel_processing
             import os
-            if CheKiPEUQ.parallel_processing.currentProcessorNumber == 0:
+            if PEUQSE.parallel_processing.currentProcessorNumber == 0:
                 pass
-            if CheKiPEUQ.parallel_processing.currentProcessorNumber > 0:                
-                file_name_suffix = "_"+str(CheKiPEUQ.parallel_processing.currentProcessorNumber)
+            if PEUQSE.parallel_processing.currentProcessorNumber > 0:                
+                file_name_suffix = "_"+str(PEUQSE.parallel_processing.currentProcessorNumber)
                 file_name_prefix = ""  
                 directory_name_suffix = "mpi_cached_files/" #TODO: FIX THIS, IT MAY NOT WORK ON EVERY OS. SHOULD USE 'os' MODULE TO FIND DIRECTION OF THE SLASH OR TO DO SOMETHING SIMILAR. CURRENTLY IT IS WORKING ON MY WINDOWS DESPITE BEING "/"
         return file_name_prefix, file_name_suffix, directory_name_suffix
@@ -2252,7 +2252,7 @@ class parameter_estimation:
             return None #This is intended for the case that the simulation fails. User can return "None" for the simulation output.
         try:#This warning will not always work if there are multiple responses. #TODO: make this a loop across the number of responses. For now, just making it a "try" and "except" statement.
             if np.array(simulationOutput).any()==float('nan'):
-                print("WARNING: Your simulation output returned a 'nan' for parameter values " +str(discreteParameterVector) + ". 'nan' values cannot be processed by the CheKiPEUQ software and this set of Parameter Values is being assigned a probability of 0.")
+                print("WARNING: Your simulation output returned a 'nan' for parameter values " +str(discreteParameterVector) + ". 'nan' values cannot be processed by the PEUQSE software and this set of Parameter Values is being assigned a probability of 0.")
                 return None #This is intended for the case that the simulation fails in some way without returning "None". 
         except:
             pass
@@ -2331,7 +2331,7 @@ class parameter_estimation:
                 return log_probability_metric, simulatedResponses_transformed #Return this rather than going through loop further.
             except:
                 pass #If it failed, we assume it is not square. For example, it could be 2 responses of length 2 each, which is not actually square.
-            #TODO: Put in near-diagonal solution described in github: https://github.com/AdityaSavara/CheKiPEUQ/issues/3
+            #TODO: Put in near-diagonal solution described in github: https://github.com/AdityaSavara/PEUQSE/issues/3
         #If neither of the above return statements have occurred, we should go through the uncertainties per response.
         log_probability_metric = 0 #Initializing since we will be adding to it.
         for responseIndex in range(self.UserInput.num_response_dimensions):
@@ -2368,7 +2368,7 @@ class parameter_estimation:
         return log_probability_metric, simulatedResponses_transformed
 
     def makeHistogramsForEachParameter(self):
-        import CheKiPEUQ.plotting_functions as plotting_functions 
+        import PEUQSE.plotting_functions as plotting_functions 
         setMatPlotLibAgg(self.UserInput.plotting_ouput_settings['setMatPlotLibAgg'])
         parameterSamples = self.post_burn_in_samples
         parameterNamesAndMathTypeExpressionsDict = self.UserInput.parameterNamesAndMathTypeExpressionsDict
@@ -2397,7 +2397,7 @@ class parameter_estimation:
                 if self.UserInput.scatter_matrix_plots_settings['individual_plots'] == 'auto':
                     individual_plots = True
         if individual_plots == True: #This means we will return individual plots.
-            #The below code was added by Troy Gustke and merged in to CheKiPEUQ at end of June 2021.
+            #The below code was added by Troy Gustke and merged in to PEUQSE at end of June 2021.
             for i, (a, a_name, a_MAP, a_mu_AP) in enumerate(zip(posterior_df.columns, parameterNamesAndMathTypeExpressionsDict.keys(), parameterMAPValue, parameterMuAPValue)):
                 for j, (b, b_name, b_MAP, b_mu_AP) in enumerate(zip(posterior_df.columns, parameterNamesAndMathTypeExpressionsDict.keys(), parameterMAPValue, parameterMuAPValue)):
                     if i != j:
@@ -2416,7 +2416,7 @@ class parameter_estimation:
     def makeScatterHeatMapPlots(self, parameterSamples = [], parameterNamesAndMathTypeExpressionsDict={}, parameterNamesList =[], parameterMAPValue=[], parameterMuAPValue=[], parameterInitialValue = [], plot_settings={'combined_plots':'auto'}):
         import pandas as pd #This is the only function that needs pandas.
         import matplotlib.pyplot as plt
-        import CheKiPEUQ.plotting_functions as plotting_functions
+        import PEUQSE.plotting_functions as plotting_functions
         if 'dpi' not in  plot_settings:  plot_settings['dpi'] = 220
         if 'figure_name' not in  plot_settings:  plot_settings['figure_name'] = 'scatter_matrix_posterior'
         if parameterSamples  ==[] : parameterSamples = self.post_burn_in_samples
@@ -2543,7 +2543,7 @@ class parameter_estimation:
             #plot_settings['figure_name'] = 'tprposterior'
         if 'figure_name' not in plot_settings:
             plot_settings['figurename'] = 'Posterior'
-        import CheKiPEUQ.plotting_functions as plotting_functions
+        import PEUQSE.plotting_functions as plotting_functions
         setMatPlotLibAgg(self.UserInput.plotting_ouput_settings['setMatPlotLibAgg'])
         allResponsesFigureObjectsList = []
         for responseDimIndex in range(self.UserInput.num_response_dimensions): #TODO: Move the exporting out of the plot creation and/or rename the function and possibly have options about whether exporting graph, data, or both.
@@ -2569,9 +2569,9 @@ class parameter_estimation:
         return allResponsesFigureObjectsList  #This is a list of matplotlib.pyplot as plt objects.
 
     def createMumpcePlots(self):
-        import CheKiPEUQ.plotting_functions as plotting_functions
+        import PEUQSE.plotting_functions as plotting_functions
         setMatPlotLibAgg(self.UserInput.plotting_ouput_settings['setMatPlotLibAgg'])
-        from CheKiPEUQ.plotting_functions import plotting_functions_class
+        from PEUQSE.plotting_functions import plotting_functions_class
         figureObject_beta = plotting_functions_class(self.UserInput) # The "beta" is only to prevent namespace conflicts with 'figureObject'.
         parameterSamples = self.post_burn_in_samples
         
@@ -2646,10 +2646,10 @@ class parameter_estimation:
     def createAllPlots(self):
         if self.UserInput.request_mpi == True: #need to check if UserInput.request_mpi is on, since if so we will only make plots after the final process.
             import os; import sys
-            import CheKiPEUQ.parallel_processing
-            if CheKiPEUQ.parallel_processing.finalProcess == True:
+            import PEUQSE.parallel_processing
+            if PEUQSE.parallel_processing.finalProcess == True:
                 pass#This will proceed as normal.
-            elif CheKiPEUQ.parallel_processing.finalProcess == False:
+            elif PEUQSE.parallel_processing.finalProcess == False:
                 return False #this will stop the plots creation.
 
         try:
@@ -2941,7 +2941,7 @@ def setMatPlotLibAgg(matPlotLibAggSetting = 'auto'):
     if matPlotLibAggSetting == False:
         return #do nothing.
     if matPlotLibAggSetting == True:
-        import CheKiPEUQ.plotting_functions as plotting_functions
+        import PEUQSE.plotting_functions as plotting_functions
         plotting_functions.matplotlib.use('Agg') #added by A. Savara June 29th, 2021.
         #no return needed.
 

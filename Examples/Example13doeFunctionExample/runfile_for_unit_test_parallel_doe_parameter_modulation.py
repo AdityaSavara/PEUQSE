@@ -5,8 +5,8 @@ import numpy as np
 import scipy
 from scipy.integrate import odeint
 #import dill
-import sys; sys.path.append('../../');  import CheKiPEUQ as CKPQ
-import CheKiPEUQ.UserInput as UserInput
+import sys; sys.path.append('../../');  import PEUQSE as CKPQ
+import PEUQSE.UserInput as UserInput
 
     
 #observed_data_Filename = 'ExperimentalDataAcetaldehydeTPDCeO2111MullinsTruncatedConstantErrors.csv'
@@ -83,9 +83,9 @@ PE_object = CKPQ.parameter_estimation(UserInput)
 
 info_gains_matrices_array = PE_object.doeParameterModulationPermutationsScanner()
 #PE_object.createInfoGainPlots()
-import CheKiPEUQ.parallel_processing
-if CheKiPEUQ.parallel_processing.currentProcessorNumber == 9: #We will check **only** the last parameter modulation (in this case, number 9).
-    CheKiPEUQ.pickleAnObject(info_gains_matrices_array[0], "runfile_for_unit_test_parallel_doe_parameter_modulation")
+import PEUQSE.parallel_processing
+if PEUQSE.parallel_processing.currentProcessorNumber == 9: #We will check **only** the last parameter modulation (in this case, number 9).
+    PEUQSE.pickleAnObject(info_gains_matrices_array[0], "runfile_for_unit_test_parallel_doe_parameter_modulation")
 
 
 

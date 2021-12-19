@@ -15,9 +15,9 @@ from shutil import rmtree
 from setuptools import find_packages, setup, Command
 
 # Package meta-data.
-NAME = 'CheKiPEUQ'
-DESCRIPTION = 'This is the CheKiPEUQ package which stands for Chemical Kinetics Parameter Estimation and Uncertainty Quantification. See https://github.com/AdityaSavara/CheKiPEUQ for more information.'
-URL = 'https://github.com/AdityaSavara/CheKiPEUQ'
+NAME = 'PEUQSE'
+DESCRIPTION = 'This is the PEUQSE package which stands for Chemical Kinetics Parameter Estimation and Uncertainty Quantification. See https://github.com/AdityaSavara/PEUQSE for more information.'
+URL = 'https://github.com/AdityaSavara/PEUQSE'
 EMAIL = 'AditySavara2008@u.northwestern.edu'  #Eric A. Walker is a co-author and can be reached at WALKER, ERIC <walke299@email.sc.edu>
 AUTHOR = 'Aditya Savara'
 REQUIRES_PYTHON = '>=3.5.0'

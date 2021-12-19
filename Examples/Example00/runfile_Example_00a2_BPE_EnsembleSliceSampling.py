@@ -1,5 +1,5 @@
-import sys; sys.path.append('../../'); import CheKiPEUQ as CKPQ
-import CheKiPEUQ.UserInput as UserInput
+import sys; sys.path.append('../../'); import PEUQSE as CKPQ
+import PEUQSE.UserInput as UserInput
 
 if __name__ == "__main__":
     import observed_values_00  #Just a simple example. The user can also put the values in directly into the runfile or extract from a csv, for example.

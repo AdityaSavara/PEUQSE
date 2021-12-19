@@ -1,5 +1,5 @@
-import sys; sys.path.append('../../');  import CheKiPEUQ as CKPQ
-import CheKiPEUQ.UserInput as UserInput
+import sys; sys.path.append('../../');  import PEUQSE as CKPQ
+import PEUQSE.UserInput as UserInput
 
 global PE_object
 
