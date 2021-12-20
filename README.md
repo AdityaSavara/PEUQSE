@@ -51,12 +51,12 @@ We see that for this example, the CPE result from fitting and the BPE results do
 Here is the short and simple code that was required after making the model equation:
 
 ```python
-import PEUQSE as CKPQ
+import PEUQSE as PEUQSE
 import PEUQSE.UserInput as UserInput 
 UserInput.model['InputParameterPriorValues'] = [200, 500] #prior expected values for a and b
 UserInput.model['InputParametersPriorValuesUncertainties'] = [100, 200] #these are 1 sigma uncertainties (1 standard deviation). The uncertainties are not correlated in this example, but a covariance matrix can be used instead.
 UserInput.model['simulateByInputParametersOnlyFunction'] = simulation_model_00.simulation_function_wrapper #This just points to the User created model equation.
-PE_object = CKPQ.parameter_estimation(UserInput) #This creates a PEUQSE object of the parameter_estimation class from the UserInput.
+PE_object = PEUQSE.parameter_estimation(UserInput) #This creates a PEUQSE object of the parameter_estimation class from the UserInput.
 PE_object.doMetropolisHastings() #This does the actual parameter_estimation by sampling.
 PE_object.createAllPlots() #This creates all of the plots below!
 ```
