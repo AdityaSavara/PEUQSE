@@ -1,6 +1,6 @@
 import sys
 sys.path.append('../../')
-import PEUQSE as CKPQ
+import PEUQSE as PEUQSE
 
 if __name__ == "__main__":
     import PEUQSE.UserInput as UserInput
@@ -40,7 +40,7 @@ if __name__ == "__main__":
 ######mumpce plots#####
     UserInput.contour_plot_settings['axis_limits'] = [-1.0, 3.0, 3.0, 7.0] #[-2.0, 4.0, 1.0, 7.0]# for the alternate plot: [-1.0, 3.0, 3.0, 7.0]
     #After making the UserInput, now we make a 'parameter_estimation' object from it.
-    PE_object = CKPQ.parameter_estimation(UserInput)
+    PE_object = PEUQSE.parameter_estimation(UserInput)
     
     #Now we do parameter estimation.
     PE_object.doMetropolisHastings()

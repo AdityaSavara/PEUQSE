@@ -32,7 +32,7 @@ prefix = ''
 #We know the function is working during template distribution because we are just using the test 12 example.
 In this template, we ***will not*** use the "set_expected_result" command. So we are commenting out the below lines, and will go directly to using the function to create an actual output.
 """
-import sys; sys.path.append('../../');  import PEUQSE as CKPQ
+import sys; sys.path.append('../../');  import PEUQSE as PEUQSE
 import PEUQSE
 import numpy as np
 #NOTE:  We are **skipping** importing the below runfile because we assume test_3 will be run before test_4.  To use test_4 by itself, the below would need to be done differently.

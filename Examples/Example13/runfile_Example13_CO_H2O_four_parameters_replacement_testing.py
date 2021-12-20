@@ -5,7 +5,7 @@ import numpy as np
 import scipy
 from scipy.integrate import odeint
 #import dill
-import sys; sys.path.append('../../');  import PEUQSE as CKPQ
+import sys; sys.path.append('../../');  import PEUQSE as PEUQSE
 import PEUQSE.UserInput as UserInput
 
 if __name__ == "__main__":
@@ -54,7 +54,7 @@ if __name__ == "__main__":
     #After making the UserInput, now we make a 'parameter_estimation' object from it.
     kB = 8.61733035E-5 #eV/K\n
 
-    PE_object = CKPQ.parameter_estimation(UserInput)
+    PE_object = PEUQSE.parameter_estimation(UserInput)
     PE_object.doMetropolisHastings()
     PE_object.createAllPlots()
 
@@ -98,7 +98,7 @@ if __name__ == "__main__":
             theta_A_obs_synth = fun.Langmuir_replacement(parameter_set) 
             UserInput.responses['responses_observed'] = [theta_A_obs_synth]
             UserInput.responses['responses_observed_uncertainties'] = [[0.05, 0.05, 0.05]]
-            PE_object_list.append(CKPQ.parameter_estimation(UserInput))
+            PE_object_list.append(PEUQSE.parameter_estimation(UserInput))
             [map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, logP] = PE_object_list[-1].doMetropolisHastings()
             info_gains.append(info_gain)
             fig, ax = plt.subplots()

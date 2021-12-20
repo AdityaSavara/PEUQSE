@@ -1,4 +1,4 @@
-import sys; sys.path.append('../../');  import PEUQSE as CKPQ
+import sys; sys.path.append('../../');  import PEUQSE as PEUQSE
 import PEUQSE.UserInput as UserInput
 
 
@@ -32,7 +32,7 @@ UserInput.parameter_estimation_settings['multistart_exportLog'] = True
 
 
 #After making the UserInput, now we make a 'parameter_estimation' object from it.
-PE_object = CKPQ.parameter_estimation(UserInput)
+PE_object = PEUQSE.parameter_estimation(UserInput)
 #PE_object.doMetropolisHastings()
 #PE_object.doOptimizeNegLogP(method="BFGS", printOptimum=True, verbose=True) #method can also be Nelder-Meade.
 PE_object.doMultiStart('doOptimizeNegLogP', passThroughArgs={'method':'BFGS'}) #This is an old non-recommended syntax though it still works. The UserInput dictionaries should be used, as in other examples.

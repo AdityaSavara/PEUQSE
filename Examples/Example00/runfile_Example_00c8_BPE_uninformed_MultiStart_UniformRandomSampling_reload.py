@@ -1,4 +1,4 @@
-import sys; sys.path.append('../../');  import PEUQSE as CKPQ
+import sys; sys.path.append('../../');  import PEUQSE as PEUQSE
 import PEUQSE.UserInput as UserInput
 
 if __name__ == "__main__":
@@ -40,7 +40,7 @@ if __name__ == "__main__":
     #####IN THIS EXAMPLE, WE WILL ADD A NEW USER INPUT LINE BELOW, THEN USE A RELOAD INSTEAD OF DOING THE SAMPLING CALL, BECAUSE WE WANT TO CHANGE THE FILTER COEFFICIENT#####
     #####LOADING FROM A DILL WOULD NOT FULFILL THIS PURPOSE###
     UserInput.parameter_estimation_settings['multistart_gridsearch_threshold_filter_coefficient'] = 4.0
-    PE_object = CKPQ.parameter_estimation(UserInput)
+    PE_object = PEUQSE.parameter_estimation(UserInput)
      
     ####SKIP DOING THE SAMPLING####
     #PE_object.doMultiStart()

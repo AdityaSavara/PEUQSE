@@ -1,5 +1,5 @@
 import sys; sys.path.append('../../')
-sys.path.append('../../../../');  import PEUQSE as CKPQ
+sys.path.append('../../../../');  import PEUQSE as PEUQSE
 import PEUQSE.UserInput as UserInput
 
 if __name__ == "__main__":
@@ -67,7 +67,7 @@ if __name__ == "__main__":
     UserInput.contour_plot_settings['axis_limits'] = [0,80, 0, 60]
     UserInput.contour_plot_settings['num_x_ticks']= 4
     #After making the UserInput, now we make a 'parameter_estimation' object from it.
-    PE_object = CKPQ.parameter_estimation(UserInput)
+    PE_object = PEUQSE.parameter_estimation(UserInput)
     
 #    #Now we do parameter estimation.
 #    PE_object.doMetropolisHastings()

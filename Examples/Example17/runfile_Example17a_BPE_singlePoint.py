@@ -1,4 +1,4 @@
-import sys; sys.path.append('../../');  import PEUQSE as CKPQ
+import sys; sys.path.append('../../');  import PEUQSE as PEUQSE
 import PEUQSE.UserInput as UserInput
 
 if __name__ == "__main__":
@@ -53,7 +53,7 @@ if __name__ == "__main__":
     UserInput.contour_plot_settings['contours_normalized'] = True
 
     #After making the UserInput, now we make a 'parameter_estimation' object from it.
-    PE_object = CKPQ.parameter_estimation(UserInput)
+    PE_object = PEUQSE.parameter_estimation(UserInput)
     
     #Now we do parameter estimation.
     PE_object.doSinglePoint(UserInput.model['InputParameterInitialGuess'])

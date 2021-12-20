@@ -1,5 +1,5 @@
 import pandas as pd
-import sys; sys.path.append('../../');  import PEUQSE as CKPQ
+import sys; sys.path.append('../../');  import PEUQSE as PEUQSE
 import cantera as ct
 import cantera.ck2cti as ck2cti
 import PEUQSE.simulationDriver.canteraSimulate
@@ -61,7 +61,7 @@ if __name__ == "__main__":
 
 
     #After making the UserInput, now we make a 'parameter_estimation' object from it.
-    PE_object = CKPQ.parameter_estimation(UserInput)
+    PE_object = PEUQSE.parameter_estimation(UserInput)
     
     #Now we do parameter estimation.
     #PE_object.doMetropolisHastings()

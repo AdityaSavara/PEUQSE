@@ -1,4 +1,4 @@
-import sys; sys.path.append('../../');  import PEUQSE as CKPQ
+import sys; sys.path.append('../../');  import PEUQSE as PEUQSE
 import PEUQSE.UserInput as UserInput
 
 if __name__ == "__main__":
@@ -30,7 +30,7 @@ if __name__ == "__main__":
 
     #UserInput.parameter_estimation_settings['mcmc_random_seed'] = 0 This can be useful for testing.
     #After making the UserInput, now we make a 'parameter_estimation' object from it.
-    PE_object = CKPQ.parameter_estimation(UserInput)
+    PE_object = PEUQSE.parameter_estimation(UserInput)
     PE_object.doMetropolisHastings()
     
     
@@ -42,7 +42,7 @@ if __name__ == "__main__":
     
     #to load a PE_object after some time, first one has to put (any) UserInput to create a PE_object, then to load from file.
     #these two steps can be done in a different python file. A different PE_object name is being used to emphasize that this process can be done from a different python file.
-    PE_object2 = CKPQ.parameter_estimation(UserInput)
+    PE_object2 = PEUQSE.parameter_estimation(UserInput)
     PE_object2 = PE_object2.load_from_dill("PE_object_00a1")
     
     

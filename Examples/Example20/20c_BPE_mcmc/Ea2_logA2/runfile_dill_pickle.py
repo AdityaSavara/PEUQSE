@@ -1,5 +1,5 @@
 import sys; sys.path.append('../../')
-sys.path.append('../../../../');  import PEUQSE as CKPQ                                                               
+sys.path.append('../../../../');  import PEUQSE as PEUQSE                                                               
 #import PEUQSE.UserInput as UserInput
 
 

@@ -1,4 +1,4 @@
-import sys; sys.path.append('../../');  import PEUQSE as CKPQ
+import sys; sys.path.append('../../');  import PEUQSE as PEUQSE
 import PEUQSE.UserInput as UserInput
 
 if __name__ == "__main__":
@@ -30,7 +30,7 @@ if __name__ == "__main__":
     UserInput.parameter_estimation_settings['mcmc_continueSampling'] = True
     
     #After making the UserInput, now we make a 'parameter_estimation' object from it.
-    PE_object = CKPQ.parameter_estimation(UserInput)
+    PE_object = PEUQSE.parameter_estimation(UserInput)
     #PE_object.doMetropolisHastings(continueSampling = False)
     PE_object.doEnsembleSliceSampling()#  one could also use PE_object.doEnsembleSliceSampling(continueSampling = True)
     PE_object.createAllPlots() #This function calls each of the below functions so that the user does not have to.

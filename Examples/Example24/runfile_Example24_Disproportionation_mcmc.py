@@ -1,4 +1,4 @@
-import sys; sys.path.append('../../');  import PEUQSE as CKPQ
+import sys; sys.path.append('../../');  import PEUQSE as PEUQSE
 import PEUQSE.UserInput as UserInput
 
 global PE_object
@@ -41,7 +41,7 @@ def main():
     #UserInput.contour_plot_settings['contours_normalized'] = True
 
     #After making the UserInput, now we make a 'parameter_estimation' object from it.
-    PE_object = CKPQ.parameter_estimation(UserInput)
+    PE_object = PEUQSE.parameter_estimation(UserInput)
     
     #Now we do parameter estimation.
     PE_object.doMetropolisHastings()
@@ -53,7 +53,7 @@ def main():
 #    PE_object.createSimulatedResponsesPlots()
     #TODO: call the mum_pce plotting objects, which will be PE_object.createContourGraphs() or something like that.
 
-    # PE_object = CKPQ.parameter_estimation(UserInput)
+    # PE_object = PEUQSE.parameter_estimation(UserInput)
     # PE_object.doOptimizeNegLogP(method="BFGS", printOptimum=True, verbose=False)
     # PE_object.createAllPlots()
     
