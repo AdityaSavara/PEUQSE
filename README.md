@@ -1,11 +1,11 @@
-# PEUQSE (formerly CheKiPEUQ)
+# PEUQSE (including CheKiPEUQ)
+
+PEUQSE stands for "Parameter Estimation and Uncertainty Quantification for Science and Engineering." The code is built to be general.  
 
 Parameter estimation for complex physical problems often suffers from finding ‘solutions’ that are not physically realistic. The PEUQSE software provides tools for finding physically realistic parameter estimates, graphs of the parameter estimate positions within parameter space, and plots of the final simulation results.
 
 The LICENSE and MANUAL are in the PEUQSE directory and at https://github.com/AdityaSavara/PEUQSE/tree/master/PEUQSE
 The LICENSE is a BSD-3-Clause LICENSE.
-
-PEUQSE stands for "Parameter Estimation and Uncertainty Quantification for Science and Engineering." The code is built to be general.  The name is typically pronounced "pukesy" ("puh-you-k-see")
 
 The recommended installation is to get Anaconda, then open an anaconda prompt and type `pip install PEUQSE[COMPLETE]` (includes all optional dependencies). Leave out the '[COMPLETE]' if you want the minimal version.
 The software can also be downloaded and used directly, or used by "python setup.py install" (the setup.py way will do basically the same thing as pip and will install the package appropriately to allow the module to be accessed by python regardless of directory, but this will not install the optional dependencies). For those who are not familiar with python, longer instructions are provided in the How to Get Started section below.
