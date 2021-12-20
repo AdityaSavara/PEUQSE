@@ -1,4 +1,4 @@
-# PEUQSE (including CheKiPEUQ)
+# PEUQSE (formerly CheKiPEUQ)
 
 PEUQSE stands for "Parameter Estimation and Uncertainty Quantification for Science and Engineering." The code is built to be general.  
 
