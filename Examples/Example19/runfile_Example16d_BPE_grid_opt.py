@@ -1,6 +1,6 @@
 import sys; sys.path.append('../../')
-sys.path.append('../../../../');  import CheKiPEUQ as CKPQ
-import CheKiPEUQ.UserInput as UserInput
+sys.path.append('../../../../');  import PEUQSE as PEUQSE
+import PEUQSE.UserInput as UserInput
 
 if __name__ == "__main__":
     #####This file is like the other Example 15 runfiles, and has the two_site_ratio as giving the percent of sites that is site 2 (as a decimal) and this is the first parameter in the parameter vector.
@@ -62,7 +62,7 @@ if __name__ == "__main__":
     #After making the UserInput, now we make a 'parameter_estimation' object from it.
 
     #After making the UserInput, now we make a 'parameter_estimation' object from it.
-    PE_object = CKPQ.parameter_estimation(UserInput)
+    PE_object = PEUQSE.parameter_estimation(UserInput)
     
 #    #Now we do parameter estimation.
 #    PE_object.doMetropolisHastings()

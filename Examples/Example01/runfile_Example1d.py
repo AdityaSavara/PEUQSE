@@ -1,11 +1,11 @@
-import sys; sys.path.append('../../');  import CheKiPEUQ as CKPQ
-import CheKiPEUQ.UserInput as UserInput
+import sys; sys.path.append('../../');  import PEUQSE as PEUQSE
+import PEUQSE.UserInput as UserInput
 
 
 if __name__ == "__main__":
-    #reload the UserInput module and ChekiPEUQ package to avoid errors.
+    #reload the UserInput module and PEUQSE package to avoid errors.
     from importlib import reload
-    reload(CKPQ)
+    reload(PEUQSE)
     reload(UserInput)
 
     import processing_functions_tpd_odeint
@@ -50,7 +50,7 @@ if __name__ == "__main__":
     UserInput.contour_plot_settings['contours_normalized'] = True
 
     #After making the UserInput, now we make a 'parameter_estimation' object from it.
-    PE_object = CKPQ.parameter_estimation(UserInput)
+    PE_object = PEUQSE.parameter_estimation(UserInput)
     
 #    #Now we do parameter estimation.
 #    PE_object.doMetropolisHastings()

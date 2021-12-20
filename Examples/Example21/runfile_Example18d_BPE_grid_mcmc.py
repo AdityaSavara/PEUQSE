@@ -1,6 +1,6 @@
 import sys; sys.path.append('../../')
-sys.path.append('../../../../');  import CheKiPEUQ as CKPQ                                                               
-import CheKiPEUQ.UserInput as UserInput
+sys.path.append('../../../../');  import PEUQSE as PEUQSE                                                               
+import PEUQSE.UserInput as UserInput
 
 if __name__ == "__main__":
     import processing_functions_tpd_odeint
@@ -61,7 +61,7 @@ if __name__ == "__main__":
     
 
     #After making the UserInput, now we make a 'parameter_estimation' object from it.
-    PE_object = CKPQ.parameter_estimation(UserInput)
+    PE_object = PEUQSE.parameter_estimation(UserInput)
     
 #    #Now we do parameter estimation.
 #    PE_object.doMetropolisHastings()

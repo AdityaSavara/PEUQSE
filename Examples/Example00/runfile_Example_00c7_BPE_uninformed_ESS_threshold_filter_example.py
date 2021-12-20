@@ -1,5 +1,5 @@
-import sys; sys.path.append('../../');  import CheKiPEUQ as CKPQ
-import CheKiPEUQ.UserInput as UserInput
+import sys; sys.path.append('../../');  import PEUQSE as PEUQSE
+import PEUQSE.UserInput as UserInput
 
 
 import observed_values_00  #Just a simple example. The user can also put the values in directly into the runfile or extract from a csv, for example.
@@ -27,7 +27,7 @@ UserInput.parameter_estimation_settings['mcmc_burn_in'] = 100
 UserInput.parameter_estimation_settings['mcmc_length'] = 1500 #The uninformed prior int his example has a "bad" MCMC walker so requires lots of sampling to converge.
 UserInput.parameter_estimation_settings['mcmc_checkPointFrequency'] = 10 #This example is long enough that it's good to get updates.
 #After making the UserInput, now we make a 'parameter_estimation' object from it.
-PE_object = CKPQ.parameter_estimation(UserInput)
+PE_object = PEUQSE.parameter_estimation(UserInput)
 UserInput.parameter_estimation_settings['mcmc_threshold_filter_samples'] = False
 UserInput.parameter_estimation_settings['mcmc_threshold_filter_coefficient'] = 'auto'
 PE_object.doEnsembleSliceSampling()

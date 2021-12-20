@@ -1,16 +1,16 @@
 import pandas as pd
-import sys; sys.path.append('../../');  import CheKiPEUQ as CKPQ
+import sys; sys.path.append('../../');  import PEUQSE as PEUQSE
 import cantera as ct
 import cantera.ck2cti as ck2cti
-import CheKiPEUQ.simulationDriver.canteraSimulate
-import CheKiPEUQ.simulationDriver.canteraKineticsParametersParser 
+import PEUQSE.simulationDriver.canteraSimulate
+import PEUQSE.simulationDriver.canteraKineticsParametersParser 
 import numpy as np
 
 
 
 
 if __name__ == "__main__":
-    import CheKiPEUQ.UserInput as UserInput
+    import PEUQSE.UserInput as UserInput
     
     import processing_functions_tpd_odeint #We just want to import the experimental data.
     observed_data_Filename = 'ExperimentalDataAcetaldehydeTPDCeO2111MullinsTruncatedConstantErrors.csv'
@@ -63,7 +63,7 @@ if __name__ == "__main__":
 
 
     #After making the UserInput, now we make a 'parameter_estimation' object from it.
-    PE_object = CKPQ.parameter_estimation(UserInput)
+    PE_object = PEUQSE.parameter_estimation(UserInput)
     
     #Now we do parameter estimation.
     #PE_object.doMetropolisHastings()

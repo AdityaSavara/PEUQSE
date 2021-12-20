@@ -1,5 +1,5 @@
-import sys; sys.path.append('../../');  import CheKiPEUQ as CKPQ
-import CheKiPEUQ.UserInput as UserInput
+import sys; sys.path.append('../../');  import PEUQSE as PEUQSE
+import PEUQSE.UserInput as UserInput
 
 if __name__ == "__main__":    
     import processing_function_two_response #This will provide the "simulation" function.
@@ -36,7 +36,7 @@ if __name__ == "__main__":
     UserInput.contour_plot_settings['contours_normalized'] = False
 
     #After making the UserInput, now we make a 'parameter_estimation' object from it.
-    PE_object = CKPQ.parameter_estimation(UserInput)
+    PE_object = PEUQSE.parameter_estimation(UserInput)
     
     #Now we do parameter estimation.
     PE_object.doGridSearch('getLogP', gridSamplingAbsoluteIntervalSize=[2,1], gridSamplingNumOfIntervals=[5,2])
