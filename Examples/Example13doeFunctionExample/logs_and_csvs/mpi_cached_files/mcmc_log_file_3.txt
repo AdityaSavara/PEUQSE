@@ -9,3 +9,4 @@ evidence:0.0225946637347551
 posterior_cov_matrix:
 [[0. 0.]
  [0. 0.]]
+Convergence Status: The difference between the MAP parameter set and mu_AP parameter set is less than 10% of the prior standard deviations for each parameter. There is no general method for knowing when the correct solution has been obtained, but this small difference is one sign of a converged solution.
