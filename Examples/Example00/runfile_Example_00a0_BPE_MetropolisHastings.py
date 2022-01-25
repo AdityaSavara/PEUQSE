@@ -35,21 +35,28 @@ if __name__ == "__main__":
     
     #Finally, create all plots!
     PE_object.createAllPlots()
-    ####NORMALLY WE WOULD NOW CREATE ALL PLOTS, BUT IN THIS EXAMPLE WE WILL DELAY DOING SO IN ORDER TO SHOW HOW TO SAVE AND LOAD A PE_OBJECT TO AND FROM A FILE.
+    #The createAllPlots function calls each of the below functions so that the user does not have to.    
+    #    PE_object.makeHistogramsForEachParameter()    
+    #    PE_object.makeSamplingScatterMatrixPlot()
+    #    PE_object.createSimulatedResponsesPlots()
+
     
-    #Optionally, one can save a PE_object for later
+    #########Optional example of saving and loading PE_objects after running the mcmc.
+    #########This feature requires having dill installed (pip install dill, https://pypi.org/project/dill/)
     try:
-        PE_object.save_to_dill("PE_object_00a0")
+        import dill
+        dillModuleExists = True
     except:
-        pass
+        dillModuleExists = False
+
     
-    #to load a PE_object after some time, first one has to put (any) UserInput to create a PE_object, then to load from file.
-    #these two steps can be done in a different python file. A different PE_object name is being used to emphasize that this process can be done from a different python file.
-    PE_object2 = PEUQSE.parameter_estimation(UserInput)
-    PE_object2 = PE_object2.load_from_dill("PE_object_00a0")
-    
-    
-    PE_object2.createAllPlots() #The createAllPlots function calls each of the below functions so that the user does not have to.
-#    PE_object.makeHistogramsForEachParameter()    
-#    PE_object.makeSamplingScatterMatrixPlot()
-#    PE_object.createSimulatedResponsesPlots()
+    #Optionally, one can save a PE_object for later,if the dill module has been installed.
+    if dillModuleExists == True: 
+        PE_object.save_to_dill("PE_object_00a0")
+        #to load a PE_object after some time, first one has to put (any) UserInput to create a PE_object, then to load from file.
+        
+        
+        #Normally, we would do the loading and plotting in another python file, but for this example the syntax is being demonstrated below within the same file.
+        PE_object2 = PEUQSE.parameter_estimation(UserInput)
+        PE_object2 = PE_object2.load_from_dill("PE_object_00a0")
+        PE_object2.createAllPlots() 
