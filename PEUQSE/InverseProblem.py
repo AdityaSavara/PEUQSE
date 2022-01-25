@@ -529,8 +529,11 @@ class parameter_estimation:
             discreteParameterVector[regularParameterIndex] = parameterValue
         if type(simulationFunction) != type(None):#This is the normal case.
             simulationOutput = simulationFunction(discreteParameterVector) 
-        elif type(simulationOutput) == type(None):
-            return 0, None #This is for the case that the simulation fails. User can have simulationOutput return a None type in case of failure. Perhaps should be made better in future. 
+        if type(simulationOutput) == type(None):
+            return None #This is for the case that the simulation fails. User can have simulationOutput return a None type in case of failure. Perhaps should be made better in future. 
+        if len(simulationOutput) == 1: #if a 'nan' is returned, then we'll treat the simulation like a failed simulation.
+            if simulationOutput == np.float('nan'):
+                return None 
 
             
         if type(simulationOutputProcessingFunction) == type(None):
@@ -1615,7 +1618,25 @@ class parameter_estimation:
         return [discreteParameterVector, objectiveFunctionValue]
 
     def calculateInfoGain(self):
-        #BELOW CALCULATE INFOGAIN RELATED QUANTITIES.
+        if self.UserInput.parameter_estimation_settings['mcmc_info_gain_returned'] == 'KL_divergence':
+            try: #If the info_gain_KL fails, we will return info_gain_log_ratio. 
+                #Below is the KL_divergence info_gain calculation.
+                length, width = self.post_burn_in_samples.shape
+                self.info_gain_KL = 0
+                self.info_gain_KL_each_parameter  = []
+                for param in range(width):
+                    import matplotlib.pyplot as plt #FIXME: #TODO: this plotting needs to be moved into the plotting area and as optinoal.
+                    (density0,bins0,pathces0)=plt.hist([self.samples_of_prior[:,param].flatten(),self.post_burn_in_samples[:,param].flatten()],bins=100,density=True)
+                    current_info_gain_KL = density0[1]*np.log(density0[1]/density0[0])
+                    current_info_gain_KL = current_info_gain_KL[np.isfinite(current_info_gain_KL)]
+                    current_info_gain_KL = np.sum(current_info_gain_KL)
+                    self.info_gain_KL_each_parameter.append(current_info_gain_KL) #could make this optional, but normally shouldn't take much memory.
+                    self.info_gain_KL = self.info_gain_KL + current_info_gain_KL
+                self.info_gain_each_parameter = self.info_gain_KL_each_parameter #could make this optional, but normally shouldn't take much memory.
+                self.info_gain = self.info_gain_KL
+            except:
+                print("unable to calculate KL_divergence info_gain. Calculating log_ratio info_gain.")
+                self.UserInput.parameter_estimation_settings['mcmc_info_gain_returned'] = 'log_ratio'
         if self.UserInput.parameter_estimation_settings['mcmc_info_gain_returned'] == 'log_ratio':
             if self.UserInput.parameter_estimation_settings['mcmc_info_gain_cutoff'] == 0:        
                 #we have log A, and we want log(A/B).  #log (e^log(A) / B )  = log(A/B).  
@@ -1667,23 +1688,7 @@ class parameter_estimation:
                 #post_burn_in_log_posteriors_vec_non_truncated = self.post_burn_in_log_posteriors_un_normed_vec - np.log(self.evidence)
                 #print(post_burn_in_log_posteriors_vec_truncated) #TODO: Export this
                 #print(post_burn_in_log_priors_vec_truncated)  #TODO: Export this
-        if self.UserInput.parameter_estimation_settings['mcmc_info_gain_returned'] == 'log_ratio':
             self.info_gain = self.info_gain_log_ratio
-        if self.UserInput.parameter_estimation_settings['mcmc_info_gain_returned'] == 'KL_divergence':
-            #Below is the KL_divergence info_gain calculation.
-            length, width = self.post_burn_in_samples.shape
-            self.info_gain_KL = 0
-            self.info_gain_KL_each_parameter  = []
-            for param in range(width):
-                import matplotlib.pyplot as plt #FIXME: #TODO: this plotting needs to be moved into the plotting area and as optinoal.
-                (density0,bins0,pathces0)=plt.hist([self.samples_of_prior[:,param].flatten(),self.post_burn_in_samples[:,param].flatten()],bins=100,density=True)
-                current_info_gain_KL = density0[1]*np.log(density0[1]/density0[0])
-                current_info_gain_KL = current_info_gain_KL[np.isfinite(current_info_gain_KL)]
-                current_info_gain_KL = np.sum(current_info_gain_KL)
-                self.info_gain_KL_each_parameter.append(current_info_gain_KL) #could make this optional, but normally shouldn't take much memory.
-                self.info_gain_KL = self.info_gain_KL + current_info_gain_KL
-            self.info_gain_each_parameter = self.info_gain_KL_each_parameter #could make this optional, but normally shouldn't take much memory.
-            self.info_gain = self.info_gain_KL
         return self.info_gain    
 
 
