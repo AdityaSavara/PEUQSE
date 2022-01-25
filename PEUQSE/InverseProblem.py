@@ -529,8 +529,11 @@ class parameter_estimation:
             discreteParameterVector[regularParameterIndex] = parameterValue
         if type(simulationFunction) != type(None):#This is the normal case.
             simulationOutput = simulationFunction(discreteParameterVector) 
-        elif type(simulationOutput) == type(None):
-            return 0, None #This is for the case that the simulation fails. User can have simulationOutput return a None type in case of failure. Perhaps should be made better in future. 
+        if type(simulationOutput) == type(None):
+            return None #This is for the case that the simulation fails. User can have simulationOutput return a None type in case of failure. Perhaps should be made better in future. 
+        if len(simulationOutput) == 1: #if a 'nan' is returned, then we'll treat the simulation like a failed simulation.
+            if simulationOutput == np.float('nan'):
+                return None 
 
             
         if type(simulationOutputProcessingFunction) == type(None):
