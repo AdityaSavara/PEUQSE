@@ -11,6 +11,7 @@ from collections.abc import Iterable
 #import mumce_py.solution mumce_pySolution
 try:
     import CiteSoft
+    from CiteSoft import function_call_cite
 except:
     import os #The below lines are to allow CiteSoftLocal to be called regardless of user's working directory.
     lenOfFileName = len(os.path.basename(__file__)) #This is the name of **this** file.
