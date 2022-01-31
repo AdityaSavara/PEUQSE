@@ -34,7 +34,7 @@ class parameter_estimation:
     software_unique_id = "https://doi.org/10.1002/cctc.202000953"
     software_kwargs = {"version": software_version, "author": ["Aditya Savara", "Eric A. Walker"], "doi": "https://doi.org/10.1002/cctc.202000953", "cite": "Savara, A. and Walker, E.A. (2020), PEUQSE Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953"} 
     @CiteSoft.after_call_compile_consolidated_log()
-    @CiteSoft.module_call_cite(unique_id=software_unique_id, software_name=software_name, **software_kwargs)
+    @CiteSoft.function_call_cite(unique_id=software_unique_id, software_name=software_name, **software_kwargs)
     def __init__(self, UserInput = None):
         #TODO: settings that are supposed to be Booleans should get Boolean cast in here. Otherwise if they are strings they will cause problems in "or" statements (where strings can return true even if the string is 'False').        
         self.UserInput = UserInput #Note that this is a pointer, so the later lines are within this object.
@@ -1223,7 +1223,7 @@ class parameter_estimation:
     software_unique_id = "https://doi.org/10.1002/cctc.202000976"
     software_kwargs = {"version": software_version, "author": ["Eric A. Walker", "Kishore Ravisankar", "Aditya Savara"], "doi": "https://doi.org/10.1002/cctc.202000976", "cite": "Eric Alan Walker, Kishore Ravisankar, Aditya Savara. PEUQSE Intro 2: Harnessing Uncertainties from Data Sets, Bayesian Design of Experiments in Chemical Kinetics. ChemCatChem. Accepted. doi:10.1002/cctc.202000976"} 
     #@CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
-    @CiteSoft.module_call_cite(unique_id=software_unique_id, software_name=software_name, **software_kwargs)
+    @CiteSoft.function_call_cite(unique_id=software_unique_id, software_name=software_name, **software_kwargs)
     def doeGetInfoGainMatrix(self, parameterPermutation, searchType='doMetropolisHastings'):#Note: There is an implied argument of info_gains_matrices_array_format being 'xyz' or 'meshgrid'
         #At present, we *must* provide a parameterPermutation because right now the only way to get an InfoGainMatrix is with synthetic data assuming a particular parameterPermutation as the "real" or "actual" parameterPermutation.
         doe_settings = self.UserInput.doe_settings
@@ -1884,7 +1884,7 @@ class parameter_estimation:
     software_unique_id = "https://github.com/minaskar/zeus"
     software_kwargs = {"version": software_version, "author": ["Minas Karamanis", "Florian Beutler"], "cite": ["Minas Karamanis and Florian Beutler. zeus: A Python Implementation of the Ensemble Slice Sampling method. 2020. ","https://arxiv.org/abs/2002.06212", "@article{ess,  title={Ensemble Slice Sampling}, author={Minas Karamanis and Florian Beutler}, year={2020}, eprint={2002.06212}, archivePrefix={arXiv}, primaryClass={stat.ML} }"] }
     #@CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
-    @CiteSoft.module_call_cite(unique_id=software_unique_id, software_name=software_name, **software_kwargs)
+    @CiteSoft.function_call_cite(unique_id=software_unique_id, software_name=software_name, **software_kwargs)
     def doEnsembleSliceSampling(self, mcmc_nwalkers_direct_input = None, walkerInitialDistribution='UserChoice', walkerInitialDistributionSpread='UserChoice', calculatePostBurnInStatistics=True, mcmc_exportLog ='UserChoice', continueSampling='auto'):
         #The distribution of walkers intial points can be uniform or gaussian or identical. As of Oct 2020, default is uniform spread around the intial guess.
         #The mcmc_nwalkers_direct_input is really meant for PermutationSearch to override the other settings, though of course people could also use it directly.  
@@ -2765,7 +2765,7 @@ software_name = "Integrated Production (Objective Function)"
 software_version = "1.0.0"
 software_unique_id = "https://doi.org/10.1016/j.susc.2016.07.001"
 software_kwargs = {"version": software_version, "author": ["Aditya Savara"], "doi": "https://doi.org/10.1016/j.susc.2016.07.001", "cite": "Savara, Aditya. 'Simulation and fitting of complex reaction network TPR: The key is the objective function.' Surface Science 653 (2016): 169-180."} 
-@CiteSoft.module_call_cite(unique_id=software_unique_id, software_name=software_name, **software_kwargs)
+@CiteSoft.function_call_cite(unique_id=software_unique_id, software_name=software_name, **software_kwargs)
 def littleEulerGivenArray(y_initial, t_values, dydtArray): 
     #numPoints = len(t_values)
     simulated_t_values = t_values #we'll simulate at the t_values given.
