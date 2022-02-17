@@ -2393,7 +2393,10 @@ class parameter_estimation:
         if parameterMAPValue == []: parameterMAPValue = self.map_parameter_set
         if parameterMuAPValue == []: parameterMuAPValue = self.mu_AP_parameter_set
         combined_plots = plot_settings['combined_plots']
-        individual_plots = plot_settings['individual_plots']
+        if individual_plots in plot_settings: 
+            individual_plots = plot_settings['individual_plots']
+        else: #TODO: A. Savara added this code to prevent crashes for cases where individual_plots was not defined. However, it should be defined automatically before this point.
+            individual_plots = True
         posterior_df = pd.DataFrame(parameterSamples,columns=[parameterNamesAndMathTypeExpressionsDict[x] for x in parameterNamesList])
         if combined_plots == 'auto': #by default, we will not make the scatter matrix when there are more than 5 parameters.
             if (len(parameterNamesList) > 5) or (len(parameterNamesAndMathTypeExpressionsDict) > 5):
