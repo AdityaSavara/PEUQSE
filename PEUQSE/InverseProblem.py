@@ -2400,7 +2400,7 @@ class parameter_estimation:
         posterior_df = pd.DataFrame(parameterSamples,columns=[parameterNamesAndMathTypeExpressionsDict[x] for x in parameterNamesList])
         if combined_plots == 'auto': #by default, we will not make the scatter matrix when there are more than 5 parameters.
             if (len(parameterNamesList) > 5) or (len(parameterNamesAndMathTypeExpressionsDict) > 5):
-                #For the case of 'auto' when the parameters is too large in number, we will turn of the combined plots.
+                #For the case of 'auto' when the parameters is too large in number, we will turn off the combined plots.
                 combined_plots = False 
                 #For the case of 'auto' we will then turn on the individual plots.
                 if self.UserInput.scatter_matrix_plots_settings['individual_plots'] == 'auto':
