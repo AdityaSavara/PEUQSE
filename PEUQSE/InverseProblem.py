@@ -2276,7 +2276,7 @@ class parameter_estimation:
         return simulatedResponses
     
     def getLogLikelihood(self,discreteParameterVector): #The variable discreteParameterVector represents a vector of values for the parameters being sampled. So it represents a single point in the multidimensional parameter space.
-        discreteParameterVectorTuple = np.ndarray.copy(discreteParameterVector) #we use a tuple in case any of the functions try to change the parameters.
+        discreteParameterVectorTuple = tuple(np.ndarray.copy(np.array(discreteParameterVector))) #we use a tuple in case any of the functions try to change the parameters.
         
         #Check if user has provided a custom log likelihood function.
         if type(self.UserInput.model['custom_logLikelihood']) != type(None):
