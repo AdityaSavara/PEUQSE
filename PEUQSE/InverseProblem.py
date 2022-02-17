@@ -1897,7 +1897,7 @@ class parameter_estimation:
             walkerInitialDistribution = 'uniform'
         if walkerInitialDistributionSpread == 'UserChoice':
             walkerInitialDistributionSpread = self.UserInput.parameter_estimation_settings['mcmc_walkerInitialDistributionSpread']
-        elif walkerInitialDistributionSpread.lower() == 'auto':
+        if walkerInitialDistributionSpread.lower() == 'auto':
             walkerInitialDistributionSpread = 1.0
             
         #Check if we need to continue sampling, and prepare for it if we need to.
