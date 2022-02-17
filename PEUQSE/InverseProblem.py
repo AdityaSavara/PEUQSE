@@ -1893,7 +1893,7 @@ class parameter_estimation:
         import zeus
         if walkerInitialDistribution == 'UserChoice':
             walkerInitialDistribution = self.UserInput.parameter_estimation_settings['mcmc_walkerInitialDistribution']
-        elif walkerInitialDistribution.lower() == 'auto':
+        if walkerInitialDistribution.lower() == 'auto':
             walkerInitialDistribution = 'uniform'
         if walkerInitialDistributionSpread == 'UserChoice':
             walkerInitialDistributionSpread = self.UserInput.parameter_estimation_settings['mcmc_walkerInitialDistributionSpread']
