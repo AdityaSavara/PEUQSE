@@ -1897,9 +1897,9 @@ class parameter_estimation:
             walkerInitialDistribution = self.UserInput.parameter_estimation_settings['mcmc_walkerInitialDistribution']
         if walkerInitialDistribution.lower() == 'auto':
             walkerInitialDistribution = 'uniform'
-        if walkerInitialDistributionSpread == 'UserChoice':
+        if str(walkerInitialDistributionSpread) == 'UserChoice':
             walkerInitialDistributionSpread = self.UserInput.parameter_estimation_settings['mcmc_walkerInitialDistributionSpread']
-        if walkerInitialDistributionSpread.lower() == 'auto':
+        if str(walkerInitialDistributionSpread).lower() == 'auto':
             walkerInitialDistributionSpread = 1.0
             
         #Check if we need to continue sampling, and prepare for it if we need to.
@@ -1962,7 +1962,7 @@ class parameter_estimation:
         if continueSampling == False:
             walkerStartPoints = self.generateInitialPoints(initialPointsDistributionType=walkerInitialDistribution, numStartPoints = self.mcmc_nwalkers,relativeInitialDistributionSpread=walkerInitialDistributionSpread) #making the first set of starting points.
         elif continueSampling == True:
-            walkerStartPoints = self.map_parameter_set
+            walkerStartPoints = self.map_parameter_set #used to be self.mcmc_last_point_sampled
         zeus_sampler = zeus.EnsembleSampler(self.mcmc_nwalkers, numParameters, logprob_fn=self.getLogP, maxiter=mcmc_maxiter) #maxiter=1E4 is the typical number, but we may want to increase it based on some UserInput variable.        
         for trialN in range(0,1000):#Todo: This number of this range is hardcoded but should probably be a user selection.
             try:
