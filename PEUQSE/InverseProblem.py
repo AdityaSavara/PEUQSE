@@ -690,8 +690,10 @@ class parameter_estimation:
         if verbose:
             print("Starting multistart/permutations search.")
         file_name_prefix, file_name_suffix, directory_name_suffix = self.getParallelProcessingPrefixAndSuffix() #As of Nov 21st 2020, these should always be '' since multiStart_continueSampling is not intended to be used with parallel sampling.
-        if self.UserInput.parameter_estimation_settings['mcmc_continueSampling']  == 'auto':
-            mcmc_continueSampling = False #need to set this variable to false if it's an auto. The only time mcmc_continue sampling should be on for multistart is if someone is doing it intentionally, which would normally only be during an MPI case.                                                                                            
+        if (self.UserInput.parameter_estimation_settings['mcmc_continueSampling']  == 'auto') or (self.UserInput.parameter_estimation_settings['mcmc_continueSampling']  == False):
+            mcmc_continueSampling = False #need to set this variable to false if it's an auto. The only time mcmc_continue sampling should be on for multistart is if someone is doing it intentionally, which would normally only be during an MPI case.
+        if (self.UserInput.parameter_estimation_settings['mcmc_continueSampling']  == True):
+            mcmc_continueSampling = True #The only time mcmc_continue sampling should be on for multistart is if someone is doing it intentionally, which would normally only be during an MPI case.
         #Check if we need to do multistart_continueSampling, and prepare for it if we need to.
         if ('multistart_continueSampling' not in self.UserInput.parameter_estimation_settings) or (self.UserInput.parameter_estimation_settings['multistart_continueSampling']  == 'auto'):
             if hasattr(self, 'multistart_MAP_logP_and_parameters_values'):
@@ -1895,9 +1897,9 @@ class parameter_estimation:
             walkerInitialDistribution = self.UserInput.parameter_estimation_settings['mcmc_walkerInitialDistribution']
         if walkerInitialDistribution.lower() == 'auto':
             walkerInitialDistribution = 'uniform'
-        if walkerInitialDistributionSpread == 'UserChoice':
+        if str(walkerInitialDistributionSpread) == 'UserChoice':
             walkerInitialDistributionSpread = self.UserInput.parameter_estimation_settings['mcmc_walkerInitialDistributionSpread']
-        if walkerInitialDistributionSpread.lower() == 'auto':
+        if str(walkerInitialDistributionSpread).lower() == 'auto':
             walkerInitialDistributionSpread = 1.0
             
         #Check if we need to continue sampling, and prepare for it if we need to.
@@ -1960,7 +1962,7 @@ class parameter_estimation:
         if continueSampling == False:
             walkerStartPoints = self.generateInitialPoints(initialPointsDistributionType=walkerInitialDistribution, numStartPoints = self.mcmc_nwalkers,relativeInitialDistributionSpread=walkerInitialDistributionSpread) #making the first set of starting points.
         elif continueSampling == True:
-            walkerStartPoints = self.mcmc_last_point_sampled
+            walkerStartPoints = self.map_parameter_set #used to be self.mcmc_last_point_sampled. However, ESS works best when sampling near the peak (if there is a monomodoal HPD).
         zeus_sampler = zeus.EnsembleSampler(self.mcmc_nwalkers, numParameters, logprob_fn=self.getLogP, maxiter=mcmc_maxiter) #maxiter=1E4 is the typical number, but we may want to increase it based on some UserInput variable.        
         for trialN in range(0,1000):#Todo: This number of this range is hardcoded but should probably be a user selection.
             try:
