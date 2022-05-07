@@ -120,7 +120,7 @@ def main():
         print("sampling case ModifyReactionssamplingCase", caseIndex, "Simulation Finished")
         
     print("####EXAMPLE 5b#####")
-    #This is like example 4, only now we are going to use the applyPieceWiseconcentrationDependence feature, which requires us to fill ceO2_input_simulation_settings.piecewise_coverage_dependences
+    #This is like example 4, only now we are going to use the applyPieceWiseconcentrationDependence feature, which requires us to turn on ceO2_input_simulation_settings.piecewise_coverage_dependence
     model_name = "ceO2"
     import ceO2_input_simulation_settings #The user may change settings in the python file with the same name.
     reactions_parameters_array = np.genfromtxt(model_name + "_input_reactions_parameters.csv", delimiter=",", dtype="str", skip_header=1)
