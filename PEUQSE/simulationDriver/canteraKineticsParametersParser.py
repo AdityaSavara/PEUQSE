@@ -34,9 +34,9 @@ def descendingLinearEWithPiecewiseOffsetCheckOneReactionAllReactions(reactions_p
     passedArray = np.zeros(len(reactions_parameters_array), dtype="bool") #This is an array that starts as all False, and we fill with true for each reaction that passes.
     for reactionIndex in range(len(reactions_parameters_array)):
         individualreactions_parameters_array = reactions_parameters_array[reactionIndex]  #TODO: it might be better to pass the individual reaction parameters array to the checking function, which would mean changing the checking function.
-        if len(np.shape(reactions_parameters_array))==1:
+        if len(np.shape(reactions_parameters_array))==1: #Check if there is a single set of intervals to be used for all reactions.
             piecewise_coverage_intervals = piecewise_coverage_intervals_all_reactions
-        else:
+        else: #The else means different intervals for each reaction.
             piecewise_coverage_intervals = piecewise_coverage_intervals_all_reactions[reactionIndex]
         E_offsets_array = E_offsets_array_all_reactions[reactionIndex]
         
@@ -49,7 +49,7 @@ def descendingLinearEWithPiecewiseOffsetCheckOneReactionAllReactions(reactions_p
         E = str(individualreactions_parameters_array[5])
 #        a = str(individualreactions_parameters_array[6])
 #        m = str(individualreactions_parameters_array[7])
-        e = str(individualreactions_parameters_array[8])
+        e = str(individualreactions_parameters_array[8])  #Note: in 2022, this is now "E" in cantera, but used to be "e".
         concentrationDependenceSpecies = str(individualreactions_parameters_array[9])
 
         #Get the numbers that we need out.
@@ -57,7 +57,7 @@ def descendingLinearEWithPiecewiseOffsetCheckOneReactionAllReactions(reactions_p
         
         if np.isnan(float(e)): #Need to make e into 0.0 if it's an nan. Otherwise the descending check will fail.
             e = 0.0
-        g_slope = -1.0*float(e) #Note that in cantera e is the negative of g_slope! https://cantera.org/science/reactions.html
+        g_slope = -1.0*float(e) #Note that in 2022 in cantera "E" (formerly "e") is the negative of g_slope! https://cantera.org/science/kinetics.html  https://cantera.org/science/kinetics.html#sec-surface
         print(reactionID, reactionEquation, e, g_slope)
         if individualReactionTypeReceived != "surface_reaction":
             passedArray[reactionIndex] = True  #if it's not a surface reaction, we are not supposed to check it.
@@ -71,6 +71,7 @@ def descendingLinearEWithPiecewiseOffsetCheckOneReactionAllReactions(reactions_p
     elif sum(passedArray) == len(passedArray): #Else the sum must be equal and we return true.
         return True
     
+    #This probably only works for the case of a single species, given how the g_slope is defined currently.
 def descendingLinearEWithPiecewiseOffsetCheckOneReaction(E_0, g_slope,piecewise_coverage_intervals, E_offsets_array):
     E_array =E_0 + g_slope*piecewise_coverage_intervals+E_offsets_array
     delta_E_array = np.diff(E_array)
@@ -448,7 +449,7 @@ def ArrheniusParametersMultiplierInOnePhase(canteraModule, canteraPhaseObject, A
                 pass
         canteraPhaseObject.modify_reaction(int(reactionID), existingReactionObject)           
 
-def populatePiecewiseConcentrationDependence(simulation_settings_module, original_reactions_parameters_array, species_name, kineticParameterName, piecewise_coverage_intervals, modifiers_array):
+def populatePiecewiseCoverageDependence(simulation_settings_module, original_reactions_parameters_array, species_name, kineticParameterName, piecewise_coverage_intervals, modifiers_array):
     try:
         len(simulation_settings_module.piecewise_coverage_dependences)
     except: #if it has no length, then dictionary has not been created yet.
@@ -461,7 +462,7 @@ def populatePiecewiseConcentrationDependence(simulation_settings_module, origina
         simulation_settings_module.piecewise_coverage_dependences[species_name]['piecewise_kinetic_parameter_modifier_arrays']={}
     simulation_settings_module.original_reactions_parameters_array = original_reactions_parameters_array
     simulation_settings_module.piecewise_coverage_dependences[species_name]['piecewise_kinetic_parameter_modifier_arrays'][kineticParameterName] = np.array(modifiers_array)
-    return simulation_settings_module.piecewise_coverage_dependences #Normally don't use the return. Normally just use it to populate the variables in the simulation_settings_module.
+    return simulation_settings_module.piecewise_coverage_dependences #Normally don't use the return. Normally just use the coverage dependences to populate the variables in the simulation_settings_module.
 
 def getInterpolatedModifiersArray(existing_values,piecewise_coverage_dependences, species_name, species_coverage, kineticParameterKey, reaction_parameters_array_kinetic_parameter_index):
     all_coverages_modifiers_array = np.array(piecewise_coverage_dependences[species_name]['piecewise_kinetic_parameter_modifier_arrays'][kineticParameterKey],dtype="float") #This is for every coverage dependent value for this species for this kinetic parameter (i.e., coverages of 0 to 1.0 in bins)
