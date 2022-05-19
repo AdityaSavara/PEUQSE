@@ -50,15 +50,15 @@ species:
     model: constant-cp
 
 reactions:
-- equation: Acetaldehyde + CeCation(S) => Acetaldehyde1-Ce(S)
+- equation: Acetaldehyde + CeCation(S) => Acetaldehyde1-Ce(S)  # Reaction 1
   sticking-coefficient: {A: 1, b: 0, Ea: 2000}
-- equation: Acetaldehyde1-Ce(S) => Acetaldehyde + CeCation(S)
-  rate-constant: {A: 1.00E+13, b: 0, Ea: 67400}
+- equation: Acetaldehyde1-Ce(S) => Acetaldehyde + CeCation(S)  # Reaction 2
+  rate-constant: {A: 1.0e+13, b: 0, Ea: 67400}
   coverage-dependencies:
     Acetaldehyde1-Ce(S): {a: 0, m: 0, E: 0}
-- equation: Acetaldehyde + CeCation(S) => Acetaldehyde2-Ce(S)
+- equation: Acetaldehyde + CeCation(S) => Acetaldehyde2-Ce(S)  # Reaction 3
   sticking-coefficient: {A: 1, b: 0, Ea: 2000}
-- equation: Acetaldehyde2-Ce(S) => Acetaldehyde + CeCation(S)
-  rate-constant: {A: 1.00E+13, b: 0, Ea: 67400}
+- equation: Acetaldehyde2-Ce(S) => Acetaldehyde + CeCation(S)  # Reaction 4
+  rate-constant: {A: 1.0e+13, b: 0, Ea: 67400}
   coverage-dependencies:
     Acetaldehyde2-Ce(S): {a: 0, m: 0, E: 0}
