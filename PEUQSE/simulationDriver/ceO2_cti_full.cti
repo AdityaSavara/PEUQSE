@@ -71,27 +71,27 @@ dummy_thermo = (
 
 species(name = "Acetaldehyde",  # CH3CHO
     atoms = " H:4 C:2 O:1 ",
-    thermo = ()
+    thermo = None
     )
 
 species(name = "OAnion(S)",
     atoms = " O:1 ",
-    thermo = ()
+    thermo = None
     )
     
 species(name = "CeCation(S)",
     atoms = " Ce:1 ",
-    thermo = ()
+    thermo = None
     )
                 
 species(name = "Acetaldehyde1-Ce(S)",  # CH3CHO #Note that the site must be included in the atoms for mass balance.
     atoms = " H:4 C:2 O:1 Ce:1",
-    thermo = ()
+    thermo = None
     )
     
 species(name = "Acetaldehyde2-Ce(S)",  # CH3CHO #Note that the site must be included in the atoms for mass balance.
     atoms = " H:4 C:2 O:1 Ce:1",
-    thermo = ()
+    thermo = None
     )
 
 #------------------------------------------------------------------------------- 
