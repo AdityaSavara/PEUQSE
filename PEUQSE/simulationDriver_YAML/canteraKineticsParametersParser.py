@@ -236,6 +236,36 @@ def create_full_cti(model_name, reactions_parameters_array = [], cti_top_info_st
         with open(cti_filename, 'w') as cti_file:
             cti_file.write(cti_string)
     return cti_string
+    
+    #This file takes the model_name, the reactions_parameters_array, and the yaml_top_info_string to create the **full** yaml string and/or yaml file.
+def create_full_yaml(model_name, reactions_parameters_array = [], yaml_top_info_string = '', write_yaml_to_file = False):
+    hardcoded = True
+    if hardcoded == True:
+        model_nme = 'ceO2"
+
+
+    #It's convenient to use only the model_name. This then REQUIRES the reaction parameters and top info to
+    #already be inside files with names of model_name+"_input_reactions_parameters.csv" and model_name+"_yaml_top_info.yaml"
+    if yaml_top_info_string == '':
+       yaml_top_info_filename = model_name + "_yaml_top_info.yaml"
+       with open(yaml_top_info_filename, "r") as yaml_top_info_file:
+           yaml_top_info_string = yaml_top_info_file.read() 
+    #Normally, somebody will have to fill out the reaction parameters file ahead of time, either manually or with code.
+    #This time, it was made through the following line:
+    #reactionIDsList, reactionTypesList, reactionEquationsList, ArrheniusParametersArray, concentrationDependencesArray, concentrationDependencesSpeciesList, is_sticking_coefficientList = exportReactionParametersFromFile("ceO2_cti_full_existing.cti", "ceO2_input_reactions_parameters.csv")
+    #TODO: exportReactionParametersFromFile should be extended to work for YAML as well.
+
+    if len(reactions_parameters_array) == len([]): #this means that the reactions_parameters_array needs to be loaded from file.
+       reaction_parameters_filename = model_name+"_input_reactions_parameters.csv"
+       reactions_parameters_array = np.genfromtxt(reaction_parameters_filename, delimiter=",", skip_header=1, dtype="str")
+
+    #FIXME: This file is temporarily just hard coded to read in an existing full yaml file. The logic needs to be changed to match create_full_cti.
+    hardcoded = True
+    if hardcoded == True:
+       with open('ceO2_yaml_full.yaml', "r") as yaml_full_file:
+           yaml_string = yaml_full_file.read()     
+    return yaml_string #this is the full yaml file string.
+
 
 def findModifiableParameterIndices(reactions_parameters_array):
     reactions_parameters_array = np.atleast_2d(reactions_parameters_array) #If for some reason a person is using only 1 reaction, we still need to make it 2D.

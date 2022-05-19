@@ -57,6 +57,41 @@ def create_cti_and_cantera_phases(model_name, reactions_parameters_array, simula
     #The choice of "surf" will make the variables easier to keep track of when it is time to make such a change.
     return cti_string, canteraPhases
     
+    
+def create_yaml_and_cantera_phases(model_name, reayamlons_parameters_array, simulation_settings_module, yaml_top_info_string = None, write_yaml_to_file = False ):
+    #The things that must be defined in advance are...
+    # a) a model name.
+    # b) The simulation settings are set in a python file which then becomes imported and an argument. This can then be changed by a script.
+    # c) The reayamlons_parameters_array must be fed as an array or as a filename that points to a file that contains such an array with a header.
+    # d) The yaml_top_info_string. 
+    if type(reayamlons_parameters_array) == type("string"):
+        reayamlons_parameters_array = np.genfromtxt(model_name + "_input_reayamlons_parameters.csv", delimiter=",", dtype="str", skip_header=1)
+    #In our example, the yaml_top_info file is already made, and the funyamlons below know where to find that file.
+    
+    #The below funyamlon makes a yaml_file and then returns the filename.
+    yaml_string = canteraKineticsParametersParser.create_full_yaml(model_name=model_name, reayamlons_parameters_array=reayamlons_parameters_array, yaml_top_info_string = yaml_top_info_string, write_yaml_to_file = write_yaml_to_file)
+    
+    canteraPhases = {}
+    #NOTE: the reayamlon parameters are in the reayamlon objects. Currently, we cannot update the coverage dependence after yaml file creation. That is why they must be created after the yaml_file is made.
+    # import the gas model and surface model.
+    from distutils.version import LooseVersion, StrictVersion
+    if LooseVersion(ct.__version__) < LooseVersion('2.5'):
+        canteraPhases['gas'] = ct.Solution(source=yaml_string, phaseid='gas')
+        #canteraPhases['gas'].reayamlonsParametersArray = reayamlons_parameters_array
+        # import the surface model
+        canteraPhases['surf']  = ct.Interface(source=yaml_string,phaseid='surf', phases=[canteraPhases['gas']]) #The word gas here is passing that same gas phase object in that was created above.
+        #canteraPhases['surf'].reayamlonsParametersArray = reayamlons_parameters_array
+    if LooseVersion(ct.__version__) >= LooseVersion('2.5'):
+        canteraPhases['gas'] = ct.Solution(source=yaml_string, name='gas')
+        #canteraPhases['gas'].reayamlonsParametersArray = reayamlons_parameters_array
+        # import the surface model
+        canteraPhases['surf']  = ct.Interface(source=yaml_string, name='surf', adjacent=[canteraPhases['gas']]) #The word gas here is passing that same gas phase object in that was created above.
+        #canteraPhases['surf'].reayamlonsParametersArray = reayamlons_parameters_array
+    #NOTE: we intentionally use "surf" rather than surface because in principle a person can make a model with more than 1 surface.
+    #The choice of "surf" will make the variables easier to keep track of when it is time to make such a change.
+    return yaml_string, canteraPhases    
+
+    
 #TODO: This can probably be generalized to run any simulation rather than only simulatePFRorTPRwithCantera.
 def modify_reactions_and_SimulatePFRorTPRwithCantera(model_name, reactions_parameters_array, simulation_settings_module, canteraPhases, ArrheniusOnly = True, byProvidedReactionID = True):
     #The things that must be defined in advance are...
