@@ -158,6 +158,91 @@ def getReactionParametersFromCanteraReactionObjectsList(reactionObjectList):
     concentrationDependencesSpeciesList = concentrationDependencesSpeciesList
     is_sticking_coefficientList = is_sticking_coefficientList
     return reactionIDsList, reactionTypesList, reactionEquationsList, ArrheniusParametersArray, concentrationDependencesArray, concentrationDependencesSpeciesList, is_sticking_coefficientList
+
+def make_reaction_yaml_string(individualreactions_parameters_array, for_full_yaml = False):
+    #first input should be a an array of strings: 
+    #reactionID	canteraReactionType	reactionEquation	A	b	E	a	m	e	concentrationDependenceSpecies	 is_sticking_coefficient
+    # 1	20	H2 + 2 PT(S) => 2 H(S)	0.046	0	0	0	-1	0	PT(S)	TRUE
+    #canteraReactionType is typically "reaction". THe falloff and three_body reactions are not yet supported at this time.  For yaml as of Cantera >2.5, there is no "surface_reaction", instead, surface_reactions are now simply "reactions".
+    ##
+    #the "for_full_yaml" option can be True or False. It is important because when adding a reaction to a model, the yaml looks different compared to when it's added to a file.
+    #For example, below is the string one would use to add a yaml reaction **to an existing cantera object**
+    #'''
+    #  equation: O2 + 2 PT(S) => 2 O(S)
+    #  rate-constant: {A: 1.8900000000000004e+19, b: -0.5, Ea: 0.0}
+    #'''
+    #and below is how one would add the reaction to a yaml file (note the dash).
+    #'''
+    #- equation: O2 + 2 PT(S) => 2 O(S)
+    #  rate-constant: {A: 1.8900000000000004e+19, b: -0.5, Ea: 0.0}
+    #'''
+    #In reality, we will use less linebreaks than the above two examples, but the main point is that the first character for each reaction is a dash when adding to file.
+    #
+    #Below is how coverage-dependencies are included (note that there is an extra indent).
+    #'''
+    #- equation: O2 + 2 PT(S) => 2 O(S)
+    #  rate-constant: {A: 1.8900000000000004e+19, b: -0.5, Ea: 0.0}
+    #  coverage-dependencies:
+    #    PT(S): {a: 0.0, m: -1.0, E: 0.0}
+    #'''    
+    #NOTE: The default converage-dependencies will mean "no change" in the rate constant and thus would have values of a=0, m=0, and e=0 (e=0 is now E=0 in the yaml way of cantera).
+    
+    reaction_yaml_string = None #This is to help diagnose errors.
+    reactionID = str(int(individualreactions_parameters_array[0])-1) #we need to subtract one for how cantera expects the reaction IDs when modifying.
+    individualReactionTypeReceived = str(individualreactions_parameters_array[1])
+    reactionEquation = str(individualreactions_parameters_array[2])
+    A = str(individualreactions_parameters_array[3])
+    b = str(individualreactions_parameters_array[4])
+    E = str(individualreactions_parameters_array[5]) #Note: this is now "Ea" in cantera 2.6
+    a = str(individualreactions_parameters_array[6])
+    m = str(individualreactions_parameters_array[7])
+    e = str(individualreactions_parameters_array[8]) #NOTE: This is now "E" in cantera 2.6.
+    concentrationDependenceSpecies = str(individualreactions_parameters_array[9])  #TODO: it is now possible to have multiple concentration dependent species. My individualreactions_parameters_array syntax will need to be updated to accommodate this. It seems this will need to become something parseable, just as the reactionEquation is parseable. 
+    is_sticking = str(individualreactions_parameters_array[10])
+    if is_sticking.capitalize() == "False": #considered using distutils.util.strtobool(is_sticking) but decided that would slow the program down.
+        ArrheniusString = "Arrhenius"
+    if is_sticking.capitalize() == "True":
+        ArrheniusString = "stick"
+    #In the new yaml way of doing things, there is a field for the rate_constant type to distinguish sticking coefficients from other rate constants.
+    if is_sticking.capitalize() == "True":
+        rate_constant_type = "sticking-coefficient"
+    if is_sticking.capitalize() == "False":
+        rate_constant_type = "rate-constant"        
+        
+    if individualReactionTypeReceived == 'surface_reaction': #For Cantera yaml, there is no longer a special designation for surface_reactions.
+        individualReactionTypeReceived = 'reaction' 
+    #Now make the reaction_yaml strings...
+    if individualReactionTypeReceived.lower() == "reaction":
+        #The spacing will be "strange" here because the ''' does not ignore linebreaks, it keeps them, and they are not normal linebreaks.
+        rxnStringTemplate = \
+'''  equation: Eqn_string
+  rate_constant_type: {A: A_value, b: b_value, Ea: Ea_value}'''
+        reaction_yaml_string = rxnStringTemplate #just initializing.
+        reaction_yaml_string = reaction_yaml_string.replace('Eqn_string', str(reactionEquation))
+        reaction_yaml_string = reaction_yaml_string.replace('A_value', str(A))
+        reaction_yaml_string = reaction_yaml_string.replace('b_value', str(b))
+        reaction_yaml_string = reaction_yaml_string.replace('Ea_value', str(E))
+        reaction_yaml_string = reaction_yaml_string.replace('rate_constant_type', str(rate_constant_type))
+        if str(concentrationDependenceSpecies).lower() != 'none': #none means no species was provided. If a species was provided, then we will append the coverage dependance.
+        #The spacing will be "strange" here because the ''' does not ignore linebreaks, it keeps them, and they are not normal linebreaks.
+            coverageDependenceStringTemplate = \
+'''
+  coverage-dependencies:
+    speciesName: {a: a_value, m: m_value, E: e_value}'''
+            coverageDependenceString = coverageDependenceStringTemplate #just initializing
+            coverageDependenceString = coverageDependenceString.replace('speciesName', str(concentrationDependenceSpecies))
+            coverageDependenceString = coverageDependenceString.replace('a_value', str(a))
+            coverageDependenceString = coverageDependenceString.replace('m_value', str(m))
+            coverageDependenceString = coverageDependenceString.replace('e_value', str(e))
+        else:
+            coverageDependenceString = '' #make a blank string if there is no coverage dependence.
+        #now add the two strings:
+        reaction_yaml_string = reaction_yaml_string + coverageDependenceString
+
+    #now modfiy the reaction in the actual model:
+    if for_full_yaml == True:
+        reaction_yaml_string = '-' + reaction_yaml_string[1:] #make the first character a dash if the string is going to be used for a yaml file.
+    return reaction_yaml_string
     
 def make_reaction_cti_string(individualreactions_parameters_array):
     #input should be a an array of strings: 
@@ -180,7 +265,10 @@ def make_reaction_cti_string(individualreactions_parameters_array):
         ArrheniusString = "Arrhenius"
     if is_sticking.capitalize() == "True":
         ArrheniusString = "stick"
-        
+
+    #TODO: I need to make the coverage dependant defaults no coverage dependence if the person has entered "None".
+    #NOTE: The default converage-dependencies will mean "no change" in the rate constant and thus would have values of a=0, m=0, and e=0 (e=0 is now E=0 in the yaml way of cantera).
+
     #Now make the reaction_cti strings...
     if individualReactionTypeReceived.lower() == "reaction":
         reaction_cti_string = '''reaction('{0}',
@@ -239,11 +327,6 @@ def create_full_cti(model_name, reactions_parameters_array = [], cti_top_info_st
     
     #This file takes the model_name, the reactions_parameters_array, and the yaml_top_info_string to create the **full** yaml string and/or yaml file.
 def create_full_yaml(model_name, reactions_parameters_array = [], yaml_top_info_string = '', write_yaml_to_file = False):
-    hardcoded = True
-    if hardcoded == True:
-        model_nme = 'ceO2'
-
-
     #It's convenient to use only the model_name. This then REQUIRES the reaction parameters and top info to
     #already be inside files with names of model_name+"_input_reactions_parameters.csv" and model_name+"_yaml_top_info.yaml"
     if yaml_top_info_string == '':
@@ -254,16 +337,26 @@ def create_full_yaml(model_name, reactions_parameters_array = [], yaml_top_info_
     #This time, it was made through the following line:
     #reactionIDsList, reactionTypesList, reactionEquationsList, ArrheniusParametersArray, concentrationDependencesArray, concentrationDependencesSpeciesList, is_sticking_coefficientList = exportReactionParametersFromFile("ceO2_cti_full_existing.cti", "ceO2_input_reactions_parameters.csv")
     #TODO: exportReactionParametersFromFile should be extended to work for YAML as well.
-
     if len(reactions_parameters_array) == len([]): #this means that the reactions_parameters_array needs to be loaded from file.
        reaction_parameters_filename = model_name+"_input_reactions_parameters.csv"
        reactions_parameters_array = np.genfromtxt(reaction_parameters_filename, delimiter=",", skip_header=1, dtype="str")
 
-    #FIXME: This file is temporarily just hard coded to read in an existing full yaml file. The logic needs to be changed to match create_full_cti.
-    hardcoded = True
-    if hardcoded == True:
-       with open('ceO2_yaml_full.yaml', "r") as yaml_full_file:
-           yaml_string = yaml_full_file.read()     
+    reactionsDataHeader = 'reactions:\n'
+    #Now make the reactions string.
+    yaml_reactions_string = '' #Start with an empty string. Should not put extra line-breaks.
+    for element in reactions_parameters_array:
+        yaml_reactions_string += make_reaction_yaml_string(element, for_full_yaml=True) + "\n" #need line breaks between each reaction_yaml_string
+    
+    #Now generate the full yaml_string
+    yaml_string = yaml_top_info_string+reactionsDataHeader+yaml_reactions_string
+    
+    if write_yaml_to_file == True:
+        yaml_filename = model_name + "_yaml_full.yaml"
+        with open(yaml_filename, 'w') as yaml_file:
+            yaml_file.write(yaml_string)
+           
+           
+           
     return yaml_string #this is the full yaml file string.
 
 

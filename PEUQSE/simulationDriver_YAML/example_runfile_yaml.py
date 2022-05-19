@@ -17,12 +17,10 @@ def main():
     #For the yaml_stop_info_string the setting "None" is used, but that just means the code will automatically look for it in a file. Though it could be provided instead.
     import ceO2_input_simulation_settings #The user may change settings in the python file with the same name.
     ceO2_input_simulation_settings.print_frequency = 100 #This makes the simulation not print things out during checkpoints.
-    canteraSimulate.create_yaml_and_SimulatePFRorTPRwithCantera("ceO2", "ceO2_input_reactions_parameters.csv", ceO2_input_simulation_settings, yaml_top_info_string = None, write_yaml_to_file = True)
+    canteraSimulate.create_yaml_and_SimulatePFRorTPRwithCantera("ceO2", "ceO2_input_reactions_parameters.csv", ceO2_input_simulation_settings, yaml_top_info_string = '', write_yaml_to_file = True)
     #Note that one can change from static to PFR by changing a variable inside ceO2_simulation_settings. 
     #To get the output as python objects and not only as file exports, see example 2.
     
-    print("temprorarily stopping after example 1."); sys.exit()
-
     print("####EXAMPLE 2#####")
     #Here is an example useage with a loop to scan different parameter settings.
     import ceO2_input_simulation_settings #The user may change settings in the python file with the same name.
@@ -43,6 +41,8 @@ def main():
         canteraSimulate.create_yaml_and_SimulatePFRorTPRwithCantera("ceO2", modified_reactions_parameters_array, ceO2_input_simulation_settings, yaml_top_info_string = yaml_top_info_string)
         np.savetxt("ceO2_output_rates_all_"+str(multiplyingFactor)+".csv", rates_all_array, delimiter=",", comments='', header=rates_all_array_header)
         print("round", multiplyingFactor, "Simulation Finished")
+        
+    print("temprorarily stopping after example 2."); sys.exit()        
         
     print("####EXAMPLE 3#####")
     #This is like example 2, only now we use the modifyAllAdjustableReactionParametersArrayValues function rather than sticking values in by simple index.
