@@ -56,6 +56,20 @@ def create_cti_and_cantera_phases(model_name, reactions_parameters_array, simula
     #NOTE: we intentionally use "surf" rather than surface because in principle a person can make a model with more than 1 surface.
     #The choice of "surf" will make the variables easier to keep track of when it is time to make such a change.
     return cti_string, canteraPhases
+
+def create_yaml_and_SimulatePFRorTPRwithCantera(model_name, reactions_parameters_array, simulation_settings_module, yaml_top_info_string = None, write_yaml_to_file = False ):
+    #The things that must be defined in advance are...
+    # a) a model name.
+    # b) The simulation settings are set in a python file which then becomes imported and an argument. This can then be changed by a script.
+    # c) The reactions_parameters_array must be fed as an array or as a filename that points to a file that contains such an array with a header.
+    # d) The yaml_top_info_string. 
+    yaml_string, canteraPhases  = create_yaml_and_cantera_phases(model_name=model_name, simulation_settings_module=simulation_settings_module, reactions_parameters_array=reactions_parameters_array, yaml_top_info_string = yaml_top_info_string, write_yaml_to_file = write_yaml_to_file)
+
+    #Now import the simulation settings before running the simulation...
+    concentrationsArray, concentrationsArrayHeader, rates_all_array, rates_all_array_header, cantera_phase_rates, canteraPhases, cantera_phase_rates_headers, canteraSimulationsObject = \
+    simulatePFRorTPRwithCantera(model_name, canteraPhases['gas'], canteraPhases['surf'], simulation_settings_module)  
+    return concentrationsArray, concentrationsArrayHeader, rates_all_array, rates_all_array_header, cantera_phase_rates, canteraPhases, cantera_phase_rates_headers, canteraSimulationsObject
+    
     
     
 def create_yaml_and_cantera_phases(model_name, reactions_parameters_array, simulation_settings_module, yaml_top_info_string = None, write_yaml_to_file = False ):
