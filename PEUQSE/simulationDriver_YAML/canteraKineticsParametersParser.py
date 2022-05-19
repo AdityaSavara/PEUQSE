@@ -241,7 +241,7 @@ def create_full_cti(model_name, reactions_parameters_array = [], cti_top_info_st
 def create_full_yaml(model_name, reactions_parameters_array = [], yaml_top_info_string = '', write_yaml_to_file = False):
     hardcoded = True
     if hardcoded == True:
-        model_nme = 'ceO2"
+        model_nme = 'ceO2'
 
 
     #It's convenient to use only the model_name. This then REQUIRES the reaction parameters and top info to

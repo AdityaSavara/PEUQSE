@@ -76,16 +76,13 @@ def create_yaml_and_cantera_phases(model_name, reactions_parameters_array, simul
     # import the gas model and surface model.
     from distutils.version import LooseVersion, StrictVersion
     if LooseVersion(ct.__version__) < LooseVersion('2.5'):
-        canteraPhases['gas'] = ct.Solution(source=yaml_string, phaseid='gas')
-        #canteraPhases['gas'].reactionsParametersArray = reactions_parameters_array
-        # import the surface model
-        canteraPhases['surf']  = ct.Interface(source=yaml_string,phaseid='surf', phases=[canteraPhases['gas']]) #The word gas here is passing that same gas phase object in that was created above.
-        #canteraPhases['surf'].reactionsParametersArray = reactions_parameters_array
+        print("Warning: This appears to be cantera version < 2.5. cantera yaml files are not supported for Cantera < 2.5. Use the cti funcitons.")
     if LooseVersion(ct.__version__) >= LooseVersion('2.5'):
-        canteraPhases['gas'] = ct.Solution(source=yaml_string, name='gas')
+        canteraPhases['gas'] = ct.Solution(yaml=yaml_string, name='gas') #used yaml= to use the string. For using the file, we would use something like infile="ceO2_yaml_full.yaml"
         #canteraPhases['gas'].reactionsParametersArray = reactions_parameters_array
         # import the surface model
-        canteraPhases['surf']  = ct.Interface(source=yaml_string, name='surf', adjacent=[canteraPhases['gas']]) #The word gas here is passing that same gas phase object in that was created above.
+         ##Below, used yaml= to use the string. For using the file, we would use something like infile="ceO2_yaml_full.yaml"
+        canteraPhases['surf']  = ct.Interface(yaml=yaml_string, name='surf', adjacent=[canteraPhases['gas']]) #The word gas here is passing that same gas phase object in that was created above.
         #canteraPhases['surf'].reactionsParametersArray = reactions_parameters_array
     #NOTE: we intentionally use "surf" rather than surface because in principle a person can make a model with more than 1 surface.
     #The choice of "surf" will make the variables easier to keep track of when it is time to make such a change.
