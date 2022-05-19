@@ -42,8 +42,6 @@ def main():
         np.savetxt("ceO2_output_rates_all_"+str(multiplyingFactor)+".csv", rates_all_array, delimiter=",", comments='', header=rates_all_array_header)
         print("round", multiplyingFactor, "Simulation Finished")
         
-    print("temprorarily stopping after example 2."); sys.exit()
-        
     print("####EXAMPLE 3#####")
     #This is like example 2, only now we use the modifyAllAdjustableReactionParametersArrayValues function rather than sticking values in by simple index.
     model_name = "ceO2"
@@ -77,6 +75,8 @@ def main():
         canteraSimulate.create_cti_and_SimulatePFRorTPRwithCantera("ceO2", modified_reactions_parameters_array, ceO2_input_simulation_settings, cti_top_info_string = cti_top_info_string)
         np.savetxt("ceO2_output_rates_all_"+"FullCTIsamplingCase"+str(caseIndex)+".csv", rates_all_array, delimiter=",", comments='', header=rates_all_array_header)              
         print("sampling case FullCTIsamplingCase", caseIndex, "Simulation Finished")
+
+    print("temprorarily stopping after example 3."); sys.exit()        
 
     print("####EXAMPLE 4#####")
     #This is like example 3, only now we use the modifyReactionsInOnePhase rather than full cti.
