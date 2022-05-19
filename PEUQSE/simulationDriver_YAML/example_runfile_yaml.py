@@ -20,6 +20,8 @@ def main():
     canteraSimulate.create_yaml_and_SimulatePFRorTPRwithCantera("ceO2", "ceO2_input_reactions_parameters.csv", ceO2_input_simulation_settings, yaml_top_info_string = None, write_yaml_to_file = True)
     #Note that one can change from static to PFR by changing a variable inside ceO2_simulation_settings. 
     #To get the output as python objects and not only as file exports, see example 2.
+    
+    print("temprorarily stopping after example 1."); sys.exit()
 
     print("####EXAMPLE 2#####")
     #Here is an example useage with a loop to scan different parameter settings.
