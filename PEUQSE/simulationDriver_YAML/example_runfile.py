@@ -119,8 +119,6 @@ def main():
         np.savetxt("ceO2_output_rates_all_"+"ModifyReactionssamplingCase"+str(caseIndex)+".csv", rates_all_array, delimiter=",", comments='', header=rates_all_array_header)
         print("sampling case ModifyReactionssamplingCase", caseIndex, "Simulation Finished")
         
-    print("temprorarily stopping after example 4."); sys.exit()        
-        
     print("####EXAMPLE 5b#####")
     #This is like example 4, only now we are going to use the applyPieceWiseconcentrationDependence feature, which requires us to turn on ceO2_input_simulation_settings.piecewise_coverage_dependence
     model_name = "ceO2"
