@@ -80,8 +80,6 @@ def main():
         np.savetxt("ceO2_output_rates_all_"+"FullCTIsamplingCase"+str(caseIndex)+".csv", rates_all_array, delimiter=",", comments='', header=rates_all_array_header)              
         print("sampling case FullCTIsamplingCase", caseIndex, "Simulation Finished")
 
-    print("temprorarily stopping after example 3."); sys.exit()
-
     print("####EXAMPLE 4#####")
     #This is like example 3, only now we use the modifyReactionsInOnePhase rather than full cti.
     model_name = "ceO2"
@@ -124,6 +122,8 @@ def main():
         canteraSimulate.modify_reactions_and_SimulatePFRorTPRwithCantera(model_name, adjustedModifiableParametersCase, ceO2_input_simulation_settings, canteraPhases=canteraPhases)        
         np.savetxt("ceO2_output_rates_all_"+"ModifyReactionssamplingCase"+str(caseIndex)+".csv", rates_all_array, delimiter=",", comments='', header=rates_all_array_header)
         print("sampling case ModifyReactionssamplingCase", caseIndex, "Simulation Finished")
+
+    print("temprorarily stopping after example 4."); sys.exit()        
         
     print("####EXAMPLE 5b#####")
     #This is like example 4, only now we are going to use the applyPieceWiseconcentrationDependence feature, which requires us to turn on ceO2_input_simulation_settings.piecewise_coverage_dependence

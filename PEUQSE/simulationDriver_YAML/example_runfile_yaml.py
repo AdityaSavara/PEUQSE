@@ -75,8 +75,6 @@ def main():
         canteraSimulate.create_yaml_and_SimulatePFRorTPRwithCantera("ceO2", modified_reactions_parameters_array, ceO2_input_simulation_settings, yaml_top_info_string = yaml_top_info_string)
         np.savetxt("ceO2_output_rates_all_"+"FullYAMLsamplingCase"+str(caseIndex)+".csv", rates_all_array, delimiter=",", comments='', header=rates_all_array_header)              
         print("sampling case FullYAMLsamplingCase", caseIndex, "Simulation Finished")
-    
-    print("temprorarily stopping after example 3."); sys.exit()        
 
     print("####EXAMPLE 4#####")
     #This is like example 3, only now we use the modifyReactionsInOnePhase rather than full yaml.
@@ -121,6 +119,8 @@ def main():
         np.savetxt("ceO2_output_rates_all_"+"ModifyReactionssamplingCase"+str(caseIndex)+".csv", rates_all_array, delimiter=",", comments='', header=rates_all_array_header)
         print("sampling case ModifyReactionssamplingCase", caseIndex, "Simulation Finished")
         
+    print("temprorarily stopping after example 4."); sys.exit()        
+    
     print("####EXAMPLE 5b#####")
     #This is like example 4, only now we are going to use the applyPieceWiseconcentrationDependence feature, which requires us to turn on ceO2_input_simulation_settings.piecewise_coverage_dependence
     model_name = "ceO2"
