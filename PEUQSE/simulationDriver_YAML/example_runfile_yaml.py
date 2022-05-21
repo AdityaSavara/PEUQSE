@@ -41,7 +41,7 @@ def main():
         canteraSimulate.create_yaml_and_SimulatePFRorTPRwithCantera("ceO2", modified_reactions_parameters_array, ceO2_input_simulation_settings, yaml_top_info_string = yaml_top_info_string)
         np.savetxt("ceO2_output_rates_all_"+str(multiplyingFactor)+".csv", rates_all_array, delimiter=",", comments='', header=rates_all_array_header)
         print("round", multiplyingFactor, "Simulation Finished")
-    sys.exit()    
+    
     print("####EXAMPLE 3#####")
     #This is like example 2, only now we use the modifyAllAdjustableReactionParametersArrayValues function rather than sticking values in by simple index.
     model_name = "ceO2"
@@ -118,7 +118,7 @@ def main():
         canteraSimulate.modify_reactions_and_SimulatePFRorTPRwithCantera(model_name, adjustedModifiableParametersCase, ceO2_input_simulation_settings, canteraPhases=canteraPhases)        
         np.savetxt("ceO2_output_rates_all_"+"ModifyReactionssamplingCase"+str(caseIndex)+".csv", rates_all_array, delimiter=",", comments='', header=rates_all_array_header)
         print("sampling case ModifyReactionssamplingCase", caseIndex, "Simulation Finished")
-        
+    
     print("####EXAMPLE 5b#####")
     #This is like example 4, only now we are going to use the applyPieceWiseconcentrationDependence feature, which requires us to turn on ceO2_input_simulation_settings.piecewise_coverage_dependence
     model_name = "ceO2"
