@@ -104,7 +104,7 @@ def create_yaml_and_cantera_phases(model_name, reactions_parameters_array, simul
 
     
 #TODO: This can probably be generalized to run any simulation rather than only simulatePFRorTPRwithCantera.
-def modify_reactions_and_SimulatePFRorTPRwithCantera(model_name, reactions_parameters_array, simulation_settings_module, canteraPhases, ArrheniusOnly = True, byProvidedReactionID = True):
+def modify_reactions_and_SimulatePFRorTPRwithCantera(model_name, reactions_parameters_array, simulation_settings_module, canteraPhases, ArrheniusOnly = False, byProvidedReactionID = True):
     #The things that must be defined in advance are...
     # a) a model name.
     # b) The simulation settings are set in a python file which then becomes imported and an argument. This can then be changed by a script.
