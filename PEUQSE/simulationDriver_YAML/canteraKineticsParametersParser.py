@@ -663,23 +663,23 @@ def multiplyReactionsInOnePhase(canteraModule, canteraPhaseObject, reactions_par
             reactionID = canteraPhaseObject.reaction_equations().index(reactionEquation) #don't add 1 because reaction index is not python array indexing.
         canteraPhaseObject.set_multiplier(rateMultipliersArray[inputReactionIndex],int(reactionID)) #note that we are iterating across each individual reaction, but that the reactionID may not match the inputReactionIndex
     
-def modifyReactionsInOnePhase(canteraPhaseObject, reactions_parameters_array, ArrheniusOnly = True, byProvidedReactionID = True, input_Ea_units = 'J/mol'):
+def modifyReactionsInOnePhase(canteraPhaseObject, reactions_parameters_array, ArrheniusOnly = False, byProvidedReactionID = True, input_Ea_units = 'J/mol'):
     #if byProvidedReactionID is set to false, then the reaction ID is "looked up" from the reactions list in the canteraPhaseObject.
-    #The "ArrheniusOnly = True" flag is because cantera currently does not support non-Arrhenius modify_reaction for surface reactions.
+    #The "ArrheniusOnly = True" flag is because cantera previously did not support non-Arrhenius modify_reaction for surface reactions. (but it is now supported as of Cantera 2.6)
     #The "multiplierOnly = True" flag just modifies the existing pre-exponential by a specified factor.
     
     import cantera as ct
-    #  Previously, we needed to classify what type of phase we had. As of cantera 2.6, that doesn't matter.
-    # if(str(type(canteraPhaseObject)))== "<class 'cantera.composite.Interface'>":
-    #     phaseType = "Interface"
-    #     inputReactionTypeNeeded = "reaction"
-    #     #outputReactionObjectType = "InterfaceReaction" 
-    # elif(str(type(canteraPhaseObject)))== "<class 'cantera.composite.Solution'>":
-    #     phaseType = "Solution"
-    #     inputReactionTypeNeeded = "reaction"
-    #     #outputReactionObjectType = "Reaction" 
-    # else: #For now, we assume the only inputReaction type is a reaction.
-    #     inputReactionTypeNeeded = "reaction"
+    # We needed to classify what type of phase we have, because surface reactions can only occur in interface objects, and pure gas phase reactions should happen in solution phase objects.
+    if(str(type(canteraPhaseObject)))== "<class 'cantera.composite.Interface'>":
+         phaseType = "Interface"
+         inputReactionTypeNeeded = "InterfaceReaction" #this capitalization is for the python object type,  not the yaml_string capitalization.
+         #outputReactionObjectType = "InterfaceReaction" 
+    elif(str(type(canteraPhaseObject)))== "<class 'cantera.composite.Solution'>":
+         phaseType = "Solution"
+         inputReactionTypeNeeded = "Reaction"  #this capitalization is for the python object type,  not the yaml_string capitalization.
+         #outputReactionObjectType = "Reaction" 
+    else: #For now, we assume the only inputReaction type is a reaction.
+         inputReactionTypeNeeded = "reaction"
 
     #Now add any reactions that match for this phase.
     for individualreactions_parameters_array in reactions_parameters_array:      
@@ -694,30 +694,38 @@ def modifyReactionsInOnePhase(canteraPhaseObject, reactions_parameters_array, Ar
         # a = str(individualreactions_parameters_array[6])
         # m = str(individualreactions_parameters_array[7])
         # e = str(individualreactions_parameters_array[8]) #NOTE: This is now "E" in cantera 2.6.        
-        if byProvidedReactionID == False: #optional.... 
-                #byProvidedReactionID is set to False, but this only works if the cantera model has the equation written exactly the same.
-                reactionID = canteraPhaseObject.reaction_equations().index(reactionEquation) #don't add 1 because reaction index is not python array indexing.
 
-        #We need to change the units of the activation energy (index 5 in the array ) if the input_Ea_units are J/mol, because cantera has everything in j/kmol inside.
-        if input_Ea_units.lower() == 'j/mol': #convert j/mol to j/kmol.
-            individualreactions_parameters_array[5] = individualreactions_parameters_array[5]*1000.0 
-
-        if ArrheniusOnly == True: #If we are constrained to Arrhenius only, we will just modify individual reaction parameters.
-            A = str(individualreactions_parameters_array[3])
-            b = str(individualreactions_parameters_array[4])            
-            E = str(individualreactions_parameters_array[5])
-            existingReactionObject = canteraPhaseObject.reactions()[int(reactionID)]
-            existingReactionObject.rate = ct.Arrhenius(float(A), float(b), float(E)) #If modifying cantera Arrhenius objects, need to convert from J/mol to J/kmol.
-            canteraPhaseObject.modify_reaction(int(reactionID), existingReactionObject)     
-        if ArrheniusOnly == False:
-            #When we are not constrained to Arrhenius only, will make a new reaction object for each reaction using a yaml_string.
-            #When we make the yaml_string for the reaction, we set "for_full_yaml" as false because we are modyfing an individual reaction.
-            yaml_string = make_reaction_yaml_string(individualreactions_parameters_array, for_full_yaml = False)
-            from distutils.version import LooseVersion, StrictVersion
-            if LooseVersion(ct.__version__) < LooseVersion('2.6'):
-                modifiedReactionObject = ct.Reaction.fromYaml(yaml_string , kinetics=canteraPhaseObject) #This is the correct way for cantera version 2.5        
-            if LooseVersion(ct.__version__) >= LooseVersion('2.6'):
-                modifiedReactionObject = ct.Reaction.from_yaml(yaml_string , kinetics=canteraPhaseObject) #This is the correct way from version 2.6            
+        #We need to check if the reaction has any surface phase species, to see if it is the right reaction type for this cantera phase.
+        if '(S)' in reactionEquation:
+            inputReactionType = "InterfaceReaction" #this capitalization is for the python object type,  not the yaml_string capitalization.
+        else:
+            inputReactionType = "Reaction" #this capitalization is for the python object type,  not the yaml_string capitalization.
+        
+        #The below block makes the actual modification to the cantera phase object.
+        #It is necesary to make sure the inputReactionType matches for the phase being sought -- otherwise the matching reactionID won't exist, and also the attempt to modify a reaction in the wrong phase will crash.
+        if inputReactionType == inputReactionTypeNeeded: #We will only make modifcations if the inputReactionType is the correct type for this phase.            
+            if byProvidedReactionID == False: #optional.... 
+                    #byProvidedReactionID is set to False, but this only works if the cantera model has the equation written exactly the same.
+                    reactionID = canteraPhaseObject.reaction_equations().index(reactionEquation) #don't add 1 because reaction index is not python array indexing.    
+            #We need to change the units of the activation energy (index 5 in the array ) if the input_Ea_units are J/mol, because cantera has everything in j/kmol inside.
+            if input_Ea_units.lower() == 'j/mol': #convert j/mol to j/kmol.
+                individualreactions_parameters_array[5] = float(individualreactions_parameters_array[5])*1000.0
+            if ArrheniusOnly == True: #If we are constrained to Arrhenius only, we will just modify individual reaction parameters. This case is unusual as of cantera 2.6
+                A = str(individualreactions_parameters_array[3])
+                b = str(individualreactions_parameters_array[4])            
+                E = str(individualreactions_parameters_array[5])
+                existingReactionObject = canteraPhaseObject.reactions()[int(reactionID)]
+                existingReactionObject.rate = ct.Arrhenius(float(A), float(b), float(E)) #If modifying cantera Arrhenius objects, need to convert from J/mol to J/kmol.
+                canteraPhaseObject.modify_reaction(int(reactionID), existingReactionObject)     
+            if ArrheniusOnly == False: #As of cantera 2.6, the This is the normal case. In this case, we modify the full reaction object                                                                                         
+                #When we are not constrained to Arrhenius only, will make a new reaction object for each reaction using a yaml_string.
+                #When we make the yaml_string for the reaction, we set "for_full_yaml" as false because we are modyfing an individual reaction.
+                yaml_string = make_reaction_yaml_string(individualreactions_parameters_array, for_full_yaml = False)
+                from distutils.version import LooseVersion, StrictVersion
+                if LooseVersion(ct.__version__) < LooseVersion('2.6'):
+                    modifiedReactionObject = ct.Reaction.fromYaml(yaml_string , kinetics=canteraPhaseObject) #This is the correct way for cantera version 2.5        
+                if LooseVersion(ct.__version__) >= LooseVersion('2.6'):
+                    modifiedReactionObject = ct.Reaction.from_yaml(yaml_string , kinetics=canteraPhaseObject) #This is the correct way from version 2.6            
                 canteraPhaseObject.modify_reaction(int(reactionID),modifiedReactionObject) 
 
 def main():
