@@ -41,7 +41,7 @@ def main():
         canteraSimulate.create_yaml_and_SimulatePFRorTPRwithCantera("ceO2", modified_reactions_parameters_array, ceO2_input_simulation_settings, yaml_top_info_string = yaml_top_info_string)
         np.savetxt("ceO2_output_rates_all_"+str(multiplyingFactor)+".csv", rates_all_array, delimiter=",", comments='', header=rates_all_array_header)
         print("round", multiplyingFactor, "Simulation Finished")
-        
+    sys.exit()    
     print("####EXAMPLE 3#####")
     #This is like example 2, only now we use the modifyAllAdjustableReactionParametersArrayValues function rather than sticking values in by simple index.
     model_name = "ceO2"
