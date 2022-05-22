@@ -284,8 +284,8 @@ def simulatePFRorTPRwithCantera(model_name, canteraGasPhaseObject, canteraSurfac
             T_surf = T_surf_0 + time*heating_rate
             surf.TP = T_surf, P_gas
             if simulation_settings_module.piecewise_coverage_dependence == True:
-                modified_reactions_parameters_array = canteraKineticsParametersParser.calculatePiecewiseCoverageDependentModifiedParametersArray(simulation_settings_module, surf.species_names, surf.coverages) #This feature requires the piecewise coverage dependence settings AND the reactions_parameters_array to already be inside the surf object **in advance**
-                canteraKineticsParametersParser.modifyReactionsInOnePhase(surf, modified_reactions_parameters_array, ArrheniusOnly=False) #May 20th 2022, changed the "ArrheniusOnly=True" to "ArrheniusOnly=False" during the YAML upgrade.
+                modified_reactions_parameters_array = canteraKineticsParametersParser.calculatePiecewiseCoverageDependentModifiedParametersArray(simulation_settings_module, surf.species_names, surf.coverages) #This feature requires the piecewise coverage dependence settings AND the reactions_parameters_array to already be inside the surf object **in advance** #As of May 2022, this feature adds the E modifiers to Ea, and multiplies the pre-exponentials by 10**modifier.
+                canteraKineticsParametersParser.modifyReactionsInOnePhase(surf, modified_reactions_parameters_array, ArrheniusOnly=False) #May 20th 2022, changed the "ArrheniusOnly=True" to "ArrheniusOnly=False" during the YAML upgrade. 
             surf.advance_coverages(t_step_size)  #sim.advance(time) would not work. Changing T with time is not officially supported but happens to work with surf.advance_coverages. Supported way to change temperature during simulation for arbitrary reactors is to use custom integrator: https://cantera.org/examples/python/reactors/custom.py.html
             dist = 0.0
             sim_dist.append(dist)

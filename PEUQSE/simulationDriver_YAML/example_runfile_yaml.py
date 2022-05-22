@@ -121,6 +121,7 @@ def main():
     
     print("####EXAMPLE 5b#####")
     #This is like example 4, only now we are going to use the applyPieceWiseconcentrationDependence feature, which requires us to turn on ceO2_input_simulation_settings.piecewise_coverage_dependence
+    #As of May 2022, this feature adds the E modifiers to Ea, and multiplies the pre-exponentials by 10**modifier.
     model_name = "ceO2"
     import ceO2_input_simulation_settings #The user may change settings in the python file with the same name.
     reactions_parameters_array = np.genfromtxt(model_name + "_input_reactions_parameters.csv", delimiter=",", dtype="str", skip_header=1)
@@ -134,13 +135,13 @@ def main():
         
     ceO2_input_simulation_settings.piecewise_coverage_dependence = True
     ceO2_input_simulation_settings.original_reactions_parameters_array = reactions_parameters_array
-    piecewise_coverage_intervals = np.array([0,0.1,0.2,0.3,0.4,0.5,1.0])
+    piecewise_coverage_intervals = np.array([0,0.1,0.2,0.3,0.4,0.5,1.0]) #these are the coverage intervals.
     species_name = "Acetaldehyde1-Ce(S)" #In this example we make the parameters depend only on the coverage of species Acetaldehyde1-Ce(S).
     kineticParameterName = "A"
-    modifiers_A = ( [0,0,0,0,0,0,0], [-1,-1,-1,-1,-1,-1,0], [0,0,0,0,0,0,0], [0,0,0,0,0,0,0])
+    modifiers_A = ( [0,0,0,0,0,0,0], [-1,-1,-1,-1,-1,-1,0], [0,0,0,0,0,0,0], [0,0,0,0,0,0,0]) #the 4 arrays here are for the four reactions, and each sub-element is for one coverage. 10^modifier will be multiplied onto the pre-exponential.
     canteraKineticsParametersParser.populatePiecewiseCoverageDependence(ceO2_input_simulation_settings, reactions_parameters_array, species_name, kineticParameterName, piecewise_coverage_intervals, modifiers_A )
     kineticParameterName = "E" #This is the activation energy.
-    modifiers_E = ( [60000,50000,40000,30000,20000,10000,0], [60000,50000,40000,30000,20000,10000,0], [0,0,0,0,0,0,0], [60000,50000,40000,30000,20000,10000,0])
+    modifiers_E = ( [60000,50000,40000,30000,20000,10000,0], [60000,50000,40000,30000,20000,10000,0], [0,0,0,0,0,0,0], [60000,50000,40000,30000,20000,10000,0]) #the 4 arrays here are for the four reactions, and each sub-element is for one coverage.#The modifier will be added to the activation energy as a function of coverage. For coverages inbetween the specified coverages and values, interpolation will be used. This means that a 'linear" coverage dependence is already easy to do. This also means that if one reaction has more coverage dependencies than another, that is fine, since the modifiers for the other reaction can be made accordingly.  
     
     #Now we call a helper function to make sure the activation energy is decreasing with coverage. It returns true if the final activation energy will decrease with coverage.
     checkResult = canteraKineticsParametersParser.descendingLinearEWithPiecewiseOffsetCheckOneReactionAllReactions(reactions_parameters_array=reactions_parameters_array, piecewise_coverage_intervals_all_reactions=piecewise_coverage_intervals, E_offsets_array_all_reactions=modifiers_E, verbose = False)
