@@ -159,7 +159,7 @@ def getReactionParametersFromCanteraReactionObjectsList(reactionObjectList):
     is_sticking_coefficientList = is_sticking_coefficientList
     return reactionIDsList, reactionTypesList, reactionEquationsList, ArrheniusParametersArray, concentrationDependencesArray, concentrationDependencesSpeciesList, is_sticking_coefficientList
 
-def make_reaction_yaml_string(individualreactions_parameters_array, for_full_yaml = False):
+def make_reaction_yaml_string(individualreactions_parameters_array, for_full_yaml = False, input_Ea_units="J/kmol"):
     #first input should be a an array of strings: 
     #reactionID	canteraReactionType	reactionEquation	A	b	E	a	m	e	concentrationDependenceSpecies	 is_sticking_coefficient
     # 1	20	H2 + 2 PT(S) => 2 H(S)	0.046	0	0	0	-1	0	PT(S)	TRUE
@@ -191,7 +191,9 @@ def make_reaction_yaml_string(individualreactions_parameters_array, for_full_yam
     reaction_yaml_string = None #This is to help diagnose errors.
     reactionID = str(int(individualreactions_parameters_array[0])-1) #we need to subtract one for how cantera expects the reaction IDs when modifying.
     individualReactionTypeReceived = str(individualreactions_parameters_array[1])
-    reactionEquation = str(individualreactions_parameters_array[2])
+    reactionEquation = str(individualreactions_parameters_array[2])    
+    if input_Ea_units.lower() == 'j/mol': #convert j/mol to j/kmol.
+        individualreactions_parameters_array[5] = float(individualreactions_parameters_array[5])*1000.0 #This is the position of Ea in the array.
     A = str(individualreactions_parameters_array[3])
     b = str(individualreactions_parameters_array[4])
     E = str(individualreactions_parameters_array[5]) #Note: this is now "Ea" in cantera 2.6
@@ -720,7 +722,7 @@ def modifyReactionsInOnePhase(canteraPhaseObject, reactions_parameters_array, Ar
             if ArrheniusOnly == False: #As of cantera 2.6, the This is the normal case. In this case, we modify the full reaction object                                                                                         
                 #When we are not constrained to Arrhenius only, will make a new reaction object for each reaction using a yaml_string.
                 #When we make the yaml_string for the reaction, we set "for_full_yaml" as false because we are modyfing an individual reaction.
-                yaml_string = make_reaction_yaml_string(individualreactions_parameters_array, for_full_yaml = False)
+                yaml_string = make_reaction_yaml_string(individualreactions_parameters_array, for_full_yaml = False, input_Ea_units="J/kmol") #put J/kmol because any conversion will have happened before now.
                 from distutils.version import LooseVersion, StrictVersion
                 if LooseVersion(ct.__version__) < LooseVersion('2.6'):
                     modifiedReactionObject = ct.Reaction.fromYaml(yaml_string , kinetics=canteraPhaseObject) #This is the correct way for cantera version 2.5        
