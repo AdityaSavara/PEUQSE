@@ -4,6 +4,7 @@ minute = 60.0 #This will convert things to seconds, as required by cantera.
 atm = 101325.0 #This will convert atm to Pascal, as requred by cantera
 
 '''START OF settings that users should change.'''
+input_Ea_units = 'J/kmol' #currently, the supported options are 'J/kmol' (cantera default) or 'J/mol'
 flow_type = "Static" #can be "PFR" or "Static". It does not only affect the next line, it affects the simulation.
 T_gas_feed = 300 
 T_surf = 100 #Initial temperature in K.
