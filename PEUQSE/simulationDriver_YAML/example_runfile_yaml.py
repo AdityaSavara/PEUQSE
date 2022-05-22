@@ -147,9 +147,9 @@ def main():
         #need to populate the piecewise parameters into the simulation_settings.
         canteraKineticsParametersParser.populatePiecewiseCoverageDependence(simulation_settings_module=ceO2_input_simulation_settings, original_reactions_parameters_array=reactions_parameters_array, species_name=species_name, kineticParameterName="A", piecewise_coverage_intervals=piecewise_coverage_intervals, modifiers_array=modifiers_A )
         canteraKineticsParametersParser.populatePiecewiseCoverageDependence(simulation_settings_module=ceO2_input_simulation_settings, original_reactions_parameters_array=reactions_parameters_array, species_name=species_name, kineticParameterName="E", piecewise_coverage_intervals=piecewise_coverage_intervals, modifiers_array=modifiers_E)
-        #Now simulate!
+        #Now simulate! #The reactions_parameters_array below is ignored because piecewise_coverage_dependence = True causes 'on-the-fly' population based on the original_reactions_parameters_array
         concentrationsArray, concentrationsArrayHeader, rates_all_array, rates_all_array_header, cantera_phase_rates, canteraPhases, cantera_phase_rates_headers, canteraSimulationsObject = \
-        canteraSimulate.modify_reactions_and_SimulatePFRorTPRwithCantera(model_name, adjustedModifiableParametersCase, ceO2_input_simulation_settings, canteraPhases=canteraPhases)
+        canteraSimulate.modify_reactions_and_SimulatePFRorTPRwithCantera(model_name, reactions_parameters_array, ceO2_input_simulation_settings, canteraPhases=canteraPhases)
         np.savetxt("ceO2_output_rates_all_"+"Piecewise_coverage_Dependence"+".csv", rates_all_array, delimiter=",", comments='', header=rates_all_array_header)
         print("Piecewise_coverage_Dependence", "Simulation Finished")
     ceO2_input_simulation_settings.piecewise_coverage_dependence = False
