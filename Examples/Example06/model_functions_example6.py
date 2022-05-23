@@ -1,5 +1,3 @@
-import cantera as ct
-import cantera.ck2cti as ck2cti
 import numpy as np
 from PEUQSE.simulationDriver import canteraSimulate
 from PEUQSE.simulationDriver import canteraKineticsParametersParser
@@ -8,7 +6,7 @@ import copy
 #First made a 'test' in main, then made a simulation wrapper to do the same thing.
 
 #We will define some things *outside* of the function to load the model.
-model_location = "..\\..\\PEUQSE\\simulationDriver_CTI\\"
+model_location = "..\\..\\PEUQSE\\simulationDriver\\"
 model_name = "ceO2"
 import ceO2_input_simulation_settings #The user may change settings in the python file with the same name.
 ceO2_input_simulation_settings.print_frequency = None #This makes the simulation not print things out during checkpoints.
@@ -37,9 +35,9 @@ checkResult = canteraKineticsParametersParser.descendingLinearEWithPiecewiseOffs
 if checkResult == True: #In this example, we are only proceeding if the coverage dependance is always decreasing with coverage.
     pass #For now we will let all cases through.
     
-cti_top_info_filename =model_location+ model_name + "_cti_top_info.cti"
-with open(cti_top_info_filename, "r") as cti_top_info_file:
-    cti_top_info_string = cti_top_info_file.read()     
+yaml_top_info_filename =model_location+ model_name + "_yaml_top_info.yaml"
+with open(yaml_top_info_filename, "r") as yaml_top_info_file:
+    yaml_top_info_string = yaml_top_info_file.read()     
 
 
 global observed_x_values #This can be set initially, then changed later if desired.
@@ -114,7 +112,7 @@ def cantera_simulation_wrapper_example6(parametersArray): #This takes in *only* 
     global canteraPhases #need to make it global so the object sticks around for next function call.
     if firstSimulation == True:
         concentrationsArray, concentrationsArrayHeader, rates_all_array, rates_all_array_header, cantera_phase_rates, canteraPhases, cantera_phase_rates_headers, canteraSimulationsObject = \
-        canteraSimulate.create_cti_and_SimulatePFRorTPRwithCantera(model_name, modified_reactions_parameters_array, ceO2_input_simulation_settings, cti_top_info_string = cti_top_info_string)
+        canteraSimulate.create_yaml_and_SimulatePFRorTPRwithCantera(model_name, modified_reactions_parameters_array, ceO2_input_simulation_settings, yaml_top_info_string = yaml_top_info_string)
         firstSimulation = False
     elif firstSimulation == False: #This must be an elif, otherwise it will always be executed. In this function, the cantera phases object will be created the first time the function is called. Then will exist for later.
         try:
@@ -199,13 +197,13 @@ if __name__ == "__main__":
     if checkResult == True: #In this example, we are only proceeding if the coverage dependance is always decreasing with coverage.
         canteraKineticsParametersParser.populatePiecewiseCoverageDependence(ceO2_input_simulation_settings, reactions_parameters_array, species_name, kineticParameterName, piecewise_coverage_intervals, modifiers_E)
         
-        cti_top_info_filename =model_location+ model_name + "_cti_top_info.cti"
-        with open(cti_top_info_filename, "r") as cti_top_info_file:
-            cti_top_info_string = cti_top_info_file.read()     
+        yaml_top_info_filename =model_location+ model_name + "_yaml_top_info.yaml"
+        with open(yaml_top_info_filename, "r") as yaml_top_info_file:
+            yaml_top_info_string = yaml_top_info_file.read()     
         
         modified_reactions_parameters_array = reactions_parameters_array
         concentrationsArray, concentrationsArrayHeader, rates_all_array, rates_all_array_header, cantera_phase_rates, canteraPhases, cantera_phase_rates_headers, canteraSimulationsObject = \
-        canteraSimulate.create_cti_and_SimulatePFRorTPRwithCantera("ceO2", modified_reactions_parameters_array, ceO2_input_simulation_settings, cti_top_info_string = cti_top_info_string)
+        canteraSimulate.create_yaml_and_SimulatePFRorTPRwithCantera("ceO2", modified_reactions_parameters_array, ceO2_input_simulation_settings, yaml_top_info_string = yaml_top_info_string)
         
         #Playing with the variables we see we can get what we want from:
     #    print(cantera_phase_rates['surf'])
@@ -237,5 +235,5 @@ if __name__ == "__main__":
             
             
             
-        #np.savetxt("ceO2_output_rates_all_"+"FullCTIsamplingCase.csv", rates_all_array, delimiter=",", comments='', header=rates_all_array_header)              
+        #np.savetxt("ceO2_output_rates_all_"+"FullYAMLsamplingCase.csv", rates_all_array, delimiter=",", comments='', header=rates_all_array_header)              
         
