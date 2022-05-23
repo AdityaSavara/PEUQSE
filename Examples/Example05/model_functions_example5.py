@@ -195,11 +195,30 @@ if __name__ == "__main__":
         plt.title('wrapperOutput1')
         plt.show()   
     #The second test case will be saved as wrapperOutput2...
-    wrapperOutput2 = cantera_simulation_wrapper_example5([0,0,0,0,10000,10000, 10000])
+    wrapperOutput2 = cantera_simulation_wrapper_example5([0,0,500,5000,10000,15000, 0])
     if type(wrapperOutput2) == type(None):
         print("WrappeOutput2 failed.")
     else:
         plt.plot(wrapperOutput2)
         plt.title('wrapperOutput2')
+        plt.show()   
+            
+            
+    #Now look at the cases with the integrals.
+    wrapperOutput1Integral = integrated_cantera_simulation_wrapper_example5([0,0,0,0,0,0,0])
+    from matplotlib import pyplot as plt
+    if type(wrapperOutput1Integral) == type(None):
+        print("WrappeOutput1 failed.")
+    else:
+        plt.plot(wrapperOutput1Integral)
+        plt.title('wrapperOutput1Integral')
+        plt.show()   
+    #The second test case will be saved as wrapperOutput2...
+    wrapperOutput2Integral = integrated_cantera_simulation_wrapper_example5([0,0,0,0,10000,10000, 10000])
+    if type(wrapperOutput2Integral) == type(None):
+        print("WrappeOutput2 failed.")
+    else:
+        plt.plot(wrapperOutput2Integral)
+        plt.title('wrapperOutput2Integral')
         plt.show()   
             

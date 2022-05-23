@@ -9,7 +9,11 @@ if __name__ == "__main__":
     UserInput.responses['responses_abscissa'] = observed_x_values
     UserInput.responses['responses_observed'] = responses_observed
     UserInput.responses['responses_observed_uncertainties'] = observedResponses_uncertainties
-
+    
+    #The below 3 lines are optional, they classify this data as transient data product concentrations and will result in an integral being used for the parameter estimation for a more well behaved response objective function.
+    UserInput.responses['data_overcategory']  = 'transient_kinetics' 
+    UserInput.responses['response_types'] = 'P'
+    UserInput.responses['response_data_types'] = 'c'
 
     #UserInput.model['parameterNamesAndMathTypeExpressionsDict'] #We will just take the default names for the parameters.
     UserInput.model['InputParameterPriorValues'] = [0,0,0,0,0,0,0] #E modifiers will start at 0.
@@ -19,6 +23,7 @@ if __name__ == "__main__":
     UserInput.model['InputParameterPriorValues_lowerBounds'] = [0,0,0,0,0,0,0]
     
     UserInput.model['simulateByInputParametersOnlyFunction'] = model_functions_example5.cantera_simulation_wrapper_example5 #This must simulate with *only* the parameters listed above, and no other arguments.
+    
 
     UserInput.simulated_response_plot_settings['x_label']= 'time (s)'
     UserInput.simulated_response_plot_settings['y_label'] = 'Integral'
