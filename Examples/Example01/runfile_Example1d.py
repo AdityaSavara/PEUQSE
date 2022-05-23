@@ -20,7 +20,7 @@ if __name__ == "__main__":
 
     UserInput.responses['data_overcategory'] = 'transient_kinetics'
     UserInput.responses['response_types']=['P'] 
-    UserInput.responses['response_data_type']=['r']
+    UserInput.responses['response_data_types']=['r']
 
     
     UserInput.simulated_response_plot_settings['x_label'] = 'time (s)'

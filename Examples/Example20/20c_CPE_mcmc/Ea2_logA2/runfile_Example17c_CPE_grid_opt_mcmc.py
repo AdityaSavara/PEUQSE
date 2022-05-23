@@ -18,7 +18,7 @@ if __name__ == "__main__":
     #We are going to use the built in transform to improve the optimization.
     UserInput.responses['data_overcategory'] = 'transient_kinetics'
     UserInput.responses['response_types']=['P'] #need a categorization for each response dimension.
-    UserInput.responses['response_data_type']=['r'] #need a categorization for each response dimension.
+    UserInput.responses['response_data_types']=['r'] #need a categorization for each response dimension.
     
     
     UserInput.simulated_response_plot_settings['x_label'] = 'time (s)'
