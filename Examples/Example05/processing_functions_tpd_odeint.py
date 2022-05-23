@@ -3,7 +3,7 @@ import numpy as np
 import scipy
 from scipy.integrate import odeint
 import pandas as pd
-from tprmodel import tprequation, tprequationPiecewise
+#from tprmodel import tprequation, tprequationPiecewise #commented out because not needed for Example 5.
 
 #Need to define beta directly, or define dt and dT.
 dT = 0.77 #Set this to 0 for an isothermal experiment.
