@@ -8,7 +8,7 @@ import copy
 #First made a 'test' in main, then made a simulation wrapper to do the same thing.
 
 #We will define some things *outside* of the function to load the model.
-model_location = "..\\..\\PEUQSE\\simulationDriver\\"
+model_location = "..\\..\\PEUQSE\\simulationDriver_CTI\\"
 model_name = "ceO2"
 import ceO2_input_simulation_settings #The user may change settings in the python file with the same name.
 ceO2_input_simulation_settings.print_frequency = None #This makes the simulation not print things out during checkpoints.
@@ -117,8 +117,11 @@ def cantera_simulation_wrapper_example6(parametersArray): #This takes in *only* 
         canteraSimulate.create_cti_and_SimulatePFRorTPRwithCantera(model_name, modified_reactions_parameters_array, ceO2_input_simulation_settings, cti_top_info_string = cti_top_info_string)
         firstSimulation = False
     elif firstSimulation == False: #This must be an elif, otherwise it will always be executed. In this function, the cantera phases object will be created the first time the function is called. Then will exist for later.
-        concentrationsArray, concentrationsArrayHeader, rates_all_array, rates_all_array_header, cantera_phase_rates, canteraPhases, cantera_phase_rates_headers, canteraSimulationsObject = \
-        canteraSimulate.modify_reactions_and_SimulatePFRorTPRwithCantera(model_name, modified_reactions_parameters_array, ceO2_input_simulation_settings, canteraPhases=canteraPhases)        
+        try:
+            concentrationsArray, concentrationsArrayHeader, rates_all_array, rates_all_array_header, cantera_phase_rates, canteraPhases, cantera_phase_rates_headers, canteraSimulationsObject = \
+            canteraSimulate.modify_reactions_and_SimulatePFRorTPRwithCantera(model_name, modified_reactions_parameters_array, ceO2_input_simulation_settings, canteraPhases=canteraPhases)        
+        except: #if a simulation fails we return a None type object.
+            return None
     
     #Now we parse the output.
     global times
@@ -140,7 +143,12 @@ def cantera_simulation_wrapper_example6(parametersArray): #This takes in *only* 
 
 def integrated_cantera_simulation_wrapper_example6(discreteParameterVector): 
     simulationOutput = cantera_simulation_wrapper_example6(discreteParameterVector)
+    if type(simulationOutput) == type(None): #return a None type object if that's what has been received.
+        print("A cantera simulation has failed. If this happens for a large percentage of the samplings, the posterior will not be sufficiently sampled.")
+        return None
+    #Else is the normal case:
     rate = simulationOutput #This has already been interpolated to observed x values.
+
     global times
     global observed_x_values
     from PEUQSE import littleEulerGivenArray
