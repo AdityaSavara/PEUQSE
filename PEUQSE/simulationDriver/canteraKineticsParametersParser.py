@@ -39,7 +39,6 @@ def descendingLinearEWithPiecewiseOffsetCheckOneReactionAllReactions(reactions_p
         else: #The else means different intervals for each reaction.
             piecewise_coverage_intervals = piecewise_coverage_intervals_all_reactions[reactionIndex]
         E_offsets_array = E_offsets_array_all_reactions[reactionIndex]
-        
         #Populate the Arrhenius type parameters related to E and its slope...
         reactionID = str(int(individualreactions_parameters_array[0])-1) #we need to subtract one for how cantera expects the reaction IDs when modifying.
         individualReactionTypeReceived = str(individualreactions_parameters_array[1])
@@ -54,14 +53,11 @@ def descendingLinearEWithPiecewiseOffsetCheckOneReactionAllReactions(reactions_p
 
         #Get the numbers that we need out.
         E_0 = float(E)
-        
         if np.isnan(float(e)): #Need to make e into 0.0 if it's an nan. Otherwise the descending check will fail.
             e = 0.0
         g_slope = -1.0*float(e) #Note that in 2022 in cantera "E" (formerly "e") is the negative of g_slope! https://cantera.org/science/kinetics.html  https://cantera.org/science/kinetics.html#sec-surface
         #print(reactionID, reactionEquation, e, g_slope)
-        if individualReactionTypeReceived != "surface_reaction":
-            passedArray[reactionIndex] = True  #if it's not a surface reaction, we are not supposed to check it.
-        if individualReactionTypeReceived == "surface_reaction":
+        if '(S)' in reactionEquation: #This means the reaction is a surface reaction  and we will check it. Otherwise, we will not.
             passedArray[reactionIndex] = descendingLinearEWithPiecewiseOffsetCheckOneReaction(E_0, g_slope,piecewise_coverage_intervals, E_offsets_array)
             if verbose == True:
                 if passedArray[reactionIndex] == False:
