@@ -567,11 +567,11 @@ class parameter_estimation:
                     abscissaIndex = responseIndex
                 #Now to do the transforms.
                 if UserInput.responses['response_types'][responseIndex] == 'I':	 #For intermediate
-                    if UserInput.responses['response_data_type'][responseIndex] == 'c':
+                    if UserInput.responses['response_data_types'][responseIndex] == 'c':
                         t_values, nestedAllResponsesArray_transformed[responseIndex], dydt_values = littleEulerGivenArray(0, UserInput.responses_abscissa[abscissaIndex], nestedAllResponsesArray[responseIndex])
                         if len(nestedAllResponsesUncertainties) > 0:
                             nestedAllResponsesUncertainties_transformed[responseIndex] = littleEulerUncertaintyPropagation(nestedAllResponsesUncertainties[responseIndex], UserInput.responses_abscissa[abscissaIndex], np.mean(nestedAllResponsesUncertainties[responseIndex])/10) 
-                    if UserInput.responses['response_data_type'][responseIndex] == 'r':
+                    if UserInput.responses['response_data_types'][responseIndex] == 'r':
                         #Perform the littleEuler twice.
                         t_values, nestedAllResponsesArray_transformed[responseIndex], dydt_values = littleEulerGivenArray(0, UserInput.responses_abscissa[abscissaIndex], nestedAllResponsesArray[responseIndex])
                         if len(nestedAllResponsesUncertainties) > 0:
@@ -580,40 +580,40 @@ class parameter_estimation:
                         if len(nestedAllResponsesUncertainties) > 0:
                             nestedAllResponsesUncertainties_transformed[responseIndex] = littleEulerUncertaintyPropagation(nestedAllResponsesUncertainties_transformed[responseIndex], UserInput.responses_abscissa[abscissaIndex], np.mean(nestedAllResponsesUncertainties[responseIndex])/10) 
                 if UserInput.responses['response_types'][responseIndex] == 'R':	#For reactant
-                    if UserInput.responses['response_data_type'][responseIndex] == 'c':
+                    if UserInput.responses['response_data_types'][responseIndex] == 'c':
                         pass
-                    if UserInput.responses['response_data_type'][responseIndex] == 'r':
+                    if UserInput.responses['response_data_types'][responseIndex] == 'r':
                         #TODO: use responses['points_if_transformed'] variable to interpolate the right number of points. This is for data that's not already evenly spaced.
                         t_values, nestedAllResponsesArray_transformed[responseIndex], dydt_values = littleEulerGivenArray(0, UserInput.responses_abscissa[abscissaIndex], nestedAllResponsesArray[responseIndex])
                         if len(nestedAllResponsesUncertainties) > 0:
                             nestedAllResponsesUncertainties_transformed[responseIndex] = littleEulerUncertaintyPropagation(nestedAllResponsesUncertainties[responseIndex], UserInput.responses_abscissa[abscissaIndex], np.mean(nestedAllResponsesUncertainties[responseIndex])/10) 
                 if UserInput.responses['response_types'][responseIndex] == 'P':	 #For product
                     
-                    if UserInput.responses['response_data_type'][responseIndex] == 'c':
+                    if UserInput.responses['response_data_types'][responseIndex] == 'c':
                         pass
-                    if UserInput.responses['response_data_type'][responseIndex] == 'r':
+                    if UserInput.responses['response_data_types'][responseIndex] == 'r':
                         #TODO: use responses['points_if_transformed'] variable to interpolate the right number of points. This is for data that's not already evenly spaced.
                         t_values, nestedAllResponsesArray_transformed[responseIndex], dydt_values = littleEulerGivenArray(0, UserInput.responses_abscissa[abscissaIndex], nestedAllResponsesArray[responseIndex])
                         if len(nestedAllResponsesUncertainties) > 0:
                             nestedAllResponsesUncertainties_transformed[responseIndex] = littleEulerUncertaintyPropagation(nestedAllResponsesUncertainties[responseIndex], UserInput.responses_abscissa[abscissaIndex], np.mean(nestedAllResponsesUncertainties[responseIndex])/10) 
                 if UserInput.responses['response_types'][responseIndex] == 'O': #O is for other.
-                    if UserInput.responses['response_data_type'][responseIndex] == 'o': #other
+                    if UserInput.responses['response_data_types'][responseIndex] == 'o': #other
                         pass
-                    if UserInput.responses['response_data_type'][responseIndex] == 'c': #concentration
+                    if UserInput.responses['response_data_types'][responseIndex] == 'c': #concentration
                         LittleEuler
-                    if UserInput.responses['response_data_type'][responseIndex] == 'r':
+                    if UserInput.responses['response_data_types'][responseIndex] == 'r':
                         LittleEulerTwice
         if UserInput.responses['data_overcategory'] == 'steady_state_kinetics': #TODO: so far, this does not do anything. It assumes that the abscissa is never time.
             for responseIndex, response in enumerate(UserInput.responses_observed):
                 if UserInput.responses['response_types'][responseIndex] == 'T':	 #For abscissa of temperature dependence. Will probably do a log transform.
-                    if UserInput.responses['response_data_type'][responseIndex] == 'c':
+                    if UserInput.responses['response_data_types'][responseIndex] == 'c':
                         pass
-                    if UserInput.responses['response_data_type'][responseIndex] == 'r':
+                    if UserInput.responses['response_data_types'][responseIndex] == 'r':
                         pass
                 if UserInput.responses['response_types'][responseIndex] == 'I' or UserInput.responses['response_types'][responseIndex] == 'P' or UserInput.responses['response_types'][responseIndex] == 'R': #For abscissa of concentration dependence.
-                    if UserInput.responses['response_data_type'][responseIndex] == 'c':
+                    if UserInput.responses['response_data_types'][responseIndex] == 'c':
                         pass
-                    if UserInput.responses['response_data_type'][responseIndex] == 'r':
+                    if UserInput.responses['response_data_types'][responseIndex] == 'r':
                         pass
         return nestedAllResponsesArray_transformed, nestedAllResponsesUncertainties_transformed  
 

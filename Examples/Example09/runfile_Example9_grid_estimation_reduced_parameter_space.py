@@ -41,7 +41,7 @@ if __name__ == "__main__":
 
     UserInput.model['kinetics_type'] = 'transient' #This transforms to the integral and back.
     UserInput.responses['response_types']=['P'] 
-    UserInput.responses['response_data_type']=['r']
+    UserInput.responses['response_data_types']=['r']
 
         
     UserInput.parameter_estimation_settings['verbose'] = False 
