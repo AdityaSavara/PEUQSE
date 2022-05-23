@@ -54,7 +54,7 @@ modifiers_A_original = modifiers_A
 global modifiers_E_original 
 modifiers_E_original = modifiers_E
 
-def cantera_simulation_wrapper_example6(parametersArray): #This takes in *only* the adjustable parameters. The modifiers for A and the modifiers for E are part of that.
+def cantera_simulation_wrapper_example6(parametersArray): #This takes in *only* the adjustable parameters. The modifiers for A and the modifiers for E are not part of that (other than gamma_1 and gamma_2)
     
     ceO2_input_simulation_settings.exportOutputs = False 
     #Now we modify the 'initial' parameters array accordingly.
