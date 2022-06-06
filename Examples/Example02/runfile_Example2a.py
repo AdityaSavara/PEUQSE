@@ -1,10 +1,7 @@
-import sys; sys.path.append('../../');  import CheKiPEUQ as CKPQ
-import CheKiPEUQ.UserInput as UserInput
+import sys; sys.path.append('../../');  import PEUQSE as PEUQSE
+import PEUQSE.UserInput as UserInput
 
 if __name__ == "__main__":    
-    import cantera as ct
-    import cantera.ck2cti as ck2cti
-
     import processing_functions_tpd_odeint #We just want to import the experimental data.
     observed_data_Filename = 'ExperimentalDataAcetaldehydeTPDCeO2111MullinsTruncatedConstantErrors.csv'
     times, responses_observed, observedResponses_uncertainties = processing_functions_tpd_odeint.import_experimental_settings(observed_data_Filename)
@@ -33,7 +30,7 @@ if __name__ == "__main__":
 
 
     #After making the UserInput, now we make a 'parameter_estimation' object from it.
-    PE_object = CKPQ.parameter_estimation(UserInput)
+    PE_object = PEUQSE.parameter_estimation(UserInput)
     
     #Now we do parameter estimation.
     PE_object.doMetropolisHastings()

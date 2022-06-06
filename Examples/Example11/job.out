@@ -9767,11 +9767,11 @@ averagetimePerSampling 0.0012611872146118723 seconds
 timeSinceLastCheckPoint 0.12999999999999545 seconds
 Estimated time remaining 7.945479452054796 seconds
 MCMC sample number  43900 checkpoint 439.0 out of 501.0
-averagetimePerSampling 0.0012610478359908887../../CheKiPEUQ/InverseProblem.py:577: RuntimeWarning: invalid value encountered in true_divide
+averagetimePerSampling 0.0012610478359908887../../PEUQSE/InverseProblem.py:577: RuntimeWarning: invalid value encountered in true_divide
   KL = density0[1]*np.log(density0[1]/density0[0])
-../../CheKiPEUQ/InverseProblem.py:577: RuntimeWarning: divide by zero encountered in log
+../../PEUQSE/InverseProblem.py:577: RuntimeWarning: divide by zero encountered in log
   KL = density0[1]*np.log(density0[1]/density0[0])
-../../CheKiPEUQ/InverseProblem.py:577: RuntimeWarning: invalid value encountered in multiply
+../../PEUQSE/InverseProblem.py:577: RuntimeWarning: invalid value encountered in multiply
   KL = density0[1]*np.log(density0[1]/density0[0])
  seconds
 timeSinceLastCheckPoint 0.12000000000000455 seconds

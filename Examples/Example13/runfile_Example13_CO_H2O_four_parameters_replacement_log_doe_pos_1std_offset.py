@@ -5,8 +5,8 @@ import numpy as np
 import scipy
 from scipy.integrate import odeint
 #import dill
-import sys; sys.path.append('../../');  import CheKiPEUQ as CKPQ
-import CheKiPEUQ.UserInput as UserInput
+import sys; sys.path.append('../../');  import PEUQSE as PEUQSE
+import PEUQSE.UserInput as UserInput
 
 if __name__ == "__main__":
     
@@ -56,7 +56,7 @@ if __name__ == "__main__":
     #After making the UserInput, now we make a 'parameter_estimation' object from it.
     
     #It's good to run a test before doing a design of experiments.
-#    PE_object = CKPQ.parameter_estimation(UserInput)
+#    PE_object = PEUQSE.parameter_estimation(UserInput)
 #    PE_object.doMetropolisHastings()
     #PE_object.createAllPlots()
     
@@ -114,7 +114,7 @@ if __name__ == "__main__":
                 print('line 101', theta_A_obs_synth)
                 UserInput.responses['responses_observed'] = theta_A_obs_synth
                 #UserInput.responses['responses_observed_uncertainties'] = [0.05, 0.05, 0.05]
-                PE_object_list.append(CKPQ.parameter_estimation(UserInput))
+                PE_object_list.append(PEUQSE.parameter_estimation(UserInput))
                 [map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, logP] = PE_object_list[counter].doMetropolisHastings()
                 info_gains.append(info_gain)
                 

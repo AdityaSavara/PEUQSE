@@ -1,9 +1,9 @@
-import sys; sys.path.append('../../');  import CheKiPEUQ as CKPQ
+import sys; sys.path.append('../../');  import PEUQSE as PEUQSE
 import processing_functions_tpd_odeint
 import pandas as pd
 
 if __name__ == "__main__":
-    import CheKiPEUQ.UserInput as UserInput
+    import PEUQSE.UserInput as UserInput
     observed_data_Filename = 'ExperimentalDataAcetaldehydeTPDCeO2111MullinsTruncatedConstantErrors.csv'
     times, responses_observed, observedResponses_uncertainties = processing_functions_tpd_odeint.import_experimental_settings_single(observed_data_Filename)
     #experiments_datarame = pd.read_csv(observed_data_Filename)    
@@ -41,7 +41,7 @@ if __name__ == "__main__":
 
     UserInput.model['kinetics_type'] = 'transient' #This transforms to the integral and back.
     UserInput.responses['response_types']=['P'] 
-    UserInput.responses['response_data_type']=['r']
+    UserInput.responses['response_data_types']=['r']
 
         
     UserInput.parameter_estimation_settings['verbose'] = False 
@@ -57,7 +57,7 @@ if __name__ == "__main__":
     UserInput.contour_plot_settings['contours_normalized'] = True
 
     #After making the UserInput, now we make a 'parameter_estimation' object from it.
-    PE_object = CKPQ.parameter_estimation(UserInput)
+    PE_object = PEUQSE.parameter_estimation(UserInput)
     
 #    #Now we do parameter estimation.
     #PE_object.doMetropolisHastings()

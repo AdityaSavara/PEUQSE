@@ -1,14 +1,13 @@
-import cantera as ct
-import cantera.ck2cti as ck2cti
+import sys; sys.path.append('../../');  import PEUQSE as PEUQSE
 import numpy as np
-from CheKiPEUQ.simulationDriver import canteraSimulate
-from CheKiPEUQ.simulationDriver import canteraKineticsParametersParser
+from PEUQSE.simulationDriver_CTI import canteraSimulate
+from PEUQSE.simulationDriver_CTI import canteraKineticsParametersParser
 import copy
 
 #First made a 'test' in main, then made a simulation wrapper to do the same thing.
 
 #We will define some things *outside* of the function to load the model.
-model_location = ".\\CheKiPEUQ\\simulationDriver\\"
+model_location = "..\..\PEUQSE\simulationDriver_CTI\\"
 model_name = "ceO2"
 import ceO2_input_simulation_settings #The user may change settings in the python file with the same name.
 ceO2_input_simulation_settings.print_frequency = None #This makes the simulation not print things out during checkpoints.
@@ -20,20 +19,23 @@ print(reactions_parameters_array)
 
 #This is before any offset modification:
 ceO2_input_simulation_settings.original_reactions_parameters_array = reactions_parameters_array
+
+#Below are the parameters that will be used for offset modifications.
 piecewise_coverage_intervals = np.array([0,0.1,0.2,0.3,0.4,0.5,1.0])
 species_name = "Acetaldehyde1-Ce(S)" #In this example we make the parameters depend only on the coverage of species Acetaldehyde1-Ce(S).
 kineticParameterName = "A"
-modifiers_A = ([0,0,0,0,0,0,0], [-1,1,-1,-1,-1,-1,0], [0,0,0,0,0,0,0], [0,0,0,0,0,0,0])
+modifiers_A = ([0,0,0,0,0,0,0], [-1,1,-1,-1,-1,-1,0], [0,0,0,0,0,0,0], [0,0,0,0,0,0,0])  #These will be used as A_orginal*(10^modifier)
 canteraKineticsParametersParser.populatePiecewiseCoverageDependence(ceO2_input_simulation_settings, reactions_parameters_array, species_name, kineticParameterName, piecewise_coverage_intervals, modifiers_A )
 kineticParameterName = "E" 
-modifiers_E = ( [60000,50000,40000,30000,20000,10000,0], [60000,50000,40000,30000,20000,10000,0], [0,0,0,0,0,0,0], [60000,50000,40000,30000,20000,10000,0])
-
-#Now we call a helper function to make sure the activation energy is decreasing with coverage. It returns true if the final activation energy will decrease with coverage.
+modifiers_E = ( [60000,50000,40000,30000,20000,10000,0], [60000,50000,40000,30000,20000,10000,0], [0,0,0,0,0,0,0], [60000,50000,40000,30000,20000,10000,0]) #These will be used as Ea_original + modifier
+#Now we call a helper function to make sure the activation energy is solely decreasing with coverage. It returns true if the final activation energy will decrease with coverage.
 checkResult = canteraKineticsParametersParser.descendingLinearEWithPiecewiseOffsetCheckOneReactionAllReactions(reactions_parameters_array=reactions_parameters_array, piecewise_coverage_intervals_all_reactions=piecewise_coverage_intervals, E_offsets_array_all_reactions=modifiers_E, verbose = False)    
 
-if checkResult == True: #In this example, we are only proceeding if the coverage dependance is always decreasing with coverage.
+if checkResult == True: #Normally, we would only proceed if the coverage dependance is always decreasing with coverage.
     pass #For now we will let all cases through.
-    
+#Now we populatePiecewiseCoverrageDependence again, this time for the Ea modifiers.
+canteraKineticsParametersParser.populatePiecewiseCoverageDependence(ceO2_input_simulation_settings, reactions_parameters_array, species_name, kineticParameterName, piecewise_coverage_intervals, modifiers_E )    
+
 cti_top_info_filename =model_location+ model_name + "_cti_top_info.cti"
 with open(cti_top_info_filename, "r") as cti_top_info_file:
     cti_top_info_string = cti_top_info_file.read()     
@@ -47,6 +49,7 @@ observed_x_values, responses_observed, observedResponses_uncertainties = process
 global firstSimulation
 firstSimulation = True
 
+print("line 47 model functions", ceO2_input_simulation_settings.piecewise_coverage_dependences)
 
 def cantera_simulation_wrapper_example4(parametersArray): #This takes in *only* the adjustable parameters. The modifiers for A and the modifiers for E are part of that.
     #Now we modify the 'initial' parameters array accordingly.
@@ -74,22 +77,27 @@ def cantera_simulation_wrapper_example4(parametersArray): #This takes in *only* 
     modifiers_A_starting_index = 6
     modifiers_A_ending_index = modifiers_A_starting_index+num_modifiers_A
     
-    print("line 74", parametersArray)
-    print("line 74", parametersArray[modifiers_A_starting_index:modifiers_A_ending_index])
-    
-    
+    # print("line 74 model functions", parametersArray)
+    # print("line 74 model functions", parametersArray[modifiers_A_starting_index:modifiers_A_ending_index])
+    # print("line 74 model functions", num_modifiers_A, num_modifiers_E)
+
+    #The below coverage dependence makes this model strange, but shows how the xyntax is for feeding in the modifiers of A and of E. In practice, it's normally not a good idea to use both gamma and modifiers of E.
     species_name = "Acetaldehyde1-Ce(S)" #In this example we make the parameters depend only on the coverage of species Acetaldehyde1-Ce(S).
     kineticParameterName = "A"
-    modifiers_A = tuple(parametersArray[6:6+num_modifiers_A]) #The first 5 parameters are the original kinetic parameters.
+    global modifiers_A  #For this example, we take the modifiers for A that were defined outside of the function.
+    #print("line 82", modifiers_A)
     canteraKineticsParametersParser.populatePiecewiseCoverageDependence(ceO2_input_simulation_settings, reactions_parameters_array, species_name, kineticParameterName, piecewise_coverage_intervals, modifiers_A )
     species_name = "Acetaldehyde1-Ce(S)" #In this example we make the parameters depend only on the coverage of species Acetaldehyde1-Ce(S).
-    kineticParameterName = "E"    
-    modifiers_E = tuple(parametersArray[6+num_modifiers_A:6+num_modifiers_A+num_modifiers_E])
+    kineticParameterName = "E" #For this example, we start with the modifiers for E that were defined outside of the function. Then, for the 2nd and 4th reaction (indices 1 and 3) we change what the modifier is.
+    global modifiers_E #For this example, we take the modifiers for E that were defined outside of the function.
+    
     canteraKineticsParametersParser.populatePiecewiseCoverageDependence(ceO2_input_simulation_settings, modified_reactions_parameters_array, species_name, kineticParameterName, piecewise_coverage_intervals, modifiers_E)
     
-    print("line 83", modifiers_A)
-    print("line 84", modifiers_E)
-    
+    # print("line 83 model functions, sim wrapper", modifiers_A)
+    # print("line 84 model functions, sim wrapper", modifiers_E)
+    # print("line 93 model functions, sim wrapper", modified_reactions_parameters_array)
+    # print("line 94 model functions, sim wrapper", piecewise_coverage_intervals)
+    #import sys; sys.exit()
     
     #Now we do the simulation. The first time, we need to do a full simulation flow.  But second time and later we can just modify the cantera phases object and run again.
     global firstSimulation
@@ -99,8 +107,11 @@ def cantera_simulation_wrapper_example4(parametersArray): #This takes in *only* 
         canteraSimulate.create_cti_and_SimulatePFRorTPRwithCantera(model_name, modified_reactions_parameters_array, ceO2_input_simulation_settings, cti_top_info_string = cti_top_info_string)
         firstSimulation = False
     elif firstSimulation == False: #This must be an elif, otherwise it will always be executed. In this function, the cantera phases object will be created the first time the function is called. Then will exist for later.
-        concentrationsArray, concentrationsArrayHeader, rates_all_array, rates_all_array_header, cantera_phase_rates, canteraPhases, cantera_phase_rates_headers, canteraSimulationsObject = \
-        canteraSimulate.modify_reactions_and_SimulatePFRorTPRwithCantera(model_name, modified_reactions_parameters_array, ceO2_input_simulation_settings, canteraPhases=canteraPhases)        
+        try:
+            concentrationsArray, concentrationsArrayHeader, rates_all_array, rates_all_array_header, cantera_phase_rates, canteraPhases, cantera_phase_rates_headers, canteraSimulationsObject = \
+            canteraSimulate.modify_reactions_and_SimulatePFRorTPRwithCantera(model_name, modified_reactions_parameters_array, ceO2_input_simulation_settings, canteraPhases=canteraPhases)        
+        except:
+            return None #return a None object if the simulation fails.
     
     #Now we parse the output.
     times = cantera_phase_rates['surf'][:,1] #This is in seconds.
@@ -120,23 +131,9 @@ def cantera_simulation_wrapper_example4(parametersArray): #This takes in *only* 
     
     return interpolatedRate
 
-totalAbsoluteRate = cantera_simulation_wrapper_example4([61.5, 41.5, 13.0, 13.0, 0.1, 0.1, #Regular kinetic params
-                                                         [0,0,0,0,0,0,0], [-1,-1,-1,-1,-1,-1,0], [0,0,0,0,0,0,0], [0,0,0,0,0,0,0] , #A modifiers.
-                                                         [60000,50000,40000,30000,20000,10000,0], [60000,50000,40000,30000,20000,10000,0], [0,0,0,0,0,0,0], [60000,50000,40000,30000,20000,10000,0] ]) #E modifiers.
-
-from matplotlib import pyplot as plt
-import numpy as np
-x = observed_x_values
-y = totalAbsoluteRate
-plt.plot(x,y)
-plt.xlabel("time (s)")
-plt.ylabel("total rate")
-plt.title('Acetaldehyde Desorption Rate')
-plt.show()    
-
 
 if __name__ == "__main__":
-    model_location = ".\\simulationDriver\\"
+    model_location = "..\..\PEUQSE\simulationDriver_CTI\\"
     model_name = "ceO2"
     
     import ceO2_input_simulation_settings #The user may change settings in the python file with the same name.

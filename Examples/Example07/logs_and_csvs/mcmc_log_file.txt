@@ -5,7 +5,8 @@ self.map_index:1137
 self.mu_AP_parameter_set:[1.47684269 3.95310653]
 self.stdap_parameter_set:[0.62813694 0.63993204]
 self.info_gain:15.188082121920036
-evidence:2.1270374525937015e-05
+evidence:2.127037452593702e-05
 posterior_cov_matrix:
 [[0.39477461 0.01845112]
  [0.01845112 0.40973989]]
+Convergence Status: The difference between the MAP parameter set and mu_AP parameter set is less than 10% of the prior standard deviations for each parameter. There is no general method for knowing when the correct solution has been obtained, but this small difference is one sign of a converged solution.

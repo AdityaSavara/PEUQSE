@@ -4,8 +4,8 @@ from matplotlib.ticker import FormatStrFormatter
 import numpy as np
 import scipy
 from scipy.integrate import odeint
-import sys; sys.path.append('../../');  import CheKiPEUQ as CKPQ
-import CheKiPEUQ.UserInput as UserInput
+import sys; sys.path.append('../../');  import PEUQSE as PEUQSE
+import PEUQSE.UserInput as UserInput
 
 if __name__ == "__main__":
     
@@ -93,7 +93,7 @@ if __name__ == "__main__":
             conc_sol_last=sol[-1,0].T
             print('conc_sol_last',conc_sol_last)
             UserInput.responses['responses_observed'] = conc_sol_last
-            PE_object_list.append(CKPQ.parameter_estimation(UserInput))
+            PE_object_list.append(PEUQSE.parameter_estimation(UserInput))
             fun.T = t
             fun.volume = v
             [map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, logP] = PE_object_list[-1].doMetropolisHastings()

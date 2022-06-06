@@ -1,5 +1,5 @@
-import sys; sys.path.append('../../');  import CheKiPEUQ as CKPQ
-import CheKiPEUQ.UserInput as UserInput
+import sys; sys.path.append('../../');  import PEUQSE as PEUQSE
+import PEUQSE.UserInput as UserInput
 
 if __name__ == "__main__":
     import processing_functions_tpd_odeint #We just want to import the experimental data.
@@ -34,7 +34,7 @@ if __name__ == "__main__":
     UserInput.simulated_response_plot_settings['y_label'] = 'Integral'
     
     UserInput.parameter_estimation_settings['verbose'] = False 
-    UserInput.parameter_estimation_settings['mcmc_checkPointFrequency'] = 100
+    UserInput.parameter_estimation_settings['mcmc_checkPointFrequency'] = 10
      
     UserInput.parameter_estimation_settings['mcmc_random_seed'] = 0 #Normally set to None so that mcmc is set to be random. To get the same results repeatedly, such as for testing purposes, set the random seed to 0 or another integer for testing purposes.
     UserInput.parameter_estimation_settings['mcmc_mode'] = 'unbiased'
@@ -44,7 +44,7 @@ if __name__ == "__main__":
 
 
     #After making the UserInput, now we make a 'parameter_estimation' object from it.
-    PE_object = CKPQ.parameter_estimation(UserInput)
+    PE_object = PEUQSE.parameter_estimation(UserInput)
     
     #Now we do parameter estimation.
     PE_object.doMetropolisHastings()

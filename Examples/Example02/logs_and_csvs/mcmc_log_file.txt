@@ -1,0 +1,23 @@
+self.initial_point_parameters:[41.5 41.5 13.  13.   0.1  0.1]
+MAP_logP:[921.51469659]
+self.map_parameter_set:[ 12.22035594 -12.4603013    2.72380509  -1.09020344   0.15752656
+   0.01594665]
+self.map_index:4831
+self.mu_AP_parameter_set:[14.01081918 -9.42707457  3.26942245  5.88586524  0.16638726  0.02289212]
+self.stdap_parameter_set:[ 3.24772919 10.33250259  1.09003109  7.55607727  0.03232516  0.06285647]
+self.info_gain:481.8700488108785
+evidence:inf
+posterior_cov_matrix:
+[[ 1.05498979e+01  1.53408922e+01  3.38052049e+00  1.29769583e+01
+  -2.14358310e-02  4.03054252e-02]
+ [ 1.53408922e+01  1.06782402e+02  4.01631795e+00  6.98057344e+01
+  -2.07395889e-01  5.59311620e-01]
+ [ 3.38052049e+00  4.01631795e+00  1.18841032e+00  3.50704582e+00
+  -4.51416412e-03  7.11820159e-03]
+ [ 1.29769583e+01  6.98057344e+01  3.50704582e+00  5.71059579e+01
+  -1.60896865e-01  3.55061024e-01]
+ [-2.14358310e-02 -2.07395889e-01 -4.51416412e-03 -1.60896865e-01
+   1.04512904e-03 -1.49994654e-03]
+ [ 4.03054252e-02  5.59311620e-01  7.11820159e-03  3.55061024e-01
+  -1.49994654e-03  3.95174190e-03]]
+Convergence Status: Warning - The difference between the MAP parameter set and mu_AP parameter set is greater than 10% of the prior standard deviations in at least one parameter. This means that either your posterior distribution is asymmetric or that it is not yet converged. This may mean that you need to increase your mcmc_length, increase or decrease your mcmc_relative_step_length, or change what is used for the model response.  There is no general method for knowing the right  value for mcmc_relative_step_length since it depends on the sharpness and smoothness of the response. See for example https://www.sciencedirect.com/science/article/pii/S0039602816300632
