@@ -2412,8 +2412,8 @@ class parameter_estimation:
         if individual_plots == True: #This means we will return individual plots.
             #The below code was added by Troy Gustke and merged in to PEUQSE at end of June 2021.
             # create tuples for plotting options
-            point_plot_settings = (self.UserInput.scatter_heatmap_plots_settings['sampled_point_sizes'], self.UserInput.scatter_heatmap_plots_settings['sampled_point_transparency'])
-            cross_plot_settings = (self.UserInput.scatter_heatmap_plots_settings['cross_marker_size'], self.UserInput.scatter_matrix_plots_settings['cross_marker_transparency'])
+            point_plot_settings = (self.UserInput.scatter_matrix_plots_settings['sampled_point_sizes'], self.UserInput.scatter_matrix_plots_settings['sampled_point_transparency'])
+            cross_plot_settings = (self.UserInput.scatter_matrix_plots_settings['cross_marker_size'], self.UserInput.scatter_matrix_plots_settings['cross_marker_transparency'])
             graphs_directory = self.UserInput.directories['graphs']
             # compare each parameter without having repeats
             # Zip parameters contain parameter names, MAP, muAP, and initial value
@@ -2421,7 +2421,7 @@ class parameter_estimation:
                 for j, (b, b_name, b_MAP, b_mu_AP, b_initial) in enumerate(zip(posterior_df.columns, parameterNamesAndMathTypeExpressionsDict.keys(), parameterMAPValue, parameterMuAPValue, parameterInitialValue)):
                     if i != j:
                         plotting_functions.createScatterMatrixPlot(posterior_df[a], posterior_df[b], (a, a_name, a_MAP, a_mu_AP, a_initial),
-                                                                    (b, b_name, b_MAP, b_mu_AP, b_initial), point_plot_settings, cross_plot_settings, graphs_directory, plot_settings)
+                                            (b, b_name, b_MAP, b_mu_AP, b_initial), point_plot_settings, cross_plot_settings, graphs_directory, plot_settings)
             return 
         pd.plotting.scatter_matrix(posterior_df)
         plt.savefig(self.UserInput.directories['graphs']+plot_settings['figure_name'],dpi=plot_settings['dpi'])
@@ -2441,22 +2441,17 @@ class parameter_estimation:
         if parameterInitialValue == []: parameterInitialValue = self.UserInput.model['InputParameterPriorValues']
         # will always be seperate plots
         posterior_df = pd.DataFrame(parameterSamples,columns=[parameterNamesAndMathTypeExpressionsDict[x] for x in parameterNamesList])
+        # create tuples for plotting options
+        point_plot_settings = (self.UserInput.scatter_heatmap_plots_settings['sampled_point_sizes'], self.UserInput.scatter_heatmap_plots_settings['sampled_point_transparency'])
+        cross_plot_settings = (self.UserInput.scatter_heatmap_plots_settings['cross_marker_size'], self.UserInput.scatter_heatmap_plots_settings['cross_marker_transparency'])
+        graphs_directory = self.UserInput.directories['graphs']
+        # compare each parameter without having repeats
+        # Zip parameters contain parameter names, MAP, muAP, and initial value
         for i, (a, a_name, a_MAP, a_mu_AP, a_initial) in enumerate(zip(posterior_df.columns, parameterNamesAndMathTypeExpressionsDict.keys(), parameterMAPValue, parameterMuAPValue, parameterInitialValue)):
             for j, (b, b_name, b_MAP, b_mu_AP, b_initial) in enumerate(zip(posterior_df.columns, parameterNamesAndMathTypeExpressionsDict.keys(), parameterMAPValue, parameterMuAPValue, parameterInitialValue)):
                 if i != j:
-                    # plt.scatter(posterior_df[a], posterior_df[b], s=1, alpha=0.5)
-                    fig, ax = plotting_functions.density_scatter(posterior_df[a], posterior_df[b], s=self.UserInput.scatter_heatmap_plots_settings['sampled_point_sizes'], alpha=self.UserInput.scatter_heatmap_plots_settings['sampled_point_transparency'])
-                    if self.UserInput.scatter_heatmap_plots_settings['cross_marker_size'] != 0:
-                        cross_size = self.UserInput.scatter_heatmap_plots_settings['cross_marker_size']
-                        cross_transparency = self.UserInput.scatter_heatmap_plots_settings['cross_marker_transparency']
-                        ax.scatter(a_MAP, b_MAP, s=cross_size, alpha=cross_transparency, c='r', marker='x') 
-                        ax.scatter(a_mu_AP, b_mu_AP, s=cross_size, alpha=cross_transparency, c='k', marker='x') 
-                        ax.scatter(a_initial, b_initial, s=cross_size, alpha=cross_transparency, c='#00A5DF', marker='x')
-                    ax.set_xlabel(a)
-                    ax.set_ylabel(b)
-                    fig.savefig(self.UserInput.directories['graphs']+f'Heat_Scatter_{a_name}_{b_name}',dpi=plot_settings['dpi'])
-                    plt.close(fig)
-        return 
+                    plotting_functions.createScatterHeatMapPlot(posterior_df[a], posterior_df[b], (a, a_name, a_MAP, a_mu_AP, a_initial),
+                                        (b, b_name, b_MAP, b_mu_AP, b_initial), point_plot_settings, cross_plot_settings, graphs_directory, plot_settings) 
 
     def createSimulatedResponsesPlots(self, allResponses_x_values=[], allResponsesListsOfYArrays =[], plot_settings={},allResponsesListsOfYUncertaintiesArrays=[] ): 
         #allResponsesListsOfYArrays  is to have 3 layers of lists: Response > Responses Observed, mu_guess Simulated Responses, map_Simulated Responses, (mu_AP_simulatedResponses) > Values
@@ -2674,12 +2669,11 @@ class parameter_estimation:
         except:
             print("Unable to make histograms plots. This usually means your model is not returning simulated results for most of the sampled parameter possibilities.")
 
-        self.makeSamplingScatterMatrixPlot(plot_settings=self.UserInput.scatter_matrix_plots_settings)
 
-        # try:
-        #     self.makeSamplingScatterMatrixPlot(plot_settings=self.UserInput.scatter_matrix_plots_settings)             
-        # except:
-        #     print("Unable to make scatter matrix plot. This usually means your run is not an MCMC run, or that the sampling did not work well. If you are using Metropolis-Hastings, try EnsembleSliceSampling or try a uniform distribution multistart.")
+        try:
+            self.makeSamplingScatterMatrixPlot(plot_settings=self.UserInput.scatter_matrix_plots_settings)             
+        except:
+            print("Unable to make scatter matrix plot. This usually means your run is not an MCMC run, or that the sampling did not work well. If you are using Metropolis-Hastings, try EnsembleSliceSampling or try a uniform distribution multistart.")
 
 
         try:
