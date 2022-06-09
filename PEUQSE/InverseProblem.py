@@ -2416,6 +2416,7 @@ class parameter_estimation:
             cross_plot_settings = (self.UserInput.scatter_heatmap_plots_settings['cross_marker_size'], self.UserInput.scatter_matrix_plots_settings['cross_marker_transparency'])
             graphs_directory = self.UserInput.directories['graphs']
             # compare each parameter without having repeats
+            # Zip parameters contain parameter names, MAP, muAP, and initial value
             for i, (a, a_name, a_MAP, a_mu_AP, a_initial) in enumerate(zip(posterior_df.columns, parameterNamesAndMathTypeExpressionsDict.keys(), parameterMAPValue, parameterMuAPValue, parameterInitialValue)):
                 for j, (b, b_name, b_MAP, b_mu_AP, b_initial) in enumerate(zip(posterior_df.columns, parameterNamesAndMathTypeExpressionsDict.keys(), parameterMAPValue, parameterMuAPValue, parameterInitialValue)):
                     if i != j:
