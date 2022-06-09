@@ -339,4 +339,35 @@ def density_scatter( x , y, ax = None, sort = True, bins = 20, **kwargs )   :
     norm = Normalize(vmin = np.min(z), vmax = np.max(z))
     cbar = fig.colorbar(cm.ScalarMappable(norm = norm), ax=ax)
     cbar.ax.set_ylabel('Density')
-    return fig, ax                                                                             
+    return fig, ax                   
+
+
+def createScatterMatrixPlot(data_a, data_b, a_tuple, b_tuple, point_plot_settings, cross_plot_settings, graphs_directory, plot_settings):
+    """Generates and saves a scatter matrix plot.
+
+    :param data_a: parameter points in first for loop (:type: pd.Series)
+    :param data_b: parameter points in second for loop (:type: pd.Series)
+    :param a_tuple: set of parameter names, MAP, muAP, and initial poitns (:type: tuple)
+    :param b_tuple: set of parameter names, MAP, muAP, and initial poitns (:type: tuple)
+    :param point_plot_settings: set of plot options for general points (:type: tuple)
+    :param cross_plot_settings: set of plot options for special points (:type: tuple)
+    :param graphs_directory: path to graphs directory (:type: str)
+    :param plot_settings: plot settings from User Input (:type: dict)
+    """
+    import matplotlib.pyplot as plt
+    fig = plt.figure()
+    # create a scatter plot of the posterior data between two parameters
+    plt.scatter(data_a, data_b, s=point_plot_settings[0], alpha=point_plot_settings[1])
+    # Allows the user to have no crosses if size is set to 0
+    if cross_plot_settings[0] != 0:
+        cross_size = cross_plot_settings[0]
+        cross_transparency = cross_plot_settings[1]
+        # creates the extra points for the MAP, muAP, and initial point denoted by crosses
+        plt.scatter(a_tuple[2], b_tuple[2], s=cross_size, alpha=cross_transparency, c='r', marker='x') 
+        plt.scatter(a_tuple[3], b_tuple[3], s=cross_size, alpha=cross_transparency, c='k', marker='x') 
+        plt.scatter(a_tuple[4], b_tuple[4], s=cross_size, alpha=cross_transparency, c='#00A5DF', marker='x')
+    # create labels and save the image to the graphs directory
+    plt.xlabel(a_tuple[0])
+    plt.ylabel(b_tuple[0])
+    fig.savefig(graphs_directory+f'Scatter_{a_tuple[1]}_{b_tuple[1]}',dpi=plot_settings['dpi'])
+    plt.close(fig)
