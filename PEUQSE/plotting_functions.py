@@ -333,7 +333,7 @@ def density_scatter( x , y, ax = None, sort = True, bins = 20, **kwargs )   :
 
     ax.scatter( x, y, c=z, **kwargs )
     norm = Normalize(vmin = np.min(z), vmax = np.max(z))
-    cbar = fig.colorbar(cm.ScalarMappable(norm = norm), ax=ax, cmap='viridis')
+    cbar = fig.colorbar(cm.ScalarMappable(norm = norm), ax=ax)
     cbar.ax.set_ylabel('Density')
     return fig, ax                   
 
