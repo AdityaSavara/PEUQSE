@@ -363,8 +363,12 @@ def createScatterMatrixPlot(data_a, data_b, a_tuple, b_tuple, point_plot_setting
         plt.scatter(a_tuple[3], b_tuple[3], s=cross_size, alpha=cross_transparency, c='k', marker='x') 
         plt.scatter(a_tuple[4], b_tuple[4], s=cross_size, alpha=cross_transparency, c='#00A5DF', marker='x')
     # create labels and save the image to the graphs directory
-    plt.xlabel(a_tuple[0])
-    plt.ylabel(b_tuple[0])
+    plt.xlabel(a_tuple[0], fontsize=plot_settings['fontsize'])
+    plt.ylabel(b_tuple[0], fontsize=plot_settings['fontsize'])
+    if plot_settings['num_x_ticks'] != 'auto' and isinstance(plot_settings['num_x_ticks'], int):
+        plt.locator_params(axis='x', nbins=plot_settings['num_x_ticks'])
+    if plot_settings['num_y_ticks'] != 'auto' and isinstance(plot_settings['num_y_ticks'], int):
+        plt.locator_params(axis='y', nbins=plot_settings['num_y_ticks'])
     fig.savefig(graphs_directory+f'Scatter_{a_tuple[1]}_{b_tuple[1]}',dpi=plot_settings['dpi'])
     plt.close(fig)
 
@@ -393,7 +397,11 @@ def createScatterHeatMapPlot(data_a, data_b, a_tuple, b_tuple, point_plot_settin
         plt.scatter(a_tuple[3], b_tuple[3], s=cross_size, alpha=cross_transparency, c='k', marker='x') 
         plt.scatter(a_tuple[4], b_tuple[4], s=cross_size, alpha=cross_transparency, c='#00A5DF', marker='x')
     # create labels and save the image to the graphs directory
-    plt.xlabel(a_tuple[0])
-    plt.ylabel(b_tuple[0])
+    plt.xlabel(a_tuple[0], fontsize=plot_settings['fontsize'])
+    plt.ylabel(b_tuple[0], fontsize=plot_settings['fontsize'])
+    if plot_settings['num_x_ticks'] != 'auto' and isinstance(plot_settings['num_x_ticks'], int):
+        plt.locator_params(axis='x', nbins=plot_settings['num_x_ticks'])
+    if plot_settings['num_y_ticks'] != 'auto' and isinstance(plot_settings['num_y_ticks'], int):
+        plt.locator_params(axis='y', nbins=plot_settings['num_y_ticks'])
     fig.savefig(graphs_directory+f'Heat_Scatter_{a_tuple[1]}_{b_tuple[1]}',dpi=plot_settings['dpi'])
     plt.close(fig)
