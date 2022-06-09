@@ -143,6 +143,9 @@ scatter_matrix_plots_settings['sampled_point_sizes'] = 1
 scatter_matrix_plots_settings['cross_marker_size'] = 10
 scatter_matrix_plots_settings['sampled_point_transparency'] = 0.5
 scatter_matrix_plots_settings['cross_marker_transparency'] = 0.8
+scatter_matrix_plots_settings['num_x_ticks'] = 'auto'
+scatter_matrix_plots_settings['num_y_ticks'] = 'auto'
+scatter_matrix_plots_settings['fontsize'] = 16
 
 #Scatter Heatmap Plot Settings
 scatter_heatmap_plots_settings ={}
@@ -152,6 +155,9 @@ scatter_heatmap_plots_settings['sampled_point_sizes'] = 1
 scatter_heatmap_plots_settings['cross_marker_size'] = 10
 scatter_heatmap_plots_settings['sampled_point_transparency'] = 0.5
 scatter_heatmap_plots_settings['cross_marker_transparency'] = 0.8
+scatter_heatmap_plots_settings['num_x_ticks'] = 'auto'
+scatter_heatmap_plots_settings['num_y_ticks'] = 'auto'
+scatter_heatmap_plots_settings['fontsize'] = 16
 
 #contour plots# / #mumpce plots#
 #model_parameter_info = np.array([{'parameter_number': 0, 'parameter_name': r'$E_{a1}$'},
