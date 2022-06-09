@@ -2435,7 +2435,7 @@ class parameter_estimation:
         import matplotlib.pyplot as plt
         import PEUQSE.plotting_functions as plotting_functions
         if 'dpi' not in  plot_settings:  plot_settings['dpi'] = 220
-        if 'figure_name' not in  plot_settings:  plot_settings['figure_name'] = 'scatter_matrix_posterior'
+        if 'figure_name' not in  plot_settings:  plot_settings['figure_name'] = 'scatter_heatmap_posterior'
         if parameterSamples  ==[] : parameterSamples = self.post_burn_in_samples
         if parameterNamesAndMathTypeExpressionsDict == {}: parameterNamesAndMathTypeExpressionsDict = self.UserInput.parameterNamesAndMathTypeExpressionsDict
         if parameterNamesList == []: parameterNamesList = self.UserInput.parameterNamesList #This is created when the parameter_estimation object is initialized.        
@@ -2448,10 +2448,13 @@ class parameter_estimation:
             for j, (b, b_name, b_MAP, b_mu_AP, b_initial) in enumerate(zip(posterior_df.columns, parameterNamesAndMathTypeExpressionsDict.keys(), parameterMAPValue, parameterMuAPValue, parameterInitialValue)):
                 if i != j:
                     # plt.scatter(posterior_df[a], posterior_df[b], s=1, alpha=0.5)
-                    fig, ax = plotting_functions.density_scatter(posterior_df[a], posterior_df[b], s=1, alpha=0.5)
-                    ax.scatter(a_MAP, b_MAP, s=10, alpha=0.8, c='r', marker='x') 
-                    ax.scatter(a_mu_AP, b_mu_AP, s=10, alpha=0.8, c='k', marker='x') 
-                    ax.scatter(a_initial, b_initial, s=10, alpha=0.8, c='#00A5DF', marker='x')
+                    fig, ax = plotting_functions.density_scatter(posterior_df[a], posterior_df[b], s=self.UserInput.scatter_heatmap_plots_settings['sampled_point_sizes'], alpha=self.UserInput.scatter_heatmap_plots_settings['sampled_point_transparency'])
+                    if self.UserInput.scatter_heatmap_plots_settings['cross_marker_size'] != 0:
+                        cross_size = self.UserInput.scatter_heatmap_plots_settings['cross_marker_size']
+                        cross_transparency = self.UserInput.scatter_heatmap_plots_settings['cross_marker_transparency']
+                        ax.scatter(a_MAP, b_MAP, s=cross_size, alpha=cross_transparency, c='r', marker='x') 
+                        ax.scatter(a_mu_AP, b_mu_AP, s=cross_size, alpha=cross_transparency, c='k', marker='x') 
+                        ax.scatter(a_initial, b_initial, s=cross_size, alpha=cross_transparency, c='#00A5DF', marker='x')
                     ax.set_xlabel(a)
                     ax.set_ylabel(b)
                     fig.savefig(self.UserInput.directories['graphs']+f'Heat_Scatter_{a_name}_{b_name}',dpi=plot_settings['dpi'])
@@ -2681,7 +2684,7 @@ class parameter_estimation:
 
 
         try:
-            self.makeScatterHeatMapPlots(plot_settings=self.UserInput.scatter_matrix_plots_settings)
+            self.makeScatterHeatMapPlots(plot_settings=self.UserInput.scatter_heatmap_plots_settings)
         except:
             print("Unable to make scatter heatmap plots. This usually means your run is not an MCMC run, or that the sampling did not work well. If you are using Metropolis-Hastings, try EnsembleSliceSampling or try a uniform distribution multistart.")
 

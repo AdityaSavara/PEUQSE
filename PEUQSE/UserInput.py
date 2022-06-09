@@ -147,6 +147,11 @@ scatter_matrix_plots_settings['cross_marker_transparency'] = 0.8
 #Scatter Heatmap Plot Settings
 scatter_heatmap_plots_settings ={}
 scatter_heatmap_plots_settings['figure_name'] = 'scatter_heatmap_posterior'
+scatter_heatmap_plots_settings['dpi'] = 220
+scatter_heatmap_plots_settings['sampled_point_sizes'] = 1
+scatter_heatmap_plots_settings['cross_marker_size'] = 10
+scatter_heatmap_plots_settings['sampled_point_transparency'] = 0.5
+scatter_heatmap_plots_settings['cross_marker_transparency'] = 0.8
 
 #contour plots# / #mumpce plots#
 #model_parameter_info = np.array([{'parameter_number': 0, 'parameter_name': r'$E_{a1}$'},
