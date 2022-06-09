@@ -140,15 +140,20 @@ def sampledParameterHistogramMaker(parameterSamples, parameterName, parameterNam
                 sampledParameterAxesDictionary[parameterName].set_ylabel('Probability Density', **axis_font)
         sampledParameterAxesDictionary[parameterName].set_xlabel(parameterNamesAndMathTypeExpressionsDict[parameterName], **axis_font)
 
-        if histogram_plot_settings['show_initial_value'] == True:
-            if parameterInitialValue!=None:
-                sampledParameterAxesDictionary[parameterName].axvline(x=parameterInitialValue, color='#00A5DF', linestyle='--')
-        if histogram_plot_settings['show_MAP_value'] == True:
-            if parameterMAPValue!=None:
-                sampledParameterAxesDictionary[parameterName].axvline(x=parameterMAPValue, color='r', linestyle='--')
-        if histogram_plot_settings['show_muAP_value'] == True:
-            if parameterMuAPValue!=None:
-                sampledParameterAxesDictionary[parameterName].axvline(x=parameterMuAPValue, color='k', linestyle='--')
+        if histogram_plot_settings['vertical_line_markers'] and None not in (parameterInitialValue, parameterMAPValue, parameterMuAPValue):
+                    sampledParameterAxesDictionary[parameterName].axvline(x=parameterInitialValue, color='#00A5DF', linestyle='--')
+                    sampledParameterAxesDictionary[parameterName].axvline(x=parameterMAPValue, color='r', linestyle='--')
+                    sampledParameterAxesDictionary[parameterName].axvline(x=parameterMuAPValue, color='k', linestyle='--')
+
+        # if histogram_plot_settings['show_initial_value'] == True:
+        #     if parameterInitialValue!=None:
+        #         sampledParameterAxesDictionary[parameterName].axvline(x=parameterInitialValue, color='#00A5DF', linestyle='--')
+        # if histogram_plot_settings['show_MAP_value'] == True:
+        #     if parameterMAPValue!=None:
+        #         sampledParameterAxesDictionary[parameterName].axvline(x=parameterMAPValue, color='r', linestyle='--')
+        # if histogram_plot_settings['show_muAP_value'] == True:
+        #     if parameterMuAPValue!=None:
+        #         sampledParameterAxesDictionary[parameterName].axvline(x=parameterMuAPValue, color='k', linestyle='--')
 
         sampledParameterAxesDictionary[parameterName].tick_params(axis='x', labelsize=histogram_plot_settings['x_label_size']) #TODO: make these labels sizes a setting that can be changed.
         sampledParameterAxesDictionary[parameterName].tick_params(axis='y', labelsize=histogram_plot_settings['y_label_size'])

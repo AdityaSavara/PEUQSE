@@ -111,12 +111,13 @@ plotting_ouput_settings['setMatPlotLibAgg'] = 'auto' #This setting controls whet
 histogram_plot_settings = {}
 histogram_plot_settings['histograms_as_density']= False # When true, the histograms will be shown as density with integral normalized to 1. It's good to keep this as False during analysis, then to set to True to make final graphs for presentations.  By default this is False. When this is False, for ESS or MH the histograms will show sampling frequency. When this is False, for uniform or random samplings, the histograms show a pseudo-sampling frequency with an order of magnitude proportional to multistart_gridsearch_threshold_filter_coefficient.
 histogram_plot_settings['y_label'] = '' #will use defaults if ''
-histogram_plot_settings['show_initial_value'] = True
-histogram_plot_settings['show_MAP_value'] = True
-histogram_plot_settings['show_muAP_value'] = True
+# histogram_plot_settings['show_initial_value'] = True
+# histogram_plot_settings['show_MAP_value'] = True
+# histogram_plot_settings['show_muAP_value'] = True
 histogram_plot_settings['x_label_size'] = 16
 histogram_plot_settings['y_label_size'] = 16
 histogram_plot_settings['axis_font_size'] = 16
+histogram_plot_settings['vertical_line_markers'] = True
 
 
 
