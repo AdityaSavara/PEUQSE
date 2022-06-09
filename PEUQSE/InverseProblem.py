@@ -2394,6 +2394,7 @@ class parameter_estimation:
         if parameterNamesList == []: parameterNamesList = self.UserInput.parameterNamesList #This is created when the parameter_estimation object is initialized.        
         if parameterMAPValue == []: parameterMAPValue = self.map_parameter_set
         if parameterMuAPValue == []: parameterMuAPValue = self.mu_AP_parameter_set
+        if parameterInitialValue == []: parameterInitialValue = self.UserInput.model['InputParameterPriorValues']
         combined_plots = plot_settings['combined_plots']
         if 'individual_plots' in plot_settings: 
             individual_plots = plot_settings['individual_plots']
@@ -2409,13 +2410,17 @@ class parameter_estimation:
                     individual_plots = True
         if individual_plots == True: #This means we will return individual plots.
             #The below code was added by Troy Gustke and merged in to PEUQSE at end of June 2021.
-            for i, (a, a_name, a_MAP, a_mu_AP) in enumerate(zip(posterior_df.columns, parameterNamesAndMathTypeExpressionsDict.keys(), parameterMAPValue, parameterMuAPValue)):
-                for j, (b, b_name, b_MAP, b_mu_AP) in enumerate(zip(posterior_df.columns, parameterNamesAndMathTypeExpressionsDict.keys(), parameterMAPValue, parameterMuAPValue)):
+            for i, (a, a_name, a_MAP, a_mu_AP, a_initial) in enumerate(zip(posterior_df.columns, parameterNamesAndMathTypeExpressionsDict.keys(), parameterMAPValue, parameterMuAPValue, parameterInitialValue)):
+                for j, (b, b_name, b_MAP, b_mu_AP, b_initial) in enumerate(zip(posterior_df.columns, parameterNamesAndMathTypeExpressionsDict.keys(), parameterMAPValue, parameterMuAPValue, parameterInitialValue)):
                     if i != j:
                         fig = plt.figure()
                         plt.scatter(posterior_df[a], posterior_df[b], s=1, alpha=0.5)
-                        plt.scatter(a_MAP, b_MAP, s=10, alpha=0.8, c='r') 
-                        plt.scatter(a_mu_AP, b_mu_AP, s=10, alpha=0.8, c='k') 
+                        if self.UserInput.scatter_heatmap_plots_settings['cross_marker_size'] != 0:
+                            cross_size = self.UserInput.scatter_matrix_plots_settings['cross_marker_size']
+                            cross_transparency = self.UserInput.scatter_matrix_plots_settings['cross_marker_transparency']
+                            plt.scatter(a_MAP, b_MAP, s=cross_size, alpha=cross_transparency, c='r', marker='x') 
+                            plt.scatter(a_mu_AP, b_mu_AP, s=cross_size, alpha=cross_transparency, c='k', marker='x') 
+                            plt.scatter(a_initial, b_initial, s=cross_size, alpha=cross_transparency, c='#00A5DF', marker='x')
                         plt.xlabel(a)
                         plt.ylabel(b)
                         fig.savefig(self.UserInput.directories['graphs']+f'Scatter_{a_name}_{b_name}',dpi=plot_settings['dpi'])
@@ -2423,6 +2428,7 @@ class parameter_estimation:
             return 
         pd.plotting.scatter_matrix(posterior_df)
         plt.savefig(self.UserInput.directories['graphs']+plot_settings['figure_name'],dpi=plot_settings['dpi'])
+        plt.close()
         
     def makeScatterHeatMapPlots(self, parameterSamples = [], parameterNamesAndMathTypeExpressionsDict={}, parameterNamesList =[], parameterMAPValue=[], parameterMuAPValue=[], parameterInitialValue = [], plot_settings={'combined_plots':'auto'}):
         import pandas as pd #This is the only function that needs pandas.

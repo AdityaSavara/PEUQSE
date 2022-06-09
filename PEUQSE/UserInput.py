@@ -139,6 +139,10 @@ scatter_matrix_plots_settings['combined_plots'] = 'auto' #True, False, or  'auto
 scatter_matrix_plots_settings['individual_plots'] = 'auto' #True, False, or 'auto'. With 'auto', the individual_plots will only be created when there are more than 5 parameters.
 scatter_matrix_plots_settings['dpi'] = 220
 scatter_matrix_plots_settings['figure_name'] = 'scatter_matrix_posterior'
+scatter_matrix_plots_settings['sampled_point_sizes'] = 1
+scatter_matrix_plots_settings['cross_marker_size'] = 10
+scatter_matrix_plots_settings['sampled_point_transparency'] = 0.5
+scatter_matrix_plots_settings['cross_marker_transparency'] = 0.8
 
 #Scatter Heatmap Plot Settings
 scatter_heatmap_plots_settings ={}
