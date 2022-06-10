@@ -365,10 +365,10 @@ def createScatterMatrixPlot(data_a, data_b, a_tuple, b_tuple, point_plot_setting
     # create labels and save the image to the graphs directory
     plt.xlabel(a_tuple[0], fontsize=plot_settings['fontsize'])
     plt.ylabel(b_tuple[0], fontsize=plot_settings['fontsize'])
-    if plot_settings['num_x_ticks'] != 'auto' and isinstance(plot_settings['num_x_ticks'], int):
-        plt.locator_params(axis='x', nbins=plot_settings['num_x_ticks'])
-    if plot_settings['num_y_ticks'] != 'auto' and isinstance(plot_settings['num_y_ticks'], int):
-        plt.locator_params(axis='y', nbins=plot_settings['num_y_ticks'])
+    if plot_settings['max_x_ticks'] != 'auto' and isinstance(plot_settings['max_x_ticks'], int):
+        plt.locator_params(axis='x', nbins=plot_settings['max_x_ticks'])
+    if plot_settings['max_y_ticks'] != 'auto' and isinstance(plot_settings['max_y_ticks'], int):
+        plt.locator_params(axis='y', nbins=plot_settings['max_y_ticks'])
     fig.savefig(graphs_directory+f'Scatter_{a_tuple[1]}_{b_tuple[1]}',dpi=plot_settings['dpi'])
     plt.close(fig)
 
@@ -399,9 +399,9 @@ def createScatterHeatMapPlot(data_a, data_b, a_tuple, b_tuple, point_plot_settin
     # create labels and save the image to the graphs directory
     ax.set_xlabel(a_tuple[0], fontsize=plot_settings['fontsize']) # , fontsize=plot_settings['fontsize']
     ax.set_ylabel(b_tuple[0], fontsize=plot_settings['fontsize']) # , fontsize=plot_settings['fontsize']
-    if plot_settings['num_x_ticks'] != 'auto' and isinstance(plot_settings['num_x_ticks'], int):
-        plt.locator_params(axis='x', nbins=plot_settings['num_x_ticks'])
-    if plot_settings['num_y_ticks'] != 'auto' and isinstance(plot_settings['num_y_ticks'], int):
-        plt.locator_params(axis='y', nbins=plot_settings['num_y_ticks'])
+    if plot_settings['max_x_ticks'] != 'auto' and isinstance(plot_settings['max_x_ticks'], int):
+        plt.locator_params(axis='x', nbins=plot_settings['max_x_ticks'])
+    if plot_settings['max_y_ticks'] != 'auto' and isinstance(plot_settings['max_y_ticks'], int):
+        plt.locator_params(axis='y', nbins=plot_settings['max_y_ticks'])
     fig.savefig(graphs_directory+f'Heat_Scatter_{a_tuple[1]}_{b_tuple[1]}',dpi=plot_settings['dpi'])
     plt.close(fig)
