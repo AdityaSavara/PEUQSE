@@ -25,7 +25,7 @@ Below explains the variables etc. Check the UserInput file and other documentati
     UserInput.doe_settings['parameter_modulation_grid_num_intervals'] = [1,1] #make the number of intervals (steps) in each dicrection. zero for a parameter that you don't want to vary
     
     #Make your PE_object as usual:
-    PE_object = CKPQ.parameter_estimation(UserInput)
+    PE_object = PEUQSE.parameter_estimation(UserInput)
     
     #Call the design of experiments function, which will either do 'xyz' or 'meshgrid'.
     PE_object.doeParameterModulationPermutationsScanner()

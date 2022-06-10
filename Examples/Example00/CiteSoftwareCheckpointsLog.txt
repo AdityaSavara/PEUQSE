@@ -5,7 +5,7 @@
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
-        CheKiPEUQ Bayesian Parameter Estimation
+        PEUQSE Bayesian Parameter Estimation
     version:
         - >-
             1.0.0
@@ -19,7 +19,7 @@
             https://doi.org/10.1002/cctc.202000953
     cite:
         - >-
-            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+            Savara, A. and Walker, E.A. (2020), PEUQSE Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
 ---
 -
     timestamp: >-
@@ -27,7 +27,7 @@
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
-        CheKiPEUQ Bayesian Parameter Estimation
+        PEUQSE Bayesian Parameter Estimation
     version:
         - >-
             1.0.0
@@ -41,7 +41,7 @@
             https://doi.org/10.1002/cctc.202000953
     cite:
         - >-
-            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+            Savara, A. and Walker, E.A. (2020), PEUQSE Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
 ---
 -
     timestamp: >-
@@ -49,7 +49,7 @@
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
-        CheKiPEUQ Bayesian Parameter Estimation
+        PEUQSE Bayesian Parameter Estimation
     version:
         - >-
             1.0.0
@@ -63,7 +63,7 @@
             https://doi.org/10.1002/cctc.202000953
     cite:
         - >-
-            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+            Savara, A. and Walker, E.A. (2020), PEUQSE Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
 ---
 -
     timestamp: >-
@@ -71,7 +71,7 @@
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
-        CheKiPEUQ Bayesian Parameter Estimation
+        PEUQSE Bayesian Parameter Estimation
     version:
         - >-
             1.0.0
@@ -85,7 +85,7 @@
             https://doi.org/10.1002/cctc.202000953
     cite:
         - >-
-            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+            Savara, A. and Walker, E.A. (2020), PEUQSE Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
 ---
 -
     timestamp: >-
@@ -93,7 +93,7 @@
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
-        CheKiPEUQ Bayesian Parameter Estimation
+        PEUQSE Bayesian Parameter Estimation
     version:
         - >-
             1.0.0
@@ -107,7 +107,7 @@
             https://doi.org/10.1002/cctc.202000953
     cite:
         - >-
-            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+            Savara, A. and Walker, E.A. (2020), PEUQSE Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
 ---
 -
     timestamp: >-
@@ -115,7 +115,7 @@
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
-        CheKiPEUQ Bayesian Parameter Estimation
+        PEUQSE Bayesian Parameter Estimation
     version:
         - >-
             1.0.0
@@ -129,7 +129,7 @@
             https://doi.org/10.1002/cctc.202000953
     cite:
         - >-
-            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+            Savara, A. and Walker, E.A. (2020), PEUQSE Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
 ---
 -
     timestamp: >-
@@ -137,7 +137,7 @@
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
-        CheKiPEUQ Bayesian Parameter Estimation
+        PEUQSE Bayesian Parameter Estimation
     version:
         - >-
             1.0.0
@@ -151,7 +151,7 @@
             https://doi.org/10.1002/cctc.202000953
     cite:
         - >-
-            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+            Savara, A. and Walker, E.A. (2020), PEUQSE Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
 ---
 -
     timestamp: >-
@@ -159,7 +159,7 @@
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
-        CheKiPEUQ Bayesian Parameter Estimation
+        PEUQSE Bayesian Parameter Estimation
     version:
         - >-
             1.0.0
@@ -173,7 +173,7 @@
             https://doi.org/10.1002/cctc.202000953
     cite:
         - >-
-            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+            Savara, A. and Walker, E.A. (2020), PEUQSE Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
 ---
 -
     timestamp: >-
@@ -181,7 +181,7 @@
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
-        CheKiPEUQ Bayesian Parameter Estimation
+        PEUQSE Bayesian Parameter Estimation
     version:
         - >-
             1.0.0
@@ -195,7 +195,7 @@
             https://doi.org/10.1002/cctc.202000953
     cite:
         - >-
-            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+            Savara, A. and Walker, E.A. (2020), PEUQSE Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
 ---
 -
     timestamp: >-
@@ -203,7 +203,7 @@
     unique_id: >-
         https://doi.org/10.1002/cctc.202000953
     software_name: >-
-        CheKiPEUQ Bayesian Parameter Estimation
+        PEUQSE Bayesian Parameter Estimation
     version:
         - >-
             1.0.0
@@ -217,4 +217,378 @@
             https://doi.org/10.1002/cctc.202000953
     cite:
         - >-
-            Savara, A. and Walker, E.A. (2020), CheKiPEUQ Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+            Savara, A. and Walker, E.A. (2020), PEUQSE Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2021-10-03T11:56:35
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        PEUQSE Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), PEUQSE Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2021-10-03T12:08:50
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        PEUQSE Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), PEUQSE Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2021-10-03T15:04:32
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        PEUQSE Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), PEUQSE Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2021-10-03T22:03:20
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        PEUQSE Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), PEUQSE Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2021-10-09T14:45:05
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        PEUQSE Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), PEUQSE Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2021-12-05T21:42:45
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        PEUQSE Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), PEUQSE Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2022-01-24T23:26:48
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        PEUQSE Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), PEUQSE Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2022-01-24T23:27:05
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        PEUQSE Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), PEUQSE Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2022-01-24T23:35:34
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        PEUQSE Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), PEUQSE Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2022-01-24T23:36:00
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        PEUQSE Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), PEUQSE Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2022-01-24T23:38:18
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        PEUQSE Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), PEUQSE Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2022-01-24T23:42:47
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        PEUQSE Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), PEUQSE Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2022-01-24T23:43:43
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        PEUQSE Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), PEUQSE Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2022-01-24T23:44:24
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        PEUQSE Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), PEUQSE Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2022-01-24T23:44:37
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        PEUQSE Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), PEUQSE Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2022-01-24T23:45:03
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        PEUQSE Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), PEUQSE Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
+---
+-
+    timestamp: >-
+        2022-01-24T23:51:38
+    unique_id: >-
+        https://doi.org/10.1002/cctc.202000953
+    software_name: >-
+        PEUQSE Bayesian Parameter Estimation
+    version:
+        - >-
+            1.0.0
+    author:
+        - >-
+            Aditya Savara
+        - >-
+            Eric A. Walker
+    doi:
+        - >-
+            https://doi.org/10.1002/cctc.202000953
+    cite:
+        - >-
+            Savara, A. and Walker, E.A. (2020), PEUQSE Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953

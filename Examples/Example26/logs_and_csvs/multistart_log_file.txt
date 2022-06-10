@@ -1,0 +1,7 @@
+centerPoint: [200. 500.]
+highest_MAP_logP: [-42.6386472]
+highest_MAP_logP_parameter_set: [166.17040085 490.74491373]
+highest_MAP_initial_point_index: 2
+highest_MAP_initial_point_parameters: [326.54575646 311.90250242]
+self.mu_AP_parameter_set :  (for the above initial point) [186.65321128 359.6148187 ]
+self.stdap_parameter_set :  (for the above initial point) [ 51.27691176 104.61756826]

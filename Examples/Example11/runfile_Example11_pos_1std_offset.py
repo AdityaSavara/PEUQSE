@@ -1,8 +1,8 @@
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
-import sys; sys.path.append('../../');  import CheKiPEUQ as CKPQ
-import CheKiPEUQ.UserInput as UserInput
+import sys; sys.path.append('../../');  import PEUQSE as PEUQSE
+import PEUQSE.UserInput as UserInput
 
 if __name__ == "__main__":
     
@@ -53,7 +53,7 @@ if __name__ == "__main__":
     for i in range(len(list_of_T)):
         fun.T = list_of_T[i]
         UserInput.responses['responses_observed'] = experiments[i]
-        PE_object_list.append(CKPQ.parameter_estimation(UserInput))
+        PE_object_list.append(PEUQSE.parameter_estimation(UserInput))
     
         #Now we do parameter estimation.
         #PE_object.doGridSearch('getLogP', verbose = False)

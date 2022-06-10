@@ -1,5 +1,5 @@
-import sys; sys.path.append('../../');  import CheKiPEUQ as CKPQ
-import CheKiPEUQ.UserInput as UserInput
+import sys; sys.path.append('../../');  import PEUQSE as PEUQSE
+import PEUQSE.UserInput as UserInput
 
 if __name__ == "__main__":
     import observed_values_00  #Just a simple example. The user can also put the values in directly into the runfile or extract from a csv, for example.
@@ -28,7 +28,7 @@ if __name__ == "__main__":
 
     UserInput.parameter_estimation_settings['mcmc_random_seed'] = None
     #After making the UserInput, now we make a 'parameter_estimation' object from it.
-    PE_object = CKPQ.parameter_estimation(UserInput)
+    PE_object = PEUQSE.parameter_estimation(UserInput)
     PE_object.doEnsembleSliceSampling()
     PE_object.doEnsembleSliceSampling()
     PE_object.createAllPlots() #This function calls each of the below functions so that the user does not have to.

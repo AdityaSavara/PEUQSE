@@ -5,8 +5,8 @@ import numpy as np
 import scipy
 from scipy.integrate import odeint
 #import dill
-import sys; sys.path.append('../../');  import CheKiPEUQ as CKPQ
-import CheKiPEUQ.UserInput as UserInput
+import sys; sys.path.append('../../');  import PEUQSE as PEUQSE
+import PEUQSE.UserInput as UserInput
 
 if __name__ == "__main__":
     
@@ -63,7 +63,7 @@ if __name__ == "__main__":
     
     
     #It's good to run a test before doing a design of experiments.
-#    PE_object = CKPQ.parameter_estimation(UserInput)
+#    PE_object = PEUQSE.parameter_estimation(UserInput)
 #    PE_object.doMetropolisHastings()
     #PE_object.createAllPlots()
     
@@ -78,7 +78,7 @@ if __name__ == "__main__":
     UserInput.doe_settings['parameter_modulation_grid_num_intervals'] = [1,1] #make the number of intervals zero for any parameter that you don't want to vary.
     
     
-    PE_object = CKPQ.parameter_estimation(UserInput)
+    PE_object = PEUQSE.parameter_estimation(UserInput)
     
     
     

@@ -3,7 +3,7 @@ import numpy as np
 import scipy
 from scipy.integrate import odeint
 import pandas as pd
-from tprmodel import tprequation, tprequationPiecewise
+#from tprmodel import tprequation, tprequationPiecewise #commented out because not needed for Example 5.
 
 #Need to define beta directly, or define dt and dT.
 dT = 0.77 #Set this to 0 for an isothermal experiment.
@@ -59,7 +59,7 @@ def TPR_integerated_simulationFunctionWrapper(discreteParameterVector):
     simulationOutput = TPR_simulationFunctionWrapper(discreteParameterVector)
     rate = no_log_wrapper_func(simulationOutput)
     global times
-    from CheKiPEUQ import littleEulerGivenArray
+    from PEUQSE import littleEulerGivenArray
     times, integrated_desorption, rate = littleEulerGivenArray(0, times, rate)
     return integrated_desorption
 
@@ -67,7 +67,7 @@ def TPR_integerated_simulationFunctionWrapperPiecewise(discreteParameterVector):
     simulationOutput = TPR_simulationFunctionWrapperPiecewise(discreteParameterVector)
     rate = no_log_wrapper_func(simulationOutput)
     global times
-    from CheKiPEUQ import littleEulerGivenArray
+    from PEUQSE import littleEulerGivenArray
     times, integrated_desorption, rate = littleEulerGivenArray(0, times, rate)
     return integrated_desorption  
     
@@ -94,7 +94,7 @@ def import_experimental_settings(Filename):
 
 def import_integrals_settings(Filename): 
     times, experiment_rates, experiment_rates_uncertainties = import_experimental_settings(Filename)
-    from CheKiPEUQ import littleEulerGivenArray, littleEulerUncertaintyPropagation
+    from PEUQSE import littleEulerGivenArray, littleEulerUncertaintyPropagation
     times, integrated_desorption, experiment_rates = littleEulerGivenArray(0, times, experiment_rates)
     integrated_desorption_uncertainties = littleEulerUncertaintyPropagation(experiment_rates_uncertainties, times, 0.2)#The 0.2 is an initial coverage uncertainty.
     return times, integrated_desorption, integrated_desorption_uncertainties

@@ -1,6 +1,6 @@
 import sys; sys.path.append('../../');
-import CheKiPEUQ as CKPQ
-import CheKiPEUQ.UserInput as UserInput
+import PEUQSE as PEUQSE
+import PEUQSE.UserInput as UserInput
 import numpy as np
 from multiprocessing import Pool
 import os
@@ -43,7 +43,7 @@ def run_simulation(inputs):
 
     #UserInput.parameter_estimation_settings['mcmc_random_seed'] = 0 This can be useful for testing.
     #After making the UserInput, now we make a 'parameter_estimation' object from it.
-    PE_object = CKPQ.parameter_estimation(UserInput)
+    PE_object = PEUQSE.parameter_estimation(UserInput)
     PE_object.doMetropolisHastings()
     PE_object.createAllPlots() #This function calls each of the below functions so that the user does not have to.
 #    PE_object.makeHistogramsForEachParameter()    

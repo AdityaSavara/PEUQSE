@@ -5,8 +5,8 @@ import numpy as np
 import scipy
 from scipy.integrate import odeint
 #import dill
-import sys; sys.path.append('../../');  import CheKiPEUQ as CKPQ
-import CheKiPEUQ.UserInput as UserInput
+import sys; sys.path.append('../../');  import PEUQSE as PEUQSE
+import PEUQSE.UserInput as UserInput
 
 if __name__ == "__main__":
     
@@ -62,7 +62,7 @@ if __name__ == "__main__":
     
     
     #It's good to run a test before doing a design of experiments.
-#    PE_object = CKPQ.parameter_estimation(UserInput)
+#    PE_object = PEUQSE.parameter_estimation(UserInput)
 #    PE_object.doMetropolisHastings()
     #PE_object.createAllPlots()
     UserInput.doe_settings['info_gains_matrices_array_format'] = 'xyz'
@@ -74,7 +74,7 @@ if __name__ == "__main__":
     UserInput.doe_settings['parameter_modulation_grid_num_intervals'] = [1,1] #make the number of intervals zero for a parameter that you don't want to vary.
     
     
-    PE_object = CKPQ.parameter_estimation(UserInput)
+    PE_object = PEUQSE.parameter_estimation(UserInput)
     
     PE_object.doeParameterModulationPermutationsScanner()
     print(PE_object.info_gains_matrices_array[0])
@@ -90,6 +90,6 @@ if __name__ == "__main__":
     # UserInput.doe_settings['independent_variable_grid_num_intervals'] = [2,2] #This is the number in each direction outward from center. So a 2 here gives 5 evaluations. A zero means we don't allow the parameter to vary.
     # #Note that we *no longer* define intervals for the parametric space.
     # simulation_functions.connected_variables_values = UserInput.responses['independent_variables_values'] #It is important to push the list *into* the other module.
-    # PE_object2 = CKPQ.parameter_estimation(UserInput)    
+    # PE_object2 = PEUQSE.parameter_estimation(UserInput)    
     # PE_object2.doeGetInfoGainMatrix(UserInput.model['InputParameterPriorValues']+UserInput.model['InputParametersPriorValuesUncertainties']) #This is an example with a +1SD perturbation.
     # PE_object2.createInfoGainPlots(plot_suffix="_manual") #note: this corresponds to having a single modulation and will overwrite the "modulation 0" file.

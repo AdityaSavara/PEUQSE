@@ -4,8 +4,8 @@ from matplotlib.ticker import FormatStrFormatter
 import numpy as np
 import scipy
 from scipy.integrate import odeint
-import sys; sys.path.append('../../');  import CheKiPEUQ as CKPQ
-import CheKiPEUQ.UserInput as UserInput
+import sys; sys.path.append('../../');  import PEUQSE as PEUQSE
+import PEUQSE.UserInput as UserInput
 
 if __name__ == "__main__":
     
@@ -84,7 +84,7 @@ if __name__ == "__main__":
             fun.T = t
             theta_A_obs = fun.Langmuir_compete_ads(delta_G_1) # Remember delta_G_1 is offset: -0.15 instead of the prior -0.2.
             UserInput.responses['responses_observed'] = theta_A_obs
-            PE_object_list.append(CKPQ.parameter_estimation(UserInput))
+            PE_object_list.append(PEUQSE.parameter_estimation(UserInput))
             [map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, logP] = PE_object_list[-1].doMetropolisHastings()
             info_gains.append(info_gain)
             fig, ax = plt.subplots()
