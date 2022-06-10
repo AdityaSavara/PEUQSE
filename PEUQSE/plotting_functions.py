@@ -385,20 +385,20 @@ def createScatterHeatMapPlot(data_a, data_b, a_tuple, b_tuple, point_plot_settin
     :param plot_settings: plot settings from User Input (:type: dict)
     """
     import matplotlib.pyplot as plt
-    fig = plt.figure()
+
     # create a scatter plot of the posterior data between two parameters
-    density_scatter(data_a, data_b, s=point_plot_settings[0], alpha=point_plot_settings[1])
+    fig, ax = density_scatter(data_a, data_b, s=point_plot_settings[0], alpha=point_plot_settings[1])
     # Allows the user to have no crosses if size is set to 0
     if cross_plot_settings[0] != 0:
         cross_size = cross_plot_settings[0]
         cross_transparency = cross_plot_settings[1]
         # creates the extra points for the MAP, muAP, and initial point denoted by crosses
-        plt.scatter(a_tuple[2], b_tuple[2], s=cross_size, alpha=cross_transparency, c='r', marker='x') 
-        plt.scatter(a_tuple[3], b_tuple[3], s=cross_size, alpha=cross_transparency, c='k', marker='x') 
-        plt.scatter(a_tuple[4], b_tuple[4], s=cross_size, alpha=cross_transparency, c='#00A5DF', marker='x')
+        ax.scatter(a_tuple[2], b_tuple[2], s=cross_size, alpha=cross_transparency, c='r', marker='x') 
+        ax.scatter(a_tuple[3], b_tuple[3], s=cross_size, alpha=cross_transparency, c='k', marker='x') 
+        ax.scatter(a_tuple[4], b_tuple[4], s=cross_size, alpha=cross_transparency, c='#00A5DF', marker='x')
     # create labels and save the image to the graphs directory
-    plt.xlabel(a_tuple[0], fontsize=plot_settings['fontsize'])
-    plt.ylabel(b_tuple[0], fontsize=plot_settings['fontsize'])
+    ax.set_xlabel(a_tuple[0], fontsize=plot_settings['fontsize']) # , fontsize=plot_settings['fontsize']
+    ax.set_ylabel(b_tuple[0], fontsize=plot_settings['fontsize']) # , fontsize=plot_settings['fontsize']
     if plot_settings['num_x_ticks'] != 'auto' and isinstance(plot_settings['num_x_ticks'], int):
         plt.locator_params(axis='x', nbins=plot_settings['num_x_ticks'])
     if plot_settings['num_y_ticks'] != 'auto' and isinstance(plot_settings['num_y_ticks'], int):
