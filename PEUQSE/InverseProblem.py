@@ -2622,7 +2622,8 @@ class parameter_estimation:
         #Below we populate any custom fields as necessary. These go into a separate argument when making mumpce plots
         #Because these are basically arguments for a 'patch' on mumpce made by A. Savara and E. Walker.
         contour_settings_custom = {}
-        contour_settings_custom_fields = {'figure_name','fontsize','num_y_ticks','num_x_ticks','colormap_posterior_customized','colormap_prior_customized','contours_normalized','colorbars','axis_limits','dpi', 'num_pts_per_axis','cmap_levels', 'space_between_subplots', 'zoom_std_devs', 'x_ticks', 'y_ticks', 'center_on'} #This is a set, not a dictionary.
+        # max_x/y_ticks and num_x/y_ticks are included in the following dict to keep backwards compatability
+        contour_settings_custom_fields = {'figure_name','fontsize','max_y_ticks','max_x_ticks','num_y_ticks','num_x_ticks','colormap_posterior_customized','colormap_prior_customized','contours_normalized','colorbars','axis_limits','dpi', 'num_pts_per_axis','cmap_levels', 'space_between_subplots', 'zoom_std_devs', 'x_ticks', 'y_ticks', 'center_on'} #This is a set, not a dictionary.
         for custom_field in contour_settings_custom_fields:
             if custom_field in self.UserInput.contour_plot_settings:
                 contour_settings_custom[custom_field] = self.UserInput.contour_plot_settings[custom_field]        
