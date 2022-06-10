@@ -61,7 +61,7 @@ if __name__ == "__main__":
     UserInput.contour_plot_settings['fontsize']=20
     #UserInput.contour_plot_settings['center_on'] = 'prior'
     UserInput.contour_plot_settings['axis_limits'] = [0,80, 0, 60]
-    UserInput.contour_plot_settings['num_x_ticks']= 4                                                      
+    UserInput.contour_plot_settings['max_x_ticks']= 4                                                      
     
 
     #After making the UserInput, now we make a 'parameter_estimation' object from it.

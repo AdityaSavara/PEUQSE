@@ -57,8 +57,8 @@ if __name__ == "__main__":
         
     UserInput.contour_plot_settings['figure_name']='PosteriorContourPlotState3'
     UserInput.contour_plot_settings['fontsize']='22'
-    UserInput.contour_plot_settings['num_y_ticks']=2
-    UserInput.contour_plot_settings['num_x_ticks']=3
+    UserInput.contour_plot_settings['max_y_ticks']=2
+    UserInput.contour_plot_settings['max_x_ticks']=3
     UserInput.contour_plot_settings['colorbars']='False'
     
     PE_object.createAllPlots()
@@ -81,5 +81,5 @@ if __name__ == "__main__":
     print(uncertaintyForTp)
     
     UserInput.contour_plot_settings['axis_limits'] = [7,20,0,140000]
-    UserInput.contour_plot_settings['num_y_ticks']=4
+    UserInput.contour_plot_settings['max_y_ticks']=4
     PE_object.createMumpcePlots()

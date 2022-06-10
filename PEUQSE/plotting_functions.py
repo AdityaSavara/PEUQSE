@@ -22,7 +22,7 @@ class plotting_functions_class():
         cov = np.cov(self.samples,rowvar=False)
         return mu, cov
 
-    def mumpce_plots(self, model_parameter_info = {}, active_parameters = [], pairs_of_parameter_indices = [], posterior_mu_vector = 0, posterior_cov_matrix = 0, prior_mu_vector = 0, prior_cov_matrix = 0, contour_settings_custom = {'figure_name','fontsize','num_y_ticks','num_x_ticks','colormap_posterior_customized','colormap_prior_customized','contours_normalized','colorbars','axis_limits'}): # Pass empty keyword arguments for important parameters.  That way, warnings may be issued if they are not set.  There is not really a good default for these keyword arguments.  They depend entirely on the nature of the data being plotted.
+    def mumpce_plots(self, model_parameter_info = {}, active_parameters = [], pairs_of_parameter_indices = [], posterior_mu_vector = 0, posterior_cov_matrix = 0, prior_mu_vector = 0, prior_cov_matrix = 0, contour_settings_custom = {'figure_name','fontsize','max_y_ticks','max_x_ticks','colormap_posterior_customized','colormap_prior_customized','contours_normalized','colorbars','axis_limits'}): # Pass empty keyword arguments for important parameters.  That way, warnings may be issued if they are not set.  There is not really a good default for these keyword arguments.  They depend entirely on the nature of the data being plotted.
         mumpceProjectObject = mumpceProject.Project() # A mumpce project object must be created.
         if len(model_parameter_info) == 0:
             print("Pass the 'model_parameter_info' argument to the mumpce_plots function.")
@@ -59,14 +59,14 @@ class plotting_functions_class():
         #    contour_settings_custom['fontsize'] = UserInput.fontsize        
         #else:
         #    contour_settings_custom['fontsize'] = 'auto'
-        #if hasattr(UserInput,'num_y_ticks'):
-        #    contour_settings_custom['num_y_ticks'] = UserInput.num_y_ticks
+        #if hasattr(UserInput,'max_y_ticks'):
+        #    contour_settings_custom['max_y_ticks'] = UserInput.max_y_ticks
         #else:
-        #    contour_settings_custom['num_y_ticks'] = 'auto'
-        #if hasattr(UserInput,'num_x_ticks'):
-        #    contour_settings_custom['num_x_ticks'] = UserInput.num_x_ticks
+        #    contour_settings_custom['max_y_ticks'] = 'auto'
+        #if hasattr(UserInput,'max_x_ticks'):
+        #    contour_settings_custom['max_x_ticks'] = UserInput.max_x_ticks
         #else:
-        #    contour_settings_custom['num_x_ticks'] = 'auto'
+        #    contour_settings_custom['max_x_ticks'] = 'auto'
         #if hasattr(UserInput,'colormap_posterior_customized'):
         #    contour_settings_custom['colormap_posterior_customized'] = UserInput.colormap_posterior_customized
         #else:
