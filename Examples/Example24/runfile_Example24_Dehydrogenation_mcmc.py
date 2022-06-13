@@ -58,8 +58,8 @@ if __name__ == "__main__":
         
     UserInput.contour_plot_settings['figure_name']='PosteriorContourPlotDehydrogenation'
     UserInput.contour_plot_settings['fontsize']='22'
-    UserInput.contour_plot_settings['max_y_ticks']=3
-    UserInput.contour_plot_settings['max_x_ticks']=3
+    UserInput.contour_plot_settings['max_num_y_ticks']=3
+    UserInput.contour_plot_settings['max_num_x_ticks']=3
     UserInput.contour_plot_settings['colorbars']='False'
     
     PE_object.createAllPlots()

@@ -143,8 +143,8 @@ scatter_matrix_plots_settings['sampled_point_sizes'] = 1 #Size of sampled points
 scatter_matrix_plots_settings['cross_marker_size'] = 10 #Size of special points (MAP, muAP, and initial point) denoted by a cross. Values should be larger than sampled_point_size to increase clarity. 
 scatter_matrix_plots_settings['sampled_point_transparency'] = 0.5 #Transparency of sampled points in scatter plot. This value ranges from 0 to 1. Values closer to 1 can make plots with many points look crowded and confusing. Mid values are recommended. 
 scatter_matrix_plots_settings['cross_marker_transparency'] = 0.8 #Transparency of special points (MAP, muAP, and initial point) denoted by a cross. This value ranges from 0 to 1. This should be larger than sampled_point_transparency to emphasize the special point locations.
-scatter_matrix_plots_settings['max_x_ticks'] = 'auto' #Maximum number of tick marks on x axis. This value should be an interger or the string 'auto' to let matplotlib choose the number of tick marks.
-scatter_matrix_plots_settings['max_y_ticks'] = 'auto' #Maximum number of tick marks on y axis. This value should be an interger or the string 'auto' to let matplotlib choose the number of tick marks.
+scatter_matrix_plots_settings['max_num_x_ticks'] = 'auto' #Maximum number of tick marks on x axis. This value should be an interger or the string 'auto' to let matplotlib choose the number of tick marks.
+scatter_matrix_plots_settings['max_num_y_ticks'] = 'auto' #Maximum number of tick marks on y axis. This value should be an interger or the string 'auto' to let matplotlib choose the number of tick marks.
 scatter_matrix_plots_settings['fontsize'] = 16 #Fontsize of labels on x and y axis. This value should be an interger. 
 
 #Scatter Heatmap Plot Settings
@@ -155,8 +155,8 @@ scatter_heatmap_plots_settings['sampled_point_sizes'] = 1 #Size of sampled point
 scatter_heatmap_plots_settings['cross_marker_size'] = 10 #Size of special points (MAP, muAP, and initial point) denoted by a cross. Values should be larger than sampled_point_size to increase clarity. 
 scatter_heatmap_plots_settings['sampled_point_transparency'] = 0.5 #Transparency of sampled points in scatter plot. This value ranges from 0 to 1. Values closer to 1 can make plots with many points look crowded and confusing. Mid values are recommended. 
 scatter_heatmap_plots_settings['cross_marker_transparency'] = 0.8 #Transparency of special points (MAP, muAP, and initial point) denoted by a cross. This value ranges from 0 to 1. This should be larger than sampled_point_transparency to emphasize the special point locations.
-scatter_heatmap_plots_settings['max_x_ticks'] = 'auto' #Maximum number of tick marks on x axis. This value should be an interger or the string 'auto' to let matplotlib choose the number of tick marks.
-scatter_heatmap_plots_settings['max_y_ticks'] = 'auto' #Maximum number of tick marks on y axis. This value should be an interger or the string 'auto' to let matplotlib choose the number of tick marks.
+scatter_heatmap_plots_settings['max_num_x_ticks'] = 'auto' #Maximum number of tick marks on x axis. This value should be an interger or the string 'auto' to let matplotlib choose the number of tick marks.
+scatter_heatmap_plots_settings['max_num_y_ticks'] = 'auto' #Maximum number of tick marks on y axis. This value should be an interger or the string 'auto' to let matplotlib choose the number of tick marks.
 scatter_heatmap_plots_settings['fontsize'] = 16 #Fontsize of labels on x and y axis. This value should be an interger. 
 
 #contour plots# / #mumpce plots#
@@ -176,8 +176,8 @@ contour_plot_settings['zoom_std_devs'] = 2.5 #how zoomed in the image is.
 contour_plot_settings['fontsize']=16  #sets the fontsize for everything except the colorbars. Can be an integer or the word 'auto', or the word "None". Should change space_between_subplots if fontsize is changed. 
 contour_plot_settings['space_between_subplots'] = 0.40 #Typically a value between 0.20 and 5.0. Set to 0.40 by default. Should be changed when font size is changed. Fontsize 'auto' tends to make small fonts which needs smaller values like 0.20.
 contour_plot_settings['cmap_levels'] = 4   #This is the number of contour levels.
-contour_plot_settings['max_y_ticks'] = 'auto'  #adusts number of y ticks (actually sets a maximum number of them). #max_y_ticks and max_x_ticks must be either a string ('auto') or an integer (such as 4, either without string or with integer casting like int('5')). This feature is recommended.  #Note that this is a *request* When it's not fulfilled exactly, the user can play with the number.
-contour_plot_settings['max_x_ticks'] = 'auto'  #adjusts number of x ticks (actually sets a maximum number of them). #max_y_ticks and max_x_ticks must be either a string ('auto') or an integer (such as 4, either without string or with integer casting like int('5')).This feature is recommended. #Note that this is a *request* When it's not fulfilled exactly, the user can play with the number.
+contour_plot_settings['max_num_y_ticks'] = 'auto'  #adusts number of y ticks (actually sets a maximum number of them). #max_num_y_ticks and max_num_x_ticks must be either a string ('auto') or an integer (such as 4, either without string or with integer casting like int('5')). This feature is recommended.  #Note that this is a *request* When it's not fulfilled exactly, the user can play with the number.
+contour_plot_settings['max_num_x_ticks'] = 'auto'  #adjusts number of x ticks (actually sets a maximum number of them). #max_num_y_ticks and max_num_x_ticks must be either a string ('auto') or an integer (such as 4, either without string or with integer casting like int('5')).This feature is recommended. #Note that this is a *request* When it's not fulfilled exactly, the user can play with the number.
 contour_plot_settings['num_pts_per_axis'] = 500 #This sets the resolution of the contours.
 contour_plot_settings['dpi'] = 220 #Dots per Inch specification. This changes the resolution of the image created. Larger values are recommended for important pictures.
 contour_plot_settings['x_ticks'] = 'auto' #feed in an array of numbers directly. Not recommended to change.

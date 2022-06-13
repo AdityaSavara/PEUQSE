@@ -22,7 +22,7 @@ class plotting_functions_class():
         cov = np.cov(self.samples,rowvar=False)
         return mu, cov
 
-    def mumpce_plots(self, model_parameter_info = {}, active_parameters = [], pairs_of_parameter_indices = [], posterior_mu_vector = 0, posterior_cov_matrix = 0, prior_mu_vector = 0, prior_cov_matrix = 0, contour_settings_custom = {'figure_name','fontsize','max_y_ticks','max_x_ticks','colormap_posterior_customized','colormap_prior_customized','contours_normalized','colorbars','axis_limits'}): # Pass empty keyword arguments for important parameters.  That way, warnings may be issued if they are not set.  There is not really a good default for these keyword arguments.  They depend entirely on the nature of the data being plotted.
+    def mumpce_plots(self, model_parameter_info = {}, active_parameters = [], pairs_of_parameter_indices = [], posterior_mu_vector = 0, posterior_cov_matrix = 0, prior_mu_vector = 0, prior_cov_matrix = 0, contour_settings_custom = {'figure_name','fontsize','max_num_y_ticks','max_num_x_ticks','colormap_posterior_customized','colormap_prior_customized','contours_normalized','colorbars','axis_limits'}): # Pass empty keyword arguments for important parameters.  That way, warnings may be issued if they are not set.  There is not really a good default for these keyword arguments.  They depend entirely on the nature of the data being plotted.
         mumpceProjectObject = mumpceProject.Project() # A mumpce project object must be created.
         if len(model_parameter_info) == 0:
             print("Pass the 'model_parameter_info' argument to the mumpce_plots function.")
@@ -59,14 +59,14 @@ class plotting_functions_class():
         #    contour_settings_custom['fontsize'] = UserInput.fontsize        
         #else:
         #    contour_settings_custom['fontsize'] = 'auto'
-        #if hasattr(UserInput,'max_y_ticks'):
-        #    contour_settings_custom['max_y_ticks'] = UserInput.max_y_ticks
+        #if hasattr(UserInput,'max_num_y_ticks'):
+        #    contour_settings_custom['max_num_y_ticks'] = UserInput.max_num_y_ticks
         #else:
-        #    contour_settings_custom['max_y_ticks'] = 'auto'
-        #if hasattr(UserInput,'max_x_ticks'):
-        #    contour_settings_custom['max_x_ticks'] = UserInput.max_x_ticks
+        #    contour_settings_custom['max_num_y_ticks'] = 'auto'
+        #if hasattr(UserInput,'max_num_x_ticks'):
+        #    contour_settings_custom['max_num_x_ticks'] = UserInput.max_num_x_ticks
         #else:
-        #    contour_settings_custom['max_x_ticks'] = 'auto'
+        #    contour_settings_custom['max_num_x_ticks'] = 'auto'
         #if hasattr(UserInput,'colormap_posterior_customized'):
         #    contour_settings_custom['colormap_posterior_customized'] = UserInput.colormap_posterior_customized
         #else:
@@ -365,10 +365,10 @@ def createScatterMatrixPlot(data_a, data_b, a_tuple, b_tuple, point_plot_setting
     # create labels and save the image to the graphs directory
     plt.xlabel(a_tuple[0], fontsize=plot_settings['fontsize'])
     plt.ylabel(b_tuple[0], fontsize=plot_settings['fontsize'])
-    if plot_settings['max_x_ticks'] != 'auto' and isinstance(plot_settings['max_x_ticks'], int):
-        plt.locator_params(axis='x', nbins=plot_settings['max_x_ticks'])
-    if plot_settings['max_y_ticks'] != 'auto' and isinstance(plot_settings['max_y_ticks'], int):
-        plt.locator_params(axis='y', nbins=plot_settings['max_y_ticks'])
+    if plot_settings['max_num_x_ticks'] != 'auto' and isinstance(plot_settings['max_num_x_ticks'], int):
+        plt.locator_params(axis='x', nbins=plot_settings['max_num_x_ticks'])
+    if plot_settings['max_num_y_ticks'] != 'auto' and isinstance(plot_settings['max_num_y_ticks'], int):
+        plt.locator_params(axis='y', nbins=plot_settings['max_num_y_ticks'])
     fig.savefig(graphs_directory+f'Scatter_{a_tuple[1]}_{b_tuple[1]}',dpi=plot_settings['dpi'])
     plt.close(fig)
 
@@ -399,9 +399,9 @@ def createScatterHeatMapPlot(data_a, data_b, a_tuple, b_tuple, point_plot_settin
     # create labels and save the image to the graphs directory
     ax.set_xlabel(a_tuple[0], fontsize=plot_settings['fontsize']) # , fontsize=plot_settings['fontsize']
     ax.set_ylabel(b_tuple[0], fontsize=plot_settings['fontsize']) # , fontsize=plot_settings['fontsize']
-    if plot_settings['max_x_ticks'] != 'auto' and isinstance(plot_settings['max_x_ticks'], int):
-        plt.locator_params(axis='x', nbins=plot_settings['max_x_ticks'])
-    if plot_settings['max_y_ticks'] != 'auto' and isinstance(plot_settings['max_y_ticks'], int):
-        plt.locator_params(axis='y', nbins=plot_settings['max_y_ticks'])
+    if plot_settings['max_num_x_ticks'] != 'auto' and isinstance(plot_settings['max_num_x_ticks'], int):
+        plt.locator_params(axis='x', nbins=plot_settings['max_num_x_ticks'])
+    if plot_settings['max_num_y_ticks'] != 'auto' and isinstance(plot_settings['max_num_y_ticks'], int):
+        plt.locator_params(axis='y', nbins=plot_settings['max_num_y_ticks'])
     fig.savefig(graphs_directory+f'Heat_Scatter_{a_tuple[1]}_{b_tuple[1]}',dpi=plot_settings['dpi'])
     plt.close(fig)

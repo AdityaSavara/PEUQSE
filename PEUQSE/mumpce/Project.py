@@ -917,16 +917,16 @@ class Project(object):
                 contour_settings_custom['fontsize']=20
             if contour_settings_custom['fontsize'] == 'auto':
                 contour_settings_custom['fontsize']=None #The argument "None" uses the matplotlib/pyplot defaults.
-            if 'max_x_ticks' not in contour_settings_custom:
+            if 'max_num_x_ticks' not in contour_settings_custom:
                 if 'num_x_ticks' in contour_settings_custom:
-                    contour_settings_custom['max_x_ticks'] = contour_settings_custom['num_x_ticks'] #This keeps backwards compatability after the UserInput name change from num_ticks to max_ticks
+                    contour_settings_custom['max_num_x_ticks'] = contour_settings_custom['num_x_ticks'] #This keeps backwards compatability after the UserInput name change from num_ticks to max_ticks
                 else:
-                    contour_settings_custom['max_x_ticks'] =4 #actually sets a maximum number. Matplotlib and pyplot often put one less.
-            if 'max_y_ticks' not in contour_settings_custom:
+                    contour_settings_custom['max_num_x_ticks'] =4 #actually sets a maximum number. Matplotlib and pyplot often put one less.
+            if 'max_num_y_ticks' not in contour_settings_custom:
                 if 'num_y_ticks' in contour_settings_custom:
-                    contour_settings_custom['max_y_ticks'] = contour_settings_custom['num_y_ticks'] #This keeps backwards compatability after the UserInput name change from num_ticks to max_ticks
+                    contour_settings_custom['max_num_y_ticks'] = contour_settings_custom['num_y_ticks'] #This keeps backwards compatability after the UserInput name change from num_ticks to max_ticks
                 else:
-                    contour_settings_custom['max_y_ticks'] =4 #actually sets a maximum number. Matplotlib and pyplot often put one less.               
+                    contour_settings_custom['max_num_y_ticks'] =4 #actually sets a maximum number. Matplotlib and pyplot often put one less.               
             if "colorbars" not in contour_settings_custom: #This is to turn the color bars on or off.
                 contour_settings_custom["colorbars"] = False
             if 'num_pts_per_axis' not in contour_settings_custom: #This sets the resolution of the contours.
@@ -997,14 +997,14 @@ class Project(object):
                     prior_colorbar.update_ticks()
             ax.set_xlabel(params_info[0]['parameter_name'])
             ax.set_ylabel(params_info[1]['parameter_name'])      
-            if str(contour_settings_custom['max_x_ticks']) != 'auto': #This is because if the word 'auto' is received then we skip these lines.
-                contour_settings_custom['max_x_ticks'] = int(contour_settings_custom['max_x_ticks'])
+            if str(contour_settings_custom['max_num_x_ticks']) != 'auto': #This is because if the word 'auto' is received then we skip these lines.
+                contour_settings_custom['max_num_x_ticks'] = int(contour_settings_custom['max_num_x_ticks'])
                 from matplotlib.ticker import MaxNLocator
-                ax.xaxis.set_major_locator( MaxNLocator(nbins = contour_settings_custom['max_x_ticks'] ) )
-            if str(contour_settings_custom['max_y_ticks']) != 'auto': #This is because if the word 'auto' is received then we skip these lines.
-                contour_settings_custom['max_y_ticks'] = int(contour_settings_custom['max_y_ticks'])
+                ax.xaxis.set_major_locator( MaxNLocator(nbins = contour_settings_custom['max_num_x_ticks'] ) )
+            if str(contour_settings_custom['max_num_y_ticks']) != 'auto': #This is because if the word 'auto' is received then we skip these lines.
+                contour_settings_custom['max_num_y_ticks'] = int(contour_settings_custom['max_num_y_ticks'])
                 from matplotlib.ticker import MaxNLocator
-                ax.yaxis.set_major_locator( MaxNLocator(nbins = contour_settings_custom['max_y_ticks'] ) )
+                ax.yaxis.set_major_locator( MaxNLocator(nbins = contour_settings_custom['max_num_y_ticks'] ) )
             if 'x_ticks' in  contour_settings_custom: #This feature is not recommended to be used.
                 if str(contour_settings_custom['x_ticks']).lower() != 'auto':
                     ax.set_xticks(contour_settings_custom['x_ticks'])

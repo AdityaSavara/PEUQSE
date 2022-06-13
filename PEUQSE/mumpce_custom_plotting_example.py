@@ -36,8 +36,8 @@ contour_settings_custom['cmap_posterior']  #define a color map directly
 contour_settings_custom['colormap_prior_customized'] #accepts a string (matplotlib colormap names, like 'Greens') or a list of tuples with 0-to-1 and colornames to interpolate between. For example, the default right now is:  [(0,    '#00FFFF'),(1,    '#0000FF')]. The tuple could have 0, 0.7, and 1, for example. #colors can be obtained from: https://www.htmlcsscolor.com/hex/244162  
 contour_settings_custom['colormap_posterior_customized'] #accepts a string (matplotlib colormap names, like 'Oranges') or a list of tuples with 0-to-1 and colornames to interpolate between. For example, the default right now is:  [(0,    '#FFFF00'),(1,    '#FF0000')]. The tuple could have 0, 0.7, and 1, for example. #colors can be obtained from: https://www.htmlcsscolor.com/hex/244162  
 contour_settings_custom['contours_normalized'] = True #Makes the maximum 1, with the contours at 0.2, 0.4, 0.6., 0.8
-contour_settings_custom['max_y_ticks'] #adusts number of y ticks (actually sets a maximum number of them). #max_y_ticks and max_x_ticks must be either a string ('auto') or an integer (such as 4, either without string or with integer casting like int('5')). This feature is recommended.  #Note that this is a *request* When it's not fulfilled exactly, the user can play with the number.
-contour_settings_custom['max_x_ticks'] #adjusts number of x ticks (actually sets a maximum number of them). #max_y_ticks and max_x_ticks must be either a string ('auto') or an integer (such as 4, either without string or with integer casting like int('5')).This feature is recommended. #Note that this is a *request* When it's not fulfilled exactly, the user can play with the number.
+contour_settings_custom['max_num_y_ticks'] #adusts number of y ticks (actually sets a maximum number of them). #max_num_y_ticks and max_num_x_ticks must be either a string ('auto') or an integer (such as 4, either without string or with integer casting like int('5')). This feature is recommended.  #Note that this is a *request* When it's not fulfilled exactly, the user can play with the number.
+contour_settings_custom['max_num_x_ticks'] #adjusts number of x ticks (actually sets a maximum number of them). #max_num_y_ticks and max_num_x_ticks must be either a string ('auto') or an integer (such as 4, either without string or with integer casting like int('5')).This feature is recommended. #Note that this is a *request* When it's not fulfilled exactly, the user can play with the number.
 contour_settings_custom['x_ticks'] #feed in an array of directly. Not recommended.
 contour_settings_custom['y_ticks'] #feed in an array of directly. Not recommended.
 contour_settings_custom['axis_limits'] #Feed in list of [x_min, x_max, y_min, y_max]. This is recommended for use.
@@ -87,8 +87,8 @@ mumpceProjectObject.plot_pdfs(mumpceProjectObject.pairsOfParameterIndices, conto
 contour_settings_custom={}
 contour_settings_custom['figure_name']='mumpce_plots_03'
 contour_settings_custom['fontsize'] = 'auto'
-contour_settings_custom['max_y_ticks'] = 'auto'
-contour_settings_custom['max_x_ticks'] = 'auto'
+contour_settings_custom['max_num_y_ticks'] = 'auto'
+contour_settings_custom['max_num_x_ticks'] = 'auto'
 contour_settings_custom['colorbars'] = True
 contour_settings_custom['space_between_subplots'] = 0.20
 mumpceProjectObject.plot_pdfs(mumpceProjectObject.pairsOfParameterIndices, contour_settings_custom = contour_settings_custom)
@@ -96,8 +96,8 @@ mumpceProjectObject.plot_pdfs(mumpceProjectObject.pairsOfParameterIndices, conto
 contour_settings_custom = {}
 contour_settings_custom['figure_name']='mumpce_plots_04'
 contour_settings_custom['fontsize'] = 'auto'
-contour_settings_custom['max_y_ticks'] = 3 #Note that this is a *request* When it's not fulfilled exactly, the user can play with the number.
-contour_settings_custom['max_x_ticks'] = 3 #Note that this is a *request* When it's not fulfilled exactly, the user can play with the number.
+contour_settings_custom['max_num_y_ticks'] = 3 #Note that this is a *request* When it's not fulfilled exactly, the user can play with the number.
+contour_settings_custom['max_num_x_ticks'] = 3 #Note that this is a *request* When it's not fulfilled exactly, the user can play with the number.
 contour_settings_custom['colormap_posterior_customized'] = "Oranges"
 contour_settings_custom['colormap_prior_customized'] = "Greens"
 contour_settings_custom['contours_normalized'] = False
