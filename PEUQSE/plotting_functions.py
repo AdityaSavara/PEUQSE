@@ -338,7 +338,7 @@ def density_scatter( x , y, ax = None, sort = True, bins = 20, **kwargs )   :
     return fig, ax                   
 
 
-def createScatterMatrixPlot(data_a, data_b, a_tuple, b_tuple, point_plot_settings, cross_plot_settings, graphs_directory, plot_settings):
+def createScatterPlot(data_a, data_b, a_tuple, b_tuple, point_plot_settings, cross_plot_settings, graphs_directory, plot_settings):
     """Generates and saves a scatter matrix plot.
 
     :param data_a: parameter points in first for loop (:type: pd.Series)

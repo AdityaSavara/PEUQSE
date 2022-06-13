@@ -2415,19 +2415,21 @@ class parameter_estimation:
             point_plot_settings = (self.UserInput.scatter_matrix_plots_settings['sampled_point_sizes'], self.UserInput.scatter_matrix_plots_settings['sampled_point_transparency'])
             cross_plot_settings = (self.UserInput.scatter_matrix_plots_settings['cross_marker_size'], self.UserInput.scatter_matrix_plots_settings['cross_marker_transparency'])
             graphs_directory = self.UserInput.directories['graphs']
-            # compare each parameter without having repeats
-            # Zip parameters contain parameter names, MAP, muAP, and initial value
-            # i and j represent the index of the matrix for the rows and columns respectively.
+            # combine all the solutions and meta data for each parameter posterior to the simulation.
+            # Zip parameters contain parameter columns in dataframe, parameter names, MAP, muAP, and initial value
+            finalParametersAndMetaData = zip(posterior_df.columns, parameterNamesAndMathTypeExpressionsDict.keys(), parameterMAPValue, parameterMuAPValue, parameterInitialValue)
+            # compare each parameter with only unique solutions
+            # i and j represent the index of an abstract matrix created from comparing the parameter vectors.
             # The loop moves through the matrix and compares parameters by plotting but will only plot the bottom triangle of the matrix.
-            for i, (param_a_column, param_a_name, param_a_MAP, param_a_mu_AP, param_a_initial) in enumerate(zip(posterior_df.columns, parameterNamesAndMathTypeExpressionsDict.keys(), parameterMAPValue, parameterMuAPValue, parameterInitialValue)):
-                for j, (param_b_column, param_b_name, param_b_MAP, param_b_mu_AP, param_b_initial) in enumerate(zip(posterior_df.columns, parameterNamesAndMathTypeExpressionsDict.keys(), parameterMAPValue, parameterMuAPValue, parameterInitialValue)):
+            for i, (param_a_column, param_a_name, param_a_MAP, param_a_mu_AP, param_a_initial) in enumerate(finalParametersAndMetaData):
+                for j, (param_b_column, param_b_name, param_b_MAP, param_b_mu_AP, param_b_initial) in enumerate(finalParametersAndMetaData):
                     if i != j and i<j: # only use the bottom triangle of the matrix and do not use the main diagonal
-                        plotting_functions.createScatterMatrixPlot(posterior_df[param_a_column], posterior_df[param_b_column], (param_a_column, param_a_name, param_a_MAP, param_a_mu_AP, param_a_initial),
+                        plotting_functions.createScatterPlot(posterior_df[param_a_column], posterior_df[param_b_column], (param_a_column, param_a_name, param_a_MAP, param_a_mu_AP, param_a_initial),
                                             (param_b_column, param_b_name, param_b_MAP, param_b_mu_AP, param_b_initial), point_plot_settings, cross_plot_settings, graphs_directory, plot_settings)
-            return 
-        pd.plotting.scatter_matrix(posterior_df)
-        plt.savefig(self.UserInput.directories['graphs']+plot_settings['figure_name'],dpi=plot_settings['dpi'])
-        plt.close()
+        else:
+            pd.plotting.scatter_matrix(posterior_df)
+            plt.savefig(self.UserInput.directories['graphs']+plot_settings['figure_name'],dpi=plot_settings['dpi'])
+            plt.close()
         
     def makeScatterHeatMapPlots(self, parameterSamples = [], parameterNamesAndMathTypeExpressionsDict={}, parameterNamesList =[], parameterMAPValue=[], parameterMuAPValue=[], parameterInitialValue = [], plot_settings={'combined_plots':'auto'}):
         import pandas as pd #This is the only function that needs pandas.
@@ -2447,12 +2449,14 @@ class parameter_estimation:
         point_plot_settings = (self.UserInput.scatter_heatmap_plots_settings['sampled_point_sizes'], self.UserInput.scatter_heatmap_plots_settings['sampled_point_transparency'])
         cross_plot_settings = (self.UserInput.scatter_heatmap_plots_settings['cross_marker_size'], self.UserInput.scatter_heatmap_plots_settings['cross_marker_transparency'])
         graphs_directory = self.UserInput.directories['graphs']
-        # compare each parameter without having repeats
-        # Zip parameters contain parameter names, MAP, muAP, and initial value
-        # i and j represent the index of the matrix for the rows and columns respectively.
+        # combine all the solutions and meta data for each parameter posterior to the simulation.
+        # Zip parameters contain parameter columns in dataframe, parameter names, MAP, muAP, and initial value
+        finalParametersAndMetaData = zip(posterior_df.columns, parameterNamesAndMathTypeExpressionsDict.keys(), parameterMAPValue, parameterMuAPValue, parameterInitialValue)
+        # compare each parameter with only unique solutions
+        # i and j represent the index of an abstract matrix created from comparing the parameter vectors.
         # The loop moves through the matrix and compares parameters by plotting but will only plot the bottom triangle of the matrix.
-        for i, (param_a_column, param_a_name, param_a_MAP, param_a_mu_AP, param_a_initial) in enumerate(zip(posterior_df.columns, parameterNamesAndMathTypeExpressionsDict.keys(), parameterMAPValue, parameterMuAPValue, parameterInitialValue)):
-            for j, (param_b_column, param_b_name, param_b_MAP, param_b_mu_AP, param_b_initial) in enumerate(zip(posterior_df.columns, parameterNamesAndMathTypeExpressionsDict.keys(), parameterMAPValue, parameterMuAPValue, parameterInitialValue)):
+        for i, (param_a_column, param_a_name, param_a_MAP, param_a_mu_AP, param_a_initial) in enumerate(finalParametersAndMetaData):
+            for j, (param_b_column, param_b_name, param_b_MAP, param_b_mu_AP, param_b_initial) in enumerate(finalParametersAndMetaData):
                 if i != j and i<j: # only use the bottom triangle of the matrix and do not use the main diagonal
                     plotting_functions.createScatterHeatMapPlot(posterior_df[param_a_column], posterior_df[param_b_column], (param_a_column, param_a_name, param_a_MAP, param_a_mu_AP, param_a_initial),
                                         (param_b_column, param_b_name, param_b_MAP, param_b_mu_AP, param_b_initial), point_plot_settings, cross_plot_settings, graphs_directory, plot_settings) 
