@@ -1,4 +1,3 @@
-from distutils.log import warn
 import numpy as np
 #from mpl_toolkits.mplot3d import Axes3D
 #import scipy
@@ -1636,8 +1635,8 @@ class parameter_estimation:
                     with catch_warnings():
                         simplefilter("ignore")
                         current_info_gain_KL = density0[1]*np.log(density0[1]/density0[0])
-                        current_info_gain_KL = current_info_gain_KL[np.isfinite(current_info_gain_KL)]
-                        current_info_gain_KL = np.sum(current_info_gain_KL)
+                    current_info_gain_KL = current_info_gain_KL[np.isfinite(current_info_gain_KL)]
+                    current_info_gain_KL = np.sum(current_info_gain_KL)
                     self.info_gain_KL_each_parameter.append(current_info_gain_KL) #could make this optional, but normally shouldn't take much memory.
                     self.info_gain_KL = self.info_gain_KL + current_info_gain_KL
                 self.info_gain_each_parameter = self.info_gain_KL_each_parameter #could make this optional, but normally shouldn't take much memory.
