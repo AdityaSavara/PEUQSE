@@ -146,7 +146,7 @@ scatter_matrix_plots_settings['cross_marker_transparency'] = 0.8 #Transparency o
 scatter_matrix_plots_settings['max_num_x_ticks'] = 'auto' #Maximum number of tick marks on x axis. This value should be an integer or the string 'auto' to let matplotlib choose the number of tick marks.
 scatter_matrix_plots_settings['max_num_y_ticks'] = 'auto' #Maximum number of tick marks on y axis. This value should be an integer or the string 'auto' to let matplotlib choose the number of tick marks.
 scatter_matrix_plots_settings['fontsize'] = 16 #Fontsize of labels on x and y axis. This value should be an integer. 
-scatter_matrix_plots_settings['all_pair_permutations'] = False #By default, (a,b) will be made and not (b,a). To get all permutations rather than only combinations, set this option to True.
+scatter_matrix_plots_settings['all_pair_permutations'] = True #By default, all possible permutations are created [(a,b) and (b,a)]. To get only combinations rather than all permutations, set this option to False.
 
 #Scatter Heatmap Plot Settings
 scatter_heatmap_plots_settings ={}
@@ -159,7 +159,7 @@ scatter_heatmap_plots_settings['cross_marker_transparency'] = 0.8 #Transparency 
 scatter_heatmap_plots_settings['max_num_x_ticks'] = 'auto' #Maximum number of tick marks on x axis. This value should be an integer or the string 'auto' to let matplotlib choose the number of tick marks.
 scatter_heatmap_plots_settings['max_num_y_ticks'] = 'auto' #Maximum number of tick marks on y axis. This value should be an integer or the string 'auto' to let matplotlib choose the number of tick marks.
 scatter_heatmap_plots_settings['fontsize'] = 16 #Fontsize of labels on x and y axis. This value should be an integer. 
-scatter_heatmap_plots_settings['all_pair_permutations'] = False #By default, (a,b) will be made and not (b,a). To get all permutations rather than only combinations, set this option to True.
+scatter_heatmap_plots_settings['all_pair_permutations'] = True #By default, all possible permutations are created [(a,b) and (b,a)]. To get only combinations rather than all permutations, set this option to False.
 
 #contour plots# / #mumpce plots#
 #model_parameter_info = np.array([{'parameter_number': 0, 'parameter_name': r'$E_{a1}$'},
