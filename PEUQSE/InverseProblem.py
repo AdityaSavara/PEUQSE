@@ -2417,14 +2417,20 @@ class parameter_estimation:
             graphs_directory = self.UserInput.directories['graphs']
             # combine all the solutions and meta data for each parameter posterior to the simulation.
             # Zip parameters contain parameter columns in dataframe, parameter names, MAP, muAP, and initial value
-            finalParametersAndMetaData = zip(posterior_df.columns, parameterNamesAndMathTypeExpressionsDict.keys(), parameterMAPValue, parameterMuAPValue, parameterInitialValue)
+            finalParametersAndMetaData1 = zip(posterior_df.columns, parameterNamesAndMathTypeExpressionsDict.keys(), parameterMAPValue, parameterMuAPValue, parameterInitialValue)
+            finalParametersAndMetaData2 = zip(posterior_df.columns, parameterNamesAndMathTypeExpressionsDict.keys(), parameterMAPValue, parameterMuAPValue, parameterInitialValue)
             # compare each parameter with only unique solutions
             # i and j represent the index of an abstract matrix created from comparing the parameter vectors.
             # The loop moves through the matrix and compares parameters by plotting but will only plot the bottom triangle of the matrix.
-            for i, (param_a_column, param_a_name, param_a_MAP, param_a_mu_AP, param_a_initial) in enumerate(finalParametersAndMetaData):
-                for j, (param_b_column, param_b_name, param_b_MAP, param_b_mu_AP, param_b_initial) in enumerate(finalParametersAndMetaData):
-                    if i != j and i<j: # only use the bottom triangle of the matrix and do not use the main diagonal
-                        plotting_functions.createScatterPlot(posterior_df[param_a_column], posterior_df[param_b_column], (param_a_column, param_a_name, param_a_MAP, param_a_mu_AP, param_a_initial),
+            for param_a_index, (param_a_column, param_a_name, param_a_MAP, param_a_mu_AP, param_a_initial) in enumerate(finalParametersAndMetaData1):
+                for param_b_index, (param_b_column, param_b_name, param_b_MAP, param_b_mu_AP, param_b_initial) in enumerate(finalParametersAndMetaData2):
+                    if param_a_index != param_b_index:
+                        if self.UserInput.scatter_matrix_plots_settings['all_pair_permutations']:
+                            plotting_functions.createScatterPlot(posterior_df[param_a_column], posterior_df[param_b_column], (param_a_column, param_a_name, param_a_MAP, param_a_mu_AP, param_a_initial),
+                                            (param_b_column, param_b_name, param_b_MAP, param_b_mu_AP, param_b_initial), point_plot_settings, cross_plot_settings, graphs_directory, plot_settings)
+                        else:
+                            if param_a_index<param_b_index: # only use the bottom triangle of the matrix and do not use the main diagonal
+                                plotting_functions.createScatterPlot(posterior_df[param_a_column], posterior_df[param_b_column], (param_a_column, param_a_name, param_a_MAP, param_a_mu_AP, param_a_initial),
                                             (param_b_column, param_b_name, param_b_MAP, param_b_mu_AP, param_b_initial), point_plot_settings, cross_plot_settings, graphs_directory, plot_settings)
         else:
             pd.plotting.scatter_matrix(posterior_df)
@@ -2451,14 +2457,20 @@ class parameter_estimation:
         graphs_directory = self.UserInput.directories['graphs']
         # combine all the solutions and meta data for each parameter posterior to the simulation.
         # Zip parameters contain parameter columns in dataframe, parameter names, MAP, muAP, and initial value
-        finalParametersAndMetaData = zip(posterior_df.columns, parameterNamesAndMathTypeExpressionsDict.keys(), parameterMAPValue, parameterMuAPValue, parameterInitialValue)
+        finalParametersAndMetaData1 = zip(posterior_df.columns, parameterNamesAndMathTypeExpressionsDict.keys(), parameterMAPValue, parameterMuAPValue, parameterInitialValue)
+        finalParametersAndMetaData2 = zip(posterior_df.columns, parameterNamesAndMathTypeExpressionsDict.keys(), parameterMAPValue, parameterMuAPValue, parameterInitialValue)
         # compare each parameter with only unique solutions
         # i and j represent the index of an abstract matrix created from comparing the parameter vectors.
         # The loop moves through the matrix and compares parameters by plotting but will only plot the bottom triangle of the matrix.
-        for i, (param_a_column, param_a_name, param_a_MAP, param_a_mu_AP, param_a_initial) in enumerate(finalParametersAndMetaData):
-            for j, (param_b_column, param_b_name, param_b_MAP, param_b_mu_AP, param_b_initial) in enumerate(finalParametersAndMetaData):
-                if i != j and i<j: # only use the bottom triangle of the matrix and do not use the main diagonal
-                    plotting_functions.createScatterHeatMapPlot(posterior_df[param_a_column], posterior_df[param_b_column], (param_a_column, param_a_name, param_a_MAP, param_a_mu_AP, param_a_initial),
+        for param_a_index, (param_a_column, param_a_name, param_a_MAP, param_a_mu_AP, param_a_initial) in enumerate(finalParametersAndMetaData1):
+            for param_b_index, (param_b_column, param_b_name, param_b_MAP, param_b_mu_AP, param_b_initial) in enumerate(finalParametersAndMetaData2):
+                if param_a_index != param_b_index:
+                    if self.UserInput.scatter_heatmap_plots_settings['all_pair_permutations']:
+                        plotting_functions.createScatterHeatMapPlot(posterior_df[param_a_column], posterior_df[param_b_column], (param_a_column, param_a_name, param_a_MAP, param_a_mu_AP, param_a_initial),
+                                    (param_b_column, param_b_name, param_b_MAP, param_b_mu_AP, param_b_initial), point_plot_settings, cross_plot_settings, graphs_directory, plot_settings) 
+                    else:
+                        if param_a_index<param_b_index: # only use the bottom triangle of the matrix and do not use the main diagonal
+                            plotting_functions.createScatterHeatMapPlot(posterior_df[param_a_column], posterior_df[param_b_column], (param_a_column, param_a_name, param_a_MAP, param_a_mu_AP, param_a_initial),
                                         (param_b_column, param_b_name, param_b_MAP, param_b_mu_AP, param_b_initial), point_plot_settings, cross_plot_settings, graphs_directory, plot_settings) 
 
     def createSimulatedResponsesPlots(self, allResponses_x_values=[], allResponsesListsOfYArrays =[], plot_settings={},allResponsesListsOfYUncertaintiesArrays=[] ): 
