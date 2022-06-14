@@ -1,5 +1,5 @@
 import pandas as pd
-import sys; sys.path.append('../../');  import PEUQSE as PEUQSE
+import sys; sys.path.insert(0, '../../');  import PEUQSE as PEUQSE
 import cantera as ct
 import cantera.ck2cti as ck2cti
 import PEUQSE.simulationDriver.canteraSimulate

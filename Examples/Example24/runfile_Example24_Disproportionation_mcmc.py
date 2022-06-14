@@ -1,4 +1,4 @@
-import sys; sys.path.append('../../');  import PEUQSE as PEUQSE
+import sys; sys.path.insert(0, '../../');  import PEUQSE as PEUQSE
 import PEUQSE.UserInput as UserInput
 
 global PE_object
@@ -60,8 +60,8 @@ def main():
         
     UserInput.contour_plot_settings['figure_name']='PosteriorContourPlotDisproportionation'
     UserInput.contour_plot_settings['fontsize']='22'
-    UserInput.contour_plot_settings['num_y_ticks']=3
-    UserInput.contour_plot_settings['num_x_ticks']=3
+    UserInput.contour_plot_settings['max_num_y_ticks']=3
+    UserInput.contour_plot_settings['max_num_x_ticks']=3
     UserInput.contour_plot_settings['colorbars']='False'
     
     PE_object.createAllPlots()
