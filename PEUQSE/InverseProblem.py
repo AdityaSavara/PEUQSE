@@ -1624,13 +1624,17 @@ class parameter_estimation:
         if self.UserInput.parameter_estimation_settings['mcmc_info_gain_returned'] == 'KL_divergence':
             try: #If the info_gain_KL fails, we will return info_gain_log_ratio. 
                 #Below is the KL_divergence info_gain calculation.
+                from warnings import catch_warnings, simplefilter #Used to surpress warnings from 0 probability density in current_info_gain_KL calculation
                 length, width = self.post_burn_in_samples.shape
                 self.info_gain_KL = 0
                 self.info_gain_KL_each_parameter  = []
                 for param in range(width):
                     import matplotlib.pyplot as plt #FIXME: #TODO: this plotting needs to be moved into the plotting area and as optinoal.
                     (density0,bins0,pathces0)=plt.hist([self.samples_of_prior[:,param].flatten(),self.post_burn_in_samples[:,param].flatten()],bins=100,density=True)
-                    current_info_gain_KL = density0[1]*np.log(density0[1]/density0[0])
+                    # the following code handles surpressing the RuntimeWarning displayed when dealing with a 0 probability density in calculating current_info_gain_KL. It does not affect the calculation at all.
+                    with catch_warnings():
+                        simplefilter("ignore")
+                        current_info_gain_KL = density0[1]*np.log(density0[1]/density0[0])
                     current_info_gain_KL = current_info_gain_KL[np.isfinite(current_info_gain_KL)]
                     current_info_gain_KL = np.sum(current_info_gain_KL)
                     self.info_gain_KL_each_parameter.append(current_info_gain_KL) #could make this optional, but normally shouldn't take much memory.

@@ -5,7 +5,7 @@ Created on Mon May  4 11:02:29 2020
 @author: fvs
 """
 
-import sys; sys.path.append('../../');  import PEUQSE as PEUQSE
+import sys; sys.path.insert(0, '../../');  import PEUQSE as PEUQSE
 import PEUQSE.UserInput as UserInput
 
 import processing_functions_tpd_odeint_two_site_NineParameters
