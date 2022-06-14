@@ -111,14 +111,14 @@ plotting_ouput_settings['setMatPlotLibAgg'] = 'auto' #This setting controls whet
 histogram_plot_settings = {}
 histogram_plot_settings['histograms_as_density']= False # When true, the histograms will be shown as density with integral normalized to 1. It's good to keep this as False during analysis, then to set to True to make final graphs for presentations.  By default this is False. When this is False, for ESS or MH the histograms will show sampling frequency. When this is False, for uniform or random samplings, the histograms show a pseudo-sampling frequency with an order of magnitude proportional to multistart_gridsearch_threshold_filter_coefficient.
 histogram_plot_settings['y_label'] = '' #will use defaults if ''
-# histogram_plot_settings['show_initial_value'] = True
-# histogram_plot_settings['show_MAP_value'] = True
-# histogram_plot_settings['show_muAP_value'] = True
+histogram_plot_settings['dpi'] = 220 #Dots per Inch specification. This changes the resolution of the image created. Larger values are recommended for important pictures.
+histogram_plot_settings['show_initial_value'] = True #This option shows the initial value as a vertical line in the histogram.
+histogram_plot_settings['show_MAP_value'] = True #This option shows the MAP as a vertical line in the histogram.
+histogram_plot_settings['show_muAP_value'] = True #This option shows the muAP as a vertical line in the histogram.
+histogram_plot_settings['vertical_linewidth'] = 1.5 #This value changes the linewidth of the initial value, MAP, and muAP. The units are points, where 1 point is dpi/72 pixels. Typical values are 1 for thin and 4 for thick.
 histogram_plot_settings['x_label_size'] = 16
 histogram_plot_settings['y_label_size'] = 16
 histogram_plot_settings['axis_font_size'] = 16
-histogram_plot_settings['vertical_line_markers'] = True
-
 
 
 #Response Plot Settings

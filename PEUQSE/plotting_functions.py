@@ -122,6 +122,8 @@ def sampledParameterHistogramMaker(parameterSamples, parameterName, parameterNam
             histogram_plot_settings['x_label_size'] = 16
             histogram_plot_settings['y_label_size'] = 16
             histogram_plot_settings['axis_font_size'] = 16
+            histogram_plot_settings['dpi'] = 220
+            histogram_plot_settings['vertical_linewidth'] = 1.5
 
 
         #The axis font size argument needs to be parsed into another form. #Code was made following answer by "binaryfunt" here https://stackoverflow.com/questions/3899980/how-to-change-the-font-size-on-a-matplotlib-plot
@@ -141,20 +143,19 @@ def sampledParameterHistogramMaker(parameterSamples, parameterName, parameterNam
         sampledParameterAxesDictionary[parameterName].set_xlabel(parameterNamesAndMathTypeExpressionsDict[parameterName], **axis_font)
 
         # Add vertical lines at initial value, MAP, and, muAP if determined by UserInput
-        if histogram_plot_settings['vertical_line_markers']:
-            # Make sure that the value passed has a value
-            if type(parameterInitialValue) != type(None):
-                sampledParameterAxesDictionary[parameterName].axvline(x=parameterInitialValue, color='#00A5DF', linestyle='--')
-            if type(parameterMAPValue) != type(None):
-                sampledParameterAxesDictionary[parameterName].axvline(x=parameterMAPValue, color='r', linestyle='--')
-            if type(parameterMuAPValue) != type(None):
-                sampledParameterAxesDictionary[parameterName].axvline(x=parameterMuAPValue, color='k', linestyle='--')
+        # Make sure that the value passed has a value
+        if histogram_plot_settings['show_initial_value'] and type(parameterInitialValue) != type(None):
+            sampledParameterAxesDictionary[parameterName].axvline(x=parameterInitialValue, color='#00A5DF', linestyle='--', linewidth=histogram_plot_settings['vertical_linewidth'])
+        if histogram_plot_settings['show_MAP_value'] and type(parameterMAPValue) != type(None):
+            sampledParameterAxesDictionary[parameterName].axvline(x=parameterMAPValue, color='r', linestyle='--', linewidth=histogram_plot_settings['vertical_linewidth'])
+        if histogram_plot_settings['show_muAP_value'] and type(parameterMuAPValue) != type(None):
+            sampledParameterAxesDictionary[parameterName].axvline(x=parameterMuAPValue, color='k', linestyle='--', linewidth=histogram_plot_settings['vertical_linewidth'])
 
 
         sampledParameterAxesDictionary[parameterName].tick_params(axis='x', labelsize=histogram_plot_settings['x_label_size']) #TODO: make these labels sizes a setting that can be changed.
         sampledParameterAxesDictionary[parameterName].tick_params(axis='y', labelsize=histogram_plot_settings['y_label_size'])
         sampledParameterFiguresDictionary[parameterName].tight_layout()
-        sampledParameterFiguresDictionary[parameterName].savefig(directory+'Histogram_sampling_'+str(parameterIndex)+'_'+parameterName+'.png', dpi=220)
+        sampledParameterFiguresDictionary[parameterName].savefig(directory+'Histogram_sampling_'+str(parameterIndex)+'_'+parameterName+'.png', dpi=histogram_plot_settings['dpi'])
 
         
         
