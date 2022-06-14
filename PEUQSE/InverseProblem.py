@@ -2411,9 +2411,7 @@ class parameter_estimation:
                     individual_plots = True
         if individual_plots == True: #This means we will return individual plots.
             #The below code was added by Troy Gustke and merged in to PEUQSE at end of June 2021.
-            # create tuples for plotting options
-            point_plot_settings = (self.UserInput.scatter_matrix_plots_settings['sampled_point_sizes'], self.UserInput.scatter_matrix_plots_settings['sampled_point_transparency'])
-            cross_plot_settings = (self.UserInput.scatter_matrix_plots_settings['cross_marker_size'], self.UserInput.scatter_matrix_plots_settings['cross_marker_transparency'])
+            # create graph variable for plotting options
             graphs_directory = self.UserInput.directories['graphs']
             # combine all the solutions and meta data for each parameter posterior to the simulation.
             # Zip parameters contain parameter columns in dataframe, parameter names, MAP, muAP, and initial value
@@ -2427,11 +2425,11 @@ class parameter_estimation:
                     if param_a_index != param_b_index:
                         if self.UserInput.scatter_matrix_plots_settings['all_pair_permutations']:
                             plotting_functions.createScatterPlot(posterior_df[param_a_column], posterior_df[param_b_column], (param_a_column, param_a_name, param_a_MAP, param_a_mu_AP, param_a_initial),
-                                            (param_b_column, param_b_name, param_b_MAP, param_b_mu_AP, param_b_initial), point_plot_settings, cross_plot_settings, graphs_directory, plot_settings)
+                                            (param_b_column, param_b_name, param_b_MAP, param_b_mu_AP, param_b_initial), graphs_directory, plot_settings)
                         else:
                             if param_a_index<param_b_index: # only use the bottom triangle of the matrix and do not use the main diagonal
                                 plotting_functions.createScatterPlot(posterior_df[param_a_column], posterior_df[param_b_column], (param_a_column, param_a_name, param_a_MAP, param_a_mu_AP, param_a_initial),
-                                            (param_b_column, param_b_name, param_b_MAP, param_b_mu_AP, param_b_initial), point_plot_settings, cross_plot_settings, graphs_directory, plot_settings)
+                                            (param_b_column, param_b_name, param_b_MAP, param_b_mu_AP, param_b_initial), graphs_directory, plot_settings)
         else:
             pd.plotting.scatter_matrix(posterior_df)
             plt.savefig(self.UserInput.directories['graphs']+plot_settings['figure_name'],dpi=plot_settings['dpi'])
@@ -2451,9 +2449,7 @@ class parameter_estimation:
         if parameterInitialValue == []: parameterInitialValue = self.UserInput.model['InputParameterPriorValues']
         # will always be seperate plots
         posterior_df = pd.DataFrame(parameterSamples,columns=[parameterNamesAndMathTypeExpressionsDict[x] for x in parameterNamesList])
-        # create tuples for plotting options
-        point_plot_settings = (self.UserInput.scatter_heatmap_plots_settings['sampled_point_sizes'], self.UserInput.scatter_heatmap_plots_settings['sampled_point_transparency'])
-        cross_plot_settings = (self.UserInput.scatter_heatmap_plots_settings['cross_marker_size'], self.UserInput.scatter_heatmap_plots_settings['cross_marker_transparency'])
+        # create graph variable for plotting options
         graphs_directory = self.UserInput.directories['graphs']
         # combine all the solutions and meta data for each parameter posterior to the simulation.
         # Zip parameters contain parameter columns in dataframe, parameter names, MAP, muAP, and initial value

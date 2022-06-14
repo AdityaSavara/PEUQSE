@@ -339,7 +339,7 @@ def density_scatter( x , y, ax = None, sort = True, bins = 20, **kwargs )   :
     return fig, ax                   
 
 
-def createScatterPlot(data_a, data_b, a_tuple, b_tuple, point_plot_settings, cross_plot_settings, graphs_directory, plot_settings):
+def createScatterPlot(data_a, data_b, a_tuple, b_tuple, graphs_directory, plot_settings):
     """Generates and saves a scatter matrix plot.
 
     :param data_a: parameter points in first for loop (:type: pd.Series)
@@ -352,6 +352,8 @@ def createScatterPlot(data_a, data_b, a_tuple, b_tuple, point_plot_settings, cro
     :param plot_settings: plot settings from User Input (:type: dict)
     """
     import matplotlib.pyplot as plt
+    point_plot_settings = (point_plot_settings['sampled_point_sizes'], point_plot_settings['sampled_point_transparency'])
+    cross_plot_settings = (point_plot_settings['cross_marker_size'], point_plot_settings['cross_marker_transparency'])
     fig = plt.figure()
     # create a scatter plot of the posterior data between two parameters
     plt.scatter(data_a, data_b, s=point_plot_settings[0], alpha=point_plot_settings[1])
@@ -373,7 +375,7 @@ def createScatterPlot(data_a, data_b, a_tuple, b_tuple, point_plot_settings, cro
     fig.savefig(graphs_directory+f'Scatter_{a_tuple[1]}_{b_tuple[1]}',dpi=plot_settings['dpi'])
     plt.close(fig)
 
-def createScatterHeatMapPlot(data_a, data_b, a_tuple, b_tuple, point_plot_settings, cross_plot_settings, graphs_directory, plot_settings):
+def createScatterHeatMapPlot(data_a, data_b, a_tuple, b_tuple, graphs_directory, plot_settings):
     """Generates and saves a scatter heat map plot.
 
     :param data_a: parameter points in first for loop (:type: pd.Series)
@@ -386,7 +388,8 @@ def createScatterHeatMapPlot(data_a, data_b, a_tuple, b_tuple, point_plot_settin
     :param plot_settings: plot settings from User Input (:type: dict)
     """
     import matplotlib.pyplot as plt
-
+    point_plot_settings = (point_plot_settings['sampled_point_sizes'], point_plot_settings['sampled_point_transparency'])
+    cross_plot_settings = (point_plot_settings['cross_marker_size'], point_plot_settings['cross_marker_transparency'])
     # create a scatter plot of the posterior data between two parameters
     fig, ax = density_scatter(data_a, data_b, s=point_plot_settings[0], alpha=point_plot_settings[1])
     # Allows the user to have no crosses if size is set to 0
