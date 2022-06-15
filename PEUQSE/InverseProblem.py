@@ -649,10 +649,18 @@ class parameter_estimation:
             initialPointsFirstTerm = np.zeros((numStartPoints, numParameters)) #Make the first term all zeros.
         elif initialPointsDistributionType.lower() =='gaussian':
             initialPointsFirstTerm = np.random.randn(numStartPoints, numParameters) #<--- this was from the zeus example. TODO: change this to rng.standard_normal
-        if initialPointsDistributionType.lower() == 'astroidal':
+        elif initialPointsDistributionType.lower() == 'astroidal':
             # The idea is to create a hypercube around the origin then apply a power law factor.
             # This factor is set as the numParameters to create an interesting distribution for Euclidean distance that starts as a uniform distribution then decays by a power law if the exponent is the number of dimensions. 
             initialPointsFirstTerm = np.random.uniform(-2, 2, [numStartPoints,numParameters]) ** numParameters
+        elif initialPointsDistributionType.lower() == 'sobol':
+            from scipy.stats import qmc
+            # A sobol object has to be created to then extract points from the object.
+            # The scramble (Owen Scramble) is always True. This option helps convergence and creates a more unbiased sampling.
+            sobol_object = qmc.Sobol(d=numParameters, scramble=True)
+            sobol_samples = sobol_object.random(numStartPoints)
+            # now we must translate the sequence (from range(0,1) to range(-2,2))
+            initialPointsFirstTerm = -2 + 4*sobol_samples
         if initialPointsDistributionType !='grid':
             #Now we add to centerPoint, usually self.UserInput.InputParameterInitialGuess. We don't use the UserInput initial guess directly because gridsearch and other things can change it -- so we need to use this one.
             initialPoints = relativeInitialDistributionSpread*initialPointsFirstTerm*self.UserInput.std_prior + centerPoint
