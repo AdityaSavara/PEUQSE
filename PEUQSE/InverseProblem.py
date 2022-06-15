@@ -652,10 +652,18 @@ class parameter_estimation:
         elif initialPointsDistributionType.lower() == 'astroidal':
             # The idea is to create a hypercube around the origin then apply a power law factor.
             # This factor is set as the numParameters to create an interesting distribution for Euclidean distance that starts as a uniform distribution then decays by a power law if the exponent is the number of dimensions. 
-            initialPointsFirstTerm = np.random.uniform(-2, 2, [numStartPoints,numParameters]) ** numParameters
+            initialPointsFirstTerm = np.random.uniform(-1, 1, [numStartPoints,numParameters]) ** numParameters
+            # This section assures that positive and negative values are generated.
+            if numParameters % 2 == 0:
+                # The exponent is turned to an odd number and the absolute value assures that negative values are included. 
+                initialPointsFirstTerm = initialPointsFirstTerm**(numParameters-1) * np.abs(initialPointsFirstTerm)
+            else:
+                initialPointsFirstTerm = initialPointsFirstTerm**numParameters
+            # Apply a proportional factor of 2 to get bounds of 2 sigma
+            initialPointsFirstTerm *= 2
         elif initialPointsDistributionType.lower() == 'sobol':
             from scipy.stats import qmc
-            from warnings import catch_warnings, simplefilter #used to surpress warnings when sobol samples are not base2.
+            from warnings import catch_warnings, simplefilter #used to suppress warnings when sobol samples are not base2.
             # A sobol object has to be created to then extract points from the object.
             # The scramble (Owen Scramble) is always True. This option helps convergence and creates a more unbiased sampling.
             sobol_object = qmc.Sobol(d=numParameters, scramble=True)
