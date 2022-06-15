@@ -655,10 +655,13 @@ class parameter_estimation:
             initialPointsFirstTerm = np.random.uniform(-2, 2, [numStartPoints,numParameters]) ** numParameters
         elif initialPointsDistributionType.lower() == 'sobol':
             from scipy.stats import qmc
+            from warnings import catch_warnings, simplefilter #used to surpress warnings when sobol samples are not base2.
             # A sobol object has to be created to then extract points from the object.
             # The scramble (Owen Scramble) is always True. This option helps convergence and creates a more unbiased sampling.
             sobol_object = qmc.Sobol(d=numParameters, scramble=True)
-            sobol_samples = sobol_object.random(numStartPoints)
+            with catch_warnings():
+                simplefilter("ignore")
+                sobol_samples = sobol_object.random(numStartPoints)
             # now we must translate the sequence (from range(0,1) to range(-2,2))
             initialPointsFirstTerm = -2 + 4*sobol_samples
         if initialPointsDistributionType !='grid':
