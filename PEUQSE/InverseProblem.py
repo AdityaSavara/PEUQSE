@@ -1885,6 +1885,19 @@ class parameter_estimation:
         pickleAnObject(self.map_parameter_set, self.UserInput.directories['pickles']+directory_name_suffix+file_name_prefix+'permutation_map_parameter_set'+file_name_suffix)
         pickleAnObject(self.UserInput.InputParameterInitialGuess, self.UserInput.directories['pickles']+directory_name_suffix+file_name_prefix+'permutation_initial_point_parameters'+file_name_suffix)
         
+    #Our EnsembleSampling is done by the emcee back end. (pip install emcee)
+    software_name = "emcee"
+    software_version = "3.1.2"
+    software_unique_id = "https://github.com/dfm/emcee"
+    software_kwargs = {"version": software_version, "author": ['Foreman-Mackey, D.', 'Hogg, D.~W.', 'Lang, D.', 'Goodman, J.'], "cite": ["@article{emcee, author = {{Foreman-Mackey}, D. and {Hogg}, D.~W. and {Lang}, D. and {Goodman}, J.}, title = {emcee: The MCMC Hammer}, journal = {PASP}, year = 2013, volume = 125, pages = {306-312}, eprint = {1202.3665}, doi = {10.1086/670067}}"] }
+    @CiteSoft.function_call_cite(unique_id=software_unique_id, software_name=software_name, **software_kwargs)
+    def doEnsembleSampling(self, mcmc_nwalkers_direct_input = None, walkerInitialDistribution='UserChoice', walkerInitialDistributionSpread='UserChoice', calculatePostBurnInStatistics=True, mcmc_exportLog ='UserChoice', continueSampling='auto'):
+        
+        import emcee
+        
+        pass
+
+
     #Our EnsembleSliceSampling is done by the Zeus back end. (pip install zeus-mcmc)
     software_name = "zeus"
     software_version = "2.0.0"
@@ -2467,11 +2480,11 @@ class parameter_estimation:
                 if param_a_index != param_b_index:
                     if self.UserInput.scatter_heatmap_plots_settings['all_pair_permutations']:
                         plotting_functions.createScatterHeatMapPlot(posterior_df[param_a_column], posterior_df[param_b_column], (param_a_column, param_a_name, param_a_MAP, param_a_mu_AP, param_a_initial),
-                                    (param_b_column, param_b_name, param_b_MAP, param_b_mu_AP, param_b_initial), point_plot_settings, cross_plot_settings, graphs_directory, plot_settings) 
+                                    (param_b_column, param_b_name, param_b_MAP, param_b_mu_AP, param_b_initial), graphs_directory, plot_settings) 
                     else:
                         if param_a_index<param_b_index: # only use the bottom triangle of the matrix and do not use the main diagonal
                             plotting_functions.createScatterHeatMapPlot(posterior_df[param_a_column], posterior_df[param_b_column], (param_a_column, param_a_name, param_a_MAP, param_a_mu_AP, param_a_initial),
-                                        (param_b_column, param_b_name, param_b_MAP, param_b_mu_AP, param_b_initial), point_plot_settings, cross_plot_settings, graphs_directory, plot_settings) 
+                                        (param_b_column, param_b_name, param_b_MAP, param_b_mu_AP, param_b_initial), graphs_directory, plot_settings) 
 
     def createSimulatedResponsesPlots(self, allResponses_x_values=[], allResponsesListsOfYArrays =[], plot_settings={},allResponsesListsOfYUncertaintiesArrays=[] ): 
         #allResponsesListsOfYArrays  is to have 3 layers of lists: Response > Responses Observed, mu_guess Simulated Responses, map_Simulated Responses, (mu_AP_simulatedResponses) > Values
