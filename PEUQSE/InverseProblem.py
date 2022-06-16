@@ -1901,7 +1901,7 @@ class parameter_estimation:
         if walkerInitialDistribution == 'UserChoice':
             walkerInitialDistribution = self.UserInput.parameter_estimation_settings['mcmc_walkerInitialDistribution']
         if walkerInitialDistribution.lower() == 'auto':
-            walkerInitialDistribution = 'uniform'
+            walkerInitialDistribution = 'sobol'
         if str(walkerInitialDistributionSpread) == 'UserChoice':
             walkerInitialDistributionSpread = self.UserInput.parameter_estimation_settings['mcmc_walkerInitialDistributionSpread']
         if str(walkerInitialDistributionSpread).lower() == 'auto':
@@ -1944,7 +1944,7 @@ class parameter_estimation:
         if isinstance(mcmc_nwalkers_direct_input, type(None)): #This is the normal case.
             if 'mcmc_nwalkers' not in self.UserInput.parameter_estimation_settings: self.mcmc_nwalkers = 'auto'
             else: self.mcmc_nwalkers = self.UserInput.parameter_estimation_settings['mcmc_nwalkers']
-            if type(self.mcmc_nwalkers) == type("string"): 
+            if isinstance(self.mcmc_nwalkers, str): 
                 if self.mcmc_nwalkers.lower() == "auto":
                     self.mcmc_nwalkers = numParameters*4
                 else: #else it is an integer, or a string meant to be an integer.
@@ -1952,7 +1952,7 @@ class parameter_estimation:
         else: #this is mainly for PermutationSearch which will (by default) use the minimum number of walkers per point.
             self.mcmc_nwalkers = int(mcmc_nwalkers_direct_input)
         if (self.mcmc_nwalkers%2) != 0: #Check that it's even. If not, add one walker.
-            print("The EnsembleSliceSampling requires an even number of Walkers. Adding one Walker.")
+            print("The EnsembleSampling requires an even number of Walkers. Adding one Walker.")
             self.mcmc_nwalkers = self.mcmc_nwalkers + 1
         requested_mcmc_steps = self.UserInput.parameter_estimation_settings['mcmc_length']
         nEnsembleSteps = int(requested_mcmc_steps/self.mcmc_nwalkers) #We calculate the calculate number of the Ensemble Steps from the total sampling steps requested divided by self.mcmc_nwalkers.
@@ -1967,33 +1967,35 @@ class parameter_estimation:
         if continueSampling == False:
             walkerStartPoints = self.generateInitialPoints(initialPointsDistributionType=walkerInitialDistribution, numStartPoints = self.mcmc_nwalkers,relativeInitialDistributionSpread=walkerInitialDistributionSpread) #making the first set of starting points.
         elif continueSampling == True:
-            walkerStartPoints = self.map_parameter_set #used to be self.mcmc_last_point_sampled. However, ESS works best when sampling near the peak (if there is a monomodoal HPD).
-        emcee_sampler = emcee.EnsembleSampler(self.mcmc_nwalkers, numParameters, logprob_fn=self.getLogP, maxiter=mcmc_maxiter) #maxiter=1E4 is the typical number, but we may want to increase it based on some UserInput variable.        
+            walkerStartPoints = self.mcmc_last_point_sampled 
+        emcee_sampler = emcee.EnsembleSampler(self.mcmc_nwalkers, numParameters, logprob_fn=self.getLogP)    
         for trialN in range(0,1000):#Todo: This number of this range is hardcoded but should probably be a user selection.
             try:
                 emcee_sampler.run_mcmc(walkerStartPoints, nEnsembleSteps)
                 break
             except Exception as exceptionObject:
+                #TODO: come up with exception summaries like this.
                 if "finite" in str(exceptionObject): #This means there is an error message from zeus saying " Invalid walker initial positions!  Initialise walkers from positions of finite log probability."
                     print("One of the starting points has a non-finite probability. Picking new starting points. If you see this message like an infinite loop, consider trying the doEnsembleSliceSampling optional argument of walkerInitialDistributionSpread. It has a default value of 1.0. Reducing this value to 0.25, for example, may work if your initial guess is near the maximum of the posterior distribution.")
                     #Need to make the sampler again, in this case, to throw away anything that has happened so far
                     walkerStartPoints = self.generateInitialPoints(initialPointsDistributionType=walkerInitialDistribution, numStartPoints = self.mcmc_nwalkers, relativeInitialDistributionSpread=walkerInitialDistributionSpread) 
-                    emcee_sampler = emcee.EnsembleSampler(self.mcmc_nwalkers, numParameters, logprob_fn=self.getLogP, maxiter=mcmc_maxiter) #maxiter=1E4 is the typical number, but we may want to increase it based on some UserInput variable.        
+                    emcee_sampler = emcee.EnsembleSampler(self.mcmc_nwalkers, numParameters, logprob_fn=self.getLogP)    
                 elif "maxiter" in str(exceptionObject): #This means there is an error message from zeus that the max iterations have been reached.
                     print("WARNING: One or more of the Ensemble Slice Sampling walkers encountered an error. The value of mcmc_maxiter is currently", mcmc_maxiter, "you should increase it, perhaps by a factor of 1E2.")
                 else:
                     print(str(exceptionObject))
                     sys.exit()
         #Now to keep the results:
-        self.post_burn_in_samples = emcee_sampler.samples.flatten(discard = self.mcmc_burn_in_length )
-        self.post_burn_in_log_posteriors_un_normed_vec = np.atleast_2d(emcee_sampler.samples.flatten_logprob(discard=self.mcmc_burn_in_length)).transpose() #Needed to make it 2D and transpose.
+        #TODO: when implementing convergence diagnostics, extract more chain information from get_chain without flattening (i think)
+        self.post_burn_in_samples = emcee_sampler.get_chain(flat=True, discard = self.mcmc_burn_in_length )
+        self.post_burn_in_log_posteriors_un_normed_vec = np.atleast_2d(emcee_sampler.get_log_prob(flat=True, discard=self.mcmc_burn_in_length)).transpose() #Needed to make it 2D and transpose.
         self.mcmc_last_point_sampled=emcee_sampler.get_last_sample #Note that for **zeus** the last point sampled is actually an array of points equal to the number of walkers.        
         if continueSampling == True:
             self.post_burn_in_samples = np.vstack((self.last_post_burn_in_samples, self.post_burn_in_samples ))
             self.post_burn_in_log_posteriors_un_normed_vec = np.vstack( (self.last_post_burn_in_log_posteriors_un_normed_vec, self.post_burn_in_log_posteriors_un_normed_vec))        
         #####BELOW HERE SHOUD BE SAME FOR doMetropolisHastings and doEnsembleSliceSampling#####
         if (self.UserInput.parameter_estimation_settings['mcmc_parallel_sampling'] or self.UserInput.parameter_estimation_settings['multistart_parallel_sampling']) == True: #If we're using certain parallel processing, we need to make calculatePostBurnInStatistics into True.
-            calculatePostBurnInStatistics = True;
+            calculatePostBurnInStatistics = True
         if self.UserInput.parameter_estimation_settings['mcmc_parallel_sampling']: #mcmc_exportLog == True is needed for mcmc_parallel_sampling, but not for multistart_parallel_sampling
             mcmc_exportLog=True
         if calculatePostBurnInStatistics == True:
