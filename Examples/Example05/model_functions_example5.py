@@ -1,4 +1,4 @@
-import sys; sys.path.append('../../'); #This is to get access to the simulationDriver directory below.
+import sys; sys.path.insert(0, '../../'); #This is to get access to the simulationDriver directory below.
 import numpy as np
 from PEUQSE.simulationDriver import canteraSimulate
 from PEUQSE.simulationDriver import canteraKineticsParametersParser

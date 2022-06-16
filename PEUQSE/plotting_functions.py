@@ -22,7 +22,7 @@ class plotting_functions_class():
         cov = np.cov(self.samples,rowvar=False)
         return mu, cov
 
-    def mumpce_plots(self, model_parameter_info = {}, active_parameters = [], pairs_of_parameter_indices = [], posterior_mu_vector = 0, posterior_cov_matrix = 0, prior_mu_vector = 0, prior_cov_matrix = 0, contour_settings_custom = {'figure_name','fontsize','num_y_ticks','num_x_ticks','colormap_posterior_customized','colormap_prior_customized','contours_normalized','colorbars','axis_limits'}): # Pass empty keyword arguments for important parameters.  That way, warnings may be issued if they are not set.  There is not really a good default for these keyword arguments.  They depend entirely on the nature of the data being plotted.
+    def mumpce_plots(self, model_parameter_info = {}, active_parameters = [], pairs_of_parameter_indices = [], posterior_mu_vector = 0, posterior_cov_matrix = 0, prior_mu_vector = 0, prior_cov_matrix = 0, contour_settings_custom = {'figure_name','fontsize','max_num_y_ticks','max_num_x_ticks','colormap_posterior_customized','colormap_prior_customized','contours_normalized','colorbars','axis_limits'}): # Pass empty keyword arguments for important parameters.  That way, warnings may be issued if they are not set.  There is not really a good default for these keyword arguments.  They depend entirely on the nature of the data being plotted.
         mumpceProjectObject = mumpceProject.Project() # A mumpce project object must be created.
         if len(model_parameter_info) == 0:
             print("Pass the 'model_parameter_info' argument to the mumpce_plots function.")
@@ -59,14 +59,14 @@ class plotting_functions_class():
         #    contour_settings_custom['fontsize'] = UserInput.fontsize        
         #else:
         #    contour_settings_custom['fontsize'] = 'auto'
-        #if hasattr(UserInput,'num_y_ticks'):
-        #    contour_settings_custom['num_y_ticks'] = UserInput.num_y_ticks
+        #if hasattr(UserInput,'max_num_y_ticks'):
+        #    contour_settings_custom['max_num_y_ticks'] = UserInput.max_num_y_ticks
         #else:
-        #    contour_settings_custom['num_y_ticks'] = 'auto'
-        #if hasattr(UserInput,'num_x_ticks'):
-        #    contour_settings_custom['num_x_ticks'] = UserInput.num_x_ticks
+        #    contour_settings_custom['max_num_y_ticks'] = 'auto'
+        #if hasattr(UserInput,'max_num_x_ticks'):
+        #    contour_settings_custom['max_num_x_ticks'] = UserInput.max_num_x_ticks
         #else:
-        #    contour_settings_custom['num_x_ticks'] = 'auto'
+        #    contour_settings_custom['max_num_x_ticks'] = 'auto'
         #if hasattr(UserInput,'colormap_posterior_customized'):
         #    contour_settings_custom['colormap_posterior_customized'] = UserInput.colormap_posterior_customized
         #else:
@@ -122,6 +122,8 @@ def sampledParameterHistogramMaker(parameterSamples, parameterName, parameterNam
             histogram_plot_settings['x_label_size'] = 16
             histogram_plot_settings['y_label_size'] = 16
             histogram_plot_settings['axis_font_size'] = 16
+            histogram_plot_settings['dpi'] = 220
+            histogram_plot_settings['vertical_linewidth'] = 1.5
 
 
         #The axis font size argument needs to be parsed into another form. #Code was made following answer by "binaryfunt" here https://stackoverflow.com/questions/3899980/how-to-change-the-font-size-on-a-matplotlib-plot
@@ -140,20 +142,20 @@ def sampledParameterHistogramMaker(parameterSamples, parameterName, parameterNam
                 sampledParameterAxesDictionary[parameterName].set_ylabel('Probability Density', **axis_font)
         sampledParameterAxesDictionary[parameterName].set_xlabel(parameterNamesAndMathTypeExpressionsDict[parameterName], **axis_font)
 
-        if histogram_plot_settings['show_initial_value'] == True:
-            if parameterInitialValue!=None:
-                sampledParameterAxesDictionary[parameterName].axvline(x=parameterInitialValue, color='#00A5DF', linestyle='--')
-        if histogram_plot_settings['show_MAP_value'] == True:
-            if parameterMAPValue!=None:
-                sampledParameterAxesDictionary[parameterName].axvline(x=parameterMAPValue, color='r', linestyle='--')
-        if histogram_plot_settings['show_muAP_value'] == True:
-            if parameterMuAPValue!=None:
-                sampledParameterAxesDictionary[parameterName].axvline(x=parameterMuAPValue, color='k', linestyle='--')
+        # Add vertical lines at initial value, MAP, and, muAP if determined by UserInput
+        # Make sure that the value passed has a value
+        if histogram_plot_settings['show_initial_value'] and type(parameterInitialValue) != type(None):
+            sampledParameterAxesDictionary[parameterName].axvline(x=parameterInitialValue, color='#00A5DF', linestyle='--', linewidth=histogram_plot_settings['vertical_linewidth'])
+        if histogram_plot_settings['show_MAP_value'] and type(parameterMAPValue) != type(None):
+            sampledParameterAxesDictionary[parameterName].axvline(x=parameterMAPValue, color='r', linestyle='--', linewidth=histogram_plot_settings['vertical_linewidth'])
+        if histogram_plot_settings['show_muAP_value'] and type(parameterMuAPValue) != type(None):
+            sampledParameterAxesDictionary[parameterName].axvline(x=parameterMuAPValue, color='k', linestyle='--', linewidth=histogram_plot_settings['vertical_linewidth'])
+
 
         sampledParameterAxesDictionary[parameterName].tick_params(axis='x', labelsize=histogram_plot_settings['x_label_size']) #TODO: make these labels sizes a setting that can be changed.
         sampledParameterAxesDictionary[parameterName].tick_params(axis='y', labelsize=histogram_plot_settings['y_label_size'])
         sampledParameterFiguresDictionary[parameterName].tight_layout()
-        sampledParameterFiguresDictionary[parameterName].savefig(directory+'Histogram_sampling_'+str(parameterIndex)+'_'+parameterName+'.png', dpi=220)
+        sampledParameterFiguresDictionary[parameterName].savefig(directory+'Histogram_sampling_'+str(parameterIndex)+'_'+parameterName+'.png', dpi=histogram_plot_settings['dpi'])
 
         
         
@@ -334,4 +336,76 @@ def density_scatter( x , y, ax = None, sort = True, bins = 20, **kwargs )   :
     norm = Normalize(vmin = np.min(z), vmax = np.max(z))
     cbar = fig.colorbar(cm.ScalarMappable(norm = norm), ax=ax)
     cbar.ax.set_ylabel('Density')
-    return fig, ax                                                                             
+    return fig, ax                   
+
+
+def createScatterPlot(data_a, data_b, a_tuple, b_tuple, graphs_directory, plot_settings):
+    """Generates and saves a scatter matrix plot.
+
+    :param data_a: parameter points in first for loop (:type: pd.Series)
+    :param data_b: parameter points in second for loop (:type: pd.Series)
+    :param a_tuple: set of parameter names, MAP, muAP, and initial poitns (:type: tuple)
+    :param b_tuple: set of parameter names, MAP, muAP, and initial poitns (:type: tuple)
+    :param point_plot_settings: set of plot options for general points (:type: tuple)
+    :param cross_plot_settings: set of plot options for special points (:type: tuple)
+    :param graphs_directory: path to graphs directory (:type: str)
+    :param plot_settings: plot settings from User Input (:type: dict)
+    """
+    import matplotlib.pyplot as plt
+    point_plot_settings = (point_plot_settings['sampled_point_sizes'], point_plot_settings['sampled_point_transparency'])
+    cross_plot_settings = (point_plot_settings['cross_marker_size'], point_plot_settings['cross_marker_transparency'])
+    fig = plt.figure()
+    # create a scatter plot of the posterior data between two parameters
+    plt.scatter(data_a, data_b, s=point_plot_settings[0], alpha=point_plot_settings[1])
+    # Allows the user to have no crosses if size is set to 0
+    if cross_plot_settings[0] != 0:
+        cross_size = cross_plot_settings[0]
+        cross_transparency = cross_plot_settings[1]
+        # creates the extra points for the MAP, muAP, and initial point denoted by crosses
+        plt.scatter(a_tuple[2], b_tuple[2], s=cross_size, alpha=cross_transparency, c='r', marker='x') 
+        plt.scatter(a_tuple[3], b_tuple[3], s=cross_size, alpha=cross_transparency, c='k', marker='x') 
+        plt.scatter(a_tuple[4], b_tuple[4], s=cross_size, alpha=cross_transparency, c='#00A5DF', marker='x')
+    # create labels and save the image to the graphs directory
+    plt.xlabel(a_tuple[0], fontsize=plot_settings['fontsize'])
+    plt.ylabel(b_tuple[0], fontsize=plot_settings['fontsize'])
+    if plot_settings['max_num_x_ticks'] != 'auto' and isinstance(plot_settings['max_num_x_ticks'], int):
+        plt.locator_params(axis='x', nbins=plot_settings['max_num_x_ticks'])
+    if plot_settings['max_num_y_ticks'] != 'auto' and isinstance(plot_settings['max_num_y_ticks'], int):
+        plt.locator_params(axis='y', nbins=plot_settings['max_num_y_ticks'])
+    fig.savefig(graphs_directory+f'Scatter_{a_tuple[1]}_{b_tuple[1]}',dpi=plot_settings['dpi'])
+    plt.close(fig)
+
+def createScatterHeatMapPlot(data_a, data_b, a_tuple, b_tuple, graphs_directory, plot_settings):
+    """Generates and saves a scatter heat map plot.
+
+    :param data_a: parameter points in first for loop (:type: pd.Series)
+    :param data_b: parameter points in second for loop (:type: pd.Series)
+    :param a_tuple: set of parameter names, MAP, muAP, and initial poitns (:type: tuple)
+    :param b_tuple: set of parameter names, MAP, muAP, and initial poitns (:type: tuple)
+    :param point_plot_settings: set of plot options for general points (:type: tuple)
+    :param cross_plot_settings: set of plot options for special points (:type: tuple)
+    :param graphs_directory: path to graphs directory (:type: str)
+    :param plot_settings: plot settings from User Input (:type: dict)
+    """
+    import matplotlib.pyplot as plt
+    point_plot_settings = (point_plot_settings['sampled_point_sizes'], point_plot_settings['sampled_point_transparency'])
+    cross_plot_settings = (point_plot_settings['cross_marker_size'], point_plot_settings['cross_marker_transparency'])
+    # create a scatter plot of the posterior data between two parameters
+    fig, ax = density_scatter(data_a, data_b, s=point_plot_settings[0], alpha=point_plot_settings[1])
+    # Allows the user to have no crosses if size is set to 0
+    if cross_plot_settings[0] != 0:
+        cross_size = cross_plot_settings[0]
+        cross_transparency = cross_plot_settings[1]
+        # creates the extra points for the MAP, muAP, and initial point denoted by crosses
+        ax.scatter(a_tuple[2], b_tuple[2], s=cross_size, alpha=cross_transparency, c='r', marker='x') 
+        ax.scatter(a_tuple[3], b_tuple[3], s=cross_size, alpha=cross_transparency, c='k', marker='x') 
+        ax.scatter(a_tuple[4], b_tuple[4], s=cross_size, alpha=cross_transparency, c='#00A5DF', marker='x')
+    # create labels and save the image to the graphs directory
+    ax.set_xlabel(a_tuple[0], fontsize=plot_settings['fontsize']) # , fontsize=plot_settings['fontsize']
+    ax.set_ylabel(b_tuple[0], fontsize=plot_settings['fontsize']) # , fontsize=plot_settings['fontsize']
+    if plot_settings['max_num_x_ticks'] != 'auto' and isinstance(plot_settings['max_num_x_ticks'], int):
+        plt.locator_params(axis='x', nbins=plot_settings['max_num_x_ticks'])
+    if plot_settings['max_num_y_ticks'] != 'auto' and isinstance(plot_settings['max_num_y_ticks'], int):
+        plt.locator_params(axis='y', nbins=plot_settings['max_num_y_ticks'])
+    fig.savefig(graphs_directory+f'Heat_Scatter_{a_tuple[1]}_{b_tuple[1]}',dpi=plot_settings['dpi'])
+    plt.close(fig)

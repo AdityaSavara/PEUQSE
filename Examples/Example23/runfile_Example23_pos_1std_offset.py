@@ -4,7 +4,7 @@ from matplotlib.ticker import FormatStrFormatter
 import numpy as np
 import scipy
 from scipy.integrate import odeint
-import sys; sys.path.append('../../');  import PEUQSE as PEUQSE
+import sys; sys.path.insert(0, '../../');  import PEUQSE as PEUQSE
 import PEUQSE.UserInput as UserInput
 
 if __name__ == "__main__":
