@@ -632,8 +632,8 @@ class parameter_estimation:
         if str(centerPoint).lower() == str(None).lower():
             centerPoint = np.array(self.UserInput.InputParameterInitialGuess)*1.0 #This may be a reduced parameter space.
         if initialPointsDistributionType.lower() not in ['grid', 'uniform', 'identical', 'gaussian', 'astroidal', 'sobol']:
-            print("Warning: initialPointsDistributionType must be from: 'grid', 'uniform', 'identical', 'gaussian', 'astroidal', 'sobol'.  A different choice was received and is not understood.  initialPointsDistributionType is being set as 'uniform'.")
-            initialPointsDistributionType = 'uniform'
+            print("Warning: initialPointsDistributionType must be from: 'grid', 'uniform', 'identical', 'gaussian', 'astroidal', 'sobol'.  A different choice was received and is not understood.  initialPointsDistributionType is being set as 'sobol'.")
+            initialPointsDistributionType = 'sobol'
         #For a multi-start with a grid, our algorithm is completely different than other cases.
         if initialPointsDistributionType.lower() =='grid':
             gridPermutations, numPermutations = self.getGridPermutations(centerPoint, gridsearchSamplingInterval=gridsearchSamplingInterval, gridsearchSamplingRadii=gridsearchSamplingRadii)
@@ -759,7 +759,7 @@ class parameter_estimation:
                     walkerInitialDistribution = self.UserInput.parameter_estimation_settings['mcmc_walkerInitialDistribution']
                 #The identical distribution is used by default because otherwise the walkers may be spread out too far and it could defeat the purpose of a gridsearch.
                 if walkerInitialDistribution.lower() == 'auto':
-                    walkerInitialDistribution = 'uniform'
+                    walkerInitialDistribution = 'sobol'
         for permutationIndex,permutation in enumerate(self.listOfPermutations):
             #####Begin PEUQSE Parallel Processing During Loop Block####
             if (self.UserInput.parameter_estimation_settings['multistart_parallel_sampling'])== True:
@@ -1923,7 +1923,7 @@ class parameter_estimation:
         if walkerInitialDistribution == 'UserChoice':
             walkerInitialDistribution = self.UserInput.parameter_estimation_settings['mcmc_walkerInitialDistribution']
         if walkerInitialDistribution.lower() == 'auto':
-            walkerInitialDistribution = 'uniform'
+            walkerInitialDistribution = 'sobol'
         if str(walkerInitialDistributionSpread) == 'UserChoice':
             walkerInitialDistributionSpread = self.UserInput.parameter_estimation_settings['mcmc_walkerInitialDistributionSpread']
         if str(walkerInitialDistributionSpread).lower() == 'auto':
