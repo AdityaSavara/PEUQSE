@@ -1,4 +1,4 @@
-import sys; sys.path.append('../../');  import PEUQSE as PEUQSE
+import sys; sys.path.insert(0, '../../');  import PEUQSE as PEUQSE
 import numpy as np
 from PEUQSE.simulationDriver_CTI import canteraSimulate
 from PEUQSE.simulationDriver_CTI import canteraKineticsParametersParser

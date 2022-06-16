@@ -1,4 +1,4 @@
-import sys; sys.path.append('../../');  import PEUQSE as PEUQSE
+import sys; sys.path.insert(0, '../../');  import PEUQSE as PEUQSE
 import processing_functions_tpd_odeint
 import pandas as pd
 

@@ -111,13 +111,14 @@ plotting_ouput_settings['setMatPlotLibAgg'] = 'auto' #This setting controls whet
 histogram_plot_settings = {}
 histogram_plot_settings['histograms_as_density']= False # When true, the histograms will be shown as density with integral normalized to 1. It's good to keep this as False during analysis, then to set to True to make final graphs for presentations.  By default this is False. When this is False, for ESS or MH the histograms will show sampling frequency. When this is False, for uniform or random samplings, the histograms show a pseudo-sampling frequency with an order of magnitude proportional to multistart_gridsearch_threshold_filter_coefficient.
 histogram_plot_settings['y_label'] = '' #will use defaults if ''
-histogram_plot_settings['show_initial_value'] = True
-histogram_plot_settings['show_MAP_value'] = True
-histogram_plot_settings['show_muAP_value'] = True
+histogram_plot_settings['dpi'] = 220 #Dots per Inch specification. This changes the resolution of the image created. Larger values are recommended for important pictures.
+histogram_plot_settings['show_initial_value'] = True #This option shows the initial value as a vertical line in the histogram.
+histogram_plot_settings['show_MAP_value'] = True #This option shows the MAP as a vertical line in the histogram.
+histogram_plot_settings['show_muAP_value'] = True #This option shows the muAP as a vertical line in the histogram.
+histogram_plot_settings['vertical_linewidth'] = 1.5 #This value changes the linewidth of the initial value, MAP, and muAP. The units are points, where 1 point is dpi/72 pixels. Typical values are 1 for thin and 4 for thick.
 histogram_plot_settings['x_label_size'] = 16
 histogram_plot_settings['y_label_size'] = 16
 histogram_plot_settings['axis_font_size'] = 16
-
 
 
 #Response Plot Settings
@@ -136,12 +137,29 @@ simulated_response_plot_settings['fontdict']= {'size':16} #A font dictionary can
 scatter_matrix_plots_settings ={}
 scatter_matrix_plots_settings['combined_plots'] = 'auto' #True, False, or  'auto'. With 'auto', the combined plots are only created if there are 5 parameters or less.
 scatter_matrix_plots_settings['individual_plots'] = 'auto' #True, False, or 'auto'. With 'auto', the individual_plots will only be created when there are more than 5 parameters.
-scatter_matrix_plots_settings['dpi'] = 220
+scatter_matrix_plots_settings['dpi'] = 220 #Dots per Inch specification. This changes the resolution of the image created. Larger values are recommended for important pictures.
 scatter_matrix_plots_settings['figure_name'] = 'scatter_matrix_posterior'
+scatter_matrix_plots_settings['sampled_point_sizes'] = 1 #Size of sampled points in the scatter plot. Lower values are recommended (under 6).
+scatter_matrix_plots_settings['cross_marker_size'] = 10 #Size of special points (MAP, muAP, and initial point) denoted by a cross. Values should be larger than sampled_point_size to increase clarity. 
+scatter_matrix_plots_settings['sampled_point_transparency'] = 0.5 #Transparency of sampled points in scatter plot. This value ranges from 0 to 1. Values closer to 1 can make plots with many points look crowded and confusing. Mid values are recommended. 
+scatter_matrix_plots_settings['cross_marker_transparency'] = 0.8 #Transparency of special points (MAP, muAP, and initial point) denoted by a cross. This value ranges from 0 to 1. This should be larger than sampled_point_transparency to emphasize the special point locations.
+scatter_matrix_plots_settings['max_num_x_ticks'] = 'auto' #Maximum number of tick marks on x axis. This value should be an integer or the string 'auto' to let matplotlib choose the number of tick marks.
+scatter_matrix_plots_settings['max_num_y_ticks'] = 'auto' #Maximum number of tick marks on y axis. This value should be an integer or the string 'auto' to let matplotlib choose the number of tick marks.
+scatter_matrix_plots_settings['fontsize'] = 16 #Fontsize of labels on x and y axis. This value should be an integer. 
+scatter_matrix_plots_settings['all_pair_permutations'] = True #By default, all possible permutations are created [(a,b) and (b,a)]. To get only combinations rather than all permutations, set this option to False.
 
 #Scatter Heatmap Plot Settings
 scatter_heatmap_plots_settings ={}
 scatter_heatmap_plots_settings['figure_name'] = 'scatter_heatmap_posterior'
+scatter_heatmap_plots_settings['dpi'] = 220 #Dots per Inch specification. This changes the resolution of the image created. Values between 220 and 600 dpi are typical.
+scatter_heatmap_plots_settings['sampled_point_sizes'] = 1 #Size of sampled points in the scatter plot. Lower values are recommended (under 6).
+scatter_heatmap_plots_settings['cross_marker_size'] = 10 #Size of special points (MAP, muAP, and initial point) denoted by a cross. Values should be larger than sampled_point_size to increase clarity. 
+scatter_heatmap_plots_settings['sampled_point_transparency'] = 0.5 #Transparency of sampled points in scatter plot. This value ranges from 0 to 1. Values closer to 1 can make plots with many points look crowded and confusing. Mid values are recommended. 
+scatter_heatmap_plots_settings['cross_marker_transparency'] = 0.8 #Transparency of special points (MAP, muAP, and initial point) denoted by a cross. This value ranges from 0 to 1. This should be larger than sampled_point_transparency to emphasize the special point locations.
+scatter_heatmap_plots_settings['max_num_x_ticks'] = 'auto' #Maximum number of tick marks on x axis. This value should be an integer or the string 'auto' to let matplotlib choose the number of tick marks.
+scatter_heatmap_plots_settings['max_num_y_ticks'] = 'auto' #Maximum number of tick marks on y axis. This value should be an integer or the string 'auto' to let matplotlib choose the number of tick marks.
+scatter_heatmap_plots_settings['fontsize'] = 16 #Fontsize of labels on x and y axis. This value should be an integer. 
+scatter_heatmap_plots_settings['all_pair_permutations'] = True #By default, all possible permutations are created [(a,b) and (b,a)]. To get only combinations rather than all permutations, set this option to False.
 
 #contour plots# / #mumpce plots#
 #model_parameter_info = np.array([{'parameter_number': 0, 'parameter_name': r'$E_{a1}$'},
@@ -160,10 +178,10 @@ contour_plot_settings['zoom_std_devs'] = 2.5 #how zoomed in the image is.
 contour_plot_settings['fontsize']=16  #sets the fontsize for everything except the colorbars. Can be an integer or the word 'auto', or the word "None". Should change space_between_subplots if fontsize is changed. 
 contour_plot_settings['space_between_subplots'] = 0.40 #Typically a value between 0.20 and 5.0. Set to 0.40 by default. Should be changed when font size is changed. Fontsize 'auto' tends to make small fonts which needs smaller values like 0.20.
 contour_plot_settings['cmap_levels'] = 4   #This is the number of contour levels.
-contour_plot_settings['num_y_ticks'] = 'auto'  #adusts number of y ticks (actually sets a maximum number of them). #num_y_ticks and num_x_ticks must be either a string ('auto') or an integer (such as 4, either without string or with integer casting like int('5')). This feature is recommended.  #Note that this is a *request* When it's not fulfilled exactly, the user can play with the number.
-contour_plot_settings['num_x_ticks'] = 'auto'  #adjusts number of x ticks (actually sets a maximum number of them). #num_y_ticks and num_x_ticks must be either a string ('auto') or an integer (such as 4, either without string or with integer casting like int('5')).This feature is recommended. #Note that this is a *request* When it's not fulfilled exactly, the user can play with the number.
+contour_plot_settings['max_num_y_ticks'] = 'auto'  #adjusts number of y ticks (actually sets a maximum number of them). #max_num_y_ticks and max_num_x_ticks must be either a string ('auto') or an integer (such as 4, either without string or with integer casting like int('5')). This feature is recommended.  #Note that this is a *request* When it's not fulfilled exactly, the user can play with the number.
+contour_plot_settings['max_num_x_ticks'] = 'auto'  #adjusts number of x ticks (actually sets a maximum number of them). #max_num_y_ticks and max_num_x_ticks must be either a string ('auto') or an integer (such as 4, either without string or with integer casting like int('5')).This feature is recommended. #Note that this is a *request* When it's not fulfilled exactly, the user can play with the number.
 contour_plot_settings['num_pts_per_axis'] = 500 #This sets the resolution of the contours.
-contour_plot_settings['dpi'] = 220
+contour_plot_settings['dpi'] = 220 #Dots per Inch specification. This changes the resolution of the image created. Values between 220 and 600 dpi are typical.
 contour_plot_settings['x_ticks'] = 'auto' #feed in an array of numbers directly. Not recommended to change.
 contour_plot_settings['y_ticks'] = 'auto' #feed in an array of numbers directly. Not recommended to change.
 contour_plot_settings['axis_limits'] = 'auto' #Feed in list of [x_min, x_max, y_min, y_max]. This is appropriate to use. If a list of lists is provided, then the individual_plots will each receive the appropriate axis_limits.

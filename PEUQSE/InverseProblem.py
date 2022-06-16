@@ -1647,13 +1647,17 @@ class parameter_estimation:
         if self.UserInput.parameter_estimation_settings['mcmc_info_gain_returned'] == 'KL_divergence':
             try: #If the info_gain_KL fails, we will return info_gain_log_ratio. 
                 #Below is the KL_divergence info_gain calculation.
+                from warnings import catch_warnings, simplefilter #Used to surpress warnings from 0 probability density in current_info_gain_KL calculation
                 length, width = self.post_burn_in_samples.shape
                 self.info_gain_KL = 0
                 self.info_gain_KL_each_parameter  = []
                 for param in range(width):
                     import matplotlib.pyplot as plt #FIXME: #TODO: this plotting needs to be moved into the plotting area and as optinoal.
                     (density0,bins0,pathces0)=plt.hist([self.samples_of_prior[:,param].flatten(),self.post_burn_in_samples[:,param].flatten()],bins=100,density=True)
-                    current_info_gain_KL = density0[1]*np.log(density0[1]/density0[0])
+                    # the following code handles surpressing the RuntimeWarning displayed when dealing with a 0 probability density in calculating current_info_gain_KL. It does not affect the calculation at all.
+                    with catch_warnings():
+                        simplefilter("ignore")
+                        current_info_gain_KL = density0[1]*np.log(density0[1]/density0[0])
                     current_info_gain_KL = current_info_gain_KL[np.isfinite(current_info_gain_KL)]
                     current_info_gain_KL = np.sum(current_info_gain_KL)
                     self.info_gain_KL_each_parameter.append(current_info_gain_KL) #could make this optional, but normally shouldn't take much memory.
@@ -2408,7 +2412,7 @@ class parameter_estimation:
         plotting_functions.makeHistogramsForEachParameter(parameterSamples,parameterNamesAndMathTypeExpressionsDict, directory = self.UserInput.directories['graphs'], parameterInitialValue=self.UserInput.model['InputParameterPriorValues'], parameterMAPValue=self.map_parameter_set, parameterMuAPValue=self.mu_AP_parameter_set, histogram_plot_settings=self.UserInput.histogram_plot_settings)
 
     def makeSamplingScatterMatrixPlot(self, parameterSamples = [], parameterNamesAndMathTypeExpressionsDict={}, parameterNamesList =[], parameterMAPValue=[], parameterMuAPValue=[], parameterInitialValue = [], plot_settings={'combined_plots':'auto'}):
-        import pandas as pd #This is the only function that needs pandas.
+        import pandas as pd #This is one of the only functions that use pandas.
         import matplotlib.pyplot as plt
         import PEUQSE.plotting_functions as plotting_functions
         if 'dpi' not in  plot_settings:  plot_settings['dpi'] = 220
@@ -2434,24 +2438,32 @@ class parameter_estimation:
                     individual_plots = True
         if individual_plots == True: #This means we will return individual plots.
             #The below code was added by Troy Gustke and merged in to PEUQSE at end of June 2021.
-            # create tuples for plotting options
-            point_plot_settings = (self.UserInput.scatter_matrix_plots_settings['sampled_point_sizes'], self.UserInput.scatter_matrix_plots_settings['sampled_point_transparency'])
-            cross_plot_settings = (self.UserInput.scatter_matrix_plots_settings['cross_marker_size'], self.UserInput.scatter_matrix_plots_settings['cross_marker_transparency'])
+            # create graph variable for plotting options
             graphs_directory = self.UserInput.directories['graphs']
-            # compare each parameter without having repeats
-            # Zip parameters contain parameter names, MAP, muAP, and initial value
-            for i, (a, a_name, a_MAP, a_mu_AP, a_initial) in enumerate(zip(posterior_df.columns, parameterNamesAndMathTypeExpressionsDict.keys(), parameterMAPValue, parameterMuAPValue, parameterInitialValue)):
-                for j, (b, b_name, b_MAP, b_mu_AP, b_initial) in enumerate(zip(posterior_df.columns, parameterNamesAndMathTypeExpressionsDict.keys(), parameterMAPValue, parameterMuAPValue, parameterInitialValue)):
-                    if i != j:
-                        plotting_functions.createScatterMatrixPlot(posterior_df[a], posterior_df[b], (a, a_name, a_MAP, a_mu_AP, a_initial),
-                                            (b, b_name, b_MAP, b_mu_AP, b_initial), point_plot_settings, cross_plot_settings, graphs_directory, plot_settings)
-            return 
-        pd.plotting.scatter_matrix(posterior_df)
-        plt.savefig(self.UserInput.directories['graphs']+plot_settings['figure_name'],dpi=plot_settings['dpi'])
-        plt.close()
+            # combine all the solutions and meta data for each parameter posterior to the simulation.
+            # Zip parameters contain parameter columns in dataframe, parameter names, MAP, muAP, and initial value
+            finalParametersAndMetaData1 = zip(posterior_df.columns, parameterNamesAndMathTypeExpressionsDict.keys(), parameterMAPValue, parameterMuAPValue, parameterInitialValue)
+            finalParametersAndMetaData2 = zip(posterior_df.columns, parameterNamesAndMathTypeExpressionsDict.keys(), parameterMAPValue, parameterMuAPValue, parameterInitialValue)
+            # compare each parameter with only unique solutions
+            # i and j represent the index of an abstract matrix created from comparing the parameter vectors.
+            # The loop moves through the matrix and compares parameters by plotting but will only plot the bottom triangle of the matrix.
+            for param_a_index, (param_a_column, param_a_name, param_a_MAP, param_a_mu_AP, param_a_initial) in enumerate(finalParametersAndMetaData1):
+                for param_b_index, (param_b_column, param_b_name, param_b_MAP, param_b_mu_AP, param_b_initial) in enumerate(finalParametersAndMetaData2):
+                    if param_a_index != param_b_index:
+                        if self.UserInput.scatter_matrix_plots_settings['all_pair_permutations']:
+                            plotting_functions.createScatterPlot(posterior_df[param_a_column], posterior_df[param_b_column], (param_a_column, param_a_name, param_a_MAP, param_a_mu_AP, param_a_initial),
+                                            (param_b_column, param_b_name, param_b_MAP, param_b_mu_AP, param_b_initial), graphs_directory, plot_settings)
+                        else:
+                            if param_a_index<param_b_index: # only use the bottom triangle of the matrix and do not use the main diagonal
+                                plotting_functions.createScatterPlot(posterior_df[param_a_column], posterior_df[param_b_column], (param_a_column, param_a_name, param_a_MAP, param_a_mu_AP, param_a_initial),
+                                            (param_b_column, param_b_name, param_b_MAP, param_b_mu_AP, param_b_initial), graphs_directory, plot_settings)
+        else:
+            pd.plotting.scatter_matrix(posterior_df)
+            plt.savefig(self.UserInput.directories['graphs']+plot_settings['figure_name'],dpi=plot_settings['dpi'])
+            plt.close()
         
     def makeScatterHeatMapPlots(self, parameterSamples = [], parameterNamesAndMathTypeExpressionsDict={}, parameterNamesList =[], parameterMAPValue=[], parameterMuAPValue=[], parameterInitialValue = [], plot_settings={'combined_plots':'auto'}):
-        import pandas as pd #This is the only function that needs pandas.
+        import pandas as pd #This is one of the only functions that use pandas.
         import matplotlib.pyplot as plt
         import PEUQSE.plotting_functions as plotting_functions
         if 'dpi' not in  plot_settings:  plot_settings['dpi'] = 220
@@ -2464,17 +2476,25 @@ class parameter_estimation:
         if parameterInitialValue == []: parameterInitialValue = self.UserInput.model['InputParameterPriorValues']
         # will always be seperate plots
         posterior_df = pd.DataFrame(parameterSamples,columns=[parameterNamesAndMathTypeExpressionsDict[x] for x in parameterNamesList])
-        # create tuples for plotting options
-        point_plot_settings = (self.UserInput.scatter_heatmap_plots_settings['sampled_point_sizes'], self.UserInput.scatter_heatmap_plots_settings['sampled_point_transparency'])
-        cross_plot_settings = (self.UserInput.scatter_heatmap_plots_settings['cross_marker_size'], self.UserInput.scatter_heatmap_plots_settings['cross_marker_transparency'])
+        # create graph variable for plotting options
         graphs_directory = self.UserInput.directories['graphs']
-        # compare each parameter without having repeats
-        # Zip parameters contain parameter names, MAP, muAP, and initial value
-        for i, (a, a_name, a_MAP, a_mu_AP, a_initial) in enumerate(zip(posterior_df.columns, parameterNamesAndMathTypeExpressionsDict.keys(), parameterMAPValue, parameterMuAPValue, parameterInitialValue)):
-            for j, (b, b_name, b_MAP, b_mu_AP, b_initial) in enumerate(zip(posterior_df.columns, parameterNamesAndMathTypeExpressionsDict.keys(), parameterMAPValue, parameterMuAPValue, parameterInitialValue)):
-                if i != j:
-                    plotting_functions.createScatterHeatMapPlot(posterior_df[a], posterior_df[b], (a, a_name, a_MAP, a_mu_AP, a_initial),
-                                        (b, b_name, b_MAP, b_mu_AP, b_initial), point_plot_settings, cross_plot_settings, graphs_directory, plot_settings) 
+        # combine all the solutions and meta data for each parameter posterior to the simulation.
+        # Zip parameters contain parameter columns in dataframe, parameter names, MAP, muAP, and initial value
+        finalParametersAndMetaData1 = zip(posterior_df.columns, parameterNamesAndMathTypeExpressionsDict.keys(), parameterMAPValue, parameterMuAPValue, parameterInitialValue)
+        finalParametersAndMetaData2 = zip(posterior_df.columns, parameterNamesAndMathTypeExpressionsDict.keys(), parameterMAPValue, parameterMuAPValue, parameterInitialValue)
+        # compare each parameter with only unique solutions
+        # i and j represent the index of an abstract matrix created from comparing the parameter vectors.
+        # The loop moves through the matrix and compares parameters by plotting but will only plot the bottom triangle of the matrix.
+        for param_a_index, (param_a_column, param_a_name, param_a_MAP, param_a_mu_AP, param_a_initial) in enumerate(finalParametersAndMetaData1):
+            for param_b_index, (param_b_column, param_b_name, param_b_MAP, param_b_mu_AP, param_b_initial) in enumerate(finalParametersAndMetaData2):
+                if param_a_index != param_b_index:
+                    if self.UserInput.scatter_heatmap_plots_settings['all_pair_permutations']:
+                        plotting_functions.createScatterHeatMapPlot(posterior_df[param_a_column], posterior_df[param_b_column], (param_a_column, param_a_name, param_a_MAP, param_a_mu_AP, param_a_initial),
+                                    (param_b_column, param_b_name, param_b_MAP, param_b_mu_AP, param_b_initial), point_plot_settings, cross_plot_settings, graphs_directory, plot_settings) 
+                    else:
+                        if param_a_index<param_b_index: # only use the bottom triangle of the matrix and do not use the main diagonal
+                            plotting_functions.createScatterHeatMapPlot(posterior_df[param_a_column], posterior_df[param_b_column], (param_a_column, param_a_name, param_a_MAP, param_a_mu_AP, param_a_initial),
+                                        (param_b_column, param_b_name, param_b_MAP, param_b_mu_AP, param_b_initial), point_plot_settings, cross_plot_settings, graphs_directory, plot_settings) 
 
     def createSimulatedResponsesPlots(self, allResponses_x_values=[], allResponsesListsOfYArrays =[], plot_settings={},allResponsesListsOfYUncertaintiesArrays=[] ): 
         #allResponsesListsOfYArrays  is to have 3 layers of lists: Response > Responses Observed, mu_guess Simulated Responses, map_Simulated Responses, (mu_AP_simulatedResponses) > Values
@@ -2646,7 +2666,7 @@ class parameter_estimation:
         #Because these are basically arguments for a 'patch' on mumpce made by A. Savara and E. Walker.
         contour_settings_custom = {}
         # max_x/y_ticks and num_x/y_ticks are included in the following dict to keep backwards compatability
-        contour_settings_custom_fields = {'figure_name','fontsize','max_y_ticks','max_x_ticks','num_y_ticks','num_x_ticks','colormap_posterior_customized','colormap_prior_customized','contours_normalized','colorbars','axis_limits','dpi', 'num_pts_per_axis','cmap_levels', 'space_between_subplots', 'zoom_std_devs', 'x_ticks', 'y_ticks', 'center_on'} #This is a set, not a dictionary.
+        contour_settings_custom_fields = {'figure_name','fontsize','max_num_y_ticks','max_num_x_ticks','num_y_ticks','num_x_ticks','colormap_posterior_customized','colormap_prior_customized','contours_normalized','colorbars','axis_limits','dpi', 'num_pts_per_axis','cmap_levels', 'space_between_subplots', 'zoom_std_devs', 'x_ticks', 'y_ticks', 'center_on'} #This is a set, not a dictionary.
         for custom_field in contour_settings_custom_fields:
             if custom_field in self.UserInput.contour_plot_settings:
                 contour_settings_custom[custom_field] = self.UserInput.contour_plot_settings[custom_field]        
