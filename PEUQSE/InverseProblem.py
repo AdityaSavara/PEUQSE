@@ -1885,6 +1885,35 @@ class parameter_estimation:
         pickleAnObject(self.map_parameter_set, self.UserInput.directories['pickles']+directory_name_suffix+file_name_prefix+'permutation_map_parameter_set'+file_name_suffix)
         pickleAnObject(self.UserInput.InputParameterInitialGuess, self.UserInput.directories['pickles']+directory_name_suffix+file_name_prefix+'permutation_initial_point_parameters'+file_name_suffix)
         
+    def callConvergenceDiagnostics(self, samplingFunctionstr: str, samplingObject=None) -> None:
+        """
+        Calls other convergence functions to do calculations and make plots.
+        """
+        # first get the autocorrelationtime
+        if samplingFunctionstr == 'EnsembleSliceSampling':
+            # zeus called function using sampling object
+            taus = samplingObject.act
+
+        elif samplingFunctionstr == 'EnsembleSampling':
+            # emcee called function using sampling object
+            taus = samplingObject.get_autocorr_time()
+
+        elif samplingFunctionstr == 'MetropolisHastings':
+            # use zeus function to create act
+            from zeus.autocorr import AutoCorrTime
+            refined_post_burn_in_samples = np.expand_dims(self.post_burn_in_samples, axis=1)
+            taus = AutoCorrTime(refined_post_burn_in_samples)
+        print('AutoCorrelatedTime of', taus)
+        
+
+        # Gelman-Rubin statistics
+        # use pymc to get this stat
+        # other pymc stats can go below
+
+
+        pass
+
+
     #Our EnsembleSampling is done by the emcee back end. (pip install emcee)
     software_name = "emcee"
     software_version = "3.1.2"
@@ -2001,6 +2030,8 @@ class parameter_estimation:
             mcmc_exportLog=True
         if calculatePostBurnInStatistics == True:
             self.calculatePostBurnInStatistics(calculate_post_burn_in_log_priors_vec = True) #This function call will also filter the lowest probability samples out, when using default settings.
+            if True: #TODO: change placeholder to UserInput defined convergence option on
+                self.callConvergenceDiagnostics('EnsembleSampling', samplingObject=emcee_sampler)
             if str(mcmc_exportLog) == 'UserChoice':
                 mcmc_exportLog = bool(self.UserInput.parameter_estimation_settings['mcmc_exportLog'])
             if mcmc_exportLog == True:
@@ -2115,8 +2146,9 @@ class parameter_estimation:
                     print(str(exceptionObject))
                     sys.exit()
         #Now to keep the results:
-        self.post_burn_in_samples = zeus_sampler.samples.flatten(discard = self.mcmc_burn_in_length )
-        self.post_burn_in_log_posteriors_un_normed_vec = np.atleast_2d(zeus_sampler.samples.flatten_logprob(discard=self.mcmc_burn_in_length)).transpose() #Needed to make it 2D and transpose.
+        adjusted_mcmc_burn_in_length = int(self.mcmc_burn_in_length / self.mcmc_nwalkers)
+        self.post_burn_in_samples = zeus_sampler.samples.flatten(discard = adjusted_mcmc_burn_in_length )
+        self.post_burn_in_log_posteriors_un_normed_vec = np.atleast_2d(zeus_sampler.samples.flatten_logprob(discard=adjusted_mcmc_burn_in_length)).transpose() #Needed to make it 2D and transpose.
         self.mcmc_last_point_sampled=zeus_sampler.get_last_sample #Note that for **zeus** the last point sampled is actually an array of points equal to the number of walkers.        
         if continueSampling == True:
             self.post_burn_in_samples = np.vstack((self.last_post_burn_in_samples, self.post_burn_in_samples ))
@@ -2128,6 +2160,8 @@ class parameter_estimation:
             mcmc_exportLog=True
         if calculatePostBurnInStatistics == True:
             self.calculatePostBurnInStatistics(calculate_post_burn_in_log_priors_vec = True) #This function call will also filter the lowest probability samples out, when using default settings.
+            if True: #TODO: change placeholder to UserInput defined convergence option on
+                self.callConvergenceDiagnostics('EnsembleSliceSampling', samplingObject=zeus_sampler)
             if str(mcmc_exportLog) == 'UserChoice':
                 mcmc_exportLog = bool(self.UserInput.parameter_estimation_settings['mcmc_exportLog'])
             if mcmc_exportLog == True:
@@ -2308,6 +2342,8 @@ class parameter_estimation:
         if calculatePostBurnInStatistics == True:
             #FIXME: I think Below, calculate_post_burn_in_log_priors_vec=True should be false unless we are using continue sampling. For now, will leave it since I am not sure why it is currently set to True/False.
             self.calculatePostBurnInStatistics(calculate_post_burn_in_log_priors_vec = True) #This function call will also filter the lowest probability samples out, when using default settings.
+            if True: #TODO: change placeholder to UserInput defined convergence option on
+                self.callConvergenceDiagnostics('MetropolisHastings')
             if str(mcmc_exportLog) == 'UserChoice':
                 mcmc_exportLog = bool(self.UserInput.parameter_estimation_settings['mcmc_exportLog'])
             if mcmc_exportLog == True:
