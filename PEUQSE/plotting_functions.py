@@ -352,8 +352,8 @@ def createScatterPlot(data_a, data_b, a_tuple, b_tuple, graphs_directory, plot_s
     :param plot_settings: plot settings from User Input (:type: dict)
     """
     import matplotlib.pyplot as plt
-    point_plot_settings = (point_plot_settings['sampled_point_sizes'], point_plot_settings['sampled_point_transparency'])
-    cross_plot_settings = (point_plot_settings['cross_marker_size'], point_plot_settings['cross_marker_transparency'])
+    point_plot_settings = (plot_settings['sampled_point_sizes'], plot_settings['sampled_point_transparency'])
+    cross_plot_settings = (plot_settings['cross_marker_size'], plot_settings['cross_marker_transparency'])
     fig = plt.figure()
     # create a scatter plot of the posterior data between two parameters
     plt.scatter(data_a, data_b, s=point_plot_settings[0], alpha=point_plot_settings[1])
@@ -388,8 +388,8 @@ def createScatterHeatMapPlot(data_a, data_b, a_tuple, b_tuple, graphs_directory,
     :param plot_settings: plot settings from User Input (:type: dict)
     """
     import matplotlib.pyplot as plt
-    point_plot_settings = (point_plot_settings['sampled_point_sizes'], point_plot_settings['sampled_point_transparency'])
-    cross_plot_settings = (point_plot_settings['cross_marker_size'], point_plot_settings['cross_marker_transparency'])
+    point_plot_settings = (plot_settings['sampled_point_sizes'], plot_settings['sampled_point_transparency'])
+    cross_plot_settings = (plot_settings['cross_marker_size'], plot_settings['cross_marker_transparency'])
     # create a scatter plot of the posterior data between two parameters
     fig, ax = density_scatter(data_a, data_b, s=point_plot_settings[0], alpha=point_plot_settings[1])
     # Allows the user to have no crosses if size is set to 0
