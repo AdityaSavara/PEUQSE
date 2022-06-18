@@ -347,7 +347,7 @@ def createScatterPlot(data_a, data_b, a_tuple, b_tuple, graphs_directory, plot_s
     :param a_tuple: set of parameter names, MAP, muAP, and initial poitns (:type: tuple)
     :param b_tuple: set of parameter names, MAP, muAP, and initial poitns (:type: tuple)
     :param graphs_directory: path to graphs directory (:type: str)
-    :param plot_settings: plot settings from User Input (:type: dict)
+    :param plot_settings: plot settings from User Input (:type: dict) https://github.com/AdityaSavara/PEUQSE/blob/master/PEUQSE/UserInput.py
     """
     import matplotlib.pyplot as plt
     point_plot_settings = (plot_settings['sampled_point_sizes'], plot_settings['sampled_point_transparency'])
@@ -381,7 +381,7 @@ def createScatterHeatMapPlot(data_a, data_b, a_tuple, b_tuple, graphs_directory,
     :param a_tuple: set of parameter names, MAP, muAP, and initial poitns (:type: tuple)
     :param b_tuple: set of parameter names, MAP, muAP, and initial poitns (:type: tuple)
     :param graphs_directory: path to graphs directory (:type: str)
-    :param plot_settings: plot settings from User Input (:type: dict)
+    :param plot_settings: plot settings from User Input (:type: dict) https://github.com/AdityaSavara/PEUQSE/blob/master/PEUQSE/UserInput.py
     """
     import matplotlib.pyplot as plt
     point_plot_settings = (plot_settings['sampled_point_sizes'], plot_settings['sampled_point_transparency'])
