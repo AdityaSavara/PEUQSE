@@ -386,7 +386,7 @@ class parameter_estimation:
             filepath = self.UserInput.directories['logs_and_csvs'] #take the default.
         #in both cases, multstart or mcmc, it's really an array of logP_and_parameter_values, just slightly different meanings.
         if sampling_type == 'multistart':  #load from the unfiltered values.
-            self.permutations_MAP_logP_and_parameters_values = np.genfromtxt(filepath + "\multistart_MAP_logP_and_parameters_values.csv", delimiter=",")
+            self.permutations_MAP_logP_and_parameters_values = np.genfromtxt(filepath + "\\multistart_MAP_logP_and_parameters_values.csv", delimiter=",")
             multistart_permutationsToSamples_threshold_filter_coefficient = self.UserInput.parameter_estimation_settings['multistart_permutationsToSamples_threshold_filter_coefficient']
             permutations_to_samples_with_logP = convertPermutationsToSamples(self.permutations_MAP_logP_and_parameters_values, relativeFilteringThreshold = 10**(-1*multistart_permutationsToSamples_threshold_filter_coefficient))
             self.post_burn_in_samples = permutations_to_samples_with_logP[:,1:] #drop the first column which is logP.
@@ -399,7 +399,7 @@ class parameter_estimation:
             self.UserInput.parameter_estimation_settings['mcmc_threshold_filter_samples'] = False
             self.calculatePostBurnInStatistics(calculate_post_burn_in_log_priors_vec = False)    
         if sampling_type == 'mcmc':
-            mcmc_logP_and_parameters_values = np.genfromtxt(filepath + "\mcmc_logP_and_parameter_samples.csv", delimiter=",")
+            mcmc_logP_and_parameters_values = np.genfromtxt(filepath + "\\mcmc_logP_and_parameter_samples.csv", delimiter=",")
             logP_and_parameter_values = np.array(mcmc_logP_and_parameters_values)
             try:
                 self.calculatePostBurnInStatistics(calculate_post_burn_in_log_priors_vec = True)
