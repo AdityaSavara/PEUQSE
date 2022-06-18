@@ -998,7 +998,7 @@ class parameter_estimation:
         #we normally only turn on permutationsToSamples if grid or uniform and if getLogP or doOptimizeNegLogP.
         permutationsToSamples = False#initialize with default
         if self.UserInput.parameter_estimation_settings['multistart_permutationsToSamples'] == True:
-            if initialPointsDistributionType == 'grid' or initialPointsDistributionType == 'uniform' or initialPointsDistributionType == 'sobol' or initialPointsDistributionType == 'astroidal':
+            if (initialPointsDistributionType == 'grid') or (initialPointsDistributionType == 'uniform') or (initialPointsDistributionType == 'sobol') or (initialPointsDistributionType == 'astroidal'):
                 if (searchType == 'getLogP') or (searchType=='doOptimizeNegLogP') or (searchType=='doOptimizeLogP') or (searchType=='doOptimizeSSR'):
                     permutationsToSamples = True
                         
