@@ -644,7 +644,7 @@ class parameter_estimation:
         if numStartPoints == 0: #This is a deprecated line. The function was originally designed for making mcmc walkers and then was generalized.
             numStartPoints = self.mcmc_nwalkers
         if initialPointsDistributionType.lower() =='uniform':
-            initialPointsFirstTerm = np.random.uniform(-2,2, [numStartPoints,numParameters]) #<-- this is from me, trying to remove bias. This way we get sampling from a uniform distribution from -2 standard deviations to +2 standard deviations.
+            initialPointsFirstTerm = np.random.uniform(-2,2, [numStartPoints,numParameters]) #<-- this is from me, trying to remove bias. This way we get sampling from a uniform distribution from -2 standard deviations to +2 standard deviations. That way the sampling is over 95% of the prior and is (according to the prior) likely to include the HPD region.
         elif initialPointsDistributionType.lower()  == 'identical':
             initialPointsFirstTerm = np.zeros((numStartPoints, numParameters)) #Make the first term all zeros.
         elif initialPointsDistributionType.lower() =='gaussian':
@@ -659,7 +659,7 @@ class parameter_estimation:
                 initialPointsFirstTerm = initialPointsFirstTerm**(numParameters-1) * np.abs(initialPointsFirstTerm)
             else:
                 initialPointsFirstTerm = initialPointsFirstTerm**numParameters
-            # Apply a proportional factor of 2 to get bounds of 2 sigma
+            # Apply a proportional factor of 2 to get bounds of 2 sigma. This is analagous to the way we get sampling from a uniform distribution from -2 standard deviations to +2 standard deviations.
             initialPointsFirstTerm *= 2
         elif initialPointsDistributionType.lower() == 'sobol':
             from scipy.stats import qmc
@@ -670,7 +670,7 @@ class parameter_estimation:
             with catch_warnings():
                 simplefilter("ignore")
                 sobol_samples = sobol_object.random(numStartPoints)
-            # now we must translate the sequence (from range(0,1) to range(-2,2))
+            # now we must translate the sequence (from range(0,1) to range(-2,2)). This is analagous to the way we get sampling from a uniform distribution from -2 standard deviations to +2 standard deviations.
             initialPointsFirstTerm = -2 + 4*sobol_samples
         if initialPointsDistributionType !='grid':
             #Now we add to centerPoint, usually self.UserInput.InputParameterInitialGuess. We don't use the UserInput initial guess directly because gridsearch and other things can change it -- so we need to use this one.
