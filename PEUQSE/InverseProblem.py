@@ -386,7 +386,7 @@ class parameter_estimation:
             filepath = self.UserInput.directories['logs_and_csvs'] #take the default.
         #in both cases, multstart or mcmc, it's really an array of logP_and_parameter_values, just slightly different meanings.
         if sampling_type == 'multistart':  #load from the unfiltered values.
-            self.permutations_MAP_logP_and_parameters_values = np.genfromtxt(filepath + "\multistart_MAP_logP_and_parameters_values.csv", delimiter=",")
+            self.permutations_MAP_logP_and_parameters_values = np.genfromtxt(filepath + "\\multistart_MAP_logP_and_parameters_values.csv", delimiter=",")
             multistart_permutationsToSamples_threshold_filter_coefficient = self.UserInput.parameter_estimation_settings['multistart_permutationsToSamples_threshold_filter_coefficient']
             permutations_to_samples_with_logP = convertPermutationsToSamples(self.permutations_MAP_logP_and_parameters_values, relativeFilteringThreshold = 10**(-1*multistart_permutationsToSamples_threshold_filter_coefficient))
             self.post_burn_in_samples = permutations_to_samples_with_logP[:,1:] #drop the first column which is logP.
@@ -399,7 +399,7 @@ class parameter_estimation:
             self.UserInput.parameter_estimation_settings['mcmc_threshold_filter_samples'] = False
             self.calculatePostBurnInStatistics(calculate_post_burn_in_log_priors_vec = False)    
         if sampling_type == 'mcmc':
-            mcmc_logP_and_parameters_values = np.genfromtxt(filepath + "\mcmc_logP_and_parameter_samples.csv", delimiter=",")
+            mcmc_logP_and_parameters_values = np.genfromtxt(filepath + "\\mcmc_logP_and_parameter_samples.csv", delimiter=",")
             logP_and_parameter_values = np.array(mcmc_logP_and_parameters_values)
             try:
                 self.calculatePostBurnInStatistics(calculate_post_burn_in_log_priors_vec = True)
@@ -631,9 +631,9 @@ class parameter_estimation:
         #The arguments gridsearchSamplingInterval and gridsearchSamplingRadii are only for the distribution type 'grid', and correspond to the variables  gridsearchSamplingInterval = [], gridsearchSamplingRadii = [] inside getGridPermutations.
         if str(centerPoint).lower() == str(None).lower():
             centerPoint = np.array(self.UserInput.InputParameterInitialGuess)*1.0 #This may be a reduced parameter space.
-        if initialPointsDistributionType.lower() not in ['grid', 'uniform', 'identical', 'gaussian']:
-            print("Warning: initialPointsDistributionType must be from: 'grid', 'uniform', 'identical', 'gaussian'.  A different choice was received and is not understood.  initialPointsDistributionType is being set as 'uniform'.")
-            initialPointsDistributionType = 'uniform'
+        if initialPointsDistributionType.lower() not in ['grid', 'uniform', 'identical', 'gaussian', 'astroidal', 'sobol']:
+            print("Warning: initialPointsDistributionType must be from: 'grid', 'uniform', 'identical', 'gaussian', 'astroidal', 'sobol'.  A different choice was received and is not understood.  initialPointsDistributionType is being set as 'sobol'.")
+            initialPointsDistributionType = 'sobol'
         #For a multi-start with a grid, our algorithm is completely different than other cases.
         if initialPointsDistributionType.lower() =='grid':
             gridPermutations, numPermutations = self.getGridPermutations(centerPoint, gridsearchSamplingInterval=gridsearchSamplingInterval, gridsearchSamplingRadii=gridsearchSamplingRadii)
@@ -644,11 +644,34 @@ class parameter_estimation:
         if numStartPoints == 0: #This is a deprecated line. The function was originally designed for making mcmc walkers and then was generalized.
             numStartPoints = self.mcmc_nwalkers
         if initialPointsDistributionType.lower() =='uniform':
-            initialPointsFirstTerm = np.random.uniform(-2,2, [numStartPoints,numParameters]) #<-- this is from me, trying to remove bias. This way we get sampling from a uniform distribution from -2 standard deviations to +2 standard deviations.
+            initialPointsFirstTerm = np.random.uniform(-2,2, [numStartPoints,numParameters]) #<-- this is from me, trying to remove bias. This way we get sampling from a uniform distribution from -2 standard deviations to +2 standard deviations. That way the sampling is over 95% of the prior and is (according to the prior) likely to include the HPD region.
         elif initialPointsDistributionType.lower()  == 'identical':
             initialPointsFirstTerm = np.zeros((numStartPoints, numParameters)) #Make the first term all zeros.
         elif initialPointsDistributionType.lower() =='gaussian':
             initialPointsFirstTerm = np.random.randn(numStartPoints, numParameters) #<--- this was from the zeus example. TODO: change this to rng.standard_normal
+        elif initialPointsDistributionType.lower() == 'astroidal':
+            # The idea is to create a hypercube around the origin then apply a power law factor.
+            # This factor is set as the numParameters to create an interesting distribution for Euclidean distance that starts as a uniform distribution then decays by a power law if the exponent is the number of dimensions. 
+            initialPointsFirstTerm = np.random.uniform(-1, 1, [numStartPoints,numParameters]) ** numParameters
+            # This section assures that positive and negative values are generated.
+            if numParameters % 2 == 0:
+                # The exponent is turned to an odd number and the absolute value assures that negative values are included. 
+                initialPointsFirstTerm = initialPointsFirstTerm**(numParameters-1) * np.abs(initialPointsFirstTerm)
+            else:
+                initialPointsFirstTerm = initialPointsFirstTerm**numParameters
+            # Apply a proportional factor of 2 to get bounds of 2 sigma. This is analagous to the way we get sampling from a uniform distribution from -2 standard deviations to +2 standard deviations.
+            initialPointsFirstTerm *= 2
+        elif initialPointsDistributionType.lower() == 'sobol':
+            from scipy.stats import qmc
+            from warnings import catch_warnings, simplefilter #used to suppress warnings when sobol samples are not base2.
+            # A sobol object has to be created to then extract points from the object.
+            # The scramble (Owen Scramble) is always True. This option helps convergence and creates a more unbiased sampling.
+            sobol_object = qmc.Sobol(d=numParameters, scramble=True)
+            with catch_warnings():
+                simplefilter("ignore")
+                sobol_samples = sobol_object.random(numStartPoints)
+            # now we must translate the sequence (from range(0,1) to range(-2,2)). This is analagous to the way we get sampling from a uniform distribution from -2 standard deviations to +2 standard deviations.
+            initialPointsFirstTerm = -2 + 4*sobol_samples
         if initialPointsDistributionType !='grid':
             #Now we add to centerPoint, usually self.UserInput.InputParameterInitialGuess. We don't use the UserInput initial guess directly because gridsearch and other things can change it -- so we need to use this one.
             initialPoints = relativeInitialDistributionSpread*initialPointsFirstTerm*self.UserInput.std_prior + centerPoint
@@ -736,7 +759,7 @@ class parameter_estimation:
                     walkerInitialDistribution = self.UserInput.parameter_estimation_settings['mcmc_walkerInitialDistribution']
                 #The identical distribution is used by default because otherwise the walkers may be spread out too far and it could defeat the purpose of a gridsearch.
                 if walkerInitialDistribution.lower() == 'auto':
-                    walkerInitialDistribution = 'uniform'
+                    walkerInitialDistribution = 'sobol'
         for permutationIndex,permutation in enumerate(self.listOfPermutations):
             #####Begin PEUQSE Parallel Processing During Loop Block####
             if (self.UserInput.parameter_estimation_settings['multistart_parallel_sampling'])== True:
@@ -975,7 +998,7 @@ class parameter_estimation:
         #we normally only turn on permutationsToSamples if grid or uniform and if getLogP or doOptimizeNegLogP.
         permutationsToSamples = False#initialize with default
         if self.UserInput.parameter_estimation_settings['multistart_permutationsToSamples'] == True:
-            if initialPointsDistributionType == 'grid' or initialPointsDistributionType == 'uniform':
+            if (initialPointsDistributionType == 'grid') or (initialPointsDistributionType == 'uniform') or (initialPointsDistributionType == 'sobol') or (initialPointsDistributionType == 'astroidal'):
                 if (searchType == 'getLogP') or (searchType=='doOptimizeNegLogP') or (searchType=='doOptimizeLogP') or (searchType=='doOptimizeSSR'):
                     permutationsToSamples = True
                         
@@ -1900,7 +1923,7 @@ class parameter_estimation:
         if walkerInitialDistribution == 'UserChoice':
             walkerInitialDistribution = self.UserInput.parameter_estimation_settings['mcmc_walkerInitialDistribution']
         if walkerInitialDistribution.lower() == 'auto':
-            walkerInitialDistribution = 'uniform'
+            walkerInitialDistribution = 'sobol'
         if str(walkerInitialDistributionSpread) == 'UserChoice':
             walkerInitialDistributionSpread = self.UserInput.parameter_estimation_settings['mcmc_walkerInitialDistributionSpread']
         if str(walkerInitialDistributionSpread).lower() == 'auto':
@@ -2467,11 +2490,11 @@ class parameter_estimation:
                 if param_a_index != param_b_index:
                     if self.UserInput.scatter_heatmap_plots_settings['all_pair_permutations']:
                         plotting_functions.createScatterHeatMapPlot(posterior_df[param_a_column], posterior_df[param_b_column], (param_a_column, param_a_name, param_a_MAP, param_a_mu_AP, param_a_initial),
-                                    (param_b_column, param_b_name, param_b_MAP, param_b_mu_AP, param_b_initial), point_plot_settings, cross_plot_settings, graphs_directory, plot_settings) 
+                                    (param_b_column, param_b_name, param_b_MAP, param_b_mu_AP, param_b_initial), graphs_directory, plot_settings) 
                     else:
                         if param_a_index<param_b_index: # only use the bottom triangle of the matrix and do not use the main diagonal
                             plotting_functions.createScatterHeatMapPlot(posterior_df[param_a_column], posterior_df[param_b_column], (param_a_column, param_a_name, param_a_MAP, param_a_mu_AP, param_a_initial),
-                                        (param_b_column, param_b_name, param_b_MAP, param_b_mu_AP, param_b_initial), point_plot_settings, cross_plot_settings, graphs_directory, plot_settings) 
+                                        (param_b_column, param_b_name, param_b_MAP, param_b_mu_AP, param_b_initial), graphs_directory, plot_settings) 
 
     def createSimulatedResponsesPlots(self, allResponses_x_values=[], allResponsesListsOfYArrays =[], plot_settings={},allResponsesListsOfYUncertaintiesArrays=[] ): 
         #allResponsesListsOfYArrays  is to have 3 layers of lists: Response > Responses Observed, mu_guess Simulated Responses, map_Simulated Responses, (mu_AP_simulatedResponses) > Values
