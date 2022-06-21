@@ -654,11 +654,12 @@ class parameter_estimation:
             # This factor is set as the numParameters to create an interesting distribution for Euclidean distance that starts as a uniform distribution then decays by a power law if the exponent is the number of dimensions. 
             initialPointsFirstTerm = np.random.uniform(-1, 1, [numStartPoints,numParameters]) ** numParameters
             # This section assures that positive and negative values are generated.
-            if numParameters % 2 == 0:
-                # The exponent is turned to an odd number and the absolute value assures that negative values are included. 
-                initialPointsFirstTerm = initialPointsFirstTerm**(numParameters-1) * np.abs(initialPointsFirstTerm)
-            else:
-                initialPointsFirstTerm = initialPointsFirstTerm**numParameters
+            # create mapping scheme of negative values, then make matrix completely positive, apply negatives back later
+            neg_map = np.ones((numStartPoints,numParameters), dtype=int)
+            neg_map[initialPointsFirstTerm < 0] = -1
+            initialPointsFirstTerm = np.abs(initialPointsFirstTerm)
+            initialPointsFirstTerm = initialPointsFirstTerm**numParameters
+            initialPointsFirstTerm = neg_map*initialPointsFirstTerm
             # Apply a proportional factor of 2 to get bounds of 2 sigma. This is analagous to the way we get sampling from a uniform distribution from -2 standard deviations to +2 standard deviations.
             initialPointsFirstTerm *= 2
         elif initialPointsDistributionType.lower() == 'sobol':
