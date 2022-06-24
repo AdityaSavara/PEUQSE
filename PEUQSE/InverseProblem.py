@@ -631,8 +631,8 @@ class parameter_estimation:
         #The arguments gridsearchSamplingInterval and gridsearchSamplingRadii are only for the distribution type 'grid', and correspond to the variables  gridsearchSamplingInterval = [], gridsearchSamplingRadii = [] inside getGridPermutations.
         if str(centerPoint).lower() == str(None).lower():
             centerPoint = np.array(self.UserInput.InputParameterInitialGuess)*1.0 #This may be a reduced parameter space.
-        if initialPointsDistributionType.lower() not in ['grid', 'uniform', 'identical', 'gaussian', 'astroidal', 'sobol']:
-            print("Warning: initialPointsDistributionType must be from: 'grid', 'uniform', 'identical', 'gaussian', 'astroidal', 'sobol'.  A different choice was received and is not understood.  initialPointsDistributionType is being set as 'sobol'.")
+        if initialPointsDistributionType.lower() not in ['grid', 'uniform', 'identical', 'gaussian', 'astroidal', 'sobol', 'shell']:
+            print("Warning: initialPointsDistributionType must be from: 'grid', 'uniform', 'identical', 'gaussian', 'astroidal', 'sobol', 'shell'.  A different choice was received and is not understood.  initialPointsDistributionType is being set as 'sobol'.")
             initialPointsDistributionType = 'sobol'
         #For a multi-start with a grid, our algorithm is completely different than other cases.
         if initialPointsDistributionType.lower() =='grid':
@@ -649,7 +649,7 @@ class parameter_estimation:
             initialPointsFirstTerm = np.zeros((numStartPoints, numParameters)) #Make the first term all zeros.
         elif initialPointsDistributionType.lower() =='gaussian':
             initialPointsFirstTerm = np.random.randn(numStartPoints, numParameters) #<--- this was from the zeus example. TODO: change this to rng.standard_normal
-        elif initialPointsDistributionType.lower() == 'astroidal':
+        elif (initialPointsDistributionType.lower() == 'astroidal') or (initialPointsDistributionType.lower() == 'shell'):
             # The idea is to create a hypercube around the origin then apply a power law factor.
             # This factor is set as the numParameters to create an interesting distribution for Euclidean distance that starts as a uniform distribution then decays by a power law if the exponent is the number of dimensions. 
             from scipy.stats import qmc
@@ -667,7 +667,10 @@ class parameter_estimation:
             neg_map = np.ones((numStartPoints,numParameters), dtype=int)
             neg_map[initialPointsFirstTerm < 0] = -1
             initialPointsFirstTerm = np.abs(initialPointsFirstTerm)
-            initialPointsFirstTerm = initialPointsFirstTerm**numParameters
+            if initialPointsDistributionType.lower() == 'astroidal':
+                initialPointsFirstTerm = initialPointsFirstTerm**numParameters
+            elif initialPointsDistributionType.lower() == 'shell':
+                initialPointsFirstTerm = initialPointsFirstTerm**(1/numParameters)
             initialPointsFirstTerm = neg_map*initialPointsFirstTerm
             # Apply a proportional factor of 2 to get bounds of 2 sigma. This is analagous to the way we get sampling from a uniform distribution from -2 standard deviations to +2 standard deviations.
             initialPointsFirstTerm *= 2
@@ -1008,7 +1011,7 @@ class parameter_estimation:
         #we normally only turn on permutationsToSamples if grid or uniform and if getLogP or doOptimizeNegLogP.
         permutationsToSamples = False#initialize with default
         if self.UserInput.parameter_estimation_settings['multistart_permutationsToSamples'] == True:
-            if (initialPointsDistributionType == 'grid') or (initialPointsDistributionType == 'uniform') or (initialPointsDistributionType == 'sobol') or (initialPointsDistributionType == 'astroidal'):
+            if (initialPointsDistributionType == 'grid') or (initialPointsDistributionType == 'uniform') or (initialPointsDistributionType == 'sobol') or (initialPointsDistributionType == 'astroidal') or (initialPointsDistributionType == 'shell'):
                 if (searchType == 'getLogP') or (searchType=='doOptimizeNegLogP') or (searchType=='doOptimizeLogP') or (searchType=='doOptimizeSSR'):
                     permutationsToSamples = True
                         
