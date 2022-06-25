@@ -1001,8 +1001,8 @@ class parameter_estimation:
             calculatePostBurnInStatistics = self.UserInput.parameter_estimation_settings['multistart_calculatePostBurnInStatistics']
         if numStartPoints == 0: #if it's still zero, we need to make it the default which is 3 times the number of active parameters.
             numStartPoints = len(self.UserInput.InputParameterInitialGuess)*3
-        if relativeInitialDistributionSpread == 0: #if it's still zero, we need to make it the default which is 1.
-            relativeInitialDistributionSpread = 1.0              
+        if relativeInitialDistributionSpread == 0: #if it's still zero, we need to make it the default which is 0.866
+            relativeInitialDistributionSpread = 0.866 #This choice is to be helpful for uniform distribution cases, as described in the user input.
         if searchType == 'doGetLogP' or searchType == 'doSinglePoint': #Fixing a common input mistake.
             searchType = 'getLogP'
         #make the initial points list by mostly passing through arguments.
@@ -1967,7 +1967,7 @@ class parameter_estimation:
         if str(walkerInitialDistributionSpread) == 'UserChoice':
             walkerInitialDistributionSpread = self.UserInput.parameter_estimation_settings['mcmc_walkerInitialDistributionSpread']
         if str(walkerInitialDistributionSpread).lower() == 'auto':
-            walkerInitialDistributionSpread = 1.0
+            walkerInitialDistributionSpread = 0.866 #This choice is intended to be useful for uniform distribution priors, as described in the UserInput file.
             
         #Check if we need to continue sampling, and prepare for it if we need to.
         if continueSampling == 'auto':
@@ -2099,7 +2099,7 @@ class parameter_estimation:
         if str(walkerInitialDistributionSpread) == 'UserChoice':
             walkerInitialDistributionSpread = self.UserInput.parameter_estimation_settings['mcmc_walkerInitialDistributionSpread']
         if str(walkerInitialDistributionSpread).lower() == 'auto':
-            walkerInitialDistributionSpread = 1.0
+            walkerInitialDistributionSpread = 0.866  #This choice is intended to be useful for uniform distribution priors, as described in the UserInput file.
             
         #Check if we need to continue sampling, and prepare for it if we need to.
         if continueSampling == 'auto':
