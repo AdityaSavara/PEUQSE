@@ -1940,14 +1940,11 @@ class parameter_estimation:
             refined_post_burn_in_samples = np.expand_dims(self.post_burn_in_samples, axis=1)
             taus = AutoCorrTime(refined_post_burn_in_samples)
         print('AutoCorrelatedTime of', taus)
-        
-
+        return taus
         # Gelman-Rubin statistics
         # use pymc to get this stat
         # other pymc stats can go below
-
-
-        pass
+        
 
 
     #Our EnsembleSampling is done by the emcee back end. (pip install emcee)
