@@ -1,5 +1,5 @@
 # Parameter Estimation and Uncertainty Quantification for Science and Engineering (PEUQSE)
-
+#
 Parameter estimation for complex physical problems often suffers from finding ‘solutions’ that are not physically realistic. The PEUQSE software (formerly named CheKiPEUQ) provides tools for finding physically realistic parameter estimates, graphs of the parameter estimate positions within parameter space, and plots of the final simulation results.
 
 The LICENSE and MANUAL are in the PEUQSE directory and at https://github.com/AdityaSavara/PEUQSE/tree/master/PEUQSE
