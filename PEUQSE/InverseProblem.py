@@ -2004,8 +2004,6 @@ class parameter_estimation:
         createGewekePlot(z_scores_sum_params_geweke_final_plot_inputs, N_geweke, z_scores_sum_params_percentage_outlier, 'Combined_Parameters', 'All Parameters', self.UserInput.directories['graphs'])
 
         
-
-
     #Our EnsembleSampling is done by the emcee back end. (pip install emcee)
     software_name = "emcee"
     software_version = "3.1.2"
@@ -2079,7 +2077,7 @@ class parameter_estimation:
         nEnsembleSteps = int(requested_mcmc_steps/self.mcmc_nwalkers) #We calculate the calculate number of the Ensemble Steps from the total sampling steps requested divided by self.mcmc_nwalkers.
         if nEnsembleSteps == 0:
             nEnsembleSteps = 1
-        if str(self.UserInput.parameter_estimation_settings['mcmc_burn_in']).lower() == 'auto': self.mcmc_burn_in_length = int(nEnsembleSteps*0.1)
+        if str(self.UserInput.parameter_estimation_settings['mcmc_burn_in']).lower() == 'auto': self.mcmc_burn_in_length = int(requested_mcmc_steps*0.1) # burn in is relative to entire ensemble
         else: self.mcmc_burn_in_length = self.UserInput.parameter_estimation_settings['mcmc_burn_in']
         if 'mcmc_maxiter' not in self.UserInput.parameter_estimation_settings: mcmc_maxiter = 1E6 #The default from zeus is 1E4, but I have found that is not always sufficient.
         else: mcmc_maxiter = self.UserInput.parameter_estimation_settings['mcmc_maxiter']
@@ -2211,7 +2209,7 @@ class parameter_estimation:
         nEnsembleSteps = int(requested_mcmc_steps/self.mcmc_nwalkers) #We calculate the calculate number of the Ensemble Steps from the total sampling steps requested divided by self.mcmc_nwalkers.
         if nEnsembleSteps == 0:
             nEnsembleSteps = 1
-        if str(self.UserInput.parameter_estimation_settings['mcmc_burn_in']).lower() == 'auto': self.mcmc_burn_in_length = int(nEnsembleSteps*0.1)
+        if str(self.UserInput.parameter_estimation_settings['mcmc_burn_in']).lower() == 'auto': self.mcmc_burn_in_length = int(requested_mcmc_steps*0.1) # burn in is relative to entire ensemble
         else: self.mcmc_burn_in_length = self.UserInput.parameter_estimation_settings['mcmc_burn_in']
         if 'mcmc_maxiter' not in self.UserInput.parameter_estimation_settings: mcmc_maxiter = 1E6 #The default from zeus is 1E4, but I have found that is not always sufficient.
         else: mcmc_maxiter = self.UserInput.parameter_estimation_settings['mcmc_maxiter']
