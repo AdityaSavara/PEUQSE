@@ -1958,51 +1958,53 @@ class parameter_estimation:
         # create plots for each parameter. The parameter names and symbols are unpacked from the dictionary.
         for param_taus, (parameter_name, parameter_math_name) in zip(taus_zeus.T, self.UserInput.model['parameterNamesAndMathTypeExpressionsDict'].items()):
             createAutoCorrPlot(window_indices_act, param_taus, parameter_name, parameter_math_name, self.UserInput.directories['graphs'])
-
-        # use arviz to guide Geweke analysis
-        from arviz import geweke
-        from PEUQSE.plotting_functions import createGewekePlot
-        # create a linearly space array for creating window sizes for Geweke percent diagnostic
-        window_indices_geweke = np.linspace(0, refined_post_burn_in_samples.shape[0], 21).astype(int)[1:]
-        # loop through each param, each chain, and each window size
-        # Geweke function is called for each window size. The full window (last one) is saved for plotting.
-        total_z_scores = [] # initialize list for combining parameters.
-        for param_num, (parameter_name, parameter_math_name) in enumerate(self.UserInput.model['parameterNamesAndMathTypeExpressionsDict'].items()):
-            z_scores_array_per_chain = [] # initialize list for number of windows
-            for chain_num in range(refined_post_burn_in_samples.shape[1]):
-                z_scores_array_per_window = [] # initialize the list
-                for window in window_indices_geweke:
-                    # calculate z scores for each window.
-                    local_z_score = geweke(refined_post_burn_in_samples[:window, chain_num, param_num])
-                    # checks if it is the last window. If yes, save the indices. Save for plotting and all last windows are the same.
-                    if window == window_indices_geweke[-1]:
-                        z_scores_final_indices = local_z_score.T[0]
-                    z_scores_array_per_window.append(local_z_score.T[1])
-                z_scores_array_per_chain.append(z_scores_array_per_window)
-            z_scores_array_per_chain = np.array(z_scores_array_per_chain)
-            # save all chains for combining all parameters.
-            total_z_scores.append(z_scores_array_per_chain)
-            z_scores_array = np.mean(np.abs(z_scores_array_per_chain), axis=0)
+        try:
+            # use arviz to guide Geweke analysis
+            from arviz import geweke
+            from PEUQSE.plotting_functions import createGewekePlot
+            # create a linearly space array for creating window sizes for Geweke percent diagnostic
+            window_indices_geweke = np.linspace(0, refined_post_burn_in_samples.shape[0], 21).astype(int)[1:]
+            # loop through each param, each chain, and each window size
+            # Geweke function is called for each window size. The full window (last one) is saved for plotting.
+            total_z_scores = [] # initialize list for combining parameters.
+            for param_num, (parameter_name, parameter_math_name) in enumerate(self.UserInput.model['parameterNamesAndMathTypeExpressionsDict'].items()):
+                z_scores_array_per_chain = [] # initialize list for number of windows
+                for chain_num in range(refined_post_burn_in_samples.shape[1]):
+                    z_scores_array_per_window = [] # initialize the list
+                    for window in window_indices_geweke:
+                        # calculate z scores for each window.
+                        local_z_score = geweke(refined_post_burn_in_samples[:window, chain_num, param_num])
+                        # checks if it is the last window. If yes, save the indices. Save for plotting and all last windows are the same.
+                        if window == window_indices_geweke[-1]:
+                            z_scores_final_indices = local_z_score.T[0]
+                        z_scores_array_per_window.append(local_z_score.T[1])
+                    z_scores_array_per_chain.append(z_scores_array_per_window)
+                z_scores_array_per_chain = np.array(z_scores_array_per_chain)
+                # save all chains for combining all parameters.
+                total_z_scores.append(z_scores_array_per_chain)
+                z_scores_array = np.mean(np.abs(z_scores_array_per_chain), axis=0)
+                # use numpy function to count how many z values fall outside 1 std. Divide by total values to get percent (decimal)
+                z_scores_percentage_outlier = np.count_nonzero(z_scores_array>1, axis=1) / z_scores_array.shape[1]
+                # save last window for plotting.
+                z_scores_final = z_scores_array[:,-1]
+                z_scores_geweke_final_plot_inputs = [z_scores_final_indices, z_scores_final] # allows for easier plotting with unpacking.
+                # now plot using PEUQSE.plotting function
+                createGewekePlot(z_scores_geweke_final_plot_inputs, window_indices_geweke, z_scores_percentage_outlier, parameter_name, parameter_math_name, self.UserInput.directories['graphs'])
+            # get combined parameter Geweke plot
+            total_z_scores = np.array(total_z_scores)
+            # abs and average across the parameters.
+            z_scores_sum_params = np.mean(np.abs(total_z_scores), axis=0)
+            # average across each chain after params are averaged.
+            z_scores_sum_params_and_chains = np.mean(z_scores_sum_params, axis=0)
+            # save final window for plotting.
+            z_scores_sum_params_final = z_scores_sum_params_and_chains[:, -1]
             # use numpy function to count how many z values fall outside 1 std. Divide by total values to get percent (decimal)
-            z_scores_percentage_outlier = np.count_nonzero(z_scores_array>1, axis=1) / z_scores_array.shape[1]
-            # save last window for plotting.
-            z_scores_final = z_scores_array[:,-1]
-            z_scores_geweke_final_plot_inputs = [z_scores_final_indices, z_scores_final] # allows for easier plotting with unpacking.
+            z_scores_sum_params_percentage_outlier = np.count_nonzero(z_scores_sum_params_and_chains>1, axis=1) / z_scores_sum_params_and_chains.shape[1]
+            z_scores_sum_params_geweke_final_plot_inputs = [z_scores_final_indices, z_scores_sum_params_final] # allows for easier plotting with unpacking.
             # now plot using PEUQSE.plotting function
-            createGewekePlot(z_scores_geweke_final_plot_inputs, window_indices_geweke, z_scores_percentage_outlier, parameter_name, parameter_math_name, self.UserInput.directories['graphs'])
-        # get combined parameter Geweke plot
-        total_z_scores = np.array(total_z_scores)
-        # abs and average across the parameters.
-        z_scores_sum_params = np.mean(np.abs(total_z_scores), axis=0)
-        # average across each chain after params are averaged.
-        z_scores_sum_params_and_chains = np.mean(z_scores_sum_params, axis=0)
-        # save final window for plotting.
-        z_scores_sum_params_final = z_scores_sum_params_and_chains[:, -1]
-        # use numpy function to count how many z values fall outside 1 std. Divide by total values to get percent (decimal)
-        z_scores_sum_params_percentage_outlier = np.count_nonzero(z_scores_sum_params_and_chains>1, axis=1) / z_scores_sum_params_and_chains.shape[1]
-        z_scores_sum_params_geweke_final_plot_inputs = [z_scores_final_indices, z_scores_sum_params_final] # allows for easier plotting with unpacking.
-        # now plot using PEUQSE.plotting function
-        createGewekePlot(z_scores_sum_params_geweke_final_plot_inputs, window_indices_geweke, z_scores_sum_params_percentage_outlier, 'Combined_Parameters', 'All Parameters', self.UserInput.directories['graphs'])
+            createGewekePlot(z_scores_sum_params_geweke_final_plot_inputs, window_indices_geweke, z_scores_sum_params_percentage_outlier, 'Combined_Parameters', 'All Parameters', self.UserInput.directories['graphs'])
+        except:
+            print('Could not calculated Geweke convergence analysis.')
 
         
     #Our EnsembleSampling is done by the emcee back end. (pip install emcee)
