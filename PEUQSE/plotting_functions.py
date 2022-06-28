@@ -405,3 +405,64 @@ def createScatterHeatMapPlot(data_a, data_b, a_tuple, b_tuple, graphs_directory,
         plt.locator_params(axis='y', nbins=plot_settings['max_num_y_ticks'])
     fig.savefig(graphs_directory+f'Heat_Scatter_{a_tuple[1]}_{b_tuple[1]}',dpi=plot_settings['dpi'])
     plt.close(fig)
+
+def createAutoCorrPlot(N, taus, param_name, param_symbol, graphs_directory):
+    """
+    Creates Integrated Autocorrelated Time Plots to show MCMC convergence.
+    Convergence can be inferred when the AutoCorrelatedTime converges.
+
+    :param N: Indices for the window size. (:type: np.array)
+    :param taus: Autocorrelated Time values. (:type: np.array)
+    :param param_name: Parameter name. (:type: str)
+    :param param_symbol: Parameter symbol. Usually in unicode raw string. (:type: str)
+    :param graphs_directory: Directory for storing graphs. (:type: str)
+    """
+    # create loglog plot
+    fig = plt.figure()
+    plt.loglog(N, taus, "o-", label='AutoCorr')
+    # get current y boundaries
+    ylim = plt.gca().get_ylim()
+    # plot 50*tau heuristical line for possible convergence
+    plt.plot(N, N / 50.0, "--k", label=r"$\tau = N/50$")
+    # reset the y boundary
+    plt.ylim(ylim)
+    # create labels and legend
+    plt.xlabel("number of samples, $N$")
+    plt.ylabel(r"$\tau$ estimates")
+    plt.title(f'Integrate Autocorrelation Time for {param_symbol}')
+    plt.legend(fontsize=14)
+    # save and close figure
+    plt.savefig(graphs_directory+'AutoCorrelationPlot_'+param_name)
+    plt.close(fig)
+
+def createGewekePlot(z_scores, N, z_percents, param_name, param_symbol, graphs_directory):
+    """
+    Creates Gewekes indicies plot of entire post burn in samples
+    and a plot for percentage of points that fall outside 1 std when compared to the 
+    first 10% of the relative window size to the last 50%.
+
+    :param z_scores: z scores for overall Geweke plot. (:type: np.array)
+    :param N: Indices for the window size. (:type: np.array)
+    :param z_percents: Percent of z scores outside 1 std for each window size. (:type: np.array)
+    :param param_name: Parameter name. (:type: str)
+    :param param_symbol: Parameter symbol. Usually in unicode raw string. (:type: str)
+    :param graphs_directory: Directory for storing graphs. (:type: str)
+    """
+    # create 2 subplots for one figure
+    fig, (ax1, ax2) = plt.subplots(1, 2, tight_layout=True, squeeze=True)
+    plt.suptitle(f'Geweke Diagnostics for {param_symbol}')
+    # plot Geweke plot on first graph
+    ax1.scatter(*z_scores)
+    # plot 1 std line. since this is abs of values only positive is needed.
+    ax1.hlines([1], 0, round(z_scores[0][-1]), linestyles='dotted')
+    # set labels and x boundaries
+    ax1.set_xlabel('Last 50% Samples')
+    ax1.set_ylabel('Z scores')
+    ax1.set_xlim(0, round(z_scores[0][-1]))
+    # plot Geweke percents
+    ax2.plot(N, z_percents, "o-")
+    # set labels, save figure, and close
+    ax2.set_xlabel('Sample Indices')
+    ax2.set_ylabel('Percent Outside '+u"\u00B1"+"1"+u"\u03C3")
+    fig.savefig(graphs_directory+'GewekeDiagnostic_'+param_name)
+    plt.close(fig)
