@@ -2120,7 +2120,7 @@ class parameter_estimation:
             mcmc_exportLog=True
         if calculatePostBurnInStatistics == True:
             self.calculatePostBurnInStatistics(calculate_post_burn_in_log_priors_vec = True) #This function call will also filter the lowest probability samples out, when using default settings.
-            if True: #TODO: change placeholder to UserInput defined convergence option on
+            if self.UserInput.parameter_estimation_settings['convergence_diagnostics']: #Run convergence diagnostics if UserInput defines it as True
                 self.callConvergenceDiagnostics('EnsembleSampling', samplingObject=emcee_sampler)
             if str(mcmc_exportLog) == 'UserChoice':
                 mcmc_exportLog = bool(self.UserInput.parameter_estimation_settings['mcmc_exportLog'])
@@ -2250,7 +2250,7 @@ class parameter_estimation:
             mcmc_exportLog=True
         if calculatePostBurnInStatistics == True:
             self.calculatePostBurnInStatistics(calculate_post_burn_in_log_priors_vec = True) #This function call will also filter the lowest probability samples out, when using default settings.
-            if True: #TODO: change placeholder to UserInput defined convergence option on
+            if self.UserInput.parameter_estimation_settings['convergence_diagnostics']: #Run convergence diagnostics if UserInput defines it as True
                 self.callConvergenceDiagnostics('EnsembleSliceSampling', samplingObject=zeus_sampler)
             if str(mcmc_exportLog) == 'UserChoice':
                 mcmc_exportLog = bool(self.UserInput.parameter_estimation_settings['mcmc_exportLog'])
@@ -2432,7 +2432,7 @@ class parameter_estimation:
         if calculatePostBurnInStatistics == True:
             #FIXME: I think Below, calculate_post_burn_in_log_priors_vec=True should be false unless we are using continue sampling. For now, will leave it since I am not sure why it is currently set to True/False.
             self.calculatePostBurnInStatistics(calculate_post_burn_in_log_priors_vec = True) #This function call will also filter the lowest probability samples out, when using default settings.
-            if True: #TODO: change placeholder to UserInput defined convergence option on
+            if self.UserInput.parameter_estimation_settings['convergence_diagnostics']: #Run convergence diagnostics if UserInput defines it as True
                 self.callConvergenceDiagnostics('MetropolisHastings')
             if str(mcmc_exportLog) == 'UserChoice':
                 mcmc_exportLog = bool(self.UserInput.parameter_estimation_settings['mcmc_exportLog'])
