@@ -1945,24 +1945,25 @@ class parameter_estimation:
             refined_post_burn_in_samples = np.expand_dims(self.post_burn_in_samples, axis=1)
 
         # create window sizes that increase on a log scale.
-        N = np.exp(np.linspace(np.log(100), np.log(self.post_burn_in_samples.shape[0]), 20)).astype(int)
+        window_indices_act = np.exp(np.linspace(np.log(100), np.log(self.post_burn_in_samples.shape[0]), 20)).astype(int)
         # initialize array with shape (N_intervals, numParams)
-        taus_zeus = np.empty((len(N), refined_post_burn_in_samples.shape[2])) 
-        # populate taus using zeus AutoCorrTime function
-        for i, n in enumerate(N):
+        taus_zeus = np.empty((len(window_indices_act), refined_post_burn_in_samples.shape[2])) 
+        # populate taus using zeus AutoCorrTime function where lag length is determined by Sokal 1989.
+        # For more information on Integrated Autocorrelation time see https://emcee.readthedocs.io/en/stable/tutorials/autocorr/ 
+        for i, n in enumerate(window_indices_act): # loop through the window indices to get larger and larger windows
             taus_zeus[i] = AutoCorrTime(refined_post_burn_in_samples[:n,:,:])
         
         # create plots using PEUQSE plotting functions file.
         from PEUQSE.plotting_functions import createAutoCorrPlot
         # create plots for each parameter. The parameter names and symbols are unpacked from the dictionary.
         for param_taus, (parameter_name, parameter_math_name) in zip(taus_zeus.T, self.UserInput.model['parameterNamesAndMathTypeExpressionsDict'].items()):
-            createAutoCorrPlot(N, param_taus, parameter_name, parameter_math_name, self.UserInput.directories['graphs'])
+            createAutoCorrPlot(window_indices_act, param_taus, parameter_name, parameter_math_name, self.UserInput.directories['graphs'])
 
         # use arviz to guide Geweke analysis
         from arviz import geweke
         from PEUQSE.plotting_functions import createGewekePlot
         # create a linearly space array for creating window sizes for Geweke percent diagnostic
-        N_geweke = np.linspace(0, refined_post_burn_in_samples.shape[0], 21).astype(int)[1:]
+        window_indices_geweke = np.linspace(0, refined_post_burn_in_samples.shape[0], 21).astype(int)[1:]
         # loop through each param, each chain, and each window size
         # Geweke function is called for each window size. The full window (last one) is saved for plotting.
         total_z_scores = [] # initialize list for combining parameters.
@@ -1970,11 +1971,11 @@ class parameter_estimation:
             z_scores_array_per_chain = [] # initialize list for number of windows
             for chain_num in range(refined_post_burn_in_samples.shape[1]):
                 z_scores_array_per_window = [] # initialize the list
-                for window in N_geweke:
+                for window in window_indices_geweke:
                     # calculate z scores for each window.
                     local_z_score = geweke(refined_post_burn_in_samples[:window, chain_num, param_num])
                     # checks if it is the last window. If yes, save the indices. Save for plotting and all last windows are the same.
-                    if window == N_geweke[-1]:
+                    if window == window_indices_geweke[-1]:
                         z_scores_final_indices = local_z_score.T[0]
                     z_scores_array_per_window.append(local_z_score.T[1])
                 z_scores_array_per_chain.append(z_scores_array_per_window)
@@ -1988,7 +1989,7 @@ class parameter_estimation:
             z_scores_final = z_scores_array[:,-1]
             z_scores_geweke_final_plot_inputs = [z_scores_final_indices, z_scores_final] # allows for easier plotting with unpacking.
             # now plot using PEUQSE.plotting function
-            createGewekePlot(z_scores_geweke_final_plot_inputs, N_geweke, z_scores_percentage_outlier, parameter_name, parameter_math_name, self.UserInput.directories['graphs'])
+            createGewekePlot(z_scores_geweke_final_plot_inputs, window_indices_geweke, z_scores_percentage_outlier, parameter_name, parameter_math_name, self.UserInput.directories['graphs'])
         # get combined parameter Geweke plot
         total_z_scores = np.array(total_z_scores)
         # abs and average across the parameters.
@@ -2001,7 +2002,7 @@ class parameter_estimation:
         z_scores_sum_params_percentage_outlier = np.count_nonzero(z_scores_sum_params_and_chains>1, axis=1) / z_scores_sum_params_and_chains.shape[1]
         z_scores_sum_params_geweke_final_plot_inputs = [z_scores_final_indices, z_scores_sum_params_final] # allows for easier plotting with unpacking.
         # now plot using PEUQSE.plotting function
-        createGewekePlot(z_scores_sum_params_geweke_final_plot_inputs, N_geweke, z_scores_sum_params_percentage_outlier, 'Combined_Parameters', 'All Parameters', self.UserInput.directories['graphs'])
+        createGewekePlot(z_scores_sum_params_geweke_final_plot_inputs, window_indices_geweke, z_scores_sum_params_percentage_outlier, 'Combined_Parameters', 'All Parameters', self.UserInput.directories['graphs'])
 
         
     #Our EnsembleSampling is done by the emcee back end. (pip install emcee)
