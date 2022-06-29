@@ -1928,6 +1928,16 @@ class parameter_estimation:
         :param samplingFunctionstr: String to define the sampler. (:type: str)
         :param samplingObject: Object that defines the sampler. (:type SamplingObject)
         """
+        # initialize self convergence
+        self.convergence = {}
+        self.convergence['AutoCorrTime'] = {}
+        self.convergence['AutoCorrTime']['window_indices'] = None
+        self.convergence['AutoCorrTime']['final_parameter_values'] = None
+        self.convergence['AutoCorrTime']['parameter_act_for_each_window'] = None
+        self.convergence['Geweke'] = {}
+        self.convergence['Geweke']['window_indices'] = None
+        self.convergence['Geweke']['final_combined_parameter_values'] = None
+
         # use the zeus AutoCorrTime function for all calculations.
         from zeus.autocorr import AutoCorrTime
         # get the samples with defined chains from the specified sampler.
@@ -1944,26 +1954,33 @@ class parameter_estimation:
         elif samplingFunctionstr == 'MetropolisHastings':
             refined_post_burn_in_samples = np.expand_dims(self.post_burn_in_samples, axis=1)
 
-        # create window sizes that increase on a log scale.
+        # create window sizes that increase on a log scale. Assign to self convergence
         window_indices_act = np.exp(np.linspace(np.log(100), np.log(self.post_burn_in_samples.shape[0]), 20)).astype(int)
+        self.convergence['AutoCorrTime']['window_indices'] = window_indices_act
         # initialize array with shape (N_intervals, numParams)
         taus_zeus = np.empty((len(window_indices_act), refined_post_burn_in_samples.shape[2])) 
         # populate taus using zeus AutoCorrTime function where lag length is determined by Sokal 1989.
         # For more information on Integrated Autocorrelation time see https://emcee.readthedocs.io/en/stable/tutorials/autocorr/ 
         for i, n in enumerate(window_indices_act): # loop through the window indices to get larger and larger windows
             taus_zeus[i] = AutoCorrTime(refined_post_burn_in_samples[:n,:,:])
+        # assign only final predictions for act to self for each parameter
+        # order of parameters is the same as the list of parameter names
+        self.convergence['AutoCorrTime']['final_parameter_values'] = taus_zeus[-1,:]
         
         # create plots using PEUQSE plotting functions file.
         from PEUQSE.plotting_functions import createAutoCorrPlot
         # create plots for each parameter. The parameter names and symbols are unpacked from the dictionary.
+        # loop through each parameter act values to plot and assign to self convergence
         for param_taus, (parameter_name, parameter_math_name) in zip(taus_zeus.T, self.UserInput.model['parameterNamesAndMathTypeExpressionsDict'].items()):
             createAutoCorrPlot(window_indices_act, param_taus, parameter_name, parameter_math_name, self.UserInput.directories['graphs'])
-        try:
+            self.convergence['AutoCorrTime']['parameter_act_for_each_window'][parameter_name] = param_taus
+        try: # prevents crashing when running convergence diagnostics on short chains or weird models
             # use arviz to guide Geweke analysis
             from arviz import geweke
             from PEUQSE.plotting_functions import createGewekePlot
-            # create a linearly space array for creating window sizes for Geweke percent diagnostic
+            # create a linearly space array for creating window sizes for Geweke percent diagnostic and self convergence
             window_indices_geweke = np.linspace(0, refined_post_burn_in_samples.shape[0], 21).astype(int)[1:]
+            self.convergence['Geweke']['window_indices'] = window_indices_geweke
             # loop through each param, each chain, and each window size
             # Geweke function is called for each window size. The full window (last one) is saved for plotting.
             total_z_scores = [] # initialize list for combining parameters.
@@ -1996,8 +2013,9 @@ class parameter_estimation:
             z_scores_sum_params = np.mean(np.abs(total_z_scores), axis=0)
             # average across each chain after params are averaged.
             z_scores_sum_params_and_chains = np.mean(z_scores_sum_params, axis=0)
-            # save final window for plotting.
+            # save final window for plotting and self convergence.
             z_scores_sum_params_final = z_scores_sum_params_and_chains[:, -1]
+            self.convergence['Geweke']['final_combined_parameter_values'] = z_scores_sum_params_final
             # use numpy function to count how many z values fall outside 1 std. Divide by total values to get percent (decimal)
             z_scores_sum_params_percentage_outlier = np.count_nonzero(z_scores_sum_params_and_chains>1, axis=1) / z_scores_sum_params_and_chains.shape[1]
             z_scores_sum_params_geweke_final_plot_inputs = [z_scores_final_indices, z_scores_sum_params_final] # allows for easier plotting with unpacking.
