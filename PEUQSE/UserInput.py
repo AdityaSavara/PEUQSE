@@ -56,7 +56,8 @@ parameter_estimation_settings['exportAllSimulatedOutputs'] = False #This feature
 parameter_estimation_settings['checkPointFrequency'] = None #Deprecated. It will override all other checkpoint choices if it is changed from None. The user should use the similar variables below.
 parameter_estimation_settings['scaling_uncertainties_type'] = "std" #"std" is for standard deviation. there is also "off" and the option of "mu" for using the absolute values of the mean(s) of the prior distribution(s). If a scalar is entered (a float) then that fixed value will be used for all scalings.
 parameter_estimation_settings['undo_scaling_uncertainties_type'] = False #This undoing can be set to True but presently only works for the case of fixed scaling (a single scalar).
-				  
+parameter_estimation_settings['convergence_diagnostics'] = True #This feature when set to True will guide convergence analysis of the sampler. This is specific to the sampler.
+
 ######MCMC settings:#####
 parameter_estimation_settings['mcmc_exportLog'] = True #exports additional information during the mcmc.
 parameter_estimation_settings['mcmc_random_seed'] = None #Normally set to None so that mcmc is set to be random. To get the same results repeatedly, such as for testing purposes, set the random seed to 0 or another integer for testing purposes.

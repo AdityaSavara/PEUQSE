@@ -1924,29 +1924,89 @@ class parameter_estimation:
     def callConvergenceDiagnostics(self, samplingFunctionstr: str, samplingObject=None) -> None:
         """
         Calls other convergence functions to do calculations and make plots.
+
+        :param samplingFunctionstr: String to define the sampler. (:type: str)
+        :param samplingObject: Object that defines the sampler. (:type SamplingObject)
         """
-        # first get the autocorrelationtime
+        # use the zeus AutoCorrTime function for all calculations.
+        from zeus.autocorr import AutoCorrTime
+        # get the samples with defined chains from the specified sampler.
         if samplingFunctionstr == 'EnsembleSliceSampling':
-            # zeus called function using sampling object
-            taus = samplingObject.act
+            # create correct burn in length for multiple chains.
+            refined_burn_in = int(self.mcmc_burn_in_length / self.mcmc_nwalkers)
+            refined_post_burn_in_samples = samplingObject.get_chain(discard=refined_burn_in)
 
         elif samplingFunctionstr == 'EnsembleSampling':
-            # emcee called function using sampling object
-            taus = samplingObject.get_autocorr_time()
+            # create correct burn in length for multiple chains.
+            refined_burn_in = int(self.mcmc_burn_in_length / self.mcmc_nwalkers)
+            refined_post_burn_in_samples = samplingObject.get_chain(discard=refined_burn_in)
 
         elif samplingFunctionstr == 'MetropolisHastings':
-            # use zeus function to create act
-            from zeus.autocorr import AutoCorrTime
             refined_post_burn_in_samples = np.expand_dims(self.post_burn_in_samples, axis=1)
-            taus = AutoCorrTime(refined_post_burn_in_samples)
-        print('AutoCorrelatedTime of', taus)
-        return taus
-        # Gelman-Rubin statistics
-        # use pymc to get this stat
-        # other pymc stats can go below
+
+        # create window sizes that increase on a log scale.
+        window_indices_act = np.exp(np.linspace(np.log(100), np.log(self.post_burn_in_samples.shape[0]), 20)).astype(int)
+        # initialize array with shape (N_intervals, numParams)
+        taus_zeus = np.empty((len(window_indices_act), refined_post_burn_in_samples.shape[2])) 
+        # populate taus using zeus AutoCorrTime function where lag length is determined by Sokal 1989.
+        # For more information on Integrated Autocorrelation time see https://emcee.readthedocs.io/en/stable/tutorials/autocorr/ 
+        for i, n in enumerate(window_indices_act): # loop through the window indices to get larger and larger windows
+            taus_zeus[i] = AutoCorrTime(refined_post_burn_in_samples[:n,:,:])
         
+        # create plots using PEUQSE plotting functions file.
+        from PEUQSE.plotting_functions import createAutoCorrPlot
+        # create plots for each parameter. The parameter names and symbols are unpacked from the dictionary.
+        for param_taus, (parameter_name, parameter_math_name) in zip(taus_zeus.T, self.UserInput.model['parameterNamesAndMathTypeExpressionsDict'].items()):
+            createAutoCorrPlot(window_indices_act, param_taus, parameter_name, parameter_math_name, self.UserInput.directories['graphs'])
+        try:
+            # use arviz to guide Geweke analysis
+            from arviz import geweke
+            from PEUQSE.plotting_functions import createGewekePlot
+            # create a linearly space array for creating window sizes for Geweke percent diagnostic
+            window_indices_geweke = np.linspace(0, refined_post_burn_in_samples.shape[0], 21).astype(int)[1:]
+            # loop through each param, each chain, and each window size
+            # Geweke function is called for each window size. The full window (last one) is saved for plotting.
+            total_z_scores = [] # initialize list for combining parameters.
+            for param_num, (parameter_name, parameter_math_name) in enumerate(self.UserInput.model['parameterNamesAndMathTypeExpressionsDict'].items()):
+                z_scores_array_per_chain = [] # initialize list for number of windows
+                for chain_num in range(refined_post_burn_in_samples.shape[1]):
+                    z_scores_array_per_window = [] # initialize the list
+                    for window in window_indices_geweke:
+                        # calculate z scores for each window.
+                        local_z_score = geweke(refined_post_burn_in_samples[:window, chain_num, param_num])
+                        # checks if it is the last window. If yes, save the indices. Save for plotting and all last windows are the same.
+                        if window == window_indices_geweke[-1]:
+                            z_scores_final_indices = local_z_score.T[0]
+                        z_scores_array_per_window.append(local_z_score.T[1])
+                    z_scores_array_per_chain.append(z_scores_array_per_window)
+                z_scores_array_per_chain = np.array(z_scores_array_per_chain)
+                # save all chains for combining all parameters.
+                total_z_scores.append(z_scores_array_per_chain)
+                z_scores_array = np.mean(np.abs(z_scores_array_per_chain), axis=0)
+                # use numpy function to count how many z values fall outside 1 std. Divide by total values to get percent (decimal)
+                z_scores_percentage_outlier = np.count_nonzero(z_scores_array>1, axis=1) / z_scores_array.shape[1]
+                # save last window for plotting.
+                z_scores_final = z_scores_array[:,-1]
+                z_scores_geweke_final_plot_inputs = [z_scores_final_indices, z_scores_final] # allows for easier plotting with unpacking.
+                # now plot using PEUQSE.plotting function
+                createGewekePlot(z_scores_geweke_final_plot_inputs, window_indices_geweke, z_scores_percentage_outlier, parameter_name, parameter_math_name, self.UserInput.directories['graphs'])
+            # get combined parameter Geweke plot
+            total_z_scores = np.array(total_z_scores)
+            # abs and average across the parameters.
+            z_scores_sum_params = np.mean(np.abs(total_z_scores), axis=0)
+            # average across each chain after params are averaged.
+            z_scores_sum_params_and_chains = np.mean(z_scores_sum_params, axis=0)
+            # save final window for plotting.
+            z_scores_sum_params_final = z_scores_sum_params_and_chains[:, -1]
+            # use numpy function to count how many z values fall outside 1 std. Divide by total values to get percent (decimal)
+            z_scores_sum_params_percentage_outlier = np.count_nonzero(z_scores_sum_params_and_chains>1, axis=1) / z_scores_sum_params_and_chains.shape[1]
+            z_scores_sum_params_geweke_final_plot_inputs = [z_scores_final_indices, z_scores_sum_params_final] # allows for easier plotting with unpacking.
+            # now plot using PEUQSE.plotting function
+            createGewekePlot(z_scores_sum_params_geweke_final_plot_inputs, window_indices_geweke, z_scores_sum_params_percentage_outlier, 'Combined_Parameters', 'All Parameters', self.UserInput.directories['graphs'])
+        except:
+            print('Could not calculated Geweke convergence analysis.')
 
-
+        
     #Our EnsembleSampling is done by the emcee back end. (pip install emcee)
     software_name = "emcee"
     software_version = "3.1.2"
@@ -2020,7 +2080,7 @@ class parameter_estimation:
         nEnsembleSteps = int(requested_mcmc_steps/self.mcmc_nwalkers) #We calculate the calculate number of the Ensemble Steps from the total sampling steps requested divided by self.mcmc_nwalkers.
         if nEnsembleSteps == 0:
             nEnsembleSteps = 1
-        if str(self.UserInput.parameter_estimation_settings['mcmc_burn_in']).lower() == 'auto': self.mcmc_burn_in_length = int(nEnsembleSteps*0.1)
+        if str(self.UserInput.parameter_estimation_settings['mcmc_burn_in']).lower() == 'auto': self.mcmc_burn_in_length = int(requested_mcmc_steps*0.1) # burn in is relative to entire ensemble
         else: self.mcmc_burn_in_length = self.UserInput.parameter_estimation_settings['mcmc_burn_in']
         if 'mcmc_maxiter' not in self.UserInput.parameter_estimation_settings: mcmc_maxiter = 1E6 #The default from zeus is 1E4, but I have found that is not always sufficient.
         else: mcmc_maxiter = self.UserInput.parameter_estimation_settings['mcmc_maxiter']
@@ -2063,7 +2123,7 @@ class parameter_estimation:
             mcmc_exportLog=True
         if calculatePostBurnInStatistics == True:
             self.calculatePostBurnInStatistics(calculate_post_burn_in_log_priors_vec = True) #This function call will also filter the lowest probability samples out, when using default settings.
-            if True: #TODO: change placeholder to UserInput defined convergence option on
+            if self.UserInput.parameter_estimation_settings['convergence_diagnostics']: #Run convergence diagnostics if UserInput defines it as True
                 self.callConvergenceDiagnostics('EnsembleSampling', samplingObject=emcee_sampler)
             if str(mcmc_exportLog) == 'UserChoice':
                 mcmc_exportLog = bool(self.UserInput.parameter_estimation_settings['mcmc_exportLog'])
@@ -2152,7 +2212,7 @@ class parameter_estimation:
         nEnsembleSteps = int(requested_mcmc_steps/self.mcmc_nwalkers) #We calculate the calculate number of the Ensemble Steps from the total sampling steps requested divided by self.mcmc_nwalkers.
         if nEnsembleSteps == 0:
             nEnsembleSteps = 1
-        if str(self.UserInput.parameter_estimation_settings['mcmc_burn_in']).lower() == 'auto': self.mcmc_burn_in_length = int(nEnsembleSteps*0.1)
+        if str(self.UserInput.parameter_estimation_settings['mcmc_burn_in']).lower() == 'auto': self.mcmc_burn_in_length = int(requested_mcmc_steps*0.1) # burn in is relative to entire ensemble
         else: self.mcmc_burn_in_length = self.UserInput.parameter_estimation_settings['mcmc_burn_in']
         if 'mcmc_maxiter' not in self.UserInput.parameter_estimation_settings: mcmc_maxiter = 1E6 #The default from zeus is 1E4, but I have found that is not always sufficient.
         else: mcmc_maxiter = self.UserInput.parameter_estimation_settings['mcmc_maxiter']
@@ -2193,7 +2253,7 @@ class parameter_estimation:
             mcmc_exportLog=True
         if calculatePostBurnInStatistics == True:
             self.calculatePostBurnInStatistics(calculate_post_burn_in_log_priors_vec = True) #This function call will also filter the lowest probability samples out, when using default settings.
-            if True: #TODO: change placeholder to UserInput defined convergence option on
+            if self.UserInput.parameter_estimation_settings['convergence_diagnostics']: #Run convergence diagnostics if UserInput defines it as True
                 self.callConvergenceDiagnostics('EnsembleSliceSampling', samplingObject=zeus_sampler)
             if str(mcmc_exportLog) == 'UserChoice':
                 mcmc_exportLog = bool(self.UserInput.parameter_estimation_settings['mcmc_exportLog'])
@@ -2375,7 +2435,7 @@ class parameter_estimation:
         if calculatePostBurnInStatistics == True:
             #FIXME: I think Below, calculate_post_burn_in_log_priors_vec=True should be false unless we are using continue sampling. For now, will leave it since I am not sure why it is currently set to True/False.
             self.calculatePostBurnInStatistics(calculate_post_burn_in_log_priors_vec = True) #This function call will also filter the lowest probability samples out, when using default settings.
-            if True: #TODO: change placeholder to UserInput defined convergence option on
+            if self.UserInput.parameter_estimation_settings['convergence_diagnostics']: #Run convergence diagnostics if UserInput defines it as True
                 self.callConvergenceDiagnostics('MetropolisHastings')
             if str(mcmc_exportLog) == 'UserChoice':
                 mcmc_exportLog = bool(self.UserInput.parameter_estimation_settings['mcmc_exportLog'])
