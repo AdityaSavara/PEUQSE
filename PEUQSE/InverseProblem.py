@@ -1944,15 +1944,15 @@ class parameter_estimation:
         if samplingFunctionstr == 'EnsembleSliceSampling':
             # create correct burn in length for multiple chains.
             refined_burn_in = int(self.mcmc_burn_in_length / self.mcmc_nwalkers)
-            refined_post_burn_in_samples = samplingObject.get_chain(discard=refined_burn_in)
+            refined_post_burn_in_samples = samplingObject.get_chain(discard=refined_burn_in) # shape is (samples, chains, parameters)
 
         elif samplingFunctionstr == 'EnsembleSampling':
             # create correct burn in length for multiple chains.
             refined_burn_in = int(self.mcmc_burn_in_length / self.mcmc_nwalkers)
-            refined_post_burn_in_samples = samplingObject.get_chain(discard=refined_burn_in)
+            refined_post_burn_in_samples = samplingObject.get_chain(discard=refined_burn_in) # shape is (samples, chains, parameters)
 
         elif samplingFunctionstr == 'MetropolisHastings':
-            refined_post_burn_in_samples = np.expand_dims(self.post_burn_in_samples, axis=1)
+            refined_post_burn_in_samples = np.expand_dims(self.post_burn_in_samples, axis=1) # shape is (samples, chains=1, parameters)
 
         # create window sizes that increase on a log scale. Assign to self convergence
         window_indices_act = np.exp(np.linspace(np.log(100), np.log(self.post_burn_in_samples.shape[0]), 20)).astype(int)
@@ -1962,7 +1962,9 @@ class parameter_estimation:
         # populate taus using zeus AutoCorrTime function where lag length is determined by Sokal 1989.
         # For more information on Integrated Autocorrelation time see https://emcee.readthedocs.io/en/stable/tutorials/autocorr/ 
         for i, n in enumerate(window_indices_act): # loop through the window indices to get larger and larger windows
-            taus_zeus[i] = AutoCorrTime(refined_post_burn_in_samples[:n,:,:])
+            # since size is (samples, chains, parameters), we pass in limited samples up to the window size index
+            # while passing in every chain and parameter
+            taus_zeus[i] = AutoCorrTime(refined_post_burn_in_samples[:n,:,:]) 
         # assign only final predictions for act to self for each parameter
         # order of parameters is the same as the list of parameter names
         self.convergence['AutoCorrTime']['final_parameter_values'] = taus_zeus[-1,:]
