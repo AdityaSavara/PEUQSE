@@ -53,7 +53,7 @@ UserInput.parameter_estimation_settings['mcmc_length'] = 4#200
 UserInput.parameter_estimation_settings['mcmc_relative_step_length'] = 0.05
 UserInput.parameter_estimation_settings['mcmc_modulate_accept_probability']  = 0 #Default value of 0. Changing this value sharpens or flattens the posterior. A value greater than 1 flattens the posterior by accepting low values more often. It can be useful when greater sampling is more important than accuracy. One way of using this feature is to try with a value of 0, then with the value equal to the number of priors for comparison, and then to gradually decrease this number as low as is useful (to minimize distortion of the result). A downside of changing changing this variable to greater than 1 is that it slows the the ascent to the maximum of the prior, so there is a balance in using it. In contrast, numbers increasingly less than one (such as 0.90 or 0.10) will speed up the ascent to the maximum of the posterior, but will also result in fewer points being retained.
 UserInput.parameter_estimation_settings['mcmc_info_gain_returned'] = 'KL_divergence' #obtains the information gain using the Kullback-Leibler divergence    
-
+UserInput.parameter_estimation_settings['convergence_diagnostics'] = False #the convergence_diagnostics slows down this unit test by a factor greater than 2, so it is being turned off.
 UserInput.contour_plot_settings['parameter_pairs'] = [[0, 1]]
 UserInput.contour_plot_settings['contours_normalized'] = False
 UserInput.contour_plot_settings['figure_name'] = 'Mumpce_contour_plot_Langmuir_compete_ads'
@@ -75,6 +75,8 @@ UserInput.doe_settings['independent_variable_grid_num_intervals'] = [1,1] #This 
 UserInput.doe_settings['parameter_modulation_grid_interval_size'] = [1,1] #use a non-zero value even for parameters that you will not vary.
 UserInput.doe_settings['parameter_modulation_grid_num_intervals'] = [1,1] #make the number of intervals zero for any parameter that you don't want to vary.
 UserInput.doe_settings['parallel_parameter_modulation'] = True
+
+
 
 PE_object = PEUQSE.parameter_estimation(UserInput)
 
