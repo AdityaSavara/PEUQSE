@@ -1929,8 +1929,8 @@ class parameter_estimation:
         :param samplingObject (optional): Object that defines the sampler. (:type SamplingObject)
         """
         if hasattr(self, 'samplingObject'):
-            samplingFunctionstr = self.samplingFunctionType
-            samplingObject = self.samplerType
+            samplingFunctionstr = self.samplerType
+            samplingObject = self.samplingObject
         if samplingFunctionstr=='':
             print("The sampling object must be saved to run this command. Change UserInput.parameter_estimation_settings['save_sampling_object']=True")
             sys.exit()        
@@ -2081,6 +2081,9 @@ class parameter_estimation:
             calculatePostBurnInStatistics = True
         if self.UserInput.parameter_estimation_settings['mcmc_parallel_sampling']: #mcmc_exportLog == True is needed for mcmc_parallel_sampling, but not for multistart_parallel_sampling
             mcmc_exportLog=True
+        if self.UserInput.parameter_estimation_settings['mcmc_store_samplingObject']:
+            self.samplerType = 'EnsembleSampling'
+            self.samplingObject = emcee_sampler
         if calculatePostBurnInStatistics == True:
             self.calculatePostBurnInStatistics(calculate_post_burn_in_log_priors_vec = True) #This function call will also filter the lowest probability samples out, when using default settings.
             if self.UserInput.parameter_estimation_settings['convergence_diagnostics']: #Run convergence diagnostics if UserInput defines it as True
@@ -2211,6 +2214,9 @@ class parameter_estimation:
             calculatePostBurnInStatistics = True;
         if self.UserInput.parameter_estimation_settings['mcmc_parallel_sampling']: #mcmc_exportLog == True is needed for mcmc_parallel_sampling, but not for multistart_parallel_sampling
             mcmc_exportLog=True
+        if self.UserInput.parameter_estimation_settings['mcmc_store_samplingObject']:
+            self.samplerType = 'EnsembleSliceSampling'
+            self.samplingObject = zeus_sampler
         if calculatePostBurnInStatistics == True:
             self.calculatePostBurnInStatistics(calculate_post_burn_in_log_priors_vec = True) #This function call will also filter the lowest probability samples out, when using default settings.
             if self.UserInput.parameter_estimation_settings['convergence_diagnostics']: #Run convergence diagnostics if UserInput defines it as True
