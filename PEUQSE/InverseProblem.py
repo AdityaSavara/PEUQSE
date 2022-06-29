@@ -1936,7 +1936,7 @@ class parameter_estimation:
             sys.exit()        
         
         #TODO: change the self.mcmc_burn_in_length to be universal and not require adjustment.
-        if (samplingFunctionstr=='EnembleSliceSampling') or (samplingFunctionstr=='EnsembleSampling'):
+        if (samplingFunctionstr=='EnsembleSliceSampling') or (samplingFunctionstr=='EnsembleSampling'):
             refined_burn_in_length = int(self.mcmc_burn_in_length/self.mcmc_nwalkers)
         else:
             refined_burn_in_length = self.mcmc_burn_in_length
@@ -1956,7 +1956,7 @@ class parameter_estimation:
         self.convergence['Geweke'] = {}
         self.convergence['Geweke']['window_indices'] = None
         self.convergence['Geweke']['final_combined_parameter_values'] = None
-        #TODO: add another Geweke dict for percents
+        self.convergence['Geweke']['final_combined_parameter_percent_outlier'] = None
 
         # unpack tuple to save convergence information to self
         self.convergence['AutoCorrTime']['window_indices'] = convergence_ouputs[0]
@@ -1964,7 +1964,7 @@ class parameter_estimation:
         self.convergence['AutoCorrTime']['parameter_act_for_each_window'] = convergence_ouputs[2]
         self.convergence['Geweke']['window_indices'] = convergence_ouputs[3]
         self.convergence['Geweke']['final_combined_parameter_values'] = convergence_ouputs[4]
-        
+        self.convergence['Geweke']['final_combined_parameter_percent_outlier'] = convergence_ouputs[5]
 
         
     #Our EnsembleSampling is done by the emcee back end. (pip install emcee)
@@ -3328,7 +3328,7 @@ def callConvergenceDiagnostics(samplingFunctionstr, samplingObject, burn_in_leng
             z_scores_final = z_scores_array[:,-1]
             z_scores_geweke_final_plot_inputs = [z_scores_final_indices, z_scores_final] # allows for easier plotting with unpacking.
             # now plot using PEUQSE.plotting function
-            createGewekePlot(z_scores_geweke_final_plot_inputs, window_indices_geweke, z_scores_percentage_outlier, parameter_name, parameter_math_name, plot_settings['graphs'])
+            createGewekePlot(z_scores_geweke_final_plot_inputs, window_indices_geweke, z_scores_percentage_outlier, parameter_name, parameter_math_name, graphs_directory)
         # get combined parameter Geweke plot
         total_z_scores = np.array(total_z_scores)
         # abs and average across the parameters.
@@ -3341,14 +3341,15 @@ def callConvergenceDiagnostics(samplingFunctionstr, samplingObject, burn_in_leng
         z_scores_sum_params_percentage_outlier = np.count_nonzero(z_scores_sum_params_and_chains>1, axis=1) / z_scores_sum_params_and_chains.shape[1]
         z_scores_sum_params_geweke_final_plot_inputs = [z_scores_final_indices, z_scores_sum_params_final] # allows for easier plotting with unpacking.
         # now plot using PEUQSE.plotting function
-        createGewekePlot(z_scores_sum_params_geweke_final_plot_inputs, window_indices_geweke, z_scores_sum_params_percentage_outlier, 'Combined_Parameters', 'All Parameters', plot_settings['graphs'])
+        createGewekePlot(z_scores_sum_params_geweke_final_plot_inputs, window_indices_geweke, z_scores_sum_params_percentage_outlier, 'Combined_Parameters', 'All Parameters', graphs_directory)
 
     except:
-        print('Could not calculated Geweke convergence analysis.')
+        print('Could not calculated Geweke convergence analysis. The chain length may be too small, so more samples are recommended.')
         window_indices_geweke = None
         z_scores_sum_params_final = None
-    # return both window_indicies, final ACT values each param, final ACT values each param and window, and final z scores summed parameters
-    return (window_indices_act, taus_zeus[-1,:], parameter_act_for_each_window, window_indices_geweke, z_scores_sum_params_final)
+        z_scores_sum_params_percentage_outlier = None
+    # return both window_indicies, final ACT values each param, final ACT values each param and window, final z scores summed parameters, and final summed parameters percent outliers
+    return (window_indices_act, taus_zeus[-1,:], parameter_act_for_each_window, window_indices_geweke, z_scores_sum_params_final, z_scores_sum_params_percentage_outlier)
         
 if __name__ == "__main__":
     pass
