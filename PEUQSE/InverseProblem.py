@@ -1948,10 +1948,13 @@ class parameter_estimation:
         window_indices_act = np.exp(np.linspace(np.log(100), np.log(self.post_burn_in_samples.shape[0]), 20)).astype(int)
         # initialize array with shape (N_intervals, numParams)
         taus_zeus = np.empty((len(window_indices_act), refined_post_burn_in_samples.shape[2])) 
-        # populate taus using zeus AutoCorrTime function where lag length is determined by Sokal 1989.
-        # For more information on Integrated Autocorrelation time see https://emcee.readthedocs.io/en/stable/tutorials/autocorr/ 
-        for i, n in enumerate(window_indices_act): # loop through the window indices to get larger and larger windows
-            taus_zeus[i] = AutoCorrTime(refined_post_burn_in_samples[:n,:,:])
+        from warnings import catch_warnings, simplefilter
+        with catch_warnings(): # removes warnings created from zeus.AutoCorrTime
+            simplefilter("ignore")
+            # populate taus using zeus AutoCorrTime function where lag length is determined by Sokal 1989.
+            # For more information on Integrated Autocorrelation time see https://emcee.readthedocs.io/en/stable/tutorials/autocorr/ 
+            for i, n in enumerate(window_indices_act): # loop through the window indices to get larger and larger windows
+                taus_zeus[i] = AutoCorrTime(refined_post_burn_in_samples[:n,:,:])
         
         # create plots using PEUQSE plotting functions file.
         from PEUQSE.plotting_functions import createAutoCorrPlot
