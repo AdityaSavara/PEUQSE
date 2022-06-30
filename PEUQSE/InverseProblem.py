@@ -928,6 +928,10 @@ class parameter_estimation:
                     #Below is needed to avoid causing an error in the calculatePostBurnInStatistics since we don't have a real priors vec.
                     self.UserInput.parameter_estimation_settings['mcmc_threshold_filter_samples'] = False
                     self.calculatePostBurnInStatistics()
+                    # create discrete_chains_post_burn_in_samples
+                    self.discrete_chains_post_burn_in_samples = np.expand_dims(self.post_burn_in_samples, axis=1)
+                    if self.UserInput.parameter_estimation_settings['convergence_diagnostics']: #Run convergence diagnostics if UserInput defines it as True
+                        self.doConvergenceDiagnostics(self.discrete_chains_post_burn_in_samples)
                 except:
                     print("Could not convertPermutationsToSamples. This usually means there were no finite probability points sampled.")
                     permutationsToSamples = False #changing to false to prevent errors during exporting.
