@@ -2010,13 +2010,13 @@ class parameter_estimation:
             print('Could not calculated Geweke convergence analysis.')
 
         
-    #Our EnsembleSampling is done by the emcee back end. (pip install emcee)
+    #Our EnsembleModifiedMHSampling is done by the emcee back end. (pip install emcee)
     software_name = "emcee"
     software_version = "3.1.2"
     software_unique_id = "https://github.com/dfm/emcee"
     software_kwargs = {"version": software_version, "author": ['Foreman-Mackey, D.', 'Hogg, D.~W.', 'Lang, D.', 'Goodman, J.'], "cite": ["@article{emcee, author = {{Foreman-Mackey}, D. and {Hogg}, D.~W. and {Lang}, D. and {Goodman}, J.}, title = {emcee: The MCMC Hammer}, journal = {PASP}, year = 2013, volume = 125, pages = {306-312}, eprint = {1202.3665}, doi = {10.1086/670067}}"] }
     @CiteSoft.function_call_cite(unique_id=software_unique_id, software_name=software_name, **software_kwargs)
-    def doEnsembleSampling(self, mcmc_nwalkers_direct_input = None, walkerInitialDistribution='UserChoice', walkerInitialDistributionSpread='UserChoice', calculatePostBurnInStatistics=True, mcmc_exportLog ='UserChoice', continueSampling='auto'):
+    def doEnsembleModifiedMHSampling(self, mcmc_nwalkers_direct_input = None, walkerInitialDistribution='UserChoice', walkerInitialDistributionSpread='UserChoice', calculatePostBurnInStatistics=True, mcmc_exportLog ='UserChoice', continueSampling='auto'):
         """
         TODO: make params and return definitions along with a short description.
         """
@@ -2077,7 +2077,7 @@ class parameter_estimation:
         else: #this is mainly for PermutationSearch which will (by default) use the minimum number of walkers per point.
             self.mcmc_nwalkers = int(mcmc_nwalkers_direct_input)
         if (self.mcmc_nwalkers%2) != 0: #Check that it's even. If not, add one walker.
-            print("The EnsembleSampling requires an even number of Walkers. Adding one Walker.")
+            print("The EnsembleJumpSampling requires an even number of Walkers. Adding one Walker.")
             self.mcmc_nwalkers = self.mcmc_nwalkers + 1
         requested_mcmc_steps = self.UserInput.parameter_estimation_settings['mcmc_length']
         nEnsembleSteps = int(requested_mcmc_steps/self.mcmc_nwalkers) #We calculate the calculate number of the Ensemble Steps from the total sampling steps requested divided by self.mcmc_nwalkers.
@@ -2140,7 +2140,12 @@ class parameter_estimation:
             self.map_index = list(self.post_burn_in_log_posteriors_un_normed_vec).index(self.map_logP) #This does not have to be a unique answer, just one of them places which gives map_logP.
             self.map_parameter_set = self.post_burn_in_samples[self.map_index] #This  is the point with the highest probability in the posterior.            
             return self.map_logP
-        pass
+    
+    def doEnsembleJumpSampling(self):
+        """
+        A wrapper for EnsembleModifiedMHSampler
+        """
+        self.doEnsembleModifiedMHSampling()
 
 
     #Our EnsembleSliceSampling is done by the Zeus back end. (pip install zeus-mcmc)
