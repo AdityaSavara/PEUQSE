@@ -1930,7 +1930,14 @@ class parameter_estimation:
         """
         if hasattr(self, 'discrete_chains_post_burn_in_samples'):
             discrete_chains_post_burn_in_samples = self.discrete_chains_post_burn_in_samples
-        #TODO: make further requirements for running this function like shape of array, checking if it is a np.array
+        # check if inputted array is a numpy array.
+        if type(discrete_chains_post_burn_in_samples).__module__ != np.__name__:
+            print('The input array needs to a numpy array. If a list was inputted, wrap the variable in np.array(var)')
+            sys.exit()
+        # check if array shape is right.
+        if len(discrete_chains_post_burn_in_samples.shape) != 3:
+            print('The input array needs to take the shape (numSamples, numChains, numParameters). The current inputs does not have the appropriate dimensions.')
+            sys.exit()
         
 
 
@@ -3274,7 +3281,7 @@ def callConvergenceDiagnostics(discrete_chains_post_burn_in_samples, parameterNa
     # populate taus using zeus AutoCorrTime function where lag length is determined by Sokal 1989.
     # For more information on Integrated Autocorrelation time see https://emcee.readthedocs.io/en/stable/tutorials/autocorr/ 
     for i, n in enumerate(window_indices_act): # loop through the window indices to get larger and larger windows
-        # since size is (samples, chains, parameters), we pass in limited samples up to the window size index
+        # since size is (numSamples, numChains, numParameters), we pass in limited samples up to the window size index
         # while passing in every chain and parameter
         taus_zeus[i] = AutoCorrTime(discrete_chains_post_burn_in_samples[:n,:,:]) 
     
