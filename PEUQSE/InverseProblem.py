@@ -1932,6 +1932,7 @@ class parameter_estimation:
         :param samplingFunctionstr (optional): String to define the sampler. (:type: str)
         :param discrete_chains_post_burn_in_samples (optional): Array that contains post burn in samples. Shape is (numSamples, numChains, numParams) (:type np.array)
         """
+        
         if hasattr(self, 'discrete_chains_post_burn_in_samples'):
             discrete_chains_post_burn_in_samples = self.discrete_chains_post_burn_in_samples
         # check if inputted array is a numpy array.
@@ -1942,8 +1943,7 @@ class parameter_estimation:
         if len(discrete_chains_post_burn_in_samples.shape) != 3:
             print('The input array needs to take the shape (numSamples, numChains, numParameters). The current inputs does not have the appropriate dimensions.')
             sys.exit()
-        
-
+       
 
         # convergence diagnostic function is called to run calculations and create plots
         # outputs are saved as a tuple 
