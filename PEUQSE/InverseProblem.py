@@ -2163,12 +2163,9 @@ class parameter_estimation:
             self.map_parameter_set = self.post_burn_in_samples[self.map_index] #This  is the point with the highest probability in the posterior.            
             return self.map_logP
     
-    def doEnsembleJumpSampling(self, mcmc_nwalkers_direct_input = None, walkerInitialDistribution='UserChoice', walkerInitialDistributionSpread='UserChoice', calculatePostBurnInStatistics=True, mcmc_exportLog ='UserChoice', continueSampling='auto'):
-        """
-        A wrapper for EnsembleModifiedMHSampler
-        """
-        mcmc_outputs = self.doEnsembleModifiedMHSampling(mcmc_nwalkers_direct_input, walkerInitialDistribution, walkerInitialDistributionSpread, calculatePostBurnInStatistics, mcmc_exportLog, continueSampling)
-        return mcmc_outputs
+    # pointer to Ensemble Modified MH sampling
+    # doEnsembleJumpSampling is provided for user convenience as a simpler choice of sampling
+    doEnsembleJumpSampling = doEnsembleModifiedMHSampling
 
 
     #Our EnsembleSliceSampling is done by the Zeus back end. (pip install zeus-mcmc)
