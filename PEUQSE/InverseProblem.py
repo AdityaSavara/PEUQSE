@@ -3276,27 +3276,30 @@ def callConvergenceDiagnostics(discrete_chains_post_burn_in_samples, parameterNa
     :param samplingFunctionstr: String to define the sampler. (:type: str)
     :param samplingObject: Object that defines the sampler. (:type SamplingObject)
     """
-    # use the zeus AutoCorrTime function for all calculations.
-    from zeus.autocorr import AutoCorrTime
-    # create window sizes that increase on a log scale. 
-    window_indices_act = np.exp(np.linspace(0, np.log(discrete_chains_post_burn_in_samples.shape[0]), 21)).astype(int)[1:]
-    # initialize array with shape (N_intervals, numParams)
-    taus_zeus = np.empty((len(window_indices_act), discrete_chains_post_burn_in_samples.shape[2])) 
-    # populate taus using zeus AutoCorrTime function where lag length is determined by Sokal 1989.
-    # For more information on Integrated Autocorrelation time see https://emcee.readthedocs.io/en/stable/tutorials/autocorr/ 
-    for i, n in enumerate(window_indices_act): # loop through the window indices to get larger and larger windows
-        # since size is (numSamples, numChains, numParameters), we pass in limited samples up to the window size index
-        # while passing in every chain and parameter
-        taus_zeus[i] = AutoCorrTime(discrete_chains_post_burn_in_samples[:n,:,:]) 
-    
-    # create plots using PEUQSE plotting functions file.
-    from PEUQSE.plotting_functions import createAutoCorrPlot
-    # create plots for each parameter. The parameter names and symbols are unpacked from the dictionary.
-    # loop through each parameter act values to plot and assign to self convergence
-    parameter_act_for_each_window = {}
-    for param_taus, (parameter_name, parameter_math_name) in zip(taus_zeus.T, parameterNamesAndMathTypeExpressionsDict.items()):
-        createAutoCorrPlot(window_indices_act, param_taus, parameter_name, parameter_math_name, graphs_directory)
-        parameter_act_for_each_window[parameter_name] = param_taus
+    try:
+        # use the zeus AutoCorrTime function for all calculations.
+        from zeus.autocorr import AutoCorrTime
+        # create window sizes that increase on a log scale. 
+        window_indices_act = np.exp(np.linspace(0, np.log(discrete_chains_post_burn_in_samples.shape[0]), 21)).astype(int)[1:]
+        # initialize array with shape (N_intervals, numParams)
+        taus_zeus = np.empty((len(window_indices_act), discrete_chains_post_burn_in_samples.shape[2])) 
+        # populate taus using zeus AutoCorrTime function where lag length is determined by Sokal 1989.
+        # For more information on Integrated Autocorrelation time see https://emcee.readthedocs.io/en/stable/tutorials/autocorr/ 
+        for i, n in enumerate(window_indices_act): # loop through the window indices to get larger and larger windows
+            # since size is (numSamples, numChains, numParameters), we pass in limited samples up to the window size index
+            # while passing in every chain and parameter
+            taus_zeus[i] = AutoCorrTime(discrete_chains_post_burn_in_samples[:n,:,:]) 
+        
+        # create plots using PEUQSE plotting functions file.
+        from PEUQSE.plotting_functions import createAutoCorrPlot
+        # create plots for each parameter. The parameter names and symbols are unpacked from the dictionary.
+        # loop through each parameter act values to plot and assign to self convergence
+        parameter_act_for_each_window = {}
+        for param_taus, (parameter_name, parameter_math_name) in zip(taus_zeus.T, parameterNamesAndMathTypeExpressionsDict.items()):
+            createAutoCorrPlot(window_indices_act, param_taus, parameter_name, parameter_math_name, graphs_directory)
+            parameter_act_for_each_window[parameter_name] = param_taus
+    except Exception as theError:
+        print('The AutoCorrelation Time plots have failed to be created. The error was:', theError)
     try: # prevents crashing when running convergence diagnostics on short chains or weird models
         # use arviz to guide Geweke analysis
         from arviz import geweke
@@ -3343,8 +3346,9 @@ def callConvergenceDiagnostics(discrete_chains_post_burn_in_samples, parameterNa
         # now plot using PEUQSE.plotting function
         createGewekePlot(z_scores_sum_params_geweke_final_plot_inputs, window_indices_geweke, z_scores_sum_params_percentage_outlier, 'Combined_Parameters', 'All Parameters', graphs_directory)
 
-    except:
+    except Exception as theError:
         print('Could not calculated Geweke convergence analysis. The chain length may be too small, so more samples are recommended.')
+        print('The Geweke diagnostic graphs failed to be created. The error was:', theError)
         window_indices_geweke = None
         z_scores_sum_params_final = None
         z_scores_sum_params_percentage_outlier = None
