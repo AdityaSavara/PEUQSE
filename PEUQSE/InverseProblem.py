@@ -931,7 +931,7 @@ class parameter_estimation:
                     # create discrete_chains_post_burn_in_samples
                     self.discrete_chains_post_burn_in_samples = np.expand_dims(self.post_burn_in_samples, axis=1)
                     if self.UserInput.parameter_estimation_settings['convergence_diagnostics']: #Run convergence diagnostics if UserInput defines it as True
-                        self.doConvergenceDiagnostics(self.discrete_chains_post_burn_in_samples)
+                        self.getConvergenceDiagnostics(self.discrete_chains_post_burn_in_samples)
                 except:
                     print("Could not convertPermutationsToSamples. This usually means there were no finite probability points sampled.")
                     permutationsToSamples = False #changing to false to prevent errors during exporting.
@@ -1925,7 +1925,7 @@ class parameter_estimation:
         pickleAnObject(self.map_parameter_set, self.UserInput.directories['pickles']+directory_name_suffix+file_name_prefix+'permutation_map_parameter_set'+file_name_suffix)
         pickleAnObject(self.UserInput.InputParameterInitialGuess, self.UserInput.directories['pickles']+directory_name_suffix+file_name_prefix+'permutation_initial_point_parameters'+file_name_suffix)
         
-    def doConvergenceDiagnostics(self, discrete_chains_post_burn_in_samples=[]):
+    def getConvergenceDiagnostics(self, discrete_chains_post_burn_in_samples=[]):
         """
         Guides Integrated Autocorrelated Time and Geweke convergence analysis and makes plots.
 
@@ -1933,7 +1933,7 @@ class parameter_estimation:
         :param discrete_chains_post_burn_in_samples (optional): Array that contains post burn in samples. Shape is (numSamples, numChains, numParams) (:type np.array)
         """
         
-        if hasattr(self, 'discrete_chains_post_burn_in_samples'):
+        if (discrete_chains_post_burn_in_samples==[]) and (hasattr(self, 'discrete_chains_post_burn_in_samples')):
             discrete_chains_post_burn_in_samples = self.discrete_chains_post_burn_in_samples
         # check if inputted array is a numpy array.
         if type(discrete_chains_post_burn_in_samples).__module__ != np.__name__:
@@ -1948,9 +1948,9 @@ class parameter_estimation:
         # convergence diagnostic function is called to run calculations and create plots
         # outputs are saved as a tuple 
         #TODO: make its own plot settings in different commit. 
-        convergence_ouputs = callConvergenceDiagnostics(discrete_chains_post_burn_in_samples, self.UserInput.model['parameterNamesAndMathTypeExpressionsDict'], self.UserInput.directories['graphs'], self.UserInput.scatter_matrix_plots_settings)
+        convergence_ouputs = calculateAndPlotConvergenceDiagnostics(discrete_chains_post_burn_in_samples, self.UserInput.model['parameterNamesAndMathTypeExpressionsDict'], self.UserInput.directories['graphs'], self.UserInput.scatter_matrix_plots_settings)
 
-        # initialize self convergence
+        # initialize and populate convergence dictionary in class object
         self.convergence = {}
         self.convergence['AutoCorrTime'] = {}
         self.convergence['AutoCorrTime']['window_indices'] = None
@@ -2086,12 +2086,12 @@ class parameter_estimation:
         if self.UserInput.parameter_estimation_settings['mcmc_parallel_sampling']: #mcmc_exportLog == True is needed for mcmc_parallel_sampling, but not for multistart_parallel_sampling
             mcmc_exportLog=True
         if self.UserInput.parameter_estimation_settings['mcmc_store_samplingObject']:
-            self.samplerType = 'EnsembleSampling'
+            self.samplerType = 'EnsembleModifiedMHSampling'
             self.samplingObject = emcee_sampler
         if calculatePostBurnInStatistics == True:
             self.calculatePostBurnInStatistics(calculate_post_burn_in_log_priors_vec = True) #This function call will also filter the lowest probability samples out, when using default settings.
             if self.UserInput.parameter_estimation_settings['convergence_diagnostics']: #Run convergence diagnostics if UserInput defines it as True
-                self.doConvergenceDiagnostics(self.discrete_chains_post_burn_in_samples)
+                self.getConvergenceDiagnostics(self.discrete_chains_post_burn_in_samples)
             if str(mcmc_exportLog) == 'UserChoice':
                 mcmc_exportLog = bool(self.UserInput.parameter_estimation_settings['mcmc_exportLog'])
             if mcmc_exportLog == True:
@@ -2225,7 +2225,7 @@ class parameter_estimation:
         if calculatePostBurnInStatistics == True:
             self.calculatePostBurnInStatistics(calculate_post_burn_in_log_priors_vec = True) #This function call will also filter the lowest probability samples out, when using default settings.
             if self.UserInput.parameter_estimation_settings['convergence_diagnostics']: #Run convergence diagnostics if UserInput defines it as True
-                self.doConvergenceDiagnostics(self.discrete_chains_post_burn_in_samples)
+                self.getConvergenceDiagnostics(self.discrete_chains_post_burn_in_samples)
             if str(mcmc_exportLog) == 'UserChoice':
                 mcmc_exportLog = bool(self.UserInput.parameter_estimation_settings['mcmc_exportLog'])
             if mcmc_exportLog == True:
@@ -2408,7 +2408,7 @@ class parameter_estimation:
             #FIXME: I think Below, calculate_post_burn_in_log_priors_vec=True should be false unless we are using continue sampling. For now, will leave it since I am not sure why it is currently set to True/False.
             self.calculatePostBurnInStatistics(calculate_post_burn_in_log_priors_vec = True) #This function call will also filter the lowest probability samples out, when using default settings.
             if self.UserInput.parameter_estimation_settings['convergence_diagnostics']: #Run convergence diagnostics if UserInput defines it as True
-                self.doConvergenceDiagnostics(self.discrete_chains_post_burn_in_samples)
+                self.getConvergenceDiagnostics(self.discrete_chains_post_burn_in_samples)
             if str(mcmc_exportLog) == 'UserChoice':
                 mcmc_exportLog = bool(self.UserInput.parameter_estimation_settings['mcmc_exportLog'])
             if mcmc_exportLog == True:
@@ -3269,7 +3269,7 @@ def deleteAllFilesInDirectory(mydir=''):
     for f in filelist:
         os.remove(os.path.join(mydir, f))
 
-def callConvergenceDiagnostics(discrete_chains_post_burn_in_samples, parameterNamesAndMathTypeExpressionsDict, graphs_directory, plot_settings):
+def calculateAndPlotConvergenceDiagnostics(discrete_chains_post_burn_in_samples, parameterNamesAndMathTypeExpressionsDict, plot_settings=[], graphs_directory='./', createPlots=True):
     """
     Calls other convergence functions to do calculations and make plots.
 
@@ -3296,7 +3296,9 @@ def callConvergenceDiagnostics(discrete_chains_post_burn_in_samples, parameterNa
         # loop through each parameter act values to plot and assign to self convergence
         parameter_act_for_each_window = {}
         for param_taus, (parameter_name, parameter_math_name) in zip(taus_zeus.T, parameterNamesAndMathTypeExpressionsDict.items()):
-            createAutoCorrPlot(window_indices_act, param_taus, parameter_name, parameter_math_name, graphs_directory)
+            # only plot if createPlots is True
+            if createPlots:
+                createAutoCorrPlot(window_indices_act, param_taus, parameter_name, parameter_math_name, graphs_directory)
             parameter_act_for_each_window[parameter_name] = param_taus
     except Exception as theError:
         print('The AutoCorrelation Time plots have failed to be created. The error was:', theError)
@@ -3330,8 +3332,9 @@ def callConvergenceDiagnostics(discrete_chains_post_burn_in_samples, parameterNa
             # save last window for plotting.
             z_scores_final = z_scores_array[:,-1]
             z_scores_geweke_final_plot_inputs = [z_scores_final_indices, z_scores_final] # allows for easier plotting with unpacking.
-            # now plot using PEUQSE.plotting function
-            createGewekePlot(z_scores_geweke_final_plot_inputs, window_indices_geweke, z_scores_percentage_outlier, parameter_name, parameter_math_name, graphs_directory)
+            # now plot using PEUQSE.plotting function if createPlots is True
+            if createPlots:
+                createGewekePlot(z_scores_geweke_final_plot_inputs, window_indices_geweke, z_scores_percentage_outlier, parameter_name, parameter_math_name, graphs_directory)
         # get combined parameter Geweke plot
         total_z_scores = np.array(total_z_scores)
         # abs and average across the parameters.
@@ -3343,8 +3346,9 @@ def callConvergenceDiagnostics(discrete_chains_post_burn_in_samples, parameterNa
         # use numpy function to count how many z values fall outside 1 std. Divide by total values to get percent (decimal)
         z_scores_sum_params_percentage_outlier = np.count_nonzero(z_scores_sum_params_and_chains>1, axis=1) / z_scores_sum_params_and_chains.shape[1]
         z_scores_sum_params_geweke_final_plot_inputs = [z_scores_final_indices, z_scores_sum_params_final] # allows for easier plotting with unpacking.
-        # now plot using PEUQSE.plotting function
-        createGewekePlot(z_scores_sum_params_geweke_final_plot_inputs, window_indices_geweke, z_scores_sum_params_percentage_outlier, 'Combined_Parameters', 'All Parameters', graphs_directory)
+        # now plot using PEUQSE.plotting function if createPlots is True
+        if createPlots:
+            createGewekePlot(z_scores_sum_params_geweke_final_plot_inputs, window_indices_geweke, z_scores_sum_params_percentage_outlier, 'Combined_Parameters', 'All Parameters', graphs_directory)
 
     except Exception as theError:
         print('Could not calculated Geweke convergence analysis. The chain length may be too small, so more samples are recommended.')
