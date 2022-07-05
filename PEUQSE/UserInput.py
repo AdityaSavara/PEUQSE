@@ -1,8 +1,8 @@
 import numpy as np
 
 #####Directory Settings####
-directories = {}
-directories['graphs'] = "./Graphs/"  #To include the graphs in the main runfile directory, just make this "./" 
+directories = {} # lower case letters are recommended when creating directories to avoid possible errors
+directories['graphs'] = "./graphs/"  #To include the graphs in the main runfile directory, just make this "./" 
 directories['logs_and_csvs'] = "./logs_and_csvs/" #to include the logs and csvs in the main runfile directory, just make this "./" 
 directories['pickles'] = "./pickles/" #to include the pickles and dills the main runfile directory, just make this "./" 
 
