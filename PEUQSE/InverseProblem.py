@@ -946,6 +946,10 @@ class parameter_estimation:
                     #Below is needed to avoid causing an error in the calculatePostBurnInStatistics since we don't have a real priors vec.
                     self.UserInput.parameter_estimation_settings['mcmc_threshold_filter_samples'] = False
                     self.calculatePostBurnInStatistics()
+                    # create discrete_chains_post_burn_in_samples
+                    self.discrete_chains_post_burn_in_samples = np.expand_dims(self.post_burn_in_samples, axis=1)
+                    if self.UserInput.parameter_estimation_settings['convergence_diagnostics']: #Run convergence diagnostics if UserInput defines it as True
+                        self.getConvergenceDiagnostics(self.discrete_chains_post_burn_in_samples)
                 except:
                     print("Could not convertPermutationsToSamples. This usually means there were no finite probability points sampled.")
                     permutationsToSamples = False #changing to false to prevent errors during exporting.
@@ -1943,93 +1947,49 @@ class parameter_estimation:
         pickleAnObject(self.map_parameter_set, self.UserInput.directories['pickles']+directory_name_suffix+file_name_prefix+'permutation_map_parameter_set'+file_name_suffix)
         pickleAnObject(self.UserInput.InputParameterInitialGuess, self.UserInput.directories['pickles']+directory_name_suffix+file_name_prefix+'permutation_initial_point_parameters'+file_name_suffix)
         
-    def callConvergenceDiagnostics(self, samplingFunctionstr: str, samplingObject=None) -> None:
+    def getConvergenceDiagnostics(self, discrete_chains_post_burn_in_samples=[]):
         """
-        Calls other convergence functions to do calculations and make plots.
+        Guides Integrated Autocorrelated Time and Geweke convergence analysis and makes plots.
 
-        :param samplingFunctionstr: String to define the sampler. (:type: str)
-        :param samplingObject: Object that defines the sampler. (:type SamplingObject)
+        :param samplingFunctionstr (optional): String to define the sampler. (:type: str)
+        :param discrete_chains_post_burn_in_samples (optional): Array that contains post burn in samples. Shape is (numSamples, numChains, numParams) (:type np.array)
         """
-        # use the zeus AutoCorrTime function for all calculations.
-        from zeus.autocorr import AutoCorrTime
-        # get the samples with defined chains from the specified sampler.
-        if samplingFunctionstr == 'EnsembleSliceSampling':
-            # create correct burn in length for multiple chains.
-            refined_burn_in = int(self.mcmc_burn_in_length / self.mcmc_nwalkers)
-            refined_post_burn_in_samples = samplingObject.get_chain(discard=refined_burn_in)
-
-        elif samplingFunctionstr == 'EnsembleSampling':
-            # create correct burn in length for multiple chains.
-            refined_burn_in = int(self.mcmc_burn_in_length / self.mcmc_nwalkers)
-            refined_post_burn_in_samples = samplingObject.get_chain(discard=refined_burn_in)
-
-        elif samplingFunctionstr == 'MetropolisHastings':
-            refined_post_burn_in_samples = np.expand_dims(self.post_burn_in_samples, axis=1)
-
-        # create window sizes that increase on a log scale.
-        window_indices_act = np.exp(np.linspace(np.log(100), np.log(self.post_burn_in_samples.shape[0]), 20)).astype(int)
-        # initialize array with shape (N_intervals, numParams)
-        taus_zeus = np.empty((len(window_indices_act), refined_post_burn_in_samples.shape[2])) 
-        from warnings import catch_warnings, simplefilter
-        with catch_warnings(): # removes warnings created from zeus.AutoCorrTime
-            simplefilter("ignore")
-            # populate taus using zeus AutoCorrTime function where lag length is determined by Sokal 1989.
-            # For more information on Integrated Autocorrelation time see https://emcee.readthedocs.io/en/stable/tutorials/autocorr/ 
-            for i, n in enumerate(window_indices_act): # loop through the window indices to get larger and larger windows
-                taus_zeus[i] = AutoCorrTime(refined_post_burn_in_samples[:n,:,:])
         
-        # create plots using PEUQSE plotting functions file.
-        from PEUQSE.plotting_functions import createAutoCorrPlot
-        # create plots for each parameter. The parameter names and symbols are unpacked from the dictionary.
-        for param_taus, (parameter_name, parameter_math_name) in zip(taus_zeus.T, self.UserInput.model['parameterNamesAndMathTypeExpressionsDict'].items()):
-            createAutoCorrPlot(window_indices_act, param_taus, parameter_name, parameter_math_name, self.UserInput.directories['graphs'])
-        try:
-            # use arviz to guide Geweke analysis
-            from arviz import geweke
-            from PEUQSE.plotting_functions import createGewekePlot
-            # create a linearly space array for creating window sizes for Geweke percent diagnostic
-            window_indices_geweke = np.linspace(0, refined_post_burn_in_samples.shape[0], 21).astype(int)[1:]
-            # loop through each param, each chain, and each window size
-            # Geweke function is called for each window size. The full window (last one) is saved for plotting.
-            total_z_scores = [] # initialize list for combining parameters.
-            for param_num, (parameter_name, parameter_math_name) in enumerate(self.UserInput.model['parameterNamesAndMathTypeExpressionsDict'].items()):
-                z_scores_array_per_chain = [] # initialize list for number of windows
-                for chain_num in range(refined_post_burn_in_samples.shape[1]):
-                    z_scores_array_per_window = [] # initialize the list
-                    for window in window_indices_geweke:
-                        # calculate z scores for each window.
-                        local_z_score = geweke(refined_post_burn_in_samples[:window, chain_num, param_num])
-                        # checks if it is the last window. If yes, save the indices. Save for plotting and all last windows are the same.
-                        if window == window_indices_geweke[-1]:
-                            z_scores_final_indices = local_z_score.T[0]
-                        z_scores_array_per_window.append(local_z_score.T[1])
-                    z_scores_array_per_chain.append(z_scores_array_per_window)
-                z_scores_array_per_chain = np.array(z_scores_array_per_chain)
-                # save all chains for combining all parameters.
-                total_z_scores.append(z_scores_array_per_chain)
-                z_scores_array = np.mean(np.abs(z_scores_array_per_chain), axis=0)
-                # use numpy function to count how many z values fall outside 1 std. Divide by total values to get percent (decimal)
-                z_scores_percentage_outlier = np.count_nonzero(z_scores_array>1, axis=1) / z_scores_array.shape[1]
-                # save last window for plotting.
-                z_scores_final = z_scores_array[:,-1]
-                z_scores_geweke_final_plot_inputs = [z_scores_final_indices, z_scores_final] # allows for easier plotting with unpacking.
-                # now plot using PEUQSE.plotting function
-                createGewekePlot(z_scores_geweke_final_plot_inputs, window_indices_geweke, z_scores_percentage_outlier, parameter_name, parameter_math_name, self.UserInput.directories['graphs'])
-            # get combined parameter Geweke plot
-            total_z_scores = np.array(total_z_scores)
-            # abs and average across the parameters.
-            z_scores_sum_params = np.mean(np.abs(total_z_scores), axis=0)
-            # average across each chain after params are averaged.
-            z_scores_sum_params_and_chains = np.mean(z_scores_sum_params, axis=0)
-            # save final window for plotting.
-            z_scores_sum_params_final = z_scores_sum_params_and_chains[:, -1]
-            # use numpy function to count how many z values fall outside 1 std. Divide by total values to get percent (decimal)
-            z_scores_sum_params_percentage_outlier = np.count_nonzero(z_scores_sum_params_and_chains>1, axis=1) / z_scores_sum_params_and_chains.shape[1]
-            z_scores_sum_params_geweke_final_plot_inputs = [z_scores_final_indices, z_scores_sum_params_final] # allows for easier plotting with unpacking.
-            # now plot using PEUQSE.plotting function
-            createGewekePlot(z_scores_sum_params_geweke_final_plot_inputs, window_indices_geweke, z_scores_sum_params_percentage_outlier, 'Combined_Parameters', 'All Parameters', self.UserInput.directories['graphs'])
-        except:
-            print('Could not calculated Geweke convergence analysis.')
+        if (discrete_chains_post_burn_in_samples==[]) and (hasattr(self, 'discrete_chains_post_burn_in_samples')):
+            discrete_chains_post_burn_in_samples = self.discrete_chains_post_burn_in_samples
+        # check if inputted array is a numpy array.
+        if type(discrete_chains_post_burn_in_samples).__module__ != np.__name__:
+            print('The input array needs to a numpy array. If a list was inputted, wrap the variable in np.array(var)')
+            sys.exit()
+        # check if array shape is right.
+        if len(discrete_chains_post_burn_in_samples.shape) != 3:
+            print('The input array needs to take the shape (numSamples, numChains, numParameters). The current inputs does not have the appropriate dimensions.')
+            sys.exit()
+       
+
+        # convergence diagnostic function is called to run calculations and create plots
+        # outputs are saved as a tuple 
+        #TODO: make its own plot settings in different commit. 
+        convergence_ouputs = calculateAndPlotConvergenceDiagnostics(discrete_chains_post_burn_in_samples, self.UserInput.model['parameterNamesAndMathTypeExpressionsDict'], self.UserInput.scatter_matrix_plots_settings, self.UserInput.directories['graphs'])
+
+        # initialize and populate convergence dictionary in class object
+        self.convergence = {}
+        self.convergence['AutoCorrTime'] = {}
+        self.convergence['AutoCorrTime']['window_indices'] = None
+        self.convergence['AutoCorrTime']['final_parameter_values'] = None
+        self.convergence['AutoCorrTime']['parameter_act_for_each_window'] = None
+        self.convergence['Geweke'] = {}
+        self.convergence['Geweke']['window_indices'] = None
+        self.convergence['Geweke']['final_combined_parameter_values'] = None
+        self.convergence['Geweke']['final_combined_parameter_percent_outlier'] = None
+
+        # unpack tuple to save convergence information to self
+        self.convergence['AutoCorrTime']['window_indices'] = convergence_ouputs[0]
+        self.convergence['AutoCorrTime']['final_parameter_values'] = convergence_ouputs[1]
+        self.convergence['AutoCorrTime']['parameter_act_for_each_window'] = convergence_ouputs[2]
+        self.convergence['Geweke']['window_indices'] = convergence_ouputs[3]
+        self.convergence['Geweke']['final_combined_parameter_values'] = convergence_ouputs[4]
+        self.convergence['Geweke']['final_combined_parameter_percent_outlier'] = convergence_ouputs[5]
 
         
     #Our EnsembleModifiedMHSampling is done by the emcee back end. (pip install emcee)
@@ -2136,6 +2096,7 @@ class parameter_estimation:
         #TODO: when implementing convergence diagnostics, extract more chain information from get_chain without flattening (i think)
         adjusted_mcmc_burn_in_length = int(self.mcmc_burn_in_length / self.mcmc_nwalkers)
         self.post_burn_in_samples = emcee_sampler.get_chain(flat=True, discard = adjusted_mcmc_burn_in_length )
+        self.discrete_chains_post_burn_in_samples = emcee_sampler.get_chain(flat=False, discard = adjusted_mcmc_burn_in_length)
         self.post_burn_in_log_posteriors_un_normed_vec = np.atleast_2d(emcee_sampler.get_log_prob(flat=True, discard=adjusted_mcmc_burn_in_length)).transpose() #Needed to make it 2D and transpose.
         self.mcmc_last_point_sampled=emcee_sampler.get_last_sample() #gets the actual last sample after all chains have been flattened to one.
         if continueSampling == True:
@@ -2146,10 +2107,13 @@ class parameter_estimation:
             calculatePostBurnInStatistics = True
         if self.UserInput.parameter_estimation_settings['mcmc_parallel_sampling']: #mcmc_exportLog == True is needed for mcmc_parallel_sampling, but not for multistart_parallel_sampling
             mcmc_exportLog=True
+        if self.UserInput.parameter_estimation_settings['mcmc_store_samplingObject']:
+            self.samplerType = 'EnsembleModifiedMHSampling'
+            self.samplingObject = emcee_sampler
         if calculatePostBurnInStatistics == True:
             self.calculatePostBurnInStatistics(calculate_post_burn_in_log_priors_vec = True) #This function call will also filter the lowest probability samples out, when using default settings.
             if self.UserInput.parameter_estimation_settings['convergence_diagnostics']: #Run convergence diagnostics if UserInput defines it as True
-                self.callConvergenceDiagnostics('EnsembleSampling', samplingObject=emcee_sampler)
+                self.getConvergenceDiagnostics(self.discrete_chains_post_burn_in_samples)
             if str(mcmc_exportLog) == 'UserChoice':
                 mcmc_exportLog = bool(self.UserInput.parameter_estimation_settings['mcmc_exportLog'])
             if mcmc_exportLog == True:
@@ -2269,6 +2233,7 @@ class parameter_estimation:
         #Now to keep the results:
         adjusted_mcmc_burn_in_length = int(self.mcmc_burn_in_length / self.mcmc_nwalkers)
         self.post_burn_in_samples = zeus_sampler.samples.flatten(discard = adjusted_mcmc_burn_in_length )
+        self.discrete_chains_post_burn_in_samples = zeus_sampler.get_chain(discard = adjusted_mcmc_burn_in_length)
         self.post_burn_in_log_posteriors_un_normed_vec = np.atleast_2d(zeus_sampler.samples.flatten_logprob(discard=adjusted_mcmc_burn_in_length)).transpose() #Needed to make it 2D and transpose.
         self.mcmc_last_point_sampled=zeus_sampler.get_last_sample #Note that for **zeus** the last point sampled is actually an array of points equal to the number of walkers.        
         if continueSampling == True:
@@ -2279,10 +2244,13 @@ class parameter_estimation:
             calculatePostBurnInStatistics = True;
         if self.UserInput.parameter_estimation_settings['mcmc_parallel_sampling']: #mcmc_exportLog == True is needed for mcmc_parallel_sampling, but not for multistart_parallel_sampling
             mcmc_exportLog=True
+        if self.UserInput.parameter_estimation_settings['mcmc_store_samplingObject']:
+            self.samplerType = 'EnsembleSliceSampling'
+            self.samplingObject = zeus_sampler
         if calculatePostBurnInStatistics == True:
             self.calculatePostBurnInStatistics(calculate_post_burn_in_log_priors_vec = True) #This function call will also filter the lowest probability samples out, when using default settings.
             if self.UserInput.parameter_estimation_settings['convergence_diagnostics']: #Run convergence diagnostics if UserInput defines it as True
-                self.callConvergenceDiagnostics('EnsembleSliceSampling', samplingObject=zeus_sampler)
+                self.getConvergenceDiagnostics(self.discrete_chains_post_burn_in_samples)
             if str(mcmc_exportLog) == 'UserChoice':
                 mcmc_exportLog = bool(self.UserInput.parameter_estimation_settings['mcmc_exportLog'])
             if mcmc_exportLog == True:
@@ -2446,6 +2414,7 @@ class parameter_estimation:
             self.during_burn_in_samples = samples[0:self.mcmc_burn_in_length] 
             self.during_burn_in_log_posteriors_un_normed_vec = log_posteriors_un_normed_vec[0:self.mcmc_burn_in_length]
         self.post_burn_in_samples = samples[self.mcmc_burn_in_length:] 
+        self.discrete_chains_post_burn_in_samples = np.expand_dims(self.post_burn_in_samples, axis=1) # MH only has one chain
         #self.post_burn_in_samples_simulatedOutputs = copy.deepcopy(samples_simulatedOutputs)
         #self.post_burn_in_samples_simulatedOutputs[self.mcmc_burn_in_length:0] #Note: this feature is presently not compatible with continueSampling.
         self.post_burn_in_log_posteriors_un_normed_vec = log_posteriors_un_normed_vec[self.mcmc_burn_in_length:]
@@ -2464,7 +2433,7 @@ class parameter_estimation:
             #FIXME: I think Below, calculate_post_burn_in_log_priors_vec=True should be false unless we are using continue sampling. For now, will leave it since I am not sure why it is currently set to True/False.
             self.calculatePostBurnInStatistics(calculate_post_burn_in_log_priors_vec = True) #This function call will also filter the lowest probability samples out, when using default settings.
             if self.UserInput.parameter_estimation_settings['convergence_diagnostics']: #Run convergence diagnostics if UserInput defines it as True
-                self.callConvergenceDiagnostics('MetropolisHastings')
+                self.getConvergenceDiagnostics(self.discrete_chains_post_burn_in_samples)
             if str(mcmc_exportLog) == 'UserChoice':
                 mcmc_exportLog = bool(self.UserInput.parameter_estimation_settings['mcmc_exportLog'])
             if mcmc_exportLog == True:
@@ -3324,6 +3293,102 @@ def deleteAllFilesInDirectory(mydir=''):
     filelist = copy.deepcopy(os.listdir(mydir))
     for f in filelist:
         os.remove(os.path.join(mydir, f))
+
+def calculateAndPlotConvergenceDiagnostics(discrete_chains_post_burn_in_samples, parameterNamesAndMathTypeExpressionsDict, plot_settings={}, graphs_directory='./', createPlots=True):
+    """
+    Calls other convergence functions to do calculations and make plots.
+
+    :param discrete_chains_post_burn_in_samples: Samples with specific arrays for chains. (:type: np.array)
+    :param parameterNamesAndMathTypeExpressionsDict: Dictionary with parameter name and symbol (:type dict)
+    :param plot_settings: Plotting settings from UserInput (:type: dict)
+    :param graphs_directory: Path to save graphs. (:type: str)
+    :param createPlots: Flag to create plots after convergence analysis. (:type: bool)
+    """
+    # makes sure the plot settings is populated before plotting
+    if len(plot_settings)==0:
+        createPlots=False
+    try:
+        # use the zeus AutoCorrTime function for all calculations.
+        from zeus.autocorr import AutoCorrTime
+        # create window sizes that increase on a log scale. 
+        window_indices_act = np.exp(np.linspace(0, np.log(discrete_chains_post_burn_in_samples.shape[0]), 21)).astype(int)[1:]
+        # initialize array with shape (N_intervals, numParams)
+        taus_zeus = np.empty((len(window_indices_act), discrete_chains_post_burn_in_samples.shape[2])) 
+        # populate taus using zeus AutoCorrTime function where lag length is determined by Sokal 1989.
+        # For more information on Integrated Autocorrelation time see https://emcee.readthedocs.io/en/stable/tutorials/autocorr/ 
+        for i, n in enumerate(window_indices_act): # loop through the window indices to get larger and larger windows
+            # since size is (numSamples, numChains, numParameters), we pass in limited samples up to the window size index
+            # while passing in every chain and parameter
+            taus_zeus[i] = AutoCorrTime(discrete_chains_post_burn_in_samples[:n,:,:]) 
+        
+        # create plots using PEUQSE plotting functions file.
+        from PEUQSE.plotting_functions import createAutoCorrPlot
+        # create plots for each parameter. The parameter names and symbols are unpacked from the dictionary.
+        # loop through each parameter act values to plot and assign to self convergence
+        parameter_act_for_each_window = {}
+        for param_taus, (parameter_name, parameter_math_name) in zip(taus_zeus.T, parameterNamesAndMathTypeExpressionsDict.items()):
+            # only plot if createPlots is True
+            if createPlots:
+                createAutoCorrPlot(window_indices_act, param_taus, parameter_name, parameter_math_name, graphs_directory)
+            parameter_act_for_each_window[parameter_name] = param_taus
+    except Exception as theError:
+        print('The AutoCorrelation Time plots have failed to be created. The error was:', theError)
+    try: # prevents crashing when running convergence diagnostics on short chains or weird models
+        # use arviz to guide Geweke analysis
+        from arviz import geweke
+        from PEUQSE.plotting_functions import createGewekePlot
+        # create a linearly space array for creating window sizes for Geweke percent diagnostic
+        window_indices_geweke = np.linspace(0, discrete_chains_post_burn_in_samples.shape[0], 21).astype(int)[1:]
+        # loop through each param, each chain, and each window size
+        # Geweke function is called for each window size. The full window (last one) is saved for plotting.
+        total_z_scores = [] # initialize list for combining parameters.
+        for param_num, (parameter_name, parameter_math_name) in enumerate(parameterNamesAndMathTypeExpressionsDict.items()):
+            z_scores_array_per_chain = [] # initialize list for number of windows
+            for chain_num in range(discrete_chains_post_burn_in_samples.shape[1]):
+                z_scores_array_per_window = [] # initialize the list
+                for window in window_indices_geweke:
+                    # calculate z scores for each window.
+                    local_z_score = geweke(discrete_chains_post_burn_in_samples[:window, chain_num, param_num])
+                    # checks if it is the last window. If yes, save the indices. Save for plotting and all last windows are the same.
+                    if window == window_indices_geweke[-1]:
+                        z_scores_final_indices = local_z_score.T[0]
+                    z_scores_array_per_window.append(local_z_score.T[1])
+                z_scores_array_per_chain.append(z_scores_array_per_window)
+            z_scores_array_per_chain = np.array(z_scores_array_per_chain)
+            # save all chains for combining all parameters.
+            total_z_scores.append(z_scores_array_per_chain)
+            z_scores_array = np.mean(np.abs(z_scores_array_per_chain), axis=0)
+            # use numpy function to count how many z values fall outside 1 std. Divide by total values to get percent (decimal)
+            z_scores_percentage_outlier = np.count_nonzero(z_scores_array>1, axis=1) / z_scores_array.shape[1]
+            # save last window for plotting.
+            z_scores_final = z_scores_array[:,-1]
+            z_scores_geweke_final_plot_inputs = [z_scores_final_indices, z_scores_final] # allows for easier plotting with unpacking.
+            # now plot using PEUQSE.plotting function if createPlots is True
+            if createPlots:
+                createGewekePlot(z_scores_geweke_final_plot_inputs, window_indices_geweke, z_scores_percentage_outlier, parameter_name, parameter_math_name, graphs_directory)
+        # get combined parameter Geweke plot
+        total_z_scores = np.array(total_z_scores)
+        # abs and average across the parameters.
+        z_scores_sum_params = np.mean(np.abs(total_z_scores), axis=0)
+        # average across each chain after params are averaged.
+        z_scores_sum_params_and_chains = np.mean(z_scores_sum_params, axis=0)
+        # save final window for plotting and self convergence.
+        z_scores_sum_params_final = z_scores_sum_params_and_chains[:, -1]
+        # use numpy function to count how many z values fall outside 1 std. Divide by total values to get percent (decimal)
+        z_scores_sum_params_percentage_outlier = np.count_nonzero(z_scores_sum_params_and_chains>1, axis=1) / z_scores_sum_params_and_chains.shape[1]
+        z_scores_sum_params_geweke_final_plot_inputs = [z_scores_final_indices, z_scores_sum_params_final] # allows for easier plotting with unpacking.
+        # now plot using PEUQSE.plotting function if createPlots is True
+        if createPlots:
+            createGewekePlot(z_scores_sum_params_geweke_final_plot_inputs, window_indices_geweke, z_scores_sum_params_percentage_outlier, 'Combined_Parameters', 'All Parameters', graphs_directory)
+
+    except Exception as theError:
+        print('Could not calculated Geweke convergence analysis. The chain length may be too small, so more samples are recommended.')
+        print('The Geweke diagnostic graphs failed to be created. The error was:', theError)
+        window_indices_geweke = None
+        z_scores_sum_params_final = None
+        z_scores_sum_params_percentage_outlier = None
+    # return both window_indicies, final ACT values each param, final ACT values each param and window, final z scores summed parameters, and final summed parameters percent outliers
+    return (window_indices_act, taus_zeus[-1,:], parameter_act_for_each_window, window_indices_geweke, z_scores_sum_params_final, z_scores_sum_params_percentage_outlier)
         
 if __name__ == "__main__":
     pass
