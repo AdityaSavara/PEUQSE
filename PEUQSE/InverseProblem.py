@@ -1948,7 +1948,7 @@ class parameter_estimation:
         # convergence diagnostic function is called to run calculations and create plots
         # outputs are saved as a tuple 
         #TODO: make its own plot settings in different commit. 
-        convergence_ouputs = calculateAndPlotConvergenceDiagnostics(discrete_chains_post_burn_in_samples, self.UserInput.model['parameterNamesAndMathTypeExpressionsDict'], self.UserInput.directories['graphs'], self.UserInput.scatter_matrix_plots_settings)
+        convergence_ouputs = calculateAndPlotConvergenceDiagnostics(discrete_chains_post_burn_in_samples, self.UserInput.model['parameterNamesAndMathTypeExpressionsDict'], self.UserInput.scatter_matrix_plots_settings, self.UserInput.directories['graphs'])
 
         # initialize and populate convergence dictionary in class object
         self.convergence = {}
@@ -3269,13 +3269,19 @@ def deleteAllFilesInDirectory(mydir=''):
     for f in filelist:
         os.remove(os.path.join(mydir, f))
 
-def calculateAndPlotConvergenceDiagnostics(discrete_chains_post_burn_in_samples, parameterNamesAndMathTypeExpressionsDict, plot_settings=[], graphs_directory='./', createPlots=True):
+def calculateAndPlotConvergenceDiagnostics(discrete_chains_post_burn_in_samples, parameterNamesAndMathTypeExpressionsDict, plot_settings={}, graphs_directory='./', createPlots=True):
     """
     Calls other convergence functions to do calculations and make plots.
 
-    :param samplingFunctionstr: String to define the sampler. (:type: str)
-    :param samplingObject: Object that defines the sampler. (:type SamplingObject)
+    :param discrete_chains_post_burn_in_samples: Samples with specific arrays for chains. (:type: np.array)
+    :param parameterNamesAndMathTypeExpressionsDict: Dictionary with parameter name and symbol (:type dict)
+    :param plot_settings: Plotting settings from UserInput (:type: dict)
+    :param graphs_directory: Path to save graphs. (:type: str)
+    :param createPlots: Flag to create plots after convergence analysis. (:type: bool)
     """
+    # makes sure the plot settings is populated before plotting
+    if len(plot_settings)==0:
+        createPlots=False
     try:
         # use the zeus AutoCorrTime function for all calculations.
         from zeus.autocorr import AutoCorrTime
