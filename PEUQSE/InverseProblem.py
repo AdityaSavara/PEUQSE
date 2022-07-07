@@ -1587,6 +1587,8 @@ class parameter_estimation:
         self.map_logP = -1.0*negLogP
         return [self.map_parameter_set, self.map_logP]
 
+    find_MAP = doOptimizeLogP # pointer to doOptimizeLogP to make our user options similar to existing popular BPE softwares (ie. pymc)
+
     def doOptimizeNegLogP(self, simulationFunctionAdditionalArgs = (), method = None, optimizationAdditionalArgs = {}, printOptimum = True, verbose=True, maxiter=0):
         #THe intention of the optional arguments is to pass them into the scipy.optimize.minimize function.
         # the 'method' argument is for Nelder-Mead, BFGS, SLSQP etc. https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html#scipy.optimize.minimize
