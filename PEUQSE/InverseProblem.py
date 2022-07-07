@@ -61,7 +61,9 @@ class parameter_estimation:
             print("The UserInput feature parameter_estimation_settings['multistart_gridsearch_threshold_filter_coefficient'] has been renamed. Use parameter_estimation_settings['multistart_permutationsToSamples_threshold_filter_coefficient'].")
             if hasattr(UserInput.parameter_estimation_settings, 'multistart_permutationsToSamples_threshold_filter_coefficient') == False:    
                 UserInput.parameter_estimation_settings['multistart_permutationsToSamples_threshold_filter_coefficient']= UserInput.parameter_estimation_settings['multistart_gridsearch_threshold_filter_coefficient']
-
+        #Check if EnsembleJumpSampling specification for multistart and change type to EnsembleModifiedMHSampling
+        if UserInput.parameter_estimation_settings['multistart_searchType'] == 'doEnsembleJumpSampling':
+            self.UserInput.parameter_estimation_settings['multistart_searchType'] = 'doEnsembleModifiedMHSampling'
 
         #Check if there are parameterNames provided. If not, we will make some.
         if len(UserInput.model['parameterNamesAndMathTypeExpressionsDict']) == 0:
@@ -712,7 +714,7 @@ class parameter_estimation:
         
     def doListOfPermutationsSearch(self, listOfPermutations, numPermutations = None, searchType='getLogP', exportLog = True, walkerInitialDistribution='UserChoice', passThroughArgs = {}, calculatePostBurnInStatistics=True,  keep_cumulative_post_burn_in_data = False, centerPoint=None, permutationsToSamples=False): #This is the 'engine' used by doGridSearch and  doMultiStartSearch
     #The listOfPermutations can also be another type of iterable.
-        #Possible searchTypes are: 'getLogP', 'doEnsembleSliceSampling', 'doMetropolisHastings', 'doOptimizeNegLogP', 'doOptimizeLogP' 'doOptimizeSSR'
+        #Possible searchTypes are: 'getLogP', 'doEnsembleSliceSampling', 'doEnsembleJumpSampling', 'doMetropolisHastings', 'doOptimizeNegLogP', 'doOptimizeLogP' 'doOptimizeSSR'
         #permutationsToSamples should normally only be True if somebody is using gridsearch or uniform multistart with getLogP.
         self.listOfPermutations = listOfPermutations #This is being made into a class variable so that it can be used during parallelization
         if str(numPermutations).lower() == str(None).lower():
@@ -721,6 +723,8 @@ class parameter_estimation:
             centerPoint = self.UserInput.InputParameterInitialGuess*1.0
         if searchType == 'doGetLogP' or searchType == 'doSinglePoint': #Fixing a common input mistake.
             searchType = 'getLogP'
+        if searchType == 'doEnsembleJumpSampling': #Fix the frontend name to the backend name. 
+            searchType = 'doEnsembleModifiedMHSampling'
         self.permutation_searchType = searchType #This is mainly for consolidate_parallel_sampling_data
         verbose = self.UserInput.parameter_estimation_settings['verbose']
         if verbose:
@@ -761,13 +765,13 @@ class parameter_estimation:
         highest_MAP_initial_point_parameters = None #just initializing
         if self.UserInput.parameter_estimation_settings['exportAllSimulatedOutputs'] == True:
             self.permutations_unfiltered_map_simulated_outputs = []
-        if searchType == 'doEnsembleSliceSampling':
+        if (searchType == 'doEnsembleSliceSampling') or (searchType == 'doEnsembleModifiedMHSampling'):
             if str(self.UserInput.parameter_estimation_settings['mcmc_nwalkers']).lower() == 'auto':
                 permutationSearch_mcmc_nwalkers = 2*len(centerPoint) #Lowest possible is 2 times num parameters for ESS.
             else:
                 permutationSearch_mcmc_nwalkers = int(self.UserInput.parameter_estimation_settings['mcmc_nwalkers'])
         #Start grid search loop.
-        if (searchType == 'doEnsembleSliceSampling') or (searchType == 'doMetropolisHastings'): #Choose the walker distribution type.
+        if (searchType == 'doEnsembleSliceSampling') or (searchType == 'doMetropolisHastings') or (searchType == 'doEnsembleModifiedMHSampling'): #Choose the walker distribution type.
                 if walkerInitialDistribution == 'UserChoice': #UserChoice comes from UserInput. It can still be auto.
                     walkerInitialDistribution = self.UserInput.parameter_estimation_settings['mcmc_walkerInitialDistribution']
                 #The identical distribution is used by default because otherwise the walkers may be spread out too far and it could defeat the purpose of a gridsearch.
@@ -821,6 +825,20 @@ class parameter_estimation:
                         self.cumulative_post_burn_in_samples = np.vstack((self.cumulative_post_burn_in_samples, self.post_burn_in_samples))
                         self.cumulative_post_burn_in_log_priors_vec = np.vstack((self.cumulative_post_burn_in_log_priors_vec, self.post_burn_in_log_priors_vec))
                         self.cumulative_post_burn_in_log_posteriors_un_normed_vec = np.vstack((self.cumulative_post_burn_in_log_posteriors_un_normed_vec, self.post_burn_in_log_posteriors_un_normed_vec))                    
+            if searchType == 'doEnsembleModifiedMHSampling':
+                self.map_logP = np.float('-inf') #initializing as -inf to have a 'pure' mcmc sampling.
+                thisResult = self.doEnsembleModifiedMHSampling(mcmc_nwalkers_direct_input=permutationSearch_mcmc_nwalkers, calculatePostBurnInStatistics=calculatePostBurnInStatistics, walkerInitialDistribution=walkerInitialDistribution, continueSampling=mcmc_continueSampling) 
+                #Note that "thisResult" has the form: [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec]
+                #self.map_logP gets done by itself in doEnsembleJumpSampling
+                if keep_cumulative_post_burn_in_data == True:
+                    if permutationIndex == 0:
+                        self.cumulative_post_burn_in_samples = self.post_burn_in_samples
+                        self.cumulative_post_burn_in_log_priors_vec = self.post_burn_in_log_priors_vec
+                        self.cumulative_post_burn_in_log_posteriors_un_normed_vec = self.post_burn_in_log_posteriors_un_normed_vec
+                    else: #This is basically elseif permutationIndex > 0:
+                        self.cumulative_post_burn_in_samples = np.vstack((self.cumulative_post_burn_in_samples, self.post_burn_in_samples))
+                        self.cumulative_post_burn_in_log_priors_vec = np.vstack((self.cumulative_post_burn_in_log_priors_vec, self.post_burn_in_log_priors_vec))
+                        self.cumulative_post_burn_in_log_posteriors_un_normed_vec = np.vstack((self.cumulative_post_burn_in_log_posteriors_un_normed_vec, self.post_burn_in_log_posteriors_un_normed_vec))
             if searchType == 'doOptimizeLogP':
                 optimizationOutput = self.doOptimizeLogP(**passThroughArgs)
                 self.map_logP = optimizationOutput[1] 
@@ -850,7 +868,7 @@ class parameter_estimation:
                 highest_MAP_initial_point_parameters = permutation
             allPermutationsResults.append(thisResult)
             if self.UserInput.parameter_estimation_settings['exportAllSimulatedOutputs'] == True:
-                if searchType == 'doEnsembleSliceSampling' or searchType=='doMetropolisHastings': #we need to run the map again, outside of mcmc, to populate 
+                if (searchType == 'doEnsembleSliceSampling') or (searchType=='doMetropolisHastings') or (searchType == 'doEnsembleModifiedMHSampling'): #we need to run the map again, outside of mcmc, to populate 
                     self.map_logP = self.getLogP(self.map_parameter_set) #this has an implied return of self.lastSimulatedResponses.
                 #else no extra work needs to be done since the last simulation was the map.
                 self.permutations_unfiltered_map_simulated_outputs.append(np.array(self.lastSimulatedResponses).flatten())
@@ -883,7 +901,7 @@ class parameter_estimation:
         #populate the map etc. with those of the best result.
         self.map_logP = self.highest_logP 
         self.map_parameter_set = highest_logP_parameter_set 
-        if (searchType == 'doEnsembleSliceSampling') or (searchType == 'doMetropolisHastings'):
+        if (searchType == 'doEnsembleSliceSampling') or (searchType == 'doMetropolisHastings') or (searchType == 'doEnsembleModifiedMHSampling'):
             #For MCMC, we can now calculate the post_burn_in statistics for the best sampling from the full samplings done. We don't want to lump all together because that would not be unbiased.
             #Note that "thisResult" and thus "bestResultSoFar" has the form: [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec]
             self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec = bestResultSoFar
@@ -928,6 +946,10 @@ class parameter_estimation:
                     #Below is needed to avoid causing an error in the calculatePostBurnInStatistics since we don't have a real priors vec.
                     self.UserInput.parameter_estimation_settings['mcmc_threshold_filter_samples'] = False
                     self.calculatePostBurnInStatistics()
+                    # create discrete_chains_post_burn_in_samples
+                    self.discrete_chains_post_burn_in_samples = np.expand_dims(self.post_burn_in_samples, axis=1)
+                    if self.UserInput.parameter_estimation_settings['convergence_diagnostics']: #Run convergence diagnostics if UserInput defines it as True
+                        self.getConvergenceDiagnostics(self.discrete_chains_post_burn_in_samples)
                 except:
                     print("Could not convertPermutationsToSamples. This usually means there were no finite probability points sampled.")
                     permutationsToSamples = False #changing to false to prevent errors during exporting.
@@ -943,8 +965,8 @@ class parameter_estimation:
                     out_file.write("highest_MAP_logP_parameter_set: " + str(bestResultSoFar[0])+ "\n")
                     out_file.write("highest_MAP_initial_point_index: " + str(highest_MAP_initial_point_index)+ "\n")
                     out_file.write("highest_MAP_initial_point_parameters: " + str( highest_MAP_initial_point_parameters)+ "\n")
-                    if (searchType == 'doEnsembleSliceSampling') or (searchType == 'doMetropolisHastings') or (permutationsToSamples == True):
-                        if (searchType == 'doEnsembleSliceSampling') or (searchType == 'doMetropolisHastings'): 
+                    if (searchType == 'doEnsembleSliceSampling') or (searchType == 'doMetropolisHastings') or (searchType == 'doEnsembleModifiedMHSampling') or (permutationsToSamples == True):
+                        if (searchType == 'doEnsembleSliceSampling') or (searchType == 'doMetropolisHastings') or (searchType == 'doEnsembleModifiedMHSampling'): 
                             caveat = ' (for the above initial point) '
                         elif permutationsToSamples == True:
                             caveat = ''
@@ -1138,7 +1160,7 @@ class parameter_estimation:
                     current_post_map_parameter_set_data = unpickleAnObject(current_post_map_parameter_set_filename)
                     self.map_parameter_set = current_post_map_parameter_set_data
 
-                    if (searchType == 'doEnsembleSliceSampling') or (searchType == 'doMetropolisHastings'):
+                    if (searchType == 'doEnsembleSliceSampling') or (searchType == 'doMetropolisHastings') or (searchType == 'doEnsembleModifiedMHSampling'):
                         current_post_burn_in_statistics_filename = "permutation_post_burn_in_statistics_"+simulationNumberString
                         current_post_burn_in_statistics_data = unpickleAnObject(current_post_burn_in_statistics_filename)
                         [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec] = current_post_burn_in_statistics_data
@@ -1149,7 +1171,7 @@ class parameter_estimation:
                     if simulationIndex == 0: #This is the first data set.
                         self.highest_logP = self.map_logP
                         self.highest_logP_parameter_set = self.map_parameter_set
-                        if (searchType == 'doEnsembleSliceSampling') or (searchType == 'doMetropolisHastings'):
+                        if (searchType == 'doEnsembleSliceSampling') or (searchType == 'doMetropolisHastings') or (searchType == 'doEnsembleModifiedMHSampling'):
                             self.highest_logP_post_burn_in_samples = self.post_burn_in_samples
                             self.highest_logP_post_burn_in_log_priors_vec = self.post_burn_in_log_priors_vec
                             self.highest_logP_post_burn_in_log_posteriors_un_normed_vec = self.post_burn_in_log_posteriors_un_normed_vec
@@ -1157,18 +1179,18 @@ class parameter_estimation:
                         if self.highest_logP < self.map_logP:
                             self.highest_logP = self.map_logP
                             self.highest_logP_parameter_set = self.map_parameter_set
-                            if (searchType == 'doEnsembleSliceSampling') or (searchType == 'doMetropolisHastings'):
+                            if (searchType == 'doEnsembleSliceSampling') or (searchType == 'doMetropolisHastings') or (searchType == 'doEnsembleModifiedMHSampling'):
                                 self.highest_logP_post_burn_in_samples = self.post_burn_in_samples
                                 self.highest_logP_post_burn_in_log_priors_vec = self.post_burn_in_log_priors_vec
                                 self.highest_logP_post_burn_in_log_posteriors_un_normed_vec = self.post_burn_in_log_posteriors_un_normed_vec
                 #After the loop is done, we want to keep the accumulated values and then do the regular final calculations.
-                if (searchType == 'doEnsembleSliceSampling') or (searchType == 'doMetropolisHastings'): #FIXME: These logic needs to be checked to make sure it is correct.
+                if (searchType == 'doEnsembleSliceSampling') or (searchType == 'doMetropolisHastings') or (searchType == 'doEnsembleModifiedMHSampling'): #FIXME: These logic needs to be checked to make sure it is correct.
                     self.map_logP = max(self.post_burn_in_log_posteriors_un_normed_vec)
                     self.map_index = list(self.post_burn_in_log_posteriors_un_normed_vec).index(self.map_logP) #This does not have to be a unique answer, just one of them places which gives map_logP.
                     self.map_parameter_set = self.post_burn_in_samples[self.map_index] #This  is the point with the highest probability in the                 
                 self.map_logP = self.highest_logP 
                 self.map_parameter_set = self.highest_logP_parameter_set
-                if (searchType == 'doEnsembleSliceSampling') or (searchType == 'doMetropolisHastings'):
+                if (searchType == 'doEnsembleSliceSampling') or (searchType == 'doMetropolisHastings') or (searchType == 'doEnsembleModifiedMHSampling'):
                     self.post_burn_in_samples = self.highest_logP_post_burn_in_samples 
                     self.post_burn_in_log_priors_vec = self.highest_logP_post_burn_in_log_priors_vec 
                     self.post_burn_in_log_posteriors_un_normed_vec = self.highest_logP_post_burn_in_log_posteriors_un_normed_vec 
@@ -1177,7 +1199,7 @@ class parameter_estimation:
                     os.chdir("..")
                 else:
                     os.chdir("../..")
-                if (searchType == 'doEnsembleSliceSampling') or (searchType == 'doMetropolisHastings'):
+                if (searchType == 'doEnsembleSliceSampling') or (searchType == 'doMetropolisHastings') or (searchType == 'doEnsembleModifiedMHSampling'):
                     self.UserInput.request_mpi = False # we need to turn this off, because otherwise it will interfere with our attempts to calculate the post_burn_in statistics.
                     self.calculatePostBurnInStatistics(calculate_post_burn_in_log_priors_vec = True) #The argument is provided because otherwise there can be some bad priors if ESS was used.
                     self.exportPostBurnInStatistics()
@@ -1305,6 +1327,8 @@ class parameter_estimation:
                     [map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, logP] = self.doMetropolisHastings()
                 if searchType=='doEnsembleSliceSampling':
                     [map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, logP] = self.doEnsembleSliceSampling()
+                if searchType == 'doEnsembleModifiedMHSampling':
+                    [map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, logP] = self.doEnsembleModifiedMHSampling()
                 conditionsPermutation = np.array(conditionsPermutation) #we're going to make this an array before adding to the info_gain matrix.
                 conditionsPermutationAndInfoGain = np.hstack((conditionsPermutation, info_gain))
                 self.info_gain_matrix.append(conditionsPermutationAndInfoGain)
@@ -1373,6 +1397,8 @@ class parameter_estimation:
                                 [map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, logP] = self.doMetropolisHastings()
                             if searchType=='doEnsembleSliceSampling':
                                 [map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, logP] = self.doEnsembleSliceSampling()
+                            if searchType=='doEnsembleModifiedMHSampling':
+                                [map_parameter_set, muap_parameter_set, stdap_parameter_set, evidence, info_gain, samples, logP] = self.doEnsembleModifiedMHSampling()
                             conditionsPermutation = np.array([indValue1,indValue2])
                             conditionsPermutationAndInfoGain = np.hstack((conditionsPermutation, info_gain))
                             self.info_gain_matrix.append(conditionsPermutationAndInfoGain) #NOTE that the structure *includes* the Permutations.
@@ -1886,7 +1912,7 @@ class parameter_estimation:
     def exportPostPermutationStatistics(self, searchType=''): #if it is an mcmc run, then we need to save the sampling as well.
         #TODO: Consider to Make header for mcmc_samples_array. Also make exporting the mcmc_samples_array optional. 
         file_name_prefix, file_name_suffix, directory_name_suffix = self.getParallelProcessingPrefixAndSuffix() #Rather self explanatory.
-        if (searchType == 'doEnsembleSliceSampling') or (searchType == 'doMetropolisHastings'): #Note: this might be needed for parallel processing, not sure.
+        if (searchType == 'doEnsembleSliceSampling') or (searchType == 'doMetropolisHastings') or (searchType == 'doEnsembleModifiedMHSampling'): #Note: this might be needed for parallel processing, not sure.
             mcmc_samples_array = np.hstack((self.post_burn_in_log_posteriors_un_normed_vec,self.post_burn_in_samples))
             np.savetxt(self.UserInput.directories['logs_and_csvs']+directory_name_suffix+file_name_prefix+'permutation_logP_and_parameter_samples'+file_name_suffix+'.csv',mcmc_samples_array, delimiter=",")
             pickleAnObject(mcmc_samples_array, self.UserInput.directories['pickles']+directory_name_suffix+file_name_prefix+'permutation_logP_and_parameter_samples'+file_name_suffix)
@@ -1902,7 +1928,7 @@ class parameter_estimation:
             out_file.write("self.initial_point_parameters:" + str( self.UserInput.InputParameterInitialGuess) + "\n")
             out_file.write("MAP_logP:" +  str(self.map_logP) + "\n")
             out_file.write("self.map_parameter_set:" + str( self.map_parameter_set) + "\n")
-            if (searchType == 'doEnsembleSliceSampling') or (searchType == 'doMetropolisHastings'): #Below are only for mcmc_sampling
+            if (searchType == 'doEnsembleSliceSampling') or (searchType == 'doMetropolisHastings') or (searchType == 'doEnsembleModifiedMHSampling'): #Below are only for mcmc_sampling
                 out_file.write("self.map_index:" +  str(self.map_index) + "\n")
                 out_file.write("self.mu_AP_parameter_set:" + str( self.mu_AP_parameter_set) + "\n")
                 out_file.write("self.stdap_parameter_set:" + str( self.stdap_parameter_set) + "\n")
@@ -1914,106 +1940,65 @@ class parameter_estimation:
                     out_file.write("Convergence Status: Warning - The difference between the MAP parameter set and mu_AP parameter set is greater than 10% of the prior standard deviations in at least one parameter. This means that either your posterior distribution is asymmetric or that it is not yet converged. This may mean that you need to increase your mcmc_length, increase or decrease your mcmc_relative_step_length, or change what is used for the model response.  There is no general method for knowing the right  value for mcmc_relative_step_length since it depends on the sharpness and smoothness of the response. See for example https://www.sciencedirect.com/science/article/pii/S0039602816300632")
                 else:
                     out_file.write("Convergence Status: The difference between the MAP parameter set and mu_AP parameter set is less than 10% of the prior standard deviations for each parameter. There is no general method for knowing when the correct solution has been obtained, but this small difference is one sign of a converged solution.")
-        if (searchType == 'doEnsembleSliceSampling') or (searchType == 'doMetropolisHastings'):
+        if (searchType == 'doEnsembleSliceSampling') or (searchType == 'doMetropolisHastings') or (searchType == 'doEnsembleModifiedMHSampling'):
             postBurnInStatistics = [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec]
             pickleAnObject(postBurnInStatistics, self.UserInput.directories['pickles']+directory_name_suffix+file_name_prefix+'permutation_post_burn_in_statistics'+file_name_suffix)
         pickleAnObject(self.map_logP, self.UserInput.directories['pickles']+directory_name_suffix+file_name_prefix+'permutation_map_logP'+file_name_suffix)
         pickleAnObject(self.map_parameter_set, self.UserInput.directories['pickles']+directory_name_suffix+file_name_prefix+'permutation_map_parameter_set'+file_name_suffix)
         pickleAnObject(self.UserInput.InputParameterInitialGuess, self.UserInput.directories['pickles']+directory_name_suffix+file_name_prefix+'permutation_initial_point_parameters'+file_name_suffix)
         
-    def callConvergenceDiagnostics(self, samplingFunctionstr: str, samplingObject=None) -> None:
+    def getConvergenceDiagnostics(self, discrete_chains_post_burn_in_samples=[]):
         """
-        Calls other convergence functions to do calculations and make plots.
+        Guides Integrated Autocorrelated Time and Geweke convergence analysis and makes plots.
 
-        :param samplingFunctionstr: String to define the sampler. (:type: str)
-        :param samplingObject: Object that defines the sampler. (:type SamplingObject)
+        :param samplingFunctionstr (optional): String to define the sampler. (:type: str)
+        :param discrete_chains_post_burn_in_samples (optional): Array that contains post burn in samples. Shape is (numSamples, numChains, numParams) (:type np.array)
         """
-        # use the zeus AutoCorrTime function for all calculations.
-        from zeus.autocorr import AutoCorrTime
-        # get the samples with defined chains from the specified sampler.
-        if samplingFunctionstr == 'EnsembleSliceSampling':
-            # create correct burn in length for multiple chains.
-            refined_burn_in = int(self.mcmc_burn_in_length / self.mcmc_nwalkers)
-            refined_post_burn_in_samples = samplingObject.get_chain(discard=refined_burn_in)
-
-        elif samplingFunctionstr == 'EnsembleSampling':
-            # create correct burn in length for multiple chains.
-            refined_burn_in = int(self.mcmc_burn_in_length / self.mcmc_nwalkers)
-            refined_post_burn_in_samples = samplingObject.get_chain(discard=refined_burn_in)
-
-        elif samplingFunctionstr == 'MetropolisHastings':
-            refined_post_burn_in_samples = np.expand_dims(self.post_burn_in_samples, axis=1)
-
-        # create window sizes that increase on a log scale.
-        window_indices_act = np.exp(np.linspace(np.log(100), np.log(self.post_burn_in_samples.shape[0]), 20)).astype(int)
-        # initialize array with shape (N_intervals, numParams)
-        taus_zeus = np.empty((len(window_indices_act), refined_post_burn_in_samples.shape[2])) 
-        # populate taus using zeus AutoCorrTime function where lag length is determined by Sokal 1989.
-        # For more information on Integrated Autocorrelation time see https://emcee.readthedocs.io/en/stable/tutorials/autocorr/ 
-        for i, n in enumerate(window_indices_act): # loop through the window indices to get larger and larger windows
-            taus_zeus[i] = AutoCorrTime(refined_post_burn_in_samples[:n,:,:])
         
-        # create plots using PEUQSE plotting functions file.
-        from PEUQSE.plotting_functions import createAutoCorrPlot
-        # create plots for each parameter. The parameter names and symbols are unpacked from the dictionary.
-        for param_taus, (parameter_name, parameter_math_name) in zip(taus_zeus.T, self.UserInput.model['parameterNamesAndMathTypeExpressionsDict'].items()):
-            createAutoCorrPlot(window_indices_act, param_taus, parameter_name, parameter_math_name, self.UserInput.directories['graphs'])
-        try:
-            # use arviz to guide Geweke analysis
-            from arviz import geweke
-            from PEUQSE.plotting_functions import createGewekePlot
-            # create a linearly space array for creating window sizes for Geweke percent diagnostic
-            window_indices_geweke = np.linspace(0, refined_post_burn_in_samples.shape[0], 21).astype(int)[1:]
-            # loop through each param, each chain, and each window size
-            # Geweke function is called for each window size. The full window (last one) is saved for plotting.
-            total_z_scores = [] # initialize list for combining parameters.
-            for param_num, (parameter_name, parameter_math_name) in enumerate(self.UserInput.model['parameterNamesAndMathTypeExpressionsDict'].items()):
-                z_scores_array_per_chain = [] # initialize list for number of windows
-                for chain_num in range(refined_post_burn_in_samples.shape[1]):
-                    z_scores_array_per_window = [] # initialize the list
-                    for window in window_indices_geweke:
-                        # calculate z scores for each window.
-                        local_z_score = geweke(refined_post_burn_in_samples[:window, chain_num, param_num])
-                        # checks if it is the last window. If yes, save the indices. Save for plotting and all last windows are the same.
-                        if window == window_indices_geweke[-1]:
-                            z_scores_final_indices = local_z_score.T[0]
-                        z_scores_array_per_window.append(local_z_score.T[1])
-                    z_scores_array_per_chain.append(z_scores_array_per_window)
-                z_scores_array_per_chain = np.array(z_scores_array_per_chain)
-                # save all chains for combining all parameters.
-                total_z_scores.append(z_scores_array_per_chain)
-                z_scores_array = np.mean(np.abs(z_scores_array_per_chain), axis=0)
-                # use numpy function to count how many z values fall outside 1 std. Divide by total values to get percent (decimal)
-                z_scores_percentage_outlier = np.count_nonzero(z_scores_array>1, axis=1) / z_scores_array.shape[1]
-                # save last window for plotting.
-                z_scores_final = z_scores_array[:,-1]
-                z_scores_geweke_final_plot_inputs = [z_scores_final_indices, z_scores_final] # allows for easier plotting with unpacking.
-                # now plot using PEUQSE.plotting function
-                createGewekePlot(z_scores_geweke_final_plot_inputs, window_indices_geweke, z_scores_percentage_outlier, parameter_name, parameter_math_name, self.UserInput.directories['graphs'])
-            # get combined parameter Geweke plot
-            total_z_scores = np.array(total_z_scores)
-            # abs and average across the parameters.
-            z_scores_sum_params = np.mean(np.abs(total_z_scores), axis=0)
-            # average across each chain after params are averaged.
-            z_scores_sum_params_and_chains = np.mean(z_scores_sum_params, axis=0)
-            # save final window for plotting.
-            z_scores_sum_params_final = z_scores_sum_params_and_chains[:, -1]
-            # use numpy function to count how many z values fall outside 1 std. Divide by total values to get percent (decimal)
-            z_scores_sum_params_percentage_outlier = np.count_nonzero(z_scores_sum_params_and_chains>1, axis=1) / z_scores_sum_params_and_chains.shape[1]
-            z_scores_sum_params_geweke_final_plot_inputs = [z_scores_final_indices, z_scores_sum_params_final] # allows for easier plotting with unpacking.
-            # now plot using PEUQSE.plotting function
-            createGewekePlot(z_scores_sum_params_geweke_final_plot_inputs, window_indices_geweke, z_scores_sum_params_percentage_outlier, 'Combined_Parameters', 'All Parameters', self.UserInput.directories['graphs'])
-        except:
-            print('Could not calculated Geweke convergence analysis.')
+        if (discrete_chains_post_burn_in_samples==[]) and (hasattr(self, 'discrete_chains_post_burn_in_samples')):
+            discrete_chains_post_burn_in_samples = self.discrete_chains_post_burn_in_samples
+        # check if inputted array is a numpy array.
+        if type(discrete_chains_post_burn_in_samples).__module__ != np.__name__:
+            print('The input array needs to a numpy array. If a list was inputted, wrap the variable in np.array(var)')
+            sys.exit()
+        # check if array shape is right.
+        if len(discrete_chains_post_burn_in_samples.shape) != 3:
+            print('The input array needs to take the shape (numSamples, numChains, numParameters). The current inputs does not have the appropriate dimensions.')
+            sys.exit()
+       
+
+        # convergence diagnostic function is called to run calculations and create plots
+        # outputs are saved as a tuple 
+        #TODO: make its own plot settings in different commit. 
+        convergence_ouputs = calculateAndPlotConvergenceDiagnostics(discrete_chains_post_burn_in_samples, self.UserInput.model['parameterNamesAndMathTypeExpressionsDict'], self.UserInput.scatter_matrix_plots_settings, self.UserInput.directories['graphs'])
+
+        # initialize and populate convergence dictionary in class object
+        self.convergence = {}
+        self.convergence['AutoCorrTime'] = {}
+        self.convergence['AutoCorrTime']['window_indices'] = None
+        self.convergence['AutoCorrTime']['final_parameter_values'] = None
+        self.convergence['AutoCorrTime']['parameter_act_for_each_window'] = None
+        self.convergence['Geweke'] = {}
+        self.convergence['Geweke']['window_indices'] = None
+        self.convergence['Geweke']['final_combined_parameter_values'] = None
+        self.convergence['Geweke']['final_combined_parameter_percent_outlier'] = None
+
+        # unpack tuple to save convergence information to self
+        self.convergence['AutoCorrTime']['window_indices'] = convergence_ouputs[0]
+        self.convergence['AutoCorrTime']['final_parameter_values'] = convergence_ouputs[1]
+        self.convergence['AutoCorrTime']['parameter_act_for_each_window'] = convergence_ouputs[2]
+        self.convergence['Geweke']['window_indices'] = convergence_ouputs[3]
+        self.convergence['Geweke']['final_combined_parameter_values'] = convergence_ouputs[4]
+        self.convergence['Geweke']['final_combined_parameter_percent_outlier'] = convergence_ouputs[5]
 
         
-    #Our EnsembleSampling is done by the emcee back end. (pip install emcee)
+    #Our EnsembleModifiedMHSampling is done by the emcee back end. (pip install emcee)
     software_name = "emcee"
     software_version = "3.1.2"
     software_unique_id = "https://github.com/dfm/emcee"
     software_kwargs = {"version": software_version, "author": ['Foreman-Mackey, D.', 'Hogg, D.~W.', 'Lang, D.', 'Goodman, J.'], "cite": ["@article{emcee, author = {{Foreman-Mackey}, D. and {Hogg}, D.~W. and {Lang}, D. and {Goodman}, J.}, title = {emcee: The MCMC Hammer}, journal = {PASP}, year = 2013, volume = 125, pages = {306-312}, eprint = {1202.3665}, doi = {10.1086/670067}}"] }
     @CiteSoft.function_call_cite(unique_id=software_unique_id, software_name=software_name, **software_kwargs)
-    def doEnsembleSampling(self, mcmc_nwalkers_direct_input = None, walkerInitialDistribution='UserChoice', walkerInitialDistributionSpread='UserChoice', calculatePostBurnInStatistics=True, mcmc_exportLog ='UserChoice', continueSampling='auto'):
+    def doEnsembleModifiedMHSampling(self, mcmc_nwalkers_direct_input = None, walkerInitialDistribution='UserChoice', walkerInitialDistributionSpread='UserChoice', calculatePostBurnInStatistics=True, mcmc_exportLog ='UserChoice', continueSampling='auto'):
         """
         TODO: make params and return definitions along with a short description.
         """
@@ -2074,7 +2059,7 @@ class parameter_estimation:
         else: #this is mainly for PermutationSearch which will (by default) use the minimum number of walkers per point.
             self.mcmc_nwalkers = int(mcmc_nwalkers_direct_input)
         if (self.mcmc_nwalkers%2) != 0: #Check that it's even. If not, add one walker.
-            print("The EnsembleSampling requires an even number of Walkers. Adding one Walker.")
+            print("The EnsembleJumpSampling requires an even number of Walkers. Adding one Walker.")
             self.mcmc_nwalkers = self.mcmc_nwalkers + 1
         requested_mcmc_steps = self.UserInput.parameter_estimation_settings['mcmc_length']
         nEnsembleSteps = int(requested_mcmc_steps/self.mcmc_nwalkers) #We calculate the calculate number of the Ensemble Steps from the total sampling steps requested divided by self.mcmc_nwalkers.
@@ -2111,20 +2096,24 @@ class parameter_estimation:
         #TODO: when implementing convergence diagnostics, extract more chain information from get_chain without flattening (i think)
         adjusted_mcmc_burn_in_length = int(self.mcmc_burn_in_length / self.mcmc_nwalkers)
         self.post_burn_in_samples = emcee_sampler.get_chain(flat=True, discard = adjusted_mcmc_burn_in_length )
+        self.discrete_chains_post_burn_in_samples = emcee_sampler.get_chain(flat=False, discard = adjusted_mcmc_burn_in_length)
         self.post_burn_in_log_posteriors_un_normed_vec = np.atleast_2d(emcee_sampler.get_log_prob(flat=True, discard=adjusted_mcmc_burn_in_length)).transpose() #Needed to make it 2D and transpose.
         self.mcmc_last_point_sampled=emcee_sampler.get_last_sample() #gets the actual last sample after all chains have been flattened to one.
         if continueSampling == True:
             self.post_burn_in_samples = np.vstack((self.last_post_burn_in_samples, self.post_burn_in_samples ))
             self.post_burn_in_log_posteriors_un_normed_vec = np.vstack( (self.last_post_burn_in_log_posteriors_un_normed_vec, self.post_burn_in_log_posteriors_un_normed_vec))        
-        #####BELOW HERE SHOUD BE SAME FOR doMetropolisHastings and doEnsembleSliceSampling#####
+        #####BELOW HERE SHOUD BE SAME FOR doMetropolisHastings and doEnsembleSliceSampling and doEnsembleModifiedMHSampling#####
         if (self.UserInput.parameter_estimation_settings['mcmc_parallel_sampling'] or self.UserInput.parameter_estimation_settings['multistart_parallel_sampling']) == True: #If we're using certain parallel processing, we need to make calculatePostBurnInStatistics into True.
             calculatePostBurnInStatistics = True
         if self.UserInput.parameter_estimation_settings['mcmc_parallel_sampling']: #mcmc_exportLog == True is needed for mcmc_parallel_sampling, but not for multistart_parallel_sampling
             mcmc_exportLog=True
+        if self.UserInput.parameter_estimation_settings['mcmc_store_samplingObject']:
+            self.samplerType = 'EnsembleModifiedMHSampling'
+            self.samplingObject = emcee_sampler
         if calculatePostBurnInStatistics == True:
             self.calculatePostBurnInStatistics(calculate_post_burn_in_log_priors_vec = True) #This function call will also filter the lowest probability samples out, when using default settings.
             if self.UserInput.parameter_estimation_settings['convergence_diagnostics']: #Run convergence diagnostics if UserInput defines it as True
-                self.callConvergenceDiagnostics('EnsembleSampling', samplingObject=emcee_sampler)
+                self.getConvergenceDiagnostics(self.discrete_chains_post_burn_in_samples)
             if str(mcmc_exportLog) == 'UserChoice':
                 mcmc_exportLog = bool(self.UserInput.parameter_estimation_settings['mcmc_exportLog'])
             if mcmc_exportLog == True:
@@ -2137,7 +2126,10 @@ class parameter_estimation:
             self.map_index = list(self.post_burn_in_log_posteriors_un_normed_vec).index(self.map_logP) #This does not have to be a unique answer, just one of them places which gives map_logP.
             self.map_parameter_set = self.post_burn_in_samples[self.map_index] #This  is the point with the highest probability in the posterior.            
             return self.map_logP
-        pass
+    
+    # pointer to Ensemble Modified MH sampling
+    # doEnsembleJumpSampling is provided for user convenience as a simpler choice of sampling
+    doEnsembleJumpSampling = doEnsembleModifiedMHSampling
 
 
     #Our EnsembleSliceSampling is done by the Zeus back end. (pip install zeus-mcmc)
@@ -2241,20 +2233,24 @@ class parameter_estimation:
         #Now to keep the results:
         adjusted_mcmc_burn_in_length = int(self.mcmc_burn_in_length / self.mcmc_nwalkers)
         self.post_burn_in_samples = zeus_sampler.samples.flatten(discard = adjusted_mcmc_burn_in_length )
+        self.discrete_chains_post_burn_in_samples = zeus_sampler.get_chain(discard = adjusted_mcmc_burn_in_length)
         self.post_burn_in_log_posteriors_un_normed_vec = np.atleast_2d(zeus_sampler.samples.flatten_logprob(discard=adjusted_mcmc_burn_in_length)).transpose() #Needed to make it 2D and transpose.
         self.mcmc_last_point_sampled=zeus_sampler.get_last_sample #Note that for **zeus** the last point sampled is actually an array of points equal to the number of walkers.        
         if continueSampling == True:
             self.post_burn_in_samples = np.vstack((self.last_post_burn_in_samples, self.post_burn_in_samples ))
             self.post_burn_in_log_posteriors_un_normed_vec = np.vstack( (self.last_post_burn_in_log_posteriors_un_normed_vec, self.post_burn_in_log_posteriors_un_normed_vec))        
-        #####BELOW HERE SHOUD BE SAME FOR doMetropolisHastings and doEnsembleSliceSampling#####
+        #####BELOW HERE SHOUD BE SAME FOR doMetropolisHastings and doEnsembleSliceSampling and doEnsembleModifiedMHSampling#####
         if (self.UserInput.parameter_estimation_settings['mcmc_parallel_sampling'] or self.UserInput.parameter_estimation_settings['multistart_parallel_sampling']) == True: #If we're using certain parallel processing, we need to make calculatePostBurnInStatistics into True.
             calculatePostBurnInStatistics = True;
         if self.UserInput.parameter_estimation_settings['mcmc_parallel_sampling']: #mcmc_exportLog == True is needed for mcmc_parallel_sampling, but not for multistart_parallel_sampling
             mcmc_exportLog=True
+        if self.UserInput.parameter_estimation_settings['mcmc_store_samplingObject']:
+            self.samplerType = 'EnsembleSliceSampling'
+            self.samplingObject = zeus_sampler
         if calculatePostBurnInStatistics == True:
             self.calculatePostBurnInStatistics(calculate_post_burn_in_log_priors_vec = True) #This function call will also filter the lowest probability samples out, when using default settings.
             if self.UserInput.parameter_estimation_settings['convergence_diagnostics']: #Run convergence diagnostics if UserInput defines it as True
-                self.callConvergenceDiagnostics('EnsembleSliceSampling', samplingObject=zeus_sampler)
+                self.getConvergenceDiagnostics(self.discrete_chains_post_burn_in_samples)
             if str(mcmc_exportLog) == 'UserChoice':
                 mcmc_exportLog = bool(self.UserInput.parameter_estimation_settings['mcmc_exportLog'])
             if mcmc_exportLog == True:
@@ -2418,13 +2414,14 @@ class parameter_estimation:
             self.during_burn_in_samples = samples[0:self.mcmc_burn_in_length] 
             self.during_burn_in_log_posteriors_un_normed_vec = log_posteriors_un_normed_vec[0:self.mcmc_burn_in_length]
         self.post_burn_in_samples = samples[self.mcmc_burn_in_length:] 
+        self.discrete_chains_post_burn_in_samples = np.expand_dims(self.post_burn_in_samples, axis=1) # MH only has one chain
         #self.post_burn_in_samples_simulatedOutputs = copy.deepcopy(samples_simulatedOutputs)
         #self.post_burn_in_samples_simulatedOutputs[self.mcmc_burn_in_length:0] #Note: this feature is presently not compatible with continueSampling.
         self.post_burn_in_log_posteriors_un_normed_vec = log_posteriors_un_normed_vec[self.mcmc_burn_in_length:]
         self.mcmc_last_point_sampled = self.post_burn_in_samples[-1]
         self.post_burn_in_log_likelihoods_vec = log_likelihoods_vec[self.mcmc_burn_in_length:]
         self.post_burn_in_log_priors_vec = log_priors_vec[self.mcmc_burn_in_length:]        
-        #####BELOW HERE SHOUD BE SAME FOR doMetropolisHastings and doEnsembleSliceSampling#####
+        #####BELOW HERE SHOUD BE SAME FOR doMetropolisHastings and doEnsembleSliceSampling and doEnsembleModifiedMHSampling#####
         if continueSampling == True:
             self.post_burn_in_samples = np.vstack((self.last_post_burn_in_samples, self.post_burn_in_samples ))
             self.post_burn_in_log_posteriors_un_normed_vec = np.vstack( (np.array(self.last_post_burn_in_log_posteriors_un_normed_vec), np.array(self.post_burn_in_log_posteriors_un_normed_vec)))
@@ -2436,7 +2433,7 @@ class parameter_estimation:
             #FIXME: I think Below, calculate_post_burn_in_log_priors_vec=True should be false unless we are using continue sampling. For now, will leave it since I am not sure why it is currently set to True/False.
             self.calculatePostBurnInStatistics(calculate_post_burn_in_log_priors_vec = True) #This function call will also filter the lowest probability samples out, when using default settings.
             if self.UserInput.parameter_estimation_settings['convergence_diagnostics']: #Run convergence diagnostics if UserInput defines it as True
-                self.callConvergenceDiagnostics('MetropolisHastings')
+                self.getConvergenceDiagnostics(self.discrete_chains_post_burn_in_samples)
             if str(mcmc_exportLog) == 'UserChoice':
                 mcmc_exportLog = bool(self.UserInput.parameter_estimation_settings['mcmc_exportLog'])
             if mcmc_exportLog == True:
@@ -3296,6 +3293,102 @@ def deleteAllFilesInDirectory(mydir=''):
     filelist = copy.deepcopy(os.listdir(mydir))
     for f in filelist:
         os.remove(os.path.join(mydir, f))
+
+def calculateAndPlotConvergenceDiagnostics(discrete_chains_post_burn_in_samples, parameterNamesAndMathTypeExpressionsDict, plot_settings={}, graphs_directory='./', createPlots=True):
+    """
+    Calls other convergence functions to do calculations and make plots.
+
+    :param discrete_chains_post_burn_in_samples: Samples with specific arrays for chains. (:type: np.array)
+    :param parameterNamesAndMathTypeExpressionsDict: Dictionary with parameter name and symbol (:type dict)
+    :param plot_settings: Plotting settings from UserInput (:type: dict)
+    :param graphs_directory: Path to save graphs. (:type: str)
+    :param createPlots: Flag to create plots after convergence analysis. (:type: bool)
+    """
+    # makes sure the plot settings is populated before plotting
+    if len(plot_settings)==0:
+        createPlots=False
+    try:
+        # use the zeus AutoCorrTime function for all calculations.
+        from zeus.autocorr import AutoCorrTime
+        # create window sizes that increase on a log scale. 
+        window_indices_act = np.exp(np.linspace(0, np.log(discrete_chains_post_burn_in_samples.shape[0]), 21)).astype(int)[1:]
+        # initialize array with shape (N_intervals, numParams)
+        taus_zeus = np.empty((len(window_indices_act), discrete_chains_post_burn_in_samples.shape[2])) 
+        # populate taus using zeus AutoCorrTime function where lag length is determined by Sokal 1989.
+        # For more information on Integrated Autocorrelation time see https://emcee.readthedocs.io/en/stable/tutorials/autocorr/ 
+        for i, n in enumerate(window_indices_act): # loop through the window indices to get larger and larger windows
+            # since size is (numSamples, numChains, numParameters), we pass in limited samples up to the window size index
+            # while passing in every chain and parameter
+            taus_zeus[i] = AutoCorrTime(discrete_chains_post_burn_in_samples[:n,:,:]) 
+        
+        # create plots using PEUQSE plotting functions file.
+        from PEUQSE.plotting_functions import createAutoCorrPlot
+        # create plots for each parameter. The parameter names and symbols are unpacked from the dictionary.
+        # loop through each parameter act values to plot and assign to self convergence
+        parameter_act_for_each_window = {}
+        for param_taus, (parameter_name, parameter_math_name) in zip(taus_zeus.T, parameterNamesAndMathTypeExpressionsDict.items()):
+            # only plot if createPlots is True
+            if createPlots:
+                createAutoCorrPlot(window_indices_act, param_taus, parameter_name, parameter_math_name, graphs_directory)
+            parameter_act_for_each_window[parameter_name] = param_taus
+    except Exception as theError:
+        print('The AutoCorrelation Time plots have failed to be created. The error was:', theError)
+    try: # prevents crashing when running convergence diagnostics on short chains or weird models
+        # use arviz to guide Geweke analysis
+        from arviz import geweke
+        from PEUQSE.plotting_functions import createGewekePlot
+        # create a linearly space array for creating window sizes for Geweke percent diagnostic
+        window_indices_geweke = np.linspace(0, discrete_chains_post_burn_in_samples.shape[0], 21).astype(int)[1:]
+        # loop through each param, each chain, and each window size
+        # Geweke function is called for each window size. The full window (last one) is saved for plotting.
+        total_z_scores = [] # initialize list for combining parameters.
+        for param_num, (parameter_name, parameter_math_name) in enumerate(parameterNamesAndMathTypeExpressionsDict.items()):
+            z_scores_array_per_chain = [] # initialize list for number of windows
+            for chain_num in range(discrete_chains_post_burn_in_samples.shape[1]):
+                z_scores_array_per_window = [] # initialize the list
+                for window in window_indices_geweke:
+                    # calculate z scores for each window.
+                    local_z_score = geweke(discrete_chains_post_burn_in_samples[:window, chain_num, param_num])
+                    # checks if it is the last window. If yes, save the indices. Save for plotting and all last windows are the same.
+                    if window == window_indices_geweke[-1]:
+                        z_scores_final_indices = local_z_score.T[0]
+                    z_scores_array_per_window.append(local_z_score.T[1])
+                z_scores_array_per_chain.append(z_scores_array_per_window)
+            z_scores_array_per_chain = np.array(z_scores_array_per_chain)
+            # save all chains for combining all parameters.
+            total_z_scores.append(z_scores_array_per_chain)
+            z_scores_array = np.mean(np.abs(z_scores_array_per_chain), axis=0)
+            # use numpy function to count how many z values fall outside 1 std. Divide by total values to get percent (decimal)
+            z_scores_percentage_outlier = np.count_nonzero(z_scores_array>1, axis=1) / z_scores_array.shape[1]
+            # save last window for plotting.
+            z_scores_final = z_scores_array[:,-1]
+            z_scores_geweke_final_plot_inputs = [z_scores_final_indices, z_scores_final] # allows for easier plotting with unpacking.
+            # now plot using PEUQSE.plotting function if createPlots is True
+            if createPlots:
+                createGewekePlot(z_scores_geweke_final_plot_inputs, window_indices_geweke, z_scores_percentage_outlier, parameter_name, parameter_math_name, graphs_directory)
+        # get combined parameter Geweke plot
+        total_z_scores = np.array(total_z_scores)
+        # abs and average across the parameters.
+        z_scores_sum_params = np.mean(np.abs(total_z_scores), axis=0)
+        # average across each chain after params are averaged.
+        z_scores_sum_params_and_chains = np.mean(z_scores_sum_params, axis=0)
+        # save final window for plotting and self convergence.
+        z_scores_sum_params_final = z_scores_sum_params_and_chains[:, -1]
+        # use numpy function to count how many z values fall outside 1 std. Divide by total values to get percent (decimal)
+        z_scores_sum_params_percentage_outlier = np.count_nonzero(z_scores_sum_params_and_chains>1, axis=1) / z_scores_sum_params_and_chains.shape[1]
+        z_scores_sum_params_geweke_final_plot_inputs = [z_scores_final_indices, z_scores_sum_params_final] # allows for easier plotting with unpacking.
+        # now plot using PEUQSE.plotting function if createPlots is True
+        if createPlots:
+            createGewekePlot(z_scores_sum_params_geweke_final_plot_inputs, window_indices_geweke, z_scores_sum_params_percentage_outlier, 'Combined_Parameters', 'All Parameters', graphs_directory)
+
+    except Exception as theError:
+        print('Could not calculated Geweke convergence analysis. The chain length may be too small, so more samples are recommended.')
+        print('The Geweke diagnostic graphs failed to be created. The error was:', theError)
+        window_indices_geweke = None
+        z_scores_sum_params_final = None
+        z_scores_sum_params_percentage_outlier = None
+    # return both window_indicies, final ACT values each param, final ACT values each param and window, final z scores summed parameters, and final summed parameters percent outliers
+    return (window_indices_act, taus_zeus[-1,:], parameter_act_for_each_window, window_indices_geweke, z_scores_sum_params_final, z_scores_sum_params_percentage_outlier)
         
 if __name__ == "__main__":
     pass
