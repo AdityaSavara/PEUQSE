@@ -3310,6 +3310,7 @@ def calculateAndPlotConvergenceDiagnostics(discrete_chains_post_burn_in_samples,
     :param graphs_directory: Path to save graphs. (:type: str)
     :param createPlots: Flag to create plots after convergence analysis. (:type: bool)
     """
+    from warnings import catch_warnings, simplefilter
     # makes sure the plot settings is populated before plotting
     if len(plot_settings)==0:
         createPlots=False
@@ -3322,10 +3323,12 @@ def calculateAndPlotConvergenceDiagnostics(discrete_chains_post_burn_in_samples,
         taus_zeus = np.empty((len(window_indices_act), discrete_chains_post_burn_in_samples.shape[2])) 
         # populate taus using zeus AutoCorrTime function where lag length is determined by Sokal 1989.
         # For more information on Integrated Autocorrelation time see https://emcee.readthedocs.io/en/stable/tutorials/autocorr/ 
-        for i, n in enumerate(window_indices_act): # loop through the window indices to get larger and larger windows
-            # since size is (numSamples, numChains, numParameters), we pass in limited samples up to the window size index
-            # while passing in every chain and parameter
-            taus_zeus[i] = AutoCorrTime(discrete_chains_post_burn_in_samples[:n,:,:]) 
+        with catch_warnings(): # suppress warnings from ACT function
+            simplefilter('ignore')
+            for i, n in enumerate(window_indices_act): # loop through the window indices to get larger and larger windows
+                # since size is (numSamples, numChains, numParameters), we pass in limited samples up to the window size index
+                # while passing in every chain and parameter
+                taus_zeus[i] = AutoCorrTime(discrete_chains_post_burn_in_samples[:n,:,:]) 
         
         # create plots using PEUQSE plotting functions file.
         from PEUQSE.plotting_functions import createAutoCorrPlot
@@ -3354,7 +3357,9 @@ def calculateAndPlotConvergenceDiagnostics(discrete_chains_post_burn_in_samples,
                 z_scores_array_per_window = [] # initialize the list
                 for window in window_indices_geweke:
                     # calculate z scores for each window.
-                    local_z_score = geweke(discrete_chains_post_burn_in_samples[:window, chain_num, param_num])
+                    with catch_warnings():
+                        simplefilter('ignore')
+                        local_z_score = geweke(discrete_chains_post_burn_in_samples[:window, chain_num, param_num])
                     # checks if it is the last window. If yes, save the indices. Save for plotting and all last windows are the same.
                     if window == window_indices_geweke[-1]:
                         z_scores_final_indices = local_z_score.T[0]
