@@ -3326,11 +3326,17 @@ def calculateAndPlotConvergenceDiagnostics(discrete_chains_post_burn_in_samples,
         # create plots for each parameter. The parameter names and symbols are unpacked from the dictionary.
         # loop through each parameter act values to plot and assign to self convergence
         parameter_act_for_each_window = {}
+        combined_parameter_act_for_each_window = np.ones((len(window_indices_act),))
         for param_taus, (parameter_name, parameter_math_name) in zip(taus_zeus.T, parameterNamesAndMathTypeExpressionsDict.items()):
             # only plot if createPlots is True
             if createPlots:
                 createAutoCorrPlot(window_indices_act, param_taus, parameter_name, parameter_math_name, graphs_directory)
             parameter_act_for_each_window[parameter_name] = param_taus
+            # combine parameters by adding log(ACT) or just by multiplying
+            combined_parameter_act_for_each_window *= param_taus
+        # create combined parameters plot for ACT
+        createAutoCorrPlot(window_indices_act, combined_parameter_act_for_each_window, 'Combined_Parameters', 'All Parameters', graphs_directory)
+        
     except Exception as theError:
         print('The AutoCorrelation Time plots have failed to be created. The error was:', theError)
     try: # prevents crashing when running convergence diagnostics on short chains or weird models
