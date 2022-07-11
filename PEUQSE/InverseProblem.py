@@ -1949,7 +1949,7 @@ class parameter_estimation:
         
     def getConvergenceDiagnostics(self, discrete_chains_post_burn_in_samples=[]):
         """
-        Guides Integrated Autocorrelated Time and Geweke convergence analysis and makes plots.
+        Guides Integrated Autocorrelation Time and Geweke convergence analysis and makes plots.
 
         :param samplingFunctionstr (optional): String to define the sampler. (:type: str)
         :param discrete_chains_post_burn_in_samples (optional): Array that contains post burn in samples. Shape is (numSamples, numChains, numParams) (:type np.array)
