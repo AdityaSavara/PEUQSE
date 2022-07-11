@@ -2143,7 +2143,7 @@ class parameter_estimation:
     software_kwargs = {"version": software_version, "author": ["Minas Karamanis", "Florian Beutler"], "cite": ["Minas Karamanis and Florian Beutler. zeus: A Python Implementation of the Ensemble Slice Sampling method. 2020. ","https://arxiv.org/abs/2002.06212", "@article{ess,  title={Ensemble Slice Sampling}, author={Minas Karamanis and Florian Beutler}, year={2020}, eprint={2002.06212}, archivePrefix={arXiv}, primaryClass={stat.ML} }"] }
     #@CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
     @CiteSoft.function_call_cite(unique_id=software_unique_id, software_name=software_name, **software_kwargs)
-    def doEnsembleSliceSampling(self, mcmc_nwalkers_direct_input = None, walkerInitialDistribution='UserChoice', walkerInitialDistributionSpread='UserChoice', calculatePostBurnInStatistics=True, mcmc_exportLog ='UserChoice', continueSampling='auto'):
+    def doEnsembleSliceSampling(self, mcmc_nwalkers_direct_input = None, walkerInitialDistribution='UserChoice', walkerInitialDistributionSpread='UserChoice', movesType='differential', calculatePostBurnInStatistics=True, mcmc_exportLog ='UserChoice', continueSampling='auto'):
         #The distribution of walkers intial points can be uniform or gaussian or identical. As of Oct 2020, default is uniform spread around the intial guess.
         #The mcmc_nwalkers_direct_input is really meant for PermutationSearch to override the other settings, though of course people could also use it directly.  
         #The walkerInitialDistributionSpread is in relative units (relative to standard deviations). In the case of a uniform inital distribution the default level of spread is actually across two standard deviations, so the walkerInitialDistributionSpread is relative to that (that is, a value of 2 would give 2*2 = 4 for the full spread in each direction from the initial guess).
@@ -2212,13 +2212,20 @@ class parameter_estimation:
         else: self.mcmc_burn_in_length = self.UserInput.parameter_estimation_settings['mcmc_burn_in']
         if 'mcmc_maxiter' not in self.UserInput.parameter_estimation_settings: mcmc_maxiter = 1E6 #The default from zeus is 1E4, but I have found that is not always sufficient.
         else: mcmc_maxiter = self.UserInput.parameter_estimation_settings['mcmc_maxiter']
+        # make the move objects from the UserInput specification
+        if movesType.lower() == 'auto': movesTypeObject = zeus.moves.DifferentialMove()
+        elif movesType.lower() == 'differential': movesTypeObject = zeus.moves.DifferentialMove()
+        elif movesType.lower() == 'global': movesTypeObject = zeus.moves.GlobalMove(n_components=4) #the n_components (believe it means number of modes to expect), has been hard coded to 4 from the default of 5. This was required to have Example00c2 to run without crashing.
+        elif movesType.lower() == 'gaussian': movesTypeObject = zeus.moves.GaussianMove()
+        elif movesType.lower() == 'kde': movesTypeObject = zeus.moves.KDEMove()
+        else: print("The move type must be one of the following: ['auto', 'differential', 'global', 'gaussian', 'kde']")
         ####end of user input variables####
         #now to do the mcmc
         if continueSampling == False:
             walkerStartPoints = self.generateInitialPoints(initialPointsDistributionType=walkerInitialDistribution, numStartPoints = self.mcmc_nwalkers,relativeInitialDistributionSpread=walkerInitialDistributionSpread) #making the first set of starting points.
         elif continueSampling == True:
             walkerStartPoints = self.map_parameter_set #used to be self.mcmc_last_point_sampled. However, ESS works best when sampling near the peak (if there is a monomodoal HPD).
-        zeus_sampler = zeus.EnsembleSampler(self.mcmc_nwalkers, numParameters, logprob_fn=self.getLogP, maxiter=mcmc_maxiter) #maxiter=1E4 is the typical number, but we may want to increase it based on some UserInput variable.        
+        zeus_sampler = zeus.EnsembleSampler(self.mcmc_nwalkers, numParameters, logprob_fn=self.getLogP, maxiter=mcmc_maxiter, moves=movesTypeObject) #maxiter=1E4 is the typical number, but we may want to increase it based on some UserInput variable.        
         for trialN in range(0,1000):#Todo: This number of this range is hardcoded but should probably be a user selection.
             try:
                 zeus_sampler.run_mcmc(walkerStartPoints, nEnsembleSteps)
@@ -2228,7 +2235,7 @@ class parameter_estimation:
                     print("One of the starting points has a non-finite probability. Picking new starting points. If you see this message like an infinite loop, consider trying the doEnsembleSliceSampling optional argument of walkerInitialDistributionSpread. It has a default value of 1.0. Reducing this value to 0.25, for example, may work if your initial guess is near the maximum of the posterior distribution.")
                     #Need to make the sampler again, in this case, to throw away anything that has happened so far
                     walkerStartPoints = self.generateInitialPoints(initialPointsDistributionType=walkerInitialDistribution, numStartPoints = self.mcmc_nwalkers, relativeInitialDistributionSpread=walkerInitialDistributionSpread) 
-                    zeus_sampler = zeus.EnsembleSampler(self.mcmc_nwalkers, numParameters, logprob_fn=self.getLogP, maxiter=mcmc_maxiter) #maxiter=1E4 is the typical number, but we may want to increase it based on some UserInput variable.        
+                    zeus_sampler = zeus.EnsembleSampler(self.mcmc_nwalkers, numParameters, logprob_fn=self.getLogP, maxiter=mcmc_maxiter, moves=movesTypeObject) #maxiter=1E4 is the typical number, but we may want to increase it based on some UserInput variable.        
                 elif "maxiter" in str(exceptionObject): #This means there is an error message from zeus that the max iterations have been reached.
                     print("WARNING: One or more of the Ensemble Slice Sampling walkers encountered an error. The value of mcmc_maxiter is currently", mcmc_maxiter, "you should increase it, perhaps by a factor of 1E2.")
                 else:
