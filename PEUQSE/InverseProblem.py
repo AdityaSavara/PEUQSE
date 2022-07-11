@@ -1587,6 +1587,8 @@ class parameter_estimation:
         self.map_logP = -1.0*negLogP
         return [self.map_parameter_set, self.map_logP]
 
+    find_MAP = doOptimizeLogP # pointer to doOptimizeLogP to make our user options similar to existing popular BPE softwares (ie. pymc)
+
     def doOptimizeNegLogP(self, simulationFunctionAdditionalArgs = (), method = None, optimizationAdditionalArgs = {}, printOptimum = True, verbose=True, maxiter=0):
         #THe intention of the optional arguments is to pass them into the scipy.optimize.minimize function.
         # the 'method' argument is for Nelder-Mead, BFGS, SLSQP etc. https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html#scipy.optimize.minimize
@@ -2096,7 +2098,9 @@ class parameter_estimation:
         #TODO: when implementing convergence diagnostics, extract more chain information from get_chain without flattening (i think)
         adjusted_mcmc_burn_in_length = int(self.mcmc_burn_in_length / self.mcmc_nwalkers)
         self.post_burn_in_samples = emcee_sampler.get_chain(flat=True, discard = adjusted_mcmc_burn_in_length )
-        self.discrete_chains_post_burn_in_samples = emcee_sampler.get_chain(flat=False, discard = adjusted_mcmc_burn_in_length)
+        discrete_chains_post_burn_in_samples = emcee_sampler.get_chain(flat=False, discard = adjusted_mcmc_burn_in_length)
+        if self.UserInput.parameter_estimation_settings['mcmc_store_samplingObject'] == True:
+            self.discrete_chains_post_burn_in_samples = discrete_chains_post_burn_in_samples
         self.post_burn_in_log_posteriors_un_normed_vec = np.atleast_2d(emcee_sampler.get_log_prob(flat=True, discard=adjusted_mcmc_burn_in_length)).transpose() #Needed to make it 2D and transpose.
         self.mcmc_last_point_sampled=emcee_sampler.get_last_sample() #gets the actual last sample after all chains have been flattened to one.
         if continueSampling == True:
@@ -2113,7 +2117,7 @@ class parameter_estimation:
         if calculatePostBurnInStatistics == True:
             self.calculatePostBurnInStatistics(calculate_post_burn_in_log_priors_vec = True) #This function call will also filter the lowest probability samples out, when using default settings.
             if self.UserInput.parameter_estimation_settings['convergence_diagnostics']: #Run convergence diagnostics if UserInput defines it as True
-                self.getConvergenceDiagnostics(self.discrete_chains_post_burn_in_samples)
+                self.getConvergenceDiagnostics(discrete_chains_post_burn_in_samples)
             if str(mcmc_exportLog) == 'UserChoice':
                 mcmc_exportLog = bool(self.UserInput.parameter_estimation_settings['mcmc_exportLog'])
             if mcmc_exportLog == True:
@@ -2233,7 +2237,9 @@ class parameter_estimation:
         #Now to keep the results:
         adjusted_mcmc_burn_in_length = int(self.mcmc_burn_in_length / self.mcmc_nwalkers)
         self.post_burn_in_samples = zeus_sampler.samples.flatten(discard = adjusted_mcmc_burn_in_length )
-        self.discrete_chains_post_burn_in_samples = zeus_sampler.get_chain(discard = adjusted_mcmc_burn_in_length)
+        discrete_chains_post_burn_in_samples = zeus_sampler.get_chain(discard = adjusted_mcmc_burn_in_length)
+        if self.UserInput.parameter_estimation_settings['mcmc_store_samplingObject'] == True:
+            self.discrete_chains_post_burn_in_samples = discrete_chains_post_burn_in_samples
         self.post_burn_in_log_posteriors_un_normed_vec = np.atleast_2d(zeus_sampler.samples.flatten_logprob(discard=adjusted_mcmc_burn_in_length)).transpose() #Needed to make it 2D and transpose.
         self.mcmc_last_point_sampled=zeus_sampler.get_last_sample #Note that for **zeus** the last point sampled is actually an array of points equal to the number of walkers.        
         if continueSampling == True:
@@ -2250,7 +2256,7 @@ class parameter_estimation:
         if calculatePostBurnInStatistics == True:
             self.calculatePostBurnInStatistics(calculate_post_burn_in_log_priors_vec = True) #This function call will also filter the lowest probability samples out, when using default settings.
             if self.UserInput.parameter_estimation_settings['convergence_diagnostics']: #Run convergence diagnostics if UserInput defines it as True
-                self.getConvergenceDiagnostics(self.discrete_chains_post_burn_in_samples)
+                self.getConvergenceDiagnostics(discrete_chains_post_burn_in_samples)
             if str(mcmc_exportLog) == 'UserChoice':
                 mcmc_exportLog = bool(self.UserInput.parameter_estimation_settings['mcmc_exportLog'])
             if mcmc_exportLog == True:
@@ -2414,7 +2420,9 @@ class parameter_estimation:
             self.during_burn_in_samples = samples[0:self.mcmc_burn_in_length] 
             self.during_burn_in_log_posteriors_un_normed_vec = log_posteriors_un_normed_vec[0:self.mcmc_burn_in_length]
         self.post_burn_in_samples = samples[self.mcmc_burn_in_length:] 
-        self.discrete_chains_post_burn_in_samples = np.expand_dims(self.post_burn_in_samples, axis=1) # MH only has one chain
+        discrete_chains_post_burn_in_samples = np.expand_dims(self.post_burn_in_samples, axis=1) # MH only has one chain
+        if self.UserInput.parameter_estimation_settings['mcmc_store_samplingObject'] == True:
+            self.discrete_chains_post_burn_in_samples = discrete_chains_post_burn_in_samples
         #self.post_burn_in_samples_simulatedOutputs = copy.deepcopy(samples_simulatedOutputs)
         #self.post_burn_in_samples_simulatedOutputs[self.mcmc_burn_in_length:0] #Note: this feature is presently not compatible with continueSampling.
         self.post_burn_in_log_posteriors_un_normed_vec = log_posteriors_un_normed_vec[self.mcmc_burn_in_length:]
@@ -2433,7 +2441,7 @@ class parameter_estimation:
             #FIXME: I think Below, calculate_post_burn_in_log_priors_vec=True should be false unless we are using continue sampling. For now, will leave it since I am not sure why it is currently set to True/False.
             self.calculatePostBurnInStatistics(calculate_post_burn_in_log_priors_vec = True) #This function call will also filter the lowest probability samples out, when using default settings.
             if self.UserInput.parameter_estimation_settings['convergence_diagnostics']: #Run convergence diagnostics if UserInput defines it as True
-                self.getConvergenceDiagnostics(self.discrete_chains_post_burn_in_samples)
+                self.getConvergenceDiagnostics(discrete_chains_post_burn_in_samples)
             if str(mcmc_exportLog) == 'UserChoice':
                 mcmc_exportLog = bool(self.UserInput.parameter_estimation_settings['mcmc_exportLog'])
             if mcmc_exportLog == True:
@@ -3304,6 +3312,7 @@ def calculateAndPlotConvergenceDiagnostics(discrete_chains_post_burn_in_samples,
     :param graphs_directory: Path to save graphs. (:type: str)
     :param createPlots: Flag to create plots after convergence analysis. (:type: bool)
     """
+    from warnings import catch_warnings, simplefilter
     # makes sure the plot settings is populated before plotting
     if len(plot_settings)==0:
         createPlots=False
@@ -3316,10 +3325,12 @@ def calculateAndPlotConvergenceDiagnostics(discrete_chains_post_burn_in_samples,
         taus_zeus = np.empty((len(window_indices_act), discrete_chains_post_burn_in_samples.shape[2])) 
         # populate taus using zeus AutoCorrTime function where lag length is determined by Sokal 1989.
         # For more information on Integrated Autocorrelation time see https://emcee.readthedocs.io/en/stable/tutorials/autocorr/ 
-        for i, n in enumerate(window_indices_act): # loop through the window indices to get larger and larger windows
-            # since size is (numSamples, numChains, numParameters), we pass in limited samples up to the window size index
-            # while passing in every chain and parameter
-            taus_zeus[i] = AutoCorrTime(discrete_chains_post_burn_in_samples[:n,:,:]) 
+        with catch_warnings(): # suppress warnings from ACT function
+            simplefilter('ignore')
+            for i, n in enumerate(window_indices_act): # loop through the window indices to get larger and larger windows
+                # since size is (numSamples, numChains, numParameters), we pass in limited samples up to the window size index
+                # while passing in every chain and parameter
+                taus_zeus[i] = AutoCorrTime(discrete_chains_post_burn_in_samples[:n,:,:]) 
         
         # create plots using PEUQSE plotting functions file.
         from PEUQSE.plotting_functions import createAutoCorrPlot
@@ -3348,7 +3359,9 @@ def calculateAndPlotConvergenceDiagnostics(discrete_chains_post_burn_in_samples,
                 z_scores_array_per_window = [] # initialize the list
                 for window in window_indices_geweke:
                     # calculate z scores for each window.
-                    local_z_score = geweke(discrete_chains_post_burn_in_samples[:window, chain_num, param_num])
+                    with catch_warnings():
+                        simplefilter('ignore')
+                        local_z_score = geweke(discrete_chains_post_burn_in_samples[:window, chain_num, param_num])
                     # checks if it is the last window. If yes, save the indices. Save for plotting and all last windows are the same.
                     if window == window_indices_geweke[-1]:
                         z_scores_final_indices = local_z_score.T[0]

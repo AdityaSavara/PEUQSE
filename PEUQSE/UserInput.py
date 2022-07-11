@@ -80,7 +80,7 @@ parameter_estimation_settings['mcmc_walkerInitialDistributionSpread'] = 'auto' #
 parameter_estimation_settings['mcmc_checkPointFrequency'] = None #This is only for MH, not ESS. (as of Oct 2020)
 parameter_estimation_settings['mcmc_parallel_sampling'] = False #This makes completely parallelized sampling of a single sampling. syntax to use is like "mpiexec -n 5 python runfile.py" where 5 is the number of processors. Currently, the first processor's results are thrown away.  In the future, this may change.
 parameter_estimation_settings['mcmc_continueSampling']  = 'auto' #This can be set to True if user would like to continue sampling from a previous result in the directory.  The mcmc_logP_and_parameter_samples.pkl file will be used.  Note that if one calls the same PE_object after mcmc sampling within a given python instance then continued sampling will also occur in that situation.
-parameter_estimation_settings['mcmc_store_samplingObject'] = True #This feature when set to True will save the mcmc sampling objects into the parameter_estimation object. The doConvergenceDiagnostics() function can be called in a local file if this is True. This should be set to False if memory becomes an issue with large sample sizes. 
+parameter_estimation_settings['mcmc_store_samplingObject'] = False #This feature when set to True will save the mcmc sampling objects into the parameter_estimation object. The doConvergenceDiagnostics() function can be called in a local file if this is True. This should be set to False if memory becomes an issue with large sample sizes. 
 
 
 ######multistart (including gridsearch)##### 
