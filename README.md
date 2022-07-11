@@ -90,6 +90,8 @@ We can see that in this example the position and uncertainty in "a" narrowed mor
 
 5) Join the Google Group to ask for further help: https://groups.google.com/g/PEUQSE-users and add to existing issues discussions github https://github.com/AdityaSavara/PEUQSE/issues
 
+6) To download new updates of PEUQSE, type 'pip install PEUQSE[COMPLETE] --upgrade'
+
 * * *
 # More info about the File Structure
 
