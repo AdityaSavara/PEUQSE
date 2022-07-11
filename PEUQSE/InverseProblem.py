@@ -1951,7 +1951,7 @@ class parameter_estimation:
         
     def getConvergenceDiagnostics(self, discrete_chains_post_burn_in_samples=[]):
         """
-        Guides Integrated Autocorrelated Time and Geweke convergence analysis and makes plots.
+        Guides Integrated Autocorrelation Time and Geweke convergence analysis and makes plots.
 
         :param samplingFunctionstr (optional): String to define the sampler. (:type: str)
         :param discrete_chains_post_burn_in_samples (optional): Array that contains post burn in samples. Shape is (numSamples, numChains, numParams) (:type np.array)
@@ -3333,16 +3333,27 @@ def calculateAndPlotConvergenceDiagnostics(discrete_chains_post_burn_in_samples,
                 taus_zeus[i] = AutoCorrTime(discrete_chains_post_burn_in_samples[:n,:,:]) 
         
         # create plots using PEUQSE plotting functions file.
-        from PEUQSE.plotting_functions import createAutoCorrPlot
+        from PEUQSE.plotting_functions import createAutoCorrTimePlot
         # create plots for each parameter. The parameter names and symbols are unpacked from the dictionary.
         # loop through each parameter act values to plot and assign to self convergence
         parameter_act_for_each_window = {}
+        combined_parameter_act_for_each_window = np.ones((len(window_indices_act),))
+        heuristic_exponent_value = 1 # for individual parameters, the heuristic line is 50tau
         for param_taus, (parameter_name, parameter_math_name) in zip(taus_zeus.T, parameterNamesAndMathTypeExpressionsDict.items()):
             # only plot if createPlots is True
             if createPlots:
-                createAutoCorrPlot(window_indices_act, param_taus, parameter_name, parameter_math_name, graphs_directory)
+                createAutoCorrTimePlot(window_indices_act, param_taus, parameter_name, parameter_math_name, heuristic_exponent_value, graphs_directory)
             parameter_act_for_each_window[parameter_name] = param_taus
+            # combine parameters by adding log(ACT) or just by multiplying
+            combined_parameter_act_for_each_window *= param_taus
+        # create combined parameters plot for ACT
+        heuristic_exponent_value = discrete_chains_post_burn_in_samples.shape[2] # reassign to the number of combined parameters, which is all parameters
+        createAutoCorrTimePlot(window_indices_act, combined_parameter_act_for_each_window, 'Combined_Parameters', 'All Parameters', heuristic_exponent_value, graphs_directory)
+        
     except Exception as theError:
+        window_indices_act = None
+        taus_zeus = None
+        parameter_act_for_each_window = None
         print('The AutoCorrelation Time plots have failed to be created. The error was:', theError)
     try: # prevents crashing when running convergence diagnostics on short chains or weird models
         # use arviz to guide Geweke analysis
