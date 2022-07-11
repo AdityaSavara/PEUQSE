@@ -406,15 +406,16 @@ def createScatterHeatMapPlot(data_a, data_b, a_tuple, b_tuple, graphs_directory,
     fig.savefig(graphs_directory+f'Heat_Scatter_{a_tuple[1]}_{b_tuple[1]}',dpi=plot_settings['dpi'])
     plt.close(fig)
 
-def createAutoCorrPlot(N, taus, param_name, param_symbol, heuristic_exponent_value, graphs_directory):
+def createAutoCorrTimePlot(N, taus, param_name, param_symbol, heuristic_exponent_value, graphs_directory):
     """
-    Creates Integrated Autocorrelated Time Plots to show MCMC convergence.
-    Convergence can be inferred when the AutoCorrelatedTime converges.
+    Creates Integrated Autocorrelation Time Plots to show MCMC convergence.
+    Convergence can be inferred when the AutoCorrelationTime converges.
+    For more information on Integrated Autocorrelation time see https://emcee.readthedocs.io/en/stable/tutorials/autocorr/ 
 
     :param N: Indices for the window size. (:type: np.array)
-    :param taus: Autocorrelated Time values. (:type: np.array)
-    :param param_name: Parameter name. (:type: str)
-    :param param_symbol: Parameter symbol. Usually in unicode raw string. (:type: str)
+    :param taus: Autocorrelation Time values. (:type: np.array)
+    :param param_name: Parameter name or "Combined_Parameters" string for combined parameter plots. (:type: str)
+    :param param_symbol: Parameter symbol. Usually in unicode raw string. Could also have "All Parameters" string for combined parameter plots. (:type: str)
     :param heuristic_exponent_value: Number of parameters being analyzed. (:type: int)
     :param graphs_directory: Directory for storing graphs. (:type: str)
     """
