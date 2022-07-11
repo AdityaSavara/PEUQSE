@@ -3327,15 +3327,17 @@ def calculateAndPlotConvergenceDiagnostics(discrete_chains_post_burn_in_samples,
         # loop through each parameter act values to plot and assign to self convergence
         parameter_act_for_each_window = {}
         combined_parameter_act_for_each_window = np.ones((len(window_indices_act),))
+        heuristic_exponent_value = 1 # for individual parameters, the heuristic line is 50tau
         for param_taus, (parameter_name, parameter_math_name) in zip(taus_zeus.T, parameterNamesAndMathTypeExpressionsDict.items()):
             # only plot if createPlots is True
             if createPlots:
-                createAutoCorrPlot(window_indices_act, param_taus, parameter_name, parameter_math_name, graphs_directory)
+                createAutoCorrPlot(window_indices_act, param_taus, parameter_name, parameter_math_name, heuristic_exponent_value, graphs_directory)
             parameter_act_for_each_window[parameter_name] = param_taus
             # combine parameters by adding log(ACT) or just by multiplying
             combined_parameter_act_for_each_window *= param_taus
         # create combined parameters plot for ACT
-        createAutoCorrPlot(window_indices_act, combined_parameter_act_for_each_window, 'Combined_Parameters', 'All Parameters', graphs_directory)
+        heuristic_exponent_value = discrete_chains_post_burn_in_samples.shape[2] # reassign to the number of combined parameters, which is all parameters
+        createAutoCorrPlot(window_indices_act, combined_parameter_act_for_each_window, 'Combined_Parameters', 'All Parameters', heuristic_exponent_value, graphs_directory)
         
     except Exception as theError:
         print('The AutoCorrelation Time plots have failed to be created. The error was:', theError)
