@@ -2076,6 +2076,11 @@ class parameter_estimation:
         if continueSampling == False:
             walkerStartPoints = self.generateInitialPoints(initialPointsDistributionType=walkerInitialDistribution, numStartPoints = self.mcmc_nwalkers,relativeInitialDistributionSpread=walkerInitialDistributionSpread) #making the first set of starting points.
         elif continueSampling == True:
+            # start points have the same amount of walkers
+            if self.mcmc_last_point_sampled.shape[0] != self.mcmc_nwalkers:
+                print('Setting walkers to be the same as the previous run for continue sampling.')
+                self.mcmc_nwalkers = self.mcmc_last_point_sampled.shape[0]
+            # starts from the last set of chains
             walkerStartPoints = self.mcmc_last_point_sampled 
         emcee_sampler = emcee.EnsembleSampler(self.mcmc_nwalkers, numParameters, log_prob_fn=self.getLogP)    
         for trialN in range(0,1000):#Todo: This number of this range is hardcoded but should probably be a user selection.
@@ -2102,7 +2107,7 @@ class parameter_estimation:
         if self.UserInput.parameter_estimation_settings['mcmc_store_samplingObject'] == True:
             self.discrete_chains_post_burn_in_samples = discrete_chains_post_burn_in_samples
         self.post_burn_in_log_posteriors_un_normed_vec = np.atleast_2d(emcee_sampler.get_log_prob(flat=True, discard=adjusted_mcmc_burn_in_length)).transpose() #Needed to make it 2D and transpose.
-        self.mcmc_last_point_sampled=emcee_sampler.get_last_sample() #gets the actual last sample after all chains have been flattened to one.
+        self.mcmc_last_point_sampled = discrete_chains_post_burn_in_samples[-1] #gets the last sample of each chain.
         if continueSampling == True:
             self.post_burn_in_samples = np.vstack((self.last_post_burn_in_samples, self.post_burn_in_samples ))
             self.post_burn_in_log_posteriors_un_normed_vec = np.vstack( (self.last_post_burn_in_log_posteriors_un_normed_vec, self.post_burn_in_log_posteriors_un_normed_vec))        
@@ -2225,6 +2230,12 @@ class parameter_estimation:
         if continueSampling == False:
             walkerStartPoints = self.generateInitialPoints(initialPointsDistributionType=walkerInitialDistribution, numStartPoints = self.mcmc_nwalkers,relativeInitialDistributionSpread=walkerInitialDistributionSpread) #making the first set of starting points.
         elif continueSampling == True:
+            # make burn in samples 0 since burn in has already occurred
+            self.mcmc_burn_in_length = 0
+            # start points have the same amount of walkers
+            if self.mcmc_last_point_sampled.shape[0] != self.mcmc_nwalkers:
+                print('Setting walkers to be the same as the previous run for continue sampling.')
+                self.mcmc_nwalkers = self.mcmc_last_point_sampled.shape[0]
             # start walkers at last walker points
             walkerStartPoints = self.mcmc_last_point_sampled
             # use global move if continue sampling occurs and movesType is on auto
