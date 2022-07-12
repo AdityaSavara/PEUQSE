@@ -3334,8 +3334,6 @@ def calculateAndPlotConvergenceDiagnostics(discrete_chains_post_burn_in_samples,
     except Exception as theError:
         print('The AutoCorrelation Time plots have failed to be created. The error was:', theError)
     try: # prevents crashing when running convergence diagnostics on short chains or weird models
-        # use arviz to guide Geweke analysis
-        from arviz import geweke
         from PEUQSE.plotting_functions import createGewekePlot
         # create a linearly space array for creating window sizes for Geweke percent diagnostic
         window_indices_geweke = np.linspace(0, discrete_chains_post_burn_in_samples.shape[0], 21).astype(int)[1:]
@@ -3347,8 +3345,8 @@ def calculateAndPlotConvergenceDiagnostics(discrete_chains_post_burn_in_samples,
             for chain_num in range(discrete_chains_post_burn_in_samples.shape[1]):
                 z_scores_array_per_window = [] # initialize the list
                 for window in window_indices_geweke:
-                    # calculate z scores for each window.
-                    local_z_score = geweke(discrete_chains_post_burn_in_samples[:window, chain_num, param_num])
+                    # calculate z scores for each window. Use default settings of first 10% and last 50% of points to compare.
+                    local_z_score = geweke_diagnostic(discrete_chains_post_burn_in_samples[:window, chain_num, param_num])
                     # checks if it is the last window. If yes, save the indices. Save for plotting and all last windows are the same.
                     if window == window_indices_geweke[-1]:
                         z_scores_final_indices = local_z_score.T[0]
@@ -3390,7 +3388,7 @@ def calculateAndPlotConvergenceDiagnostics(discrete_chains_post_burn_in_samples,
     # return both window_indicies, final ACT values each param, final ACT values each param and window, final z scores summed parameters, and final summed parameters percent outliers
     return (window_indices_act, taus_zeus[-1,:], parameter_act_for_each_window, window_indices_geweke, z_scores_sum_params_final, z_scores_sum_params_percentage_outlier)
         
-def geweke_local(post_burn_in_samples, initial_window=0.1, comparison_window=0.5, intervals=20):
+def geweke_diagnostic(post_burn_in_samples, initial_window=0.1, comparison_window=0.5, intervals=20):
     """ Geweke diagnostic for convergence of MCMC sampling. 
     Z scores are compared from the initial window to a final window of the sampling. 
 
