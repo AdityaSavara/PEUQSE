@@ -2282,6 +2282,10 @@ class parameter_estimation:
             self.map_parameter_set = self.post_burn_in_samples[self.map_index] #This  is the point with the highest probability in the posterior.            
             return self.map_logP
             
+    def doEnsembleSliceSamplingGM(self):
+        """A wrapper for Enseble Slice Sampler that uses Global Move"""
+        self.doEnsembleSliceSampling(movesType='global')
+
     #main function to get samples #TODO: Maybe Should return map_log_P and mu_AP_log_P?
     #@CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
     def doMetropolisHastings(self, calculatePostBurnInStatistics = True, mcmc_exportLog='UserChoice', continueSampling = 'auto'):
