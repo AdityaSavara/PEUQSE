@@ -2076,6 +2076,14 @@ class parameter_estimation:
         if continueSampling == False:
             walkerStartPoints = self.generateInitialPoints(initialPointsDistributionType=walkerInitialDistribution, numStartPoints = self.mcmc_nwalkers,relativeInitialDistributionSpread=walkerInitialDistributionSpread) #making the first set of starting points.
         elif continueSampling == True:
+            # make burn in samples 0 since burn in has already occurred
+            self.mcmc_burn_in_length = 0
+            # start points have the same amount of walkers
+            previous_mcmc_nwalkers = self.mcmc_last_point_sampled.shape[0] # last points have shape (nwalkers, nparams)
+            if previous_mcmc_nwalkers != self.mcmc_nwalkers:
+                print(f'Setting walkers to be the same as the previous run for continue sampling: from {self.mcmc_nwalkers} to {previous_mcmc_nwalkers} walkers')
+                self.mcmc_nwalkers = previous_mcmc_nwalkers
+            # starts from the last set of chains
             walkerStartPoints = self.mcmc_last_point_sampled 
         emcee_sampler = emcee.EnsembleSampler(self.mcmc_nwalkers, numParameters, log_prob_fn=self.getLogP)    
         for trialN in range(0,1000):#Todo: This number of this range is hardcoded but should probably be a user selection.
@@ -2102,7 +2110,7 @@ class parameter_estimation:
         if self.UserInput.parameter_estimation_settings['mcmc_store_samplingObject'] == True:
             self.discrete_chains_post_burn_in_samples = discrete_chains_post_burn_in_samples
         self.post_burn_in_log_posteriors_un_normed_vec = np.atleast_2d(emcee_sampler.get_log_prob(flat=True, discard=adjusted_mcmc_burn_in_length)).transpose() #Needed to make it 2D and transpose.
-        self.mcmc_last_point_sampled=emcee_sampler.get_last_sample() #gets the actual last sample after all chains have been flattened to one.
+        self.mcmc_last_point_sampled = discrete_chains_post_burn_in_samples[-1] #gets the last sample of each chain.
         if continueSampling == True:
             self.post_burn_in_samples = np.vstack((self.last_post_burn_in_samples, self.post_burn_in_samples ))
             self.post_burn_in_log_posteriors_un_normed_vec = np.vstack( (self.last_post_burn_in_log_posteriors_un_normed_vec, self.post_burn_in_log_posteriors_un_normed_vec))        
@@ -2143,7 +2151,7 @@ class parameter_estimation:
     software_kwargs = {"version": software_version, "author": ["Minas Karamanis", "Florian Beutler"], "cite": ["Minas Karamanis and Florian Beutler. zeus: A Python Implementation of the Ensemble Slice Sampling method. 2020. ","https://arxiv.org/abs/2002.06212", "@article{ess,  title={Ensemble Slice Sampling}, author={Minas Karamanis and Florian Beutler}, year={2020}, eprint={2002.06212}, archivePrefix={arXiv}, primaryClass={stat.ML} }"] }
     #@CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
     @CiteSoft.function_call_cite(unique_id=software_unique_id, software_name=software_name, **software_kwargs)
-    def doEnsembleSliceSampling(self, mcmc_nwalkers_direct_input = None, walkerInitialDistribution='UserChoice', walkerInitialDistributionSpread='UserChoice', movesType='differential', calculatePostBurnInStatistics=True, mcmc_exportLog ='UserChoice', continueSampling='auto'):
+    def doEnsembleSliceSampling(self, mcmc_nwalkers_direct_input = None, walkerInitialDistribution='UserChoice', walkerInitialDistributionSpread='UserChoice', movesType='UserChoice', calculatePostBurnInStatistics=True, mcmc_exportLog ='UserChoice', continueSampling='auto'):
         #The distribution of walkers intial points can be uniform or gaussian or identical. As of Oct 2020, default is uniform spread around the intial guess.
         #The mcmc_nwalkers_direct_input is really meant for PermutationSearch to override the other settings, though of course people could also use it directly.  
         #The walkerInitialDistributionSpread is in relative units (relative to standard deviations). In the case of a uniform inital distribution the default level of spread is actually across two standard deviations, so the walkerInitialDistributionSpread is relative to that (that is, a value of 2 would give 2*2 = 4 for the full spread in each direction from the initial guess).
@@ -2212,7 +2220,8 @@ class parameter_estimation:
         else: self.mcmc_burn_in_length = self.UserInput.parameter_estimation_settings['mcmc_burn_in']
         if 'mcmc_maxiter' not in self.UserInput.parameter_estimation_settings: mcmc_maxiter = 1E6 #The default from zeus is 1E4, but I have found that is not always sufficient.
         else: mcmc_maxiter = self.UserInput.parameter_estimation_settings['mcmc_maxiter']
-        # make the move objects from the UserInput specification
+        # make the move objects from the UserInput or argument specification
+        if movesType == 'UserChoice': movesType = self.UserInput.parameter_estimation_settings['mcmc_movesType']
         if movesType.lower() == 'auto': movesTypeObject = zeus.moves.DifferentialMove()
         elif movesType.lower() == 'differential': movesTypeObject = zeus.moves.DifferentialMove()
         elif movesType.lower() == 'global': movesTypeObject = zeus.moves.GlobalMove(n_components=4) #the n_components (believe it means number of modes to expect), has been hard coded to 4 from the default of 5. This was required to have Example00c2 to run without crashing.
@@ -2224,7 +2233,18 @@ class parameter_estimation:
         if continueSampling == False:
             walkerStartPoints = self.generateInitialPoints(initialPointsDistributionType=walkerInitialDistribution, numStartPoints = self.mcmc_nwalkers,relativeInitialDistributionSpread=walkerInitialDistributionSpread) #making the first set of starting points.
         elif continueSampling == True:
-            walkerStartPoints = self.map_parameter_set #used to be self.mcmc_last_point_sampled. However, ESS works best when sampling near the peak (if there is a monomodoal HPD).
+            # make burn in samples 0 since burn in has already occurred
+            self.mcmc_burn_in_length = 0
+            # start points have the same amount of walkers
+            previous_mcmc_nwalkers = self.mcmc_last_point_sampled.shape[0] # last points have shape (nwalkers, nparams)
+            if previous_mcmc_nwalkers != self.mcmc_nwalkers:
+                print(f'Setting walkers to be the same as the previous run for continue sampling: from {self.mcmc_nwalkers} to {previous_mcmc_nwalkers} walkers')
+                self.mcmc_nwalkers = previous_mcmc_nwalkers
+            # start walkers at last walker points
+            walkerStartPoints = self.mcmc_last_point_sampled
+            # use global move if continue sampling occurs and movesType is on auto
+            if movesType.lower() == 'auto': movesTypeObject = zeus.moves.GlobalMove(n_components=4); print('Using Global Move in continue sampling')
+            # walkerStartPoints = self.map_parameter_set #used to be self.mcmc_last_point_sampled. However, ESS works best when sampling near the peak (if there is a monomodoal HPD).
         zeus_sampler = zeus.EnsembleSampler(self.mcmc_nwalkers, numParameters, logprob_fn=self.getLogP, maxiter=mcmc_maxiter, moves=movesTypeObject) #maxiter=1E4 is the typical number, but we may want to increase it based on some UserInput variable.        
         for trialN in range(0,1000):#Todo: This number of this range is hardcoded but should probably be a user selection.
             try:
@@ -2248,7 +2268,7 @@ class parameter_estimation:
         if self.UserInput.parameter_estimation_settings['mcmc_store_samplingObject'] == True:
             self.discrete_chains_post_burn_in_samples = discrete_chains_post_burn_in_samples
         self.post_burn_in_log_posteriors_un_normed_vec = np.atleast_2d(zeus_sampler.samples.flatten_logprob(discard=adjusted_mcmc_burn_in_length)).transpose() #Needed to make it 2D and transpose.
-        self.mcmc_last_point_sampled=zeus_sampler.get_last_sample #Note that for **zeus** the last point sampled is actually an array of points equal to the number of walkers.        
+        self.mcmc_last_point_sampled = discrete_chains_post_burn_in_samples[-1] #Note that for **zeus** the last point sampled is actually an array of points equal to the number of walkers.        
         if continueSampling == True:
             self.post_burn_in_samples = np.vstack((self.last_post_burn_in_samples, self.post_burn_in_samples ))
             self.post_burn_in_log_posteriors_un_normed_vec = np.vstack( (self.last_post_burn_in_log_posteriors_un_normed_vec, self.post_burn_in_log_posteriors_un_normed_vec))        
@@ -2277,6 +2297,10 @@ class parameter_estimation:
             self.map_parameter_set = self.post_burn_in_samples[self.map_index] #This  is the point with the highest probability in the posterior.            
             return self.map_logP
             
+    def doEnsembleSliceSamplingGM(self):
+        """A wrapper for Enseble Slice Sampler that uses Global Move"""
+        self.doEnsembleSliceSampling(movesType='global')
+
     #main function to get samples #TODO: Maybe Should return map_log_P and mu_AP_log_P?
     #@CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
     def doMetropolisHastings(self, calculatePostBurnInStatistics = True, mcmc_exportLog='UserChoice', continueSampling = 'auto'):
