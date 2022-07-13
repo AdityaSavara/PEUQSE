@@ -1587,6 +1587,8 @@ class parameter_estimation:
         self.map_logP = -1.0*negLogP
         return [self.map_parameter_set, self.map_logP]
 
+    find_MAP = doOptimizeLogP # pointer to doOptimizeLogP to make our user options similar to existing popular BPE softwares (ie. pymc)
+
     def doOptimizeNegLogP(self, simulationFunctionAdditionalArgs = (), method = None, optimizationAdditionalArgs = {}, printOptimum = True, verbose=True, maxiter=0):
         #THe intention of the optional arguments is to pass them into the scipy.optimize.minimize function.
         # the 'method' argument is for Nelder-Mead, BFGS, SLSQP etc. https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html#scipy.optimize.minimize
@@ -1949,7 +1951,7 @@ class parameter_estimation:
         
     def getConvergenceDiagnostics(self, discrete_chains_post_burn_in_samples=[]):
         """
-        Guides Integrated Autocorrelated Time and Geweke convergence analysis and makes plots.
+        Guides Integrated Autocorrelation Time and Geweke convergence analysis and makes plots.
 
         :param samplingFunctionstr (optional): String to define the sampler. (:type: str)
         :param discrete_chains_post_burn_in_samples (optional): Array that contains post burn in samples. Shape is (numSamples, numChains, numParams) (:type np.array)
@@ -2096,7 +2098,9 @@ class parameter_estimation:
         #TODO: when implementing convergence diagnostics, extract more chain information from get_chain without flattening (i think)
         adjusted_mcmc_burn_in_length = int(self.mcmc_burn_in_length / self.mcmc_nwalkers)
         self.post_burn_in_samples = emcee_sampler.get_chain(flat=True, discard = adjusted_mcmc_burn_in_length )
-        self.discrete_chains_post_burn_in_samples = emcee_sampler.get_chain(flat=False, discard = adjusted_mcmc_burn_in_length)
+        discrete_chains_post_burn_in_samples = emcee_sampler.get_chain(flat=False, discard = adjusted_mcmc_burn_in_length)
+        if self.UserInput.parameter_estimation_settings['mcmc_store_samplingObject'] == True:
+            self.discrete_chains_post_burn_in_samples = discrete_chains_post_burn_in_samples
         self.post_burn_in_log_posteriors_un_normed_vec = np.atleast_2d(emcee_sampler.get_log_prob(flat=True, discard=adjusted_mcmc_burn_in_length)).transpose() #Needed to make it 2D and transpose.
         self.mcmc_last_point_sampled=emcee_sampler.get_last_sample() #gets the actual last sample after all chains have been flattened to one.
         if continueSampling == True:
@@ -2113,7 +2117,7 @@ class parameter_estimation:
         if calculatePostBurnInStatistics == True:
             self.calculatePostBurnInStatistics(calculate_post_burn_in_log_priors_vec = True) #This function call will also filter the lowest probability samples out, when using default settings.
             if self.UserInput.parameter_estimation_settings['convergence_diagnostics']: #Run convergence diagnostics if UserInput defines it as True
-                self.getConvergenceDiagnostics(self.discrete_chains_post_burn_in_samples)
+                self.getConvergenceDiagnostics(discrete_chains_post_burn_in_samples)
             if str(mcmc_exportLog) == 'UserChoice':
                 mcmc_exportLog = bool(self.UserInput.parameter_estimation_settings['mcmc_exportLog'])
             if mcmc_exportLog == True:
@@ -2139,7 +2143,7 @@ class parameter_estimation:
     software_kwargs = {"version": software_version, "author": ["Minas Karamanis", "Florian Beutler"], "cite": ["Minas Karamanis and Florian Beutler. zeus: A Python Implementation of the Ensemble Slice Sampling method. 2020. ","https://arxiv.org/abs/2002.06212", "@article{ess,  title={Ensemble Slice Sampling}, author={Minas Karamanis and Florian Beutler}, year={2020}, eprint={2002.06212}, archivePrefix={arXiv}, primaryClass={stat.ML} }"] }
     #@CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
     @CiteSoft.function_call_cite(unique_id=software_unique_id, software_name=software_name, **software_kwargs)
-    def doEnsembleSliceSampling(self, mcmc_nwalkers_direct_input = None, walkerInitialDistribution='UserChoice', walkerInitialDistributionSpread='UserChoice', calculatePostBurnInStatistics=True, mcmc_exportLog ='UserChoice', continueSampling='auto'):
+    def doEnsembleSliceSampling(self, mcmc_nwalkers_direct_input = None, walkerInitialDistribution='UserChoice', walkerInitialDistributionSpread='UserChoice', movesType='differential', calculatePostBurnInStatistics=True, mcmc_exportLog ='UserChoice', continueSampling='auto'):
         #The distribution of walkers intial points can be uniform or gaussian or identical. As of Oct 2020, default is uniform spread around the intial guess.
         #The mcmc_nwalkers_direct_input is really meant for PermutationSearch to override the other settings, though of course people could also use it directly.  
         #The walkerInitialDistributionSpread is in relative units (relative to standard deviations). In the case of a uniform inital distribution the default level of spread is actually across two standard deviations, so the walkerInitialDistributionSpread is relative to that (that is, a value of 2 would give 2*2 = 4 for the full spread in each direction from the initial guess).
@@ -2208,13 +2212,20 @@ class parameter_estimation:
         else: self.mcmc_burn_in_length = self.UserInput.parameter_estimation_settings['mcmc_burn_in']
         if 'mcmc_maxiter' not in self.UserInput.parameter_estimation_settings: mcmc_maxiter = 1E6 #The default from zeus is 1E4, but I have found that is not always sufficient.
         else: mcmc_maxiter = self.UserInput.parameter_estimation_settings['mcmc_maxiter']
+        # make the move objects from the UserInput specification
+        if movesType.lower() == 'auto': movesTypeObject = zeus.moves.DifferentialMove()
+        elif movesType.lower() == 'differential': movesTypeObject = zeus.moves.DifferentialMove()
+        elif movesType.lower() == 'global': movesTypeObject = zeus.moves.GlobalMove(n_components=4) #the n_components (believe it means number of modes to expect), has been hard coded to 4 from the default of 5. This was required to have Example00c2 to run without crashing.
+        elif movesType.lower() == 'gaussian': movesTypeObject = zeus.moves.GaussianMove()
+        elif movesType.lower() == 'kde': movesTypeObject = zeus.moves.KDEMove()
+        else: print("The move type must be one of the following: ['auto', 'differential', 'global', 'gaussian', 'kde']")
         ####end of user input variables####
         #now to do the mcmc
         if continueSampling == False:
             walkerStartPoints = self.generateInitialPoints(initialPointsDistributionType=walkerInitialDistribution, numStartPoints = self.mcmc_nwalkers,relativeInitialDistributionSpread=walkerInitialDistributionSpread) #making the first set of starting points.
         elif continueSampling == True:
             walkerStartPoints = self.map_parameter_set #used to be self.mcmc_last_point_sampled. However, ESS works best when sampling near the peak (if there is a monomodoal HPD).
-        zeus_sampler = zeus.EnsembleSampler(self.mcmc_nwalkers, numParameters, logprob_fn=self.getLogP, maxiter=mcmc_maxiter) #maxiter=1E4 is the typical number, but we may want to increase it based on some UserInput variable.        
+        zeus_sampler = zeus.EnsembleSampler(self.mcmc_nwalkers, numParameters, logprob_fn=self.getLogP, maxiter=mcmc_maxiter, moves=movesTypeObject) #maxiter=1E4 is the typical number, but we may want to increase it based on some UserInput variable.        
         for trialN in range(0,1000):#Todo: This number of this range is hardcoded but should probably be a user selection.
             try:
                 zeus_sampler.run_mcmc(walkerStartPoints, nEnsembleSteps)
@@ -2224,7 +2235,7 @@ class parameter_estimation:
                     print("One of the starting points has a non-finite probability. Picking new starting points. If you see this message like an infinite loop, consider trying the doEnsembleSliceSampling optional argument of walkerInitialDistributionSpread. It has a default value of 1.0. Reducing this value to 0.25, for example, may work if your initial guess is near the maximum of the posterior distribution.")
                     #Need to make the sampler again, in this case, to throw away anything that has happened so far
                     walkerStartPoints = self.generateInitialPoints(initialPointsDistributionType=walkerInitialDistribution, numStartPoints = self.mcmc_nwalkers, relativeInitialDistributionSpread=walkerInitialDistributionSpread) 
-                    zeus_sampler = zeus.EnsembleSampler(self.mcmc_nwalkers, numParameters, logprob_fn=self.getLogP, maxiter=mcmc_maxiter) #maxiter=1E4 is the typical number, but we may want to increase it based on some UserInput variable.        
+                    zeus_sampler = zeus.EnsembleSampler(self.mcmc_nwalkers, numParameters, logprob_fn=self.getLogP, maxiter=mcmc_maxiter, moves=movesTypeObject) #maxiter=1E4 is the typical number, but we may want to increase it based on some UserInput variable.        
                 elif "maxiter" in str(exceptionObject): #This means there is an error message from zeus that the max iterations have been reached.
                     print("WARNING: One or more of the Ensemble Slice Sampling walkers encountered an error. The value of mcmc_maxiter is currently", mcmc_maxiter, "you should increase it, perhaps by a factor of 1E2.")
                 else:
@@ -2233,7 +2244,9 @@ class parameter_estimation:
         #Now to keep the results:
         adjusted_mcmc_burn_in_length = int(self.mcmc_burn_in_length / self.mcmc_nwalkers)
         self.post_burn_in_samples = zeus_sampler.samples.flatten(discard = adjusted_mcmc_burn_in_length )
-        self.discrete_chains_post_burn_in_samples = zeus_sampler.get_chain(discard = adjusted_mcmc_burn_in_length)
+        discrete_chains_post_burn_in_samples = zeus_sampler.get_chain(discard = adjusted_mcmc_burn_in_length)
+        if self.UserInput.parameter_estimation_settings['mcmc_store_samplingObject'] == True:
+            self.discrete_chains_post_burn_in_samples = discrete_chains_post_burn_in_samples
         self.post_burn_in_log_posteriors_un_normed_vec = np.atleast_2d(zeus_sampler.samples.flatten_logprob(discard=adjusted_mcmc_burn_in_length)).transpose() #Needed to make it 2D and transpose.
         self.mcmc_last_point_sampled=zeus_sampler.get_last_sample #Note that for **zeus** the last point sampled is actually an array of points equal to the number of walkers.        
         if continueSampling == True:
@@ -2250,7 +2263,7 @@ class parameter_estimation:
         if calculatePostBurnInStatistics == True:
             self.calculatePostBurnInStatistics(calculate_post_burn_in_log_priors_vec = True) #This function call will also filter the lowest probability samples out, when using default settings.
             if self.UserInput.parameter_estimation_settings['convergence_diagnostics']: #Run convergence diagnostics if UserInput defines it as True
-                self.getConvergenceDiagnostics(self.discrete_chains_post_burn_in_samples)
+                self.getConvergenceDiagnostics(discrete_chains_post_burn_in_samples)
             if str(mcmc_exportLog) == 'UserChoice':
                 mcmc_exportLog = bool(self.UserInput.parameter_estimation_settings['mcmc_exportLog'])
             if mcmc_exportLog == True:
@@ -2414,7 +2427,9 @@ class parameter_estimation:
             self.during_burn_in_samples = samples[0:self.mcmc_burn_in_length] 
             self.during_burn_in_log_posteriors_un_normed_vec = log_posteriors_un_normed_vec[0:self.mcmc_burn_in_length]
         self.post_burn_in_samples = samples[self.mcmc_burn_in_length:] 
-        self.discrete_chains_post_burn_in_samples = np.expand_dims(self.post_burn_in_samples, axis=1) # MH only has one chain
+        discrete_chains_post_burn_in_samples = np.expand_dims(self.post_burn_in_samples, axis=1) # MH only has one chain
+        if self.UserInput.parameter_estimation_settings['mcmc_store_samplingObject'] == True:
+            self.discrete_chains_post_burn_in_samples = discrete_chains_post_burn_in_samples
         #self.post_burn_in_samples_simulatedOutputs = copy.deepcopy(samples_simulatedOutputs)
         #self.post_burn_in_samples_simulatedOutputs[self.mcmc_burn_in_length:0] #Note: this feature is presently not compatible with continueSampling.
         self.post_burn_in_log_posteriors_un_normed_vec = log_posteriors_un_normed_vec[self.mcmc_burn_in_length:]
@@ -2433,7 +2448,7 @@ class parameter_estimation:
             #FIXME: I think Below, calculate_post_burn_in_log_priors_vec=True should be false unless we are using continue sampling. For now, will leave it since I am not sure why it is currently set to True/False.
             self.calculatePostBurnInStatistics(calculate_post_burn_in_log_priors_vec = True) #This function call will also filter the lowest probability samples out, when using default settings.
             if self.UserInput.parameter_estimation_settings['convergence_diagnostics']: #Run convergence diagnostics if UserInput defines it as True
-                self.getConvergenceDiagnostics(self.discrete_chains_post_burn_in_samples)
+                self.getConvergenceDiagnostics(discrete_chains_post_burn_in_samples)
             if str(mcmc_exportLog) == 'UserChoice':
                 mcmc_exportLog = bool(self.UserInput.parameter_estimation_settings['mcmc_exportLog'])
             if mcmc_exportLog == True:
@@ -3304,6 +3319,7 @@ def calculateAndPlotConvergenceDiagnostics(discrete_chains_post_burn_in_samples,
     :param graphs_directory: Path to save graphs. (:type: str)
     :param createPlots: Flag to create plots after convergence analysis. (:type: bool)
     """
+    from warnings import catch_warnings, simplefilter
     # makes sure the plot settings is populated before plotting
     if len(plot_settings)==0:
         createPlots=False
@@ -3316,22 +3332,35 @@ def calculateAndPlotConvergenceDiagnostics(discrete_chains_post_burn_in_samples,
         taus_zeus = np.empty((len(window_indices_act), discrete_chains_post_burn_in_samples.shape[2])) 
         # populate taus using zeus AutoCorrTime function where lag length is determined by Sokal 1989.
         # For more information on Integrated Autocorrelation time see https://emcee.readthedocs.io/en/stable/tutorials/autocorr/ 
-        for i, n in enumerate(window_indices_act): # loop through the window indices to get larger and larger windows
-            # since size is (numSamples, numChains, numParameters), we pass in limited samples up to the window size index
-            # while passing in every chain and parameter
-            taus_zeus[i] = AutoCorrTime(discrete_chains_post_burn_in_samples[:n,:,:]) 
+        with catch_warnings(): # suppress warnings from ACT function
+            simplefilter('ignore')
+            for i, n in enumerate(window_indices_act): # loop through the window indices to get larger and larger windows
+                # since size is (numSamples, numChains, numParameters), we pass in limited samples up to the window size index
+                # while passing in every chain and parameter
+                taus_zeus[i] = AutoCorrTime(discrete_chains_post_burn_in_samples[:n,:,:]) 
         
         # create plots using PEUQSE plotting functions file.
-        from PEUQSE.plotting_functions import createAutoCorrPlot
+        from PEUQSE.plotting_functions import createAutoCorrTimePlot
         # create plots for each parameter. The parameter names and symbols are unpacked from the dictionary.
         # loop through each parameter act values to plot and assign to self convergence
         parameter_act_for_each_window = {}
+        combined_parameter_act_for_each_window = np.ones((len(window_indices_act),))
+        heuristic_exponent_value = 1 # for individual parameters, the heuristic line is 50tau
         for param_taus, (parameter_name, parameter_math_name) in zip(taus_zeus.T, parameterNamesAndMathTypeExpressionsDict.items()):
             # only plot if createPlots is True
             if createPlots:
-                createAutoCorrPlot(window_indices_act, param_taus, parameter_name, parameter_math_name, graphs_directory)
+                createAutoCorrTimePlot(window_indices_act, param_taus, parameter_name, parameter_math_name, heuristic_exponent_value, graphs_directory)
             parameter_act_for_each_window[parameter_name] = param_taus
+            # combine parameters by adding log(ACT) or just by multiplying
+            combined_parameter_act_for_each_window *= param_taus
+        # create combined parameters plot for ACT
+        heuristic_exponent_value = discrete_chains_post_burn_in_samples.shape[2] # reassign to the number of combined parameters, which is all parameters
+        createAutoCorrTimePlot(window_indices_act, combined_parameter_act_for_each_window, 'Combined_Parameters', 'All Parameters', heuristic_exponent_value, graphs_directory)
+        
     except Exception as theError:
+        window_indices_act = None
+        taus_zeus = None
+        parameter_act_for_each_window = None
         print('The AutoCorrelation Time plots have failed to be created. The error was:', theError)
     try: # prevents crashing when running convergence diagnostics on short chains or weird models
         from PEUQSE.plotting_functions import createGewekePlot
@@ -3346,7 +3375,9 @@ def calculateAndPlotConvergenceDiagnostics(discrete_chains_post_burn_in_samples,
                 z_scores_array_per_window = [] # initialize the list
                 for window in window_indices_geweke:
                     # calculate z scores for each window. Use default settings of first 10% and last 50% of points to compare.
-                    local_z_score = geweke_diagnostic(discrete_chains_post_burn_in_samples[:window, chain_num, param_num])
+                    with catch_warnings():
+                        simplefilter('ignore')
+                        local_z_score = geweke_diagnostic(discrete_chains_post_burn_in_samples[:window, chain_num, param_num])
                     # checks if it is the last window. If yes, save the indices. Save for plotting and all last windows are the same.
                     if window == window_indices_geweke[-1]:
                         z_scores_final_indices = local_z_score.T[0]
