@@ -3363,6 +3363,9 @@ def calculateAndPlotConvergenceDiagnostics(discrete_chains_post_burn_in_samples,
         parameter_act_for_each_window = None
         print('The AutoCorrelation Time plots have failed to be created. The error was:', theError)
     try: # prevents crashing when running convergence diagnostics on short chains or weird models
+        # We previously used ARVIZ version 0.11.0 with the below syntax and switched in July 2022.
+        # from arviz import geweke
+        # local_z_score = geweke(discrete_chains_post_burn_in_samples[:window, chain_num, param_num])
         from PEUQSE.plotting_functions import createGewekePlot
         # create a linearly space array for creating window sizes for Geweke percent diagnostic
         window_indices_geweke = np.linspace(0, discrete_chains_post_burn_in_samples.shape[0], 21).astype(int)[1:]
