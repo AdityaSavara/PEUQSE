@@ -2015,7 +2015,13 @@ class parameter_estimation:
             walkerInitialDistributionSpread = self.UserInput.parameter_estimation_settings['mcmc_walkerInitialDistributionSpread']
         if str(walkerInitialDistributionSpread).lower() == 'auto':
             walkerInitialDistributionSpread = 0.866 #This choice is intended to be useful for uniform distribution priors, as described in the UserInput file.
-            
+        # First check whether the UserInput already has been used to run another MCMC run, and if so make sure it is the same algorithm type
+        if hasattr(self.UserInput, 'last_MCMC_run_type'):
+            if self.UserInput.last_MCMC_run_type == 'EJS':
+                pass
+            else:
+                print("ERROR: Two different algorithms of MCMC runs were attempted to be run within the same python instance without reloading the UserInput. To run two MCMC runs of different algorithms in the same python instance is not supported, but can be accomplished by using imp.reload(UserInput) followed by imp.reload(PEUQSE) between changing MCMC algorithms, and which requires re-populating the UserInput with your choices. "); sys.exit()
+
         #Check if we need to continue sampling, and prepare for it if we need to.
         if continueSampling == 'auto':
             if ('mcmc_continueSampling' not in self.UserInput.parameter_estimation_settings) or self.UserInput.parameter_estimation_settings['mcmc_continueSampling'] == 'auto': #check that UserInput does not overrule the auto.
@@ -2111,6 +2117,8 @@ class parameter_estimation:
             self.discrete_chains_post_burn_in_samples = discrete_chains_post_burn_in_samples
         self.post_burn_in_log_posteriors_un_normed_vec = np.atleast_2d(emcee_sampler.get_log_prob(flat=True, discard=adjusted_mcmc_burn_in_length)).transpose() #Needed to make it 2D and transpose.
         self.mcmc_last_point_sampled = discrete_chains_post_burn_in_samples[-1] #gets the last sample of each chain.
+        # Populate the last_MCMC_run_type in UserInput so that there is a record of which MCMC run type was last used with this UserInput instance.
+        self.UserInput.last_MCMC_run_type = 'EJS'
         if continueSampling == True:
             self.post_burn_in_samples = np.vstack((self.last_post_burn_in_samples, self.post_burn_in_samples ))
             self.post_burn_in_log_posteriors_un_normed_vec = np.vstack( (self.last_post_burn_in_log_posteriors_un_normed_vec, self.post_burn_in_log_posteriors_un_normed_vec))        
@@ -2164,7 +2172,13 @@ class parameter_estimation:
             walkerInitialDistributionSpread = self.UserInput.parameter_estimation_settings['mcmc_walkerInitialDistributionSpread']
         if str(walkerInitialDistributionSpread).lower() == 'auto':
             walkerInitialDistributionSpread = 0.866  #This choice is intended to be useful for uniform distribution priors, as described in the UserInput file.
-            
+        # First check whether the UserInput already has been used to run another MCMC run, and if so make sure it is the same algorithm type
+        if hasattr(self.UserInput, 'last_MCMC_run_type'):
+            if self.UserInput.last_MCMC_run_type == 'ESS':
+                pass
+            else:
+                print("ERROR: Two different algorithms of MCMC runs were attempted to be run within the same python instance without reloading the UserInput. To run two MCMC runs of different algorithms in the same python instance is not supported, but can be accomplished by using imp.reload(UserInput) followed by imp.reload(PEUQSE) between changing MCMC algorithms, and which requires re-populating the UserInput with your choices. "); sys.exit()
+
         #Check if we need to continue sampling, and prepare for it if we need to.
         if continueSampling == 'auto':
             if ('mcmc_continueSampling' not in self.UserInput.parameter_estimation_settings) or self.UserInput.parameter_estimation_settings['mcmc_continueSampling'] == 'auto': #check that UserInput does not overrule the auto.
@@ -2269,6 +2283,8 @@ class parameter_estimation:
             self.discrete_chains_post_burn_in_samples = discrete_chains_post_burn_in_samples
         self.post_burn_in_log_posteriors_un_normed_vec = np.atleast_2d(zeus_sampler.samples.flatten_logprob(discard=adjusted_mcmc_burn_in_length)).transpose() #Needed to make it 2D and transpose.
         self.mcmc_last_point_sampled = discrete_chains_post_burn_in_samples[-1] #Note that for **zeus** the last point sampled is actually an array of points equal to the number of walkers.        
+        # Populate the last_MCMC_run_type in UserInput so that there is a record of which MCMC run type was last used with this UserInput instance.
+        self.UserInput.last_MCMC_run_type = 'ESS'
         if continueSampling == True:
             self.post_burn_in_samples = np.vstack((self.last_post_burn_in_samples, self.post_burn_in_samples ))
             self.post_burn_in_log_posteriors_un_normed_vec = np.vstack( (self.last_post_burn_in_log_posteriors_un_normed_vec, self.post_burn_in_log_posteriors_un_normed_vec))        
@@ -2304,6 +2320,13 @@ class parameter_estimation:
     #main function to get samples #TODO: Maybe Should return map_log_P and mu_AP_log_P?
     #@CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
     def doMetropolisHastings(self, calculatePostBurnInStatistics = True, mcmc_exportLog='UserChoice', continueSampling = 'auto'):
+        # First check whether the UserInput already has been used to run another MCMC run, and if so make sure it is the same algorithm type
+        if hasattr(self.UserInput, 'last_MCMC_run_type'):
+            if self.UserInput.last_MCMC_run_type == 'MH':
+                pass
+            else:
+                print("ERROR: Two different algorithms of MCMC runs were attempted to be run within the same python instance without reloading the UserInput. To run two MCMC runs of different algorithms in the same python instance is not supported, but can be accomplished by using imp.reload(UserInput) followed by imp.reload(PEUQSE) between changing MCMC algorithms, and which requires re-populating the UserInput with your choices. "); sys.exit()
+
         #Check if we need to continue sampling, and prepare for it if we need to.
         if continueSampling == 'auto':
             if ('mcmc_continueSampling' not in self.UserInput.parameter_estimation_settings) or self.UserInput.parameter_estimation_settings['mcmc_continueSampling'] == 'auto': #check that UserInput does not overrule the auto.
@@ -2460,6 +2483,8 @@ class parameter_estimation:
         self.mcmc_last_point_sampled = self.post_burn_in_samples[-1]
         self.post_burn_in_log_likelihoods_vec = log_likelihoods_vec[self.mcmc_burn_in_length:]
         self.post_burn_in_log_priors_vec = log_priors_vec[self.mcmc_burn_in_length:]        
+        # Populate the last_MCMC_run_type in UserInput so that there is a record of which MCMC run type was last used with this UserInput instance.
+        self.UserInput.last_MCMC_run_type = 'MH'
         #####BELOW HERE SHOUD BE SAME FOR doMetropolisHastings and doEnsembleSliceSampling and doEnsembleModifiedMHSampling#####
         if continueSampling == True:
             self.post_burn_in_samples = np.vstack((self.last_post_burn_in_samples, self.post_burn_in_samples ))
