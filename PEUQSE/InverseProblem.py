@@ -2015,7 +2015,13 @@ class parameter_estimation:
             walkerInitialDistributionSpread = self.UserInput.parameter_estimation_settings['mcmc_walkerInitialDistributionSpread']
         if str(walkerInitialDistributionSpread).lower() == 'auto':
             walkerInitialDistributionSpread = 0.866 #This choice is intended to be useful for uniform distribution priors, as described in the UserInput file.
-            
+        # First check whether the UserInput already has been used to run another MCMC run, and if so make sure it is the same algorithm type
+        if hasattr(self.UserInput, 'last_MCMC_run_type'):
+            if self.UserInput.last_MCMC_run_type == 'EJS':
+                pass
+            else:
+                print("ERROR: Two different algorithms of MCMC runs were attempted to be run within the same python instance without reloading the UserInput. To run two MCMC runs of different algorithms in the same python instance is not supported, but can be accomplished by using imp.reload(UserInput) followed by imp.reload(PEUQSE) between changing MCMC algorithms, and which requires re-populating the UserInput with your choices. "); sys.exit()
+
         #Check if we need to continue sampling, and prepare for it if we need to.
         if continueSampling == 'auto':
             if ('mcmc_continueSampling' not in self.UserInput.parameter_estimation_settings) or self.UserInput.parameter_estimation_settings['mcmc_continueSampling'] == 'auto': #check that UserInput does not overrule the auto.
@@ -2076,6 +2082,14 @@ class parameter_estimation:
         if continueSampling == False:
             walkerStartPoints = self.generateInitialPoints(initialPointsDistributionType=walkerInitialDistribution, numStartPoints = self.mcmc_nwalkers,relativeInitialDistributionSpread=walkerInitialDistributionSpread) #making the first set of starting points.
         elif continueSampling == True:
+            # make burn in samples 0 since burn in has already occurred
+            self.mcmc_burn_in_length = 0
+            # start points have the same amount of walkers
+            previous_mcmc_nwalkers = self.mcmc_last_point_sampled.shape[0] # last points have shape (nwalkers, nparams)
+            if previous_mcmc_nwalkers != self.mcmc_nwalkers:
+                print(f'Setting walkers to be the same as the previous run for continue sampling: from {self.mcmc_nwalkers} to {previous_mcmc_nwalkers} walkers')
+                self.mcmc_nwalkers = previous_mcmc_nwalkers
+            # starts from the last set of chains
             walkerStartPoints = self.mcmc_last_point_sampled 
         emcee_sampler = emcee.EnsembleSampler(self.mcmc_nwalkers, numParameters, log_prob_fn=self.getLogP)    
         for trialN in range(0,1000):#Todo: This number of this range is hardcoded but should probably be a user selection.
@@ -2102,7 +2116,9 @@ class parameter_estimation:
         if self.UserInput.parameter_estimation_settings['mcmc_store_samplingObject'] == True:
             self.discrete_chains_post_burn_in_samples = discrete_chains_post_burn_in_samples
         self.post_burn_in_log_posteriors_un_normed_vec = np.atleast_2d(emcee_sampler.get_log_prob(flat=True, discard=adjusted_mcmc_burn_in_length)).transpose() #Needed to make it 2D and transpose.
-        self.mcmc_last_point_sampled=emcee_sampler.get_last_sample() #gets the actual last sample after all chains have been flattened to one.
+        self.mcmc_last_point_sampled = discrete_chains_post_burn_in_samples[-1] #gets the last sample of each chain.
+        # Populate the last_MCMC_run_type in UserInput so that there is a record of which MCMC run type was last used with this UserInput instance.
+        self.UserInput.last_MCMC_run_type = 'EJS'
         if continueSampling == True:
             self.post_burn_in_samples = np.vstack((self.last_post_burn_in_samples, self.post_burn_in_samples ))
             self.post_burn_in_log_posteriors_un_normed_vec = np.vstack( (self.last_post_burn_in_log_posteriors_un_normed_vec, self.post_burn_in_log_posteriors_un_normed_vec))        
@@ -2143,7 +2159,7 @@ class parameter_estimation:
     software_kwargs = {"version": software_version, "author": ["Minas Karamanis", "Florian Beutler"], "cite": ["Minas Karamanis and Florian Beutler. zeus: A Python Implementation of the Ensemble Slice Sampling method. 2020. ","https://arxiv.org/abs/2002.06212", "@article{ess,  title={Ensemble Slice Sampling}, author={Minas Karamanis and Florian Beutler}, year={2020}, eprint={2002.06212}, archivePrefix={arXiv}, primaryClass={stat.ML} }"] }
     #@CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
     @CiteSoft.function_call_cite(unique_id=software_unique_id, software_name=software_name, **software_kwargs)
-    def doEnsembleSliceSampling(self, mcmc_nwalkers_direct_input = None, walkerInitialDistribution='UserChoice', walkerInitialDistributionSpread='UserChoice', calculatePostBurnInStatistics=True, mcmc_exportLog ='UserChoice', continueSampling='auto'):
+    def doEnsembleSliceSampling(self, mcmc_nwalkers_direct_input = None, walkerInitialDistribution='UserChoice', walkerInitialDistributionSpread='UserChoice', movesType='UserChoice', calculatePostBurnInStatistics=True, mcmc_exportLog ='UserChoice', continueSampling='auto'):
         #The distribution of walkers intial points can be uniform or gaussian or identical. As of Oct 2020, default is uniform spread around the intial guess.
         #The mcmc_nwalkers_direct_input is really meant for PermutationSearch to override the other settings, though of course people could also use it directly.  
         #The walkerInitialDistributionSpread is in relative units (relative to standard deviations). In the case of a uniform inital distribution the default level of spread is actually across two standard deviations, so the walkerInitialDistributionSpread is relative to that (that is, a value of 2 would give 2*2 = 4 for the full spread in each direction from the initial guess).
@@ -2156,7 +2172,13 @@ class parameter_estimation:
             walkerInitialDistributionSpread = self.UserInput.parameter_estimation_settings['mcmc_walkerInitialDistributionSpread']
         if str(walkerInitialDistributionSpread).lower() == 'auto':
             walkerInitialDistributionSpread = 0.866  #This choice is intended to be useful for uniform distribution priors, as described in the UserInput file.
-            
+        # First check whether the UserInput already has been used to run another MCMC run, and if so make sure it is the same algorithm type
+        if hasattr(self.UserInput, 'last_MCMC_run_type'):
+            if self.UserInput.last_MCMC_run_type == 'ESS':
+                pass
+            else:
+                print("ERROR: Two different algorithms of MCMC runs were attempted to be run within the same python instance without reloading the UserInput. To run two MCMC runs of different algorithms in the same python instance is not supported, but can be accomplished by using imp.reload(UserInput) followed by imp.reload(PEUQSE) between changing MCMC algorithms, and which requires re-populating the UserInput with your choices. "); sys.exit()
+
         #Check if we need to continue sampling, and prepare for it if we need to.
         if continueSampling == 'auto':
             if ('mcmc_continueSampling' not in self.UserInput.parameter_estimation_settings) or self.UserInput.parameter_estimation_settings['mcmc_continueSampling'] == 'auto': #check that UserInput does not overrule the auto.
@@ -2212,13 +2234,32 @@ class parameter_estimation:
         else: self.mcmc_burn_in_length = self.UserInput.parameter_estimation_settings['mcmc_burn_in']
         if 'mcmc_maxiter' not in self.UserInput.parameter_estimation_settings: mcmc_maxiter = 1E6 #The default from zeus is 1E4, but I have found that is not always sufficient.
         else: mcmc_maxiter = self.UserInput.parameter_estimation_settings['mcmc_maxiter']
+        # make the move objects from the UserInput or argument specification
+        if movesType == 'UserChoice': movesType = self.UserInput.parameter_estimation_settings['mcmc_movesType']
+        if movesType.lower() == 'auto': movesTypeObject = zeus.moves.DifferentialMove()
+        elif movesType.lower() == 'differential': movesTypeObject = zeus.moves.DifferentialMove()
+        elif movesType.lower() == 'global': movesTypeObject = zeus.moves.GlobalMove(n_components=4) #the n_components (believe it means number of modes to expect), has been hard coded to 4 from the default of 5. This was required to have Example00c2 to run without crashing.
+        elif movesType.lower() == 'gaussian': movesTypeObject = zeus.moves.GaussianMove()
+        elif movesType.lower() == 'kde': movesTypeObject = zeus.moves.KDEMove()
+        else: print("The move type must be one of the following: ['auto', 'differential', 'global', 'gaussian', 'kde']")
         ####end of user input variables####
         #now to do the mcmc
         if continueSampling == False:
             walkerStartPoints = self.generateInitialPoints(initialPointsDistributionType=walkerInitialDistribution, numStartPoints = self.mcmc_nwalkers,relativeInitialDistributionSpread=walkerInitialDistributionSpread) #making the first set of starting points.
         elif continueSampling == True:
-            walkerStartPoints = self.map_parameter_set #used to be self.mcmc_last_point_sampled. However, ESS works best when sampling near the peak (if there is a monomodoal HPD).
-        zeus_sampler = zeus.EnsembleSampler(self.mcmc_nwalkers, numParameters, logprob_fn=self.getLogP, maxiter=mcmc_maxiter) #maxiter=1E4 is the typical number, but we may want to increase it based on some UserInput variable.        
+            # make burn in samples 0 since burn in has already occurred
+            self.mcmc_burn_in_length = 0
+            # start points have the same amount of walkers
+            previous_mcmc_nwalkers = self.mcmc_last_point_sampled.shape[0] # last points have shape (nwalkers, nparams)
+            if previous_mcmc_nwalkers != self.mcmc_nwalkers:
+                print(f'Setting walkers to be the same as the previous run for continue sampling: from {self.mcmc_nwalkers} to {previous_mcmc_nwalkers} walkers')
+                self.mcmc_nwalkers = previous_mcmc_nwalkers
+            # start walkers at last walker points
+            walkerStartPoints = self.mcmc_last_point_sampled
+            # use global move if continue sampling occurs and movesType is on auto
+            if movesType.lower() == 'auto': movesTypeObject = zeus.moves.GlobalMove(n_components=4); print('Using Global Move in continue sampling')
+            # walkerStartPoints = self.map_parameter_set #used to be self.mcmc_last_point_sampled. However, ESS works best when sampling near the peak (if there is a monomodoal HPD).
+        zeus_sampler = zeus.EnsembleSampler(self.mcmc_nwalkers, numParameters, logprob_fn=self.getLogP, maxiter=mcmc_maxiter, moves=movesTypeObject) #maxiter=1E4 is the typical number, but we may want to increase it based on some UserInput variable.        
         for trialN in range(0,1000):#Todo: This number of this range is hardcoded but should probably be a user selection.
             try:
                 zeus_sampler.run_mcmc(walkerStartPoints, nEnsembleSteps)
@@ -2228,7 +2269,7 @@ class parameter_estimation:
                     print("One of the starting points has a non-finite probability. Picking new starting points. If you see this message like an infinite loop, consider trying the doEnsembleSliceSampling optional argument of walkerInitialDistributionSpread. It has a default value of 1.0. Reducing this value to 0.25, for example, may work if your initial guess is near the maximum of the posterior distribution.")
                     #Need to make the sampler again, in this case, to throw away anything that has happened so far
                     walkerStartPoints = self.generateInitialPoints(initialPointsDistributionType=walkerInitialDistribution, numStartPoints = self.mcmc_nwalkers, relativeInitialDistributionSpread=walkerInitialDistributionSpread) 
-                    zeus_sampler = zeus.EnsembleSampler(self.mcmc_nwalkers, numParameters, logprob_fn=self.getLogP, maxiter=mcmc_maxiter) #maxiter=1E4 is the typical number, but we may want to increase it based on some UserInput variable.        
+                    zeus_sampler = zeus.EnsembleSampler(self.mcmc_nwalkers, numParameters, logprob_fn=self.getLogP, maxiter=mcmc_maxiter, moves=movesTypeObject) #maxiter=1E4 is the typical number, but we may want to increase it based on some UserInput variable.        
                 elif "maxiter" in str(exceptionObject): #This means there is an error message from zeus that the max iterations have been reached.
                     print("WARNING: One or more of the Ensemble Slice Sampling walkers encountered an error. The value of mcmc_maxiter is currently", mcmc_maxiter, "you should increase it, perhaps by a factor of 1E2.")
                 else:
@@ -2241,7 +2282,9 @@ class parameter_estimation:
         if self.UserInput.parameter_estimation_settings['mcmc_store_samplingObject'] == True:
             self.discrete_chains_post_burn_in_samples = discrete_chains_post_burn_in_samples
         self.post_burn_in_log_posteriors_un_normed_vec = np.atleast_2d(zeus_sampler.samples.flatten_logprob(discard=adjusted_mcmc_burn_in_length)).transpose() #Needed to make it 2D and transpose.
-        self.mcmc_last_point_sampled=zeus_sampler.get_last_sample #Note that for **zeus** the last point sampled is actually an array of points equal to the number of walkers.        
+        self.mcmc_last_point_sampled = discrete_chains_post_burn_in_samples[-1] #Note that for **zeus** the last point sampled is actually an array of points equal to the number of walkers.        
+        # Populate the last_MCMC_run_type in UserInput so that there is a record of which MCMC run type was last used with this UserInput instance.
+        self.UserInput.last_MCMC_run_type = 'ESS'
         if continueSampling == True:
             self.post_burn_in_samples = np.vstack((self.last_post_burn_in_samples, self.post_burn_in_samples ))
             self.post_burn_in_log_posteriors_un_normed_vec = np.vstack( (self.last_post_burn_in_log_posteriors_un_normed_vec, self.post_burn_in_log_posteriors_un_normed_vec))        
@@ -2270,9 +2313,20 @@ class parameter_estimation:
             self.map_parameter_set = self.post_burn_in_samples[self.map_index] #This  is the point with the highest probability in the posterior.            
             return self.map_logP
             
+    def doEnsembleSliceSamplingGM(self):
+        """A wrapper for Enseble Slice Sampler that uses Global Move"""
+        self.doEnsembleSliceSampling(movesType='global')
+
     #main function to get samples #TODO: Maybe Should return map_log_P and mu_AP_log_P?
     #@CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
     def doMetropolisHastings(self, calculatePostBurnInStatistics = True, mcmc_exportLog='UserChoice', continueSampling = 'auto'):
+        # First check whether the UserInput already has been used to run another MCMC run, and if so make sure it is the same algorithm type
+        if hasattr(self.UserInput, 'last_MCMC_run_type'):
+            if self.UserInput.last_MCMC_run_type == 'MH':
+                pass
+            else:
+                print("ERROR: Two different algorithms of MCMC runs were attempted to be run within the same python instance without reloading the UserInput. To run two MCMC runs of different algorithms in the same python instance is not supported, but can be accomplished by using imp.reload(UserInput) followed by imp.reload(PEUQSE) between changing MCMC algorithms, and which requires re-populating the UserInput with your choices. "); sys.exit()
+
         #Check if we need to continue sampling, and prepare for it if we need to.
         if continueSampling == 'auto':
             if ('mcmc_continueSampling' not in self.UserInput.parameter_estimation_settings) or self.UserInput.parameter_estimation_settings['mcmc_continueSampling'] == 'auto': #check that UserInput does not overrule the auto.
@@ -2429,6 +2483,8 @@ class parameter_estimation:
         self.mcmc_last_point_sampled = self.post_burn_in_samples[-1]
         self.post_burn_in_log_likelihoods_vec = log_likelihoods_vec[self.mcmc_burn_in_length:]
         self.post_burn_in_log_priors_vec = log_priors_vec[self.mcmc_burn_in_length:]        
+        # Populate the last_MCMC_run_type in UserInput so that there is a record of which MCMC run type was last used with this UserInput instance.
+        self.UserInput.last_MCMC_run_type = 'MH'
         #####BELOW HERE SHOUD BE SAME FOR doMetropolisHastings and doEnsembleSliceSampling and doEnsembleModifiedMHSampling#####
         if continueSampling == True:
             self.post_burn_in_samples = np.vstack((self.last_post_burn_in_samples, self.post_burn_in_samples ))
@@ -3356,8 +3412,9 @@ def calculateAndPlotConvergenceDiagnostics(discrete_chains_post_burn_in_samples,
         parameter_act_for_each_window = None
         print('The AutoCorrelation Time plots have failed to be created. The error was:', theError)
     try: # prevents crashing when running convergence diagnostics on short chains or weird models
-        # use arviz to guide Geweke analysis
-        from arviz import geweke
+        # We previously used ARVIZ version 0.11.0 with the below syntax and switched in July 2022.
+        # from arviz import geweke
+        # local_z_score = geweke(discrete_chains_post_burn_in_samples[:window, chain_num, param_num])
         from PEUQSE.plotting_functions import createGewekePlot
         # create a linearly space array for creating window sizes for Geweke percent diagnostic
         window_indices_geweke = np.linspace(0, discrete_chains_post_burn_in_samples.shape[0], 21).astype(int)[1:]
@@ -3369,10 +3426,10 @@ def calculateAndPlotConvergenceDiagnostics(discrete_chains_post_burn_in_samples,
             for chain_num in range(discrete_chains_post_burn_in_samples.shape[1]):
                 z_scores_array_per_window = [] # initialize the list
                 for window in window_indices_geweke:
-                    # calculate z scores for each window.
+                    # calculate z scores for each window. Use default settings of first 10% and last 50% of points to compare.
                     with catch_warnings():
                         simplefilter('ignore')
-                        local_z_score = geweke(discrete_chains_post_burn_in_samples[:window, chain_num, param_num])
+                        local_z_score = geweke_diagnostic(discrete_chains_post_burn_in_samples[:window, chain_num, param_num])
                     # checks if it is the last window. If yes, save the indices. Save for plotting and all last windows are the same.
                     if window == window_indices_geweke[-1]:
                         z_scores_final_indices = local_z_score.T[0]
@@ -3414,6 +3471,50 @@ def calculateAndPlotConvergenceDiagnostics(discrete_chains_post_burn_in_samples,
     # return both window_indicies, final ACT values each param, final ACT values each param and window, final z scores summed parameters, and final summed parameters percent outliers
     return (window_indices_act, taus_zeus[-1,:], parameter_act_for_each_window, window_indices_geweke, z_scores_sum_params_final, z_scores_sum_params_percentage_outlier)
         
+def geweke_diagnostic(post_burn_in_samples, initial_window=0.1, comparison_window=0.5, intervals=20):
+    """ Geweke diagnostic for convergence of MCMC sampling. 
+    Z scores are compared from the initial window to a final window of the sampling. 
+
+    :param post_burn_in_samples: Samples in MCMC sampling after burn in period. (:type: np.array)
+    :param initial_window: Percent of initial samples to be compared. (:type: float)
+    :param comparison_window: Percent of final samples to be compared to initial values. (:type: float)
+    :param intervals: Number of intervals for windows to be compared. (:type: int)
+
+    Geweke function based on logic from arviz module file diagnostics.py version=0.11.0
+    """
+    for interval in (initial_window, comparison_window):
+        if interval <= 0 or interval >= 1:
+            raise ValueError("Invalid intervals for Geweke convergence analysis:", (initial_window, comparison_window), "Must be between 0 and 1")
+    if initial_window + comparison_window >= 1:
+        raise ValueError("Invalid intervals for Geweke convergence analysis:", (initial_window, comparison_window), "first and last intervals should not overlap.")
+
+    # Initialize list of z-scores
+    z_scores_total = []
+
+    # Last index value of the input samples
+    last_index = len(post_burn_in_samples) - 1
+
+    # Start intervals going up to the start of the comparison window of the chain
+    last_start_index = (1 - comparison_window) * last_index
+
+    # Calculate starting indices
+    start_indices = np.linspace(0, last_start_index, num=intervals, endpoint=True, dtype=int)
+
+    # Loop over start indices
+    for start in start_indices:
+        # Calculate slices
+        first_slice = post_burn_in_samples[start : start + int(initial_window * (last_index - start))]
+        last_slice = post_burn_in_samples[int(last_index - comparison_window * (last_index - start)) :]
+
+        z_score = first_slice.mean() - last_slice.mean()
+        z_score /= np.sqrt(first_slice.var() + last_slice.var())
+
+        z_scores_total.append([start, z_score])
+
+    return np.array(z_scores_total)
+
+
+
 if __name__ == "__main__":
     pass
 
