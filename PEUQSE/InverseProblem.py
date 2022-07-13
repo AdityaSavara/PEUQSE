@@ -2076,10 +2076,13 @@ class parameter_estimation:
         if continueSampling == False:
             walkerStartPoints = self.generateInitialPoints(initialPointsDistributionType=walkerInitialDistribution, numStartPoints = self.mcmc_nwalkers,relativeInitialDistributionSpread=walkerInitialDistributionSpread) #making the first set of starting points.
         elif continueSampling == True:
+            # make burn in samples 0 since burn in has already occurred
+            self.mcmc_burn_in_length = 0
             # start points have the same amount of walkers
-            if self.mcmc_last_point_sampled.shape[0] != self.mcmc_nwalkers:
-                print('Setting walkers to be the same as the previous run for continue sampling.')
-                self.mcmc_nwalkers = self.mcmc_last_point_sampled.shape[0]
+            previous_mcmc_nwalkers = self.mcmc_last_point_sampled.shape[0] # last points have shape (nwalkers, nparams)
+            if previous_mcmc_nwalkers != self.mcmc_nwalkers:
+                print(f'Setting walkers to be the same as the previous run for continue sampling: from {self.mcmc_nwalkers} to {previous_mcmc_nwalkers} walkers')
+                self.mcmc_nwalkers = previous_mcmc_nwalkers
             # starts from the last set of chains
             walkerStartPoints = self.mcmc_last_point_sampled 
         emcee_sampler = emcee.EnsembleSampler(self.mcmc_nwalkers, numParameters, log_prob_fn=self.getLogP)    
@@ -2233,9 +2236,10 @@ class parameter_estimation:
             # make burn in samples 0 since burn in has already occurred
             self.mcmc_burn_in_length = 0
             # start points have the same amount of walkers
-            if self.mcmc_last_point_sampled.shape[0] != self.mcmc_nwalkers:
-                print('Setting walkers to be the same as the previous run for continue sampling.')
-                self.mcmc_nwalkers = self.mcmc_last_point_sampled.shape[0]
+            previous_mcmc_nwalkers = self.mcmc_last_point_sampled.shape[0] # last points have shape (nwalkers, nparams)
+            if previous_mcmc_nwalkers != self.mcmc_nwalkers:
+                print(f'Setting walkers to be the same as the previous run for continue sampling: from {self.mcmc_nwalkers} to {previous_mcmc_nwalkers} walkers')
+                self.mcmc_nwalkers = previous_mcmc_nwalkers
             # start walkers at last walker points
             walkerStartPoints = self.mcmc_last_point_sampled
             # use global move if continue sampling occurs and movesType is on auto
