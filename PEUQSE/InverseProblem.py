@@ -2614,8 +2614,13 @@ class parameter_estimation:
 
         #Now get the simulated responses.
         simulatedResponses = self.getSimulatedResponses(discreteParameterVectorTuple)
+        #Failure checks:
         if type(simulatedResponses) == type(None):
             return float('-inf'), None #This is intended for the case that the simulation fails, indicated by receiving an 'nan' or None type from user's simulation function.
+        #Check if there are any 'nan' in the simulations array, and treat that as a failure also.
+        nans_in_array = np.isnan(simulatedResponses)        
+        if True in nans_in_array:
+            return float('-inf'), None
         #need to check if there are any 'responses_simulation_uncertainties'.
         if type(self.UserInput.responses_simulation_uncertainties) == type(None): #if it's a None type, we keep it as a None type
             responses_simulation_uncertainties = None
