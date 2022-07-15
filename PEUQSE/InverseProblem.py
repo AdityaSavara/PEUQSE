@@ -2094,7 +2094,7 @@ class parameter_estimation:
         emcee_sampler = emcee.EnsembleSampler(self.mcmc_nwalkers, numParameters, log_prob_fn=self.getLogP)    
         for trialN in range(0,1000):#Todo: This number of this range is hardcoded but should probably be a user selection.
             try:
-                emcee_sampler.run_mcmc(walkerStartPoints, nEnsembleSteps)
+                emcee_sampler.run_mcmc(walkerStartPoints, nEnsembleSteps,progress=True)
                 break
             except Exception as exceptionObject:
                 #TODO: come up with exception summaries like this.
