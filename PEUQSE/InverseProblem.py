@@ -2783,12 +2783,13 @@ class parameter_estimation:
         graphs_directory = self.UserInput.directories['graphs']
         # combine all the solutions and meta data for each parameter posterior to the simulation.
         # Zip parameters contain parameter columns in dataframe, parameter names, MAP, muAP, and initial value
-        finalParametersAndMetaData1 = zip(posterior_df.columns, parameterNamesAndMathTypeExpressionsDict.keys(), parameterMAPValue, parameterMuAPValue, parameterInitialValue)
-        finalParametersAndMetaData2 = zip(posterior_df.columns, parameterNamesAndMathTypeExpressionsDict.keys(), parameterMAPValue, parameterMuAPValue, parameterInitialValue)
         # compare each parameter with only unique solutions
         # i and j represent the index of an abstract matrix created from comparing the parameter vectors.
         # The loop moves through the matrix and compares parameters by plotting but will only plot the bottom triangle of the matrix.
+        finalParametersAndMetaData1 = zip(posterior_df.columns, parameterNamesAndMathTypeExpressionsDict.keys(), parameterMAPValue, parameterMuAPValue, parameterInitialValue)
         for param_a_index, (param_a_column, param_a_name, param_a_MAP, param_a_mu_AP, param_a_initial) in enumerate(finalParametersAndMetaData1):
+            #The zipping must be done each loop, because the enumeration can only occur one time per zip.
+            finalParametersAndMetaData2 = zip(posterior_df.columns, parameterNamesAndMathTypeExpressionsDict.keys(), parameterMAPValue, parameterMuAPValue, parameterInitialValue)
             for param_b_index, (param_b_column, param_b_name, param_b_MAP, param_b_mu_AP, param_b_initial) in enumerate(finalParametersAndMetaData2):
                 if param_a_index != param_b_index:
                     if self.UserInput.scatter_heatmap_plots_settings['all_pair_permutations']:
@@ -3024,10 +3025,9 @@ class parameter_estimation:
             print("Unable to make scatter matrix plot. This usually means your run is not an MCMC run, or that the sampling did not work well. If you are using Metropolis-Hastings, try EnsembleSliceSampling or try a uniform distribution multistart.")
 
 
-        try:
-            self.makeScatterHeatMapPlots(plot_settings=self.UserInput.scatter_heatmap_plots_settings)
-        except:
-            print("Unable to make scatter heatmap plots. This usually means your run is not an MCMC run, or that the sampling did not work well. If you are using Metropolis-Hastings, try EnsembleSliceSampling or try a uniform distribution multistart.")
+        
+        self.makeScatterHeatMapPlots(plot_settings=self.UserInput.scatter_heatmap_plots_settings)
+
 
         try:        
             self.createMumpcePlots()
