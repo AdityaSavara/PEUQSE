@@ -1972,19 +1972,17 @@ class parameter_estimation:
         # convergence diagnostic function is called to run calculations and create plots
         # outputs are saved as a tuple 
         #TODO: make its own plot settings in different commit. 
-        convergence_ouputs = calculateAndPlotConvergenceDiagnostics(discrete_chains_post_burn_in_samples, self.UserInput.model['parameterNamesAndMathTypeExpressionsDict'], self.UserInput.scatter_matrix_plots_settings, self.UserInput.directories['graphs'])
+        try:
+            convergence_ouputs = calculateAndPlotConvergenceDiagnostics(discrete_chains_post_burn_in_samples, self.UserInput.model['parameterNamesAndMathTypeExpressionsDict'], self.UserInput.scatter_matrix_plots_settings, self.UserInput.directories['graphs'])
+        except Exception as theError:
+            print("Warning: Unable to calculate and plot convergence diagnostics. The error was:", theError)
+            return None #this is to end the function, so it does not crash below.
+            
 
         # initialize and populate convergence dictionary in class object
         self.convergence = {}
         self.convergence['AutoCorrTime'] = {}
-        self.convergence['AutoCorrTime']['window_indices'] = None
-        self.convergence['AutoCorrTime']['final_parameter_values'] = None
-        self.convergence['AutoCorrTime']['parameter_act_for_each_window'] = None
         self.convergence['Geweke'] = {}
-        self.convergence['Geweke']['window_indices'] = None
-        self.convergence['Geweke']['final_combined_parameter_values'] = None
-        self.convergence['Geweke']['final_combined_parameter_percent_outlier'] = None
-
         # unpack tuple to save convergence information to self
         self.convergence['AutoCorrTime']['window_indices'] = convergence_ouputs[0]
         self.convergence['AutoCorrTime']['final_parameter_values'] = convergence_ouputs[1]
