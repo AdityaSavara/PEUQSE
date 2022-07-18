@@ -1972,19 +1972,17 @@ class parameter_estimation:
         # convergence diagnostic function is called to run calculations and create plots
         # outputs are saved as a tuple 
         #TODO: make its own plot settings in different commit. 
-        convergence_ouputs = calculateAndPlotConvergenceDiagnostics(discrete_chains_post_burn_in_samples, self.UserInput.model['parameterNamesAndMathTypeExpressionsDict'], self.UserInput.scatter_matrix_plots_settings, self.UserInput.directories['graphs'])
+        try:
+            convergence_ouputs = calculateAndPlotConvergenceDiagnostics(discrete_chains_post_burn_in_samples, self.UserInput.model['parameterNamesAndMathTypeExpressionsDict'], self.UserInput.scatter_matrix_plots_settings, self.UserInput.directories['graphs'])
+        except Exception as theError:
+            print("Warning: Unable to calculate and plot convergence diagnostics. The error was:", theError)
+            return None #this is to end the function, so it does not crash below.
+            
 
         # initialize and populate convergence dictionary in class object
         self.convergence = {}
         self.convergence['AutoCorrTime'] = {}
-        self.convergence['AutoCorrTime']['window_indices'] = None
-        self.convergence['AutoCorrTime']['final_parameter_values'] = None
-        self.convergence['AutoCorrTime']['parameter_act_for_each_window'] = None
         self.convergence['Geweke'] = {}
-        self.convergence['Geweke']['window_indices'] = None
-        self.convergence['Geweke']['final_combined_parameter_values'] = None
-        self.convergence['Geweke']['final_combined_parameter_percent_outlier'] = None
-
         # unpack tuple to save convergence information to self
         self.convergence['AutoCorrTime']['window_indices'] = convergence_ouputs[0]
         self.convergence['AutoCorrTime']['final_parameter_values'] = convergence_ouputs[1]
@@ -2094,7 +2092,7 @@ class parameter_estimation:
         emcee_sampler = emcee.EnsembleSampler(self.mcmc_nwalkers, numParameters, log_prob_fn=self.getLogP)    
         for trialN in range(0,1000):#Todo: This number of this range is hardcoded but should probably be a user selection.
             try:
-                emcee_sampler.run_mcmc(walkerStartPoints, nEnsembleSteps)
+                emcee_sampler.run_mcmc(walkerStartPoints, nEnsembleSteps,progress=True)
                 break
             except Exception as exceptionObject:
                 #TODO: come up with exception summaries like this.
@@ -2614,8 +2612,13 @@ class parameter_estimation:
 
         #Now get the simulated responses.
         simulatedResponses = self.getSimulatedResponses(discreteParameterVectorTuple)
+        #Failure checks:
         if type(simulatedResponses) == type(None):
             return float('-inf'), None #This is intended for the case that the simulation fails, indicated by receiving an 'nan' or None type from user's simulation function.
+        #Check if there are any 'nan' in the simulations array, and treat that as a failure also.
+        nans_in_array = np.isnan(simulatedResponses)        
+        if True in nans_in_array:
+            return float('-inf'), None
         #need to check if there are any 'responses_simulation_uncertainties'.
         if type(self.UserInput.responses_simulation_uncertainties) == type(None): #if it's a None type, we keep it as a None type
             responses_simulation_uncertainties = None
@@ -2778,12 +2781,13 @@ class parameter_estimation:
         graphs_directory = self.UserInput.directories['graphs']
         # combine all the solutions and meta data for each parameter posterior to the simulation.
         # Zip parameters contain parameter columns in dataframe, parameter names, MAP, muAP, and initial value
-        finalParametersAndMetaData1 = zip(posterior_df.columns, parameterNamesAndMathTypeExpressionsDict.keys(), parameterMAPValue, parameterMuAPValue, parameterInitialValue)
-        finalParametersAndMetaData2 = zip(posterior_df.columns, parameterNamesAndMathTypeExpressionsDict.keys(), parameterMAPValue, parameterMuAPValue, parameterInitialValue)
         # compare each parameter with only unique solutions
         # i and j represent the index of an abstract matrix created from comparing the parameter vectors.
         # The loop moves through the matrix and compares parameters by plotting but will only plot the bottom triangle of the matrix.
+        finalParametersAndMetaData1 = zip(posterior_df.columns, parameterNamesAndMathTypeExpressionsDict.keys(), parameterMAPValue, parameterMuAPValue, parameterInitialValue)
         for param_a_index, (param_a_column, param_a_name, param_a_MAP, param_a_mu_AP, param_a_initial) in enumerate(finalParametersAndMetaData1):
+            #The zipping must be done each loop, because the enumeration can only occur one time per zip.
+            finalParametersAndMetaData2 = zip(posterior_df.columns, parameterNamesAndMathTypeExpressionsDict.keys(), parameterMAPValue, parameterMuAPValue, parameterInitialValue)
             for param_b_index, (param_b_column, param_b_name, param_b_MAP, param_b_mu_AP, param_b_initial) in enumerate(finalParametersAndMetaData2):
                 if param_a_index != param_b_index:
                     if self.UserInput.scatter_heatmap_plots_settings['all_pair_permutations']:
@@ -2799,6 +2803,7 @@ class parameter_estimation:
         if allResponses_x_values == []: 
             allResponses_x_values = nestedObjectsFunctions.makeAtLeast_2dNested(self.UserInput.responses_abscissa)
         if allResponsesListsOfYArrays  ==[]: #In this case, we assume allResponsesListsOfYUncertaintiesArrays == [] also.
+            allResponsesListsOfYArrays = [] #Need to make a new list in the case that there was one already, to avoid overwriting the default argument object.
             allResponsesListsOfYUncertaintiesArrays = [] #Set accompanying uncertainties list to a blank list in case it is not already one. Otherwise appending would mess up indexing.
             simulationFunction = self.UserInput.simulationFunction #Do NOT use self.UserInput.model['simulateByInputParametersOnlyFunction']  because that won't work with reduced parameter space requests.
             simulationOutputProcessingFunction = self.UserInput.simulationOutputProcessingFunction #Do NOT use self.UserInput.model['simulationOutputProcessingFunction'] because that won't work with reduced parameter space requests.
@@ -3018,10 +3023,9 @@ class parameter_estimation:
             print("Unable to make scatter matrix plot. This usually means your run is not an MCMC run, or that the sampling did not work well. If you are using Metropolis-Hastings, try EnsembleSliceSampling or try a uniform distribution multistart.")
 
 
-        try:
-            self.makeScatterHeatMapPlots(plot_settings=self.UserInput.scatter_heatmap_plots_settings)
-        except:
-            print("Unable to make scatter heatmap plots. This usually means your run is not an MCMC run, or that the sampling did not work well. If you are using Metropolis-Hastings, try EnsembleSliceSampling or try a uniform distribution multistart.")
+        
+        self.makeScatterHeatMapPlots(plot_settings=self.UserInput.scatter_heatmap_plots_settings)
+
 
         try:        
             self.createMumpcePlots()
