@@ -340,8 +340,33 @@ class parameter_estimation:
         #self.covmat_prior = UserInput.covmat_prior
         self.Q_mu = self.UserInput.mu_prior*0 # Q samples the next step at any point in the chain.  The next step may be accepted or rejected.  Q_mu is centered (0) around the current theta.  
         self.Q_covmat = self.UserInput.covmat_prior # Take small steps. 
-        #Getting initial guess of parameters and populating the internal variable for it.
         #TODO: Make initial guess handle a string, then assume that it is a pickle file
+        # check if InputParameterInitialGuess is a string
+        # if so, read the pickle file in the same way as the sampling functions (look for file, then read)
+        # After reading it, slice the matrix to only the first walker is saved.
+        if isinstance(self.UserInput.model['InputParameterInitialGuess'], str):
+            # try to read from current directory and pickle directory
+            start_point_pkl_file_name = self.UserInput.model['InputParameterInitialGuess']
+            if '.pkl' in start_point_pkl_file_name: # remove '.pkl' from string if it is there
+                start_point_pkl_file_name = start_point_pkl_file_name.replace('.pkl', '')
+            from os.path import exists
+            # check if file exists in current working directory
+            if exists(start_point_pkl_file_name + 'pkl'):
+                initialGuessUnfiltered = unpickleAnObject(start_point_pkl_file_name)
+            # check if file exists in pickle directory
+            elif exists(self.UserInput.directories['pickles'] + start_point_pkl_file_name + '.pkl'):
+                initialGuessUnfiltered = unpickleAnObject(self.UserInput.directories['pickles'] + start_point_pkl_file_name)
+            else:
+                print('The pickled object for initial guess points must exist in base directory or pickles directory. The pickled file should have extension of ".pkl"')
+        if len(initialGuessUnfiltered.shape) == 1:
+            self.UserInput.InputParameterInitialGuess = initialGuessUnfiltered
+        elif len(initialGuessUnfiltered.shape) == 2:
+            # this is assumed to have the shape (num_walkers, num_parameters)
+            self.UserInput.InputParameterInitialGuess = initialGuessUnfiltered[0] # take only the first walker as the initial points
+        else:
+            print('The shape of the initial guess pickled array should be (num_walkers, num_parameters). The current pickled array does not have this shape and has:', initialGuessUnfiltered.shape)
+            
+        #Getting initial guess of parameters and populating the internal variable for it.
         if ('InputParameterInitialGuess' not in self.UserInput.model) or (len(self.UserInput.model['InputParameterInitialGuess'])== 0): #if an initial guess is not provided, we use the prior.
             self.UserInput.model['InputParameterInitialGuess'] = np.array(self.UserInput.mu_prior, dtype='float')
         #From now, we switch to self.UserInput.InputParameterInitialGuess because this is needed in case we're going to do reducedParameterSpace or grid sampling.
