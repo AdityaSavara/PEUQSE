@@ -358,19 +358,20 @@ class parameter_estimation:
                 initialGuessUnfiltered = unpickleAnObject(self.UserInput.directories['pickles'] + start_point_pkl_file_name)
             else:
                 print('The pickled object for initial guess points must exist in base directory or pickles directory. The pickled file should have extension of ".pkl"')
-        if len(initialGuessUnfiltered.shape) == 1:
-            self.UserInput.InputParameterInitialGuess = initialGuessUnfiltered
-        elif len(initialGuessUnfiltered.shape) == 2:
-            # this is assumed to have the shape (num_walkers, num_parameters)
-            self.UserInput.InputParameterInitialGuess = initialGuessUnfiltered[0] # take only the first walker as the initial points
+            # check if the shape of the loaded initial guess is a single point or a list of walkers
+            if len(initialGuessUnfiltered.shape) == 1:
+                self.UserInput.InputParameterInitialGuess = initialGuessUnfiltered
+            elif len(initialGuessUnfiltered.shape) == 2:
+                # this is assumed to have the shape (num_walkers, num_parameters)
+                self.UserInput.InputParameterInitialGuess = initialGuessUnfiltered[0] # take only the first walker as the initial points
+            else:
+                print('The shape of the initial guess pickled array should be (num_walkers, num_parameters). The current pickled array does not have this shape and has:', initialGuessUnfiltered.shape)
         else:
-            print('The shape of the initial guess pickled array should be (num_walkers, num_parameters). The current pickled array does not have this shape and has:', initialGuessUnfiltered.shape)
-            
-        #Getting initial guess of parameters and populating the internal variable for it.
-        if ('InputParameterInitialGuess' not in self.UserInput.model) or (len(self.UserInput.model['InputParameterInitialGuess'])== 0): #if an initial guess is not provided, we use the prior.
-            self.UserInput.model['InputParameterInitialGuess'] = np.array(self.UserInput.mu_prior, dtype='float')
-        #From now, we switch to self.UserInput.InputParameterInitialGuess because this is needed in case we're going to do reducedParameterSpace or grid sampling.
-        self.UserInput.InputParameterInitialGuess = np.array(self.UserInput.model['InputParameterInitialGuess'], dtype='float')
+            #Getting initial guess of parameters and populating the internal variable for it.
+            if ('InputParameterInitialGuess' not in self.UserInput.model) or (len(self.UserInput.model['InputParameterInitialGuess'])== 0): #if an initial guess is not provided, we use the prior.
+                self.UserInput.model['InputParameterInitialGuess'] = np.array(self.UserInput.mu_prior, dtype='float')
+            #From now, we switch to self.UserInput.InputParameterInitialGuess because this is needed in case we're going to do reducedParameterSpace or grid sampling.
+            self.UserInput.InputParameterInitialGuess = np.array(self.UserInput.model['InputParameterInitialGuess'], dtype='float')
         #Now populate the simulation Functions. #NOTE: These will be changed if a reduced parameter space is used.
         self.UserInput.simulationFunction = self.UserInput.model['simulateByInputParametersOnlyFunction']
         self.UserInput.simulationOutputProcessingFunction = self.UserInput.model['simulationOutputProcessingFunction']
@@ -2125,13 +2126,13 @@ class parameter_estimation:
             else:
                 print('The pickled object for initial guess points must exist in base directory or pickles directory.')
                 sys.exit()
-        # check if start points have the same amount of walkers
-        initial_guess_mcmc_nwalkers = walkerStartPoints.shape[0] # last points have shape (nwalkers, nparams)
-        if len(walkerStartPoints.shape) == 1:
-            loaded_initial_guess_flag = False # set this to false so initial points can be generated
-        elif initial_guess_mcmc_nwalkers != self.mcmc_nwalkers:
-            print(f'Initial guess walker number must be the same shape as mcmc_nwalkers: {self.mcmc_nwalkers} mcmc walkers but initial guess had {initial_guess_mcmc_nwalkers} walkers')
-            sys.exit()
+            # check if start points have the same amount of walkers
+            initial_guess_mcmc_nwalkers = walkerStartPoints.shape[0] # last points have shape (nwalkers, nparams)
+            if len(walkerStartPoints.shape) == 1:
+                loaded_initial_guess_flag = False # set this to false so initial points can be generated
+            elif initial_guess_mcmc_nwalkers != self.mcmc_nwalkers:
+                print(f'Initial guess walker number must be the same shape as mcmc_nwalkers: {self.mcmc_nwalkers} mcmc walkers but initial guess had {initial_guess_mcmc_nwalkers} walkers')
+                sys.exit()
         if continueSampling == False:
             # check if initial guess is loaded
             if not loaded_initial_guess_flag:
@@ -2321,13 +2322,13 @@ class parameter_estimation:
             else:
                 print('The pickled object for initial guess points must exist in base directory or pickles directory.')
                 sys.exit()
-        # check if start points have the same amount of walkers
-        initial_guess_mcmc_nwalkers = walkerStartPoints.shape[0] # last points have shape (nwalkers, nparams)
-        if len(walkerStartPoints.shape) == 1:
-            loaded_initial_guess_flag = False # set this to false so initial points can be generated
-        elif initial_guess_mcmc_nwalkers != self.mcmc_nwalkers:
-            print(f'Initial guess walker number must be the same shape as mcmc_nwalkers: {self.mcmc_nwalkers} mcmc walkers but initial guess had {initial_guess_mcmc_nwalkers} walkers')
-            sys.exit()
+            # check if start points have the same amount of walkers
+            initial_guess_mcmc_nwalkers = walkerStartPoints.shape[0] # last points have shape (nwalkers, nparams)
+            if len(walkerStartPoints.shape) == 1:
+                loaded_initial_guess_flag = False # set this to false so initial points can be generated
+            elif initial_guess_mcmc_nwalkers != self.mcmc_nwalkers:
+                print(f'Initial guess walker number must be the same shape as mcmc_nwalkers: {self.mcmc_nwalkers} mcmc walkers but initial guess had {initial_guess_mcmc_nwalkers} walkers')
+                sys.exit()
         if continueSampling == False:
             # check if initial guess is loaded
             if not loaded_initial_guess_flag:
