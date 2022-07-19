@@ -3023,9 +3023,10 @@ class parameter_estimation:
             print("Unable to make scatter matrix plot. This usually means your run is not an MCMC run, or that the sampling did not work well. If you are using Metropolis-Hastings, try EnsembleSliceSampling or try a uniform distribution multistart.")
 
 
-        
-        self.makeScatterHeatMapPlots(plot_settings=self.UserInput.scatter_heatmap_plots_settings)
-
+        try:
+            self.makeScatterHeatMapPlots(plot_settings=self.UserInput.scatter_heatmap_plots_settings)
+        except:
+            print("Unable to make scatter heatmap plots. This usually means your run is not an MCMC run, or that the sampling did not work well. If you are using Metropolis-Hastings, try one of the other samplers: EnsembleSliceSampling,  EnsembleJumpSampling,  astroidal distribution multistart, or uniform distribution multistart.")
 
         try:        
             self.createMumpcePlots()
