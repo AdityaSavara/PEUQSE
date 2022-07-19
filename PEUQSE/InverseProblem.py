@@ -340,11 +340,38 @@ class parameter_estimation:
         #self.covmat_prior = UserInput.covmat_prior
         self.Q_mu = self.UserInput.mu_prior*0 # Q samples the next step at any point in the chain.  The next step may be accepted or rejected.  Q_mu is centered (0) around the current theta.  
         self.Q_covmat = self.UserInput.covmat_prior # Take small steps. 
-        #Getting initial guess of parameters and populating the internal variable for it.
-        if ('InputParameterInitialGuess' not in self.UserInput.model) or (len(self.UserInput.model['InputParameterInitialGuess'])== 0): #if an initial guess is not provided, we use the prior.
-            self.UserInput.model['InputParameterInitialGuess'] = np.array(self.UserInput.mu_prior, dtype='float')
-        #From now, we switch to self.UserInput.InputParameterInitialGuess because this is needed in case we're going to do reducedParameterSpace or grid sampling.
-        self.UserInput.InputParameterInitialGuess = np.array(self.UserInput.model['InputParameterInitialGuess'], dtype='float')
+        #TODO: Make initial guess handle a string, then assume that it is a pickle file
+        # check if InputParameterInitialGuess is a string
+        # if so, read the pickle file in the same way as the sampling functions (look for file, then read)
+        # After reading it, slice the matrix to only the first walker is saved.
+        if isinstance(self.UserInput.model['InputParameterInitialGuess'], str):
+            # try to read from current directory and pickle directory
+            start_point_pkl_file_name = self.UserInput.model['InputParameterInitialGuess']
+            if '.pkl' in start_point_pkl_file_name: # remove '.pkl' from string if it is there
+                start_point_pkl_file_name = start_point_pkl_file_name.replace('.pkl', '')
+            from os.path import exists
+            # check if file exists in current working directory
+            if exists(start_point_pkl_file_name + 'pkl'):
+                initialGuessUnfiltered = unpickleAnObject(start_point_pkl_file_name)
+            # check if file exists in pickle directory
+            elif exists(self.UserInput.directories['pickles'] + start_point_pkl_file_name + '.pkl'):
+                initialGuessUnfiltered = unpickleAnObject(self.UserInput.directories['pickles'] + start_point_pkl_file_name)
+            else:
+                print('The pickled object for initial guess points must exist in base directory or pickles directory. The pickled file should have extension of ".pkl"')
+            # check if the shape of the loaded initial guess is a single point or a list of walkers
+            if len(initialGuessUnfiltered.shape) == 1:
+                self.UserInput.InputParameterInitialGuess = initialGuessUnfiltered
+            elif len(initialGuessUnfiltered.shape) == 2:
+                # this is assumed to have the shape (num_walkers, num_parameters)
+                self.UserInput.InputParameterInitialGuess = initialGuessUnfiltered[0] # take only the first walker as the initial points
+            else:
+                print('The shape of the initial guess pickled array should be (num_walkers, num_parameters). The current pickled array does not have this shape and has:', initialGuessUnfiltered.shape)
+        else:
+            #Getting initial guess of parameters and populating the internal variable for it.
+            if ('InputParameterInitialGuess' not in self.UserInput.model) or (len(self.UserInput.model['InputParameterInitialGuess'])== 0): #if an initial guess is not provided, we use the prior.
+                self.UserInput.model['InputParameterInitialGuess'] = np.array(self.UserInput.mu_prior, dtype='float')
+            #From now, we switch to self.UserInput.InputParameterInitialGuess because this is needed in case we're going to do reducedParameterSpace or grid sampling.
+            self.UserInput.InputParameterInitialGuess = np.array(self.UserInput.model['InputParameterInitialGuess'], dtype='float')
         #Now populate the simulation Functions. #NOTE: These will be changed if a reduced parameter space is used.
         self.UserInput.simulationFunction = self.UserInput.model['simulateByInputParametersOnlyFunction']
         self.UserInput.simulationOutputProcessingFunction = self.UserInput.model['simulationOutputProcessingFunction']
@@ -1906,7 +1933,10 @@ class parameter_estimation:
             np.savetxt(self.UserInput.directories['logs_and_csvs']+directory_name_suffix+file_name_prefix+'mcmc_burn_in_logP_and_parameter_samples'+file_name_suffix+'.csv',np.hstack((self.during_burn_in_log_posteriors_un_normed_vec, self.during_burn_in_samples)), delimiter=",")
         pickleAnObject(postBurnInStatistics,self.UserInput.directories['pickles']+directory_name_suffix+file_name_prefix+'mcmc_post_burn_in_statistics'+file_name_suffix)
         pickleAnObject(self.map_logP,self.UserInput.directories['pickles']+directory_name_suffix+file_name_prefix+'mcmc_map_logP'+file_name_suffix)
-        pickleAnObject(self.UserInput.InputParameterInitialGuess,self.UserInput.directories['pickles']+directory_name_suffix+file_name_prefix+'mcmc_initial_point_parameters'+file_name_suffix)
+        if self.UserInput.parameter_estimation_settings['mcmc_continueSampling'] == True:
+            pickleAnObject(self.UserInput.InputParameterInitialGuess,self.UserInput.directories['pickles']+directory_name_suffix+file_name_prefix+'mcmc_continued_initial_point_parameters'+file_name_suffix)
+        else:
+            pickleAnObject(self.UserInput.InputParameterInitialGuess,self.UserInput.directories['pickles']+directory_name_suffix+file_name_prefix+'mcmc_initial_point_parameters'+file_name_suffix)
         if hasattr(self, 'mcmc_last_point_sampled'):
             pickleAnObject(self.mcmc_last_point_sampled, self.UserInput.directories['pickles']+directory_name_suffix+file_name_prefix+'mcmc_last_point_sampled'+file_name_suffix)
 
@@ -1972,19 +2002,17 @@ class parameter_estimation:
         # convergence diagnostic function is called to run calculations and create plots
         # outputs are saved as a tuple 
         #TODO: make its own plot settings in different commit. 
-        convergence_ouputs = calculateAndPlotConvergenceDiagnostics(discrete_chains_post_burn_in_samples, self.UserInput.model['parameterNamesAndMathTypeExpressionsDict'], self.UserInput.scatter_matrix_plots_settings, self.UserInput.directories['graphs'])
+        try:
+            convergence_ouputs = calculateAndPlotConvergenceDiagnostics(discrete_chains_post_burn_in_samples, self.UserInput.model['parameterNamesAndMathTypeExpressionsDict'], self.UserInput.scatter_matrix_plots_settings, self.UserInput.directories['graphs'])
+        except Exception as theError:
+            print("Warning: Unable to calculate and plot convergence diagnostics. The error was:", theError)
+            return None #this is to end the function, so it does not crash below.
+            
 
         # initialize and populate convergence dictionary in class object
         self.convergence = {}
         self.convergence['AutoCorrTime'] = {}
-        self.convergence['AutoCorrTime']['window_indices'] = None
-        self.convergence['AutoCorrTime']['final_parameter_values'] = None
-        self.convergence['AutoCorrTime']['parameter_act_for_each_window'] = None
         self.convergence['Geweke'] = {}
-        self.convergence['Geweke']['window_indices'] = None
-        self.convergence['Geweke']['final_combined_parameter_values'] = None
-        self.convergence['Geweke']['final_combined_parameter_percent_outlier'] = None
-
         # unpack tuple to save convergence information to self
         self.convergence['AutoCorrTime']['window_indices'] = convergence_ouputs[0]
         self.convergence['AutoCorrTime']['final_parameter_values'] = convergence_ouputs[1]
@@ -2052,7 +2080,7 @@ class parameter_estimation:
                 self.last_InputParameterInitialGuess_data = unpickleAnObject(self.UserInput.directories['pickles']+self.last_InputParameterInitialGuess_filename)
                 self.UserInput.InputParameterInitialGuess = self.last_InputParameterInitialGuess_data #populating this because otherwise non-grid Multi-Start will get the wrong values exported. & Same for final plots.
         ####these variables need to be made part of UserInput####
-        numParameters = len(self.UserInput.InputParameterInitialGuess) #This is the number of parameters.
+        numParameters = len(self.UserInput.mu_prior) #This is the number of parameters.
         if 'mcmc_random_seed' in self.UserInput.parameter_estimation_settings:
             if isinstance(self.UserInput.parameter_estimation_settings['mcmc_random_seed'], int): #if it's an integer, then it's not a "None" type or string, and we will use it.
                 np.random.seed(self.UserInput.parameter_estimation_settings['mcmc_random_seed'])
@@ -2079,8 +2107,39 @@ class parameter_estimation:
         else: mcmc_maxiter = self.UserInput.parameter_estimation_settings['mcmc_maxiter']
         ####end of user input variables####
         #now to do the mcmc
+        # if the initial guess is a string, read its pickle file for starting points for walkers
+        # if this read array is a single point, proceed as normal
+        # if this read array is multiple points, make sure that it has the same shape as number of walkers
+        # else, print error and exit
+        loaded_initial_guess_flag = False # flag to switch allow normal generation of initial points to guided if the loaded points are a single point
+        if isinstance(self.UserInput.model['InputParameterInitialGuess'], str): # if yes, then assume a pickle file is imported
+            # try to read from current directory and pickle directory
+            start_point_pkl_file_name = self.UserInput.model['InputParameterInitialGuess']
+            if '.pkl' in start_point_pkl_file_name: # remove '.pkl' from string if it is there
+                start_point_pkl_file_name = start_point_pkl_file_name.replace('.pkl', '')
+            from os.path import exists
+            # check if file exists in current working directory
+            if exists(start_point_pkl_file_name + 'pkl'):
+                walkerStartPoints = unpickleAnObject(start_point_pkl_file_name)
+                loaded_initial_guess_flag = True # makes sure the pickled array is used for starting points
+            # check if file exists in pickle directory
+            elif exists(self.UserInput.directories['pickles'] + start_point_pkl_file_name + '.pkl'):
+                walkerStartPoints = unpickleAnObject(self.UserInput.directories['pickles'] + start_point_pkl_file_name)
+                loaded_initial_guess_flag = True # makes sure the pickled array is used for starting points
+            else:
+                print('The pickled object for initial guess points must exist in base directory or pickles directory.')
+                sys.exit()
+            # check if start points have the same amount of walkers
+            initial_guess_mcmc_nwalkers = walkerStartPoints.shape[0] # last points have shape (nwalkers, nparams)
+            if len(walkerStartPoints.shape) == 1:
+                loaded_initial_guess_flag = False # set this to false so initial points can be generated
+            elif initial_guess_mcmc_nwalkers != self.mcmc_nwalkers:
+                print(f'Initial guess walker number must be the same shape as mcmc_nwalkers: {self.mcmc_nwalkers} mcmc walkers but initial guess had {initial_guess_mcmc_nwalkers} walkers')
+                sys.exit()
         if continueSampling == False:
-            walkerStartPoints = self.generateInitialPoints(initialPointsDistributionType=walkerInitialDistribution, numStartPoints = self.mcmc_nwalkers,relativeInitialDistributionSpread=walkerInitialDistributionSpread) #making the first set of starting points.
+            # check if initial guess is loaded
+            if not loaded_initial_guess_flag:
+                walkerStartPoints = self.generateInitialPoints(initialPointsDistributionType=walkerInitialDistribution, numStartPoints = self.mcmc_nwalkers,relativeInitialDistributionSpread=walkerInitialDistributionSpread) #making the first set of starting points.
         elif continueSampling == True:
             # make burn in samples 0 since burn in has already occurred
             self.mcmc_burn_in_length = 0
@@ -2094,7 +2153,7 @@ class parameter_estimation:
         emcee_sampler = emcee.EnsembleSampler(self.mcmc_nwalkers, numParameters, log_prob_fn=self.getLogP)    
         for trialN in range(0,1000):#Todo: This number of this range is hardcoded but should probably be a user selection.
             try:
-                emcee_sampler.run_mcmc(walkerStartPoints, nEnsembleSteps)
+                emcee_sampler.run_mcmc(walkerStartPoints, nEnsembleSteps,progress=True)
                 break
             except Exception as exceptionObject:
                 #TODO: come up with exception summaries like this.
@@ -2209,7 +2268,7 @@ class parameter_estimation:
                 self.last_InputParameterInitialGuess_data = unpickleAnObject(self.UserInput.directories['pickles']+self.last_InputParameterInitialGuess_filename)
                 self.UserInput.InputParameterInitialGuess = self.last_InputParameterInitialGuess_data #populating this because otherwise non-grid Multi-Start will get the wrong values exported. & Same for final plots.
         ####these variables need to be made part of UserInput####
-        numParameters = len(self.UserInput.InputParameterInitialGuess) #This is the number of parameters.
+        numParameters = len(self.UserInput.mu_prior) #This is the number of parameters.
         if 'mcmc_random_seed' in self.UserInput.parameter_estimation_settings:
             if type(self.UserInput.parameter_estimation_settings['mcmc_random_seed']) == type(1): #if it's an integer, then it's not a "None" type or string, and we will use it.
                 np.random.seed(self.UserInput.parameter_estimation_settings['mcmc_random_seed'])
@@ -2244,8 +2303,39 @@ class parameter_estimation:
         else: print("The move type must be one of the following: ['auto', 'differential', 'global', 'gaussian', 'kde']")
         ####end of user input variables####
         #now to do the mcmc
+        # if the initial guess is a string, read its pickle file for starting points for walkers
+        # if this read array is a single point, proceed as normal
+        # if this read array is multiple points, make sure that it has the same shape as number of walkers
+        # else, print error and exit
+        loaded_initial_guess_flag = False # flag to switch allow normal generation of initial points to guided if the loaded points are a single point
+        if isinstance(self.UserInput.model['InputParameterInitialGuess'], str): # if yes, then assume a pickle file is imported
+            # try to read from current directory and pickle directory
+            start_point_pkl_file_name = self.UserInput.model['InputParameterInitialGuess']
+            if '.pkl' in start_point_pkl_file_name: # remove '.pkl' from string if it is there
+                start_point_pkl_file_name = start_point_pkl_file_name.replace('.pkl', '')
+            from os.path import exists
+            # check if file exists in current working directory
+            if exists(start_point_pkl_file_name + 'pkl'):
+                walkerStartPoints = unpickleAnObject(start_point_pkl_file_name)
+                loaded_initial_guess_flag = True # makes sure the pickled array is used for starting points
+            # check if file exists in pickle directory
+            elif exists(self.UserInput.directories['pickles'] + start_point_pkl_file_name + '.pkl'):
+                walkerStartPoints = unpickleAnObject(self.UserInput.directories['pickles'] + start_point_pkl_file_name)
+                loaded_initial_guess_flag = True # makes sure the pickled array is used for starting points
+            else:
+                print('The pickled object for initial guess points must exist in base directory or pickles directory.')
+                sys.exit()
+            # check if start points have the same amount of walkers
+            initial_guess_mcmc_nwalkers = walkerStartPoints.shape[0] # last points have shape (nwalkers, nparams)
+            if len(walkerStartPoints.shape) == 1:
+                loaded_initial_guess_flag = False # set this to false so initial points can be generated
+            elif initial_guess_mcmc_nwalkers != self.mcmc_nwalkers:
+                print(f'Initial guess walker number must be the same shape as mcmc_nwalkers: {self.mcmc_nwalkers} mcmc walkers but initial guess had {initial_guess_mcmc_nwalkers} walkers')
+                sys.exit()
         if continueSampling == False:
-            walkerStartPoints = self.generateInitialPoints(initialPointsDistributionType=walkerInitialDistribution, numStartPoints = self.mcmc_nwalkers,relativeInitialDistributionSpread=walkerInitialDistributionSpread) #making the first set of starting points.
+            # check if initial guess is loaded
+            if not loaded_initial_guess_flag:
+                walkerStartPoints = self.generateInitialPoints(initialPointsDistributionType=walkerInitialDistribution, numStartPoints = self.mcmc_nwalkers,relativeInitialDistributionSpread=walkerInitialDistributionSpread) #making the first set of starting points.
         elif continueSampling == True:
             # make burn in samples 0 since burn in has already occurred
             self.mcmc_burn_in_length = 0
@@ -2614,8 +2704,13 @@ class parameter_estimation:
 
         #Now get the simulated responses.
         simulatedResponses = self.getSimulatedResponses(discreteParameterVectorTuple)
+        #Failure checks:
         if type(simulatedResponses) == type(None):
             return float('-inf'), None #This is intended for the case that the simulation fails, indicated by receiving an 'nan' or None type from user's simulation function.
+        #Check if there are any 'nan' in the simulations array, and treat that as a failure also.
+        nans_in_array = np.isnan(simulatedResponses)        
+        if True in nans_in_array:
+            return float('-inf'), None
         #need to check if there are any 'responses_simulation_uncertainties'.
         if type(self.UserInput.responses_simulation_uncertainties) == type(None): #if it's a None type, we keep it as a None type
             responses_simulation_uncertainties = None
@@ -2778,12 +2873,13 @@ class parameter_estimation:
         graphs_directory = self.UserInput.directories['graphs']
         # combine all the solutions and meta data for each parameter posterior to the simulation.
         # Zip parameters contain parameter columns in dataframe, parameter names, MAP, muAP, and initial value
-        finalParametersAndMetaData1 = zip(posterior_df.columns, parameterNamesAndMathTypeExpressionsDict.keys(), parameterMAPValue, parameterMuAPValue, parameterInitialValue)
-        finalParametersAndMetaData2 = zip(posterior_df.columns, parameterNamesAndMathTypeExpressionsDict.keys(), parameterMAPValue, parameterMuAPValue, parameterInitialValue)
         # compare each parameter with only unique solutions
         # i and j represent the index of an abstract matrix created from comparing the parameter vectors.
         # The loop moves through the matrix and compares parameters by plotting but will only plot the bottom triangle of the matrix.
+        finalParametersAndMetaData1 = zip(posterior_df.columns, parameterNamesAndMathTypeExpressionsDict.keys(), parameterMAPValue, parameterMuAPValue, parameterInitialValue)
         for param_a_index, (param_a_column, param_a_name, param_a_MAP, param_a_mu_AP, param_a_initial) in enumerate(finalParametersAndMetaData1):
+            #The zipping must be done each loop, because the enumeration can only occur one time per zip.
+            finalParametersAndMetaData2 = zip(posterior_df.columns, parameterNamesAndMathTypeExpressionsDict.keys(), parameterMAPValue, parameterMuAPValue, parameterInitialValue)
             for param_b_index, (param_b_column, param_b_name, param_b_MAP, param_b_mu_AP, param_b_initial) in enumerate(finalParametersAndMetaData2):
                 if param_a_index != param_b_index:
                     if self.UserInput.scatter_heatmap_plots_settings['all_pair_permutations']:
@@ -2799,6 +2895,7 @@ class parameter_estimation:
         if allResponses_x_values == []: 
             allResponses_x_values = nestedObjectsFunctions.makeAtLeast_2dNested(self.UserInput.responses_abscissa)
         if allResponsesListsOfYArrays  ==[]: #In this case, we assume allResponsesListsOfYUncertaintiesArrays == [] also.
+            allResponsesListsOfYArrays = [] #Need to make a new list in the case that there was one already, to avoid overwriting the default argument object.
             allResponsesListsOfYUncertaintiesArrays = [] #Set accompanying uncertainties list to a blank list in case it is not already one. Otherwise appending would mess up indexing.
             simulationFunction = self.UserInput.simulationFunction #Do NOT use self.UserInput.model['simulateByInputParametersOnlyFunction']  because that won't work with reduced parameter space requests.
             simulationOutputProcessingFunction = self.UserInput.simulationOutputProcessingFunction #Do NOT use self.UserInput.model['simulationOutputProcessingFunction'] because that won't work with reduced parameter space requests.
@@ -3018,10 +3115,9 @@ class parameter_estimation:
             print("Unable to make scatter matrix plot. This usually means your run is not an MCMC run, or that the sampling did not work well. If you are using Metropolis-Hastings, try EnsembleSliceSampling or try a uniform distribution multistart.")
 
 
-        try:
-            self.makeScatterHeatMapPlots(plot_settings=self.UserInput.scatter_heatmap_plots_settings)
-        except:
-            print("Unable to make scatter heatmap plots. This usually means your run is not an MCMC run, or that the sampling did not work well. If you are using Metropolis-Hastings, try EnsembleSliceSampling or try a uniform distribution multistart.")
+        
+        self.makeScatterHeatMapPlots(plot_settings=self.UserInput.scatter_heatmap_plots_settings)
+
 
         try:        
             self.createMumpcePlots()
