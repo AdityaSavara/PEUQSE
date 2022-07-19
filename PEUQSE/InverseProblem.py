@@ -1933,7 +1933,10 @@ class parameter_estimation:
             np.savetxt(self.UserInput.directories['logs_and_csvs']+directory_name_suffix+file_name_prefix+'mcmc_burn_in_logP_and_parameter_samples'+file_name_suffix+'.csv',np.hstack((self.during_burn_in_log_posteriors_un_normed_vec, self.during_burn_in_samples)), delimiter=",")
         pickleAnObject(postBurnInStatistics,self.UserInput.directories['pickles']+directory_name_suffix+file_name_prefix+'mcmc_post_burn_in_statistics'+file_name_suffix)
         pickleAnObject(self.map_logP,self.UserInput.directories['pickles']+directory_name_suffix+file_name_prefix+'mcmc_map_logP'+file_name_suffix)
-        pickleAnObject(self.UserInput.InputParameterInitialGuess,self.UserInput.directories['pickles']+directory_name_suffix+file_name_prefix+'mcmc_initial_point_parameters'+file_name_suffix)
+        if self.UserInput.parameter_estimation_settings['mcmc_continueSampling'] == True:
+            pickleAnObject(self.UserInput.InputParameterInitialGuess,self.UserInput.directories['pickles']+directory_name_suffix+file_name_prefix+'mcmc_continued_initial_point_parameters'+file_name_suffix)
+        else:
+            pickleAnObject(self.UserInput.InputParameterInitialGuess,self.UserInput.directories['pickles']+directory_name_suffix+file_name_prefix+'mcmc_initial_point_parameters'+file_name_suffix)
         if hasattr(self, 'mcmc_last_point_sampled'):
             pickleAnObject(self.mcmc_last_point_sampled, self.UserInput.directories['pickles']+directory_name_suffix+file_name_prefix+'mcmc_last_point_sampled'+file_name_suffix)
 
