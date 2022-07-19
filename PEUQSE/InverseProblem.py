@@ -341,6 +341,7 @@ class parameter_estimation:
         self.Q_mu = self.UserInput.mu_prior*0 # Q samples the next step at any point in the chain.  The next step may be accepted or rejected.  Q_mu is centered (0) around the current theta.  
         self.Q_covmat = self.UserInput.covmat_prior # Take small steps. 
         #Getting initial guess of parameters and populating the internal variable for it.
+        #TODO: Make initial guess handle a string, then assume that it is a pickle file
         if ('InputParameterInitialGuess' not in self.UserInput.model) or (len(self.UserInput.model['InputParameterInitialGuess'])== 0): #if an initial guess is not provided, we use the prior.
             self.UserInput.model['InputParameterInitialGuess'] = np.array(self.UserInput.mu_prior, dtype='float')
         #From now, we switch to self.UserInput.InputParameterInitialGuess because this is needed in case we're going to do reducedParameterSpace or grid sampling.
@@ -2077,8 +2078,39 @@ class parameter_estimation:
         else: mcmc_maxiter = self.UserInput.parameter_estimation_settings['mcmc_maxiter']
         ####end of user input variables####
         #now to do the mcmc
+        # if the initial guess is a string, read its pickle file for starting points for walkers
+        # if this read array is a single point, proceed as normal
+        # if this read array is multiple points, make sure that it has the same shape as number of walkers
+        # else, print error and exit
+        loaded_initial_guess_flag = False # flag to switch allow normal generation of initial points to guided if the loaded points are a single point
+        if isinstance(self.UserInput.model['InputParameterInitialGuess'], str): # if yes, then assume a pickle file is imported
+            # try to read from current directory and pickle directory
+            start_point_pkl_file_name = self.UserInput.model['InputParameterInitialGuess']
+            if '.pkl' in start_point_pkl_file_name: # remove '.pkl' from string if it is there
+                start_point_pkl_file_name = start_point_pkl_file_name.replace('.pkl', '')
+            from os.path import exists
+            # check if file exists in current working directory
+            if exists(start_point_pkl_file_name + 'pkl'):
+                walkerStartPoints = unpickleAnObject(start_point_pkl_file_name)
+                loaded_initial_guess_flag = True # makes sure the pickled array is used for starting points
+            # check if file exists in pickle directory
+            elif exists(self.UserInput.directories['pickles'] + start_point_pkl_file_name + '.pkl'):
+                walkerStartPoints = unpickleAnObject(self.UserInput.directories['pickles'] + start_point_pkl_file_name)
+                loaded_initial_guess_flag = True # makes sure the pickled array is used for starting points
+            else:
+                print('The pickled object for initial guess points must exist in base directory or pickles directory.')
+                sys.exit()
+        # check if start points have the same amount of walkers
+        initial_guess_mcmc_nwalkers = walkerStartPoints.shape[0] # last points have shape (nwalkers, nparams)
+        if len(walkerStartPoints.shape) == 1:
+            loaded_initial_guess_flag = False # set this to false so initial points can be generated
+        elif initial_guess_mcmc_nwalkers != self.mcmc_nwalkers:
+            print(f'Initial guess walker number must be the same shape as mcmc_nwalkers: {self.mcmc_nwalkers} mcmc walkers but initial guess had {initial_guess_mcmc_nwalkers} walkers')
+            sys.exit()
         if continueSampling == False:
-            walkerStartPoints = self.generateInitialPoints(initialPointsDistributionType=walkerInitialDistribution, numStartPoints = self.mcmc_nwalkers,relativeInitialDistributionSpread=walkerInitialDistributionSpread) #making the first set of starting points.
+            # check if initial guess is loaded
+            if not loaded_initial_guess_flag:
+                walkerStartPoints = self.generateInitialPoints(initialPointsDistributionType=walkerInitialDistribution, numStartPoints = self.mcmc_nwalkers,relativeInitialDistributionSpread=walkerInitialDistributionSpread) #making the first set of starting points.
         elif continueSampling == True:
             # make burn in samples 0 since burn in has already occurred
             self.mcmc_burn_in_length = 0
@@ -2242,8 +2274,39 @@ class parameter_estimation:
         else: print("The move type must be one of the following: ['auto', 'differential', 'global', 'gaussian', 'kde']")
         ####end of user input variables####
         #now to do the mcmc
+        # if the initial guess is a string, read its pickle file for starting points for walkers
+        # if this read array is a single point, proceed as normal
+        # if this read array is multiple points, make sure that it has the same shape as number of walkers
+        # else, print error and exit
+        loaded_initial_guess_flag = False # flag to switch allow normal generation of initial points to guided if the loaded points are a single point
+        if isinstance(self.UserInput.model['InputParameterInitialGuess'], str): # if yes, then assume a pickle file is imported
+            # try to read from current directory and pickle directory
+            start_point_pkl_file_name = self.UserInput.model['InputParameterInitialGuess']
+            if '.pkl' in start_point_pkl_file_name: # remove '.pkl' from string if it is there
+                start_point_pkl_file_name = start_point_pkl_file_name.replace('.pkl', '')
+            from os.path import exists
+            # check if file exists in current working directory
+            if exists(start_point_pkl_file_name + 'pkl'):
+                walkerStartPoints = unpickleAnObject(start_point_pkl_file_name)
+                loaded_initial_guess_flag = True # makes sure the pickled array is used for starting points
+            # check if file exists in pickle directory
+            elif exists(self.UserInput.directories['pickles'] + start_point_pkl_file_name + '.pkl'):
+                walkerStartPoints = unpickleAnObject(self.UserInput.directories['pickles'] + start_point_pkl_file_name)
+                loaded_initial_guess_flag = True # makes sure the pickled array is used for starting points
+            else:
+                print('The pickled object for initial guess points must exist in base directory or pickles directory.')
+                sys.exit()
+        # check if start points have the same amount of walkers
+        initial_guess_mcmc_nwalkers = walkerStartPoints.shape[0] # last points have shape (nwalkers, nparams)
+        if len(walkerStartPoints.shape) == 1:
+            loaded_initial_guess_flag = False # set this to false so initial points can be generated
+        elif initial_guess_mcmc_nwalkers != self.mcmc_nwalkers:
+            print(f'Initial guess walker number must be the same shape as mcmc_nwalkers: {self.mcmc_nwalkers} mcmc walkers but initial guess had {initial_guess_mcmc_nwalkers} walkers')
+            sys.exit()
         if continueSampling == False:
-            walkerStartPoints = self.generateInitialPoints(initialPointsDistributionType=walkerInitialDistribution, numStartPoints = self.mcmc_nwalkers,relativeInitialDistributionSpread=walkerInitialDistributionSpread) #making the first set of starting points.
+            # check if initial guess is loaded
+            if not loaded_initial_guess_flag:
+                walkerStartPoints = self.generateInitialPoints(initialPointsDistributionType=walkerInitialDistribution, numStartPoints = self.mcmc_nwalkers,relativeInitialDistributionSpread=walkerInitialDistributionSpread) #making the first set of starting points.
         elif continueSampling == True:
             # make burn in samples 0 since burn in has already occurred
             self.mcmc_burn_in_length = 0
