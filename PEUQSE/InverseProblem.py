@@ -2080,7 +2080,7 @@ class parameter_estimation:
                 self.last_InputParameterInitialGuess_data = unpickleAnObject(self.UserInput.directories['pickles']+self.last_InputParameterInitialGuess_filename)
                 self.UserInput.InputParameterInitialGuess = self.last_InputParameterInitialGuess_data #populating this because otherwise non-grid Multi-Start will get the wrong values exported. & Same for final plots.
         ####these variables need to be made part of UserInput####
-        numParameters = len(self.UserInput.InputParameterInitialGuess) #This is the number of parameters.
+        numParameters = len(self.UserInput.mu_prior) #This is the number of parameters.
         if 'mcmc_random_seed' in self.UserInput.parameter_estimation_settings:
             if isinstance(self.UserInput.parameter_estimation_settings['mcmc_random_seed'], int): #if it's an integer, then it's not a "None" type or string, and we will use it.
                 np.random.seed(self.UserInput.parameter_estimation_settings['mcmc_random_seed'])
@@ -2268,7 +2268,7 @@ class parameter_estimation:
                 self.last_InputParameterInitialGuess_data = unpickleAnObject(self.UserInput.directories['pickles']+self.last_InputParameterInitialGuess_filename)
                 self.UserInput.InputParameterInitialGuess = self.last_InputParameterInitialGuess_data #populating this because otherwise non-grid Multi-Start will get the wrong values exported. & Same for final plots.
         ####these variables need to be made part of UserInput####
-        numParameters = len(self.UserInput.InputParameterInitialGuess) #This is the number of parameters.
+        numParameters = len(self.UserInput.mu_prior) #This is the number of parameters.
         if 'mcmc_random_seed' in self.UserInput.parameter_estimation_settings:
             if type(self.UserInput.parameter_estimation_settings['mcmc_random_seed']) == type(1): #if it's an integer, then it's not a "None" type or string, and we will use it.
                 np.random.seed(self.UserInput.parameter_estimation_settings['mcmc_random_seed'])
