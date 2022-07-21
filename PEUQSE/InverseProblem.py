@@ -351,7 +351,7 @@ class parameter_estimation:
                 start_point_pkl_file_name = start_point_pkl_file_name.replace('.pkl', '')
             from os.path import exists
             # check if file exists in current working directory
-            if exists(start_point_pkl_file_name + 'pkl'):
+            if exists(start_point_pkl_file_name + '.pkl'):
                 initialGuessUnfiltered = unpickleAnObject(start_point_pkl_file_name)
             # check if file exists in pickle directory
             elif exists(self.UserInput.directories['pickles'] + start_point_pkl_file_name + '.pkl'):
@@ -2121,7 +2121,7 @@ class parameter_estimation:
                 start_point_pkl_file_name = start_point_pkl_file_name.replace('.pkl', '')
             from os.path import exists
             # check if file exists in current working directory
-            if exists(start_point_pkl_file_name + 'pkl'):
+            if exists(start_point_pkl_file_name + '.pkl'):
                 walkerStartPoints = unpickleAnObject(start_point_pkl_file_name)
                 loaded_initial_guess_flag = True # makes sure the pickled array is used for starting points
             # check if file exists in pickle directory
@@ -2317,7 +2317,7 @@ class parameter_estimation:
                 start_point_pkl_file_name = start_point_pkl_file_name.replace('.pkl', '')
             from os.path import exists
             # check if file exists in current working directory
-            if exists(start_point_pkl_file_name + 'pkl'):
+            if exists(start_point_pkl_file_name + '.pkl'):
                 walkerStartPoints = unpickleAnObject(start_point_pkl_file_name)
                 loaded_initial_guess_flag = True # makes sure the pickled array is used for starting points
             # check if file exists in pickle directory
