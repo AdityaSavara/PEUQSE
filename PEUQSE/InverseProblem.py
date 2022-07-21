@@ -3401,7 +3401,7 @@ def pickleAnObject(objectToPickle, base_file_name, file_name_prefix ='',  file_n
     try:
         import pickle
         base_file_name = base_file_name.replace(file_name_extension, "") #remove the pkl extension if it’s already there, then we will add it back.
-        data_filename = file_name_prefix + base_file_name + file_name_prefix + file_name_extension
+        data_filename = file_name_prefix + base_file_name + file_name_suffix + file_name_extension
         with open(data_filename, 'wb') as picklefile:
             pickle.dump(objectToPickle, picklefile)
     except Exception as theError:
@@ -3410,7 +3410,7 @@ def pickleAnObject(objectToPickle, base_file_name, file_name_prefix ='',  file_n
 def unpickleAnObject(base_file_name, file_name_prefix ='',  file_name_suffix='', file_name_extension='.pkl'):
     import pickle
     base_file_name = base_file_name.replace(file_name_extension, "") #remove the pkl extension if it’s already there, then we will add it back.
-    data_filename = file_name_prefix + base_file_name + file_name_prefix + file_name_extension
+    data_filename = file_name_prefix + base_file_name + file_name_suffix + file_name_extension
     with open(data_filename, 'rb') as picklefile:
         theObject = pickle.load(picklefile)
     return theObject
@@ -3423,7 +3423,7 @@ def dillpickleAnObject(objectToPickle, base_file_name, file_name_prefix ='',  fi
     except:
         print("To use this feature requires dill. If you don't have it, open an anaconda prompt and type 'pip install dill' or use conda install. https://anaconda.org/anaconda/dill")
     base_file_name = base_file_name.replace(file_name_extension, "") #remove the pkl extension if it’s already there, then we will add it back.
-    data_filename = file_name_prefix + base_file_name + file_name_prefix + file_name_extension
+    data_filename = file_name_prefix + base_file_name + file_name_suffix + file_name_extension
     try:
         with open(data_filename, 'wb') as picklefile:
             dill.dump(objectToPickle, picklefile)
@@ -3437,7 +3437,7 @@ def unDillpickleAnObject(base_file_name, file_name_prefix ='',  file_name_suffix
     except:
         print("To use this feature requires dill. If you don't have it, open an anaconda prompt and type 'pip install dill' or use conda install. https://anaconda.org/anaconda/dill")
     base_file_name = base_file_name.replace(file_name_extension, "") #remove the pkl extension if it’s already there, then we will add it back.
-    data_filename = file_name_prefix + base_file_name + file_name_prefix + file_name_extension
+    data_filename = file_name_prefix + base_file_name + file_name_suffix + file_name_extension
     with open(data_filename, 'rb') as picklefile:
         theObject = dill.load(picklefile)
     return theObject
