@@ -3493,12 +3493,10 @@ def getPointsNearExistingSample(numPointsToGet, existingSamples, logP_value = No
     if not isinstance(parameters_values, type(None)):
         referencePoint = parameters_values
     else: 
-        # find Index where existingSamples[:,0] = logP_value
-        possibleIndices = np.where(existingSamples[:,0]) # = logP_value
-        #will take the first possibility.
-        indexToUse = possibleIndices[0]
+        # find Index where existingSamples[:,0] = logP_value, takes the first value encountered that has the lowest value. This handles equal differences.
+        indexToUse = np.abs(existingSamples[:,0] - logP_value).argmin() # finds the value that is closest to the input logP value
         parameters_values = existingSamples[indexToUse]
-        referencePoint = parameters_values
+        referencePoint = parameters_values[1:]
 
     #now we will add a 0 in front to represent a logP_value. This will come in useful during subtractions.
     referencePointWithZeroInFront =  np.hstack(([0],referencePoint))
