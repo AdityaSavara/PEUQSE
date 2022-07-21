@@ -358,6 +358,7 @@ class parameter_estimation:
                 initialGuessUnfiltered = unpickleAnObject(self.UserInput.directories['pickles'] + start_point_pkl_file_name)
             else:
                 print('The pickled object for initial guess points must exist in base directory or pickles directory. The pickled file should have extension of ".pkl"')
+                sys.exit()
             # check if the shape of the loaded initial guess is a single point or a list of walkers
             if len(initialGuessUnfiltered.shape) == 1:
                 self.UserInput.InputParameterInitialGuess = initialGuessUnfiltered
@@ -366,6 +367,7 @@ class parameter_estimation:
                 self.UserInput.InputParameterInitialGuess = initialGuessUnfiltered[0] # take only the first walker as the initial points
             else:
                 print('The shape of the initial guess pickled array should be (num_walkers, num_parameters). The current pickled array does not have this shape and has:', initialGuessUnfiltered.shape)
+                sys.exit()
         else:
             #Getting initial guess of parameters and populating the internal variable for it.
             if ('InputParameterInitialGuess' not in self.UserInput.model) or (len(self.UserInput.model['InputParameterInitialGuess'])== 0): #if an initial guess is not provided, we use the prior.
@@ -3454,6 +3456,76 @@ def deleteAllFilesInDirectory(mydir=''):
     filelist = copy.deepcopy(os.listdir(mydir))
     for f in filelist:
         os.remove(os.path.join(mydir, f))
+
+def getPointsNearExistingSample(numPointsToGet, existingSamples, logP_value = None, parameters_values = None, sortBy = 'relative_delta', pickleFileName='pointsNearExistingSample.pkl'):
+    """
+    This function retrieves a number of points near a point in existingSamples, either based on a logP_value or parameters_values.
+    All of the rows in existingSamples must be of the form of LogP in the first column and parameters_values in the later columns.
+    Either a logP_value can be provided to get the nearest points, or a parameters_values must be provided.
+    if both are provided, the parameters_values vector will be how the 'reference' point will be chosen.
+
+    :return extracted_parameter_samples: The parameter sets that meet the defined criteria. Shape is (numPointsToGet, numSamples). (:type: np.array)
+    :return extracted_logP_values: The logP values of the associated parameter sets. (:type: np.array)
+    :return extracted_objective_values: The objective values to order the parameters on the defined criteria. (:type: np.array)
+    """
+    
+    #The sorting can occur by 'relative_delta', 'absolute_delta', 'absolute_distance', 'relative_distance'. The distance cases are not yet implemented.
+
+    #First check if existingSamples is a string. If it's a string, we assume it's a filename, including extension.
+    if isinstance(existingSamples, str):
+        if ".csv" in existingSamples:
+            existingSamples = np.genfromtxt(existingSamples, delimiter=',', dtype=float)
+        elif ".pkl" in existingSamples:
+            existingSamples = unpickleAnObject(existingSamples, file_name_extension='')
+    else: #else it is already an array like object.
+       pass 
+
+    #Now, we need to remove any rows where existingSamples has '-inf' in the first column, because we don't want to sample from points with 0 probability:
+    existingSamples = existingSamples[ existingSamples[:,0] > float('-inf')] #this is numpy syntax for returning a filtered array with a particular condition, and here the condition is that for all rows the first value is > float('-inf').
+
+    if not isinstance(parameters_values, type(None)):
+        referencePoint = parameters_values
+    else: 
+        # find Index where existingSamples[:,0] = logP_value
+        possibleIndices = np.where(existingSamples[:,0]) # = logP_value
+        #will take the first possibility.
+        indexToUse = possibleIndices[0]
+        parameters_values = existingSamples[indexToUse]
+        referencePoint = parameters_values
+
+    #now we will add a 0 in front to represent a logP_value. This will come in useful during subtractions.
+    referencePointWithZeroInFront =  np.hstack(([0],referencePoint))
+
+    #Now calculate the sortBy array.
+    sortByCalculationsArray = copy.deepcopy(existingSamples)
+    if sortBy == 'absolute_delta': #take the deltas relative to the reference point, then take their absolute values.
+        sortByCalculationsArray = (existingSamples - referencePointWithZeroInFront)
+        sortByCalculationsArray[:,1:] = np.abs(sortByCalculationsArray[:,1:])
+    if sortBy == 'relative_delta': #take the deltas relative to the reference point, then take their absolute values, then divide by absolute magnitudes.
+        sortByCalculationsArray = (existingSamples - referencePointWithZeroInFront)
+        sortByCalculationsArray[:,1:] = np.abs(sortByCalculationsArray[:,1:])/ np.abs(referencePointWithZeroInFront[1:]) #divide by all of the parameter magnitudes.
+
+    objectiveFunctionArray = np.zeros(len(sortByCalculationsArray)) #make an array of the same length where we can have the the sums.
+    objectiveFunctionArray = np.sum(sortByCalculationsArray[:,1:], axis=1)[:, np.newaxis]
+
+    #now we can stack this in front of the existingSamples for sorting.
+    
+    arrayToSort = np.hstack((objectiveFunctionArray, existingSamples))
+    
+    #now sort it.
+    sortedArray = arrayToSort[arrayToSort[:,0].argsort()] #by default this will be smallest to largest, which is what we want.
+    
+    extractedSamples_with_objective_function_and_logP = sortedArray[0:numPointsToGet].T #extract the relevant rows
+
+    extracted_objective_values = extractedSamples_with_objective_function_and_logP[0]
+    extracted_logP_values = extractedSamples_with_objective_function_and_logP[1]
+    extracted_parameter_samples = extractedSamples_with_objective_function_and_logP[2:].T
+
+    #TODO: pickle points before returning
+    pickleAnObject(extracted_parameter_samples, pickleFileName, file_name_extension='')
+    # return extractedSamples_with_objective_function_and_logP #note that for most applications, we will then want to slice off the first 1 or 2 columns.
+    return extracted_parameter_samples, extracted_logP_values, extracted_objective_values
+
 
 def calculateAndPlotConvergenceDiagnostics(discrete_chains_post_burn_in_samples, parameterNamesAndMathTypeExpressionsDict, plot_settings={}, graphs_directory='./', createPlots=True):
     """
