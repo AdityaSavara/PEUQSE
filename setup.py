@@ -21,7 +21,7 @@ URL = 'https://github.com/AdityaSavara/PEUQSE'
 EMAIL = 'AditySavara2008@u.northwestern.edu'  #Eric A. Walker is a co-author and can be reached at WALKER, ERIC <walke299@email.sc.edu>
 AUTHOR = 'Aditya Savara'
 REQUIRES_PYTHON = '>=3.5.0'
-VERSION = '1.1.4'
+VERSION = '1.1.5'
 LICENSE = 'BSD-3-Clause'
 
 # What packages are required for this module to be executed?
