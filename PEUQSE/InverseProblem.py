@@ -100,7 +100,7 @@ class parameter_estimation:
                 UserInput.parameter_estimation_settings['mcmc_parallel_sampling'] = False
                 
         if UserInput.request_mpi == True: #Rank zero needs to clear out the mpi_cached_files directory (unless we are continuing sampling), so check if we are using rank 0.
-            import os; import sys
+            import os; #import sys
             import PEUQSE.parallel_processing
             if PEUQSE.parallel_processing.currentProcessorNumber == 0:
                 if not os.path.exists('./mpi_cached_files'):
@@ -3509,17 +3509,21 @@ def getPointsNearExistingSample(numPointsToGet, existingSamples, logP_value = No
     if sortBy == 'relative_delta': #take the deltas relative to the reference point, then take their absolute values, then divide by absolute magnitudes.
         sortByCalculationsArray = (existingSamples - referencePointWithZeroInFront)
         sortByCalculationsArray[:,1:] = np.abs(sortByCalculationsArray[:,1:])/ np.abs(referencePointWithZeroInFront[1:]) #divide by all of the parameter magnitudes.
+    # Distance is calculated according to Sqrt(Sum((xi – xi0)^2)). This section only squares the residual.
     if sortBy == 'absolute_distance': # take distance relative to reference point
         sortByCalculationsArray = (existingSamples - referencePointWithZeroInFront)**2
         sortByCalculationsArray[:,1:] = np.abs(sortByCalculationsArray[:,1:])
     if sortBy == 'relative_distance': #take distance relative to reference point
         sortByCalculationsArray = (existingSamples - referencePointWithZeroInFront)**2
-        sortByCalculationsArray[:,1:] = np.abs(sortByCalculationsArray[:,1:])/ np.abs(referencePointWithZeroInFront[1:]) #divide by all of the parameter magnitudes.
+        sortByCalculationsArray[:,1:] = np.abs(sortByCalculationsArray[:,1:])/ np.abs(referencePointWithZeroInFront[1:]**2) #this converts into relative distance since (xi - xi0)**2/xi0**2 = ((xi - xi0)/xi)**2
 
-    #make an array of the same length where we can have the the sums.
-    objectiveFunctionArray = np.sum(sortByCalculationsArray[:,1:], axis=1)[:, np.newaxis]
+    # we must sum over the rows only, so axis=1 is necessary. 
+    # The axis is added to allow for hstack to work. Must be a 2d array.
+    # Sum((xi – xi0)^2) is guided by:
+    objectiveFunctionArray = np.sum(sortByCalculationsArray[:,1:], axis=1)[:, np.newaxis] # add an axis to make 2d array
 
-    # check if criteria is by distance, if so then wrap the evaluation in a sqrt. This is according to sqrt((x1 - x0)**2 + (y1 - y0)**2)
+    # check if criteria is by distance, if so then wrap the evaluation in a sqrt. 
+    # Sqrt(Sum((xi – xi0)^2)) is guided by:
     if 'distance' in sortBy:
         objectiveFunctionArray = np.sqrt(objectiveFunctionArray)
 
