@@ -3132,9 +3132,9 @@ class parameter_estimation:
             pass
             
     def save_to_dill(self, base_file_name, file_name_prefix ='',  file_name_suffix='', file_name_extension='.dill'):
-        save_PE_object(self, base_file_name, file_name_prefix ='',  file_name_suffix='', file_name_extension='.dill')
+        save_PE_object(self, base_file_name, file_name_prefix,  file_name_suffix, file_name_extension)
     def load_from_dill(self, base_file_name, file_name_prefix ='',  file_name_suffix='', file_name_extension='.dill'):
-        theObject = load_PE_object(base_file_name, file_name_prefix ='',  file_name_suffix='', file_name_extension='.dill')
+        theObject = load_PE_object(base_file_name, file_name_prefix,  file_name_suffix, file_name_extension)
         print("PE_object.load_from_dill executed. This function returns a new PE_object. To overwrite an existing PE_object, use PE_object = PE_object.load_from_dill(...)")
         return theObject
         
@@ -3400,6 +3400,7 @@ def setMatPlotLibAgg(matPlotLibAggSetting = 'auto'):
 def pickleAnObject(objectToPickle, base_file_name, file_name_prefix ='',  file_name_suffix='', file_name_extension='.pkl'):
     try:
         import pickle
+        base_file_name = base_file_name.replace(file_name_extension, "") #remove the pkl extension if it’s already there, then we will add it back.
         data_filename = file_name_prefix + base_file_name + file_name_prefix + file_name_extension
         with open(data_filename, 'wb') as picklefile:
             pickle.dump(objectToPickle, picklefile)
@@ -3408,6 +3409,7 @@ def pickleAnObject(objectToPickle, base_file_name, file_name_prefix ='',  file_n
 
 def unpickleAnObject(base_file_name, file_name_prefix ='',  file_name_suffix='', file_name_extension='.pkl'):
     import pickle
+    base_file_name = base_file_name.replace(file_name_extension, "") #remove the pkl extension if it’s already there, then we will add it back.
     data_filename = file_name_prefix + base_file_name + file_name_prefix + file_name_extension
     with open(data_filename, 'rb') as picklefile:
         theObject = pickle.load(picklefile)
@@ -3420,6 +3422,7 @@ def dillpickleAnObject(objectToPickle, base_file_name, file_name_prefix ='',  fi
         import dill
     except:
         print("To use this feature requires dill. If you don't have it, open an anaconda prompt and type 'pip install dill' or use conda install. https://anaconda.org/anaconda/dill")
+    base_file_name = base_file_name.replace(file_name_extension, "") #remove the pkl extension if it’s already there, then we will add it back.
     data_filename = file_name_prefix + base_file_name + file_name_prefix + file_name_extension
     try:
         with open(data_filename, 'wb') as picklefile:
@@ -3433,16 +3436,17 @@ def unDillpickleAnObject(base_file_name, file_name_prefix ='',  file_name_suffix
         import dill
     except:
         print("To use this feature requires dill. If you don't have it, open an anaconda prompt and type 'pip install dill' or use conda install. https://anaconda.org/anaconda/dill")
+    base_file_name = base_file_name.replace(file_name_extension, "") #remove the pkl extension if it’s already there, then we will add it back.
     data_filename = file_name_prefix + base_file_name + file_name_prefix + file_name_extension
     with open(data_filename, 'rb') as picklefile:
         theObject = dill.load(picklefile)
     return theObject
 
 def save_PE_object(objectToPickle, base_file_name, file_name_prefix ='',  file_name_suffix='', file_name_extension='.dill'):
-    dillpickleAnObject(objectToPickle, base_file_name, file_name_prefix ='',  file_name_suffix='', file_name_extension='.dill')
+    dillpickleAnObject(objectToPickle, base_file_name, file_name_prefix,  file_name_suffix, file_name_extension)
 
 def load_PE_object(base_file_name, file_name_prefix ='',  file_name_suffix='', file_name_extension='.dill'):
-    theObject = unDillpickleAnObject(base_file_name, file_name_prefix ='',  file_name_suffix='', file_name_extension='.dill')
+    theObject = unDillpickleAnObject(base_file_name, file_name_prefix,  file_name_suffix, file_name_extension)
     return theObject
 
 def deleteAllFilesInDirectory(mydir=''):
