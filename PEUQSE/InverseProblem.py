@@ -1987,7 +1987,7 @@ class parameter_estimation:
         :param discrete_chains_post_burn_in_samples (optional): Array that contains post burn in samples. Shape is (numSamples, numChains, numParams) (:type np.array)
         """
         
-        if (discrete_chains_post_burn_in_samples==[]) and (hasattr(self, 'discrete_chains_post_burn_in_samples')):
+        if (len(discrete_chains_post_burn_in_samples)==0) and (hasattr(self, 'discrete_chains_post_burn_in_samples')):
             discrete_chains_post_burn_in_samples = self.discrete_chains_post_burn_in_samples
         # check if inputted array is a numpy array.
         if type(discrete_chains_post_burn_in_samples).__module__ != np.__name__:
