@@ -3464,12 +3464,19 @@ def getPointsNearExistingSample(numPointsToGet, existingSamples, logP_value = No
     Either a logP_value can be provided to get the nearest points, or a parameters_values must be provided.
     if both are provided, the parameters_values vector will be how the 'reference' point will be chosen.
 
-    :return extracted_parameter_samples: The parameter sets that meet the defined criteria. Shape is (numPointsToGet, numSamples). (:type: np.array)
+    :param numPointsToGet: Number of points to generate around point of interest. (:type: int)
+    :param existingSamples: Array of existing points or string of CSV or PKL file that contains previous samples from another BPE run. It is recommended to import mcmc_logP_and_parameter_samples.csv. (:type: np.array or str)
+    :param logP_value: LogP value to center points around. logP_value or parameters_value must be used as criteria. (:type: float)
+    :param parameter_values: Parameter values to center points around. logP_value or parameters_value must be used as criteria. (:type: list or np.array)
+    :param sortBy: Define the criteria to sort. Options are ['relative_delta', 'absolute_delta', 'absolute_distance', 'relative_distance']. (:type: str)
+    :param pickleFileName: The name to export the pickle file of the nearest points. (:type: str)
+
+    :return extracted_parameter_samples: The parameter sets that meet the defined criteria. Shape is (numPointsToGet, numParameters). (:type: np.array)
     :return extracted_logP_values: The logP values of the associated parameter sets. (:type: np.array)
     :return extracted_objective_values: The objective values to order the parameters on the defined criteria. (:type: np.array)
     """
     
-    #The sorting can occur by 'relative_delta', 'absolute_delta', 'absolute_distance', 'relative_distance'. The distance cases are not yet implemented.
+    #The sorting can occur by 'relative_delta', 'absolute_delta', 'absolute_distance', 'relative_distance'. 
 
     #First check if existingSamples is a string. If it's a string, we assume it's a filename, including extension.
     if isinstance(existingSamples, str):
@@ -3504,26 +3511,36 @@ def getPointsNearExistingSample(numPointsToGet, existingSamples, logP_value = No
     if sortBy == 'relative_delta': #take the deltas relative to the reference point, then take their absolute values, then divide by absolute magnitudes.
         sortByCalculationsArray = (existingSamples - referencePointWithZeroInFront)
         sortByCalculationsArray[:,1:] = np.abs(sortByCalculationsArray[:,1:])/ np.abs(referencePointWithZeroInFront[1:]) #divide by all of the parameter magnitudes.
+    if sortBy == 'absolute_distance': # take distance relative to reference point
+        sortByCalculationsArray = (existingSamples - referencePointWithZeroInFront)**2
+        sortByCalculationsArray[:,1:] = np.abs(sortByCalculationsArray[:,1:])
+    if sortBy == 'relative_distance': #take distance relative to reference point
+        sortByCalculationsArray = (existingSamples - referencePointWithZeroInFront)**2
+        sortByCalculationsArray[:,1:] = np.abs(sortByCalculationsArray[:,1:])/ np.abs(referencePointWithZeroInFront[1:]) #divide by all of the parameter magnitudes.
 
-    objectiveFunctionArray = np.zeros(len(sortByCalculationsArray)) #make an array of the same length where we can have the the sums.
+    #make an array of the same length where we can have the the sums.
     objectiveFunctionArray = np.sum(sortByCalculationsArray[:,1:], axis=1)[:, np.newaxis]
 
+    # check if criteria is by distance, if so then wrap the evaluation in a sqrt. This is according to sqrt((x1 - x0)**2 + (y1 - y0)**2)
+    if 'distance' in sortBy:
+        objectiveFunctionArray = np.sqrt(objectiveFunctionArray)
+
     #now we can stack this in front of the existingSamples for sorting.
-    
     arrayToSort = np.hstack((objectiveFunctionArray, existingSamples))
     
     #now sort it.
     sortedArray = arrayToSort[arrayToSort[:,0].argsort()] #by default this will be smallest to largest, which is what we want.
     
-    extractedSamples_with_objective_function_and_logP = sortedArray[0:numPointsToGet].T #extract the relevant rows
+    extractedSamples_with_objective_function_and_logP = sortedArray[0:numPointsToGet].T #extract the relevant rows and transform to appropriate shape of (numPointsToGet, numParameters)
 
+    # seperate values into separate variables. 
     extracted_objective_values = extractedSamples_with_objective_function_and_logP[0]
     extracted_logP_values = extractedSamples_with_objective_function_and_logP[1]
     extracted_parameter_samples = extractedSamples_with_objective_function_and_logP[2:].T
 
-    #TODO: pickle points before returning
+    #pickle pointes to easily be used as initial guess
     pickleAnObject(extracted_parameter_samples, pickleFileName, file_name_extension='')
-    # return extractedSamples_with_objective_function_and_logP #note that for most applications, we will then want to slice off the first 1 or 2 columns.
+    # return parameter samples, logP values, and objective values separately
     return extracted_parameter_samples, extracted_logP_values, extracted_objective_values
 
 
