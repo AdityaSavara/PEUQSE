@@ -3483,7 +3483,7 @@ def getPointsNearExistingSample(numPointsToGet, existingSamples, logP_value = No
         if ".csv" in existingSamples:
             existingSamples = np.genfromtxt(existingSamples, delimiter=',', dtype=float)
         elif ".pkl" in existingSamples:
-            existingSamples = unpickleAnObject(existingSamples, file_name_extension='')
+            existingSamples = unpickleAnObject(existingSamples)
     else: #else it is already an array like object.
        pass 
 
@@ -3541,7 +3541,7 @@ def getPointsNearExistingSample(numPointsToGet, existingSamples, logP_value = No
     extracted_parameter_samples = extractedSamples_with_objective_function_and_logP[2:].T
 
     #pickle pointes to easily be used as initial guess
-    pickleAnObject(extracted_parameter_samples, pickleFileName, file_name_extension='')
+    pickleAnObject(extracted_parameter_samples, pickleFileName)
     # return parameter samples, logP values, and objective values separately
     return extracted_parameter_samples, extracted_logP_values, extracted_objective_values
 
