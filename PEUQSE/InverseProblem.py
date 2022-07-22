@@ -100,7 +100,7 @@ class parameter_estimation:
                 UserInput.parameter_estimation_settings['mcmc_parallel_sampling'] = False
                 
         if UserInput.request_mpi == True: #Rank zero needs to clear out the mpi_cached_files directory (unless we are continuing sampling), so check if we are using rank 0.
-            import os; import sys
+            import os; #import sys
             import PEUQSE.parallel_processing
             if PEUQSE.parallel_processing.currentProcessorNumber == 0:
                 if not os.path.exists('./mpi_cached_files'):
@@ -351,13 +351,14 @@ class parameter_estimation:
                 start_point_pkl_file_name = start_point_pkl_file_name.replace('.pkl', '')
             from os.path import exists
             # check if file exists in current working directory
-            if exists(start_point_pkl_file_name + 'pkl'):
+            if exists(start_point_pkl_file_name + '.pkl'):
                 initialGuessUnfiltered = unpickleAnObject(start_point_pkl_file_name)
             # check if file exists in pickle directory
             elif exists(self.UserInput.directories['pickles'] + start_point_pkl_file_name + '.pkl'):
                 initialGuessUnfiltered = unpickleAnObject(self.UserInput.directories['pickles'] + start_point_pkl_file_name)
             else:
                 print('The pickled object for initial guess points must exist in base directory or pickles directory. The pickled file should have extension of ".pkl"')
+                sys.exit()
             # check if the shape of the loaded initial guess is a single point or a list of walkers
             if len(initialGuessUnfiltered.shape) == 1:
                 self.UserInput.InputParameterInitialGuess = initialGuessUnfiltered
@@ -366,6 +367,7 @@ class parameter_estimation:
                 self.UserInput.InputParameterInitialGuess = initialGuessUnfiltered[0] # take only the first walker as the initial points
             else:
                 print('The shape of the initial guess pickled array should be (num_walkers, num_parameters). The current pickled array does not have this shape and has:', initialGuessUnfiltered.shape)
+                sys.exit()
         else:
             #Getting initial guess of parameters and populating the internal variable for it.
             if ('InputParameterInitialGuess' not in self.UserInput.model) or (len(self.UserInput.model['InputParameterInitialGuess'])== 0): #if an initial guess is not provided, we use the prior.
@@ -1987,7 +1989,7 @@ class parameter_estimation:
         :param discrete_chains_post_burn_in_samples (optional): Array that contains post burn in samples. Shape is (numSamples, numChains, numParams) (:type np.array)
         """
         
-        if (discrete_chains_post_burn_in_samples==[]) and (hasattr(self, 'discrete_chains_post_burn_in_samples')):
+        if (len(discrete_chains_post_burn_in_samples)==0) and (hasattr(self, 'discrete_chains_post_burn_in_samples')):
             discrete_chains_post_burn_in_samples = self.discrete_chains_post_burn_in_samples
         # check if inputted array is a numpy array.
         if type(discrete_chains_post_burn_in_samples).__module__ != np.__name__:
@@ -2119,7 +2121,7 @@ class parameter_estimation:
                 start_point_pkl_file_name = start_point_pkl_file_name.replace('.pkl', '')
             from os.path import exists
             # check if file exists in current working directory
-            if exists(start_point_pkl_file_name + 'pkl'):
+            if exists(start_point_pkl_file_name + '.pkl'):
                 walkerStartPoints = unpickleAnObject(start_point_pkl_file_name)
                 loaded_initial_guess_flag = True # makes sure the pickled array is used for starting points
             # check if file exists in pickle directory
@@ -2315,7 +2317,7 @@ class parameter_estimation:
                 start_point_pkl_file_name = start_point_pkl_file_name.replace('.pkl', '')
             from os.path import exists
             # check if file exists in current working directory
-            if exists(start_point_pkl_file_name + 'pkl'):
+            if exists(start_point_pkl_file_name + '.pkl'):
                 walkerStartPoints = unpickleAnObject(start_point_pkl_file_name)
                 loaded_initial_guess_flag = True # makes sure the pickled array is used for starting points
             # check if file exists in pickle directory
@@ -3132,9 +3134,9 @@ class parameter_estimation:
             pass
             
     def save_to_dill(self, base_file_name, file_name_prefix ='',  file_name_suffix='', file_name_extension='.dill'):
-        save_PE_object(self, base_file_name, file_name_prefix ='',  file_name_suffix='', file_name_extension='.dill')
+        save_PE_object(self, base_file_name, file_name_prefix=file_name_prefix, file_name_suffix=file_name_suffix, file_name_extension=file_name_extension)
     def load_from_dill(self, base_file_name, file_name_prefix ='',  file_name_suffix='', file_name_extension='.dill'):
-        theObject = load_PE_object(base_file_name, file_name_prefix ='',  file_name_suffix='', file_name_extension='.dill')
+        theObject = load_PE_object(base_file_name, file_name_prefix=file_name_prefix, file_name_suffix=file_name_suffix, file_name_extension=file_name_extension)
         print("PE_object.load_from_dill executed. This function returns a new PE_object. To overwrite an existing PE_object, use PE_object = PE_object.load_from_dill(...)")
         return theObject
         
@@ -3400,7 +3402,8 @@ def setMatPlotLibAgg(matPlotLibAggSetting = 'auto'):
 def pickleAnObject(objectToPickle, base_file_name, file_name_prefix ='',  file_name_suffix='', file_name_extension='.pkl'):
     try:
         import pickle
-        data_filename = file_name_prefix + base_file_name + file_name_prefix + file_name_extension
+        base_file_name = base_file_name.replace(file_name_extension, "") #remove the pkl extension if it’s already there, then we will add it back.
+        data_filename = file_name_prefix + base_file_name + file_name_suffix + file_name_extension
         with open(data_filename, 'wb') as picklefile:
             pickle.dump(objectToPickle, picklefile)
     except Exception as theError:
@@ -3408,7 +3411,8 @@ def pickleAnObject(objectToPickle, base_file_name, file_name_prefix ='',  file_n
 
 def unpickleAnObject(base_file_name, file_name_prefix ='',  file_name_suffix='', file_name_extension='.pkl'):
     import pickle
-    data_filename = file_name_prefix + base_file_name + file_name_prefix + file_name_extension
+    base_file_name = base_file_name.replace(file_name_extension, "") #remove the pkl extension if it’s already there, then we will add it back.
+    data_filename = file_name_prefix + base_file_name + file_name_suffix + file_name_extension
     with open(data_filename, 'rb') as picklefile:
         theObject = pickle.load(picklefile)
     return theObject
@@ -3420,7 +3424,8 @@ def dillpickleAnObject(objectToPickle, base_file_name, file_name_prefix ='',  fi
         import dill
     except:
         print("To use this feature requires dill. If you don't have it, open an anaconda prompt and type 'pip install dill' or use conda install. https://anaconda.org/anaconda/dill")
-    data_filename = file_name_prefix + base_file_name + file_name_prefix + file_name_extension
+    base_file_name = base_file_name.replace(file_name_extension, "") #remove the pkl extension if it’s already there, then we will add it back.
+    data_filename = file_name_prefix + base_file_name + file_name_suffix + file_name_extension
     try:
         with open(data_filename, 'wb') as picklefile:
             dill.dump(objectToPickle, picklefile)
@@ -3433,16 +3438,17 @@ def unDillpickleAnObject(base_file_name, file_name_prefix ='',  file_name_suffix
         import dill
     except:
         print("To use this feature requires dill. If you don't have it, open an anaconda prompt and type 'pip install dill' or use conda install. https://anaconda.org/anaconda/dill")
-    data_filename = file_name_prefix + base_file_name + file_name_prefix + file_name_extension
+    base_file_name = base_file_name.replace(file_name_extension, "") #remove the pkl extension if it’s already there, then we will add it back.
+    data_filename = file_name_prefix + base_file_name + file_name_suffix + file_name_extension
     with open(data_filename, 'rb') as picklefile:
         theObject = dill.load(picklefile)
     return theObject
 
 def save_PE_object(objectToPickle, base_file_name, file_name_prefix ='',  file_name_suffix='', file_name_extension='.dill'):
-    dillpickleAnObject(objectToPickle, base_file_name, file_name_prefix ='',  file_name_suffix='', file_name_extension='.dill')
+    dillpickleAnObject(objectToPickle, base_file_name, file_name_prefix=file_name_prefix, file_name_suffix=file_name_suffix, file_name_extension=file_name_extension)
 
 def load_PE_object(base_file_name, file_name_prefix ='',  file_name_suffix='', file_name_extension='.dill'):
-    theObject = unDillpickleAnObject(base_file_name, file_name_prefix ='',  file_name_suffix='', file_name_extension='.dill')
+    theObject = unDillpickleAnObject(base_file_name, file_name_prefix=file_name_prefix, file_name_suffix=file_name_suffix, file_name_extension=file_name_extension)
     return theObject
 
 def deleteAllFilesInDirectory(mydir=''):
@@ -3454,6 +3460,95 @@ def deleteAllFilesInDirectory(mydir=''):
     filelist = copy.deepcopy(os.listdir(mydir))
     for f in filelist:
         os.remove(os.path.join(mydir, f))
+
+def getPointsNearExistingSample(numPointsToGet, existingSamples, logP_value = None, parameters_values = None, sortBy = 'relative_delta', pickleFileName='pointsNearExistingSample.pkl'):
+    """
+    This function retrieves a number of points near a point in existingSamples, either based on a logP_value or parameters_values.
+    All of the rows in existingSamples must be of the form of LogP in the first column and parameters_values in the later columns.
+    Either a logP_value can be provided to get the nearest points, or a parameters_values must be provided.
+    if both are provided, the parameters_values vector will be how the 'reference' point will be chosen.
+
+    :param numPointsToGet: Number of points to generate around point of interest. (:type: int)
+    :param existingSamples: Array of existing points or string of CSV or PKL file that contains previous samples from another BPE run. It is recommended to import mcmc_logP_and_parameter_samples.csv. (:type: np.array or str)
+    :param logP_value: LogP value to center points around. logP_value or parameters_value must be used as criteria. (:type: float)
+    :param parameter_values: Parameter values to center points around. logP_value or parameters_value must be used as criteria. (:type: list or np.array)
+    :param sortBy: Define the criteria to sort. Options are ['relative_delta', 'absolute_delta', 'absolute_distance', 'relative_distance']. (:type: str)
+    :param pickleFileName: The name to export the pickle file of the nearest points. (:type: str)
+
+    :return extracted_parameter_samples: The parameter sets that meet the defined criteria. Shape is (numPointsToGet, numParameters). (:type: np.array)
+    :return extracted_logP_values: The logP values of the associated parameter sets. (:type: np.array)
+    :return extracted_objective_values: The objective values to order the parameters on the defined criteria. (:type: np.array)
+    """
+    
+    #The sorting can occur by 'relative_delta', 'absolute_delta', 'absolute_distance', 'relative_distance'. 
+
+    #First check if existingSamples is a string. If it's a string, we assume it's a filename, including extension.
+    if isinstance(existingSamples, str):
+        if ".csv" in existingSamples:
+            existingSamples = np.genfromtxt(existingSamples, delimiter=',', dtype=float)
+        elif ".pkl" in existingSamples:
+            existingSamples = unpickleAnObject(existingSamples)
+    else: #else it is already an array like object.
+       pass 
+
+    #Now, we need to remove any rows where existingSamples has '-inf' in the first column, because we don't want to sample from points with 0 probability:
+    existingSamples = existingSamples[ existingSamples[:,0] > float('-inf')] #this is numpy syntax for returning a filtered array with a particular condition, and here the condition is that for all rows the first value is > float('-inf').
+
+    if not isinstance(parameters_values, type(None)):
+        referencePoint = parameters_values
+    else: 
+        # find Index where existingSamples[:,0] = logP_value, takes the first value encountered that has the lowest value. This handles equal differences.
+        indexToUse = np.abs(existingSamples[:,0] - logP_value).argmin() # finds the value that is closest to the input logP value
+        parameters_values = existingSamples[indexToUse]
+        referencePoint = parameters_values[1:]
+
+    #now we will add a 0 in front to represent a logP_value. This will come in useful during subtractions.
+    referencePointWithZeroInFront =  np.hstack(([0],referencePoint))
+
+    #Now calculate the sortBy array.
+    sortByCalculationsArray = copy.deepcopy(existingSamples)
+    if sortBy == 'absolute_delta': #take the deltas relative to the reference point, then take their absolute values.
+        sortByCalculationsArray = (existingSamples - referencePointWithZeroInFront)
+        sortByCalculationsArray[:,1:] = np.abs(sortByCalculationsArray[:,1:])
+    if sortBy == 'relative_delta': #take the deltas relative to the reference point, then take their absolute values, then divide by absolute magnitudes.
+        sortByCalculationsArray = (existingSamples - referencePointWithZeroInFront)
+        sortByCalculationsArray[:,1:] = np.abs(sortByCalculationsArray[:,1:])/ np.abs(referencePointWithZeroInFront[1:]) #divide by all of the parameter magnitudes.
+    # Distance is calculated according to Sqrt(Sum((xi – xi0)^2)). This section only squares the residual.
+    if sortBy == 'absolute_distance': # take distance relative to reference point
+        sortByCalculationsArray = (existingSamples - referencePointWithZeroInFront)**2
+        sortByCalculationsArray[:,1:] = np.abs(sortByCalculationsArray[:,1:])
+    if sortBy == 'relative_distance': #take distance relative to reference point
+        sortByCalculationsArray = (existingSamples - referencePointWithZeroInFront)**2
+        sortByCalculationsArray[:,1:] = np.abs(sortByCalculationsArray[:,1:])/ np.abs(referencePointWithZeroInFront[1:]**2) #this converts into relative distance since (xi - xi0)**2/xi0**2 = ((xi - xi0)/xi)**2
+
+    # we must sum over the rows only, so axis=1 is necessary. 
+    # The axis is added to allow for hstack to work. Must be a 2d array.
+    # Sum((xi – xi0)^2) is guided by:
+    objectiveFunctionArray = np.sum(sortByCalculationsArray[:,1:], axis=1)[:, np.newaxis] # add an axis to make 2d array
+
+    # check if criteria is by distance, if so then wrap the evaluation in a sqrt. 
+    # Sqrt(Sum((xi – xi0)^2)) is guided by:
+    if 'distance' in sortBy:
+        objectiveFunctionArray = np.sqrt(objectiveFunctionArray)
+
+    #now we can stack this in front of the existingSamples for sorting.
+    arrayToSort = np.hstack((objectiveFunctionArray, existingSamples))
+    
+    #now sort it.
+    sortedArray = arrayToSort[arrayToSort[:,0].argsort()] #by default this will be smallest to largest, which is what we want.
+    
+    extractedSamples_with_objective_function_and_logP = sortedArray[0:numPointsToGet].T #extract the relevant rows and transform to appropriate shape of (numPointsToGet, numParameters)
+
+    # seperate values into separate variables. 
+    extracted_objective_values = extractedSamples_with_objective_function_and_logP[0]
+    extracted_logP_values = extractedSamples_with_objective_function_and_logP[1]
+    extracted_parameter_samples = extractedSamples_with_objective_function_and_logP[2:].T
+
+    #pickle pointes to easily be used as initial guess
+    pickleAnObject(extracted_parameter_samples, pickleFileName)
+    # return parameter samples, logP values, and objective values separately
+    return extracted_parameter_samples, extracted_logP_values, extracted_objective_values
+
 
 def calculateAndPlotConvergenceDiagnostics(discrete_chains_post_burn_in_samples, parameterNamesAndMathTypeExpressionsDict, plot_settings={}, graphs_directory='./', createPlots=True):
     """
