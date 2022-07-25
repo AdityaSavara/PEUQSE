@@ -1,0 +1,4 @@
+*.xlsx
+CITATIONS/
+*.dill
+__pycache__/
