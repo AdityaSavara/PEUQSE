@@ -3549,6 +3549,32 @@ def getPointsNearExistingSample(numPointsToGet, existingSamples, logP_value = No
     # return parameter samples, logP values, and objective values separately
     return extracted_parameter_samples, extracted_logP_values, extracted_objective_values
 
+def truncateSamples(post_burn_in_samples, parameterBounds=[]):
+    """
+    Truncate samples by bounding the parameter space. Put None in bounds that are not truncated.
+    Parameter bounds are inclusive.
+
+    :param post_burn_in_samples: Samples after mcmc run. (:type: np.array)
+    :param parameterBounds: List of parameter bounds. Bounds are tuples with lower being first element and upper bound being the second. (:type: tuples in list)
+    """
+    # check length of parameter bounds
+    if post_burn_in_samples.shape[1] != len(parameterBounds):
+        print('The samples must have shape (numSamples, numParameters) and parameterBounds must be a list of tuples containing the lower and upper bounds for a parameter. The parameters bounds must be in the same order as the parameters ordered in the samples variable.')
+        sys.exit()
+    # apply a mask to truncate samples relative to parameter bounds
+    for param_index, paramBound in enumerate(parameterBounds):
+        lowerBound, upperBound = paramBound
+        # check if Nones were input, this indicates to not truncate the parameter
+        if (lowerBound == None) and (upperBound == None):
+            continue # skips to the next iteration
+        elif lowerBound == None: # create mask for lower bound
+            truncatedMask = (post_burn_in_samples[:, param_index] <= upperBound)
+        elif upperBound == None: # create mask for upper bound
+            truncatedMask = (post_burn_in_samples[:, param_index] >= lowerBound)
+        else: # create mask for lower and upper bound
+            truncatedMask = ((post_burn_in_samples[:, param_index] >= lowerBound) & (post_burn_in_samples[:, param_index] <= upperBound))
+        post_burn_in_samples = post_burn_in_samples[truncatedMask, :] # truncate number of samples from the mask
+    return post_burn_in_samples
 
 def calculateAndPlotConvergenceDiagnostics(discrete_chains_post_burn_in_samples, parameterNamesAndMathTypeExpressionsDict, plot_settings={}, graphs_directory='./', createPlots=True):
     """
