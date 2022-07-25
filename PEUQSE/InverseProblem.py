@@ -1832,7 +1832,7 @@ class parameter_estimation:
                 mergedArray = np.hstack( (self.post_burn_in_log_posteriors_un_normed_vec, self.post_burn_in_log_priors_vec, self.post_burn_in_samples) )
             except:
                 print("Line 866: There has been an error, here are post_burn_in_log_posteriors_un_normed_vec, post_burn_in_samples, post_burn_in_log_priors_vec", np.shape(self.post_burn_in_log_posteriors_un_normed_vec), np.shape(self.post_burn_in_samples), np.shape(self.post_burn_in_log_priors_vec))
-                print(self.post_burn_in_log_posteriors_un_normed_vec, self.post_burn_in_samples, self.post_burn_in_log_priors_vec)
+                # print(self.post_burn_in_log_posteriors_un_normed_vec, self.post_burn_in_samples, self.post_burn_in_log_priors_vec)
                 sys.exit()
             #Now need to find cases where the probability is too low and filter them out.
             #Filtering Step 1: Find average and Stdev of log(-logP)
@@ -2797,6 +2797,27 @@ class parameter_estimation:
             log_probability_metric = log_probability_metric + response_log_probability_metric
         return log_probability_metric, simulatedResponses_transformed
 
+    def doTruncateSamples(self, post_burn_in_samples=[], parameterBounds=[]):
+        """
+        Truncate the post_burn_in_samples variable along with other variables that are relative to it. 
+        Apply a lower and upper bound to a parameter to truncate.
+        Bounds are Inclusive. Set a None on a bound to not have it change. 
+        Example of changing just lower bound for one parameter: parameterBounds = [(paramLowerBound, None)]
+
+        :param post_burn_in_samples: Samples after mcmc run. (:type: np.array)
+        :param parameterBounds: List of parameter bounds. Bounds are tuples with lower being first element and upper bound being the second. (:type: tuples in list)
+        """
+        if post_burn_in_samples == []:
+            post_burn_in_samples = self.post_burn_in_samples
+        # truncate the post burn in samples according to the parameterBounds
+        truncated_post_burn_in_samples, truncated_mask = truncateSamples(post_burn_in_samples, parameterBounds = parameterBounds, returnMask=True)
+        # reassign class variables to the truncated versions
+        self.post_burn_in_samples = truncated_post_burn_in_samples
+        self.post_burn_in_log_posteriors_un_normed_vec = self.post_burn_in_log_posteriors_un_normed_vec[truncated_mask, :]
+        self.post_burn_in_log_priors_vec = self.post_burn_in_log_priors_vec[truncated_mask, :]
+        # return post_burn_in_samples
+        return truncated_post_burn_in_samples
+
     def makeHistogramsForEachParameter(self):
         import PEUQSE.plotting_functions as plotting_functions 
         setMatPlotLibAgg(self.UserInput.plotting_ouput_settings['setMatPlotLibAgg'])
@@ -3549,13 +3570,14 @@ def getPointsNearExistingSample(numPointsToGet, existingSamples, logP_value = No
     # return parameter samples, logP values, and objective values separately
     return extracted_parameter_samples, extracted_logP_values, extracted_objective_values
 
-def truncateSamples(post_burn_in_samples, parameterBounds=[]):
+def truncateSamples(post_burn_in_samples, parameterBounds=[], returnMask=False):
     """
     Truncate samples by bounding the parameter space. Put None in bounds that are not truncated.
     Parameter bounds are inclusive.
 
     :param post_burn_in_samples: Samples after mcmc run. (:type: np.array)
     :param parameterBounds: List of parameter bounds. Bounds are tuples with lower being first element and upper bound being the second. (:type: tuples in list)
+    :param returnMask: Boolean value to return the mask along with the samples. (:type: bool)
     """
     # check length of parameter bounds
     if post_burn_in_samples.shape[1] != len(parameterBounds):
@@ -3574,7 +3596,10 @@ def truncateSamples(post_burn_in_samples, parameterBounds=[]):
         else: # create mask for lower and upper bound
             truncatedMask = ((post_burn_in_samples[:, param_index] >= lowerBound) & (post_burn_in_samples[:, param_index] <= upperBound))
         post_burn_in_samples = post_burn_in_samples[truncatedMask, :] # truncate number of samples from the mask
-    return post_burn_in_samples
+    if returnMask:
+        return post_burn_in_samples, truncatedMask
+    else:
+        return post_burn_in_samples
 
 def calculateAndPlotConvergenceDiagnostics(discrete_chains_post_burn_in_samples, parameterNamesAndMathTypeExpressionsDict, plot_settings={}, graphs_directory='./', createPlots=True):
     """
