@@ -3604,30 +3604,34 @@ def truncateSamples(samples, parameterBoundsLower=None, parameterBoundsUpper=Non
     else:
         return samples
 
-def splitSamples(samples, parameter_indices, splitting_values):
+def splitSamples(samples, parameter_indices, all_parameters_splitting_values):
     """
     Split samples at a given value(s).
     The samples will be returned in order. 
     Only supports splitting across one parameter for now. 
 
-    :param samples:  (:type: np.array)
-    :param parameter_indicies:  (:type: list of ints)
-    :param splitting_values:  (:type: list of lists)
+    :param samples: Parameter samples with shape (numSamples, numParams) (:type: np.array)
+    :param parameter_indicies: Indices of parameters that are considered when splitting. Only supports one parameter. Ex: [3] (:type: list of ints)
+    :param all_parameters_splitting_values: List of values to split at. Only supports splitting for one parameter. Ex: [[1,2,3]] (:type: list of lists)
     """
     # check if parameter indices is not in a list
     if isinstance(parameter_indices, int):
         parameter_indices = [parameter_indices]
+    # make sure the splitting_values variable is a list of lists, or something similar
+    all_parameters_splitting_values = nestedObjectsFunctions.makeAtLeast_2dNested(all_parameters_splitting_values)
     # check if parameter indices is not one, right now only one parameter can be handled
     if len(parameter_indices) != 1:
         print('This function (splitSamples) only supports splitting across one parameter for now.')
         sys.exit()
     #TODO: change code to make handle multiple parameters, currently it will not
+    parameter_index = parameter_indices[0]
+    splitting_values = all_parameters_splitting_values[0]
     # sort samples
-    sorted_indices = np.argsort(samples[:, parameter_indices[0]], axis=0)[:, np.newaxis] # add newaxis to make samples and sorted_indices the same dimensions
+    sorted_indices = np.argsort(samples[:, parameter_index], axis=0)[:, np.newaxis] # add newaxis to make samples and sorted_indices the same dimensions
     sorted_samples = np.take_along_axis(samples, sorted_indices, axis=0)
     # find splitting spots
-    split_at = sorted_samples[:, parameter_indices[0]].searchsorted(splitting_values)
-    split_samples = np.split(sorted_samples, split_at)
+    split_at = sorted_samples[:, parameter_index].searchsorted(splitting_values) 
+    split_samples = np.split(sorted_samples, split_at) # split_at must be a list-like object
     # return list of arrays
     return split_samples
 
