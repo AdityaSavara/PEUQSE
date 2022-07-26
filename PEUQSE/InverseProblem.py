@@ -1832,7 +1832,7 @@ class parameter_estimation:
                 mergedArray = np.hstack( (self.post_burn_in_log_posteriors_un_normed_vec, self.post_burn_in_log_priors_vec, self.post_burn_in_samples) )
             except:
                 print("Line 866: There has been an error, here are post_burn_in_log_posteriors_un_normed_vec, post_burn_in_samples, post_burn_in_log_priors_vec", np.shape(self.post_burn_in_log_posteriors_un_normed_vec), np.shape(self.post_burn_in_samples), np.shape(self.post_burn_in_log_priors_vec))
-                print(self.post_burn_in_log_posteriors_un_normed_vec, self.post_burn_in_samples, self.post_burn_in_log_priors_vec)
+                # print(self.post_burn_in_log_posteriors_un_normed_vec, self.post_burn_in_samples, self.post_burn_in_log_priors_vec)
                 sys.exit()
             #Now need to find cases where the probability is too low and filter them out.
             #Filtering Step 1: Find average and Stdev of log(-logP)
@@ -2797,6 +2797,28 @@ class parameter_estimation:
             log_probability_metric = log_probability_metric + response_log_probability_metric
         return log_probability_metric, simulatedResponses_transformed
 
+    def truncatePostBurnInSamples(self, post_burn_in_samples=[], parameterBoundsLower=None, parameterBoundsUpper=None):
+        """
+        Truncate the post_burn_in_samples variable along with other variables that are relative to it. 
+        Apply a lower and upper bound to a parameter to truncate.
+        Bounds are Inclusive. Set a None on a bound to not have it change. 
+        Example of changing just lower bound for one parameter: parameterBounds = [(paramLowerBound, None)]
+
+        :param post_burn_in_samples: Samples after mcmc run. (:type: np.array)
+        :param parameterBoundsLower: List of parameter lower bounds. Use None to indicate a bound not being applied. (:type: list)
+        :param parameterBoundsUpper: List of parameter upper bounds. Use None to indicate a bound not being applied. (:type: list)
+        """
+        if post_burn_in_samples == []:
+            post_burn_in_samples = self.post_burn_in_samples
+        # truncate the post burn in samples according to the parameterBounds
+        truncated_post_burn_in_samples, truncated_mask = truncateSamples(post_burn_in_samples, parameterBoundsLower=parameterBoundsLower, parameterBoundsUpper=parameterBoundsUpper, returnMask=True)
+        # reassign class variables to the truncated versions
+        self.post_burn_in_samples = truncated_post_burn_in_samples
+        self.post_burn_in_log_posteriors_un_normed_vec = self.post_burn_in_log_posteriors_un_normed_vec[truncated_mask, :]
+        self.post_burn_in_log_priors_vec = self.post_burn_in_log_priors_vec[truncated_mask, :]
+        # return post_burn_in_samples
+        return truncated_post_burn_in_samples
+
     def makeHistogramsForEachParameter(self):
         import PEUQSE.plotting_functions as plotting_functions 
         setMatPlotLibAgg(self.UserInput.plotting_ouput_settings['setMatPlotLibAgg'])
@@ -3549,6 +3571,69 @@ def getPointsNearExistingSample(numPointsToGet, existingSamples, logP_value = No
     # return parameter samples, logP values, and objective values separately
     return extracted_parameter_samples, extracted_logP_values, extracted_objective_values
 
+def truncateSamples(samples, parameterBoundsLower=None, parameterBoundsUpper=None, returnMask=False):
+    """
+    Truncate samples by bounding the parameter space. Put None in bounds that are not truncated.
+    Parameter bounds are inclusive.
+
+    :param samples: Samples after mcmc run. (:type: np.array)
+    :param parameterBoundsLower: List of parameter lower bounds. Use None to indicate a bound not being applied. (:type: list)
+    :param parameterBoundsUpper: List of parameter upper bounds. Use None to indicate a bound not being applied. (:type: list)
+    :param returnMask: Boolean value to return the mask along with the samples. (:type: bool)
+    """
+    parameterBounds = zip(parameterBoundsLower, parameterBoundsUpper)
+    # check length of parameter bounds
+    if samples.shape[1] != len(parameterBounds):
+        print('The samples must have shape (numSamples, numParameters) and parameterBounds must be a list of tuples containing the lower and upper bounds for a parameter. The parameters bounds must be in the same order as the parameters ordered in the samples variable.')
+        sys.exit()
+    # apply a mask to truncate samples relative to parameter bounds
+    for param_index, paramBounds in enumerate(parameterBounds):
+        lowerBound, upperBound = paramBounds
+        # check if Nones were input, this indicates to not truncate the parameter
+        if (isinstance(lowerBound, type(None))) and (isinstance(upperBound, type(None))):
+            continue # skips to the next iteration
+        elif isinstance(lowerBound, type(None)): # create mask for lower bound
+            truncatedMask = (samples[:, param_index] <= upperBound)
+        elif isinstance(upperBound, type(None)): # create mask for upper bound
+            truncatedMask = (samples[:, param_index] >= lowerBound)
+        else: # create mask for lower and upper bound
+            truncatedMask = ((samples[:, param_index] >= lowerBound) & (samples[:, param_index] <= upperBound))
+        samples = samples[truncatedMask, :] # truncate number of samples from the mask
+    if returnMask:
+        return samples, truncatedMask
+    else:
+        return samples
+
+def splitSamples(samples, parameter_indices, all_parameters_splitting_values):
+    """
+    Split samples at a given value(s).
+    The samples will be returned in order. 
+    Only supports splitting across one parameter for now. 
+
+    :param samples: Parameter samples with shape (numSamples, numParams) (:type: np.array)
+    :param parameter_indicies: Indices of parameters that are considered when splitting. Only supports one parameter. Ex: [3] (:type: list of ints)
+    :param all_parameters_splitting_values: List of values to split at. Only supports splitting for one parameter. Ex: [[1,2,3]] (:type: list of lists)
+    """
+    # check if parameter indices is not in a list
+    if isinstance(parameter_indices, int):
+        parameter_indices = [parameter_indices]
+    # make sure the splitting_values variable is a list of lists, or something similar
+    all_parameters_splitting_values = nestedObjectsFunctions.makeAtLeast_2dNested(all_parameters_splitting_values)
+    # check if parameter indices is not one, right now only one parameter can be handled
+    if len(parameter_indices) != 1:
+        print('This function (splitSamples) only supports splitting across one parameter for now.')
+        sys.exit()
+    #TODO: change code to make handle multiple parameters, currently it will not
+    parameter_index = parameter_indices[0]
+    splitting_values = all_parameters_splitting_values[0]
+    # sort samples
+    sorted_indices = np.argsort(samples[:, parameter_index], axis=0)[:, np.newaxis] # add newaxis to make samples and sorted_indices the same dimensions
+    sorted_samples = np.take_along_axis(samples, sorted_indices, axis=0)
+    # find splitting spots
+    split_at = sorted_samples[:, parameter_index].searchsorted(splitting_values) 
+    split_samples = np.split(sorted_samples, split_at) # split_at must be a list-like object
+    # return list of arrays
+    return split_samples
 
 def calculateAndPlotConvergenceDiagnostics(discrete_chains_post_burn_in_samples, parameterNamesAndMathTypeExpressionsDict, plot_settings={}, graphs_directory='./', createPlots=True):
     """
