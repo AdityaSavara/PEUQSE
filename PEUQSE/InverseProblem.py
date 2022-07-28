@@ -3483,7 +3483,7 @@ def deleteAllFilesInDirectory(mydir=''):
     for f in filelist:
         os.remove(os.path.join(mydir, f))
 
-def getPointsNearExistingSample(numPointsToGet, existingSamples, logP_value = None, parameters_values = None, sortBy = 'relative_delta', pickleFileName='pointsNearExistingSample.pkl'):
+def getPointsNearExistingSample(numPointsToGet, existingSamples, logP_value = None, parameters_values = None, sortBy = 'relative_delta', pickleFileName='pointsNearExistingSample.pkl', unique_points=True):
     """
     This function retrieves a number of points near a point in existingSamples, either based on a logP_value or parameters_values.
     All of the rows in existingSamples must be of the form of LogP in the first column and parameters_values in the later columns.
@@ -3559,6 +3559,10 @@ def getPointsNearExistingSample(numPointsToGet, existingSamples, logP_value = No
     #now sort it.
     sortedArray = arrayToSort[arrayToSort[:,0].argsort()] #by default this will be smallest to largest, which is what we want.
     
+    # have only unique points if unique_points is True
+    if unique_points:
+        sortedArray = np.unique(sortedArray, axis=0)
+
     extractedSamples_with_objective_function_and_logP = sortedArray[0:numPointsToGet].T #extract the relevant rows and transform to appropriate shape of (numPointsToGet, numParameters)
 
     # seperate values into separate variables. 
