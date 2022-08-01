@@ -1,3 +1,9 @@
+[![PyPI version](https://badge.fury.io/py/PEUQSE.svg)](https://badge.fury.io/py/PEUQSE)
+[![DOI:<10.11578/dc.20200908.7>](http://img.shields.io/badge/DOI-10.11578/dc.20200908.7-green.svg)](<https://doi.org/10.11578/dc.20200908.7>) [![Build Status](https://app.travis-ci.com/AdityaSavara/PEUQSE.svg?branch=master)](https://app.travis-ci.com/AdityaSavara/PEUQSE)  [![UnitTests:<UnitTests>](http://img.shields.io/badge/UnitTests-Passing-blue.svg)](<Passing-blue>) 
+[![Open Source Love](https://badges.frapsoft.com/os/v3/open-source.svg?v=103)](https://github.com/ellerbrock/open-source-badges/)
+
+
+
 # Parameter Estimation and Uncertainty Quantification for Science and Engineering (PEUQSE)
 
 Parameter estimation for complex physical problems often suffers from finding ‘solutions’ that are not physically realistic. The PEUQSE software (formerly named CheKiPEUQ) provides tools for finding physically realistic parameter estimates, graphs of the parameter estimate positions within parameter space, and plots of the final simulation results.
