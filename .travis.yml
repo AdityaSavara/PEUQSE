@@ -3,6 +3,12 @@ language: python
 python:
   - "3.8"
 # commands to install dependencies
+env:
+  global:
+    - HYDRA_LAUNCHER=fork
+    - OMPI_MCA_plm=isolated
+    - OMPI_MCA_rmaps_base_oversubscribe=true
+
 install:
   #No installation is required for UnitTesterSG with what is already on the Travis CI, so commenting out the below to let the build test run faster.
   #- virtualenv -p /opt/pyenv/versions/3.8/bin/python3.8 venv
@@ -22,6 +28,7 @@ install:
   - pip install dill
   - pip install emcee
   - pip install mpi4py
+  - source Examples/.azure/install-$MPI.sh
 script: 
   - cd Examples
   - python3 runPytestDriver.py failWithError #The "failWithError" optional argument will cause an error exitCode if any unit tests fail.
