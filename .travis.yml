@@ -17,7 +17,6 @@ install:
   #- python setup.py install  #now overwrite old installations with the current version.
 # command to run tests
 #remove the test_13.py before running the runPytestDriver.py since that python file is designed to give an error as downloaded.
-  - sudo apt install python3-mpi4py
   - pip install UnitTesterSG
   - pip install numpy
   - pip install pandas
@@ -27,8 +26,8 @@ install:
   - pip install zeus-mcmc
   - pip install dill
   - pip install emcee
-  - pip install mpi4py
   - source Examples/.azure/install-$MPI.sh
+  - pip install mpi4py
 script: 
   - cd Examples
   - python3 runPytestDriver.py failWithError #The "failWithError" optional argument will cause an error exitCode if any unit tests fail.
