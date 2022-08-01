@@ -62,7 +62,12 @@ try:
     os.remove("runfile_for_unit_test_parallel_doe_parameter_modulation.pkl")
 except:
     pass
-os.system("mpiexec -n 26 python runfile_for_unit_test_parallel_doe_parameter_modulation.py")  #This will run the file, given how it's structured.
+try:
+    os.system("mpiexec -n 26 python runfile_for_unit_test_parallel_doe_parameter_modulation.py")  #This will run the file, given how it's structured.
+except:
+    os.system("mpirun -n 26 python runfile_for_unit_test_parallel_doe_parameter_modulation.py")  #This will run the file, given how it's structured.
+
+
 actualResult = PEUQSE.unpickleAnObject("runfile_for_unit_test_parallel_doe_parameter_modulation")
 
 input = None
