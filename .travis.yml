@@ -1,58 +1,7 @@
-#The .travis.yml file has been significantly expanded by following this example to get mpi4py working: https://github.com/bsamseth/mpi4py-travis/blob/master/.travis.yml
-#The directory ci was put inside of PEUQSE, such that one line below was changed to PEUQSE/ci/install-openmpi.sh
-#This is the mpi4py portion:
-language: cpp
-dist: xenial
-notifications:
-  email: false
-
-cache: 
-  directories:
-    - $TRAVIS_BUILD_DIR/openmpi-build
-    - $TRAVIS_BUILD_DIR/openmpi-3.1.3
-
-matrix:
-  include:
-    - os: linux
-      addons:
-        apt:
-          sources:
-            - deadsnakes
-            - ubuntu-toolchain-r-test
-          packages:
-            - python3-dev
-            - g++-7
-      env:
-        - C_COMPILER="gcc-7", CXX_COMPILER="g++-7"
-
-before_install:
-  - pyenv global $(pyenv whence 2to3)
-  - pip install pipenv
-  - export MPI_BUILD_DIR=$TRAVIS_BUILD_DIR/openmpi-build
-  - export MPI_VERSION="3.1"
-  - export MPI_FULL_VERSION="3.1.3"
-
-install:
-  # Non-cached builds can take some time. Tell Travis not to time out (30 min should be plenty).
-  - source PEUQSE/ci/install-openmpi.sh
-  - echo $MPI_CC
-  - echo $MPI_CXX
-  - echo $MPI_EXEC
-  - env MPICC=$MPI_CC pipenv install --skip-lock
-
-script:
-  # Build C++ program.
-  - $MPI_CXX -std=c++17 hello_mpi.cpp -o hello
-  # Run C++ program. Travis may not have 2 cores available. Try with 2, if fail do 1.
-  - $MPI_EXEC -n 2 ./hello || $MPI_EXEC -n 1 ./hello
-  # Run mpi4py based program.
-  - $MPI_EXEC -n 2 pipenv run python hello_mpi.py || $MPI_EXEC -n 1 pipenv run python hello_mpi.py
-
-
 #This is the PEUQSE portion:
 language: python
 python:
-  - "3.7-dev"
+  - "3.8"
 # commands to install dependencies
 install:
   #No installation is required for UnitTesterSG with what is already on the Travis CI, so commenting out the below to let the build test run faster.
@@ -62,6 +11,7 @@ install:
   #- python setup.py install  #now overwrite old installations with the current version.
 # command to run tests
 #remove the test_13.py before running the runPytestDriver.py since that python file is designed to give an error as downloaded.
+  - sudo apt install python3-mpi4py
   - pip install UnitTesterSG
   - pip install numpy
   - pip install pandas
