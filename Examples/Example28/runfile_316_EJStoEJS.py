@@ -66,14 +66,13 @@ if __name__ == "__main__":
     # This assumes that the MAP exists in the highest posterior density region
     # A pickle file of the starting points are created in the pickles directory as specified
     numWalkers = 24 # run next mcmc run with 24 walkers
-    path_to_previous_run_log = UserInput.directories['logs_and_csvs'] + 'mcmc_logP_and_parameter_samples.csv' # concatenate User specified path for logs with the log file name
-    pickleFilePath = UserInput.directories['pickles'] + 'pointsNearExistingSample.pkl'
+    path_to_previous_run_log = 'logs_and_csvs/mcmc_logP_and_parameter_samples.csv' # User specified path for logs with the log file name
+    # getPointsNearExistingSample returns multiple outputs, we only care about the first, which are the starting point parameter sets
     starting_points, _, __ = PEUQSE.getPointsNearExistingSample(numPointsToGet=numWalkers, existingSamples=path_to_previous_run_log, parameters_values=MAP_burnin, pickleFileName=pickleFilePath)
-    print("These are the starting points:", starting_points)
     # set up next simulation
     UserInput.parameter_estimation_settings['mcmc_length'] = 1000
     UserInput.parameter_estimation_settings['mcmc_nwalkers'] = numWalkers
-    UserInput.model['InputParameterInitialGuess'] = pickleFilePath # by inputting a string, the input is assumed to be a pickled file
+    UserInput.model['InputParameterInitialGuess'] = starting_points # input the starting points as initial guess, this can handle a list of arrays for multiple walkers
 
     # create new PE_object **VERY IMPORTANT**
     PE_object = PEUQSE.parameter_estimation(UserInput)
