@@ -26,7 +26,8 @@ install:
   - pip install zeus-mcmc
   - pip install dill
   - pip install emcee
-  - source ./PEUQSE/.azure/install-$MPI.sh
+  - cd .azure/install-$MPI.sh
+  - cd ..
   - pip install mpi4py
 script: 
   - cd Examples
