@@ -9,7 +9,12 @@ install:
   #- pip install UnitTesterSG[COMPLETE] #this is mostly to get the dependencies.
   #- python setup.py install  #now overwrite old installations with the current version.
 # command to run tests
-#remove the test_13.py before running the runPytestDriver.py since that python file is designed to give an error as downloaded.
+#remove the Examples13 doe test_3 and test_4.py since they require MPI and we have not gotten that to work on travis CI.
+  - cd Examples/Example13doeFunctionExample/
+  - rm test_3.py
+  - rm test_4.py
+  - cd ..
+  - cd ..  
   - pip install UnitTesterSG
   - pip install numpy
   - pip install pandas
