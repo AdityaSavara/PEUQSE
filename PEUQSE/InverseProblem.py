@@ -2091,7 +2091,7 @@ class parameter_estimation:
             else: self.mcmc_nwalkers = self.UserInput.parameter_estimation_settings['mcmc_nwalkers']
             if isinstance(self.mcmc_nwalkers, str): 
                 if self.mcmc_nwalkers.lower() == "auto":
-                    self.mcmc_nwalkers = numParameters*16 # according to zeus paper, 16*D is the optimal number of walkers for emcee
+                    self.mcmc_nwalkers = numParameters*16 # according to zeus paper (https://doi.org/10.1093/mnras/stab2867), 16*D is the optimal number of walkers for emcee
                 else: #else it is an integer, or a string meant to be an integer.
                     self.mcmc_nwalkers =  int(self.mcmc_nwalkers)
         else: #this is mainly for PermutationSearch which will (by default) use the minimum number of walkers per point.
@@ -2279,7 +2279,7 @@ class parameter_estimation:
             else: self.mcmc_nwalkers = self.UserInput.parameter_estimation_settings['mcmc_nwalkers']
             if type(self.mcmc_nwalkers) == type("string"): 
                 if self.mcmc_nwalkers.lower() == "auto":
-                    self.mcmc_nwalkers = numParameters*4 # according to zeus paper, 4*D is the optimal number of walkers for general problems. Multimodal problems use 4 to 8*D.
+                    self.mcmc_nwalkers = numParameters*4 # according to zeus paper (https://doi.org/10.1093/mnras/stab2867), 4*D is the optimal number of walkers for general problems. Multimodal problems use 4 to 8*D.
                 else: #else it is an integer, or a string meant to be an integer.
                     self.mcmc_nwalkers =  int(self.mcmc_nwalkers)
         else: #this is mainly for PermutationSearch which will (by default) use the minimum number of walkers per point.
