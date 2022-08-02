@@ -1,5 +1,6 @@
 [![PyPI version](https://badge.fury.io/py/PEUQSE.svg)](https://badge.fury.io/py/PEUQSE)
 [![DOI:<10.11578/dc.20200908.7>](http://img.shields.io/badge/DOI-10.11578/dc.20200908.7-green.svg)](<https://doi.org/10.11578/dc.20200908.7>) [![Build Status](https://app.travis-ci.com/AdityaSavara/PEUQSE.svg?branch=master)](https://app.travis-ci.com/AdityaSavara/PEUQSE)  [![UnitTests:<UnitTests>](http://img.shields.io/badge/UnitTests-Passing-blue.svg)](<Passing-blue>) 
+[![Downloads](https://pepy.tech/badge/peuqse/month)](https://pepy.tech/project/peuqse)
 [![Open Source Love](https://badges.frapsoft.com/os/v3/open-source.svg?v=103)](https://github.com/ellerbrock/open-source-badges/)
 
 
