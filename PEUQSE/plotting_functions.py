@@ -280,6 +280,95 @@ def createSimulatedResponsesPlot(x_values, listOfYArrays, plot_settings={}, list
         plt.close(fig0)
     return fig0
 
+def createPredictedResponsesVsObservedDistribution(likelihoodSamples, posteriorSamples, listOfYTuples, plot_settings={}, directory=''):
+    """
+    Creates a distribution plot of the likelihood term and the posterior term. 
+    The Likelihood takes the responses observed and responses uncertainty.
+    The posterior just plots the posterior responses in histogram. 
+
+    :param likelihoodSamples: Contains likelihood weights and assoiciated response values. List contains both arrays like [responses, weights]. (:type: list)
+    :param posteriorSamples: Contains posterior weights and associated response values. List contains both arrays like [responses, weights]. (:type: list)
+    :param listofYTuples: Contains points of interest with response value and logP. (:type: list of tuples)
+    """
+
+    exportFigure = True #This variable should be moved to an argument or something in plot_settings.
+    #First put some defaults in if not already defined.
+    if 'x_label' not in plot_settings: plot_settings['x_label'] = ''
+    if 'y_label' not in plot_settings: plot_settings['y_label'] = ''
+    if 'legendLabels' not in plot_settings: plot_settings['legendLabels'] = ''
+    if 'figure_name' not in plot_settings: plot_settings['figure_name'] = 'simulatedResponsesPlot'
+    if 'dpi' not in plot_settings: plot_settings['dpi']=220
+    
+    fig0, ax0 = plt.subplots()
+    if 'fontdict' in plot_settings: 
+        #There are various things that could be added to this fontdict. #https://www.tutorialexample.com/understand-matplotlib-fontdict-a-beginner-guide-matplotlib-tutorial/
+        fontdict = plot_settings['fontdict']
+        if 'size' in fontdict:
+            ax0.tick_params(axis='x', labelsize=fontdict['size'])
+            ax0.tick_params(axis='y', labelsize=fontdict['size'])
+    else:
+        fontdict = None #initializing with the matplotlib default
+    ax0.set_xlabel(plot_settings['x_label'], fontdict=fontdict)
+    ax0.set_ylabel(plot_settings['y_label'], fontdict=fontdict) #TODO: THis is not yet generalized (will be a function)
+    #Currently the vertical line width is set to 3 pixels wide.
+    if 'vline_linewidth' in plot_settings: vline_linewidth = plot_settings['vline_linewidth'] # making a convenient local variable.
+    if str(vline_linewidth).lower() == 'auto':
+        vline_linewidth = 3 #default pixel width of vertical lines
+    if str(vline_linewidth).lower() == 'none': vline_linewidth = 0 #This will hide the rror bars if they are not desired.
+    if 'y_range' in plot_settings: ax0.set_ylim(plot_settings['y_range'] )
+    # plot distributions
+    # likelihood can be plotted as a curve since it is coming from a KDE
+    ax0.plot(*likelihoodSamples, color='g')
+    ax0.fill_between(*likelihoodSamples, y2=0, alpha=0.6, color='g')
+    # plot histogram from the input weights and responses
+    ax0.bar(*posteriorSamples, width=np.diff(posteriorSamples[0]), align='edge', alpha=0.5, color='tab:orange', edgecolor='w')
+    
+    if len(listOfYTuples) == 3: #This generally means observed, mu_guess, map, in that order.       
+        observed_points = listOfYTuples[0]
+        mu_guess_points = listOfYTuples[1]
+        map_points = listOfYTuples[2]
+        # MAP and observed value will be to the top. Other vlines will be relative to the probability of the MAP
+        mu_guess_rel_prob = np.exp(mu_guess_points[1])/np.exp(map_points[1])
+        if mu_guess_rel_prob < 0.01:
+            mu_guess_rel_prob = 0.01
+        ax0.vlines(observed_points[0], 0, 1, colors='g', linewidth=3, label=f'Observed')
+        ax0.vlines(mu_guess_points[0], 0, mu_guess_rel_prob, colors='#00A5DF', linewidth=3, label=f'Initial={mu_guess_points[1]}')
+        ax0.vlines(map_points[0], 0, 1, colors='r', linewidth=3, label=f'MAP={map_points[1]}')
+
+    elif len(listOfYTuples) == 4: #This generally means observed, mu_guess, map, mu_app
+        observed_points = listOfYTuples[0]
+        mu_guess_points = listOfYTuples[1]
+        map_points = listOfYTuples[2]
+        mu_ap_points = listOfYTuples[3]
+        # MAP and observed value will be to the top. Other vlines will be relative to the probability of the MAP
+        mu_guess_rel_prob = np.exp(mu_guess_points[1])/np.exp(map_points[1])
+        if mu_guess_rel_prob < 0.01:
+            mu_guess_rel_prob = 0.01
+        mu_ap_rel_prob = np.exp(mu_ap_points[1])/np.exp(map_points[1])
+        if mu_ap_rel_prob < 0.01:
+            mu_ap_rel_prob = 0.01
+        ax0.vlines(observed_points[0], 0, 1, colors='g', linewidth=3, label=f'Observed')
+        ax0.vlines(mu_guess_points[0], 0, mu_guess_rel_prob, colors='#00A5DF', linewidth=3, label=f'Initial={mu_guess_points[1]}')
+        ax0.vlines(map_points[0], 0, 1, colors='r', linewidth=3, label=f'MAP={map_points[1]}')
+        ax0.vlines(mu_ap_points[0], 0, mu_ap_rel_prob, colors='k', linewidth=3, label=f'muAP={mu_ap_points[1]}')
+
+    else: #Not super sure how to handle this yet. 
+        if len(x_values) > 1: #This means there are enough data to make lines.        
+            for seriesIndex in range(len(listOfYTuples)):
+                ax0.plot(x_values[0],listOfYTuples[seriesIndex])
+        if len(x_values) == 1: #This means there are single points, and we need to make symbols.
+            for seriesIndex in range(len(listOfYTuples)):
+                ax0.plot(x_values[0],listOfYTuples[seriesIndex], 'o')         
+
+    if plot_settings['legend'] == True:
+        #TODO Talk to Dr. Savara about this
+        ax0.legend(plot_settings['legendLabels']) #legends must be after plots are made.
+    fig0.tight_layout()
+    if exportFigure==True:
+        fig0.savefig(directory + plot_settings['figure_name'] + '.png', dpi=plot_settings['dpi'])
+    plt.close(fig0)
+    return fig0
+
 def makeTrisurfacePlot(xValues, yValues, zValues, exportFigure = True, figure_name="TrisurfacePlot", showFigure=True, directory=''):
     from mpl_toolkits.mplot3d import Axes3D #Although it does not look like this is called here, the InfoGain plots will fail without this line.
     fig1, ax1 =  plt.subplots(1)
