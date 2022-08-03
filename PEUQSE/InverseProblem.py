@@ -3359,13 +3359,13 @@ def boundsCheck(values, valuesBounds, boundsType):
     parametersTruncated = values[valuesBounds !=  None].flatten() #flattening because becomes mysteriously nested.  On 6/28/22, removed the type call since python behavior changed. The line used to be: parametersTruncated = values[type(valuesBounds) != type(None)].flatten()
     parametersBoundsTruncated = valuesBounds[valuesBounds !=  None].flatten() #flattening because becomes mysteriously nested. On 6/28/22, removed the type call since python behavior changed. The line used to be: parametersBoundsTruncated = valuesBounds[type(valuesBounds) != type(None)].flatten()
     if boundsType.lower() == 'upper': #we make the input into lower case before proceeding.
-        upperCheck = parametersTruncated < parametersBoundsTruncated #Check if all are smaller.
+        upperCheck = parametersTruncated <= parametersBoundsTruncated #Check if all are smaller.
         if False in upperCheck: #If any of them failed, we return False.
             return False
         else:
             pass #else we do the lower bounds check next.
     if boundsType.lower() == 'lower':
-        lowerCheck = parametersTruncated > parametersBoundsTruncated #Check if all are smaller.
+        lowerCheck = parametersTruncated >= parametersBoundsTruncated #Check if all are smaller.
         if False in lowerCheck: #If any of them failed, we return False.
             return False
         else:
