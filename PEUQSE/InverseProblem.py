@@ -789,7 +789,8 @@ class parameter_estimation:
                 timeAtLastPermutation = timeAtPermutationSearchStart #just initializing
         self.highest_logP = float('-inf') #just initializing
         highest_logP_parameter_set = np.ones(len(self.UserInput.InputParameterInitialGuess))*float('nan') #just initializing
-        bestResultSoFar = [self.highest_logP, highest_logP_parameter_set, None, None, None, None, None, None] #just initializing
+        #bestResultSoFar has this form: [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec]   
+        bestResultSoFar = [highest_logP_parameter_set, None, None, None, None, None, None] #just initializing. 
         highest_MAP_initial_point_index = None #just initializing
         highest_MAP_initial_point_parameters = None #just initializing
         if self.UserInput.parameter_estimation_settings['exportAllSimulatedOutputs'] == True:
@@ -824,7 +825,7 @@ class parameter_estimation:
             if (searchType == 'getLogP'):
                 self.map_logP = self.getLogP(permutation) #The getLogP function does not fill map_logP by itself.
                 self.map_parameter_set = permutation
-                thisResult = [self.map_logP, self.map_parameter_set, None, None, None, None, None, None]
+                thisResult = [self.map_parameter_set, None, None, None, None, None, None]
                 #thisResultStr = [self.map_logP, str(self.map_parameter_set).replace(",","|").replace("[","").replace('(','').replace(')',''), 'None', 'None', 'None', 'None', 'None', 'None']
             if searchType == 'doMetropolisHastings':
                 self.map_logP = np.float('-inf') #initializing as -inf to have a 'pure' mcmc sampling.
@@ -872,17 +873,17 @@ class parameter_estimation:
                 optimizationOutput = self.doOptimizeLogP(**passThroughArgs)
                 self.map_logP = optimizationOutput[1] 
                 self.map_parameter_set = optimizationOutput[0]
-                thisResult = [self.map_logP, self.map_parameter_set, None, None, None, None, None, None]
+                thisResult = [self.map_parameter_set, None, None, None, None, None, None]
             if searchType == 'doOptimizeNegLogP':
                 optimizationOutput = self.doOptimizeNegLogP(**passThroughArgs)
                 self.map_logP = -1.0*optimizationOutput[1] #need to times by negative 1 to convert negLogP into P.
                 self.map_parameter_set = optimizationOutput[0]
-                thisResult = [self.map_logP, self.map_parameter_set, None, None, None, None, None, None]
+                thisResult = [self.map_parameter_set, None, None, None, None, None, None]
             if searchType == 'doOptimizeSSR':
                 optimizationOutput = self.doOptimizeSSR(**passThroughArgs)
                 self.map_logP = -1.0*optimizationOutput[1]  #The SSR is a minimizing objective function, so we multiply by -1 to make it analagous to a log_P.
                 self.map_parameter_set = optimizationOutput[0]
-                thisResult = [self.map_logP, self.map_parameter_set, None, None, None, None, None, None]
+                thisResult = [self.map_parameter_set, None, None, None, None, None, None]
             if (type(self.UserInput.parameter_estimation_settings['multistart_checkPointFrequency']) != type(None)) or (verbose == True):
                 timeAtThisPermutation = time.time()
                 timeOfThisPermutation = timeAtThisPermutation - timeAtLastPermutation
@@ -966,7 +967,7 @@ class parameter_estimation:
                 else:
                     multistart_permutationsToSamples_threshold_filter_coefficient = self.UserInput.parameter_estimation_settings['multistart_permutationsToSamples_threshold_filter_coefficient']
                 try:
-                    logP_values_and_samples = convertPermutationsToSamples(self.permutations_MAP_logP_and_parameters_values, maxLogP=float(bestResultSoFar[0]), relativeFilteringThreshold = 10**(-1*multistart_permutationsToSamples_threshold_filter_coefficient))
+                    logP_values_and_samples = convertPermutationsToSamples(self.permutations_MAP_logP_and_parameters_values, maxLogP=float(self.map_logP), relativeFilteringThreshold = 10**(-1*multistart_permutationsToSamples_threshold_filter_coefficient))
                     self.post_burn_in_log_posteriors_un_normed_vec = logP_values_and_samples[:,0]
                     self.post_burn_in_log_posteriors_un_normed_vec = np.array(nestedObjectsFunctions.makeAtLeast_2dNested(self.post_burn_in_log_posteriors_un_normed_vec)).transpose()
                     self.post_burn_in_samples = logP_values_and_samples[:,1:]
@@ -2091,7 +2092,7 @@ class parameter_estimation:
             else: self.mcmc_nwalkers = self.UserInput.parameter_estimation_settings['mcmc_nwalkers']
             if isinstance(self.mcmc_nwalkers, str): 
                 if self.mcmc_nwalkers.lower() == "auto":
-                    self.mcmc_nwalkers = numParameters*4
+                    self.mcmc_nwalkers = numParameters*16 # according to zeus paper (https://doi.org/10.1093/mnras/stab2867), 16*D is the optimal number of walkers for emcee
                 else: #else it is an integer, or a string meant to be an integer.
                     self.mcmc_nwalkers =  int(self.mcmc_nwalkers)
         else: #this is mainly for PermutationSearch which will (by default) use the minimum number of walkers per point.
@@ -2279,7 +2280,7 @@ class parameter_estimation:
             else: self.mcmc_nwalkers = self.UserInput.parameter_estimation_settings['mcmc_nwalkers']
             if type(self.mcmc_nwalkers) == type("string"): 
                 if self.mcmc_nwalkers.lower() == "auto":
-                    self.mcmc_nwalkers = numParameters*4
+                    self.mcmc_nwalkers = numParameters*4 # according to zeus paper (https://doi.org/10.1093/mnras/stab2867), 4*D is the optimal number of walkers for general problems. Multimodal problems benefit from additional walkers.
                 else: #else it is an integer, or a string meant to be an integer.
                     self.mcmc_nwalkers =  int(self.mcmc_nwalkers)
         else: #this is mainly for PermutationSearch which will (by default) use the minimum number of walkers per point.
@@ -3358,13 +3359,13 @@ def boundsCheck(values, valuesBounds, boundsType):
     parametersTruncated = values[valuesBounds !=  None].flatten() #flattening because becomes mysteriously nested.  On 6/28/22, removed the type call since python behavior changed. The line used to be: parametersTruncated = values[type(valuesBounds) != type(None)].flatten()
     parametersBoundsTruncated = valuesBounds[valuesBounds !=  None].flatten() #flattening because becomes mysteriously nested. On 6/28/22, removed the type call since python behavior changed. The line used to be: parametersBoundsTruncated = valuesBounds[type(valuesBounds) != type(None)].flatten()
     if boundsType.lower() == 'upper': #we make the input into lower case before proceeding.
-        upperCheck = parametersTruncated < parametersBoundsTruncated #Check if all are smaller.
+        upperCheck = parametersTruncated <= parametersBoundsTruncated #Check if all are smaller.
         if False in upperCheck: #If any of them failed, we return False.
             return False
         else:
             pass #else we do the lower bounds check next.
     if boundsType.lower() == 'lower':
-        lowerCheck = parametersTruncated > parametersBoundsTruncated #Check if all are smaller.
+        lowerCheck = parametersTruncated >= parametersBoundsTruncated #Check if all are smaller.
         if False in lowerCheck: #If any of them failed, we return False.
             return False
         else:
@@ -3483,7 +3484,7 @@ def deleteAllFilesInDirectory(mydir=''):
     for f in filelist:
         os.remove(os.path.join(mydir, f))
 
-def getPointsNearExistingSample(numPointsToGet, existingSamples, logP_value = None, parameters_values = None, sortBy = 'relative_delta', pickleFileName='pointsNearExistingSample.pkl'):
+def getPointsNearExistingSample(numPointsToGet, existingSamples, logP_value = None, parameters_values = None, sortBy = 'relative_delta', pickleFileName='pointsNearExistingSample.pkl', unique_points=True):
     """
     This function retrieves a number of points near a point in existingSamples, either based on a logP_value or parameters_values.
     All of the rows in existingSamples must be of the form of LogP in the first column and parameters_values in the later columns.
@@ -3559,6 +3560,10 @@ def getPointsNearExistingSample(numPointsToGet, existingSamples, logP_value = No
     #now sort it.
     sortedArray = arrayToSort[arrayToSort[:,0].argsort()] #by default this will be smallest to largest, which is what we want.
     
+    # have only unique points if unique_points is True
+    if unique_points:
+        sortedArray = np.unique(sortedArray, axis=0)
+
     extractedSamples_with_objective_function_and_logP = sortedArray[0:numPointsToGet].T #extract the relevant rows and transform to appropriate shape of (numPointsToGet, numParameters)
 
     # seperate values into separate variables. 
