@@ -789,7 +789,8 @@ class parameter_estimation:
                 timeAtLastPermutation = timeAtPermutationSearchStart #just initializing
         self.highest_logP = float('-inf') #just initializing
         highest_logP_parameter_set = np.ones(len(self.UserInput.InputParameterInitialGuess))*float('nan') #just initializing
-        bestResultSoFar = [self.highest_logP, highest_logP_parameter_set, None, None, None, None, None, None] #just initializing
+        #bestResultSoFar has this form: [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec]   
+        bestResultSoFar = [highest_logP_parameter_set, None, None, None, None, None] #just initializing. 
         highest_MAP_initial_point_index = None #just initializing
         highest_MAP_initial_point_parameters = None #just initializing
         if self.UserInput.parameter_estimation_settings['exportAllSimulatedOutputs'] == True:
@@ -824,7 +825,7 @@ class parameter_estimation:
             if (searchType == 'getLogP'):
                 self.map_logP = self.getLogP(permutation) #The getLogP function does not fill map_logP by itself.
                 self.map_parameter_set = permutation
-                thisResult = [self.map_logP, self.map_parameter_set, None, None, None, None, None, None]
+                thisResult = [self.map_parameter_set, None, None, None, None, None, None]
                 #thisResultStr = [self.map_logP, str(self.map_parameter_set).replace(",","|").replace("[","").replace('(','').replace(')',''), 'None', 'None', 'None', 'None', 'None', 'None']
             if searchType == 'doMetropolisHastings':
                 self.map_logP = np.float('-inf') #initializing as -inf to have a 'pure' mcmc sampling.
@@ -966,7 +967,7 @@ class parameter_estimation:
                 else:
                     multistart_permutationsToSamples_threshold_filter_coefficient = self.UserInput.parameter_estimation_settings['multistart_permutationsToSamples_threshold_filter_coefficient']
                 try:
-                    logP_values_and_samples = convertPermutationsToSamples(self.permutations_MAP_logP_and_parameters_values, maxLogP=float(bestResultSoFar[0]), relativeFilteringThreshold = 10**(-1*multistart_permutationsToSamples_threshold_filter_coefficient))
+                    logP_values_and_samples = convertPermutationsToSamples(self.permutations_MAP_logP_and_parameters_values, maxLogP=float(self.map_logP), relativeFilteringThreshold = 10**(-1*multistart_permutationsToSamples_threshold_filter_coefficient))
                     self.post_burn_in_log_posteriors_un_normed_vec = logP_values_and_samples[:,0]
                     self.post_burn_in_log_posteriors_un_normed_vec = np.array(nestedObjectsFunctions.makeAtLeast_2dNested(self.post_burn_in_log_posteriors_un_normed_vec)).transpose()
                     self.post_burn_in_samples = logP_values_and_samples[:,1:]
