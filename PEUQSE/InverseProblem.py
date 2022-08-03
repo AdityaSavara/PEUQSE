@@ -1705,7 +1705,7 @@ class parameter_estimation:
         if type(discreteParameterVector)==type(None): #If somebody did not feed a specific vector, we take the initial guess.
             discreteParameterVector = self.UserInput.InputParameterInitialGuess
         if self.reducedParameterSpaceOn: #if reduced parameter space is on, we need to use a reduced discreteParameterVector
-            reducedIndices = UserInput.model['reducedParameterSpace']
+            reducedIndices = self.UserInput.model['reducedParameterSpace']
             discreteParameterVector = returnReducedIterable(discreteParameterVector)
         if objectiveFunction=='logP':
             self.map_parameter_set = discreteParameterVector
