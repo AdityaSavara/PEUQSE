@@ -1706,7 +1706,7 @@ class parameter_estimation:
             discreteParameterVector = self.UserInput.InputParameterInitialGuess
         if self.reducedParameterSpaceOn: #if reduced parameter space is on, we need to use a reduced discreteParameterVector
             reducedIndices = self.UserInput.model['reducedParameterSpace']
-            discreteParameterVector = returnReducedIterable(discreteParameterVector)
+            discreteParameterVector = returnReducedIterable(discreteParameterVector, reducedIndices)
         if objectiveFunction=='logP':
             self.map_parameter_set = discreteParameterVector
             self.map_logP = self.getLogP(discreteParameterVector)
