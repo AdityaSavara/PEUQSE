@@ -790,7 +790,7 @@ class parameter_estimation:
         self.highest_logP = float('-inf') #just initializing
         highest_logP_parameter_set = np.ones(len(self.UserInput.InputParameterInitialGuess))*float('nan') #just initializing
         #bestResultSoFar has this form: [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec]   
-        bestResultSoFar = [highest_logP_parameter_set, None, None, None, None, None] #just initializing. 
+        bestResultSoFar = [highest_logP_parameter_set, None, None, None, None, None, None] #just initializing. 
         highest_MAP_initial_point_index = None #just initializing
         highest_MAP_initial_point_parameters = None #just initializing
         if self.UserInput.parameter_estimation_settings['exportAllSimulatedOutputs'] == True:
@@ -873,17 +873,17 @@ class parameter_estimation:
                 optimizationOutput = self.doOptimizeLogP(**passThroughArgs)
                 self.map_logP = optimizationOutput[1] 
                 self.map_parameter_set = optimizationOutput[0]
-                thisResult = [self.map_logP, self.map_parameter_set, None, None, None, None, None, None]
+                thisResult = [self.map_parameter_set, None, None, None, None, None, None]
             if searchType == 'doOptimizeNegLogP':
                 optimizationOutput = self.doOptimizeNegLogP(**passThroughArgs)
                 self.map_logP = -1.0*optimizationOutput[1] #need to times by negative 1 to convert negLogP into P.
                 self.map_parameter_set = optimizationOutput[0]
-                thisResult = [self.map_logP, self.map_parameter_set, None, None, None, None, None, None]
+                thisResult = [self.map_parameter_set, None, None, None, None, None, None]
             if searchType == 'doOptimizeSSR':
                 optimizationOutput = self.doOptimizeSSR(**passThroughArgs)
                 self.map_logP = -1.0*optimizationOutput[1]  #The SSR is a minimizing objective function, so we multiply by -1 to make it analagous to a log_P.
                 self.map_parameter_set = optimizationOutput[0]
-                thisResult = [self.map_logP, self.map_parameter_set, None, None, None, None, None, None]
+                thisResult = [self.map_parameter_set, None, None, None, None, None, None]
             if (type(self.UserInput.parameter_estimation_settings['multistart_checkPointFrequency']) != type(None)) or (verbose == True):
                 timeAtThisPermutation = time.time()
                 timeOfThisPermutation = timeAtThisPermutation - timeAtLastPermutation
