@@ -359,6 +359,8 @@ class parameter_estimation:
             else:
                 print('The pickled object for initial guess points must exist in base directory or pickles directory. The pickled file should have extension of ".pkl"')
                 sys.exit()
+            # make sure the initial guess is a numpy array
+            initialGuessUnfiltered = np.array(initialGuessUnfiltered)
             # check if the shape of the loaded initial guess is a single point or a list of walkers
             if len(initialGuessUnfiltered.shape) == 1:
                 self.UserInput.InputParameterInitialGuess = initialGuessUnfiltered
@@ -374,10 +376,19 @@ class parameter_estimation:
                 self.UserInput.model['InputParameterInitialGuess'] = np.array(self.UserInput.mu_prior, dtype='float')
             #From now, we switch to self.UserInput.InputParameterInitialGuess because this is needed in case we're going to do reducedParameterSpace or grid sampling.
             self.UserInput.InputParameterInitialGuess = np.array(self.UserInput.model['InputParameterInitialGuess'], dtype='float')
+            # reassure the initial guess is a numpy array
+            # check the shape to make sure it is a 1D array
+            self.UserInput.InputParameterInitialGuess = np.array(self.UserInput.InputParameterInitialGuess)
+            if len(self.UserInput.InputParameterInitialGuess.shape) > 1:
+                if self.UserInput.InputParameterInitialGuess.shape[0] == 1: # make sure that the array was not double nested by accident
+                    self.UserInput.InputParameterInitialGuess = np.ndarray.flatten(self.UserInput.InputParameterInitialGuess)
+                else:
+                    print('The Initial guess must be either a 1D array or pickle file string.')
+                    sys.exit()
         #Now populate the simulation Functions. #NOTE: These will be changed if a reduced parameter space is used.
         self.UserInput.simulationFunction = self.UserInput.model['simulateByInputParametersOnlyFunction']
         self.UserInput.simulationOutputProcessingFunction = self.UserInput.model['simulationOutputProcessingFunction']
-    
+
         #Check the shapes of the arrays for UserInput.responses_observed and UserInput.responses_observed_uncertainties by doing a simulation. Warn the user if the shapes don't match.
         initialGuessSimulatedResponses = self.getSimulatedResponses(self.UserInput.InputParameterInitialGuess)
         if np.shape(initialGuessSimulatedResponses) != np.shape(UserInput.responses_observed):
@@ -2135,6 +2146,8 @@ class parameter_estimation:
             else:
                 print('The pickled object for initial guess points must exist in base directory or pickles directory.')
                 sys.exit()
+            # make sure the initial guess is a numpy array
+            walkerStartPoints = np.array(walkerStartPoints)
             # check if start points have the same amount of walkers
             initial_guess_mcmc_nwalkers = walkerStartPoints.shape[0] # last points have shape (nwalkers, nparams)
             if len(walkerStartPoints.shape) == 1:
@@ -2331,6 +2344,8 @@ class parameter_estimation:
             else:
                 print('The pickled object for initial guess points must exist in base directory or pickles directory.')
                 sys.exit()
+            # make sure the initial guess is a numpy array
+            walkerStartPoints = np.array(walkerStartPoints)
             # check if start points have the same amount of walkers
             initial_guess_mcmc_nwalkers = walkerStartPoints.shape[0] # last points have shape (nwalkers, nparams)
             if len(walkerStartPoints.shape) == 1:
