@@ -2927,7 +2927,9 @@ class parameter_estimation:
         if allResponses_x_values == []: 
             if flatten == True:
                 allResponses_x_values = np.array(self.UserInput.responses_abscissa).flatten()
-            allResponses_x_values = nestedObjectsFunctions.makeAtLeast_2dNested(allResponses_x_values)
+                allResponses_x_values = nestedObjectsFunctions.makeAtLeast_2dNested(allResponses_x_values)
+            else:
+                allResponses_x_values = nestedObjectsFunctions.makeAtLeast_2dNested(self.UserInput.responses_abscissa)
         if allResponsesListsOfYArrays  ==[]: #In this case, we assume allResponsesListsOfYUncertaintiesArrays == [] also.
             allResponsesListsOfYArrays = [] #Need to make a new list in the case that there was one already, to avoid overwriting the default argument object.
             allResponsesListsOfYUncertaintiesArrays = [] #Set accompanying uncertainties list to a blank list in case it is not already one. Otherwise appending would mess up indexing.
@@ -2956,7 +2958,6 @@ class parameter_estimation:
                     self.mu_guess_responses_simulation_uncertainties = np.array(self.get_responses_simulation_uncertainties(self.UserInput.InputParameterInitialGuess)).flatten()
                 self.mu_guess_responses_simulation_uncertainties = nestedObjectsFunctions.makeAtLeast_2dNested(self.mu_guess_responses_simulation_uncertainties)
                 self.mu_guess_responses_simulation_uncertainties = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(self.mu_guess_responses_simulation_uncertainties)
-
             #Get map simiulated output and simulated responses.
             self.map_SimulatedOutput = simulationFunction(self.map_parameter_set)           
             if type(simulationOutputProcessingFunction) == type(None):
