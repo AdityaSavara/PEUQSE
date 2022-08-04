@@ -2989,17 +2989,28 @@ class parameter_estimation:
             if hasattr(self, 'mu_AP_parameter_set'): #Check if a mu_AP has been assigned. It is normally only assigned if mcmc was used.           
                 #Get mu_AP simiulated output and simulated responses.
                 self.mu_AP_SimulatedOutput = simulationFunction(self.mu_AP_parameter_set)
+                #Make an internal variable in case we need to flatten.
+                mu_AP_SimulatedOutput = copy.deepcopy(self.mu_AP_SimulatedOutput)
                 if type(simulationOutputProcessingFunction) == type(None):
-                    self.mu_AP_SimulatedResponses = nestedObjectsFunctions.makeAtLeast_2dNested(self.mu_AP_SimulatedOutput)
-                    self.mu_AP_SimulatedResponses = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(self.mu_AP_SimulatedResponses)
+                    mu_AP_SimulatedResponses = mu_AP_SimulatedOutput
+                     if flatten == True:
+                        mu_AP_SimulatedResponses = np.array(mu_AP_SimulatedResponses).flatten()  
+                    mu_AP_SimulatedResponses = nestedObjectsFunctions.makeAtLeast_2dNested(mu_AP_SimulatedResponses)
+                    mu_AP_SimulatedResponses = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(mu_AP_SimulatedResponses)
                 if type(simulationOutputProcessingFunction) != type(None):
-                    self.mu_AP_SimulatedResponses =  nestedObjectsFunctions.makeAtLeast_2dNested(     simulationOutputProcessingFunction(self.mu_AP_SimulatedOutput)      )
-                    self.mu_AP_SimulatedResponses = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(self.mu_AP_SimulatedResponses)
+                    mu_AP_SimulatedResponses = simulationOutputProcessingFunction(mu_AP_SimulatedOutput)
+                    if flatten == True:
+                        mu_AP_SimulatedResponses = np.array(mu_AP_SimulatedResponses).flatten()  
+                    mu_AP_SimulatedResponses = nestedObjectsFunctions.makeAtLeast_2dNested(mu_AP_SimulatedResponses)
+                    mu_AP_SimulatedResponses = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(mu_AP_SimulatedResponses)
                 #Check if we have simulation uncertainties, and populate if so.
                 if type(self.UserInput.responses_simulation_uncertainties) != type(None):
-                    self.mu_AP_responses_simulation_uncertainties = nestedObjectsFunctions.makeAtLeast_2dNested( self.get_responses_simulation_uncertainties(self.mu_AP_parameter_set))
-                    self.mu_AP_responses_simulation_uncertainties = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(self.mu_AP_responses_simulation_uncertainties)
-            
+                    #make an internal variable in case we need to flatten.
+                    mu_AP_responses_simulation_uncertainties = self.get_responses_simulation_uncertainties(self.mu_AP_parameter_set)
+                    if flatten == True:
+                        mu_AP_responses_simulation_uncertainties = np.array(mu_AP_responses_simulation_uncertainties).flatten()
+                    mu_AP_responses_simulation_uncertainties = nestedObjectsFunctions.makeAtLeast_2dNested(mu_AP_responses_simulation_uncertainties)
+                    mu_AP_responses_simulation_uncertainties = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(mu_AP_responses_simulation_uncertainties)
             #Now to populate the allResponsesListsOfYArrays and the allResponsesListsOfYUncertaintiesArrays
             for responseDimIndex in range(num_response_dimensions):
                 if not hasattr(self, 'mu_AP_parameter_set'): #Check if a mu_AP has been assigned. It is normally only assigned if mcmc was used.    
