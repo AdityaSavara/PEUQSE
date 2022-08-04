@@ -2922,7 +2922,7 @@ class parameter_estimation:
         #allResponsesListsOfYArrays  is to have 3 layers of lists: Response > Responses Observed, mu_guess Simulated Responses, map_Simulated Responses, (mu_AP_simulatedResponses) > Values
         #flatten = True will convert the individual responses into a 'single response series'
         num_response_dimensions = self.UserInput.num_response_dimensions
-        if flatten = True: #if we are flattening, we will have 1 response dimension at the end.
+        if flatten == True: #if we are flattening, we will have 1 response dimension at the end.
             num_response_dimensions = 1
         if allResponses_x_values == []: 
             if flatten == True:
