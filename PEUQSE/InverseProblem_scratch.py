@@ -3011,10 +3011,12 @@ class parameter_estimation:
                         mu_AP_responses_simulation_uncertainties = np.array(mu_AP_responses_simulation_uncertainties).flatten()
                     mu_AP_responses_simulation_uncertainties = nestedObjectsFunctions.makeAtLeast_2dNested(mu_AP_responses_simulation_uncertainties)
                     mu_AP_responses_simulation_uncertainties = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(mu_AP_responses_simulation_uncertainties)
-            
-            if flatten == True:        
-                self.UserInput.responses_observed = [np.array(self.UserInput.responses_observed).flatten()]
-                self.UserInput.responses_observed_uncertainties = [np.array(self.UserInput.responses_observed_uncertainties).flatten()]
+            #make internal variables for responses_observed and responses_observed_uncertainties in case we need to flatten them.
+            responses_observed = copy.deepcopy(self.UserInput.responses_observed)
+            responses_observed_uncertainties = copy.deepcop(self.UserInput.responses_observed_uncertainties)
+            if flatten == True: #flatten and then nest, as needed. ("lazy" way)
+                responses_observed = [np.array(responses_observed).flatten()]
+                responses_observed_uncertainties = [np.array(responses_observed_uncertainties).flatten()]
             #Now to populate the allResponsesListsOfYArrays and the allResponsesListsOfYUncertaintiesArrays
             for responseDimIndex in range(num_response_dimensions):
                 if not hasattr(self, 'mu_AP_parameter_set'): #Check if a mu_AP has been assigned. It is normally only assigned if mcmc was used.    
