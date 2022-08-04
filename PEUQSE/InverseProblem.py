@@ -2921,6 +2921,9 @@ class parameter_estimation:
     def createSimulatedResponsesPlots(self, allResponses_x_values=[], allResponsesListsOfYArrays =[], plot_settings={},allResponsesListsOfYUncertaintiesArrays=[], flatten = False): 
         #allResponsesListsOfYArrays  is to have 3 layers of lists: Response > Responses Observed, mu_guess Simulated Responses, map_Simulated Responses, (mu_AP_simulatedResponses) > Values
         #flatten = True will convert the individual responses into a 'single response series'
+        num_response_dimensions = self.UserInput.num_response_dimensions
+        if flatten = True: #if we are flattening, we will have 1 response dimension at the end.
+            num_response_dimensions = 1
         if allResponses_x_values == []: 
             allResponses_x_values = nestedObjectsFunctions.makeAtLeast_2dNested(self.UserInput.responses_abscissa)
         if allResponsesListsOfYArrays  ==[]: #In this case, we assume allResponsesListsOfYUncertaintiesArrays == [] also.
@@ -2972,7 +2975,6 @@ class parameter_estimation:
                     self.mu_AP_responses_simulation_uncertainties = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(self.mu_AP_responses_simulation_uncertainties)
             
             #Now to populate the allResponsesListsOfYArrays and the allResponsesListsOfYUncertaintiesArrays
-            num_response_dimensions = self.UserInput.num_response_dimensions
             for responseDimIndex in range(num_response_dimensions):
                 if not hasattr(self, 'mu_AP_parameter_set'): #Check if a mu_AP has been assigned. It is normally only assigned if mcmc was used.    
                     if num_response_dimensions == 1: 
