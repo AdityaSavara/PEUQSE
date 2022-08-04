@@ -380,8 +380,11 @@ class parameter_estimation:
             # check the shape to make sure it is a 1D array
             self.UserInput.InputParameterInitialGuess = np.array(self.UserInput.InputParameterInitialGuess)
             if len(self.UserInput.InputParameterInitialGuess.shape) > 1:
-                print('The Initial guess must be either a 1D array or pickle file string.')
-                sys.exit()
+                if self.UserInput.InputParameterInitialGuess.shape[0] == 1: # make sure that the array was not double nested by accident
+                    self.UserInput.InputParameterInitialGuess = np.ndarray.flatten(self.UserInput.InputParameterInitialGuess)
+                else:
+                    print('The Initial guess must be either a 1D array or pickle file string.')
+                    sys.exit()
         #Now populate the simulation Functions. #NOTE: These will be changed if a reduced parameter space is used.
         self.UserInput.simulationFunction = self.UserInput.model['simulateByInputParametersOnlyFunction']
         self.UserInput.simulationOutputProcessingFunction = self.UserInput.model['simulationOutputProcessingFunction']
