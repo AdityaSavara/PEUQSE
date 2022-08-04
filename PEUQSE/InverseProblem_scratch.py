@@ -3021,36 +3021,36 @@ class parameter_estimation:
             for responseDimIndex in range(num_response_dimensions):
                 if not hasattr(self, 'mu_AP_parameter_set'): #Check if a mu_AP has been assigned. It is normally only assigned if mcmc was used.    
                     if num_response_dimensions == 1: 
-                        listOfYArrays = [self.UserInput.responses_observed[responseDimIndex], self.mu_guess_SimulatedResponses[responseDimIndex], self.map_SimulatedResponses[responseDimIndex]]        
+                        listOfYArrays = [UserInput.responses_observed[responseDimIndex], mu_guess_SimulatedResponses[responseDimIndex], map_SimulatedResponses[responseDimIndex]]        
                         allResponsesListsOfYArrays.append(listOfYArrays)
                         #Now to do uncertainties, there are two cases. First case is with only observed uncertainties and no simulation ones.
                         if type(self.UserInput.responses_simulation_uncertainties) == type(None): #This means there are no simulation uncertainties. So for each response dimension, there will be a list with only the observed uncertainties in that list.
-                            allResponsesListsOfYUncertaintiesArrays.append( [self.UserInput.responses_observed_uncertainties[responseDimIndex]] ) #Just creating nesting, we need to give a list for each response dimension.
+                            allResponsesListsOfYUncertaintiesArrays.append( [responses_observed_uncertainties[responseDimIndex]] ) #Just creating nesting, we need to give a list for each response dimension.
                         else: #This case means that there are some responses_simulation_uncertainties to include, so allResponsesListsOfYUncertaintiesArrays will have more dimensions *within* its nested values.
-                            allResponsesListsOfYUncertaintiesArrays.append([self.UserInput.responses_observed_uncertainties[responseDimIndex],self.mu_guess_responses_simulation_uncertainties[responseDimIndex],self.map_responses_simulation_uncertainties[responseDimIndex]]) #We need to give a list for each response dimension.                                        
+                            allResponsesListsOfYUncertaintiesArrays.append([responses_observed_uncertainties[responseDimIndex],mu_guess_responses_simulation_uncertainties[responseDimIndex],map_responses_simulation_uncertainties[responseDimIndex]]) #We need to give a list for each response dimension.
                     elif num_response_dimensions > 1: 
-                        listOfYArrays = [self.UserInput.responses_observed[responseDimIndex], self.mu_guess_SimulatedResponses[responseDimIndex], self.map_SimulatedResponses[responseDimIndex]]        
+                        listOfYArrays = [responses_observed[responseDimIndex], mu_guess_SimulatedResponses[responseDimIndex], map_SimulatedResponses[responseDimIndex]]        
                         allResponsesListsOfYArrays.append(listOfYArrays)
                         #Now to do uncertainties, there are two cases. First case is with only observed uncertainties and no simulation ones.
                         if type(self.UserInput.responses_simulation_uncertainties) == type(None): #This means there are no simulation uncertainties. So for each response dimension, there will be a list with only the observed uncertainties in that list.
-                            allResponsesListsOfYUncertaintiesArrays.append( [self.UserInput.responses_observed_uncertainties[responseDimIndex]] ) #Just creating nesting, we need to give a list for each response dimension.
+                            allResponsesListsOfYUncertaintiesArrays.append( [responses_observed_uncertainties[responseDimIndex]] ) #Just creating nesting, we need to give a list for each response dimension.
                         else: #This case means that there are some responses_simulation_uncertainties to include, so allResponsesListsOfYUncertaintiesArrays will have more dimensions *within* its nested values.
-                            allResponsesListsOfYUncertaintiesArrays.append([self.UserInput.responses_observed_uncertainties[responseDimIndex],self.mu_guess_responses_simulation_uncertainties[responseDimIndex],self.map_responses_simulation_uncertainties[responseDimIndex]]) #We need to give a list for each response dimension.                    
+                            allResponsesListsOfYUncertaintiesArrays.append([responses_observed_uncertainties[responseDimIndex],mu_guess_responses_simulation_uncertainties[responseDimIndex],map_responses_simulation_uncertainties[responseDimIndex]]) #We need to give a list for each response dimension.                    
                 if hasattr(self, 'mu_AP_parameter_set'):
                     if num_response_dimensions == 1: 
-                        listOfYArrays = [self.UserInput.responses_observed[responseDimIndex], self.mu_guess_SimulatedResponses[responseDimIndex], self.map_SimulatedResponses[responseDimIndex], self.mu_AP_SimulatedResponses[responseDimIndex]]        
+                        listOfYArrays = [UserInput.responses_observed[responseDimIndex], mu_guess_SimulatedResponses[responseDimIndex], map_SimulatedResponses[responseDimIndex], mu_AP_SimulatedResponses[responseDimIndex]]        
                         allResponsesListsOfYArrays.append(listOfYArrays)
                         if type(self.UserInput.responses_simulation_uncertainties) == type(None): #This means there are no simulation uncertainties. So for each response dimension, there will be a list with only the observed uncertainties in that list.
-                            allResponsesListsOfYUncertaintiesArrays.append( [self.UserInput.responses_observed_uncertainties[responseDimIndex]] ) #Just creating nesting, we need to give a list for each response dimension.
+                            allResponsesListsOfYUncertaintiesArrays.append( [responses_observed_uncertainties[responseDimIndex]] ) #Just creating nesting, we need to give a list for each response dimension.
                         else: #This case means that there are some responses_simulation_uncertainties to include, so allResponsesListsOfYUncertaintiesArrays will have more dimensions *within* its nested values.
-                            allResponsesListsOfYUncertaintiesArrays.append([self.UserInput.responses_observed_uncertainties[responseDimIndex],self.mu_guess_responses_simulation_uncertainties[responseDimIndex],self.map_responses_simulation_uncertainties[responseDimIndex],self.mu_AP_responses_simulation_uncertainties[responseDimIndex]]) #We need to give a list for each response dimension.                                        
+                            allResponsesListsOfYUncertaintiesArrays.append([responses_observed_uncertainties[responseDimIndex],mu_guess_responses_simulation_uncertainties[responseDimIndex],map_responses_simulation_uncertainties[responseDimIndex],mu_AP_responses_simulation_uncertainties[responseDimIndex]]) #We need to give a list for each response dimension.                                        
                     elif num_response_dimensions > 1: 
-                        listOfYArrays = [self.UserInput.responses_observed[responseDimIndex], self.mu_guess_SimulatedResponses[responseDimIndex], self.map_SimulatedResponses[responseDimIndex], self.mu_AP_SimulatedResponses[responseDimIndex]]        
+                        listOfYArrays = [responses_observed[responseDimIndex], mu_guess_SimulatedResponses[responseDimIndex], map_SimulatedResponses[responseDimIndex], mu_AP_SimulatedResponses[responseDimIndex]]        
                         allResponsesListsOfYArrays.append(listOfYArrays)
                         if type(self.UserInput.responses_simulation_uncertainties) == type(None): #This means there are no simulation uncertainties. So for each response dimension, there will be a list with only the observed uncertainties in that list.
-                            allResponsesListsOfYUncertaintiesArrays.append( [self.UserInput.responses_observed_uncertainties[responseDimIndex]] ) #Just creating nesting, we need to give a list for each response dimension.
+                            allResponsesListsOfYUncertaintiesArrays.append( [responses_observed_uncertainties[responseDimIndex]] ) #Just creating nesting, we need to give a list for each response dimension.
                         else: #This case means that there are some responses_simulation_uncertainties to include, so allResponsesListsOfYUncertaintiesArrays will have more dimensions *within* its nested values.
-                            allResponsesListsOfYUncertaintiesArrays.append([self.UserInput.responses_observed_uncertainties[responseDimIndex],self.mu_guess_responses_simulation_uncertainties[responseDimIndex],self.map_responses_simulation_uncertainties[responseDimIndex],self.mu_AP_responses_simulation_uncertainties[responseDimIndex]]) #We need to give a list for each response dimension. 
+                            allResponsesListsOfYUncertaintiesArrays.append([responses_observed_uncertainties[responseDimIndex],mu_guess_responses_simulation_uncertainties[responseDimIndex],map_responses_simulation_uncertainties[responseDimIndex],mu_AP_responses_simulation_uncertainties[responseDimIndex]]) #We need to give a list for each response dimension. 
 
         if plot_settings == {}: 
             plot_settings = self.UserInput.simulated_response_plot_settings
@@ -3075,7 +3075,9 @@ class parameter_estimation:
             #Some code for setting up individual plot settings in case there are multiple response dimensions.
             individual_plot_settings = copy.deepcopy(plot_settings) #we need to edit the plot settings slightly for each plot.
             if num_response_dimensions == 1:
-                responseSuffix = '' #If there is only 1 dimension, we don't need to add a suffix to the files created. That would only confuse people.
+                responseSuffix = '' #If there is only 1 dimension, we don't need to add a suffix to the files created. That would only confuse people, unless it is a 'flattened' case, in which case we will add a suffix of 'combined'.
+                if flatten == True:
+                    responseSuffix = '_combined'
             if num_response_dimensions > 1:
                 responseSuffix = "_"+str(responseDimIndex)
             individual_plot_settings['figure_name'] = individual_plot_settings['figure_name']+responseSuffix
