@@ -156,7 +156,7 @@ def sampledParameterHistogramMaker(parameterSamples, parameterName, parameterNam
         sampledParameterAxesDictionary[parameterName].tick_params(axis='y', labelsize=histogram_plot_settings['y_label_size'])
         sampledParameterFiguresDictionary[parameterName].tight_layout()
         sampledParameterFiguresDictionary[parameterName].savefig(directory+'Histogram_sampling_'+str(parameterIndex)+'_'+parameterName+'.png', dpi=histogram_plot_settings['dpi'])
-
+        plt.close(sampledParameterFiguresDictionary[parameterName])
         
         
         #The above block makes code kind of like this in a dynamic fashion. Since we know how many we will need, a dictionary is used to avoid the need for 'exec' statements when making new parameters.
@@ -179,7 +179,7 @@ def makeHistogramsForEachParameter(parameterSamples,parameterNamesAndMathTypeExp
         Mu_APValue = mup
         sampledParameterHistogramMaker(parameterSamples, parameterName, parameterNamesAndMathTypeExpressionsDict, sampledParameterFiguresDictionary, sampledParameterAxesDictionary, directory=directory, parameterInitialValue=initialValue, parameterMAPValue=MAPValue, parameterMuAPValue=Mu_APValue, histogram_plot_settings=histogram_plot_settings)        
 
-def createSimulatedResponsesPlot(x_values, listOfYArrays, plot_settings={}, listOfYUncertaintiesArrays=[], showFigure=True, directory=''):
+def createSimulatedResponsesPlot(x_values, listOfYArrays, plot_settings={}, listOfYUncertaintiesArrays=[], showFigure=False, directory=''):
     exportFigure = True #This variable should be moved to an argument or something in plot_settings.
     #First put some defaults in if not already defined.
     x_values = np.array(x_values)
@@ -280,7 +280,7 @@ def createSimulatedResponsesPlot(x_values, listOfYArrays, plot_settings={}, list
         plt.close(fig0)
     return fig0
 
-def makeTrisurfacePlot(xValues, yValues, zValues, exportFigure = True, figure_name="TrisurfacePlot", showFigure=True, directory=''):
+def makeTrisurfacePlot(xValues, yValues, zValues, exportFigure = True, figure_name="TrisurfacePlot", showFigure=False, directory=''):
     from mpl_toolkits.mplot3d import Axes3D #Although it does not look like this is called here, the InfoGain plots will fail without this line.
     fig1, ax1 =  plt.subplots(1)
     ax1 = plt.axes(projection ='3d')
@@ -291,7 +291,7 @@ def makeTrisurfacePlot(xValues, yValues, zValues, exportFigure = True, figure_na
         plt.close(fig1)
     return fig1, ax1, image
 
-def makeMeshGridSurfacePlot(XX, YY, ZZ,  plot_settings = {}, exportFigure = True, figure_name="MeshGridSurfacePlot", showFigure=True, directory=''):
+def makeMeshGridSurfacePlot(XX, YY, ZZ,  plot_settings = {}, exportFigure = True, figure_name="MeshGridSurfacePlot", showFigure=False, directory=''):
     #TODO: plot_settings should be used for axis labels etc, like above.
     #TODO: create a UserInput variable named info_gain_plot_settings (like what the other cases have).
     from mpl_toolkits.mplot3d import Axes3D #I am not sure if this line is needed here, it might b.

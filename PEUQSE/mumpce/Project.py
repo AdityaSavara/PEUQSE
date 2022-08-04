@@ -1050,6 +1050,7 @@ class Project(object):
             fig.subplots_adjust(wspace = contour_settings_custom['space_between_subplots']) 
             if 'figure_name' in contour_settings_custom:
                 fig.savefig(contour_settings_custom['figure_name']+".png",dpi=contour_settings_custom['dpi'])
+        plt.close(fig)
         return fig
     
     def plot_covariance(self,factors_list=None):
