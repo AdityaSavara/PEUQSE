@@ -87,7 +87,7 @@ class plotting_functions_class():
         #    contour_settings_custom['colorbars'] = UserInput.colorbars
         #else:
         #    contour_settings_custom['colorbars'] = True
-        mumpceProjectObject.plot_pdfs(mumpceProjectObject.pairsOfParameterIndices, contour_settings_custom = contour_settings_custom)
+        mumpceProjectObject.plot_pdfs(mumpceProjectObject.pairsOfParameterIndices, contour_settings_custom = contour_settings_custom, showFigure = showFigure)
 
 
     def seaborn_scatterplot_matrix(self):
