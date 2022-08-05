@@ -1713,11 +1713,11 @@ class parameter_estimation:
     #This is *not* recommended for use in other functions, where it is recommended that getLogP be called directly.
     def doSinglePoint(self, discreteParameterVector=None, objectiveFunction='logP'):
         #objectiveFunction can be 'logP' or 'SSR'
-        if type(discreteParameterVector)==type(None): #If somebody did not feed a specific vector, we take the initial guess.
-            discreteParameterVector = self.UserInput.InputParameterInitialGuess
-        if self.reducedParameterSpaceOn: #if reduced parameter space is on, we need to use a reduced discreteParameterVector
+        if type(discreteParameterVector)!=type(None) and (self.reducedParameterSpaceOn): #if reduced parameter space is on, and the user is providing an discreteParameterVector, we that is supposed to be the full parameter vector so we will reduce it. 
             reducedIndices = self.UserInput.model['reducedParameterSpace']
             discreteParameterVector = returnReducedIterable(discreteParameterVector, reducedIndices)
+        if type(discreteParameterVector)==type(None): #If somebody did not feed a specific vector, we take the initial guess. For the case of a reducedParameterSpace, this internal variable is already reduced.
+            discreteParameterVector = self.UserInput.InputParameterInitialGuess
         if objectiveFunction=='logP':
             self.map_parameter_set = discreteParameterVector
             self.map_logP = self.getLogP(discreteParameterVector)
@@ -2940,11 +2940,19 @@ class parameter_estimation:
                             plotting_functions.createScatterHeatMapPlot(posterior_df[param_a_column], posterior_df[param_b_column], (param_a_column, param_a_name, param_a_MAP, param_a_mu_AP, param_a_initial),
                                         (param_b_column, param_b_name, param_b_MAP, param_b_mu_AP, param_b_initial), graphs_directory, plot_settings) 
 
-    def createSimulatedResponsesPlots(self, allResponses_x_values=[], allResponsesListsOfYArrays =[], plot_settings={},allResponsesListsOfYUncertaintiesArrays=[], showFigure=None): 
+    def createSimulatedResponsesPlots(self, allResponses_x_values=[], allResponsesListsOfYArrays =[], plot_settings={},allResponsesListsOfYUncertaintiesArrays=[], showFigure=None, flatten=False): 
         if showFigure == None: showFigure = True
         #allResponsesListsOfYArrays  is to have 3 layers of lists: Response > Responses Observed, mu_guess Simulated Responses, map_Simulated Responses, (mu_AP_simulatedResponses) > Values
+        #flatten = True will convert the individual responses into a 'single response series'
+        num_response_dimensions = self.UserInput.num_response_dimensions
+        if flatten == True: #if we are flattening, we will have 1 response dimension at the end.
+            num_response_dimensions = 1
         if allResponses_x_values == []: 
-            allResponses_x_values = nestedObjectsFunctions.makeAtLeast_2dNested(self.UserInput.responses_abscissa)
+            if flatten == True:
+                allResponses_x_values = np.array(self.UserInput.responses_abscissa).flatten()
+                allResponses_x_values = nestedObjectsFunctions.makeAtLeast_2dNested(allResponses_x_values)
+            else:
+                allResponses_x_values = nestedObjectsFunctions.makeAtLeast_2dNested(self.UserInput.responses_abscissa)
         if allResponsesListsOfYArrays  ==[]: #In this case, we assume allResponsesListsOfYUncertaintiesArrays == [] also.
             allResponsesListsOfYArrays = [] #Need to make a new list in the case that there was one already, to avoid overwriting the default argument object.
             allResponsesListsOfYUncertaintiesArrays = [] #Set accompanying uncertainties list to a blank list in case it is not already one. Otherwise appending would mess up indexing.
@@ -2955,78 +2963,117 @@ class parameter_estimation:
             
             #Get mu_guess simulated output and responses. 
             self.mu_guess_SimulatedOutput = simulationFunction( self.UserInput.InputParameterInitialGuess) #Do NOT use self.UserInput.model['InputParameterInitialGuess'] because that won't work with reduced parameter space requests.
+            #Make in internal variable in case we need to flatten.
+            mu_guess_SimulatedOutput = copy.deepcopy(self.mu_guess_SimulatedOutput)
             if type(simulationOutputProcessingFunction) == type(None):
-                self.mu_guess_SimulatedResponses = nestedObjectsFunctions.makeAtLeast_2dNested(self.mu_guess_SimulatedOutput)
-                self.mu_guess_SimulatedResponses = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(self.mu_guess_SimulatedResponses)
+                mu_guess_SimulatedResponses = mu_guess_SimulatedOutput
+                if flatten == True:
+                    mu_guess_SimulatedResponses = np.array(mu_guess_SimulatedResponses).flatten()
+                mu_guess_SimulatedResponses = nestedObjectsFunctions.makeAtLeast_2dNested(mu_guess_SimulatedResponses)
+                mu_guess_SimulatedResponses = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(mu_guess_SimulatedResponses)
             if type(simulationOutputProcessingFunction) != type(None):
-                self.mu_guess_SimulatedResponses =  nestedObjectsFunctions.makeAtLeast_2dNested(     simulationOutputProcessingFunction(self.mu_guess_SimulatedOutput)     )
-                self.mu_guess_SimulatedResponses = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(self.mu_guess_SimulatedResponses)
+                mu_guess_SimulatedResponses = simulationOutputProcessingFunction(mu_guess_SimulatedOutput)
+                if flatten == True:
+                    mu_guess_SimulatedResponses = np.array(mu_guess_SimulatedResponses).flatten()
+                mu_guess_SimulatedResponses =  nestedObjectsFunctions.makeAtLeast_2dNested(mu_guess_SimulatedResponses)     
+                mu_guess_SimulatedResponses = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(mu_guess_SimulatedResponses)
             #Check if we have simulation uncertainties, and populate if so.
             if type(self.UserInput.responses_simulation_uncertainties) != type(None):
-                self.mu_guess_responses_simulation_uncertainties = nestedObjectsFunctions.makeAtLeast_2dNested(self.get_responses_simulation_uncertainties(self.UserInput.InputParameterInitialGuess))
-                self.mu_guess_responses_simulation_uncertainties = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(self.mu_guess_responses_simulation_uncertainties)
-                
+                #make an internal variable in case we need to flatten.
+                mu_guess_responses_simulation_uncertainties = self.get_responses_simulation_uncertainties(self.UserInput.InputParameterInitialGuess)
+                if flatten == True:
+                    mu_guess_responses_simulation_uncertainties = np.array(mu_guess_responses_simulation_uncertainties).flatten()
+                mu_guess_responses_simulation_uncertainties = nestedObjectsFunctions.makeAtLeast_2dNested(mu_guess_responses_simulation_uncertainties)
+                mu_guess_responses_simulation_uncertainties = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(mu_guess_responses_simulation_uncertainties)
             #Get map simiulated output and simulated responses.
-            self.map_SimulatedOutput = simulationFunction(self.map_parameter_set)           
+            self.map_SimulatedOutput = simulationFunction(self.map_parameter_set)
+            #Make an internal variable in case we need to flatten.
+            map_SimulatedOutput = copy.deepcopy(self.map_SimulatedOutput)
             if type(simulationOutputProcessingFunction) == type(None):
-                self.map_SimulatedResponses = nestedObjectsFunctions.makeAtLeast_2dNested(self.map_SimulatedOutput)
-                self.map_SimulatedResponses = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(self.map_SimulatedResponses)
+                map_SimulatedResponses = map_SimulatedOutput
+                if flatten == True:
+                    map_SimulatedResponses = np.array(map_SimulatedResponses).flatten()
+                map_SimulatedResponses = nestedObjectsFunctions.makeAtLeast_2dNested(map_SimulatedResponses)
+                map_SimulatedResponses = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(map_SimulatedResponses)
             if type(simulationOutputProcessingFunction) != type(None):
-                self.map_SimulatedResponses =  nestedObjectsFunctions.makeAtLeast_2dNested(     simulationOutputProcessingFunction(self.map_SimulatedOutput)     )
-                self.map_SimulatedResponses = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(self.map_SimulatedResponses)
+                map_SimulatedResponses = simulationOutputProcessingFunction(map_SimulatedOutput)
+                if flatten == True:
+                    map_SimulatedResponses = np.array(map_SimulatedResponses).flatten()
+                map_SimulatedResponses = nestedObjectsFunctions.makeAtLeast_2dNested(map_SimulatedResponses)
+                map_SimulatedResponses = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(map_SimulatedResponses)
             #Check if we have simulation uncertainties, and populate if so.
             if type(self.UserInput.responses_simulation_uncertainties) != type(None):
-                self.map_responses_simulation_uncertainties = nestedObjectsFunctions.makeAtLeast_2dNested(self.get_responses_simulation_uncertainties(self.map_parameter_set))
-                self.map_responses_simulation_uncertainties = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(self.map_responses_simulation_uncertainties)
-            
+                #make an internal variable in case we need to flatten.
+                map_responses_simulation_uncertainties = self.get_responses_simulation_uncertainties(self.map_parameter_set)
+                if flatten == True:
+                    map_responses_simulation_uncertainties = np.array(map_responses_simulation_uncertainties).flatten()
+                map_responses_simulation_uncertainties = nestedObjectsFunctions.makeAtLeast_2dNested(map_responses_simulation_uncertainties)
+                map_responses_simulation_uncertainties = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(map_responses_simulation_uncertainties)
             if hasattr(self, 'mu_AP_parameter_set'): #Check if a mu_AP has been assigned. It is normally only assigned if mcmc was used.           
                 #Get mu_AP simiulated output and simulated responses.
                 self.mu_AP_SimulatedOutput = simulationFunction(self.mu_AP_parameter_set)
+                #Make an internal variable in case we need to flatten.
+                mu_AP_SimulatedOutput = copy.deepcopy(self.mu_AP_SimulatedOutput)
                 if type(simulationOutputProcessingFunction) == type(None):
-                    self.mu_AP_SimulatedResponses = nestedObjectsFunctions.makeAtLeast_2dNested(self.mu_AP_SimulatedOutput)
-                    self.mu_AP_SimulatedResponses = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(self.mu_AP_SimulatedResponses)
+                    mu_AP_SimulatedResponses = mu_AP_SimulatedOutput
+                    if flatten == True:
+                        mu_AP_SimulatedResponses = np.array(mu_AP_SimulatedResponses).flatten()  
+                    mu_AP_SimulatedResponses = nestedObjectsFunctions.makeAtLeast_2dNested(mu_AP_SimulatedResponses)
+                    mu_AP_SimulatedResponses = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(mu_AP_SimulatedResponses)
                 if type(simulationOutputProcessingFunction) != type(None):
-                    self.mu_AP_SimulatedResponses =  nestedObjectsFunctions.makeAtLeast_2dNested(     simulationOutputProcessingFunction(self.mu_AP_SimulatedOutput)      )
-                    self.mu_AP_SimulatedResponses = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(self.mu_AP_SimulatedResponses)
+                    mu_AP_SimulatedResponses = simulationOutputProcessingFunction(mu_AP_SimulatedOutput)
+                    if flatten == True:
+                        mu_AP_SimulatedResponses = np.array(mu_AP_SimulatedResponses).flatten()  
+                    mu_AP_SimulatedResponses = nestedObjectsFunctions.makeAtLeast_2dNested(mu_AP_SimulatedResponses)
+                    mu_AP_SimulatedResponses = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(mu_AP_SimulatedResponses)
                 #Check if we have simulation uncertainties, and populate if so.
                 if type(self.UserInput.responses_simulation_uncertainties) != type(None):
-                    self.mu_AP_responses_simulation_uncertainties = nestedObjectsFunctions.makeAtLeast_2dNested( self.get_responses_simulation_uncertainties(self.mu_AP_parameter_set))
-                    self.mu_AP_responses_simulation_uncertainties = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(self.mu_AP_responses_simulation_uncertainties)
-            
+                    #make an internal variable in case we need to flatten.
+                    mu_AP_responses_simulation_uncertainties = self.get_responses_simulation_uncertainties(self.mu_AP_parameter_set)
+                    if flatten == True:
+                        mu_AP_responses_simulation_uncertainties = np.array(mu_AP_responses_simulation_uncertainties).flatten()
+                    mu_AP_responses_simulation_uncertainties = nestedObjectsFunctions.makeAtLeast_2dNested(mu_AP_responses_simulation_uncertainties)
+                    mu_AP_responses_simulation_uncertainties = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(mu_AP_responses_simulation_uncertainties)
+            #make internal variables for responses_observed and responses_observed_uncertainties in case we need to flatten them.
+            responses_observed = copy.deepcopy(self.UserInput.responses_observed)
+            responses_observed_uncertainties = copy.deepcopy(self.UserInput.responses_observed_uncertainties)
+            if flatten == True: #flatten and then nest, as needed. ("lazy" way)
+                responses_observed = [np.array(responses_observed).flatten()]
+                responses_observed_uncertainties = [np.array(responses_observed_uncertainties).flatten()]
             #Now to populate the allResponsesListsOfYArrays and the allResponsesListsOfYUncertaintiesArrays
-            for responseDimIndex in range(self.UserInput.num_response_dimensions):
+            for responseDimIndex in range(num_response_dimensions):
                 if not hasattr(self, 'mu_AP_parameter_set'): #Check if a mu_AP has been assigned. It is normally only assigned if mcmc was used.    
-                    if self.UserInput.num_response_dimensions == 1: 
-                        listOfYArrays = [self.UserInput.responses_observed[responseDimIndex], self.mu_guess_SimulatedResponses[responseDimIndex], self.map_SimulatedResponses[responseDimIndex]]        
+                    if num_response_dimensions == 1: 
+                        listOfYArrays = [responses_observed[responseDimIndex], mu_guess_SimulatedResponses[responseDimIndex], map_SimulatedResponses[responseDimIndex]]        
                         allResponsesListsOfYArrays.append(listOfYArrays)
                         #Now to do uncertainties, there are two cases. First case is with only observed uncertainties and no simulation ones.
                         if type(self.UserInput.responses_simulation_uncertainties) == type(None): #This means there are no simulation uncertainties. So for each response dimension, there will be a list with only the observed uncertainties in that list.
-                            allResponsesListsOfYUncertaintiesArrays.append( [self.UserInput.responses_observed_uncertainties[responseDimIndex]] ) #Just creating nesting, we need to give a list for each response dimension.
+                            allResponsesListsOfYUncertaintiesArrays.append( [responses_observed_uncertainties[responseDimIndex]] ) #Just creating nesting, we need to give a list for each response dimension.
                         else: #This case means that there are some responses_simulation_uncertainties to include, so allResponsesListsOfYUncertaintiesArrays will have more dimensions *within* its nested values.
-                            allResponsesListsOfYUncertaintiesArrays.append([self.UserInput.responses_observed_uncertainties[responseDimIndex],self.mu_guess_responses_simulation_uncertainties[responseDimIndex],self.map_responses_simulation_uncertainties[responseDimIndex]]) #We need to give a list for each response dimension.                                        
-                    elif self.UserInput.num_response_dimensions > 1: 
-                        listOfYArrays = [self.UserInput.responses_observed[responseDimIndex], self.mu_guess_SimulatedResponses[responseDimIndex], self.map_SimulatedResponses[responseDimIndex]]        
+                            allResponsesListsOfYUncertaintiesArrays.append([responses_observed_uncertainties[responseDimIndex],mu_guess_responses_simulation_uncertainties[responseDimIndex],map_responses_simulation_uncertainties[responseDimIndex]]) #We need to give a list for each response dimension.
+                    elif num_response_dimensions > 1: 
+                        listOfYArrays = [responses_observed[responseDimIndex], mu_guess_SimulatedResponses[responseDimIndex], map_SimulatedResponses[responseDimIndex]]        
                         allResponsesListsOfYArrays.append(listOfYArrays)
                         #Now to do uncertainties, there are two cases. First case is with only observed uncertainties and no simulation ones.
                         if type(self.UserInput.responses_simulation_uncertainties) == type(None): #This means there are no simulation uncertainties. So for each response dimension, there will be a list with only the observed uncertainties in that list.
-                            allResponsesListsOfYUncertaintiesArrays.append( [self.UserInput.responses_observed_uncertainties[responseDimIndex]] ) #Just creating nesting, we need to give a list for each response dimension.
+                            allResponsesListsOfYUncertaintiesArrays.append( [responses_observed_uncertainties[responseDimIndex]] ) #Just creating nesting, we need to give a list for each response dimension.
                         else: #This case means that there are some responses_simulation_uncertainties to include, so allResponsesListsOfYUncertaintiesArrays will have more dimensions *within* its nested values.
-                            allResponsesListsOfYUncertaintiesArrays.append([self.UserInput.responses_observed_uncertainties[responseDimIndex],self.mu_guess_responses_simulation_uncertainties[responseDimIndex],self.map_responses_simulation_uncertainties[responseDimIndex]]) #We need to give a list for each response dimension.                    
+                            allResponsesListsOfYUncertaintiesArrays.append([responses_observed_uncertainties[responseDimIndex],mu_guess_responses_simulation_uncertainties[responseDimIndex],map_responses_simulation_uncertainties[responseDimIndex]]) #We need to give a list for each response dimension.                    
                 if hasattr(self, 'mu_AP_parameter_set'):
-                    if self.UserInput.num_response_dimensions == 1: 
-                        listOfYArrays = [self.UserInput.responses_observed[responseDimIndex], self.mu_guess_SimulatedResponses[responseDimIndex], self.map_SimulatedResponses[responseDimIndex], self.mu_AP_SimulatedResponses[responseDimIndex]]        
+                    if num_response_dimensions == 1: 
+                        listOfYArrays = [responses_observed[responseDimIndex], mu_guess_SimulatedResponses[responseDimIndex], map_SimulatedResponses[responseDimIndex], mu_AP_SimulatedResponses[responseDimIndex]]        
                         allResponsesListsOfYArrays.append(listOfYArrays)
                         if type(self.UserInput.responses_simulation_uncertainties) == type(None): #This means there are no simulation uncertainties. So for each response dimension, there will be a list with only the observed uncertainties in that list.
-                            allResponsesListsOfYUncertaintiesArrays.append( [self.UserInput.responses_observed_uncertainties[responseDimIndex]] ) #Just creating nesting, we need to give a list for each response dimension.
+                            allResponsesListsOfYUncertaintiesArrays.append( [responses_observed_uncertainties[responseDimIndex]] ) #Just creating nesting, we need to give a list for each response dimension.
                         else: #This case means that there are some responses_simulation_uncertainties to include, so allResponsesListsOfYUncertaintiesArrays will have more dimensions *within* its nested values.
-                            allResponsesListsOfYUncertaintiesArrays.append([self.UserInput.responses_observed_uncertainties[responseDimIndex],self.mu_guess_responses_simulation_uncertainties[responseDimIndex],self.map_responses_simulation_uncertainties[responseDimIndex],self.mu_AP_responses_simulation_uncertainties[responseDimIndex]]) #We need to give a list for each response dimension.                                        
-                    elif self.UserInput.num_response_dimensions > 1: 
-                        listOfYArrays = [self.UserInput.responses_observed[responseDimIndex], self.mu_guess_SimulatedResponses[responseDimIndex], self.map_SimulatedResponses[responseDimIndex], self.mu_AP_SimulatedResponses[responseDimIndex]]        
+                            allResponsesListsOfYUncertaintiesArrays.append([responses_observed_uncertainties[responseDimIndex],mu_guess_responses_simulation_uncertainties[responseDimIndex],map_responses_simulation_uncertainties[responseDimIndex],mu_AP_responses_simulation_uncertainties[responseDimIndex]]) #We need to give a list for each response dimension.                                        
+                    elif num_response_dimensions > 1: 
+                        listOfYArrays = [responses_observed[responseDimIndex], mu_guess_SimulatedResponses[responseDimIndex], map_SimulatedResponses[responseDimIndex], mu_AP_SimulatedResponses[responseDimIndex]]        
                         allResponsesListsOfYArrays.append(listOfYArrays)
                         if type(self.UserInput.responses_simulation_uncertainties) == type(None): #This means there are no simulation uncertainties. So for each response dimension, there will be a list with only the observed uncertainties in that list.
-                            allResponsesListsOfYUncertaintiesArrays.append( [self.UserInput.responses_observed_uncertainties[responseDimIndex]] ) #Just creating nesting, we need to give a list for each response dimension.
+                            allResponsesListsOfYUncertaintiesArrays.append( [responses_observed_uncertainties[responseDimIndex]] ) #Just creating nesting, we need to give a list for each response dimension.
                         else: #This case means that there are some responses_simulation_uncertainties to include, so allResponsesListsOfYUncertaintiesArrays will have more dimensions *within* its nested values.
-                            allResponsesListsOfYUncertaintiesArrays.append([self.UserInput.responses_observed_uncertainties[responseDimIndex],self.mu_guess_responses_simulation_uncertainties[responseDimIndex],self.map_responses_simulation_uncertainties[responseDimIndex],self.mu_AP_responses_simulation_uncertainties[responseDimIndex]]) #We need to give a list for each response dimension. 
+                            allResponsesListsOfYUncertaintiesArrays.append([responses_observed_uncertainties[responseDimIndex],mu_guess_responses_simulation_uncertainties[responseDimIndex],map_responses_simulation_uncertainties[responseDimIndex],mu_AP_responses_simulation_uncertainties[responseDimIndex]]) #We need to give a list for each response dimension. 
 
         if plot_settings == {}: 
             plot_settings = self.UserInput.simulated_response_plot_settings
@@ -3047,12 +3094,14 @@ class parameter_estimation:
         import PEUQSE.plotting_functions as plotting_functions
         setMatPlotLibAgg(self.UserInput.plotting_ouput_settings['setMatPlotLibAgg'])
         allResponsesFigureObjectsList = []
-        for responseDimIndex in range(self.UserInput.num_response_dimensions): #TODO: Move the exporting out of the plot creation and/or rename the function and possibly have options about whether exporting graph, data, or both.
+        for responseDimIndex in range(num_response_dimensions): #TODO: Move the exporting out of the plot creation and/or rename the function and possibly have options about whether exporting graph, data, or both.
             #Some code for setting up individual plot settings in case there are multiple response dimensions.
             individual_plot_settings = copy.deepcopy(plot_settings) #we need to edit the plot settings slightly for each plot.
-            if self.UserInput.num_response_dimensions == 1:
-                responseSuffix = '' #If there is only 1 dimension, we don't need to add a suffix to the files created. That would only confuse people.
-            if self.UserInput.num_response_dimensions > 1:
+            if num_response_dimensions == 1:
+                responseSuffix = '' #If there is only 1 dimension, we don't need to add a suffix to the files created. That would only confuse people, unless it is a 'flattened' case, in which case we will add a suffix of 'combined'.
+                if flatten == True:
+                    responseSuffix = '_combined'
+            if num_response_dimensions > 1:
                 responseSuffix = "_"+str(responseDimIndex)
             individual_plot_settings['figure_name'] = individual_plot_settings['figure_name']+responseSuffix
             if 'x_label' in plot_settings:
@@ -3150,7 +3199,6 @@ class parameter_estimation:
         #if showFigure is none, then the default showFigure choices will occur for each of the plotting functions.
         print("Creating all plots for PEUQSE PE_object...")
         if self.UserInput.request_mpi == True: #need to check if UserInput.request_mpi is on, since if so we will only make plots after the final process.
-            import os; import sys
             import PEUQSE.parallel_processing
             if PEUQSE.parallel_processing.finalProcess == True:
                 pass#This will proceed as normal.
@@ -3186,6 +3234,14 @@ class parameter_estimation:
         try:
             self.createSimulatedResponsesPlots(allResponses_x_values=[], allResponsesListsOfYArrays =[], plot_settings={},allResponsesListsOfYUncertaintiesArrays=[], showFigure=showFigure) #forcing the arguments to be blanks, because otherwise it might use some cached values.
             if verbose: print("Finished with create simulated responses plots function call.")
+        except:
+            print("Unable to make simulated response plots. This is unusual and typically means your observed values and simulated values are not the same array shape. If so, that needs to be fixed.")
+            pass
+
+
+        #Now we will call createSimulatedResponsesPlots again with flatten = True so that the series get plotted. This should only occur if all responses are scalars.
+        try:
+            self.createSimulatedResponsesPlots(allResponses_x_values=[], allResponsesListsOfYArrays =[], plot_settings={},allResponsesListsOfYUncertaintiesArrays=[], flatten = True) #forcing the arguments to be blanks, because otherwise it might use some cached values.
         except:
             print("Unable to make simulated response plots. This is unusual and typically means your observed values and simulated values are not the same array shape. If so, that needs to be fixed.")
             pass
