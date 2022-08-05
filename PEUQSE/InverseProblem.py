@@ -3208,7 +3208,7 @@ class parameter_estimation:
             pass
 
 
-        #Now we will call createSimulatedResponsesPlots again with flatten = True so that the series get plotted.
+        #Now we will call createSimulatedResponsesPlots again with flatten = True so that the series get plotted. This should only occur if all responses are scalars.
         try:
             self.createSimulatedResponsesPlots(allResponses_x_values=[], allResponsesListsOfYArrays =[], plot_settings={},allResponsesListsOfYUncertaintiesArrays=[], flatten = True) #forcing the arguments to be blanks, because otherwise it might use some cached values.
         except:
