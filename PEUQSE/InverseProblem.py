@@ -2973,7 +2973,7 @@ class parameter_estimation:
                 map_SimulatedResponses = nestedObjectsFunctions.makeAtLeast_2dNested(map_SimulatedResponses)
                 map_SimulatedResponses = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(map_SimulatedResponses)
             if type(simulationOutputProcessingFunction) != type(None):
-                map_SimulatedResponses = simulationOutputProcessingFunction(map_SimulatedOutput
+                map_SimulatedResponses = simulationOutputProcessingFunction(map_SimulatedOutput)
                 if flatten == True:
                     map_SimulatedResponses = np.array(map_SimulatedResponses).flatten()
                 map_SimulatedResponses = nestedObjectsFunctions.makeAtLeast_2dNested(map_SimulatedResponses)
@@ -2993,7 +2993,7 @@ class parameter_estimation:
                 mu_AP_SimulatedOutput = copy.deepcopy(self.mu_AP_SimulatedOutput)
                 if type(simulationOutputProcessingFunction) == type(None):
                     mu_AP_SimulatedResponses = mu_AP_SimulatedOutput
-                     if flatten == True:
+                    if flatten == True:
                         mu_AP_SimulatedResponses = np.array(mu_AP_SimulatedResponses).flatten()  
                     mu_AP_SimulatedResponses = nestedObjectsFunctions.makeAtLeast_2dNested(mu_AP_SimulatedResponses)
                     mu_AP_SimulatedResponses = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(mu_AP_SimulatedResponses)
