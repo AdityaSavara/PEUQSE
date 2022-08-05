@@ -3013,7 +3013,7 @@ class parameter_estimation:
                     mu_AP_responses_simulation_uncertainties = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(mu_AP_responses_simulation_uncertainties)
             #make internal variables for responses_observed and responses_observed_uncertainties in case we need to flatten them.
             responses_observed = copy.deepcopy(self.UserInput.responses_observed)
-            responses_observed_uncertainties = copy.deepcop(self.UserInput.responses_observed_uncertainties)
+            responses_observed_uncertainties = copy.deepcopy(self.UserInput.responses_observed_uncertainties)
             if flatten == True: #flatten and then nest, as needed. ("lazy" way)
                 responses_observed = [np.array(responses_observed).flatten()]
                 responses_observed_uncertainties = [np.array(responses_observed_uncertainties).flatten()]
