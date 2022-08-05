@@ -1982,14 +1982,14 @@ class parameter_estimation:
         pickleAnObject(self.map_parameter_set, self.UserInput.directories['pickles']+directory_name_suffix+file_name_prefix+'permutation_map_parameter_set'+file_name_suffix)
         pickleAnObject(self.UserInput.InputParameterInitialGuess, self.UserInput.directories['pickles']+directory_name_suffix+file_name_prefix+'permutation_initial_point_parameters'+file_name_suffix)
         
-    def getConvergenceDiagnostics(self, discrete_chains_post_burn_in_samples=[]):
+    def getConvergenceDiagnostics(self, discrete_chains_post_burn_in_samples=[], showFigure = None):
         """
         Guides Integrated Autocorrelation Time and Geweke convergence analysis and makes plots.
 
         :param samplingFunctionstr (optional): String to define the sampler. (:type: str)
         :param discrete_chains_post_burn_in_samples (optional): Array that contains post burn in samples. Shape is (numSamples, numChains, numParams) (:type np.array)
         """
-        
+        if showFigure == None: showFigure = True
         if (len(discrete_chains_post_burn_in_samples)==0) and (hasattr(self, 'discrete_chains_post_burn_in_samples')):
             discrete_chains_post_burn_in_samples = self.discrete_chains_post_burn_in_samples
         # check if inputted array is a numpy array.
@@ -2006,7 +2006,7 @@ class parameter_estimation:
         # outputs are saved as a tuple 
         #TODO: make its own plot settings in different commit. 
         try:
-            convergence_ouputs = calculateAndPlotConvergenceDiagnostics(discrete_chains_post_burn_in_samples, self.UserInput.model['parameterNamesAndMathTypeExpressionsDict'], self.UserInput.scatter_matrix_plots_settings, self.UserInput.directories['graphs'])
+            convergence_ouputs = calculateAndPlotConvergenceDiagnostics(discrete_chains_post_burn_in_samples, self.UserInput.model['parameterNamesAndMathTypeExpressionsDict'], self.UserInput.scatter_matrix_plots_settings, self.UserInput.directories['graphs'], showFigure = showFigure)
         except Exception as theError:
             print("Warning: Unable to calculate and plot convergence diagnostics. The error was:", theError)
             return None #this is to end the function, so it does not crash below.
@@ -2798,7 +2798,8 @@ class parameter_estimation:
             log_probability_metric = log_probability_metric + response_log_probability_metric
         return log_probability_metric, simulatedResponses_transformed
 
-    def makeHistogramsForEachParameter(self, showFigure=True):
+    def makeHistogramsForEachParameter(self, showFigure=None):
+        if showFigure == None: showFigure = False
         import PEUQSE.plotting_functions as plotting_functions 
         setMatPlotLibAgg(self.UserInput.plotting_ouput_settings['setMatPlotLibAgg'])
         parameterSamples = self.post_burn_in_samples
@@ -2807,7 +2808,8 @@ class parameter_estimation:
             self.UserInput.histogram_plot_settings={}
         plotting_functions.makeHistogramsForEachParameter(parameterSamples,parameterNamesAndMathTypeExpressionsDict, directory = self.UserInput.directories['graphs'], parameterInitialValue=self.UserInput.model['InputParameterPriorValues'], parameterMAPValue=self.map_parameter_set, parameterMuAPValue=self.mu_AP_parameter_set, histogram_plot_settings=self.UserInput.histogram_plot_settings, showFigure=showFigure)
 
-    def makeSamplingScatterMatrixPlot(self, parameterSamples = [], parameterNamesAndMathTypeExpressionsDict={}, parameterNamesList =[], parameterMAPValue=[], parameterMuAPValue=[], parameterInitialValue = [], showFigure=True, plot_settings={'combined_plots':'auto'}):
+    def makeSamplingScatterMatrixPlot(self, parameterSamples = [], parameterNamesAndMathTypeExpressionsDict={}, parameterNamesList =[], parameterMAPValue=[], parameterMuAPValue=[], parameterInitialValue = [], showFigure=None, plot_settings={'combined_plots':'auto'}):
+        #showFigure will be set down below depending on whether combined plots is occurring or not.
         import pandas as pd #This is one of the only functions that use pandas.
         import matplotlib.pyplot as plt
         import PEUQSE.plotting_functions as plotting_functions
@@ -2833,6 +2835,7 @@ class parameter_estimation:
                 if self.UserInput.scatter_matrix_plots_settings['individual_plots'] == 'auto':
                     individual_plots = True
         if individual_plots == True: #This means we will return individual plots.
+            if showFigure == None: showFigure = False #individual plots will not showFigure by default.
             #The below code was added by Troy Gustke and merged in to PEUQSE at end of June 2021.
             # create graph variable for plotting options
             graphs_directory = self.UserInput.directories['graphs']
@@ -2854,12 +2857,14 @@ class parameter_estimation:
                                 plotting_functions.createScatterPlot(posterior_df[param_a_column], posterior_df[param_b_column], (param_a_column, param_a_name, param_a_MAP, param_a_mu_AP, param_a_initial),
                                             (param_b_column, param_b_name, param_b_MAP, param_b_mu_AP, param_b_initial), graphs_directory, plot_settings, showFigure=showFigure)
         else:
+            if showFigure == None: showFigure = True #combined plots will showFigure by default.
             pd.plotting.scatter_matrix(posterior_df)
             plt.savefig(self.UserInput.directories['graphs']+plot_settings['figure_name'],dpi=plot_settings['dpi'])
             if showFigure == False:
                 plt.close()
         
-    def makeScatterHeatMapPlots(self, parameterSamples = [], parameterNamesAndMathTypeExpressionsDict={}, parameterNamesList =[], parameterMAPValue=[], parameterMuAPValue=[], parameterInitialValue = [], showFigure=True, plot_settings={'combined_plots':'auto'}):
+    def makeScatterHeatMapPlots(self, parameterSamples = [], parameterNamesAndMathTypeExpressionsDict={}, parameterNamesList =[], parameterMAPValue=[], parameterMuAPValue=[], parameterInitialValue = [], showFigure=None, plot_settings={'combined_plots':'auto'}):
+        if showFigure == None: showFigure = True
         import pandas as pd #This is one of the only functions that use pandas.
         import matplotlib.pyplot as plt
         import PEUQSE.plotting_functions as plotting_functions
@@ -2894,7 +2899,8 @@ class parameter_estimation:
                             plotting_functions.createScatterHeatMapPlot(posterior_df[param_a_column], posterior_df[param_b_column], (param_a_column, param_a_name, param_a_MAP, param_a_mu_AP, param_a_initial),
                                         (param_b_column, param_b_name, param_b_MAP, param_b_mu_AP, param_b_initial), graphs_directory, plot_settings) 
 
-    def createSimulatedResponsesPlots(self, allResponses_x_values=[], allResponsesListsOfYArrays =[], plot_settings={},allResponsesListsOfYUncertaintiesArrays=[], showFigure=True): 
+    def createSimulatedResponsesPlots(self, allResponses_x_values=[], allResponsesListsOfYArrays =[], plot_settings={},allResponsesListsOfYUncertaintiesArrays=[], showFigure=None): 
+        if showFigure == None: showFigure = True
         #allResponsesListsOfYArrays  is to have 3 layers of lists: Response > Responses Observed, mu_guess Simulated Responses, map_Simulated Responses, (mu_AP_simulatedResponses) > Values
         if allResponses_x_values == []: 
             allResponses_x_values = nestedObjectsFunctions.makeAtLeast_2dNested(self.UserInput.responses_abscissa)
@@ -3022,7 +3028,8 @@ class parameter_estimation:
             allResponsesFigureObjectsList.append(figureObject)
         return allResponsesFigureObjectsList  #This is a list of matplotlib.pyplot as plt objects.
 
-    def createMumpcePlots(self, showFigure=True):
+    def createMumpcePlots(self, showFigure=None):
+        if showFigure == None: showFigure = False
         import PEUQSE.plotting_functions as plotting_functions
         setMatPlotLibAgg(self.UserInput.plotting_ouput_settings['setMatPlotLibAgg'])
         from PEUQSE.plotting_functions import plotting_functions_class
@@ -3098,7 +3105,8 @@ class parameter_estimation:
         return figureObject_beta
 
     @CiteSoft.after_call_compile_consolidated_log(compile_checkpoints=True) #This is from the CiteSoft module.
-    def createAllPlots(self, verbose = False, showFigure=False):
+    def createAllPlots(self, verbose = False, showFigure=None):
+        #if showFigure is none, then the default showFigure choices will occur for each of the plotting functions.
         print("Creating all plots for PEUQSE PE_object...")
         if self.UserInput.request_mpi == True: #need to check if UserInput.request_mpi is on, since if so we will only make plots after the final process.
             import os; import sys
@@ -3560,7 +3568,7 @@ def getPointsNearExistingSample(numPointsToGet, existingSamples, logP_value = No
     return extracted_parameter_samples, extracted_logP_values, extracted_objective_values
 
 
-def calculateAndPlotConvergenceDiagnostics(discrete_chains_post_burn_in_samples, parameterNamesAndMathTypeExpressionsDict, plot_settings={}, graphs_directory='./', createPlots=True):
+def calculateAndPlotConvergenceDiagnostics(discrete_chains_post_burn_in_samples, parameterNamesAndMathTypeExpressionsDict, plot_settings={}, graphs_directory='./', createPlots=True, showFigure = None):
     """
     Calls other convergence functions to do calculations and make plots.
 
@@ -3571,6 +3579,7 @@ def calculateAndPlotConvergenceDiagnostics(discrete_chains_post_burn_in_samples,
     :param createPlots: Flag to create plots after convergence analysis. (:type: bool)
     """
     from warnings import catch_warnings, simplefilter
+    if showFigure == None: showFigure = True
     # makes sure the plot settings is populated before plotting
     if len(plot_settings)==0:
         createPlots=False
@@ -3589,7 +3598,6 @@ def calculateAndPlotConvergenceDiagnostics(discrete_chains_post_burn_in_samples,
                 # since size is (numSamples, numChains, numParameters), we pass in limited samples up to the window size index
                 # while passing in every chain and parameter
                 taus_zeus[i] = AutoCorrTime(discrete_chains_post_burn_in_samples[:n,:,:]) 
-        
         # create plots using PEUQSE plotting functions file.
         from PEUQSE.plotting_functions import createAutoCorrTimePlot
         # create plots for each parameter. The parameter names and symbols are unpacked from the dictionary.
@@ -3600,14 +3608,13 @@ def calculateAndPlotConvergenceDiagnostics(discrete_chains_post_burn_in_samples,
         for param_taus, (parameter_name, parameter_math_name) in zip(taus_zeus.T, parameterNamesAndMathTypeExpressionsDict.items()):
             # only plot if createPlots is True
             if createPlots:
-                createAutoCorrTimePlot(window_indices_act, param_taus, parameter_name, parameter_math_name, heuristic_exponent_value, graphs_directory)
+                createAutoCorrTimePlot(window_indices_act, param_taus, parameter_name, parameter_math_name, heuristic_exponent_value, graphs_directory, showFigure=showFigure)
             parameter_act_for_each_window[parameter_name] = param_taus
             # combine parameters by adding log(ACT) or just by multiplying
             combined_parameter_act_for_each_window *= param_taus
         # create combined parameters plot for ACT
         heuristic_exponent_value = discrete_chains_post_burn_in_samples.shape[2] # reassign to the number of combined parameters, which is all parameters
-        createAutoCorrTimePlot(window_indices_act, combined_parameter_act_for_each_window, 'Combined_Parameters', 'All Parameters', heuristic_exponent_value, graphs_directory)
-        
+        createAutoCorrTimePlot(window_indices_act, combined_parameter_act_for_each_window, 'Combined_Parameters', 'All Parameters', heuristic_exponent_value, graphs_directory, showFigure=showFigure)
     except Exception as theError:
         window_indices_act = None
         taus_zeus = None
@@ -3648,7 +3655,7 @@ def calculateAndPlotConvergenceDiagnostics(discrete_chains_post_burn_in_samples,
             z_scores_geweke_final_plot_inputs = [z_scores_final_indices, z_scores_final] # allows for easier plotting with unpacking.
             # now plot using PEUQSE.plotting function if createPlots is True
             if createPlots:
-                createGewekePlot(z_scores_geweke_final_plot_inputs, window_indices_geweke, z_scores_percentage_outlier, parameter_name, parameter_math_name, graphs_directory)
+                createGewekePlot(z_scores_geweke_final_plot_inputs, window_indices_geweke, z_scores_percentage_outlier, parameter_name, parameter_math_name, graphs_directory, showFigure=showFigure)
         # get combined parameter Geweke plot
         total_z_scores = np.array(total_z_scores)
         # abs and average across the parameters.
@@ -3662,8 +3669,7 @@ def calculateAndPlotConvergenceDiagnostics(discrete_chains_post_burn_in_samples,
         z_scores_sum_params_geweke_final_plot_inputs = [z_scores_final_indices, z_scores_sum_params_final] # allows for easier plotting with unpacking.
         # now plot using PEUQSE.plotting function if createPlots is True
         if createPlots:
-            createGewekePlot(z_scores_sum_params_geweke_final_plot_inputs, window_indices_geweke, z_scores_sum_params_percentage_outlier, 'Combined_Parameters', 'All Parameters', graphs_directory)
-
+            createGewekePlot(z_scores_sum_params_geweke_final_plot_inputs, window_indices_geweke, z_scores_sum_params_percentage_outlier, 'Combined_Parameters', 'All Parameters', graphs_directory, showFigure=showFigure)
     except Exception as theError:
         print('Could not calculated Geweke convergence analysis. The chain length may be too small, so more samples are recommended.')
         print('The Geweke diagnostic graphs failed to be created. The error was:', theError)

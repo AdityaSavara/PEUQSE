@@ -409,7 +409,7 @@ def createScatterHeatMapPlot(data_a, data_b, a_tuple, b_tuple, graphs_directory,
     if showFigure == False:
         plt.close(fig)
 
-def createAutoCorrTimePlot(N, taus, param_name, param_symbol, heuristic_exponent_value, graphs_directory, showFigure=False):
+def createAutoCorrTimePlot(N, taus, param_name, param_symbol, heuristic_exponent_value, graphs_directory, showFigure=None):
     """
     Creates Integrated Autocorrelation Time Plots to show MCMC convergence.
     Convergence can be inferred when the AutoCorrelationTime converges.
@@ -422,6 +422,7 @@ def createAutoCorrTimePlot(N, taus, param_name, param_symbol, heuristic_exponent
     :param heuristic_exponent_value: Number of parameters being analyzed. (:type: int)
     :param graphs_directory: Directory for storing graphs. (:type: str)
     """
+    if showFigure== None: showFigure = True
     # create loglog plot
     fig = plt.figure()
     plt.loglog(N, taus, "o-", label='AutoCorr')
@@ -442,7 +443,7 @@ def createAutoCorrTimePlot(N, taus, param_name, param_symbol, heuristic_exponent
     if showFigure == False:
         plt.close(fig)
 
-def createGewekePlot(z_scores, N, z_percents, param_name, param_symbol, graphs_directory, showFigure=False):
+def createGewekePlot(z_scores, N, z_percents, param_name, param_symbol, graphs_directory, showFigure=None):
     """
     Creates Gewekes indicies plot of entire post burn in samples
     and a plot for percentage of points that fall outside 1 std when compared to the 
@@ -455,6 +456,7 @@ def createGewekePlot(z_scores, N, z_percents, param_name, param_symbol, graphs_d
     :param param_symbol: Parameter symbol. Usually in unicode raw string. (:type: str)
     :param graphs_directory: Directory for storing graphs. (:type: str)
     """
+    if showFigure== None: showFigure = True
     # create 2 subplots for one figure
     fig, (ax1, ax2) = plt.subplots(1, 2, tight_layout=True, squeeze=True)
     plt.suptitle(f'Geweke Diagnostics for {param_symbol}')
