@@ -3098,7 +3098,8 @@ class parameter_estimation:
         return figureObject_beta
 
     @CiteSoft.after_call_compile_consolidated_log(compile_checkpoints=True) #This is from the CiteSoft module.
-    def createAllPlots(self, showFigure=False):
+    def createAllPlots(self, verbose = False, showFigure=False):
+        print("Creating all plots for PEUQSE PE_object...")
         if self.UserInput.request_mpi == True: #need to check if UserInput.request_mpi is on, since if so we will only make plots after the final process.
             import os; import sys
             import PEUQSE.parallel_processing
@@ -3109,31 +3110,38 @@ class parameter_estimation:
 
         try:
             self.makeHistogramsForEachParameter(showFigure=showFigure)               
+            if verbose: print("Finished with make histograms function call.")
         except:
             print("Unable to make histograms plots. This usually means your model is not returning simulated results for most of the sampled parameter possibilities.")
 
 
         try:
             self.makeSamplingScatterMatrixPlot(plot_settings=self.UserInput.scatter_matrix_plots_settings, showFigure=showFigure)             
+            if verbose: print("Finished with makeSamplingScatterMatrixPlot function call.")
         except:
             print("Unable to make scatter matrix plot. This usually means your run is not an MCMC run, or that the sampling did not work well. If you are using Metropolis-Hastings, try EnsembleSliceSampling or try a uniform distribution multistart.")
 
 
         try:
             self.makeScatterHeatMapPlots(plot_settings=self.UserInput.scatter_heatmap_plots_settings, showFigure=showFigure)
+            if verbose: print("Finished with make scatter heatmaps function call.")
         except:
             print("Unable to make scatter heatmap plots. This usually means your run is not an MCMC run, or that the sampling did not work well. If you are using Metropolis-Hastings, try one of the other samplers: EnsembleSliceSampling,  EnsembleJumpSampling,  astroidal distribution multistart, or uniform distribution multistart.")
 
         try:        
             self.createMumpcePlots(showFigure=showFigure)
+            if verbose: print("Finished with create contour plots function call.")
         except:
             print("Unable to make contour plots. This usually means your run is not an MCMC run. However, it could mean that your prior and posterior are too far from each other for plotting.  You can change contour_plot_settings['colobars'] to false and can also change the contour_plot_settings['axis_limits'] if you know which region you wish to have plotted.")
 
         try:
             self.createSimulatedResponsesPlots(allResponses_x_values=[], allResponsesListsOfYArrays =[], plot_settings={},allResponsesListsOfYUncertaintiesArrays=[], showFigure=showFigure) #forcing the arguments to be blanks, because otherwise it might use some cached values.
+            if verbose: print("Finished with create simulated responses plots function call.")
         except:
             print("Unable to make simulated response plots. This is unusual and typically means your observed values and simulated values are not the same array shape. If so, that needs to be fixed.")
             pass
+            
+        print("Finished creating all plots. See plots inside:", self.UserInput.directories['graphs']) #TODO: take the graphs string, remove the '.' at the front if present, and print the full absolute path here.
             
     def save_to_dill(self, base_file_name, file_name_prefix ='',  file_name_suffix='', file_name_extension='.dill'):
         save_PE_object(self, base_file_name, file_name_prefix=file_name_prefix, file_name_suffix=file_name_suffix, file_name_extension=file_name_extension)
