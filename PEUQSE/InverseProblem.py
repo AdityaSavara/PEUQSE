@@ -359,6 +359,8 @@ class parameter_estimation:
             else:
                 print('The pickled object for initial guess points must exist in base directory or pickles directory. The pickled file should have extension of ".pkl"')
                 sys.exit()
+            # make sure the initial guess is a numpy array
+            initialGuessUnfiltered = np.array(initialGuessUnfiltered)
             # check if the shape of the loaded initial guess is a single point or a list of walkers
             if len(initialGuessUnfiltered.shape) == 1:
                 self.UserInput.InputParameterInitialGuess = initialGuessUnfiltered
@@ -374,10 +376,19 @@ class parameter_estimation:
                 self.UserInput.model['InputParameterInitialGuess'] = np.array(self.UserInput.mu_prior, dtype='float')
             #From now, we switch to self.UserInput.InputParameterInitialGuess because this is needed in case we're going to do reducedParameterSpace or grid sampling.
             self.UserInput.InputParameterInitialGuess = np.array(self.UserInput.model['InputParameterInitialGuess'], dtype='float')
+            # reassure the initial guess is a numpy array
+            # check the shape to make sure it is a 1D array
+            self.UserInput.InputParameterInitialGuess = np.array(self.UserInput.InputParameterInitialGuess)
+            if len(self.UserInput.InputParameterInitialGuess.shape) > 1:
+                if self.UserInput.InputParameterInitialGuess.shape[0] == 1: # make sure that the array was not double nested by accident
+                    self.UserInput.InputParameterInitialGuess = np.ndarray.flatten(self.UserInput.InputParameterInitialGuess)
+                else:
+                    print('The Initial guess must be either a 1D array or pickle file string.')
+                    sys.exit()
         #Now populate the simulation Functions. #NOTE: These will be changed if a reduced parameter space is used.
         self.UserInput.simulationFunction = self.UserInput.model['simulateByInputParametersOnlyFunction']
         self.UserInput.simulationOutputProcessingFunction = self.UserInput.model['simulationOutputProcessingFunction']
-    
+
         #Check the shapes of the arrays for UserInput.responses_observed and UserInput.responses_observed_uncertainties by doing a simulation. Warn the user if the shapes don't match.
         initialGuessSimulatedResponses = self.getSimulatedResponses(self.UserInput.InputParameterInitialGuess)
         if np.shape(initialGuessSimulatedResponses) != np.shape(UserInput.responses_observed):
@@ -789,7 +800,8 @@ class parameter_estimation:
                 timeAtLastPermutation = timeAtPermutationSearchStart #just initializing
         self.highest_logP = float('-inf') #just initializing
         highest_logP_parameter_set = np.ones(len(self.UserInput.InputParameterInitialGuess))*float('nan') #just initializing
-        bestResultSoFar = [self.highest_logP, highest_logP_parameter_set, None, None, None, None, None, None] #just initializing
+        #bestResultSoFar has this form: [self.map_parameter_set, self.mu_AP_parameter_set, self.stdap_parameter_set, self.evidence, self.info_gain, self.post_burn_in_samples, self.post_burn_in_log_posteriors_un_normed_vec]   
+        bestResultSoFar = [highest_logP_parameter_set, None, None, None, None, None, None] #just initializing. 
         highest_MAP_initial_point_index = None #just initializing
         highest_MAP_initial_point_parameters = None #just initializing
         if self.UserInput.parameter_estimation_settings['exportAllSimulatedOutputs'] == True:
@@ -824,7 +836,7 @@ class parameter_estimation:
             if (searchType == 'getLogP'):
                 self.map_logP = self.getLogP(permutation) #The getLogP function does not fill map_logP by itself.
                 self.map_parameter_set = permutation
-                thisResult = [self.map_logP, self.map_parameter_set, None, None, None, None, None, None]
+                thisResult = [self.map_parameter_set, None, None, None, None, None, None]
                 #thisResultStr = [self.map_logP, str(self.map_parameter_set).replace(",","|").replace("[","").replace('(','').replace(')',''), 'None', 'None', 'None', 'None', 'None', 'None']
             if searchType == 'doMetropolisHastings':
                 self.map_logP = np.float('-inf') #initializing as -inf to have a 'pure' mcmc sampling.
@@ -872,17 +884,17 @@ class parameter_estimation:
                 optimizationOutput = self.doOptimizeLogP(**passThroughArgs)
                 self.map_logP = optimizationOutput[1] 
                 self.map_parameter_set = optimizationOutput[0]
-                thisResult = [self.map_logP, self.map_parameter_set, None, None, None, None, None, None]
+                thisResult = [self.map_parameter_set, None, None, None, None, None, None]
             if searchType == 'doOptimizeNegLogP':
                 optimizationOutput = self.doOptimizeNegLogP(**passThroughArgs)
                 self.map_logP = -1.0*optimizationOutput[1] #need to times by negative 1 to convert negLogP into P.
                 self.map_parameter_set = optimizationOutput[0]
-                thisResult = [self.map_logP, self.map_parameter_set, None, None, None, None, None, None]
+                thisResult = [self.map_parameter_set, None, None, None, None, None, None]
             if searchType == 'doOptimizeSSR':
                 optimizationOutput = self.doOptimizeSSR(**passThroughArgs)
                 self.map_logP = -1.0*optimizationOutput[1]  #The SSR is a minimizing objective function, so we multiply by -1 to make it analagous to a log_P.
                 self.map_parameter_set = optimizationOutput[0]
-                thisResult = [self.map_logP, self.map_parameter_set, None, None, None, None, None, None]
+                thisResult = [self.map_parameter_set, None, None, None, None, None, None]
             if (type(self.UserInput.parameter_estimation_settings['multistart_checkPointFrequency']) != type(None)) or (verbose == True):
                 timeAtThisPermutation = time.time()
                 timeOfThisPermutation = timeAtThisPermutation - timeAtLastPermutation
@@ -966,7 +978,7 @@ class parameter_estimation:
                 else:
                     multistart_permutationsToSamples_threshold_filter_coefficient = self.UserInput.parameter_estimation_settings['multistart_permutationsToSamples_threshold_filter_coefficient']
                 try:
-                    logP_values_and_samples = convertPermutationsToSamples(self.permutations_MAP_logP_and_parameters_values, maxLogP=float(bestResultSoFar[0]), relativeFilteringThreshold = 10**(-1*multistart_permutationsToSamples_threshold_filter_coefficient))
+                    logP_values_and_samples = convertPermutationsToSamples(self.permutations_MAP_logP_and_parameters_values, maxLogP=float(self.map_logP), relativeFilteringThreshold = 10**(-1*multistart_permutationsToSamples_threshold_filter_coefficient))
                     self.post_burn_in_log_posteriors_un_normed_vec = logP_values_and_samples[:,0]
                     self.post_burn_in_log_posteriors_un_normed_vec = np.array(nestedObjectsFunctions.makeAtLeast_2dNested(self.post_burn_in_log_posteriors_un_normed_vec)).transpose()
                     self.post_burn_in_samples = logP_values_and_samples[:,1:]
@@ -1703,6 +1715,9 @@ class parameter_estimation:
         #objectiveFunction can be 'logP' or 'SSR'
         if type(discreteParameterVector)==type(None): #If somebody did not feed a specific vector, we take the initial guess.
             discreteParameterVector = self.UserInput.InputParameterInitialGuess
+        if self.reducedParameterSpaceOn: #if reduced parameter space is on, we need to use a reduced discreteParameterVector
+            reducedIndices = self.UserInput.model['reducedParameterSpace']
+            discreteParameterVector = returnReducedIterable(discreteParameterVector, reducedIndices)
         if objectiveFunction=='logP':
             self.map_parameter_set = discreteParameterVector
             self.map_logP = self.getLogP(discreteParameterVector)
@@ -1833,7 +1848,7 @@ class parameter_estimation:
                 mergedArray = np.hstack( (self.post_burn_in_log_posteriors_un_normed_vec, self.post_burn_in_log_priors_vec, self.post_burn_in_samples) )
             except:
                 print("Line 866: There has been an error, here are post_burn_in_log_posteriors_un_normed_vec, post_burn_in_samples, post_burn_in_log_priors_vec", np.shape(self.post_burn_in_log_posteriors_un_normed_vec), np.shape(self.post_burn_in_samples), np.shape(self.post_burn_in_log_priors_vec))
-                print(self.post_burn_in_log_posteriors_un_normed_vec, self.post_burn_in_samples, self.post_burn_in_log_priors_vec)
+                # print(self.post_burn_in_log_posteriors_un_normed_vec, self.post_burn_in_samples, self.post_burn_in_log_priors_vec)
                 sys.exit()
             #Now need to find cases where the probability is too low and filter them out.
             #Filtering Step 1: Find average and Stdev of log(-logP)
@@ -2092,7 +2107,7 @@ class parameter_estimation:
             else: self.mcmc_nwalkers = self.UserInput.parameter_estimation_settings['mcmc_nwalkers']
             if isinstance(self.mcmc_nwalkers, str): 
                 if self.mcmc_nwalkers.lower() == "auto":
-                    self.mcmc_nwalkers = numParameters*4
+                    self.mcmc_nwalkers = numParameters*16 # according to zeus paper (https://doi.org/10.1093/mnras/stab2867), 16*D is the optimal number of walkers for emcee
                 else: #else it is an integer, or a string meant to be an integer.
                     self.mcmc_nwalkers =  int(self.mcmc_nwalkers)
         else: #this is mainly for PermutationSearch which will (by default) use the minimum number of walkers per point.
@@ -2132,6 +2147,8 @@ class parameter_estimation:
             else:
                 print('The pickled object for initial guess points must exist in base directory or pickles directory.')
                 sys.exit()
+            # make sure the initial guess is a numpy array
+            walkerStartPoints = np.array(walkerStartPoints)
             # check if start points have the same amount of walkers
             initial_guess_mcmc_nwalkers = walkerStartPoints.shape[0] # last points have shape (nwalkers, nparams)
             if len(walkerStartPoints.shape) == 1:
@@ -2280,7 +2297,7 @@ class parameter_estimation:
             else: self.mcmc_nwalkers = self.UserInput.parameter_estimation_settings['mcmc_nwalkers']
             if type(self.mcmc_nwalkers) == type("string"): 
                 if self.mcmc_nwalkers.lower() == "auto":
-                    self.mcmc_nwalkers = numParameters*4
+                    self.mcmc_nwalkers = numParameters*4 # according to zeus paper (https://doi.org/10.1093/mnras/stab2867), 4*D is the optimal number of walkers for general problems. Multimodal problems benefit from additional walkers.
                 else: #else it is an integer, or a string meant to be an integer.
                     self.mcmc_nwalkers =  int(self.mcmc_nwalkers)
         else: #this is mainly for PermutationSearch which will (by default) use the minimum number of walkers per point.
@@ -2328,6 +2345,8 @@ class parameter_estimation:
             else:
                 print('The pickled object for initial guess points must exist in base directory or pickles directory.')
                 sys.exit()
+            # make sure the initial guess is a numpy array
+            walkerStartPoints = np.array(walkerStartPoints)
             # check if start points have the same amount of walkers
             initial_guess_mcmc_nwalkers = walkerStartPoints.shape[0] # last points have shape (nwalkers, nparams)
             if len(walkerStartPoints.shape) == 1:
@@ -2797,6 +2816,28 @@ class parameter_estimation:
                     response_log_probability_metric = current_log_probability_metric + response_log_probability_metric
             log_probability_metric = log_probability_metric + response_log_probability_metric
         return log_probability_metric, simulatedResponses_transformed
+
+    def truncatePostBurnInSamples(self, post_burn_in_samples=[], parameterBoundsLower=None, parameterBoundsUpper=None):
+        """
+        Truncate the post_burn_in_samples variable along with other variables that are relative to it. 
+        Apply a lower and upper bound to a parameter to truncate.
+        Bounds are Inclusive. Set a None on a bound to not have it change. 
+        Example of changing just lower bound for one parameter: parameterBounds = [(paramLowerBound, None)]
+
+        :param post_burn_in_samples: Samples after mcmc run. (:type: np.array)
+        :param parameterBoundsLower: List of parameter lower bounds. Use None to indicate a bound not being applied. (:type: list)
+        :param parameterBoundsUpper: List of parameter upper bounds. Use None to indicate a bound not being applied. (:type: list)
+        """
+        if post_burn_in_samples == []:
+            post_burn_in_samples = self.post_burn_in_samples
+        # truncate the post burn in samples according to the parameterBounds
+        truncated_post_burn_in_samples, truncated_mask = truncateSamples(post_burn_in_samples, parameterBoundsLower=parameterBoundsLower, parameterBoundsUpper=parameterBoundsUpper, returnMask=True)
+        # reassign class variables to the truncated versions
+        self.post_burn_in_samples = truncated_post_burn_in_samples
+        self.post_burn_in_log_posteriors_un_normed_vec = self.post_burn_in_log_posteriors_un_normed_vec[truncated_mask, :]
+        self.post_burn_in_log_priors_vec = self.post_burn_in_log_priors_vec[truncated_mask, :]
+        # return post_burn_in_samples
+        return truncated_post_burn_in_samples
 
     def makeHistogramsForEachParameter(self, showFigure=None):
         if showFigure == None: showFigure = True
@@ -3354,13 +3395,13 @@ def boundsCheck(values, valuesBounds, boundsType):
     parametersTruncated = values[valuesBounds !=  None].flatten() #flattening because becomes mysteriously nested.  On 6/28/22, removed the type call since python behavior changed. The line used to be: parametersTruncated = values[type(valuesBounds) != type(None)].flatten()
     parametersBoundsTruncated = valuesBounds[valuesBounds !=  None].flatten() #flattening because becomes mysteriously nested. On 6/28/22, removed the type call since python behavior changed. The line used to be: parametersBoundsTruncated = valuesBounds[type(valuesBounds) != type(None)].flatten()
     if boundsType.lower() == 'upper': #we make the input into lower case before proceeding.
-        upperCheck = parametersTruncated < parametersBoundsTruncated #Check if all are smaller.
+        upperCheck = parametersTruncated <= parametersBoundsTruncated #Check if all are smaller.
         if False in upperCheck: #If any of them failed, we return False.
             return False
         else:
             pass #else we do the lower bounds check next.
     if boundsType.lower() == 'lower':
-        lowerCheck = parametersTruncated > parametersBoundsTruncated #Check if all are smaller.
+        lowerCheck = parametersTruncated >= parametersBoundsTruncated #Check if all are smaller.
         if False in lowerCheck: #If any of them failed, we return False.
             return False
         else:
@@ -3479,7 +3520,7 @@ def deleteAllFilesInDirectory(mydir=''):
     for f in filelist:
         os.remove(os.path.join(mydir, f))
 
-def getPointsNearExistingSample(numPointsToGet, existingSamples, logP_value = None, parameters_values = None, sortBy = 'relative_delta', pickleFileName='pointsNearExistingSample.pkl'):
+def getPointsNearExistingSample(numPointsToGet, existingSamples, logP_value = None, parameters_values = None, sortBy = 'relative_delta', pickleFileName='pointsNearExistingSample.pkl', unique_points=True):
     """
     This function retrieves a number of points near a point in existingSamples, either based on a logP_value or parameters_values.
     All of the rows in existingSamples must be of the form of LogP in the first column and parameters_values in the later columns.
@@ -3555,6 +3596,10 @@ def getPointsNearExistingSample(numPointsToGet, existingSamples, logP_value = No
     #now sort it.
     sortedArray = arrayToSort[arrayToSort[:,0].argsort()] #by default this will be smallest to largest, which is what we want.
     
+    # have only unique points if unique_points is True
+    if unique_points:
+        sortedArray = np.unique(sortedArray, axis=0)
+
     extractedSamples_with_objective_function_and_logP = sortedArray[0:numPointsToGet].T #extract the relevant rows and transform to appropriate shape of (numPointsToGet, numParameters)
 
     # seperate values into separate variables. 
@@ -3567,6 +3612,69 @@ def getPointsNearExistingSample(numPointsToGet, existingSamples, logP_value = No
     # return parameter samples, logP values, and objective values separately
     return extracted_parameter_samples, extracted_logP_values, extracted_objective_values
 
+def truncateSamples(samples, parameterBoundsLower=None, parameterBoundsUpper=None, returnMask=False):
+    """
+    Truncate samples by bounding the parameter space. Put None in bounds that are not truncated.
+    Parameter bounds are inclusive.
+
+    :param samples: Samples after mcmc run. (:type: np.array)
+    :param parameterBoundsLower: List of parameter lower bounds. Use None to indicate a bound not being applied. (:type: list)
+    :param parameterBoundsUpper: List of parameter upper bounds. Use None to indicate a bound not being applied. (:type: list)
+    :param returnMask: Boolean value to return the mask along with the samples. (:type: bool)
+    """
+    parameterBounds = zip(parameterBoundsLower, parameterBoundsUpper)
+    # check length of parameter bounds
+    if samples.shape[1] != len(parameterBounds):
+        print('The samples must have shape (numSamples, numParameters) and parameterBounds must be a list of tuples containing the lower and upper bounds for a parameter. The parameters bounds must be in the same order as the parameters ordered in the samples variable.')
+        sys.exit()
+    # apply a mask to truncate samples relative to parameter bounds
+    for param_index, paramBounds in enumerate(parameterBounds):
+        lowerBound, upperBound = paramBounds
+        # check if Nones were input, this indicates to not truncate the parameter
+        if (isinstance(lowerBound, type(None))) and (isinstance(upperBound, type(None))):
+            continue # skips to the next iteration
+        elif isinstance(lowerBound, type(None)): # create mask for lower bound
+            truncatedMask = (samples[:, param_index] <= upperBound)
+        elif isinstance(upperBound, type(None)): # create mask for upper bound
+            truncatedMask = (samples[:, param_index] >= lowerBound)
+        else: # create mask for lower and upper bound
+            truncatedMask = ((samples[:, param_index] >= lowerBound) & (samples[:, param_index] <= upperBound))
+        samples = samples[truncatedMask, :] # truncate number of samples from the mask
+    if returnMask:
+        return samples, truncatedMask
+    else:
+        return samples
+
+def splitSamples(samples, parameter_indices, all_parameters_splitting_values):
+    """
+    Split samples at a given value(s).
+    The samples will be returned in order. 
+    Only supports splitting across one parameter for now. 
+
+    :param samples: Parameter samples with shape (numSamples, numParams) (:type: np.array)
+    :param parameter_indicies: Indices of parameters that are considered when splitting. Only supports one parameter. Ex: [3] (:type: list of ints)
+    :param all_parameters_splitting_values: List of values to split at. Only supports splitting for one parameter. Ex: [[1,2,3]] (:type: list of lists)
+    """
+    # check if parameter indices is not in a list
+    if isinstance(parameter_indices, int):
+        parameter_indices = [parameter_indices]
+    # make sure the splitting_values variable is a list of lists, or something similar
+    all_parameters_splitting_values = nestedObjectsFunctions.makeAtLeast_2dNested(all_parameters_splitting_values)
+    # check if parameter indices is not one, right now only one parameter can be handled
+    if len(parameter_indices) != 1:
+        print('This function (splitSamples) only supports splitting across one parameter for now.')
+        sys.exit()
+    #TODO: change code to make handle multiple parameters, currently it will not
+    parameter_index = parameter_indices[0]
+    splitting_values = all_parameters_splitting_values[0]
+    # sort samples
+    sorted_indices = np.argsort(samples[:, parameter_index], axis=0)[:, np.newaxis] # add newaxis to make samples and sorted_indices the same dimensions
+    sorted_samples = np.take_along_axis(samples, sorted_indices, axis=0)
+    # find splitting spots
+    split_at = sorted_samples[:, parameter_index].searchsorted(splitting_values) 
+    split_samples = np.split(sorted_samples, split_at) # split_at must be a list-like object
+    # return list of arrays
+    return split_samples
 
 def calculateAndPlotConvergenceDiagnostics(discrete_chains_post_burn_in_samples, parameterNamesAndMathTypeExpressionsDict, plot_settings={}, graphs_directory='./', createPlots=True, showFigure = None):
     """
