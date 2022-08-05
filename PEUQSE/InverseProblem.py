@@ -2799,7 +2799,7 @@ class parameter_estimation:
         return log_probability_metric, simulatedResponses_transformed
 
     def makeHistogramsForEachParameter(self, showFigure=None):
-        if showFigure == None: showFigure = False
+        if showFigure == None: showFigure = True
         import PEUQSE.plotting_functions as plotting_functions 
         setMatPlotLibAgg(self.UserInput.plotting_ouput_settings['setMatPlotLibAgg'])
         parameterSamples = self.post_burn_in_samples
@@ -3149,7 +3149,7 @@ class parameter_estimation:
             print("Unable to make simulated response plots. This is unusual and typically means your observed values and simulated values are not the same array shape. If so, that needs to be fixed.")
             pass
             
-        print("Finished creating all plots. See plots inside:", self.UserInput.directories['graphs']) #TODO: take the graphs string, remove the '.' at the front if present, and print the full absolute path here.
+        print("Finished creating all plots. Only some plots are shown on screen. The fulls set of plots are in:", self.UserInput.directories['graphs']) #TODO: take the graphs string, remove the '.' at the front if present, and print the full absolute path here.
             
     def save_to_dill(self, base_file_name, file_name_prefix ='',  file_name_suffix='', file_name_extension='.dill'):
         save_PE_object(self, base_file_name, file_name_prefix=file_name_prefix, file_name_suffix=file_name_suffix, file_name_extension=file_name_extension)
