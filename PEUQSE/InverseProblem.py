@@ -3173,7 +3173,6 @@ class parameter_estimation:
     @CiteSoft.after_call_compile_consolidated_log(compile_checkpoints=True) #This is from the CiteSoft module.
     def createAllPlots(self):
         if self.UserInput.request_mpi == True: #need to check if UserInput.request_mpi is on, since if so we will only make plots after the final process.
-            import os; import sys
             import PEUQSE.parallel_processing
             if PEUQSE.parallel_processing.finalProcess == True:
                 pass#This will proceed as normal.
