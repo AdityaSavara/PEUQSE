@@ -1713,11 +1713,11 @@ class parameter_estimation:
     #This is *not* recommended for use in other functions, where it is recommended that getLogP be called directly.
     def doSinglePoint(self, discreteParameterVector=None, objectiveFunction='logP'):
         #objectiveFunction can be 'logP' or 'SSR'
-        if type(discreteParameterVector)==type(None): #If somebody did not feed a specific vector, we take the initial guess.
-            discreteParameterVector = self.UserInput.InputParameterInitialGuess
-        if self.reducedParameterSpaceOn: #if reduced parameter space is on, we need to use a reduced discreteParameterVector
+        if type(discreteParameterVector)!=type(None) and (self.reducedParameterSpaceOn): #if reduced parameter space is on, and the user is providing an discreteParameterVector, we that is supposed to be the full parameter vector so we will reduce it. 
             reducedIndices = self.UserInput.model['reducedParameterSpace']
             discreteParameterVector = returnReducedIterable(discreteParameterVector, reducedIndices)
+        if type(discreteParameterVector)==type(None): #If somebody did not feed a specific vector, we take the initial guess. For the case of a reducedParameterSpace, this internal variable is already reduced.
+            discreteParameterVector = self.UserInput.InputParameterInitialGuess
         if objectiveFunction=='logP':
             self.map_parameter_set = discreteParameterVector
             self.map_logP = self.getLogP(discreteParameterVector)
@@ -2940,7 +2940,7 @@ class parameter_estimation:
                             plotting_functions.createScatterHeatMapPlot(posterior_df[param_a_column], posterior_df[param_b_column], (param_a_column, param_a_name, param_a_MAP, param_a_mu_AP, param_a_initial),
                                         (param_b_column, param_b_name, param_b_MAP, param_b_mu_AP, param_b_initial), graphs_directory, plot_settings) 
 
-    def createSimulatedResponsesPlots(self, allResponses_x_values=[], allResponsesListsOfYArrays =[], plot_settings={},allResponsesListsOfYUncertaintiesArrays=[], showFigure=None): 
+    def createSimulatedResponsesPlots(self, allResponses_x_values=[], allResponsesListsOfYArrays =[], plot_settings={},allResponsesListsOfYUncertaintiesArrays=[], showFigure=None, flatten=False): 
         if showFigure == None: showFigure = True
         #allResponsesListsOfYArrays  is to have 3 layers of lists: Response > Responses Observed, mu_guess Simulated Responses, map_Simulated Responses, (mu_AP_simulatedResponses) > Values
         #flatten = True will convert the individual responses into a 'single response series'
