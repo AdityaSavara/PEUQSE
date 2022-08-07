@@ -82,6 +82,10 @@ class parameter_estimation:
         if self.UserInput.parameter_estimation_settings['verbose']: 
             print("Parameter Estimation Object Initialized")
         
+        
+        #Set self.UserInput.user_requested_convergence_diagnostics to that from the UserInput. This may be changed to true or false during multi-start etc.
+        self.UserInput.user_requested_convergence_diagnostics = self.UserInput.parameter_estimation_settings['convergence_diagnostics']
+        
         if type(UserInput.parameter_estimation_settings['checkPointFrequency']) != type(None): #This is for backwards compatibility.
             UserInput.parameter_estimation_settings['mcmc_checkPointFrequency'] = UserInput.parameter_estimation_settings['checkPointFrequency']
             UserInput.parameter_estimation_settings['multistart_checkPointFrequency'] = UserInput.parameter_estimation_settings['checkPointFrequency']
@@ -298,6 +302,9 @@ class parameter_estimation:
             if self.middle_of_doe_flag == False: #If the flag is there, we only proceed to call the function if the flag is set to false.
                 if type(UserInput.model['populateIndependentVariablesFunction']) != type(None):
                     UserInput.model['populateIndependentVariablesFunction'](UserInput.responses['independent_variables_values']) 
+        if hasattr(self, 'middle_of_doe_flag'): #if the middle_of_doe_flag is there and true, then we also turn off the convergence diagnostics.
+            if self.middle_of_doe_flag == True:
+                self.UserInput.user_requested_convergence_diagnostics = False
                 
         #Now scale things as needed:
         if UserInput.parameter_estimation_settings['scaling_uncertainties_type'] == "off":
@@ -552,7 +559,7 @@ class parameter_estimation:
             responses_simulation_uncertainties = self.UserInput.responses_simulation_uncertainties(discreteParameterVector) #This is passing an argument to a function.
             responses_simulation_uncertainties = np.array(nestedObjectsFunctions.makeAtLeast_2dNested(responses_simulation_uncertainties))
             responses_simulation_uncertainties = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(responses_simulation_uncertainties)
-        return responses_simulation_uncertainties
+        return responses_simulation_uncertainties #this normally a list of list where each element at the deepest level is 1 standard deviation of uncertainty (not variance).
 
     def simulateWithSubsetOfParameters(self,reducedParametersVector): #This is a wrapper.
         #This function has implied arguments of ...
@@ -769,6 +776,12 @@ class parameter_estimation:
         verbose = self.UserInput.parameter_estimation_settings['verbose']
         if verbose:
             print("Starting multistart/permutations search.")
+        if searchType in ['doEnsembleSliceSampling', 'doEnsembleJumpSampling', 'doMetropolisHastings']:
+            if self.UserInput.user_requested_convergence_diagnostics == True:
+                print("Notification: doMultistart / doListOfPermutationsSearch is being used with an MCMC searchType, which performs many MCMC runs. Convergence diagnostics are being turned off for the individual runs, and will be used only for the best run.")
+                self.UserInput.user_requested_convergence_diagnostics = False
+        
+
         file_name_prefix, file_name_suffix, directory_name_suffix = self.getParallelProcessingPrefixAndSuffix() #As of Nov 21st 2020, these should always be '' since multiStart_continueSampling is not intended to be used with parallel sampling.
         if (self.UserInput.parameter_estimation_settings['mcmc_continueSampling']  == 'auto') or (self.UserInput.parameter_estimation_settings['mcmc_continueSampling']  == False):
             mcmc_continueSampling = False #need to set this variable to false if it's an auto. The only time mcmc_continue sampling should be on for multistart is if someone is doing it intentionally, which would normally only be during an MPI case.
@@ -846,10 +859,12 @@ class parameter_estimation:
                 if keep_cumulative_post_burn_in_data == True:
                     if permutationIndex == 0:
                         self.cumulative_post_burn_in_samples = self.post_burn_in_samples
+                        self.cumulative_discrete_chains_post_burn_in_samples = self.discrete_chains_post_burn_in_samples
                         self.cumulative_post_burn_in_log_priors_vec = self.post_burn_in_log_priors_vec
                         self.cumulative_post_burn_in_log_posteriors_un_normed_vec = self.post_burn_in_log_posteriors_un_normed_vec
                     else: #This is basically elseif permutationIndex > 0:
                         self.cumulative_post_burn_in_samples = np.vstack((self.cumulative_post_burn_in_samples, self.post_burn_in_samples))
+                        self.cumulative_discrete_chains_post_burn_in_samples = np.vstack((self.cumulative_discrete_chains_post_burn_in_samples, self.discrete_chains_post_burn_in_samples)) 
                         self.cumulative_post_burn_in_log_priors_vec = np.vstack((self.cumulative_post_burn_in_log_priors_vec, self.post_burn_in_log_priors_vec))
                         self.cumulative_post_burn_in_log_posteriors_un_normed_vec = np.vstack((self.cumulative_post_burn_in_log_posteriors_un_normed_vec, self.post_burn_in_log_posteriors_un_normed_vec))
             if searchType == 'doEnsembleSliceSampling':
@@ -860,12 +875,14 @@ class parameter_estimation:
                 if keep_cumulative_post_burn_in_data == True:
                     if permutationIndex == 0:
                         self.cumulative_post_burn_in_samples = self.post_burn_in_samples
+                        self.cumulative_discrete_chains_post_burn_in_samples = self.discrete_chains_post_burn_in_samples
                         self.cumulative_post_burn_in_log_priors_vec = self.post_burn_in_log_priors_vec
                         self.cumulative_post_burn_in_log_posteriors_un_normed_vec = self.post_burn_in_log_posteriors_un_normed_vec
                     else: #This is basically elseif permutationIndex > 0:
                         self.cumulative_post_burn_in_samples = np.vstack((self.cumulative_post_burn_in_samples, self.post_burn_in_samples))
+                        self.cumulative_discrete_chains_post_burn_in_samples = np.vstack((self.cumulative_discrete_chains_post_burn_in_samples, self.discrete_chains_post_burn_in_samples)) 
                         self.cumulative_post_burn_in_log_priors_vec = np.vstack((self.cumulative_post_burn_in_log_priors_vec, self.post_burn_in_log_priors_vec))
-                        self.cumulative_post_burn_in_log_posteriors_un_normed_vec = np.vstack((self.cumulative_post_burn_in_log_posteriors_un_normed_vec, self.post_burn_in_log_posteriors_un_normed_vec))                    
+                        self.cumulative_post_burn_in_log_posteriors_un_normed_vec = np.vstack((self.cumulative_post_burn_in_log_posteriors_un_normed_vec, self.post_burn_in_log_posteriors_un_normed_vec))
             if searchType == 'doEnsembleModifiedMHSampling':
                 self.map_logP = np.float('-inf') #initializing as -inf to have a 'pure' mcmc sampling.
                 thisResult = self.doEnsembleModifiedMHSampling(mcmc_nwalkers_direct_input=permutationSearch_mcmc_nwalkers, calculatePostBurnInStatistics=calculatePostBurnInStatistics, walkerInitialDistribution=walkerInitialDistribution, continueSampling=mcmc_continueSampling) 
@@ -874,10 +891,12 @@ class parameter_estimation:
                 if keep_cumulative_post_burn_in_data == True:
                     if permutationIndex == 0:
                         self.cumulative_post_burn_in_samples = self.post_burn_in_samples
+                        self.cumulative_discrete_chains_post_burn_in_samples = self.discrete_chains_post_burn_in_samples
                         self.cumulative_post_burn_in_log_priors_vec = self.post_burn_in_log_priors_vec
                         self.cumulative_post_burn_in_log_posteriors_un_normed_vec = self.post_burn_in_log_posteriors_un_normed_vec
                     else: #This is basically elseif permutationIndex > 0:
                         self.cumulative_post_burn_in_samples = np.vstack((self.cumulative_post_burn_in_samples, self.post_burn_in_samples))
+                        self.cumulative_discrete_chains_post_burn_in_samples = np.vstack((self.cumulative_discrete_chains_post_burn_in_samples, self.discrete_chains_post_burn_in_samples)) 
                         self.cumulative_post_burn_in_log_priors_vec = np.vstack((self.cumulative_post_burn_in_log_priors_vec, self.post_burn_in_log_priors_vec))
                         self.cumulative_post_burn_in_log_posteriors_un_normed_vec = np.vstack((self.cumulative_post_burn_in_log_posteriors_un_normed_vec, self.post_burn_in_log_posteriors_un_normed_vec))
             if searchType == 'doOptimizeLogP':
@@ -907,6 +926,8 @@ class parameter_estimation:
                 highest_logP_parameter_set = np.copy(self.map_parameter_set)
                 highest_MAP_initial_point_index = permutationIndex
                 highest_MAP_initial_point_parameters = permutation
+                if hasattr(self, 'discrete_chains_post_burn_in_samples'):
+                    bestResultSoFar_discrete_chains_post_burn_in_samples = self.discrete_chains_post_burn_in_samples
             allPermutationsResults.append(thisResult)
             if self.UserInput.parameter_estimation_settings['exportAllSimulatedOutputs'] == True:
                 if (searchType == 'doEnsembleSliceSampling') or (searchType=='doMetropolisHastings') or (searchType == 'doEnsembleModifiedMHSampling'): #we need to run the map again, outside of mcmc, to populate 
@@ -951,6 +972,8 @@ class parameter_estimation:
                 #self.post_burn_in_log_posteriors_un_normed_vec = bestResultSoFar[6]
                 self.calculatePostBurnInStatistics(calculate_post_burn_in_log_priors_vec = True)
                 self.exportPostBurnInStatistics()
+            if self.UserInput.parameter_estimation_settings['convergence_diagnostics'] == True: #at the end of the permutations, calculate convergence diagnostics for the last run.
+                self.getConvergenceDiagnostics(bestResultSoFar_discrete_chains_post_burn_in_samples)
             #One could call calculatePostBurnInStatistics() if one wanted the cumulative from all results. But we don't actually want that.
             #Below should not be used. These commented out lines are biased towards the center of the grid.
             #self.post_burn_in_samples = cumulative_post_burn_in_samples
@@ -1070,14 +1093,12 @@ class parameter_estimation:
             searchType = 'getLogP'
         #make the initial points list by mostly passing through arguments.
         multiStartInitialPointsList = self.generateInitialPoints(numStartPoints=numStartPoints, relativeInitialDistributionSpread=relativeInitialDistributionSpread, initialPointsDistributionType=initialPointsDistributionType, centerPoint = centerPoint, gridsearchSamplingInterval = gridsearchSamplingInterval, gridsearchSamplingRadii = gridsearchSamplingRadii)
-        
         #we normally only turn on permutationsToSamples if grid or uniform and if getLogP or doOptimizeNegLogP.
         permutationsToSamples = False#initialize with default
         if self.UserInput.parameter_estimation_settings['multistart_permutationsToSamples'] == True:
             if (initialPointsDistributionType == 'grid') or (initialPointsDistributionType == 'uniform') or (initialPointsDistributionType == 'sobol') or (initialPointsDistributionType == 'astroidal') or (initialPointsDistributionType == 'shell'):
                 if (searchType == 'getLogP') or (searchType=='doOptimizeNegLogP') or (searchType=='doOptimizeLogP') or (searchType=='doOptimizeSSR'):
                     permutationsToSamples = True
-                        
         #Look for the best result (highest map_logP) from among these permutations. Maybe later should add optional argument to allow searching for highest mu_AP to find HPD.
         bestResultSoFar = self.doListOfPermutationsSearch(listOfPermutations=multiStartInitialPointsList, searchType=searchType, exportLog=exportLog, walkerInitialDistribution=walkerInitialDistribution, passThroughArgs=passThroughArgs, calculatePostBurnInStatistics=calculatePostBurnInStatistics, keep_cumulative_post_burn_in_data=keep_cumulative_post_burn_in_data, centerPoint = centerPoint, permutationsToSamples=permutationsToSamples)
         return bestResultSoFar
@@ -1462,6 +1483,9 @@ class parameter_estimation:
     
     #This function requires population of the UserInput doe_settings dictionary. It automatically scans many parameter modulation Permutations.
     def doeParameterModulationPermutationsScanner(self, searchType='doMetropolisHastings'):
+        print("Notification: doeParameterModulationPermutationsScanner is being used which performs many MCMC runs. Convergence diagnostics are being turned off for these runs.")
+        self.UserInput.user_requested_convergence_diagnostics = False
+        
         import PEUQSE.CombinationGeneratorModule as CombinationGeneratorModule
         doe_settings = self.UserInput.doe_settings 
         #For the parameters, we are able to use a default one standard deviation grid if gridSamplingAbsoluteIntervalSize is a blank list.
@@ -2211,7 +2235,7 @@ class parameter_estimation:
             self.samplingObject = emcee_sampler
         if calculatePostBurnInStatistics == True:
             self.calculatePostBurnInStatistics(calculate_post_burn_in_log_priors_vec = True) #This function call will also filter the lowest probability samples out, when using default settings.
-            if self.UserInput.parameter_estimation_settings['convergence_diagnostics']: #Run convergence diagnostics if UserInput defines it as True
+            if self.UserInput.user_requested_convergence_diagnostics: #Run convergence diagnostics if UserInput defines it as True
                 self.getConvergenceDiagnostics(discrete_chains_post_burn_in_samples)
             if str(mcmc_exportLog) == 'UserChoice':
                 mcmc_exportLog = bool(self.UserInput.parameter_estimation_settings['mcmc_exportLog'])
@@ -2410,7 +2434,7 @@ class parameter_estimation:
             self.samplingObject = zeus_sampler
         if calculatePostBurnInStatistics == True:
             self.calculatePostBurnInStatistics(calculate_post_burn_in_log_priors_vec = True) #This function call will also filter the lowest probability samples out, when using default settings.
-            if self.UserInput.parameter_estimation_settings['convergence_diagnostics']: #Run convergence diagnostics if UserInput defines it as True
+            if self.UserInput.user_requested_convergence_diagnostics: #Run convergence diagnostics if UserInput defines it as True
                 self.getConvergenceDiagnostics(discrete_chains_post_burn_in_samples)
             if str(mcmc_exportLog) == 'UserChoice':
                 mcmc_exportLog = bool(self.UserInput.parameter_estimation_settings['mcmc_exportLog'])
@@ -2608,7 +2632,7 @@ class parameter_estimation:
         if calculatePostBurnInStatistics == True:
             #FIXME: I think Below, calculate_post_burn_in_log_priors_vec=True should be false unless we are using continue sampling. For now, will leave it since I am not sure why it is currently set to True/False.
             self.calculatePostBurnInStatistics(calculate_post_burn_in_log_priors_vec = True) #This function call will also filter the lowest probability samples out, when using default settings.
-            if self.UserInput.parameter_estimation_settings['convergence_diagnostics']: #Run convergence diagnostics if UserInput defines it as True
+            if self.UserInput.user_requested_convergence_diagnostics: #Run convergence diagnostics if UserInput defines it as True
                 self.getConvergenceDiagnostics(discrete_chains_post_burn_in_samples)
             if str(mcmc_exportLog) == 'UserChoice':
                 mcmc_exportLog = bool(self.UserInput.parameter_estimation_settings['mcmc_exportLog'])
@@ -2738,7 +2762,6 @@ class parameter_estimation:
             responses_simulation_uncertainties = None
         else:  #Else we get it based on the the discreteParameterVectorTuple
             responses_simulation_uncertainties = self.get_responses_simulation_uncertainties(discreteParameterVectorTuple)
-
         #Now need to do transforms. Transforms are only for calculating log likelihood. If responses_simulation_uncertainties is "None", then we need to have one less argument passed in and a blank list is returned along with the transformed simulated responses.
         if type(responses_simulation_uncertainties) == type(None):
             simulatedResponses_transformed, blank_list = self.transform_responses(simulatedResponses) #This creates transforms for any data that we might need it. The same transforms were also applied to the observed responses.
@@ -2747,12 +2770,24 @@ class parameter_estimation:
         else:
             simulatedResponses_transformed, responses_simulation_uncertainties_transformed = self.transform_responses(simulatedResponses, responses_simulation_uncertainties) #This creates transforms for any data that we might need it. The same transforms were also applied to the observed responses.
             simulated_responses_covmat_transformed = returnShapedResponseCovMat(self.UserInput.num_response_dimensions, responses_simulation_uncertainties_transformed)  #assume we got standard deviations back.
-        observedResponses_transformed = self.UserInput.responses_observed_transformed
+        log_probability_metric, simulatedResponses_transformed = self.getLogLikelihood_byResponses(simulatedResponses_transformed, simulated_responses_covmat_transformed)
+        return log_probability_metric, simulatedResponses_transformed
+
+    def getLogLikelihood_byResponses(self, simulatedResponses_transformed, simulated_responses_covmat_transformed=None, observedResponses_transformed=None,observed_responses_covmat_transformed=None):      
+        #This function is meant for internal use only, but could be called by a user if desired.
+        #simulatedResponses_transformed and observedResponses_transformed are just the simulatedResponses and observedResponses in their "final" form: lack of transform is completely normal. If a user has a need to call this function directly and is not planning on transforming their responses (such as log transform or integral) or if the user does not know what transform to use, then the user should simply provide simulatedResponses and observedResponses as the "already transformed" data.
+        
+        #This function expects the uncertainties received to be in covmat form already (1 covmat per response), but can instead be a vectors of variances per response (NOT standard deviations: if the user is calling this function directly and only has standard deviations, then the standard deviations must be squared before calling this funciton,such as by np.square).  The simulatedResponses_transformed must be the same shape as observedResponses_transformed.
+        #The simulated_responses_covmat_transformed and observed_responses_covmat_transformed must be teh same shape is both are provided. 
+        
+        if type(observedResponses_transformed) == type(None):
+            observedResponses_transformed = self.UserInput.responses_observed_transformed
         #If our likelihood is  “probability of Response given Theta”…  we have a continuous probability distribution for both the response and theta. That means the pdf  must use binning on both variables. Eric notes that the pdf returns a probability density, not a probability mass. So the pdf function here divides by the width of whatever small bin is being used and then returns the density accordingly. Because of this, our what we are calling likelihood is not actually probability (it’s not the actual likelihood) but is proportional to the likelihood.
         #Thus we call it a probability_metric and not a probability. #TODO: consider changing names of likelihood and get likelihood to "likelihoodMetric" and "getLikelihoodMetric"
         #Now we need to make the comprehensive_responses_covmat.
         #First we will check whether observed_responses_covmat_transformed is square or not. The multivariate_normal.pdf function requires a diagonal values vector to be 1D.
-        observed_responses_covmat_transformed = self.observed_responses_covmat_transformed
+        if type(observed_responses_covmat_transformed) == type(None):
+            observed_responses_covmat_transformed = self.observed_responses_covmat_transformed
         
         #For some cases, we should prepare to split the likelihood.
         if self.prepareResponsesForSplitLikelihood == True:
@@ -2816,6 +2851,7 @@ class parameter_estimation:
                     response_log_probability_metric = current_log_probability_metric + response_log_probability_metric
             log_probability_metric = log_probability_metric + response_log_probability_metric
         return log_probability_metric, simulatedResponses_transformed
+
 
     def truncatePostBurnInSamples(self, post_burn_in_samples=[], parameterBoundsLower=None, parameterBoundsUpper=None):
         """
@@ -3421,7 +3457,7 @@ def returnReducedIterable(iterableObjectToReduce, reducedIndices):
 
 
 def returnShapedResponseCovMat(numResponseDimensions, uncertainties):
-    #The uncertainties, whether transformed or not, must be one of the folllowing: a) for a single dimension response can be a 1D array of standard deviations, b) for as ingle dimension response can be a covmat already (so already variances), c) for a multidimensional response we *only* support standard deviations at this time.
+    #The uncertainties, whether transformed or not, must be one of the folllowing: a) for a single dimension response can be a 1D array of standard deviations, b) for a single dimension response can be a covmat already (so already variances), c) for a multidimensional response we *only* support standard deviations at this time.
     if numResponseDimensions == 1:
         shapedUncertainties = np.array(uncertainties, dtype="float") #Initializing variable. 
         if np.shape(shapedUncertainties)[0] == (1): #This means it's just a list of standard deviations and needs to be squared to become variances.
