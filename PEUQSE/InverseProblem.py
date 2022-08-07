@@ -2738,7 +2738,6 @@ class parameter_estimation:
             responses_simulation_uncertainties = None
         else:  #Else we get it based on the the discreteParameterVectorTuple
             responses_simulation_uncertainties = self.get_responses_simulation_uncertainties(discreteParameterVectorTuple)
-
         #Now need to do transforms. Transforms are only for calculating log likelihood. If responses_simulation_uncertainties is "None", then we need to have one less argument passed in and a blank list is returned along with the transformed simulated responses.
         if type(responses_simulation_uncertainties) == type(None):
             simulatedResponses_transformed, blank_list = self.transform_responses(simulatedResponses) #This creates transforms for any data that we might need it. The same transforms were also applied to the observed responses.
@@ -2747,6 +2746,11 @@ class parameter_estimation:
         else:
             simulatedResponses_transformed, responses_simulation_uncertainties_transformed = self.transform_responses(simulatedResponses, responses_simulation_uncertainties) #This creates transforms for any data that we might need it. The same transforms were also applied to the observed responses.
             simulated_responses_covmat_transformed = returnShapedResponseCovMat(self.UserInput.num_response_dimensions, responses_simulation_uncertainties_transformed)  #assume we got standard deviations back.
+        logLikelihood = self.getLogLikelihood_byResponses()
+        return logLikelihood
+
+    def getLogLikelihood_byResponses(self):      
+
         observedResponses_transformed = self.UserInput.responses_observed_transformed
         #If our likelihood is  “probability of Response given Theta”…  we have a continuous probability distribution for both the response and theta. That means the pdf  must use binning on both variables. Eric notes that the pdf returns a probability density, not a probability mass. So the pdf function here divides by the width of whatever small bin is being used and then returns the density accordingly. Because of this, our what we are calling likelihood is not actually probability (it’s not the actual likelihood) but is proportional to the likelihood.
         #Thus we call it a probability_metric and not a probability. #TODO: consider changing names of likelihood and get likelihood to "likelihoodMetric" and "getLikelihoodMetric"
@@ -2816,6 +2820,7 @@ class parameter_estimation:
                     response_log_probability_metric = current_log_probability_metric + response_log_probability_metric
             log_probability_metric = log_probability_metric + response_log_probability_metric
         return log_probability_metric, simulatedResponses_transformed
+
 
     def truncatePostBurnInSamples(self, post_burn_in_samples=[], parameterBoundsLower=None, parameterBoundsUpper=None):
         """
