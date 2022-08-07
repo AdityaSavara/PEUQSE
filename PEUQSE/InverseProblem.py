@@ -305,8 +305,6 @@ class parameter_estimation:
         if hasattr(self, 'middle_of_doe_flag'): #if the middle_of_doe_flag is there and true, then we also turn off the convergence diagnostics.
             if self.middle_of_doe_flag == True:
                 self.UserInput.user_requested_convergence_diagnostics = False
-                print("line 309 self.UserInput.", self.UserInput.user_requested_convergence_diagnostics)
-                
                 
         #Now scale things as needed:
         if UserInput.parameter_estimation_settings['scaling_uncertainties_type'] == "off":
