@@ -552,7 +552,7 @@ class parameter_estimation:
             responses_simulation_uncertainties = self.UserInput.responses_simulation_uncertainties(discreteParameterVector) #This is passing an argument to a function.
             responses_simulation_uncertainties = np.array(nestedObjectsFunctions.makeAtLeast_2dNested(responses_simulation_uncertainties))
             responses_simulation_uncertainties = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(responses_simulation_uncertainties)
-        return responses_simulation_uncertainties
+        return responses_simulation_uncertainties #this normally a list of list where each element at the deepest level is 1 standard deviation of uncertainty (not variance).
 
     def simulateWithSubsetOfParameters(self,reducedParametersVector): #This is a wrapper.
         #This function has implied arguments of ...
@@ -2746,17 +2746,24 @@ class parameter_estimation:
         else:
             simulatedResponses_transformed, responses_simulation_uncertainties_transformed = self.transform_responses(simulatedResponses, responses_simulation_uncertainties) #This creates transforms for any data that we might need it. The same transforms were also applied to the observed responses.
             simulated_responses_covmat_transformed = returnShapedResponseCovMat(self.UserInput.num_response_dimensions, responses_simulation_uncertainties_transformed)  #assume we got standard deviations back.
-        logLikelihood = self.getLogLikelihood_byResponses()
-        return logLikelihood
+        log_probability_metric, simulatedResponses_transformed = self.getLogLikelihood_byResponses(simulatedResponses_transformed, simulated_responses_covmat_transformed)
+        return log_probability_metric, simulatedResponses_transformed
 
-    def getLogLikelihood_byResponses(self):      
-
-        observedResponses_transformed = self.UserInput.responses_observed_transformed
+    def getLogLikelihood_byResponses(self, simulatedResponses_transformed, simulated_responses_covmat_transformed=None, observedResponses_transformed=None,observed_responses_covmat_transformed=None):      
+        #This function is meant for internal use only, but could be called by a user if desired.
+        #simulatedResponses_transformed and observedResponses_transformed are just the simulatedResponses and observedResponses in their "final" form: lack of transform is completely normal. If a user has a need to call this function directly and is not planning on transforming their responses (such as log transform or integral) or if the user does not know what transform to use, then the user should simply provide simulatedResponses and observedResponses as the "already transformed" data.
+        
+        #This function expects the uncertainties received to be in covmat form already (1 covmat per response), but can instead be a vectors of variances per response (NOT standard deviations: if the user is calling this function directly and only has standard deviations, then the standard deviations must be squared before calling this funciton,such as by np.square).  The simulatedResponses_transformed must be the same shape as observedResponses_transformed.
+        #The simulated_responses_covmat_transformed and observed_responses_covmat_transformed must be teh same shape is both are provided. 
+        
+        if type(observedResponses_transformed) == type(None):
+            observedResponses_transformed = self.UserInput.responses_observed_transformed
         #If our likelihood is  “probability of Response given Theta”…  we have a continuous probability distribution for both the response and theta. That means the pdf  must use binning on both variables. Eric notes that the pdf returns a probability density, not a probability mass. So the pdf function here divides by the width of whatever small bin is being used and then returns the density accordingly. Because of this, our what we are calling likelihood is not actually probability (it’s not the actual likelihood) but is proportional to the likelihood.
         #Thus we call it a probability_metric and not a probability. #TODO: consider changing names of likelihood and get likelihood to "likelihoodMetric" and "getLikelihoodMetric"
         #Now we need to make the comprehensive_responses_covmat.
         #First we will check whether observed_responses_covmat_transformed is square or not. The multivariate_normal.pdf function requires a diagonal values vector to be 1D.
-        observed_responses_covmat_transformed = self.observed_responses_covmat_transformed
+        if type(observed_responses_covmat_transformed) == type(None):
+            observed_responses_covmat_transformed = self.observed_responses_covmat_transformed
         
         #For some cases, we should prepare to split the likelihood.
         if self.prepareResponsesForSplitLikelihood == True:
@@ -3426,7 +3433,7 @@ def returnReducedIterable(iterableObjectToReduce, reducedIndices):
 
 
 def returnShapedResponseCovMat(numResponseDimensions, uncertainties):
-    #The uncertainties, whether transformed or not, must be one of the folllowing: a) for a single dimension response can be a 1D array of standard deviations, b) for as ingle dimension response can be a covmat already (so already variances), c) for a multidimensional response we *only* support standard deviations at this time.
+    #The uncertainties, whether transformed or not, must be one of the folllowing: a) for a single dimension response can be a 1D array of standard deviations, b) for a single dimension response can be a covmat already (so already variances), c) for a multidimensional response we *only* support standard deviations at this time.
     if numResponseDimensions == 1:
         shapedUncertainties = np.array(uncertainties, dtype="float") #Initializing variable. 
         if np.shape(shapedUncertainties)[0] == (1): #This means it's just a list of standard deviations and needs to be squared to become variances.
