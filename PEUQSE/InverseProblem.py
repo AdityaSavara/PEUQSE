@@ -82,6 +82,10 @@ class parameter_estimation:
         if self.UserInput.parameter_estimation_settings['verbose']: 
             print("Parameter Estimation Object Initialized")
         
+        
+        #Set self.UserInput.user_requested_convergence_diagnostics to that from the UserInput. This may be changed to true or false during multi-start etc.
+        self.UserInput.user_requested_convergence_diagnostics = self.UserInput.parameter_estimation_settings['convergence_diagnostics']
+        
         if type(UserInput.parameter_estimation_settings['checkPointFrequency']) != type(None): #This is for backwards compatibility.
             UserInput.parameter_estimation_settings['mcmc_checkPointFrequency'] = UserInput.parameter_estimation_settings['checkPointFrequency']
             UserInput.parameter_estimation_settings['multistart_checkPointFrequency'] = UserInput.parameter_estimation_settings['checkPointFrequency']
@@ -298,6 +302,11 @@ class parameter_estimation:
             if self.middle_of_doe_flag == False: #If the flag is there, we only proceed to call the function if the flag is set to false.
                 if type(UserInput.model['populateIndependentVariablesFunction']) != type(None):
                     UserInput.model['populateIndependentVariablesFunction'](UserInput.responses['independent_variables_values']) 
+        if hasattr(self, 'middle_of_doe_flag'): #if the middle_of_doe_flag is there and true, then we also turn off the convergence diagnostics.
+            if self.middle_of_doe_flag == True:
+                self.UserInput.user_requested_convergence_diagnostics = False
+                print("line 309 self.UserInput.", self.UserInput.user_requested_convergence_diagnostics)
+                
                 
         #Now scale things as needed:
         if UserInput.parameter_estimation_settings['scaling_uncertainties_type'] == "off":
@@ -769,6 +778,12 @@ class parameter_estimation:
         verbose = self.UserInput.parameter_estimation_settings['verbose']
         if verbose:
             print("Starting multistart/permutations search.")
+        if searchType in ['doEnsembleSliceSampling', 'doEnsembleJumpSampling', 'doMetropolisHastings']:
+            if self.UserInput.user_requested_convergence_diagnostics == True:
+                print("Notification: doMultistart / doListOfPermutationsSearch is being used with an MCMC searchType, which performs many MCMC runs. Convergence diagnostics are being turned off for the individual runs, and will be used only for the best run.")
+                self.UserInput.user_requested_convergence_diagnostics = False
+        
+
         file_name_prefix, file_name_suffix, directory_name_suffix = self.getParallelProcessingPrefixAndSuffix() #As of Nov 21st 2020, these should always be '' since multiStart_continueSampling is not intended to be used with parallel sampling.
         if (self.UserInput.parameter_estimation_settings['mcmc_continueSampling']  == 'auto') or (self.UserInput.parameter_estimation_settings['mcmc_continueSampling']  == False):
             mcmc_continueSampling = False #need to set this variable to false if it's an auto. The only time mcmc_continue sampling should be on for multistart is if someone is doing it intentionally, which would normally only be during an MPI case.
@@ -846,10 +861,12 @@ class parameter_estimation:
                 if keep_cumulative_post_burn_in_data == True:
                     if permutationIndex == 0:
                         self.cumulative_post_burn_in_samples = self.post_burn_in_samples
+                        self.cumulative_discrete_chains_post_burn_in_samples = self.discrete_chains_post_burn_in_samples
                         self.cumulative_post_burn_in_log_priors_vec = self.post_burn_in_log_priors_vec
                         self.cumulative_post_burn_in_log_posteriors_un_normed_vec = self.post_burn_in_log_posteriors_un_normed_vec
                     else: #This is basically elseif permutationIndex > 0:
                         self.cumulative_post_burn_in_samples = np.vstack((self.cumulative_post_burn_in_samples, self.post_burn_in_samples))
+                        self.cumulative_discrete_chains_post_burn_in_samples = np.vstack((self.cumulative_discrete_chains_post_burn_in_samples, self.discrete_chains_post_burn_in_samples)) 
                         self.cumulative_post_burn_in_log_priors_vec = np.vstack((self.cumulative_post_burn_in_log_priors_vec, self.post_burn_in_log_priors_vec))
                         self.cumulative_post_burn_in_log_posteriors_un_normed_vec = np.vstack((self.cumulative_post_burn_in_log_posteriors_un_normed_vec, self.post_burn_in_log_posteriors_un_normed_vec))
             if searchType == 'doEnsembleSliceSampling':
@@ -860,12 +877,14 @@ class parameter_estimation:
                 if keep_cumulative_post_burn_in_data == True:
                     if permutationIndex == 0:
                         self.cumulative_post_burn_in_samples = self.post_burn_in_samples
+                        self.cumulative_discrete_chains_post_burn_in_samples = self.discrete_chains_post_burn_in_samples
                         self.cumulative_post_burn_in_log_priors_vec = self.post_burn_in_log_priors_vec
                         self.cumulative_post_burn_in_log_posteriors_un_normed_vec = self.post_burn_in_log_posteriors_un_normed_vec
                     else: #This is basically elseif permutationIndex > 0:
                         self.cumulative_post_burn_in_samples = np.vstack((self.cumulative_post_burn_in_samples, self.post_burn_in_samples))
+                        self.cumulative_discrete_chains_post_burn_in_samples = np.vstack((self.cumulative_discrete_chains_post_burn_in_samples, self.discrete_chains_post_burn_in_samples)) 
                         self.cumulative_post_burn_in_log_priors_vec = np.vstack((self.cumulative_post_burn_in_log_priors_vec, self.post_burn_in_log_priors_vec))
-                        self.cumulative_post_burn_in_log_posteriors_un_normed_vec = np.vstack((self.cumulative_post_burn_in_log_posteriors_un_normed_vec, self.post_burn_in_log_posteriors_un_normed_vec))                    
+                        self.cumulative_post_burn_in_log_posteriors_un_normed_vec = np.vstack((self.cumulative_post_burn_in_log_posteriors_un_normed_vec, self.post_burn_in_log_posteriors_un_normed_vec))
             if searchType == 'doEnsembleModifiedMHSampling':
                 self.map_logP = np.float('-inf') #initializing as -inf to have a 'pure' mcmc sampling.
                 thisResult = self.doEnsembleModifiedMHSampling(mcmc_nwalkers_direct_input=permutationSearch_mcmc_nwalkers, calculatePostBurnInStatistics=calculatePostBurnInStatistics, walkerInitialDistribution=walkerInitialDistribution, continueSampling=mcmc_continueSampling) 
@@ -874,10 +893,12 @@ class parameter_estimation:
                 if keep_cumulative_post_burn_in_data == True:
                     if permutationIndex == 0:
                         self.cumulative_post_burn_in_samples = self.post_burn_in_samples
+                        self.cumulative_discrete_chains_post_burn_in_samples = self.discrete_chains_post_burn_in_samples
                         self.cumulative_post_burn_in_log_priors_vec = self.post_burn_in_log_priors_vec
                         self.cumulative_post_burn_in_log_posteriors_un_normed_vec = self.post_burn_in_log_posteriors_un_normed_vec
                     else: #This is basically elseif permutationIndex > 0:
                         self.cumulative_post_burn_in_samples = np.vstack((self.cumulative_post_burn_in_samples, self.post_burn_in_samples))
+                        self.cumulative_discrete_chains_post_burn_in_samples = np.vstack((self.cumulative_discrete_chains_post_burn_in_samples, self.discrete_chains_post_burn_in_samples)) 
                         self.cumulative_post_burn_in_log_priors_vec = np.vstack((self.cumulative_post_burn_in_log_priors_vec, self.post_burn_in_log_priors_vec))
                         self.cumulative_post_burn_in_log_posteriors_un_normed_vec = np.vstack((self.cumulative_post_burn_in_log_posteriors_un_normed_vec, self.post_burn_in_log_posteriors_un_normed_vec))
             if searchType == 'doOptimizeLogP':
@@ -907,6 +928,8 @@ class parameter_estimation:
                 highest_logP_parameter_set = np.copy(self.map_parameter_set)
                 highest_MAP_initial_point_index = permutationIndex
                 highest_MAP_initial_point_parameters = permutation
+                if hasattr(self, 'discrete_chains_post_burn_in_samples'):
+                    bestResultSoFar_discrete_chains_post_burn_in_samples = self.discrete_chains_post_burn_in_samples
             allPermutationsResults.append(thisResult)
             if self.UserInput.parameter_estimation_settings['exportAllSimulatedOutputs'] == True:
                 if (searchType == 'doEnsembleSliceSampling') or (searchType=='doMetropolisHastings') or (searchType == 'doEnsembleModifiedMHSampling'): #we need to run the map again, outside of mcmc, to populate 
@@ -951,6 +974,8 @@ class parameter_estimation:
                 #self.post_burn_in_log_posteriors_un_normed_vec = bestResultSoFar[6]
                 self.calculatePostBurnInStatistics(calculate_post_burn_in_log_priors_vec = True)
                 self.exportPostBurnInStatistics()
+            if self.UserInput.parameter_estimation_settings['convergence_diagnostics'] == True: #at the end of the permutations, calculate convergence diagnostics for the last run.
+                self.getConvergenceDiagnostics(bestResultSoFar_discrete_chains_post_burn_in_samples)
             #One could call calculatePostBurnInStatistics() if one wanted the cumulative from all results. But we don't actually want that.
             #Below should not be used. These commented out lines are biased towards the center of the grid.
             #self.post_burn_in_samples = cumulative_post_burn_in_samples
@@ -1070,14 +1095,12 @@ class parameter_estimation:
             searchType = 'getLogP'
         #make the initial points list by mostly passing through arguments.
         multiStartInitialPointsList = self.generateInitialPoints(numStartPoints=numStartPoints, relativeInitialDistributionSpread=relativeInitialDistributionSpread, initialPointsDistributionType=initialPointsDistributionType, centerPoint = centerPoint, gridsearchSamplingInterval = gridsearchSamplingInterval, gridsearchSamplingRadii = gridsearchSamplingRadii)
-        
         #we normally only turn on permutationsToSamples if grid or uniform and if getLogP or doOptimizeNegLogP.
         permutationsToSamples = False#initialize with default
         if self.UserInput.parameter_estimation_settings['multistart_permutationsToSamples'] == True:
             if (initialPointsDistributionType == 'grid') or (initialPointsDistributionType == 'uniform') or (initialPointsDistributionType == 'sobol') or (initialPointsDistributionType == 'astroidal') or (initialPointsDistributionType == 'shell'):
                 if (searchType == 'getLogP') or (searchType=='doOptimizeNegLogP') or (searchType=='doOptimizeLogP') or (searchType=='doOptimizeSSR'):
                     permutationsToSamples = True
-                        
         #Look for the best result (highest map_logP) from among these permutations. Maybe later should add optional argument to allow searching for highest mu_AP to find HPD.
         bestResultSoFar = self.doListOfPermutationsSearch(listOfPermutations=multiStartInitialPointsList, searchType=searchType, exportLog=exportLog, walkerInitialDistribution=walkerInitialDistribution, passThroughArgs=passThroughArgs, calculatePostBurnInStatistics=calculatePostBurnInStatistics, keep_cumulative_post_burn_in_data=keep_cumulative_post_burn_in_data, centerPoint = centerPoint, permutationsToSamples=permutationsToSamples)
         return bestResultSoFar
@@ -1462,6 +1485,9 @@ class parameter_estimation:
     
     #This function requires population of the UserInput doe_settings dictionary. It automatically scans many parameter modulation Permutations.
     def doeParameterModulationPermutationsScanner(self, searchType='doMetropolisHastings'):
+        print("Notification: doeParameterModulationPermutationsScanner is being used which performs many MCMC runs. Convergence diagnostics are being turned off for these runs.")
+        self.UserInput.user_requested_convergence_diagnostics = False
+        
         import PEUQSE.CombinationGeneratorModule as CombinationGeneratorModule
         doe_settings = self.UserInput.doe_settings 
         #For the parameters, we are able to use a default one standard deviation grid if gridSamplingAbsoluteIntervalSize is a blank list.
@@ -2211,7 +2237,7 @@ class parameter_estimation:
             self.samplingObject = emcee_sampler
         if calculatePostBurnInStatistics == True:
             self.calculatePostBurnInStatistics(calculate_post_burn_in_log_priors_vec = True) #This function call will also filter the lowest probability samples out, when using default settings.
-            if self.UserInput.parameter_estimation_settings['convergence_diagnostics']: #Run convergence diagnostics if UserInput defines it as True
+            if self.UserInput.user_requested_convergence_diagnostics: #Run convergence diagnostics if UserInput defines it as True
                 self.getConvergenceDiagnostics(discrete_chains_post_burn_in_samples)
             if str(mcmc_exportLog) == 'UserChoice':
                 mcmc_exportLog = bool(self.UserInput.parameter_estimation_settings['mcmc_exportLog'])
@@ -2410,7 +2436,7 @@ class parameter_estimation:
             self.samplingObject = zeus_sampler
         if calculatePostBurnInStatistics == True:
             self.calculatePostBurnInStatistics(calculate_post_burn_in_log_priors_vec = True) #This function call will also filter the lowest probability samples out, when using default settings.
-            if self.UserInput.parameter_estimation_settings['convergence_diagnostics']: #Run convergence diagnostics if UserInput defines it as True
+            if self.UserInput.user_requested_convergence_diagnostics: #Run convergence diagnostics if UserInput defines it as True
                 self.getConvergenceDiagnostics(discrete_chains_post_burn_in_samples)
             if str(mcmc_exportLog) == 'UserChoice':
                 mcmc_exportLog = bool(self.UserInput.parameter_estimation_settings['mcmc_exportLog'])
@@ -2608,7 +2634,7 @@ class parameter_estimation:
         if calculatePostBurnInStatistics == True:
             #FIXME: I think Below, calculate_post_burn_in_log_priors_vec=True should be false unless we are using continue sampling. For now, will leave it since I am not sure why it is currently set to True/False.
             self.calculatePostBurnInStatistics(calculate_post_burn_in_log_priors_vec = True) #This function call will also filter the lowest probability samples out, when using default settings.
-            if self.UserInput.parameter_estimation_settings['convergence_diagnostics']: #Run convergence diagnostics if UserInput defines it as True
+            if self.UserInput.user_requested_convergence_diagnostics: #Run convergence diagnostics if UserInput defines it as True
                 self.getConvergenceDiagnostics(discrete_chains_post_burn_in_samples)
             if str(mcmc_exportLog) == 'UserChoice':
                 mcmc_exportLog = bool(self.UserInput.parameter_estimation_settings['mcmc_exportLog'])
