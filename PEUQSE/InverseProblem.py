@@ -2752,10 +2752,12 @@ class parameter_estimation:
         simulatedResponses = self.getSimulatedResponses(discreteParameterVectorTuple)
         #Failure checks:
         if type(simulatedResponses) == type(None):
+            print("Warning: There are likelihood points that have zero probability due to receiving a None type back for the simulated responses. If there are too many points like this during an MCMC or permutationsToSamples run, the MAP and mu_AP returned will not be meaningful. Parameters: " + str(discreteParameterVectorTuple))
             return float('-inf'), None #This is intended for the case that the simulation fails, indicated by receiving an 'nan' or None type from user's simulation function.
         #Check if there are any 'nan' in the simulations array, and treat that as a failure also.
         nans_in_array = np.isnan(simulatedResponses)        
         if True in nans_in_array:
+            print("Warning: There are likelihood points that have zero probability due to not a number ('nan') values in the simulated responses. If there are too many points like this, the MAP and mu_AP returned will not be meaningful. Parameters: " + str(discreteParameterVectorTuple))
             return float('-inf'), None
         #need to check if there are any 'responses_simulation_uncertainties'.
         if type(self.UserInput.responses_simulation_uncertainties) == type(None): #if it's a None type, we keep it as a None type
@@ -2771,8 +2773,6 @@ class parameter_estimation:
             simulatedResponses_transformed, responses_simulation_uncertainties_transformed = self.transform_responses(simulatedResponses, responses_simulation_uncertainties) #This creates transforms for any data that we might need it. The same transforms were also applied to the observed responses.
             simulated_responses_covmat_transformed = returnShapedResponseCovMat(self.UserInput.num_response_dimensions, responses_simulation_uncertainties_transformed)  #assume we got standard deviations back.
         log_probability_metric, simulatedResponses_transformed = self.getLogLikelihood_byResponses(simulatedResponses_transformed, simulated_responses_covmat_transformed)
-        if float(log_probability_metric) == float('-inf'):
-            print("Warning: There are posterior points that have zero probability. If there are too many points like this, the MAP and mu_AP returned will not be meaningful. Parameters:", discreteParameterVectorTuple)
         return log_probability_metric, simulatedResponses_transformed
 
     def getLogLikelihood_byResponses(self, simulatedResponses_transformed, simulated_responses_covmat_transformed=None, observedResponses_transformed=None,observed_responses_covmat_transformed=None):      
@@ -2811,10 +2811,14 @@ class parameter_estimation:
         comprehensive_responses_covmat_shape = copy.deepcopy(observed_responses_covmat_transformed_shape) #no need to take the shape of the actual comprehensive_responses_covmat since they must be same. This is probably slightly less computation.
         if (len(comprehensive_responses_covmat_shape) == 1) and (comprehensive_responses_covmat_shape[0]==1): #Matrix is square because has only one value.
             log_probability_metric = multivariate_normal.logpdf(mean=simulatedResponses_transformed,x=observedResponses_transformed,cov=comprehensive_responses_covmat)
+            if float(log_probability_metric) == float('-inf'):
+                print("Warning: There are likelihood points that have zero probability. If there are too many points like this, the MAP and mu_AP returned will not be meaningful. Parameters: " + str(discreteParameterVectorTuple))
             return log_probability_metric, simulatedResponses_transformed #Return this rather than going through loop further.
         elif len(comprehensive_responses_covmat_shape) > 1 and (comprehensive_responses_covmat_shape[0] == comprehensive_responses_covmat_shape[1]):  #Else it is 2D, check if it's square.
             try:
                 log_probability_metric = multivariate_normal.logpdf(mean=simulatedResponses_transformed,x=observedResponses_transformed,cov=comprehensive_responses_covmat)
+                if float(log_probability_metric) == float('-inf'):
+                    print("Warning: There are likelihood points that have zero probability. If there are too many points like this, the MAP and mu_AP returned will not be meaningful. Parameters: " + str(discreteParameterVectorTuple))
                 return log_probability_metric, simulatedResponses_transformed #Return this rather than going through loop further.
             except:
                 pass #If it failed, we assume it is not square. For example, it could be 2 responses of length 2 each, which is not actually square.
@@ -2848,7 +2852,7 @@ class parameter_estimation:
                         current_log_probability_metric = float('-inf')
                     #response_log_probability_metric = current_log_probability_metric + response_log_probability_metric
                     if float(current_log_probability_metric) == float('-inf'):
-                        print("Warning: There are cases of sampling where a response value has zero probability in the likelihood. If there are too many points like this, the MAP and mu_AP returned will not be meaningful. ResponseIndex:", responseIndex)
+                        warnings.warn("Warning: There are cases of sampling where a response value has zero probability in the likelihood. If there are too many points like this, the MAP and mu_AP returned will not be meaningful. ResponseIndex: " + str( responseIndex))
                         current_log_probability_metric = -1E100 #Just choosing an arbitrarily very severe penalty. I know that I have seen 1E-48 to -303 from the multivariate pdf, and values inbetween like -171, -217, -272. I found that -1000 seems to be worse, but I don't have a systematic testing. I think -1000 was causing numerical errors.
                     response_log_probability_metric = current_log_probability_metric + response_log_probability_metric
             log_probability_metric = log_probability_metric + response_log_probability_metric
