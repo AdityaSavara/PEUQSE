@@ -22,7 +22,7 @@ class plotting_functions_class():
         cov = np.cov(self.samples,rowvar=False)
         return mu, cov
 
-    def mumpce_plots(self, model_parameter_info = {}, active_parameters = [], pairs_of_parameter_indices = [], posterior_mu_vector = 0, posterior_cov_matrix = 0, prior_mu_vector = 0, prior_cov_matrix = 0, contour_settings_custom = {'figure_name','fontsize','max_num_y_ticks','max_num_x_ticks','colormap_posterior_customized','colormap_prior_customized','contours_normalized','colorbars','axis_limits'}): # Pass empty keyword arguments for important parameters.  That way, warnings may be issued if they are not set.  There is not really a good default for these keyword arguments.  They depend entirely on the nature of the data being plotted.
+    def mumpce_plots(self, model_parameter_info = {}, active_parameters = [], pairs_of_parameter_indices = [], posterior_mu_vector = 0, posterior_cov_matrix = 0, prior_mu_vector = 0, prior_cov_matrix = 0, showFigure=True, contour_settings_custom = {'figure_name','fontsize','max_num_y_ticks','max_num_x_ticks','colormap_posterior_customized','colormap_prior_customized','contours_normalized','colorbars','axis_limits'}): # Pass empty keyword arguments for important parameters.  That way, warnings may be issued if they are not set.  There is not really a good default for these keyword arguments.  They depend entirely on the nature of the data being plotted.
         mumpceProjectObject = mumpceProject.Project() # A mumpce project object must be created.
         if len(model_parameter_info) == 0:
             print("Pass the 'model_parameter_info' argument to the mumpce_plots function.")
@@ -87,7 +87,7 @@ class plotting_functions_class():
         #    contour_settings_custom['colorbars'] = UserInput.colorbars
         #else:
         #    contour_settings_custom['colorbars'] = True
-        mumpceProjectObject.plot_pdfs(mumpceProjectObject.pairsOfParameterIndices, contour_settings_custom = contour_settings_custom)
+        mumpceProjectObject.plot_pdfs(mumpceProjectObject.pairsOfParameterIndices, contour_settings_custom = contour_settings_custom, showFigure = showFigure)
 
 
     def seaborn_scatterplot_matrix(self):
@@ -110,7 +110,7 @@ class plotting_functions_class():
     def rate_tot_plot(self):
         return
 
-def sampledParameterHistogramMaker(parameterSamples, parameterName, parameterNamesAndMathTypeExpressionsDict, sampledParameterFiguresDictionary, sampledParameterAxesDictionary, directory='', parameterInitialValue=None, parameterMAPValue=None, parameterMuAPValue=None, histogram_plot_settings={}):
+def sampledParameterHistogramMaker(parameterSamples, parameterName, parameterNamesAndMathTypeExpressionsDict, sampledParameterFiguresDictionary, sampledParameterAxesDictionary, directory='', parameterInitialValue=None, parameterMAPValue=None, parameterMuAPValue=None, showFigure=False, histogram_plot_settings={}):
 
         if len(histogram_plot_settings) == 0: #this means histogram_plot_settings was not provided, or was blank, in which case we will populate variables with defaults.
             histogram_plot_settings = copy.deepcopy(histogram_plot_settings) #first make a fresh copy so the original dictionary is not changed.
@@ -156,7 +156,8 @@ def sampledParameterHistogramMaker(parameterSamples, parameterName, parameterNam
         sampledParameterAxesDictionary[parameterName].tick_params(axis='y', labelsize=histogram_plot_settings['y_label_size'])
         sampledParameterFiguresDictionary[parameterName].tight_layout()
         sampledParameterFiguresDictionary[parameterName].savefig(directory+'Histogram_sampling_'+str(parameterIndex)+'_'+parameterName+'.png', dpi=histogram_plot_settings['dpi'])
-
+        if showFigure == False:
+            plt.close(sampledParameterFiguresDictionary[parameterName])
         
         
         #The above block makes code kind of like this in a dynamic fashion. Since we know how many we will need, a dictionary is used to avoid the need for 'exec' statements when making new parameters.
@@ -168,7 +169,7 @@ def sampledParameterHistogramMaker(parameterSamples, parameterName, parameterNam
         # fig2.savefig('Ea2.png', dpi=220)
 
     #Make histograms for each parameter. Need to make some dictionaries where relevant objects will be stored.
-def makeHistogramsForEachParameter(parameterSamples,parameterNamesAndMathTypeExpressionsDict, directory='', parameterInitialValue=None, parameterMAPValue=None, parameterMuAPValue=None, histogram_plot_settings={}):
+def makeHistogramsForEachParameter(parameterSamples,parameterNamesAndMathTypeExpressionsDict, directory='', parameterInitialValue=None, parameterMAPValue=None, parameterMuAPValue=None, showFigure=False, histogram_plot_settings={}):
     sampledParameterFiguresDictionary = copy.deepcopy(parameterNamesAndMathTypeExpressionsDict) #This must be a deep copy to perserve original.
     sampledParameterAxesDictionary = copy.deepcopy(parameterNamesAndMathTypeExpressionsDict) #This must be a deep copy to preserve original.
     #The below code was originally added by Eric Walker, then modified by Troy Gustke to add in the initialValue, MAPvalue, and mu_apvALUE in June 2021, and merged in by A. Savara.    
@@ -177,9 +178,9 @@ def makeHistogramsForEachParameter(parameterSamples,parameterNamesAndMathTypeExp
         initialValue = iv
         MAPValue = mp
         Mu_APValue = mup
-        sampledParameterHistogramMaker(parameterSamples, parameterName, parameterNamesAndMathTypeExpressionsDict, sampledParameterFiguresDictionary, sampledParameterAxesDictionary, directory=directory, parameterInitialValue=initialValue, parameterMAPValue=MAPValue, parameterMuAPValue=Mu_APValue, histogram_plot_settings=histogram_plot_settings)        
+        sampledParameterHistogramMaker(parameterSamples, parameterName, parameterNamesAndMathTypeExpressionsDict, sampledParameterFiguresDictionary, sampledParameterAxesDictionary, directory=directory, parameterInitialValue=initialValue, parameterMAPValue=MAPValue, parameterMuAPValue=Mu_APValue, histogram_plot_settings=histogram_plot_settings, showFigure=showFigure)        
 
-def createSimulatedResponsesPlot(x_values, listOfYArrays, plot_settings={}, listOfYUncertaintiesArrays=[], showFigure=True, directory=''):
+def createSimulatedResponsesPlot(x_values, listOfYArrays, plot_settings={}, listOfYUncertaintiesArrays=[], showFigure=False, directory=''):
     exportFigure = True #This variable should be moved to an argument or something in plot_settings.
     #First put some defaults in if not already defined.
     x_values = np.array(x_values)
@@ -369,7 +370,7 @@ def createPredictedResponsesVsObservedDistribution(likelihoodSamples, posteriorS
     plt.close(fig0)
     return fig0
 
-def makeTrisurfacePlot(xValues, yValues, zValues, exportFigure = True, figure_name="TrisurfacePlot", showFigure=True, directory=''):
+def makeTrisurfacePlot(xValues, yValues, zValues, exportFigure = True, figure_name="TrisurfacePlot", showFigure=False, directory=''):
     from mpl_toolkits.mplot3d import Axes3D #Although it does not look like this is called here, the InfoGain plots will fail without this line.
     fig1, ax1 =  plt.subplots(1)
     ax1 = plt.axes(projection ='3d')
@@ -380,7 +381,7 @@ def makeTrisurfacePlot(xValues, yValues, zValues, exportFigure = True, figure_na
         plt.close(fig1)
     return fig1, ax1, image
 
-def makeMeshGridSurfacePlot(XX, YY, ZZ,  plot_settings = {}, exportFigure = True, figure_name="MeshGridSurfacePlot", showFigure=True, directory=''):
+def makeMeshGridSurfacePlot(XX, YY, ZZ,  plot_settings = {}, exportFigure = True, figure_name="MeshGridSurfacePlot", showFigure=False, directory=''):
     #TODO: plot_settings should be used for axis labels etc, like above.
     #TODO: create a UserInput variable named info_gain_plot_settings (like what the other cases have).
     from mpl_toolkits.mplot3d import Axes3D #I am not sure if this line is needed here, it might b.
@@ -428,7 +429,7 @@ def density_scatter( x , y, ax = None, sort = True, bins = 20, **kwargs )   :
     return fig, ax                   
 
 
-def createScatterPlot(data_a, data_b, a_tuple, b_tuple, graphs_directory, plot_settings):
+def createScatterPlot(data_a, data_b, a_tuple, b_tuple, graphs_directory, plot_settings, showFigure=False):
     """Generates and saves a scatter matrix plot.
 
     :param data_a: parameter points in first for loop (:type: pd.Series)
@@ -460,9 +461,10 @@ def createScatterPlot(data_a, data_b, a_tuple, b_tuple, graphs_directory, plot_s
     if plot_settings['max_num_y_ticks'] != 'auto' and isinstance(plot_settings['max_num_y_ticks'], int):
         plt.locator_params(axis='y', nbins=plot_settings['max_num_y_ticks'])
     fig.savefig(graphs_directory+f'Scatter_{a_tuple[1]}_{b_tuple[1]}',dpi=plot_settings['dpi'])
-    plt.close(fig)
+    if showFigure==False:
+        plt.close(fig)
 
-def createScatterHeatMapPlot(data_a, data_b, a_tuple, b_tuple, graphs_directory, plot_settings):
+def createScatterHeatMapPlot(data_a, data_b, a_tuple, b_tuple, graphs_directory, plot_settings, showFigure=False):
     """Generates and saves a scatter heat map plot.
 
     :param data_a: parameter points in first for loop (:type: pd.Series)
@@ -493,9 +495,10 @@ def createScatterHeatMapPlot(data_a, data_b, a_tuple, b_tuple, graphs_directory,
     if plot_settings['max_num_y_ticks'] != 'auto' and isinstance(plot_settings['max_num_y_ticks'], int):
         plt.locator_params(axis='y', nbins=plot_settings['max_num_y_ticks'])
     fig.savefig(graphs_directory+f'Heat_Scatter_{a_tuple[1]}_{b_tuple[1]}',dpi=plot_settings['dpi'])
-    plt.close(fig)
+    if showFigure == False:
+        plt.close(fig)
 
-def createAutoCorrTimePlot(N, taus, param_name, param_symbol, heuristic_exponent_value, graphs_directory):
+def createAutoCorrTimePlot(N, taus, param_name, param_symbol, heuristic_exponent_value, graphs_directory, showFigure=None):
     """
     Creates Integrated Autocorrelation Time Plots to show MCMC convergence.
     Convergence can be inferred when the AutoCorrelationTime converges.
@@ -508,6 +511,7 @@ def createAutoCorrTimePlot(N, taus, param_name, param_symbol, heuristic_exponent
     :param heuristic_exponent_value: Number of parameters being analyzed. (:type: int)
     :param graphs_directory: Directory for storing graphs. (:type: str)
     """
+    if showFigure== None: showFigure = True
     # create loglog plot
     fig = plt.figure()
     plt.loglog(N, taus, "o-", label='AutoCorr')
@@ -525,9 +529,10 @@ def createAutoCorrTimePlot(N, taus, param_name, param_symbol, heuristic_exponent
     plt.legend(fontsize=14)
     # save and close figure
     plt.savefig(graphs_directory+'AutoCorrelationPlot_'+param_name)
-    plt.close(fig)
+    if showFigure == False:
+        plt.close(fig)
 
-def createGewekePlot(z_scores, N, z_percents, param_name, param_symbol, graphs_directory):
+def createGewekePlot(z_scores, N, z_percents, param_name, param_symbol, graphs_directory, showFigure=None):
     """
     Creates Gewekes indicies plot of entire post burn in samples
     and a plot for percentage of points that fall outside 1 std when compared to the 
@@ -540,6 +545,7 @@ def createGewekePlot(z_scores, N, z_percents, param_name, param_symbol, graphs_d
     :param param_symbol: Parameter symbol. Usually in unicode raw string. (:type: str)
     :param graphs_directory: Directory for storing graphs. (:type: str)
     """
+    if showFigure== None: showFigure = True
     # create 2 subplots for one figure
     fig, (ax1, ax2) = plt.subplots(1, 2, tight_layout=True, squeeze=True)
     plt.suptitle(f'Geweke Diagnostics for {param_symbol}')
@@ -557,4 +563,5 @@ def createGewekePlot(z_scores, N, z_percents, param_name, param_symbol, graphs_d
     ax2.set_xlabel('Sample Indices')
     ax2.set_ylabel('Percent Outside '+u"\u00B1"+"1"+u"\u03C3")
     fig.savefig(graphs_directory+'GewekeDiagnostic_'+param_name)
-    plt.close(fig)
+    if showFigure == False:
+        plt.close(fig)
