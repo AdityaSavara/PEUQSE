@@ -1016,7 +1016,7 @@ class Project(object):
                 item.set_fontsize(contour_settings_custom['fontsize'])
         return ax
     
-    def plot_pdfs(self,factors_list=[[0,1]], contour_settings_custom = {}):
+    def plot_pdfs(self,factors_list=[[0,1]], contour_settings_custom = {}, showFigure=True):
         """Generates a plot of the joint probability density functions for several pairs of parameters.
         
         :param factors_list: A list of pairs of parameters. For each pair [x, y] the parameter x will appear on the x axis and the parameter y will appear on the y axis. If this parameter is not supplied, it defaults to [0,1].
@@ -1050,6 +1050,8 @@ class Project(object):
             fig.subplots_adjust(wspace = contour_settings_custom['space_between_subplots']) 
             if 'figure_name' in contour_settings_custom:
                 fig.savefig(contour_settings_custom['figure_name']+".png",dpi=contour_settings_custom['dpi'])
+        if showFigure == False:
+            plt.close(fig)
         return fig
     
     def plot_covariance(self,factors_list=None):

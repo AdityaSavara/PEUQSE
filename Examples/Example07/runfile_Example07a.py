@@ -15,7 +15,7 @@ UserInput.model['InputParameterInitialGuess'] = [1, 5] #This is where the mcmc c
 
 UserInput.model['simulateByInputParametersOnlyFunction'] = processing_function_two_response.split_to_separated_lists #This must simulate with *only* the parameters listed above, and no other arguments.
 
-UserInput.simulated_response_plot_settings['figure_name'] = 'Posterior_Example_two_response' #This creates the filename, also.
+#UserInput.simulated_response_plot_settings['figure_name'] = 'Posterior_Example_two_response' #This would change the filename prefix.
 
 
 

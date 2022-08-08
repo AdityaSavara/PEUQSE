@@ -49,8 +49,8 @@ if __name__ == "__main__":
     # UserInput.parameter_estimation_settings['checkPointFrequency'] = 1
 
     # Reduced sample size needed for EnsembleSliceSampling() due to single-mode data
-    UserInput.parameter_estimation_settings['mcmc_length'] = 1000000 # 10000 is the default.
-    
+    UserInput.parameter_estimation_settings['mcmc_length'] = 10000 # 10000 is the default.
+    UserInput.parameter_estimation_settings['mcmc_nwalkers'] = 24 # make sure this is the same between the EJSresampled as well
     # UserInput.parameter_estimation_settings['mcmc_threshold_filter_coefficient'] = 2.0 
        
     # UserInput.parameter_estimation_settings['mcmc_walkerInitialDistribution'] = 'identical'

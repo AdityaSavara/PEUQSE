@@ -13,7 +13,7 @@ if __name__ == "__main__":
     
     import processing_function_mem_reactor_km_only as fun
 
-    UserInput.responses['responses_observed_uncertainties'] = 0.04
+    UserInput.responses['responses_observed_uncertainties'] = [0.04]
     
     UserInput.simulated_response_plot_settings['x_label'] = r'$reactor outlet$'
     UserInput.simulated_response_plot_settings['y_label'] = r'$ln(C_A)i$'
@@ -32,7 +32,7 @@ if __name__ == "__main__":
     
     UserInput.parameter_estimation_settings['scaling_uncertainties_type'] = "2e3"
     UserInput.parameter_estimation_settings['verbose'] = False 
-    UserInput.parameter_estimation_settings['checkPointFrequency'] = 100
+    UserInput.parameter_estimation_settings['mcmc_checkPointFrequency'] = 100
      
     UserInput.parameter_estimation_settings['mcmc_mode'] = 'unbiased'
     UserInput.parameter_estimation_settings['mcmc_random_seed'] = 0 #Normally set to None so that mcmc is set to be random. To get the same results repeatedly, such as for testing purposes, set the random seed to 0 or another integer for testing purposes.
@@ -69,18 +69,19 @@ if __name__ == "__main__":
             conc_sol_last=sol[-1,0].T
             flow_rates_a.append(conc_sol_last)
 
-    fig = plt.figure(figsize = (5,5))
-    ax = fig.add_subplot(111, projection='3d')
+    #fig = plt.figure(figsize = (5,5))
+    #ax = fig.add_subplot(111, projection='3d')
+    fig1,ax1 = plt.subplots(figsize=(5,5))
     TT, V = np.meshgrid(temperatures, volumes)
     flow_rates_a=np.asarray(flow_rates_a)
     FRA = flow_rates_a.reshape(TT.shape)
-    surf = ax.plot_surface(TT,V,FRA,cmap=matplotlib.cm.coolwarm)
-    ax.set_xlabel('Temperature')
-    ax.set_ylabel('Volume')
-    ax.set_zlabel('Flow Rate')
-    ax.set_title('Surface Plot of F_A')
-    fig.colorbar(surf, shrink=0.5, aspect=5)
-    fig.savefig('synthetic_observables.png',dpi=220)
+    surf = ax1.pcolor(TT,V,FRA,cmap=matplotlib.cm.coolwarm)
+    ax1.set_xlabel('Temperature')
+    ax1.set_ylabel('Volume')
+    #ax1.set_zlabel('Flow Rate')
+    ax1.set_title('Surface Plot of F_A')
+    fig1.colorbar(surf, shrink=0.5, aspect=5)
+    fig1.savefig('synthetic_observables.png',dpi=220)
 
     fun.k_1 = 1e2
     fun.k_minus_1 = 1
@@ -92,7 +93,7 @@ if __name__ == "__main__":
             sol = odeint(fun.cmr, F0, np.linspace(0,v,50), args=(k_1,k_minus_1,k_m,t))
             conc_sol_last=sol[-1,0].T
             print('conc_sol_last',conc_sol_last)
-            UserInput.responses['responses_observed'] = conc_sol_last
+            UserInput.responses['responses_observed'] = [conc_sol_last]
             PE_object_list.append(PEUQSE.parameter_estimation(UserInput))
             fun.T = t
             fun.volume = v

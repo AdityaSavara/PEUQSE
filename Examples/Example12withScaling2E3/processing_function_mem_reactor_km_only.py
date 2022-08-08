@@ -16,18 +16,20 @@ k_1 = 1e2
 k_minus_1 = 1
 
 def cmr(theta,V,k_1,k_minus_1,k_B,T0):
+    
     F_A, F_B = theta
     F_T = F_A + F_B
     C_T0 = P0 / (R * T0)
     C_A = C_T0 * F_A / F_T
     C_B = C_T0 * F_B / F_T
     r_A = k_1*C_A - k_minus_1*C_B
-    R_B = np.array(k_B)*np.array(C_B)
+    R_B = k_B*C_B
     dFdV = [-r_A, r_A - R_B]
     return dFdV
 
 def mem_reactor(sample):
-    sol = odeint(cmr, F0, np.linspace(0,volume,2), args=(k_1, k_minus_1, sample, T))
+    #sample should be a list with 1 value.
+    sol = odeint(cmr, F0, np.linspace(0,volume,2), args=(k_1, k_minus_1, sample[0], T))
     conc_sol_last=sol[-1,:].T 
     # print('km',sample)
     # print('F_A',conc_sol_last[0])
