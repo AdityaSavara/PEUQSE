@@ -2852,6 +2852,34 @@ class parameter_estimation:
             log_probability_metric = log_probability_metric + response_log_probability_metric
         return log_probability_metric, simulatedResponses_transformed
 
+    def getLogLikelihoodDistributionSamples(self):
+        """ 
+        Draw sufficient samples from the likelihood distribution. This can be Gaussian or a customLikelihood.
+
+        :return responses_and_weights_total: List of tuples that contain the responses and weights for the input likelihood distribution. Shape is [(responses, weights), ...] for len(numResponses) (:type: list of tuples)
+        """
+        if type(self.UserInput.model['custom_logLikelihood']) == type(None):
+            # assume Gaussian likelihood. Take mean and uncertainty to generate samples
+            from scipy.stats import norm
+            # establish mean and uncertainty
+            response_means = self.UserInput.responses['responses_observed']
+            #TODO: In the future, 
+            response_stds = self.UserInput.responses['responses_observed_uncertainties'] #TODO: make handling of cov matrix, return diagonal
+            all_responses_and_relative_probabilities = []
+            
+            for mean, std in zip(response_means, response_stds):
+                # make uniformly spaced samples from +-2 stds
+                response_values = np.linspace(mean-2*std, mean+2*std, 1000)
+                # retrieve the associated probability at each evaluation point from response_values
+                response_relative_probabilities = norm.pdf(response_values, mean, std)
+                # normalize the probabilities into relative probabilities with max 1
+                response_relative_probabilities = response_relative_probabilities/np.max(response_relative_probabilities)
+                all_responses_and_relative_probabilities.append((response_values, response_relative_probabilities))
+        else:
+            # draw from custom likelihood. Talk to Dr. Savara more about this.
+            print('Custom likelihoods are not fully supported the PredictedResponsesVsObservedDistribution plots.')
+            sys.exit()
+        return all_responses_and_relative_probabilities
 
     def truncatePostBurnInSamples(self, post_burn_in_samples=[], parameterBoundsLower=None, parameterBoundsUpper=None):
         """
@@ -3155,6 +3183,11 @@ class parameter_estimation:
         return allResponsesFigureObjectsList  #This is a list of matplotlib.pyplot as plt objects.
   
     def createPredictedResponsesVsObservedDistributions(self, allResponses_x_values=[], allResponsesListsOfYArrays =[], plot_settings={}): 
+        # What to make before plotting:
+        # Get the likelihood weights for making the histograms. Made from numpy.histogram from likelihood distribution
+        # Get the weights of the posterior samples. This is done by getting the responses with associated parameter sets then do numpy.histogram
+        # Make a listOfYTuples which would have all the special points (observed, mu guess, MAP, muAP)
+
         #allResponsesListsOfYArrays  is to have 3 layers of lists: Response > Responses Observed, mu_guess Simulated Responses, map_Simulated Responses, (mu_AP_simulatedResponses) > Values
         if allResponses_x_values == []: 
             allResponses_x_values = nestedObjectsFunctions.makeAtLeast_2dNested(self.UserInput.responses_abscissa)
@@ -3207,6 +3240,7 @@ class parameter_estimation:
                     self.mu_AP_responses_simulation_uncertainties = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(self.mu_AP_responses_simulation_uncertainties)
             
             #Now to populate the allResponsesListsOfYArrays and the allResponsesListsOfYUncertaintiesArrays
+            #TODO: Change this to format of List of Tuples
             for responseDimIndex in range(self.UserInput.num_response_dimensions):
                 if not hasattr(self, 'mu_AP_parameter_set'): #Check if a mu_AP has been assigned. It is normally only assigned if mcmc was used.    
                     if self.UserInput.num_response_dimensions == 1: 
@@ -3240,6 +3274,45 @@ class parameter_estimation:
                             allResponsesListsOfYUncertaintiesArrays.append( [self.UserInput.responses_observed_uncertainties[responseDimIndex]] ) #Just creating nesting, we need to give a list for each response dimension.
                         else: #This case means that there are some responses_simulation_uncertainties to include, so allResponsesListsOfYUncertaintiesArrays will have more dimensions *within* its nested values.
                             allResponsesListsOfYUncertaintiesArrays.append([self.UserInput.responses_observed_uncertainties[responseDimIndex],self.mu_guess_responses_simulation_uncertainties[responseDimIndex],self.map_responses_simulation_uncertainties[responseDimIndex],self.mu_AP_responses_simulation_uncertainties[responseDimIndex]]) #We need to give a list for each response dimension. 
+
+        # Call getLogLikelihood and hold onto the second return object (the overall responses) 
+        # This needs to get called for every parameter set
+        # This is for the posterior samples
+        # limit the evaluations for scalar responses as argmin(100k, numSamples) or for series responses argmin(1k, numSamples)
+        if self.post_burn_in_samples.shape[0] > 100000:
+            posterior_samples = self.post_burn_in_samples[-100000:]
+        else:
+            posterior_samples = self.post_burn_in_samples
+
+        all_sample_responses_posterior = []
+        for sample in posterior_samples:
+            sample_logp, sample_responses = self.getLogLikelihood(sample)
+            all_sample_responses_posterior.append(sample_responses)
+        all_sample_responses_posterior = np.array(all_sample_responses_posterior)
+        sample_frequency, sample_bins = np.histogram(all_sample_responses_posterior)
+        posterior_relative_probability = sample_frequency/np.max(sample_frequency)
+        all_responses_and_relative_probabilities_posterior = [sample_bins, posterior_relative_probability]
+
+
+        # make helper function that can handle Gaussian and customlikelihood functions
+        # returned object is list of tuples that contain the response array and weights for each response
+        all_responses_and_relative_probabilities_likelihood = self.getLogLikelihoodDistributionSamples()
+
+        # create prior response distributions
+        # createInitialDistribution using Sobol
+        # getLogLikelihood_responses with the same number of samples as the posterior is being sampled
+        # send into plotting function 
+        initial_points_prior = self.generateInitialPoints(len(posterior_samples), initialPointsDistributionType='sobol')
+        all_sample_responses_prior = []
+        for sample in initial_points_prior:
+            sample_logp, sample_responses = self.getLogLikelihood(sample)
+            all_sample_responses_prior.append(sample_responses)
+        all_sample_responses_prior = np.array(all_sample_responses_prior)
+        sample_frequency, sample_bins = np.histogram(all_sample_responses_prior)
+        prior_relative_probability = sample_frequency/np.max(sample_frequency)
+        all_responses_and_relative_probabilities_prior = [sample_bins, prior_relative_probability]
+
+
 
         if plot_settings == {}: 
             plot_settings = self.UserInput.simulated_response_plot_settings
@@ -3275,8 +3348,8 @@ class parameter_estimation:
                 if type(plot_settings['y_label']) == type(['list']) and len(plot_settings['y_label']) > 1: #the  label can be a single string, or a list of multiple response's labels. If it's a list of greater than 1 length, then we need to use the response index.
                     individual_plot_settings['y_label'] = plot_settings['y_label'][responseDimIndex]                
             #TODO, low priority: we can check if x_range and y_range are nested, and thereby allow individual response dimension values for those.                               
-            numberAbscissas = np.shape(allResponses_x_values)[0]
-            #We have a separate abscissa for each response.              
+            numberAbscissas = np.shape(allResponses_x_values)[0]    
+
             figureObject = plotting_functions.createPredictedResponsesVsObservedDistribution(allResponses_x_values[responseDimIndex], allResponsesListsOfYArrays[responseDimIndex], individual_plot_settings, listOfYUncertaintiesArrays=allResponsesListsOfYUncertaintiesArrays[responseDimIndex], directory = self.UserInput.directories['graphs'])
                # np.savetxt(self.UserInput.directories['logs_and_csvs']+individual_plot_settings['figure_name']+".csv", np.vstack((allResponses_x_values[responseDimIndex], allResponsesListsOfYArrays[responseDimIndex])).transpose(), delimiter=",", header='x_values, observed, sim_initial_guess, sim_MAP, sim_mu_AP', comments='')
             allResponsesFigureObjectsList.append(figureObject)
