@@ -2771,6 +2771,8 @@ class parameter_estimation:
             simulatedResponses_transformed, responses_simulation_uncertainties_transformed = self.transform_responses(simulatedResponses, responses_simulation_uncertainties) #This creates transforms for any data that we might need it. The same transforms were also applied to the observed responses.
             simulated_responses_covmat_transformed = returnShapedResponseCovMat(self.UserInput.num_response_dimensions, responses_simulation_uncertainties_transformed)  #assume we got standard deviations back.
         log_probability_metric, simulatedResponses_transformed = self.getLogLikelihood_byResponses(simulatedResponses_transformed, simulated_responses_covmat_transformed)
+        if float(log_probability_metric) == float('-inf'):
+            print("Warning: There are posterior points that have zero probability. If there are too many points like this, the MAP and mu_AP returned will not be meaningful. Parameters:", discreteParameterVectorTuple)
         return log_probability_metric, simulatedResponses_transformed
 
     def getLogLikelihood_byResponses(self, simulatedResponses_transformed, simulated_responses_covmat_transformed=None, observedResponses_transformed=None,observed_responses_covmat_transformed=None):      
@@ -2846,7 +2848,7 @@ class parameter_estimation:
                         current_log_probability_metric = float('-inf')
                     #response_log_probability_metric = current_log_probability_metric + response_log_probability_metric
                     if float(current_log_probability_metric) == float('-inf'):
-                        print("Warning: There are posterior points that have zero probability. If there are too many points like this, the MAP and mu_AP returned will not be meaningful. Parameters:", discreteParameterVectorTuple)
+                        print("Warning: There are cases of sampling where a response value has zero probability in the likelihood. If there are too many points like this, the MAP and mu_AP returned will not be meaningful. ResponseIndex:", responseIndex)
                         current_log_probability_metric = -1E100 #Just choosing an arbitrarily very severe penalty. I know that I have seen 1E-48 to -303 from the multivariate pdf, and values inbetween like -171, -217, -272. I found that -1000 seems to be worse, but I don't have a systematic testing. I think -1000 was causing numerical errors.
                     response_log_probability_metric = current_log_probability_metric + response_log_probability_metric
             log_probability_metric = log_probability_metric + response_log_probability_metric
