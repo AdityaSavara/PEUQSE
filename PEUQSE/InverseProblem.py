@@ -3083,6 +3083,7 @@ class parameter_estimation:
                 responses_observed = [np.array(responses_observed).flatten()]
                 responses_observed_uncertainties = [np.array(responses_observed_uncertainties).flatten()]
             #Now to populate the allResponsesListsOfYArrays and the allResponsesListsOfYUncertaintiesArrays
+            #TODO: the below "if else" statements for "if num_response_dimensions == 1: " and "if num_response_dimensions > 1" are probably not necessary anymore. The code looks like it is now identical for both cases. If so, these if/else statements should be removed and the duplicate code removed.
             for responseDimIndex in range(num_response_dimensions):
                 if not hasattr(self, 'mu_AP_parameter_set'): #Check if a mu_AP has been assigned. It is normally only assigned if mcmc was used.    
                     if num_response_dimensions == 1: 
