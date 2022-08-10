@@ -2453,6 +2453,14 @@ class parameter_estimation:
         """A wrapper for Enseble Slice Sampler that uses Global Move"""
         self.doEnsembleSliceSampling(movesType='global')
 
+    def doEnsembleSliceSamplingGlobal(self):
+        """A wrapper for Ensemble Slice Sampler that uses Global Move"""
+        self.doEnsembleSliceSampling(movesType='global')
+
+    def doEnsembleSliceSamplingDifferential(self):
+        """A wrapper for Ensemble Slice Sampler that uses Differential Move"""
+        self.doEnsembleSliceSampling(movesType='differential')
+
     #main function to get samples #TODO: Maybe Should return map_log_P and mu_AP_log_P?
     #@CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
     def doMetropolisHastings(self, calculatePostBurnInStatistics = True, mcmc_exportLog='UserChoice', continueSampling = 'auto'):
