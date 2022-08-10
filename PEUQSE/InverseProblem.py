@@ -2453,6 +2453,14 @@ class parameter_estimation:
         """A wrapper for Enseble Slice Sampler that uses Global Move"""
         self.doEnsembleSliceSampling(movesType='global')
 
+    def doEnsembleSliceSamplingGlobal(self):
+        """A wrapper for Ensemble Slice Sampler that uses Global Move"""
+        self.doEnsembleSliceSampling(movesType='global')
+
+    def doEnsembleSliceSamplingDifferential(self):
+        """A wrapper for Ensemble Slice Sampler that uses Differential Move"""
+        self.doEnsembleSliceSampling(movesType='differential')
+
     #main function to get samples #TODO: Maybe Should return map_log_P and mu_AP_log_P?
     #@CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
     def doMetropolisHastings(self, calculatePostBurnInStatistics = True, mcmc_exportLog='UserChoice', continueSampling = 'auto'):
@@ -3083,6 +3091,7 @@ class parameter_estimation:
                 responses_observed = [np.array(responses_observed).flatten()]
                 responses_observed_uncertainties = [np.array(responses_observed_uncertainties).flatten()]
             #Now to populate the allResponsesListsOfYArrays and the allResponsesListsOfYUncertaintiesArrays
+            #TODO: the below "if else" statements for "if num_response_dimensions == 1: " and "if num_response_dimensions > 1" are probably not necessary anymore. The code looks like it is now identical for both cases. If so, these if/else statements should be removed and the duplicate code removed.
             for responseDimIndex in range(num_response_dimensions):
                 if not hasattr(self, 'mu_AP_parameter_set'): #Check if a mu_AP has been assigned. It is normally only assigned if mcmc was used.    
                     if num_response_dimensions == 1: 
