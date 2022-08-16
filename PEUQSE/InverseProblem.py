@@ -973,7 +973,10 @@ class parameter_estimation:
                 self.calculatePostBurnInStatistics(calculate_post_burn_in_log_priors_vec = True)
                 self.exportPostBurnInStatistics()
             if self.UserInput.parameter_estimation_settings['convergence_diagnostics'] == True: #at the end of the permutations, calculate convergence diagnostics for the last run.
-                self.getConvergenceDiagnostics(bestResultSoFar_discrete_chains_post_burn_in_samples)
+                if keep_cumulative_post_burn_in_data == True:
+                    self.getConvergenceDiagnostics(bestResultSoFar_discrete_chains_post_burn_in_samples)
+                else:
+                    print("Warning: could not get convergence diagnostics for multi-start because keep_cumulative_post_burn_in_data was set to False.")
             #One could call calculatePostBurnInStatistics() if one wanted the cumulative from all results. But we don't actually want that.
             #Below should not be used. These commented out lines are biased towards the center of the grid.
             #self.post_burn_in_samples = cumulative_post_burn_in_samples
