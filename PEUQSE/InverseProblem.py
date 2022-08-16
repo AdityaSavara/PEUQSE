@@ -759,7 +759,7 @@ class parameter_estimation:
         gridPermutations = CombinationGeneratorModule.combinationGenerator(gridCenterVector, gridsearchSamplingInterval, gridsearchSamplingRadii, SpreadType=SpreadType,toFile=toFile)
         return gridPermutations, numPermutations  
         
-    def doListOfPermutationsSearch(self, listOfPermutations, numPermutations = None, searchType='getLogP', exportLog = True, walkerInitialDistribution='UserChoice', passThroughArgs = {}, calculatePostBurnInStatistics=True,  keep_cumulative_post_burn_in_data = True, centerPoint=None, permutationsToSamples=False): #This is the 'engine' used by doGridSearch and  doMultiStartSearch
+    def doListOfPermutationsSearch(self, listOfPermutations, numPermutations = None, searchType='getLogP', exportLog = True, walkerInitialDistribution='UserChoice', passThroughArgs = {}, calculatePostBurnInStatistics=True,  keep_cumulative_post_burn_in_data = False, centerPoint=None, permutationsToSamples=False): #This is the 'engine' used by doGridSearch and  doMultiStartSearch
     #The listOfPermutations can also be another type of iterable.
         #Possible searchTypes are: 'getLogP', 'doEnsembleSliceSampling', 'doEnsembleJumpSampling', 'doMetropolisHastings', 'doOptimizeNegLogP', 'doOptimizeLogP' 'doOptimizeSSR'
         #permutationsToSamples should normally only be True if somebody is using gridsearch or uniform multistart with getLogP.
