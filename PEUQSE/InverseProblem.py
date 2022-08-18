@@ -7,8 +7,7 @@ import sys
 import time
 import copy
 from collections.abc import Iterable 
-#import mumce_py.Project as mumce_pyProject #FIXME: Eric to fix plotting/graphing issue described in issue 9 -- https://github.com/AdityaSavara/ODE-KIN-BAYES-SG-EW/issues/9
-#import mumce_py.solution mumce_pySolution
+
 try:
     import CiteSoft
     from CiteSoft import function_call_cite
@@ -1730,7 +1729,7 @@ class parameter_estimation:
         self.opt_SSR = optimizeResult.fun #This is the best fit SSR.
         if printOptimum == True:
             print("Final results from doOptimizeSSR:", self.opt_parameter_set, "final SSR:", self.opt_SSR, "final negSSR:", -1*self.opt_SSR)
-        #FIXME: Right now, the createAllPlots command will not work unless we populate the map parameter set, so that is what we are doing. But a better longterm solution needs to be made. In which the graph says "opt" rather than "MAP" and uses the appropriate variables.
+        #TODO: Right now, the createAllPlots command will not work unless we populate the map parameter set, so that is what we are doing. But a better longterm solution needs to be made. In which the graph says "opt" rather than "MAP" and uses the appropriate variables.
         #TODO: Also need to add things like WSSR based on magnitude and variance weightings.
         self.map_parameter_set = self.opt_parameter_set
         return [self.opt_parameter_set, self.opt_SSR]
@@ -1797,7 +1796,7 @@ class parameter_estimation:
                 stackedLogProbabilities = np.vstack((self.post_burn_in_log_priors_vec.transpose(), self.post_burn_in_log_posteriors_un_normed_vec.transpose()))
                 #Now, we are going to make a list of abscissaIndices to remove, recognizing that numpy arrays are "transposed" relative to excel.
                 abscissaIndicesToRemove = [] 
-                #FIXME: Below there are some "if verbose", but those should not be printed, they should be collected and exported to a file at the end.
+                #TODO: Below there are some "if verbose", but those should not be printed, they should be collected and exported to a file at the end.
                 for abscissaIndex in range(np.shape(stackedLogProbabilities)[1]):
                     if self.UserInput.parameter_estimation_settings['verbose']:
                         print("parameter set:", self.post_burn_in_samples[abscissaIndex])
@@ -2527,9 +2526,9 @@ class parameter_estimation:
             timeOfFirstCheckpoint = time.time()
             timeCheckpoint = time.time() - timeOfFirstCheckpoint #First checkpoint at time 0.
             numCheckPoints = self.UserInput.parameter_estimation_settings['mcmc_length']/self.UserInput.parameter_estimation_settings['mcmc_checkPointFrequency']
-        #Before sampling should fill in the first entry for the posterior vector we have created. #FIXME: It would probably be better to start with i of 0 in below sampling loop. I believe that right now the "burn in" and "samples" arrays are actually off by an index of 1. But trying to change that alters their length relative to other arrays and causes problems. Since we always do many samples and this only affects the initial point being averaged in twice, it is not a major problem. It's also avoided if people use a burn in of at least 1.
+        #Before sampling should fill in the first entry for the posterior vector we have created. #TODO: It would probably be better to start with i of 0 in below sampling loop. I believe that right now the "burn in" and "samples" arrays are actually off by an index of 1. But trying to change that alters their length relative to other arrays and causes problems. Since we always do many samples and this only affects the initial point being averaged in twice, it is not a major problem. It's also avoided if people use a burn in of at least 1.
         log_posteriors_un_normed_vec[0]= self.getLogP(samples[0])
-        for i in range(1, self.UserInput.parameter_estimation_settings['mcmc_length']): #FIXME: Don't we need to start with i of 0?
+        for i in range(1, self.UserInput.parameter_estimation_settings['mcmc_length']): #TODO: This should be checked... Don't we need to start with i of 0?
             sampleNumber = i #This is so that later we can change it to i+1 if the loop starts from i of 0 in the future.
             if self.UserInput.parameter_estimation_settings['verbose']: print("MCMC sample number", sampleNumber)                  
             if self.UserInput.parameter_estimation_settings['mcmc_mode'] == 'unbiased':
@@ -2542,7 +2541,7 @@ class parameter_estimation:
             log_prior_proposal = self.getLogPrior(proposal_sample)
             [log_likelihood_proposal, simulationOutput_proposal] = self.getLogLikelihood(proposal_sample)
             log_prior_current_location = self.getLogPrior(samples[i-1,:]) #"current" location is the most recent accepted location, because we haven't decided yet if we're going to move.
-            [log_likelihood_current_location, simulationOutput_current_location] = self.getLogLikelihood(samples[i-1,:]) #FIXME: the previous likelihood should be stored so that it doesn't need to be calculated again.
+            [log_likelihood_current_location, simulationOutput_current_location] = self.getLogLikelihood(samples[i-1,:]) #TODO: the previous likelihood should be stored so that it doesn't need to be calculated again.
             log_accept_probability = (log_likelihood_proposal + log_prior_proposal) - (log_likelihood_current_location + log_prior_current_location) 
             if self.UserInput.parameter_estimation_settings['verbose']: print('Current log_likelihood',log_likelihood_current_location, 'Proposed log_likelihood', log_likelihood_proposal, '\nLog of Accept_probability (gauranteed if above 0)', log_accept_probability)
             if self.UserInput.parameter_estimation_settings['verbose']: print('Current posterior',log_likelihood_current_location+log_prior_current_location, 'Proposed Posterior', log_likelihood_proposal+log_prior_proposal)
@@ -2561,7 +2560,7 @@ class parameter_estimation:
                   #print(simulationOutput_proposal)
                 samples[i,:] = proposal_sample
                 samples_drawn[i,:] = proposal_sample
-                log_postereriors_drawn[i] = (log_likelihood_proposal+log_prior_proposal) #FIXME: should be using getlogP
+                log_postereriors_drawn[i] = (log_likelihood_proposal+log_prior_proposal) #TODO: should be using getlogP
                 #samples_simulatedOutputs[i,:] = nestedObjectsFunctions.flatten_2dNested(simulationOutput_proposal)
                 log_posteriors_un_normed_vec[i] = log_likelihood_proposal+log_prior_proposal 
                 log_likelihoods_vec[i] = log_likelihood_proposal
@@ -2641,7 +2640,7 @@ class parameter_estimation:
         if self.UserInput.parameter_estimation_settings['mcmc_parallel_sampling']: #mcmc_exportLog == True is needed for mcmc_parallel_sampling, but not for multistart_parallel_sampling
             mcmc_exportLog=True
         if calculatePostBurnInStatistics == True:
-            #FIXME: I think Below, calculate_post_burn_in_log_priors_vec=True should be false unless we are using continue sampling. For now, will leave it since I am not sure why it is currently set to True/False.
+            #TODO: I think Below, calculate_post_burn_in_log_priors_vec=True should be false unless we are using continue sampling. For now, will leave it since I am not sure why it is currently set to True/False.
             self.calculatePostBurnInStatistics(calculate_post_burn_in_log_priors_vec = True) #This function call will also filter the lowest probability samples out, when using default settings.
             if self.UserInput.user_requested_convergence_diagnostics: #Run convergence diagnostics if UserInput defines it as True
                 self.getConvergenceDiagnostics(discrete_chains_post_burn_in_samples)
