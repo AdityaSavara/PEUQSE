@@ -2542,6 +2542,7 @@ class parameter_estimation:
             [log_likelihood_proposal, simulationOutput_proposal] = self.getLogLikelihood(proposal_sample)
             log_prior_current_location = self.getLogPrior(samples[i-1,:]) #"current" location is the most recent accepted location, because we haven't decided yet if we're going to move.
             [log_likelihood_current_location, simulationOutput_current_location] = self.getLogLikelihood(samples[i-1,:]) #TODO: the previous likelihood should be stored so that it doesn't need to be calculated again.
+            #TODO: The below line (log_accept_probability calculation) should be based on the current and earlier logP (not adding the likelihoods and priors), that way we can rely on the getLogP function and can just store the current and previous logP.
             log_accept_probability = (log_likelihood_proposal + log_prior_proposal) - (log_likelihood_current_location + log_prior_current_location) 
             if self.UserInput.parameter_estimation_settings['verbose']: print('Current log_likelihood',log_likelihood_current_location, 'Proposed log_likelihood', log_likelihood_proposal, '\nLog of Accept_probability (gauranteed if above 0)', log_accept_probability)
             if self.UserInput.parameter_estimation_settings['verbose']: print('Current posterior',log_likelihood_current_location+log_prior_current_location, 'Proposed Posterior', log_likelihood_proposal+log_prior_proposal)
@@ -2560,7 +2561,7 @@ class parameter_estimation:
                   #print(simulationOutput_proposal)
                 samples[i,:] = proposal_sample
                 samples_drawn[i,:] = proposal_sample
-                log_postereriors_drawn[i] = (log_likelihood_proposal+log_prior_proposal) #TODO: should be using getlogP
+                log_postereriors_drawn[i] = (log_likelihood_proposal+log_prior_proposal) #TODO: should be using getlogP for the proposed and prior location. log_accept_probability line needs to be changed.
                 #samples_simulatedOutputs[i,:] = nestedObjectsFunctions.flatten_2dNested(simulationOutput_proposal)
                 log_posteriors_un_normed_vec[i] = log_likelihood_proposal+log_prior_proposal 
                 log_likelihoods_vec[i] = log_likelihood_proposal
