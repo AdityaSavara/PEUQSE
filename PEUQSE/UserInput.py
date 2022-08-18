@@ -61,7 +61,7 @@ parameter_estimation_settings['convergence_diagnostics'] = True #This feature wh
 ######MCMC settings:#####
 parameter_estimation_settings['mcmc_exportLog'] = True #exports additional information during the mcmc.
 parameter_estimation_settings['mcmc_random_seed'] = None #Normally set to None so that mcmc is set to be random. To get the same results repeatedly, such as for testing purposes, set the random seed to 0 or another integer for testing purposes.
-parameter_estimation_settings['mcmc_mode'] = 'unbiased' #can be 'unbiased', 'MAP_finding', or 'HPD_exploring', the exploring one should take the MAP as an initial guess.
+parameter_estimation_settings['mcmc_mode'] = 'unbiased' #This is only for MH (doMetropolisHastings) and is ignored for other sampler. Can be 'unbiased', 'MAP_finding', or 'HPD_exploring', the exploring one should take the MAP as an initial guess.
 parameter_estimation_settings['mcmc_length'] = 10000   #This is the number of mcmc steps to take.
 parameter_estimation_settings['mcmc_burn_in'] = 'auto' #This must be an integer or Auto. When it is set to auto it will be 10% of the mcmc_length (as of Oct 2020). 
 parameter_estimation_settings['mcmc_relative_step_length'] = 0.1 #Default value is of 0.1, but values such as 1 are also quite reasonable. This is the step length relative to the covmat of the prior. So it is relative to the variance, not relative to the standard deviation.  As of Oct 2020, this only accepts the MetropolisHastings step size and not the EnsembleSliceSampling step size.
@@ -85,9 +85,12 @@ parameter_estimation_settings['mcmc_movesType'] = 'auto' #This feature creates m
 
 
 ######multistart (including gridsearch)##### 
-#To do a gridsearch, make multistart_initialPointsDistributionType into 'grid' and then set the two 'gridsearchSampling' variables.
-#The multistart feature exports the best values to permutations_log_file.txt, and relevant outputs to permutations_initial_points_parameters_values.csv and permutations_MAP_logP_and_parameters_values.csv
-parameter_estimation_settings['multistart_searchType'] = 'getLogP' #Possible searchTypes are: 'getLogP', 'doEnsembleSliceSampling', 'doEnsembleJumpSampling', 'doMetropolisHastings', 'doOptimizeLogP', 'doOptimizeNegLogP', 'doOptimizeSSR'.  These can also be called by syntax like PE_object.doMultiStart('doEnsembleSliceSampling') in the runfile
+#The multistart feature initiates separate runs. This should not be confused with separate walkers (walkers are contained in individual runs).
+##There are a few broad categorie of multistarts: (a) Many runs of single points (getLogP) at many points in parameter space. In this case, the multistart has many runs, but if it is a non-Markov set of initial points (uniform, Sobol, astroidal) then it can be treated like a single sampling, and PEUQSE does that. PEUQSE will use 'multistart_permutationsToSamples' by default in this case.  (b) Many MCMC runs. In this case, multistart is really intended to launch many separate searches for the HPD in high dimensional spaces, with the hope that one of the searches will find the best result.  PEUQSE will treat multistart MCMC executions accordingly and retains *only* the statistics for the best MCMC run. (c) Multistart with many doOptimize calls (either doOptimizeLogP or doOptimizeNegLogP).  This third category of multistart is also for finding the best solutions by starting from many initial points. For the third category of multistart, any statistics about distributions should not be regarded as meaningul, as noted in the warning in the logfile.
+#Regardless of the category of multistart, the multistart feature exports the best values to permutations_log_file.txt, and relevant outputs to permutations_initial_points_parameters_values.csv and permutations_MAP_logP_and_parameters_values.csv
+#A gridsearch is just a special case of an initial distribution for a multistart. To do a gridsearch, make multistart_initialPointsDistributionType into 'grid' and then set the two 'gridsearchSampling' variables.
+
+parameter_estimation_settings['multistart_searchType'] = 'getLogP' #Possible searchTypes are: 'getLogP', 'doEnsembleSliceSampling', 'doEnsembleJumpSampling', 'doMetropolisHastings', 'doOptimizeLogP', 'doOptimizeNegLogP', 'doOptimizeSSR'. See above description for the several 'broad' categories of multi_starts. These can also be called by syntax like PE_object.doMultiStart('doEnsembleSliceSampling') in the runfile, but that is discouraged.
 parameter_estimation_settings['multistart_checkPointFrequency'] = None #Note: this setting does not work perfectly with ESS.
 parameter_estimation_settings['multistart_parallel_sampling'] = False
 parameter_estimation_settings['multistart_centerPoint'] = None #With None the centerPoint will be taken as model['InputParameterInitialGuess'] 
