@@ -1,0 +1,12 @@
+self.initial_point_parameters:[0. 0.]
+MAP_logP:[-40.56399279]
+self.map_parameter_set:[   235.3314457  168996.67377444]
+self.map_index:644
+self.mu_AP_parameter_set:[ -1706.26675647 153167.95393336]
+self.stdap_parameter_set:[ 12588.13364081 332937.14259048]
+self.info_gain:7.873319953630117e-05
+evidence:3.1815598153844006e-26
+posterior_cov_matrix:
+[[ 1.58477110e+08 -8.54831768e+08]
+ [-8.54831768e+08  1.10858334e+11]]
+Convergence Status: The difference between the MAP parameter set and mu_AP parameter set is less than 10% of the prior standard deviations for each parameter. There is no general method for knowing when the correct solution has been obtained, but this small difference is one sign of a converged solution.

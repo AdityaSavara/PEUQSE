@@ -8,26 +8,11 @@ def split_to_list(inputArray):
     return listAfterSplit
 
 def split_to_separated_lists(inputArray):
-    print(inputArray)
     listAfterSplit = []
     for element in inputArray:
         listAfterSplit.append([element]) #Note the extra bracket inside to create nesting.
-    #print(listAfterSplit)    
     return listAfterSplit
 
-def split_to_separated_lists_None_and_Nan_filtered(inputArray):
-    listAfterSplit = []
-    if inputArray[0]*inputArray[1]> 2.5:
-        return None
-        #listAfterSplit.append([[float('nan')],[float('nan')]])
-    elif inputArray[1] < 2.5:
-        listAfterSplit.append([[float('nan')],[0]])
-    else:
-        for element in inputArray:
-            listAfterSplit.append([element]) #Note the extra bracket inside to create nesting.
-    print(listAfterSplit)
-    return listAfterSplit
-        
 def split_to_two_separated_lists(inputArray):
     listAfterSplit = [inputArray[0:2], inputArray[2:4]]
     return listAfterSplit
