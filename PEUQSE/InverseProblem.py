@@ -3327,7 +3327,7 @@ class parameter_estimation:
 
 
         if plot_settings == {}: 
-            plot_settings = self.UserInput.simulated_response_plot_settings
+            plot_settings = self.UserInput.predicted_vs_observed_response_plot_settings
             #Other allowed settings are like this, but will be fed in as simulated_response_plot_settings keys rather than plot_settings keys.
             #plot_settings['x_label'] = 'T (K)'
             #plot_settings['y_label'] = r'$rate (s^{-1})$'
@@ -3347,8 +3347,8 @@ class parameter_estimation:
                 responseSuffix = "_"+str(responseDimIndex)
             individual_plot_settings['figure_name'] = individual_plot_settings['figure_name']+responseSuffix
             # make x_label be the response name by default
-            if 'x_label' not in individual_plot_settings:
-                individual_plot_settings['x_label'] = self.UserInput.response_names[responseDimIndex]
+            # if 'x_label' not in individual_plot_settings:
+            #     individual_plot_settings['x_label'] = self.UserInput.response_names[responseDimIndex]
             if 'x_label' in plot_settings:
                 if type(plot_settings['x_label']) == type(['list']) and len(plot_settings['x_label']) > 1: #the  label can be a single string, or a list of multiple response's labels. If it's a list of greater than 1 length, then we need to use the response index.
                     individual_plot_settings['x_label'] = plot_settings['x_label'][responseDimIndex]
@@ -3490,7 +3490,13 @@ class parameter_estimation:
         except:
             print("Unable to make simulated response plots. This is unusual and typically means your observed values and simulated values are not the same array shape. If so, that needs to be fixed.")
             pass
-            
+
+        try:
+            self.createPredictedResponsesVsObservedDistributions(allResponses_x_values=[], allResponsesListsOfYTuples =[], plot_settings=self.UserInput.predicted_vs_observed_response_plot_settings) #forcing the arguments to be blanks, because otherwise it might use some cached values.
+        except:
+            print("Unable to make predicted vs observed response plots. This is unusual and typically means your observed values and simulated values are not the same array shape. If so, that needs to be fixed.")
+            pass
+
         print("Finished creating all plots. Only some plots are shown on screen. The fulls set of plots are in:", self.UserInput.directories['graphs']) #TODO: take the graphs string, remove the '.' at the front if present, and print the full absolute path here.
             
     def save_to_dill(self, base_file_name, file_name_prefix ='',  file_name_suffix='', file_name_extension='.dill'):

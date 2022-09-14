@@ -318,22 +318,25 @@ def createPredictedResponsesVsObservedDistribution(likelihoodSamples=None, prior
     likelihood_dict['x_values'] = likelihoodSamples[0]
     likelihood_dict['y_values'] = likelihoodSamples[1]
     likelihood_dict['plot_settings'] = {}
-    likelihood_dict['plot_settings']['color'] = 'g'
-    likelihood_dict['plot_settings']['transparency'] = 0.6
+    likelihood_dict['plot_settings']['color'] = plot_settings['likelihood_color']
+    likelihood_dict['plot_settings']['transparency'] = plot_settings['transparency']
+    likelihood_dict['plot_settings']['marker_size'] = plot_settings['marker_size']
     
     posterior_dict = {}
     posterior_dict['x_values'] = posteriorSamples[0]
     posterior_dict['y_values'] = posteriorSamples[1]
     posterior_dict['plot_settings'] = {}
-    posterior_dict['plot_settings']['color'] = 'tab:orange'
-    posterior_dict['plot_settings']['transparency'] = 0.6
+    posterior_dict['plot_settings']['color'] = plot_settings['posterior_color']
+    posterior_dict['plot_settings']['transparency'] = plot_settings['transparency']
+    posterior_dict['plot_settings']['marker_size'] = plot_settings['marker_size']
 
     prior_dict = {}
     prior_dict['x_values'] = priorSamples[0]
     prior_dict['y_values'] = priorSamples[1]
     prior_dict['plot_settings'] = {}
-    prior_dict['plot_settings']['color'] = 'b'
-    prior_dict['plot_settings']['transparency'] = 0.6
+    prior_dict['plot_settings']['color'] = plot_settings['prior_color']
+    prior_dict['plot_settings']['transparency'] = plot_settings['transparency']
+    prior_dict['plot_settings']['marker_size'] = plot_settings['marker_size']
     
     # create the distribution list
     distribution_list = [likelihood_dict, prior_dict, posterior_dict]
@@ -356,7 +359,7 @@ def createPredictedResponsesVsObservedDistribution(likelihoodSamples=None, prior
         map_dict['height'] = 1 * posterior_max_height
         map_dict['plot_settings'] = {}
         map_dict['plot_settings']['color'] = 'r'
-        map_dict['plot_settings']['line_width'] = 6 # units of pixels
+        map_dict['plot_settings']['line_width'] = plot_settings['bar_width'] # units of pixels
         map_dict['plot_settings']['label'] = 'MAP=%.2e' % (map_points[0]) # make scientific notation
 
         observed_dict = {}
@@ -364,7 +367,7 @@ def createPredictedResponsesVsObservedDistribution(likelihoodSamples=None, prior
         observed_dict['height'] = 1 * posterior_max_height
         observed_dict['plot_settings'] = {}
         observed_dict['plot_settings']['color'] = 'g'
-        observed_dict['plot_settings']['line_width'] = 6 # units of pixels
+        observed_dict['plot_settings']['line_width'] = plot_settings['bar_width'] # units of pixels
         observed_dict['plot_settings']['label'] = 'Observed'
 
         mu_guess_dict = {}
@@ -372,7 +375,7 @@ def createPredictedResponsesVsObservedDistribution(likelihoodSamples=None, prior
         mu_guess_dict['height'] = mu_guess_rel_prob * posterior_max_height
         mu_guess_dict['plot_settings'] = {}
         mu_guess_dict['plot_settings']['color'] = '#00A5DF'
-        mu_guess_dict['plot_settings']['line_width'] = 6 # units of pixels
+        mu_guess_dict['plot_settings']['line_width'] = plot_settings['bar_width'] # units of pixels
         mu_guess_dict['plot_settings']['label'] = 'Initial=%.2e' % (mu_guess_points[0]) # make scientific notation
 
         muAP_dict = {}
@@ -380,7 +383,7 @@ def createPredictedResponsesVsObservedDistribution(likelihoodSamples=None, prior
         muAP_dict['height'] = 1 * posterior_max_height
         muAP_dict['plot_settings'] = {}
         muAP_dict['plot_settings']['color'] = 'k'
-        muAP_dict['plot_settings']['line_width'] = 6 # units of pixels
+        muAP_dict['plot_settings']['line_width'] = plot_settings['bar_width'] # units of pixels
         muAP_dict['plot_settings']['label'] = 'muAP=%.2e' % (mu_ap_points[0]) # make scientific notation
 
         # create bars list for plotting function
@@ -410,7 +413,7 @@ def createPredictedResponsesVsObservedDistribution(likelihoodSamples=None, prior
         map_dict['height'] = 1 * posterior_max_height
         map_dict['plot_settings'] = {}
         map_dict['plot_settings']['color'] = 'r'
-        map_dict['plot_settings']['line_width'] = 6 # units of pixels
+        map_dict['plot_settings']['line_width'] = plot_settings['bar_width'] # units of pixels
         map_dict['plot_settings']['label'] = 'MAP=%.2e' % (map_points[0]) # make scientific notation
 
         observed_dict = {}
@@ -418,7 +421,7 @@ def createPredictedResponsesVsObservedDistribution(likelihoodSamples=None, prior
         observed_dict['height'] = np.max(likelihood_dict['y_values'])
         observed_dict['plot_settings'] = {}
         observed_dict['plot_settings']['color'] = 'g'
-        observed_dict['plot_settings']['line_width'] = 6 # units of pixels
+        observed_dict['plot_settings']['line_width'] = plot_settings['bar_width'] # units of pixels
         observed_dict['plot_settings']['label'] = 'Observed'
 
         mu_guess_dict = {}
@@ -426,7 +429,7 @@ def createPredictedResponsesVsObservedDistribution(likelihoodSamples=None, prior
         mu_guess_dict['height'] = mu_guess_rel_prob * posterior_max_height
         mu_guess_dict['plot_settings'] = {}
         mu_guess_dict['plot_settings']['color'] = '#00A5DF'
-        mu_guess_dict['plot_settings']['line_width'] = 6 # units of pixels
+        mu_guess_dict['plot_settings']['line_width'] = plot_settings['bar_width'] # units of pixels
         mu_guess_dict['plot_settings']['label'] = 'Initial=%.2e' % (mu_guess_points[0]) # make scientific notation
 
         muAP_dict = {}
@@ -434,7 +437,7 @@ def createPredictedResponsesVsObservedDistribution(likelihoodSamples=None, prior
         muAP_dict['height'] = mu_ap_rel_prob * posterior_max_height
         muAP_dict['plot_settings'] = {}
         muAP_dict['plot_settings']['color'] = 'k'
-        muAP_dict['plot_settings']['line_width'] = 6 # units of pixels
+        muAP_dict['plot_settings']['line_width'] = plot_settings['bar_width'] # units of pixels
         muAP_dict['plot_settings']['label'] = 'muAP=%.2e' % (mu_ap_points[0]) # make scientific notation
 
         # create bars list for plotting function
@@ -472,11 +475,15 @@ def plotDistributionWithBars(distribution_list=[], bars_list=[], plot_settings={
         if 'plot_settings' not in dist_dict: dist_dict['plot_settings'] = {}
         if 'color' not in dist_dict['plot_settings']: dist_dict['plot_settings']['color'] = 'b'
         if 'transparency' not in dist_dict['plot_settings'] : dist_dict['plot_settings']['transparency'] = 0.5
+        if 'marker_size' not in dist_dict['plot_settings']: dist_dict['plot_settings']['marker_size'] = 0
         x_values = dist_dict['x_values']
         y_values = dist_dict['y_values']
         color = dist_dict['plot_settings']['color']
         transparency = dist_dict['plot_settings']['transparency']
-        ax0.plot(x_values, y_values, color=color, marker='o', markersize=12) # , marker='o', markersize=12
+        if dist_dict['plot_settings']['marker_size'] > 0:
+            ax0.plot(x_values, y_values, color=color, marker='o', markersize=dist_dict['plot_settings']['marker_size'])
+        else:
+            ax0.plot(x_values, y_values, color=color) 
         ax0.fill_between(x_values, y_values, y2=0, color=color, alpha=transparency)
     # plot the bars on the distribution plot
     for bar_dict in bars_list:
@@ -489,7 +496,8 @@ def plotDistributionWithBars(distribution_list=[], bars_list=[], plot_settings={
         color = bar_dict['plot_settings']['color']
         line_width = bar_dict['plot_settings']['line_width']
         label = bar_dict['plot_settings']['label']
-        ax0.vlines(x_value, 0, height, colors=color, linewidth=line_width, label=label)
+        if line_width > 0:
+            ax0.vlines(x_value, 0, height, colors=color, linewidth=line_width, label=label)
     # use general plot_settings to label axis and title
     if 'fontdict' in plot_settings: 
         #There are various things that could be added to this fontdict. #https://www.tutorialexample.com/understand-matplotlib-fontdict-a-beginner-guide-matplotlib-tutorial/
@@ -497,8 +505,8 @@ def plotDistributionWithBars(distribution_list=[], bars_list=[], plot_settings={
         if 'size' in fontdict:
             ax0.tick_params(axis='x', labelsize=fontdict['size'])
             ax0.tick_params(axis='y', labelsize=fontdict['size'])
-        else:
-            fontdict = None #initializing with the matplotlib default
+    else:
+        fontdict = None #initializing with the matplotlib default
     if 'x_label' in plot_settings: ax0.set_xlabel(plot_settings['x_label'], fontdict=fontdict)
     if 'y_label' in plot_settings: ax0.set_ylabel(plot_settings['y_label'], fontdict=fontdict)
     if 'y_range' in plot_settings: ax0.set_ylim(plot_settings['y_range'] )
