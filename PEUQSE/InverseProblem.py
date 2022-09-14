@@ -3291,7 +3291,10 @@ class parameter_estimation:
             # kde = gaussian_kde(response)
             # posterior_relative_probability = kde(sample_bins)
             # posterior_relative_probability = sample_frequency/np.max(sample_frequency) 
-            responses_and_relative_probabilities_posterior = (sample_bins, posterior_relative_probability) # make tuple packet of values and rel probability
+            # smooth this data first, the shape is (numSamples, numProp)
+            smoothing_window_width = 10 # this is the number of bins to smooth over, make this a UserInput
+            smoothed_posterior_relative_probability = np.convolve(posterior_relative_probability, np.ones((smoothing_window_width,))/smoothing_window_width, mode='same')
+            responses_and_relative_probabilities_posterior = (sample_bins, smoothed_posterior_relative_probability) # make tuple packet of values and rel probability
             all_responses_and_relative_probabilities_posterior.append(responses_and_relative_probabilities_posterior)
 
 
@@ -3316,7 +3319,10 @@ class parameter_estimation:
             # kde = gaussian_kde(response)
             # prior_relative_probability = kde(sample_bins)
             # prior_relative_probability = sample_frequency/np.max(sample_frequency)
-            responses_and_relative_probabilities_prior = (sample_bins, prior_relative_probability)
+            # smooth this data first, the shape is (numSamples, numProp)
+            smoothing_window_width = 10 # this is the number of bins to smooth over, make this a UserInput
+            smoothed_prior_relative_probability = np.convolve(prior_relative_probability, np.ones((smoothing_window_width,))/smoothing_window_width, mode='same')
+            responses_and_relative_probabilities_prior = (sample_bins, smoothed_prior_relative_probability) # make tuple packet of values and rel probability
             all_responses_and_relative_probabilities_prior.append(responses_and_relative_probabilities_prior)
 
 
@@ -3340,6 +3346,9 @@ class parameter_estimation:
             if self.UserInput.num_response_dimensions > 1:
                 responseSuffix = "_"+str(responseDimIndex)
             individual_plot_settings['figure_name'] = individual_plot_settings['figure_name']+responseSuffix
+            # make x_label be the response name by default
+            if 'x_label' not in individual_plot_settings:
+                individual_plot_settings['x_label'] = self.UserInput.response_names[responseDimIndex]
             if 'x_label' in plot_settings:
                 if type(plot_settings['x_label']) == type(['list']) and len(plot_settings['x_label']) > 1: #the  label can be a single string, or a list of multiple response's labels. If it's a list of greater than 1 length, then we need to use the response index.
                     individual_plot_settings['x_label'] = plot_settings['x_label'][responseDimIndex]

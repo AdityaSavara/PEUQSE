@@ -357,7 +357,7 @@ def createPredictedResponsesVsObservedDistribution(likelihoodSamples=None, prior
         map_dict['plot_settings'] = {}
         map_dict['plot_settings']['color'] = 'r'
         map_dict['plot_settings']['line_width'] = 6 # units of pixels
-        map_dict['plot_settings']['label'] = f'MAP={round(map_points[0], 2)}' # make scientific notation
+        map_dict['plot_settings']['label'] = 'MAP=%.2e' % (map_points[0]) # make scientific notation
 
         observed_dict = {}
         observed_dict['x_value'] = observed_points[1]
@@ -373,7 +373,7 @@ def createPredictedResponsesVsObservedDistribution(likelihoodSamples=None, prior
         mu_guess_dict['plot_settings'] = {}
         mu_guess_dict['plot_settings']['color'] = '#00A5DF'
         mu_guess_dict['plot_settings']['line_width'] = 6 # units of pixels
-        mu_guess_dict['plot_settings']['label'] = f'Initial={mu_guess_points[0]}'
+        mu_guess_dict['plot_settings']['label'] = 'Initial=%.2e' % (mu_guess_points[0]) # make scientific notation
 
         muAP_dict = {}
         muAP_dict['x_value'] = mu_ap_points[1]
@@ -381,7 +381,7 @@ def createPredictedResponsesVsObservedDistribution(likelihoodSamples=None, prior
         muAP_dict['plot_settings'] = {}
         muAP_dict['plot_settings']['color'] = 'k'
         muAP_dict['plot_settings']['line_width'] = 6 # units of pixels
-        muAP_dict['plot_settings']['label'] = f'muAP={mu_ap_points[0]}'
+        muAP_dict['plot_settings']['label'] = 'muAP=%.2e' % (mu_ap_points[0]) # make scientific notation
 
         # create bars list for plotting function
         bars_list = [map_dict, observed_dict, mu_guess_dict]
@@ -411,7 +411,7 @@ def createPredictedResponsesVsObservedDistribution(likelihoodSamples=None, prior
         map_dict['plot_settings'] = {}
         map_dict['plot_settings']['color'] = 'r'
         map_dict['plot_settings']['line_width'] = 6 # units of pixels
-        map_dict['plot_settings']['label'] = f'MAP={map_points[0]}'
+        map_dict['plot_settings']['label'] = 'MAP=%.2e' % (map_points[0]) # make scientific notation
 
         observed_dict = {}
         observed_dict['x_value'] = observed_points[1]
@@ -427,7 +427,7 @@ def createPredictedResponsesVsObservedDistribution(likelihoodSamples=None, prior
         mu_guess_dict['plot_settings'] = {}
         mu_guess_dict['plot_settings']['color'] = '#00A5DF'
         mu_guess_dict['plot_settings']['line_width'] = 6 # units of pixels
-        mu_guess_dict['plot_settings']['label'] = f'Initial={mu_guess_points[0]}'
+        mu_guess_dict['plot_settings']['label'] = 'Initial=%.2e' % (mu_guess_points[0]) # make scientific notation
 
         muAP_dict = {}
         muAP_dict['x_value'] = mu_ap_points[1]
@@ -435,7 +435,7 @@ def createPredictedResponsesVsObservedDistribution(likelihoodSamples=None, prior
         muAP_dict['plot_settings'] = {}
         muAP_dict['plot_settings']['color'] = 'k'
         muAP_dict['plot_settings']['line_width'] = 6 # units of pixels
-        muAP_dict['plot_settings']['label'] = f'muAP={mu_ap_points[0]}'
+        muAP_dict['plot_settings']['label'] = 'muAP=%.2e' % (mu_ap_points[0]) # make scientific notation
 
         # create bars list for plotting function
         bars_list = [map_dict, observed_dict, mu_guess_dict, muAP_dict]
@@ -476,7 +476,7 @@ def plotDistributionWithBars(distribution_list=[], bars_list=[], plot_settings={
         y_values = dist_dict['y_values']
         color = dist_dict['plot_settings']['color']
         transparency = dist_dict['plot_settings']['transparency']
-        ax0.plot(x_values, y_values, color=color, marker='o', markersize=12)
+        ax0.plot(x_values, y_values, color=color, marker='o', markersize=12) # , marker='o', markersize=12
         ax0.fill_between(x_values, y_values, y2=0, color=color, alpha=transparency)
     # plot the bars on the distribution plot
     for bar_dict in bars_list:
