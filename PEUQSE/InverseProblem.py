@@ -7,8 +7,7 @@ import sys
 import time
 import copy
 from collections.abc import Iterable 
-#import mumce_py.Project as mumce_pyProject #FIXME: Eric to fix plotting/graphing issue described in issue 9 -- https://github.com/AdityaSavara/ODE-KIN-BAYES-SG-EW/issues/9
-#import mumce_py.solution mumce_pySolution
+
 try:
     import CiteSoft
     from CiteSoft import function_call_cite
@@ -973,7 +972,10 @@ class parameter_estimation:
                 self.calculatePostBurnInStatistics(calculate_post_burn_in_log_priors_vec = True)
                 self.exportPostBurnInStatistics()
             if self.UserInput.parameter_estimation_settings['convergence_diagnostics'] == True: #at the end of the permutations, calculate convergence diagnostics for the last run.
-                self.getConvergenceDiagnostics(bestResultSoFar_discrete_chains_post_burn_in_samples)
+                if keep_cumulative_post_burn_in_data == True:
+                    self.getConvergenceDiagnostics(bestResultSoFar_discrete_chains_post_burn_in_samples)
+                else:
+                    print("Warning: could not get convergence diagnostics for multi-start because keep_cumulative_post_burn_in_data was set to False.")
             #One could call calculatePostBurnInStatistics() if one wanted the cumulative from all results. But we don't actually want that.
             #Below should not be used. These commented out lines are biased towards the center of the grid.
             #self.post_burn_in_samples = cumulative_post_burn_in_samples
@@ -1727,7 +1729,7 @@ class parameter_estimation:
         self.opt_SSR = optimizeResult.fun #This is the best fit SSR.
         if printOptimum == True:
             print("Final results from doOptimizeSSR:", self.opt_parameter_set, "final SSR:", self.opt_SSR, "final negSSR:", -1*self.opt_SSR)
-        #FIXME: Right now, the createAllPlots command will not work unless we populate the map parameter set, so that is what we are doing. But a better longterm solution needs to be made. In which the graph says "opt" rather than "MAP" and uses the appropriate variables.
+        #TODO: Right now, the createAllPlots command will not work unless we populate the map parameter set, so that is what we are doing. But a better longterm solution needs to be made. In which the graph says "opt" rather than "MAP" and uses the appropriate variables.
         #TODO: Also need to add things like WSSR based on magnitude and variance weightings.
         self.map_parameter_set = self.opt_parameter_set
         return [self.opt_parameter_set, self.opt_SSR]
@@ -1794,7 +1796,7 @@ class parameter_estimation:
                 stackedLogProbabilities = np.vstack((self.post_burn_in_log_priors_vec.transpose(), self.post_burn_in_log_posteriors_un_normed_vec.transpose()))
                 #Now, we are going to make a list of abscissaIndices to remove, recognizing that numpy arrays are "transposed" relative to excel.
                 abscissaIndicesToRemove = [] 
-                #FIXME: Below there are some "if verbose", but those should not be printed, they should be collected and exported to a file at the end.
+                #TODO: Below there are some "if verbose", but those should not be printed, they should be collected and exported to a file at the end.
                 for abscissaIndex in range(np.shape(stackedLogProbabilities)[1]):
                     if self.UserInput.parameter_estimation_settings['verbose']:
                         print("parameter set:", self.post_burn_in_samples[abscissaIndex])
@@ -2453,6 +2455,14 @@ class parameter_estimation:
         """A wrapper for Enseble Slice Sampler that uses Global Move"""
         self.doEnsembleSliceSampling(movesType='global')
 
+    def doEnsembleSliceSamplingGlobal(self):
+        """A wrapper for Ensemble Slice Sampler that uses Global Move"""
+        self.doEnsembleSliceSampling(movesType='global')
+
+    def doEnsembleSliceSamplingDifferential(self):
+        """A wrapper for Ensemble Slice Sampler that uses Differential Move"""
+        self.doEnsembleSliceSampling(movesType='differential')
+
     #main function to get samples #TODO: Maybe Should return map_log_P and mu_AP_log_P?
     #@CiteSoft.after_call_compile_consolidated_log() #This is from the CiteSoft module.
     def doMetropolisHastings(self, calculatePostBurnInStatistics = True, mcmc_exportLog='UserChoice', continueSampling = 'auto'):
@@ -2516,9 +2526,9 @@ class parameter_estimation:
             timeOfFirstCheckpoint = time.time()
             timeCheckpoint = time.time() - timeOfFirstCheckpoint #First checkpoint at time 0.
             numCheckPoints = self.UserInput.parameter_estimation_settings['mcmc_length']/self.UserInput.parameter_estimation_settings['mcmc_checkPointFrequency']
-        #Before sampling should fill in the first entry for the posterior vector we have created. #FIXME: It would probably be better to start with i of 0 in below sampling loop. I believe that right now the "burn in" and "samples" arrays are actually off by an index of 1. But trying to change that alters their length relative to other arrays and causes problems. Since we always do many samples and this only affects the initial point being averaged in twice, it is not a major problem. It's also avoided if people use a burn in of at least 1.
+        #Before sampling should fill in the first entry for the posterior vector we have created. #TODO: It would probably be better to start with i of 0 in below sampling loop. I believe that right now the "burn in" and "samples" arrays are actually off by an index of 1. But trying to change that alters their length relative to other arrays and causes problems. Since we always do many samples and this only affects the initial point being averaged in twice, it is not a major problem. It's also avoided if people use a burn in of at least 1.
         log_posteriors_un_normed_vec[0]= self.getLogP(samples[0])
-        for i in range(1, self.UserInput.parameter_estimation_settings['mcmc_length']): #FIXME: Don't we need to start with i of 0?
+        for i in range(1, self.UserInput.parameter_estimation_settings['mcmc_length']): #TODO: This should be checked... Don't we need to start with i of 0?
             sampleNumber = i #This is so that later we can change it to i+1 if the loop starts from i of 0 in the future.
             if self.UserInput.parameter_estimation_settings['verbose']: print("MCMC sample number", sampleNumber)                  
             if self.UserInput.parameter_estimation_settings['mcmc_mode'] == 'unbiased':
@@ -2531,7 +2541,8 @@ class parameter_estimation:
             log_prior_proposal = self.getLogPrior(proposal_sample)
             [log_likelihood_proposal, simulationOutput_proposal] = self.getLogLikelihood(proposal_sample)
             log_prior_current_location = self.getLogPrior(samples[i-1,:]) #"current" location is the most recent accepted location, because we haven't decided yet if we're going to move.
-            [log_likelihood_current_location, simulationOutput_current_location] = self.getLogLikelihood(samples[i-1,:]) #FIXME: the previous likelihood should be stored so that it doesn't need to be calculated again.
+            [log_likelihood_current_location, simulationOutput_current_location] = self.getLogLikelihood(samples[i-1,:]) #TODO: the previous likelihood should be stored so that it doesn't need to be calculated again.
+            #TODO: The below line (log_accept_probability calculation) should be based on the current and earlier logP (not adding the likelihoods and priors), that way we can rely on the getLogP function and can just store the current and previous logP.
             log_accept_probability = (log_likelihood_proposal + log_prior_proposal) - (log_likelihood_current_location + log_prior_current_location) 
             if self.UserInput.parameter_estimation_settings['verbose']: print('Current log_likelihood',log_likelihood_current_location, 'Proposed log_likelihood', log_likelihood_proposal, '\nLog of Accept_probability (gauranteed if above 0)', log_accept_probability)
             if self.UserInput.parameter_estimation_settings['verbose']: print('Current posterior',log_likelihood_current_location+log_prior_current_location, 'Proposed Posterior', log_likelihood_proposal+log_prior_proposal)
@@ -2550,7 +2561,7 @@ class parameter_estimation:
                   #print(simulationOutput_proposal)
                 samples[i,:] = proposal_sample
                 samples_drawn[i,:] = proposal_sample
-                log_postereriors_drawn[i] = (log_likelihood_proposal+log_prior_proposal) #FIXME: should be using getlogP
+                log_postereriors_drawn[i] = (log_likelihood_proposal+log_prior_proposal) #TODO: should be using getlogP for the proposed and prior location. log_accept_probability line needs to be changed.
                 #samples_simulatedOutputs[i,:] = nestedObjectsFunctions.flatten_2dNested(simulationOutput_proposal)
                 log_posteriors_un_normed_vec[i] = log_likelihood_proposal+log_prior_proposal 
                 log_likelihoods_vec[i] = log_likelihood_proposal
@@ -2630,7 +2641,7 @@ class parameter_estimation:
         if self.UserInput.parameter_estimation_settings['mcmc_parallel_sampling']: #mcmc_exportLog == True is needed for mcmc_parallel_sampling, but not for multistart_parallel_sampling
             mcmc_exportLog=True
         if calculatePostBurnInStatistics == True:
-            #FIXME: I think Below, calculate_post_burn_in_log_priors_vec=True should be false unless we are using continue sampling. For now, will leave it since I am not sure why it is currently set to True/False.
+            #TODO: I think Below, calculate_post_burn_in_log_priors_vec=True should be false unless we are using continue sampling. For now, will leave it since I am not sure why it is currently set to True/False.
             self.calculatePostBurnInStatistics(calculate_post_burn_in_log_priors_vec = True) #This function call will also filter the lowest probability samples out, when using default settings.
             if self.UserInput.user_requested_convergence_diagnostics: #Run convergence diagnostics if UserInput defines it as True
                 self.getConvergenceDiagnostics(discrete_chains_post_burn_in_samples)
@@ -2752,10 +2763,12 @@ class parameter_estimation:
         simulatedResponses = self.getSimulatedResponses(discreteParameterVectorTuple)
         #Failure checks:
         if type(simulatedResponses) == type(None):
+            print("Warning: There are likelihood points that have zero probability due to receiving a None type back for the simulated responses. If there are too many points like this during an MCMC or permutationsToSamples run, the MAP and mu_AP returned will not be meaningful. Parameters: " + str(discreteParameterVectorTuple))
             return float('-inf'), None #This is intended for the case that the simulation fails, indicated by receiving an 'nan' or None type from user's simulation function.
         #Check if there are any 'nan' in the simulations array, and treat that as a failure also.
         nans_in_array = np.isnan(simulatedResponses)        
         if True in nans_in_array:
+            print("Warning: There are likelihood points that have zero probability due to not a number ('nan') values in the simulated responses. If there are too many points like this, the MAP and mu_AP returned will not be meaningful. Parameters: " + str(discreteParameterVectorTuple))
             return float('-inf'), None
         #need to check if there are any 'responses_simulation_uncertainties'.
         if type(self.UserInput.responses_simulation_uncertainties) == type(None): #if it's a None type, we keep it as a None type
@@ -2809,10 +2822,14 @@ class parameter_estimation:
         comprehensive_responses_covmat_shape = copy.deepcopy(observed_responses_covmat_transformed_shape) #no need to take the shape of the actual comprehensive_responses_covmat since they must be same. This is probably slightly less computation.
         if (len(comprehensive_responses_covmat_shape) == 1) and (comprehensive_responses_covmat_shape[0]==1): #Matrix is square because has only one value.
             log_probability_metric = multivariate_normal.logpdf(mean=simulatedResponses_transformed,x=observedResponses_transformed,cov=comprehensive_responses_covmat)
+            if float(log_probability_metric) == float('-inf'):
+                print("Warning: There are likelihood points that have zero probability. If there are too many points like this, the MAP and mu_AP returned will not be meaningful. Parameters: " + str(discreteParameterVectorTuple))
             return log_probability_metric, simulatedResponses_transformed #Return this rather than going through loop further.
         elif len(comprehensive_responses_covmat_shape) > 1 and (comprehensive_responses_covmat_shape[0] == comprehensive_responses_covmat_shape[1]):  #Else it is 2D, check if it's square.
             try:
                 log_probability_metric = multivariate_normal.logpdf(mean=simulatedResponses_transformed,x=observedResponses_transformed,cov=comprehensive_responses_covmat)
+                if float(log_probability_metric) == float('-inf'):
+                    print("Warning: There are likelihood points that have zero probability. If there are too many points like this, the MAP and mu_AP returned will not be meaningful. Parameters: " + str(discreteParameterVectorTuple))
                 return log_probability_metric, simulatedResponses_transformed #Return this rather than going through loop further.
             except:
                 pass #If it failed, we assume it is not square. For example, it could be 2 responses of length 2 each, which is not actually square.
@@ -2846,7 +2863,7 @@ class parameter_estimation:
                         current_log_probability_metric = float('-inf')
                     #response_log_probability_metric = current_log_probability_metric + response_log_probability_metric
                     if float(current_log_probability_metric) == float('-inf'):
-                        print("Warning: There are posterior points that have zero probability. If there are too many points like this, the MAP and mu_AP returned will not be meaningful. Parameters:", discreteParameterVectorTuple)
+                        warnings.warn("Warning: There are cases of sampling where a response value has zero probability in the likelihood. If there are too many points like this, the MAP and mu_AP returned will not be meaningful. ResponseIndex: " + str( responseIndex))
                         current_log_probability_metric = -1E100 #Just choosing an arbitrarily very severe penalty. I know that I have seen 1E-48 to -303 from the multivariate pdf, and values inbetween like -171, -217, -272. I found that -1000 seems to be worse, but I don't have a systematic testing. I think -1000 was causing numerical errors.
                     response_log_probability_metric = current_log_probability_metric + response_log_probability_metric
             log_probability_metric = log_probability_metric + response_log_probability_metric
@@ -3106,6 +3123,7 @@ class parameter_estimation:
                 responses_observed = [np.array(responses_observed).flatten()]
                 responses_observed_uncertainties = [np.array(responses_observed_uncertainties).flatten()]
             #Now to populate the allResponsesListsOfYArrays and the allResponsesListsOfYUncertaintiesArrays
+            #TODO: the below "if else" statements for "if num_response_dimensions == 1: " and "if num_response_dimensions > 1" are probably not necessary anymore. The code looks like it is now identical for both cases. If so, these if/else statements should be removed and the duplicate code removed.
             for responseDimIndex in range(num_response_dimensions):
                 if not hasattr(self, 'mu_AP_parameter_set'): #Check if a mu_AP has been assigned. It is normally only assigned if mcmc was used.    
                     if num_response_dimensions == 1: 
@@ -3439,6 +3457,8 @@ class parameter_estimation:
             figureObject_beta.mumpce_plots(model_parameter_info = self.UserInput.model_parameter_info, active_parameters = active_parameters, pairs_of_parameter_indices = pairs_of_parameter_indices, posterior_mu_vector = posterior_mu_vector, posterior_cov_matrix = posterior_cov_matrix, prior_mu_vector = np.array(self.UserInput.mu_prior), prior_cov_matrix = self.UserInput.covmat_prior, contour_settings_custom = contour_settings_custom, showFigure=showFigure)
         return figureObject_beta
 
+    createContourPlots = createMumpcePlots #This is just a pointer.
+
     @CiteSoft.after_call_compile_consolidated_log(compile_checkpoints=True) #This is from the CiteSoft module.
     def createAllPlots(self, verbose = False, showFigure=None):
         #if showFigure is none, then the default showFigure choices will occur for each of the plotting functions.
@@ -3471,7 +3491,7 @@ class parameter_estimation:
             print("Unable to make scatter heatmap plots. This usually means your run is not an MCMC run, or that the sampling did not work well. If you are using Metropolis-Hastings, try one of the other samplers: EnsembleSliceSampling,  EnsembleJumpSampling,  astroidal distribution multistart, or uniform distribution multistart.")
 
         try:        
-            self.createMumpcePlots(showFigure=showFigure)
+            self.createContourPlots(showFigure=showFigure)
             if verbose: print("Finished with create contour plots function call.")
         except:
             print("Unable to make contour plots. This usually means your run is not an MCMC run. However, it could mean that your prior and posterior are too far from each other for plotting.  You can change contour_plot_settings['colobars'] to false and can also change the contour_plot_settings['axis_limits'] if you know which region you wish to have plotted.")

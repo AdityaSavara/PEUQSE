@@ -8,8 +8,7 @@ if __name__ == "__main__":
     UserInput.responses['responses_abscissa'] = observed_values_00.observed_data_x_values
     UserInput.responses['responses_observed'] = observed_values_00.observed_data_y_values
     UserInput.responses['responses_observed_uncertainties'] = observed_values_00.observed_data_y_values_uncertainties
-
-    UserInput.histogram_plot_settings['histograms_as_density'] = False #False is the default, so this line is not needed. Histograms will show sampling frequency.
+  
     
     UserInput.simulated_response_plot_settings['x_label'] = 'distance (m)'
     UserInput.simulated_response_plot_settings['y_label'] = r'$time (s)$'
@@ -24,29 +23,24 @@ if __name__ == "__main__":
     
     UserInput.model['simulateByInputParametersOnlyFunction'] = simulation_model_00.simulation_function_wrapper #This must simulate with *only* the parameters listed above, and no other arguments.
 
-    UserInput.parameter_estimation_settings['mcmc_checkPointFrequency'] = 1000
-    UserInput.parameter_estimation_settings['mcmc_length'] = 10000 #10000 is the default.
+    
+    UserInput.parameter_estimation_settings['mcmc_threshold_filter_samples'] = True
 
-
-    #UserInput.parameter_estimation_settings['mcmc_random_seed'] = 0 This can be useful for testing.
+    UserInput.parameter_estimation_settings['mcmc_random_seed'] = 0
+    
+    UserInput.parameter_estimation_settings['multistart_searchType'] = 'getLogP'
+    UserInput.parameter_estimation_settings['multistart_initialPointsDistributionType'] = 'uniform'
+    UserInput.parameter_estimation_settings['multistart_exportLog'] = True
+    UserInput.parameter_estimation_settings['multistart_gridsearch_threshold_filter_coefficient'] = 2.0 #The lower this is, the more the points become filtered. It is not recommended to go below 2.0.
+    UserInput.parameter_estimation_settings['multistart_numStartPoints'] = 10000
+    UserInput.parameter_estimation_settings['multistart_relativeInitialDistributionSpread'] = 2.0
+    
     #After making the UserInput, now we make a 'parameter_estimation' object from it.
     PE_object = PEUQSE.parameter_estimation(UserInput)
-    PE_object.doMetropolisHastings()
-    
-    
-    ####NORMALLY WE WOULD NOW CREATE ALL PLOTS, BUT IN THIS EXAMPLE WE WILL DELAY DOING SO IN ORDER TO SHOW HOW TO SAVE AND LOAD A PE_OBJECT TO AND FROM A FILE.
-    #PE_object.createAllPlots()
-
-    #to save a PE_object for later
-    PE_object.save_to_dill("PE_object_00a1")
-    
-    #to load a PE_object after some time, first one has to put (any) UserInput to create a PE_object, then to load from file.
-    #these two steps can be done in a different python file. A different PE_object name is being used to emphasize that this process can be done from a different python file.
-    PE_object2 = PEUQSE.parameter_estimation(UserInput)
-    PE_object2 = PE_object2.load_from_dill("PE_object_00a1")
-    
-    
-    PE_object2.createAllPlots() #This function calls each of the below functions so that the user does not have to.
+    #PE_object.doMetropolisHastings()
+    #PE_object.doOptimizeNegLogP(method="BFGS", printOptimum=True, verbose=True) #method can also be Nelder-Meade.
+    PE_object.doMultiStart()
+    PE_object.createAllPlots() #This function calls each of the below functions so that the user does not have to.
 #    PE_object.makeHistogramsForEachParameter()    
 #    PE_object.makeSamplingScatterMatrixPlot()
 #    PE_object.createSimulatedResponsesPlots()
