@@ -2869,6 +2869,35 @@ class parameter_estimation:
             log_probability_metric = log_probability_metric + response_log_probability_metric
         return log_probability_metric, simulatedResponses_transformed
 
+    def _getLogLikelihoodDistributionSamples(self):
+        """ 
+        Draw sufficient samples from the likelihood distribution. This can be Gaussian or a customLikelihood.
+        This is a helper function intended to only be used by createPredictedResponsesVsObservedDistributions. 
+
+        :return responses_and_weights_total: List of tuples that contain the responses and weights for the input likelihood distribution. Shape is [(responses, weights), ...] for len(numResponses) (:type: list of tuples)
+        """
+        if type(self.UserInput.model['custom_logLikelihood']) == type(None):
+            # assume Gaussian likelihood. Take mean and uncertainty to generate samples
+            from scipy.stats import norm
+            # establish mean and uncertainty
+            response_means = self.UserInput.responses['responses_observed']
+            #TODO: In the future, 
+            response_stds = self.UserInput.responses['responses_observed_uncertainties'] #TODO: make handling of cov matrix, return diagonal
+            all_responses_and_relative_probabilities = []
+            
+            for mean, std in zip(response_means, response_stds):
+                # make uniformly spaced samples from +-2 stds
+                response_values = np.linspace(mean-2*std, mean+2*std, 1000)
+                # retrieve the associated probability at each evaluation point from response_values
+                response_relative_probabilities = norm.pdf(response_values, mean, std)
+                # normalize the probabilities into relative probabilities with max 1
+                # response_relative_probabilities = response_relative_probabilities/np.max(response_relative_probabilities)
+                all_responses_and_relative_probabilities.append((np.ndarray.flatten(response_values), np.ndarray.flatten(response_relative_probabilities)))
+        else:
+            # draw from custom likelihood. Talk to Dr. Savara more about this.
+            print('Custom likelihoods are not fully supported the PredictedResponsesVsObservedDistribution plots.')
+            sys.exit()
+        return all_responses_and_relative_probabilities
 
     def truncatePostBurnInSamples(self, post_burn_in_samples=[], parameterBoundsLower=None, parameterBoundsUpper=None):
         """
@@ -3171,7 +3200,187 @@ class parameter_estimation:
                # np.savetxt(self.UserInput.directories['logs_and_csvs']+individual_plot_settings['figure_name']+".csv", np.vstack((allResponses_x_values[responseDimIndex], allResponsesListsOfYArrays[responseDimIndex])).transpose(), delimiter=",", header='x_values, observed, sim_initial_guess, sim_MAP, sim_mu_AP', comments='')
             allResponsesFigureObjectsList.append(figureObject)
         return allResponsesFigureObjectsList  #This is a list of matplotlib.pyplot as plt objects.
-    
+  
+    def createPredictedResponsesVsObservedDistributions(self, allResponses_x_values=[], allResponsesListsOfYTuples =[], plot_settings={}): 
+        # What to make before plotting:
+        # Get the likelihood weights for making the histograms. Made from numpy.histogram from likelihood distribution
+        # Get the weights of the posterior samples. This is done by getting the responses with associated parameter sets then do numpy.histogram
+        # Make a listOfYTuples which would have all the special points (observed, mu guess, MAP, muAP)
+
+        #allResponsesListsOfYArrays  is to have 3 layers of lists: Response > Responses Observed, mu_guess Simulated Responses, map_Simulated Responses, (mu_AP_simulatedResponses) > Values
+        # This section will either recieve or generate discrete values which will be plotted as vertical lines
+        if allResponses_x_values == []: 
+            allResponses_x_values = nestedObjectsFunctions.makeAtLeast_2dNested(self.UserInput.responses_abscissa)
+        if allResponsesListsOfYTuples  ==[]: #In this case, we assume allResponsesListsOfYUncertaintiesArrays == [] also.
+            allResponsesListsOfYTuples = [] #Need to make a new list in the case that there was one already, to avoid overwriting the default argument object.
+            allResponsesListsOfYUncertaintiesArrays = [] #Set accompanying uncertainties list to a blank list in case it is not already one. Otherwise appending would mess up indexing.
+            # simulationFunction = self.UserInput.simulationFunction #Do NOT use self.UserInput.model['simulateByInputParametersOnlyFunction']  because that won't work with reduced parameter space requests.
+            # simulationOutputProcessingFunction = self.UserInput.simulationOutputProcessingFunction #Do NOT use self.UserInput.model['simulationOutputProcessingFunction'] because that won't work with reduced parameter space requests.
+            
+            #We already have self.UserInput.responses_observed, and will use that below. So now we get the simulated responses for the guess, MAP, mu_ap etc.
+            
+            #Get mu_guess simulated output and responses. 
+            mu_guess_LogP = self.getLogP(self.UserInput.InputParameterInitialGuess)
+            mu_guess_SimulatedOutput = self.getSimulatedResponses(self.UserInput.InputParameterInitialGuess) #Do NOT use self.UserInput.model['InputParameterInitialGuess'] because that won't work with reduced parameter space requests.
+            #Check if we have simulation uncertainties, and populate if so.
+            # if type(self.UserInput.responses_simulation_uncertainties) != type(None):
+            #     self.mu_guess_responses_simulation_uncertainties = nestedObjectsFunctions.makeAtLeast_2dNested(self.get_responses_simulation_uncertainties(self.UserInput.InputParameterInitialGuess))
+            #     self.mu_guess_responses_simulation_uncertainties = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(self.mu_guess_responses_simulation_uncertainties)
+                
+            #Get map simiulated output and simulated responses.
+            map_LogP = self.getLogP(self.map_parameter_set)
+            map_SimulatedOutput = self.getSimulatedResponses(self.map_parameter_set)         
+            #Check if we have simulation uncertainties, and populate if so.
+            # if type(self.UserInput.responses_simulation_uncertainties) != type(None):
+            #     self.map_responses_simulation_uncertainties = nestedObjectsFunctions.makeAtLeast_2dNested(self.get_responses_simulation_uncertainties(self.map_parameter_set))
+            #     self.map_responses_simulation_uncertainties = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(self.map_responses_simulation_uncertainties)
+            
+            if hasattr(self, 'mu_AP_parameter_set'): #Check if a mu_AP has been assigned. It is normally only assigned if mcmc was used.           
+                #Get mu_AP simiulated output and simulated responses.
+                mu_AP_LogP = self.getLogP(self.mu_AP_parameter_set)
+                mu_AP_SimulatedOutput = self.getSimulatedResponses(self.mu_AP_parameter_set)         
+                #Check if we have simulation uncertainties, and populate if so.
+                # if type(self.UserInput.responses_simulation_uncertainties) != type(None):
+                #     self.mu_AP_responses_simulation_uncertainties = nestedObjectsFunctions.makeAtLeast_2dNested( self.get_responses_simulation_uncertainties(self.mu_AP_parameter_set))
+                #     self.mu_AP_responses_simulation_uncertainties = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(self.mu_AP_responses_simulation_uncertainties)
+            
+            #Now to populate the allResponsesListsOfYArrays and the allResponsesListsOfYUncertaintiesArrays
+            # The listOfYArrays has the order observed, mu_guess, map, and muAP(if available) wiht tuples of (LogP, response value)
+            # for observed values, the LogP becomes None
+            #TODO: Change this to format of List of Tuples
+            for responseDimIndex in range(self.UserInput.num_response_dimensions):
+                if not hasattr(self, 'mu_AP_parameter_set'): #Check if a mu_AP has been assigned. It is normally only assigned if mcmc was used.    
+                    if self.UserInput.num_response_dimensions == 1: 
+                        listOfYArrays = [(None, self.UserInput.responses_observed[responseDimIndex]), (mu_guess_LogP, mu_guess_SimulatedOutput[responseDimIndex]), (map_LogP, map_SimulatedOutput[responseDimIndex])]        
+                        allResponsesListsOfYTuples.append(listOfYArrays)
+                        #Now to do uncertainties, there are two cases. First case is with only observed uncertainties and no simulation ones.
+                        # if type(self.UserInput.responses_simulation_uncertainties) == type(None): #This means there are no simulation uncertainties. So for each response dimension, there will be a list with only the observed uncertainties in that list.
+                        #     allResponsesListsOfYUncertaintiesArrays.append( [self.UserInput.responses_observed_uncertainties[responseDimIndex]] ) #Just creating nesting, we need to give a list for each response dimension.
+                        # else: #This case means that there are some responses_simulation_uncertainties to include, so allResponsesListsOfYUncertaintiesArrays will have more dimensions *within* its nested values.
+                        #     allResponsesListsOfYUncertaintiesArrays.append([self.UserInput.responses_observed_uncertainties[responseDimIndex],self.mu_guess_responses_simulation_uncertainties[responseDimIndex],self.map_responses_simulation_uncertainties[responseDimIndex]]) #We need to give a list for each response dimension.                                        
+                    elif self.UserInput.num_response_dimensions > 1: 
+                        # print('Predicted Responses Vs Observed Distribution plot does not handle response series yet.')
+                        # sys.exit()
+                        listOfYArrays = [(None, self.UserInput.responses_observed[responseDimIndex]), (mu_guess_LogP, mu_guess_SimulatedOutput[responseDimIndex]), (map_LogP, map_SimulatedOutput[responseDimIndex])]        
+                        allResponsesListsOfYTuples.append(listOfYArrays)
+                        # #Now to do uncertainties, there are two cases. First case is with only observed uncertainties and no simulation ones.
+                        # if type(self.UserInput.responses_simulation_uncertainties) == type(None): #This means there are no simulation uncertainties. So for each response dimension, there will be a list with only the observed uncertainties in that list.
+                        #     allResponsesListsOfYUncertaintiesArrays.append( [self.UserInput.responses_observed_uncertainties[responseDimIndex]] ) #Just creating nesting, we need to give a list for each response dimension.
+                        # else: #This case means that there are some responses_simulation_uncertainties to include, so allResponsesListsOfYUncertaintiesArrays will have more dimensions *within* its nested values.
+                        #     allResponsesListsOfYUncertaintiesArrays.append([self.UserInput.responses_observed_uncertainties[responseDimIndex],self.mu_guess_responses_simulation_uncertainties[responseDimIndex],self.map_responses_simulation_uncertainties[responseDimIndex]]) #We need to give a list for each response dimension.                    
+                if hasattr(self, 'mu_AP_parameter_set'):
+                    if self.UserInput.num_response_dimensions == 1: 
+                        listOfYArrays = [(None, self.UserInput.responses_observed[responseDimIndex]), (mu_guess_LogP, mu_guess_SimulatedOutput[responseDimIndex]), (map_LogP, map_SimulatedOutput[responseDimIndex]), (mu_AP_LogP, mu_AP_SimulatedOutput[responseDimIndex])]        
+                        allResponsesListsOfYTuples.append(listOfYArrays)
+                        # if type(self.UserInput.responses_simulation_uncertainties) == type(None): #This means there are no simulation uncertainties. So for each response dimension, there will be a list with only the observed uncertainties in that list.
+                        #     allResponsesListsOfYUncertaintiesArrays.append( [self.UserInput.responses_observed_uncertainties[responseDimIndex]] ) #Just creating nesting, we need to give a list for each response dimension.
+                        # else: #This case means that there are some responses_simulation_uncertainties to include, so allResponsesListsOfYUncertaintiesArrays will have more dimensions *within* its nested values.
+                        #     allResponsesListsOfYUncertaintiesArrays.append([self.UserInput.responses_observed_uncertainties[responseDimIndex],self.mu_guess_responses_simulation_uncertainties[responseDimIndex],self.map_responses_simulation_uncertainties[responseDimIndex],self.mu_AP_responses_simulation_uncertainties[responseDimIndex]]) #We need to give a list for each response dimension.                                        
+                    elif self.UserInput.num_response_dimensions > 1: 
+                        # print('Predicted Responses Vs Observed Distribution plot does not handle response series yet.')
+                        # sys.exit()
+                        #
+                        listOfYArrays = [(None, self.UserInput.responses_observed[responseDimIndex]), (mu_guess_LogP, mu_guess_SimulatedOutput[responseDimIndex]), (map_LogP, map_SimulatedOutput[responseDimIndex]), (mu_AP_LogP, mu_AP_SimulatedOutput[responseDimIndex])]        
+                        allResponsesListsOfYTuples.append(listOfYArrays)
+                        # if type(self.UserInput.responses_simulation_uncertainties) == type(None): #This means there are no simulation uncertainties. So for each response dimension, there will be a list with only the observed uncertainties in that list.
+                        #     allResponsesListsOfYUncertaintiesArrays.append( [self.UserInput.responses_observed_uncertainties[responseDimIndex]] ) #Just creating nesting, we need to give a list for each response dimension.
+                        # else: #This case means that there are some responses_simulation_uncertainties to include, so allResponsesListsOfYUncertaintiesArrays will have more dimensions *within* its nested values.
+                        #     allResponsesListsOfYUncertaintiesArrays.append([self.UserInput.responses_observed_uncertainties[responseDimIndex],self.mu_guess_responses_simulation_uncertainties[responseDimIndex],self.map_responses_simulation_uncertainties[responseDimIndex],self.mu_AP_responses_simulation_uncertainties[responseDimIndex]]) #We need to give a list for each response dimension. 
+
+        # Call getLogLikelihood and hold onto the second return object (the overall responses) 
+        # This needs to get called for every parameter set
+        # This is for the posterior samples
+        # limit the evaluations for scalar responses as argmin(100k, numSamples) or for series responses argmin(1k, numSamples)
+        if self.post_burn_in_samples.shape[0] > 100000:
+            posterior_samples = np.random.choice(self.post_burn_in_samples, 100000, replace=False) 
+        else:
+            posterior_samples = self.post_burn_in_samples
+        # from scipy.stats import gaussian_kde
+        all_sample_responses_posterior = []
+        for sample in posterior_samples:
+            sample_responses = self.getSimulatedResponses(sample)
+            all_sample_responses_posterior.append(np.ndarray.flatten(sample_responses)) # np.flatten this, (numProp, 1) second 1 is not necessary 
+        all_sample_responses_posterior = np.array(all_sample_responses_posterior).T # this has shape of (numSamples, numProp)
+        all_responses_and_relative_probabilities_posterior = []
+        for response in all_sample_responses_posterior:
+            # sample_bins = np.linspace(np.min(response), np.max(response), 1000)
+            posterior_relative_probability, sample_bins = np.histogram(response, bins=100, density=True)
+            sample_bins = sample_bins[:-1] # the bins from np.histogram gives n+1 points so we trim the last point off to match the number of samples 
+            # kde = gaussian_kde(response)
+            # posterior_relative_probability = kde(sample_bins)
+            # posterior_relative_probability = sample_frequency/np.max(sample_frequency) 
+            # smooth this data first, the shape is (numSamples, numProp)
+            smoothing_window_width = 10 # this is the number of bins to smooth over, make this a UserInput
+            smoothed_posterior_relative_probability = np.convolve(posterior_relative_probability, np.ones((smoothing_window_width,))/smoothing_window_width, mode='same')
+            responses_and_relative_probabilities_posterior = (sample_bins, smoothed_posterior_relative_probability) # make tuple packet of values and rel probability
+            all_responses_and_relative_probabilities_posterior.append(responses_and_relative_probabilities_posterior)
+
+
+        # make helper function that can handle Gaussian and customlikelihood functions
+        # returned object is list of tuples that contain the response array and weights for each response
+        all_responses_and_relative_probabilities_likelihood = self._getLogLikelihoodDistributionSamples()
+
+        # create prior response distributions
+        # createInitialDistribution using Sobol
+        # getLogLikelihood_responses with the same number of samples as the posterior is being sampled
+        # send into plotting function 
+        initial_points_prior = self.generateInitialPoints(len(posterior_samples), initialPointsDistributionType='sobol')
+        all_sample_responses_prior = []
+        for sample in initial_points_prior:
+            sample_responses = self.getSimulatedResponses(sample)
+            all_sample_responses_prior.append(np.ndarray.flatten(sample_responses))
+        all_sample_responses_prior = np.array(all_sample_responses_prior).T
+        all_responses_and_relative_probabilities_prior = []
+        for response in all_sample_responses_prior:
+            prior_relative_probability, sample_bins = np.histogram(response, bins=100, density=True)
+            sample_bins = sample_bins[:-1] # the bins from np.histogram gives n+1 points so we trim the last point off to match the number of samples 
+            # kde = gaussian_kde(response)
+            # prior_relative_probability = kde(sample_bins)
+            # prior_relative_probability = sample_frequency/np.max(sample_frequency)
+            # smooth this data first, the shape is (numSamples, numProp)
+            smoothing_window_width = 10 # this is the number of bins to smooth over, make this a UserInput
+            smoothed_prior_relative_probability = np.convolve(prior_relative_probability, np.ones((smoothing_window_width,))/smoothing_window_width, mode='same')
+            responses_and_relative_probabilities_prior = (sample_bins, smoothed_prior_relative_probability) # make tuple packet of values and rel probability
+            all_responses_and_relative_probabilities_prior.append(responses_and_relative_probabilities_prior)
+
+
+        if plot_settings == {}: 
+            plot_settings = self.UserInput.predicted_vs_observed_response_plot_settings
+            #Other allowed settings are like this, but will be fed in as simulated_response_plot_settings keys rather than plot_settings keys.
+            #plot_settings['x_label'] = 'T (K)'
+            #plot_settings['y_label'] = r'$rate (s^{-1})$'
+            #plot_settings['y_range'] = [0.00, 0.025] #optional.
+            #plot_settings['figure_name'] = 'tprposterior'
+        # if 'figure_name' not in plot_settings: #TODO: make appropriate with the plot settings for the plotting feature
+        plot_settings['figure_name'] = 'ResponseDistributionsPlot'
+        import PEUQSE.plotting_functions as plotting_functions
+        setMatPlotLibAgg(self.UserInput.plotting_ouput_settings['setMatPlotLibAgg'])
+        allResponsesFigureObjectsList = []
+        for responseDimIndex in range(self.UserInput.num_response_dimensions): #TODO: Move the exporting out of the plot creation and/or rename the function and possibly have options about whether exporting graph, data, or both.
+            #Some code for setting up individual plot settings in case there are multiple response dimensions.
+            individual_plot_settings = copy.deepcopy(plot_settings) #we need to edit the plot settings slightly for each plot.
+            if self.UserInput.num_response_dimensions == 1:
+                responseSuffix = '' #If there is only 1 dimension, we don't need to add a suffix to the files created. That would only confuse people.
+            if self.UserInput.num_response_dimensions > 1:
+                responseSuffix = "_"+str(responseDimIndex)
+            individual_plot_settings['figure_name'] = individual_plot_settings['figure_name']+responseSuffix
+            # make x_label be the response name by default
+            # if 'x_label' not in individual_plot_settings:
+            #     individual_plot_settings['x_label'] = self.UserInput.response_names[responseDimIndex]
+            if 'x_label' in plot_settings:
+                if type(plot_settings['x_label']) == type(['list']) and len(plot_settings['x_label']) > 1: #the  label can be a single string, or a list of multiple response's labels. If it's a list of greater than 1 length, then we need to use the response index.
+                    individual_plot_settings['x_label'] = plot_settings['x_label'][responseDimIndex]
+            if 'y_label' in plot_settings:
+                if type(plot_settings['y_label']) == type(['list']) and len(plot_settings['y_label']) > 1: #the  label can be a single string, or a list of multiple response's labels. If it's a list of greater than 1 length, then we need to use the response index.
+                    individual_plot_settings['y_label'] = plot_settings['y_label'][responseDimIndex]                
+            #TODO, low priority: we can check if x_range and y_range are nested, and thereby allow individual response dimension values for those.                               
+            numberAbscissas = np.shape(allResponses_x_values)[0]    
+
+            figureObject = plotting_functions.createPredictedResponsesVsObservedDistribution(likelihoodSamples=all_responses_and_relative_probabilities_likelihood[responseDimIndex], priorSamples=all_responses_and_relative_probabilities_prior[responseDimIndex], posteriorSamples=all_responses_and_relative_probabilities_posterior[responseDimIndex], listOfYTuples=allResponsesListsOfYTuples[responseDimIndex], plot_settings=individual_plot_settings, directory = self.UserInput.directories['graphs'])
+               # np.savetxt(self.UserInput.directories['logs_and_csvs']+individual_plot_settings['figure_name']+".csv", np.vstack((allResponses_x_values[responseDimIndex], allResponsesListsOfYArrays[responseDimIndex])).transpose(), delimiter=",", header='x_values, observed, sim_initial_guess, sim_MAP, sim_mu_AP', comments='')
+            allResponsesFigureObjectsList.append(figureObject)
+        return allResponsesFigureObjectsList  #This is a list of matplotlib.pyplot as plt objects.
+
     def createMumpcePlots(self, showFigure=None):
         if showFigure == None: showFigure = False
         import PEUQSE.plotting_functions as plotting_functions
@@ -3301,7 +3510,13 @@ class parameter_estimation:
         except:
             print("Unable to make simulated response plots. This is unusual and typically means your observed values and simulated values are not the same array shape. If so, that needs to be fixed.")
             pass
-            
+
+        try:
+            self.createPredictedResponsesVsObservedDistributions(allResponses_x_values=[], allResponsesListsOfYTuples =[], plot_settings=self.UserInput.predicted_vs_observed_response_plot_settings) #forcing the arguments to be blanks, because otherwise it might use some cached values.
+        except:
+            print("Unable to make predicted vs observed response plots. This is unusual and typically means your observed values and simulated values are not the same array shape. If so, that needs to be fixed.")
+            pass
+
         print("Finished creating all plots. Only some plots are shown on screen. The fulls set of plots are in:", self.UserInput.directories['graphs']) #TODO: take the graphs string, remove the '.' at the front if present, and print the full absolute path here.
             
     def save_to_dill(self, base_file_name, file_name_prefix ='',  file_name_suffix='', file_name_extension='.dill'):

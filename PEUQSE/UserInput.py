@@ -167,6 +167,19 @@ scatter_heatmap_plots_settings['max_num_y_ticks'] = 'auto' #Maximum number of ti
 scatter_heatmap_plots_settings['fontsize'] = 16 #Fontsize of labels on x and y axis. This value should be an integer. 
 scatter_heatmap_plots_settings['all_pair_permutations'] = True #By default, all possible permutations are created [(a,b) and (b,a)]. To get only combinations rather than all permutations, set this option to False.
 
+# Predicted Response vs Observed Response Plot Settings
+predicted_vs_observed_response_plot_settings = {}
+predicted_vs_observed_response_plot_settings['dpi'] = 220 #Dots per Inch specification. This changes the resolution of the image created. Values between 220 and 600 dpi are typical.
+predicted_vs_observed_response_plot_settings['figure_name'] = 'ResponseDistributionsPlot' #This is the default name for predicted vs observed response plots.
+predicted_vs_observed_response_plot_settings['legend'] = True #Can be changed to false to turn off the legend.
+predicted_vs_observed_response_plot_settings['likelihood_color'] = 'g' #Color of the likelihood function. Can be any valid matplotlib color.
+predicted_vs_observed_response_plot_settings['posterior_color'] = 'tab:orange' #Color of the posterior function. Can be any valid matplotlib color.
+predicted_vs_observed_response_plot_settings['prior_color'] = 'b' #Color of the prior function. Can be any valid matplotlib color.
+predicted_vs_observed_response_plot_settings['transparency'] = 0.6 #Transparency of the likelihood, posterior, and prior functions. This value ranges from 0 to 1. Values closer to 1 can make plots with many points look crowded and confusing. Mid values are recommended.
+predicted_vs_observed_response_plot_settings['marker_size'] = 0 #Size of the markers used to plot the data. This value should be an integer. If marker size is 0, no markers will be plotted.
+predicted_vs_observed_response_plot_settings['bar_width'] = 6 #Width of the bars used to plot the MAP, muAP, and initial point. This value should be an integer. If bar width is 0, no bars will be plotted.
+
+
 #contour plots# / #mumpce plots#
 #model_parameter_info = np.array([{'parameter_number': 0, 'parameter_name': r'$E_{a1}$'},
 #{'parameter_number': 1, 'parameter_name': r'$E_{a2}$'},
