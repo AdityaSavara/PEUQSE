@@ -1,4 +1,7 @@
 import sys
+from turtle import color
+
+from importlib_metadata import distribution
 #sys.path.insert(0, '/mumpce/')
 import PEUQSE.mumpce.Project as mumpceProject
 import PEUQSE.mumpce.solution as mumpceSolution
@@ -213,7 +216,7 @@ def createSimulatedResponsesPlot(x_values, listOfYArrays, plot_settings={}, list
             error_linewidth = 10
     if str(error_linewidth).lower() == 'none': error_linewidth = 0 #This will hide the rror bars if they are not desired.
     if 'y_range' in plot_settings: ax0.set_ylim(plot_settings['y_range'] )
-    if len(listOfYArrays) == 3: #This generally means observed, mu_guess, map, in that order.
+    if len(listOfYArrays) == 3: #This list generally contains observed, mu_guess, map, in that order.
         if len(x_values) > 1: #This means there are enough data to make lines.        
             for seriesIndex in range(len(listOfYArrays)):           
                 ax0.plot(x_values,listOfYArrays[0],'g')
@@ -237,7 +240,7 @@ def createSimulatedResponsesPlot(x_values, listOfYArrays, plot_settings={}, list
                 ax0.plot(x_values,listOfYArrays[2], 'ro') 
                 if len(listOfYUncertaintiesArrays) > 1: #If length is >1, uncertainties for all data sets
                     ax0.errorbar(x_values, listOfYArrays[2], yerr=np.array(listOfYUncertaintiesArrays[2]).flatten(), fmt='.', barsabove=False, markersize=0, linewidth=error_linewidth, color="gray", ecolor="lightgray") #markersize=0 because we want no marker for this.
-    elif len(listOfYArrays) == 4: #This generally means observed, mu_guess, map, mu_app
+    elif len(listOfYArrays) == 4: #This list generally contains observed, mu_guess, map, and muAP in that order.
         if len(x_values) > 1: #This means there are enough data to make lines.        
             for seriesIndex in range(len(listOfYArrays)):
                 ax0.plot(x_values,listOfYArrays[0],'g')
@@ -280,6 +283,239 @@ def createSimulatedResponsesPlot(x_values, listOfYArrays, plot_settings={}, list
     if showFigure==False:
         plt.close(fig0)
     return fig0
+
+def createPredictedResponsesVsObservedDistribution(likelihoodSamples=None, priorSamples=None, posteriorSamples=None, listOfYTuples=[], plot_settings={}, showFigure=False, directory=''):
+    """
+    Creates plots of distributions of responses values that correspond to probability distributions of 
+        A) the observed value's uncertainty within the likelihood term, 
+        B) the prior distribution, and 
+        C) the posterior distribution.
+    The Likelihood takes the responses observed and responses uncertainty and makes a plot analogous to a histogram.
+    The posterior and prior cases just plot the responses in a way analogous to a histogram. 
+    The plots are generated using a general helping function for plotting distibutions and bars.
+
+    :param likelihoodSamples: Contains response values and part of the associated likelihood probability density. List contains both arrays like [(responses, probability density)]. (:type: list of tuples)
+    :param posteriorSamples: Contains response values and the associated posterior probability density. List contains both arrays like [(responses, probability density)]. (:type: list of tuples)
+    :param priorSamples: Contains response values and the associated prior probability density. List contains both arrays like [(responses, probability density)]. (:type: list of tuples)
+    :param listofYTuples: Contains points of interest with form (logP, response value). This list generally contains observed, mu_guess, map, and muAP (optional) in that order. (:type: list of tuples)
+    
+    :return fig0: Returns the figure object of the plot created. (:type: mpl.pyplot.figure)
+    """
+
+    exportFigure = True #This variable should be moved to an argument or something in plot_settings.
+    #First put some defaults in if not already defined.
+    if 'x_label' not in plot_settings: plot_settings['x_label'] = ''
+    if 'y_label' not in plot_settings: plot_settings['y_label'] = ''
+    # if 'legendLabels' not in plot_settings: plot_settings['legendLabels'] = ''
+    if 'figure_name' not in plot_settings: plot_settings['figure_name'] = 'simulatedResponsesPlot'
+    if 'dpi' not in plot_settings: plot_settings['dpi']=220
+
+    #TODO: Implement different user settings for plot_settings
+
+    # plot distributions
+    # make distribution lists for helper plotting function
+    likelihood_dict = {}
+    likelihood_dict['x_values'] = likelihoodSamples[0]
+    likelihood_dict['y_values'] = likelihoodSamples[1]
+    likelihood_dict['plot_settings'] = {}
+    likelihood_dict['plot_settings']['color'] = plot_settings['likelihood_color']
+    likelihood_dict['plot_settings']['transparency'] = plot_settings['transparency']
+    likelihood_dict['plot_settings']['marker_size'] = plot_settings['marker_size']
+    
+    posterior_dict = {}
+    posterior_dict['x_values'] = posteriorSamples[0]
+    posterior_dict['y_values'] = posteriorSamples[1]
+    posterior_dict['plot_settings'] = {}
+    posterior_dict['plot_settings']['color'] = plot_settings['posterior_color']
+    posterior_dict['plot_settings']['transparency'] = plot_settings['transparency']
+    posterior_dict['plot_settings']['marker_size'] = plot_settings['marker_size']
+
+    prior_dict = {}
+    prior_dict['x_values'] = priorSamples[0]
+    prior_dict['y_values'] = priorSamples[1]
+    prior_dict['plot_settings'] = {}
+    prior_dict['plot_settings']['color'] = plot_settings['prior_color']
+    prior_dict['plot_settings']['transparency'] = plot_settings['transparency']
+    prior_dict['plot_settings']['marker_size'] = plot_settings['marker_size']
+    
+    # create the distribution list
+    distribution_list = [likelihood_dict, prior_dict, posterior_dict]
+    
+    # create the bars list
+    # populate based on the scenario of 
+    if len(listOfYTuples) == 3: #This list generally contains observed, mu_guess, map, in that order.       
+        observed_points = listOfYTuples[0]
+        mu_guess_points = listOfYTuples[1]
+        map_points = listOfYTuples[2]
+        # MAP and observed value will be to the top. Other vlines will be relative to the probability of the MAP
+        mu_guess_rel_prob = np.exp(mu_guess_points[0])/np.exp(map_points[0])
+        if mu_guess_rel_prob < 0.01:
+            mu_guess_rel_prob = 0.01
+        # get highest height in posterior distribution 
+        posterior_max_height = np.max(posterior_dict['y_values'])
+        # create dictionaries for bars list
+        map_dict = {}
+        map_dict['x_value'] = map_points[1]
+        map_dict['height'] = 1 * posterior_max_height
+        map_dict['plot_settings'] = {}
+        map_dict['plot_settings']['color'] = 'r'
+        map_dict['plot_settings']['line_width'] = plot_settings['bar_width'] # units of pixels
+        map_dict['plot_settings']['label'] = 'MAP=%.2e' % (map_points[0]) # make scientific notation
+
+        observed_dict = {}
+        observed_dict['x_value'] = observed_points[1]
+        observed_dict['height'] = 1 * posterior_max_height
+        observed_dict['plot_settings'] = {}
+        observed_dict['plot_settings']['color'] = 'g'
+        observed_dict['plot_settings']['line_width'] = plot_settings['bar_width'] # units of pixels
+        observed_dict['plot_settings']['label'] = 'Observed'
+
+        mu_guess_dict = {}
+        mu_guess_dict['x_value'] = mu_guess_points[1]
+        mu_guess_dict['height'] = mu_guess_rel_prob * posterior_max_height
+        mu_guess_dict['plot_settings'] = {}
+        mu_guess_dict['plot_settings']['color'] = '#00A5DF'
+        mu_guess_dict['plot_settings']['line_width'] = plot_settings['bar_width'] # units of pixels
+        mu_guess_dict['plot_settings']['label'] = 'Initial=%.2e' % (mu_guess_points[0]) # make scientific notation
+
+        muAP_dict = {}
+        muAP_dict['x_value'] = mu_ap_points[1]
+        muAP_dict['height'] = 1 * posterior_max_height
+        muAP_dict['plot_settings'] = {}
+        muAP_dict['plot_settings']['color'] = 'k'
+        muAP_dict['plot_settings']['line_width'] = plot_settings['bar_width'] # units of pixels
+        muAP_dict['plot_settings']['label'] = 'muAP=%.2e' % (mu_ap_points[0]) # make scientific notation
+
+        # create bars list for plotting function
+        bars_list = [map_dict, observed_dict, mu_guess_dict]
+
+        # ax0.vlines(observed_points[0], 0, 1, colors='g', linewidth=3, label=f'Observed')
+        # ax0.vlines(mu_guess_points[0], 0, mu_guess_rel_prob, colors='#00A5DF', linewidth=3, label=f'Initial={mu_guess_points[1]}')
+        # ax0.vlines(map_points[0], 0, 1, colors='r', linewidth=3, label=f'MAP={map_points[1]}')
+
+    elif len(listOfYTuples) == 4: #This list generally contains observed, mu_guess, map, mu_app
+        observed_points = listOfYTuples[0]
+        mu_guess_points = listOfYTuples[1]
+        map_points = listOfYTuples[2]
+        mu_ap_points = listOfYTuples[3]
+        # MAP and observed value will be to the top. Other vlines will be relative to the probability of the MAP
+        mu_guess_rel_prob = np.exp(mu_guess_points[0])/np.exp(map_points[0])
+        if mu_guess_rel_prob < 0.01:
+            mu_guess_rel_prob = 0.01
+        mu_ap_rel_prob = np.exp(mu_ap_points[0])/np.exp(map_points[0])
+        if mu_ap_rel_prob < 0.01:
+            mu_ap_rel_prob = 0.01
+        # get highest height in posterior distribution 
+        posterior_max_height = np.max(posterior_dict['y_values'])
+        # create dictionaries for bars list
+        map_dict = {}
+        map_dict['x_value'] = map_points[1]
+        map_dict['height'] = 1 * posterior_max_height
+        map_dict['plot_settings'] = {}
+        map_dict['plot_settings']['color'] = 'r'
+        map_dict['plot_settings']['line_width'] = plot_settings['bar_width'] # units of pixels
+        map_dict['plot_settings']['label'] = 'MAP=%.2e' % (map_points[0]) # make scientific notation
+
+        observed_dict = {}
+        observed_dict['x_value'] = observed_points[1]
+        observed_dict['height'] = np.max(likelihood_dict['y_values'])
+        observed_dict['plot_settings'] = {}
+        observed_dict['plot_settings']['color'] = 'g'
+        observed_dict['plot_settings']['line_width'] = plot_settings['bar_width'] # units of pixels
+        observed_dict['plot_settings']['label'] = 'Observed'
+
+        mu_guess_dict = {}
+        mu_guess_dict['x_value'] = mu_guess_points[1]
+        mu_guess_dict['height'] = mu_guess_rel_prob * posterior_max_height
+        mu_guess_dict['plot_settings'] = {}
+        mu_guess_dict['plot_settings']['color'] = '#00A5DF'
+        mu_guess_dict['plot_settings']['line_width'] = plot_settings['bar_width'] # units of pixels
+        mu_guess_dict['plot_settings']['label'] = 'Initial=%.2e' % (mu_guess_points[0]) # make scientific notation
+
+        muAP_dict = {}
+        muAP_dict['x_value'] = mu_ap_points[1]
+        muAP_dict['height'] = mu_ap_rel_prob * posterior_max_height
+        muAP_dict['plot_settings'] = {}
+        muAP_dict['plot_settings']['color'] = 'k'
+        muAP_dict['plot_settings']['line_width'] = plot_settings['bar_width'] # units of pixels
+        muAP_dict['plot_settings']['label'] = 'muAP=%.2e' % (mu_ap_points[0]) # make scientific notation
+
+        # create bars list for plotting function
+        bars_list = [map_dict, observed_dict, mu_guess_dict, muAP_dict]
+
+        # ax0.vlines(observed_points[0], 0, 1, colors='g', linewidth=3, label=f'Observed')
+        # ax0.vlines(mu_guess_points[0], 0, mu_guess_rel_prob, colors='#00A5DF', linewidth=3, label=f'Initial={mu_guess_points[1]}')
+        # ax0.vlines(map_points[0], 0, 1, colors='r', linewidth=3, label=f'MAP={map_points[1]}')
+        # ax0.vlines(mu_ap_points[0], 0, mu_ap_rel_prob, colors='k', linewidth=3, label=f'muAP={mu_ap_points[1]}')
+
+    else: #create default inputs that do not plot lines
+        bars_list = []
+
+    fig0 = plotDistributionWithBars(distribution_list=distribution_list, bars_list=bars_list, plot_settings=plot_settings)
+    
+
+    if exportFigure==True:
+        fig0.savefig(directory + plot_settings['figure_name'] + '.png', dpi=plot_settings['dpi'])
+        print('Saving a plot')
+    if showFigure==False: # close the figure if the user specfies
+        plt.close(fig0)
+    return fig0
+
+def plotDistributionWithBars(distribution_list=[], bars_list=[], plot_settings={}):
+    """
+    Takes in a list of dictionaries for all distributions and a list for all bar lines to be plotted.
+    
+    :param distribution_list: List of dictionaries that contain 'x_values', 'y_values' where y_values are relative_probability points, and plotting options like ... (:type: list of dicts)
+    :param bars_list: List of dictionaries that contain 'x_value', 'height', and plotting options like ... (:type: list of dicts)
+    """
+    fig0, ax0 = plt.subplots()
+    # plot distibutions with the appropriate plot settings
+    for dist_dict in distribution_list:
+        # process default inputs if dict is not fully populated
+        if 'plot_settings' not in dist_dict: dist_dict['plot_settings'] = {}
+        if 'color' not in dist_dict['plot_settings']: dist_dict['plot_settings']['color'] = 'b'
+        if 'transparency' not in dist_dict['plot_settings'] : dist_dict['plot_settings']['transparency'] = 0.5
+        if 'marker_size' not in dist_dict['plot_settings']: dist_dict['plot_settings']['marker_size'] = 0
+        x_values = dist_dict['x_values']
+        y_values = dist_dict['y_values']
+        color = dist_dict['plot_settings']['color']
+        transparency = dist_dict['plot_settings']['transparency']
+        if dist_dict['plot_settings']['marker_size'] > 0:
+            ax0.plot(x_values, y_values, color=color, marker='o', markersize=dist_dict['plot_settings']['marker_size'])
+        else:
+            ax0.plot(x_values, y_values, color=color) 
+        ax0.fill_between(x_values, y_values, y2=0, color=color, alpha=transparency)
+    # plot the bars on the distribution plot
+    for bar_dict in bars_list:
+        if 'plot_settings' not in bar_dict: bar_dict['plot_settings'] = {}
+        if 'color' not in bar_dict['plot_settings']: bar_dict['plot_settings']['color'] = 'k'
+        if 'line_width' not in bar_dict['plot_settings'] : bar_dict['plot_settings']['line_width'] = 4
+        if 'label' not in bar_dict['plot_settings']: bar_dict['plot_settings']['label'] = ''
+        x_value = bar_dict['x_value']
+        height = bar_dict['height']
+        color = bar_dict['plot_settings']['color']
+        line_width = bar_dict['plot_settings']['line_width']
+        label = bar_dict['plot_settings']['label']
+        if line_width > 0:
+            ax0.vlines(x_value, 0, height, colors=color, linewidth=line_width, label=label)
+    # use general plot_settings to label axis and title
+    if 'fontdict' in plot_settings: 
+        #There are various things that could be added to this fontdict. #https://www.tutorialexample.com/understand-matplotlib-fontdict-a-beginner-guide-matplotlib-tutorial/
+        fontdict = plot_settings['fontdict']
+        if 'size' in fontdict:
+            ax0.tick_params(axis='x', labelsize=fontdict['size'])
+            ax0.tick_params(axis='y', labelsize=fontdict['size'])
+    else:
+        fontdict = None #initializing with the matplotlib default
+    if 'x_label' in plot_settings: ax0.set_xlabel(plot_settings['x_label'], fontdict=fontdict)
+    if 'y_label' in plot_settings: ax0.set_ylabel(plot_settings['y_label'], fontdict=fontdict)
+    if 'y_range' in plot_settings: ax0.set_ylim(plot_settings['y_range'] )
+    ax0.legend()
+    fig0.tight_layout()
+    plt.close(fig0)
+    return fig0
+    
+
 
 def makeTrisurfacePlot(xValues, yValues, zValues, exportFigure = True, figure_name="TrisurfacePlot", showFigure=False, directory=''):
     from mpl_toolkits.mplot3d import Axes3D #Although it does not look like this is called here, the InfoGain plots will fail without this line.
