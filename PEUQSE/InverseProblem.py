@@ -421,6 +421,10 @@ class parameter_estimation:
                 initialLogP = self.getLogP(self.UserInput.InputParameterInitialGuess)
                 if (self.UserInput.model['exportResponses'] == 'auto') or (self.UserInput.model['exportResponses'] == True):
                     self.exportResponses(choiceOrResponsesData="initial") #This will actually call the get logP for the initial guess a second time, which is probably okay.
+                    try: #we will try to export the prior as well, but pass if that is not successful.
+                        self.exportResponses(choiceOrResponsesData="prior") #This will actually call the get logP for the initial guess a second time, which is probably okay.
+                    except:
+                        pass
             except Exception as exceptionObject:
                 print("The initial test simulation with test parameters of" + str(self.UserInput.InputParameterInitialGuess) + "failed with error " + str(exceptionObject))
             if (np.isnan(initialLogP) or initialLogP < -1E90):    
