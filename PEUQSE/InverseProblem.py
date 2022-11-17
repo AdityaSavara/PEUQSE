@@ -3109,32 +3109,7 @@ class parameter_estimation:
             simulationFunction = self.UserInput.simulationFunction #Do NOT use self.UserInput.model['simulateByInputParametersOnlyFunction']  because that won't work with reduced parameter space requests.
             simulationOutputProcessingFunction = self.UserInput.simulationOutputProcessingFunction #Do NOT use self.UserInput.model['simulationOutputProcessingFunction'] because that won't work with reduced parameter space requests.
             
-            #We already have self.UserInput.responses_observed, and will use that below. So now we get the simulated responses for the guess, MAP, mu_ap etc.
-            
-            #Get mu_guess simulated output and responses. 
-            self.mu_guess_SimulatedOutput = simulationFunction( self.UserInput.InputParameterInitialGuess) #Do NOT use self.UserInput.model['InputParameterInitialGuess'] because that won't work with reduced parameter space requests.
-            #Make in internal variable in case we need to flatten.
-            mu_guess_SimulatedOutput = copy.deepcopy(self.mu_guess_SimulatedOutput)
-            if type(simulationOutputProcessingFunction) == type(None):
-                mu_guess_SimulatedResponses = mu_guess_SimulatedOutput
-                if flatten == True:
-                    mu_guess_SimulatedResponses = np.array(mu_guess_SimulatedResponses).flatten()
-                mu_guess_SimulatedResponses = nestedObjectsFunctions.makeAtLeast_2dNested(mu_guess_SimulatedResponses)
-                mu_guess_SimulatedResponses = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(mu_guess_SimulatedResponses)
-            if type(simulationOutputProcessingFunction) != type(None):
-                mu_guess_SimulatedResponses = simulationOutputProcessingFunction(mu_guess_SimulatedOutput)
-                if flatten == True:
-                    mu_guess_SimulatedResponses = np.array(mu_guess_SimulatedResponses).flatten()
-                mu_guess_SimulatedResponses =  nestedObjectsFunctions.makeAtLeast_2dNested(mu_guess_SimulatedResponses)     
-                mu_guess_SimulatedResponses = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(mu_guess_SimulatedResponses)
-            #Check if we have simulation uncertainties, and populate if so.
-            if type(self.UserInput.responses_simulation_uncertainties) != type(None):
-                #make an internal variable in case we need to flatten.
-                mu_guess_responses_simulation_uncertainties = self.get_responses_simulation_uncertainties(self.UserInput.InputParameterInitialGuess)
-                if flatten == True:
-                    mu_guess_responses_simulation_uncertainties = np.array(mu_guess_responses_simulation_uncertainties).flatten()
-                mu_guess_responses_simulation_uncertainties = nestedObjectsFunctions.makeAtLeast_2dNested(mu_guess_responses_simulation_uncertainties)
-                mu_guess_responses_simulation_uncertainties = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(mu_guess_responses_simulation_uncertainties)
+            #We already have self.UserInput.responses_observed, and will use that below. So now we get the simulated responses for the guess, MAP, mu_ap etc. We will get the map first since the guess might be a failure.
             #Get map simiulated output and simulated responses.
             self.map_SimulatedOutput = simulationFunction(self.map_parameter_set)
             #Make an internal variable in case we need to flatten.
@@ -3184,6 +3159,36 @@ class parameter_estimation:
                         mu_AP_responses_simulation_uncertainties = np.array(mu_AP_responses_simulation_uncertainties).flatten()
                     mu_AP_responses_simulation_uncertainties = nestedObjectsFunctions.makeAtLeast_2dNested(mu_AP_responses_simulation_uncertainties)
                     mu_AP_responses_simulation_uncertainties = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(mu_AP_responses_simulation_uncertainties)
+            #Get mu_guess simulated output and responses. 
+            self.mu_guess_SimulatedOutput = simulationFunction( self.UserInput.InputParameterInitialGuess) #Do NOT use self.UserInput.model['InputParameterInitialGuess'] because that won't work with reduced parameter space requests.
+            #Make in internal variable in case we need to flatten.
+            mu_guess_SimulatedOutput = copy.deepcopy(self.mu_guess_SimulatedOutput)
+            if type(simulationOutputProcessingFunction) == type(None):
+                mu_guess_SimulatedResponses = mu_guess_SimulatedOutput
+                if type(mu_guess_SimulatedResponses) != type(None):#normal case.
+                    pass
+                else: #else, we will make a 'nan' array that is the same shape as the map array. #TODO: There should be a warning printed to the logs when this occurs, because this causes the graph to have no line. Currently, we don't have any system for collecting warnings to print to the user.  Later, we'll have a global variable which is a set which we will append warnings to if they are not already in it, then print those out at the end.
+                    desiredShape = np.shape(map_SimulatedResponses)
+                    mu_guess_SimulatedResponses = np.empty((desiredShape)) #make the right shape.
+                    mu_guess_SimulatedResponses[:] = np.NaN #this fills it with nan.      
+                if flatten == True:
+                    mu_guess_SimulatedResponses = np.array(mu_guess_SimulatedResponses).flatten()
+                mu_guess_SimulatedResponses = nestedObjectsFunctions.makeAtLeast_2dNested(mu_guess_SimulatedResponses)
+                mu_guess_SimulatedResponses = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(mu_guess_SimulatedResponses)
+            if type(simulationOutputProcessingFunction) != type(None):
+                mu_guess_SimulatedResponses = simulationOutputProcessingFunction(mu_guess_SimulatedOutput)
+                if flatten == True:
+                    mu_guess_SimulatedResponses = np.array(mu_guess_SimulatedResponses).flatten()
+                mu_guess_SimulatedResponses =  nestedObjectsFunctions.makeAtLeast_2dNested(mu_guess_SimulatedResponses)     
+                mu_guess_SimulatedResponses = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(mu_guess_SimulatedResponses)
+            #Check if we have simulation uncertainties, and populate if so.
+            if type(self.UserInput.responses_simulation_uncertainties) != type(None):
+                #make an internal variable in case we need to flatten.
+                mu_guess_responses_simulation_uncertainties = self.get_responses_simulation_uncertainties(self.UserInput.InputParameterInitialGuess)
+                if flatten == True:
+                    mu_guess_responses_simulation_uncertainties = np.array(mu_guess_responses_simulation_uncertainties).flatten()
+                mu_guess_responses_simulation_uncertainties = nestedObjectsFunctions.makeAtLeast_2dNested(mu_guess_responses_simulation_uncertainties)
+                mu_guess_responses_simulation_uncertainties = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(mu_guess_responses_simulation_uncertainties)
             #make internal variables for responses_observed and responses_observed_uncertainties in case we need to flatten them.
             responses_observed = copy.deepcopy(self.UserInput.responses_observed)
             responses_observed_uncertainties = copy.deepcopy(self.UserInput.responses_observed_uncertainties)
