@@ -2104,12 +2104,12 @@ class parameter_estimation:
                 else: #for last heading:
                     headerString = headerString + "Response" + str(responseIndex)
             responsesDataWithAbscissa = np.vstack((self.UserInput.responses_abscissa, responsesData))
-            np.savetxt(self.UserInput.directories['logs_and_csvs']+ "ExportedResponseData__" + filenameString + choice + "__ResponsesConsolidated" + ".csv", responsesDataWithAbscissa.transpose(), delimiter=",", encoding =None,header=headerString, comments='')
+            np.savetxt(self.UserInput.directories['logs_and_csvs']+ "ExportedResponsesData__" + filenameString + choice + "__ResponsesConsolidated" + ".csv", responsesDataWithAbscissa.transpose(), delimiter=",", encoding =None,header=headerString, comments='')
         else:
             for responseIndex,responseData in enumerate(responsesData):
                 headerString = 'ResponseAbscissa,' + "Response" + str(responseIndex)
                 responseDataWithAbscissa = np.vstack((self.UserInput.responses_abscissa[responseIndex],responseData))
-                np.savetxt(self.UserInput.directories['logs_and_csvs']+ "ExportedResponseData__" + filenameString + choice + "__Response" + str(responseIndex)  + ".csv", responseDataWithAbscissa.transpose(), delimiter=",", encoding =None, header=headerString, comments='')
+                np.savetxt(self.UserInput.directories['logs_and_csvs']+ "ExportedResponsesData__" + filenameString + choice + "__Response" + str(responseIndex)  + ".csv", responseDataWithAbscissa.transpose(), delimiter=",", encoding =None, header=headerString, comments='')
         
     def getConvergenceDiagnostics(self, discrete_chains_post_burn_in_samples=[], showFigure = None):
         """
