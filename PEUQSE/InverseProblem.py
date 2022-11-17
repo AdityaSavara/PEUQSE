@@ -2057,7 +2057,7 @@ class parameter_estimation:
            self.exportResponses("last")
            self.exportResponses("map")
            self.exportResponses("muap")
-           self.exportResponses("initial")
+           self.exportResponses("initial_guess")
            self.exportResponses("prior")
            return None #After finishing the recursive calls, we need to also end *this* function call rather than letting it go further.
         if choice == "last_called": #This must be before any of the other possible simulation choices.
@@ -2851,12 +2851,16 @@ class parameter_estimation:
             print("Warning: There are likelihood points that have zero probability due to receiving a None type back for the simulated responses. If there are too many points like this during an MCMC or permutationsToSamples run, the MAP and mu_AP returned will not be meaningful. Parameters: " + str(discreteParameterVectorTuple))
             return float('-inf'), None #This is intended for the case that the simulation fails, indicated by receiving an 'nan' or None type from user's simulation function.
         #Check if there are any 'nan' in the simulations array, and treat that as a failure also.
-        try: 
+        try:  #normal case
             nans_in_array = np.isnan(simulatedResponses)
-        except:
+        except: #This exception is for staggered responses. It's not ideal to use an exception, but should not cause too much inefficiency.
             nans_in_array = []
             for responseData in simulatedResponses:
-                if np.isnan(responseData).any():
+                try:
+                    nanCheck = np.isnan(responseData).any()
+                except:
+                    nanCheck = np.isnan(np.array(responseData, dtype="float")).any() #oddly, for nested data sometimes need to specify the dtype as an array. This is intentionally in an except statement to avoid slowing down the regular case.
+                if nanCheck:
                     nans_in_array.append(True)
                 else:
                     nans_in_array.append(False)
@@ -3383,18 +3387,15 @@ class parameter_estimation:
         try:
             self.createSimulatedResponsesPlots(allResponses_x_values=[], allResponsesListsOfYArrays =[], plot_settings={},allResponsesListsOfYUncertaintiesArrays=[], showFigure=showFigure) #forcing the arguments to be blanks, because otherwise it might use some cached values.
             if verbose: print("Finished with create simulated responses plots function call.")
-        except:
-            print("Unable to make simulated response plots. This is unusual and typically means your observed values and simulated values are not the same array shape. If so, that needs to be fixed.")
-            pass
-
+        except Exception as exceptionObject:
+            print("Unable to make simulated response plots. This is unusual and typically means your observed values and simulated values are not the same array shape. If so, that needs to be fixed.")#For debugging: The exception was:" + str(exceptionObject))
 
         #Now we will call createSimulatedResponsesPlots again with flatten = True so that the series get plotted. This should only occur if all responses are scalars.
         try:
             self.createSimulatedResponsesPlots(allResponses_x_values=[], allResponsesListsOfYArrays =[], plot_settings={},allResponsesListsOfYUncertaintiesArrays=[], flatten = True) #forcing the arguments to be blanks, because otherwise it might use some cached values.
-        except:
-            print("Unable to make simulated response plots. This is unusual and typically means your observed values and simulated values are not the same array shape. If so, that needs to be fixed.")
-            pass
-            
+        except Exception as exceptionObject:
+            print("Unable to make second type of simulated response plots. This is normal if your responses are vectors and not scalars. Otherwise, it usually means your observed values and simulated values are not the same array shape. If so, that needs to be fixed.")
+                        
         print("Finished creating all plots. Only some plots are shown on screen. The fulls set of plots are in:", self.UserInput.directories['graphs']) #TODO: take the graphs string, remove the '.' at the front if present, and print the full absolute path here.
             
     def save_to_dill(self, base_file_name, file_name_prefix ='',  file_name_suffix='', file_name_extension='.dill'):
