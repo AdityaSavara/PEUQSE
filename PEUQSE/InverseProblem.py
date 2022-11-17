@@ -811,7 +811,7 @@ class parameter_estimation:
                 self.last_permutations_MAP_logP_and_parameters_values_filename = file_name_prefix + "multistart_MAP_logP_and_parameters_values" + file_name_suffix
                 self.last_permutations_MAP_logP_and_parameters_values = unpickleAnObject(self.UserInput.directories['pickles']+self.last_permutations_MAP_logP_and_parameters_values_filename)
             #extract he last_listOfPermutations from the array object.
-            self.last_listOfPermutations =   np.array(nestedObjectsFunctions.makeAtLeast_2dNested(self.last_permutations_MAP_logP_and_parameters_values[:,1:])) #later columns are the permutations.
+            self.last_listOfPermutations =   np.array(nestedObjectsFunctions.makeAtLeast_2dNested(np.array(self.last_permutations_MAP_logP_and_parameters_values)[:,1:])) #later columns are the permutations.
             if np.shape(self.last_listOfPermutations)[0] == 1: #In this case, need to transpose.
                 self.last_listOfPermutations = self.last_listOfPermutations.transpose()
             #unlike in mcmc_continueSampling, we don't need the last_InputParameterInitialGuess information.
