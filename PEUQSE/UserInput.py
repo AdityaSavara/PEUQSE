@@ -46,7 +46,7 @@ model['InputParameterPriorValues_lowerBounds'] = []#Optional. This should be a l
 model['simulatedResponses_upperBounds'] = [] #Optional. Disallows responses outside of provided bounds. This should be a list/array of the same shape as responses_observed. Use a value of "None" for any parameter that should not be bounded in this direction.  The code then sets the likelihood (and posterior) to ~0 when any of the responses go outside of their bounds.  Not compatible with data_overcategory feature.
 model['simulatedResponses_lowerBounds'] = [] #Optional. Disallows responses outside of provided bounds. This should be a list/array of the same shape as responses_observed. Use a value of "None" for any parameter that should not be bounded in this direction.  The code then sets the likelihood (and posterior) to ~0 when any of the responses go outside of their bounds.  Not compatible with data_overcategory feature.
 model['PosteriorParameterBounds'] = {} #Optional. Allows user to alter the parameter space after sampling has occurred. This should be a dictionary with the parameter name and a tuple with the lower bound first. 
-
+model['exportResponses'] = 'auto' #by default, we will always export the observed responses, the muap, map, single point, initial guess, prior.
 
 #####Parameter Estimation Inputs#####
 parameter_estimation_settings = {}

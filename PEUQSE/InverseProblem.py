@@ -212,6 +212,8 @@ class parameter_estimation:
         #Make sure all objects inside are arrays (if they are lists we convert them). This is needed to apply the heurestic.
         UserInput.responses_abscissa = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(UserInput.responses_abscissa)
         UserInput.responses_observed = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(UserInput.responses_observed)
+        if (self.UserInput.model['exportResponses'] == 'auto') or (self.UserInput.model['exportResponses'] == True):
+            self.exportResponses(choiceOrResponsesData="observed") #now export as part of the normal flow.
 
         #Now to process responses_observed_uncertainties, there are several options so we need to process it according to the cases.
         #The normal case:
@@ -415,7 +417,16 @@ class parameter_estimation:
         self.prepareResponsesForSplitLikelihood = False #initialized as false, will change to True if needed.
         #First check if it is a single response, then if so a singlepoint with the initial values and see if it turns out okay.
         if len(self.UserInput.responses_observed_transformed)==1: #this means single response
-            initialLogP = self.getLogP(self.UserInput.InputParameterInitialGuess)
+            try:
+                initialLogP = self.getLogP(self.UserInput.InputParameterInitialGuess)
+                if (self.UserInput.model['exportResponses'] == 'auto') or (self.UserInput.model['exportResponses'] == True):
+                    self.exportResponses(choiceOrResponsesData="initial") #This will actually call the get logP for the initial guess a second time, which is probably okay.
+                    try: #we will try to export the prior as well, but pass if that is not successful.
+                        self.exportResponses(choiceOrResponsesData="prior") #This will actually call the get logP for the initial guess a second time, which is probably okay.
+                    except:
+                        pass
+            except Exception as exceptionObject:
+                print("The initial test simulation with test parameters of" + str(self.UserInput.InputParameterInitialGuess) + "failed with error " + str(exceptionObject))
             if (np.isnan(initialLogP) or initialLogP < -1E90):    
                 if np.shape(UserInput.responses_observed) == np.shape(UserInput.responses_observed_uncertainties):
                     #this if statement only occurs if uncertainties are standard deviations and not covmat, 
@@ -952,8 +963,7 @@ class parameter_estimation:
                 return self.map_logP #This is sortof like a sys.exit(), we are just ending the PermutationSearch function here if we are not on the finalProcess. 
             if PEUQSE.parallel_processing.finalProcess == True:
                 self.UserInput.parameter_estimation_settings['multistart_parallel_sampling'] = False ##We are turning off the parallel sampling variable because the parallel sampling is over now. The export log will become export extra things if we keep this on for the next step.
-                self.consolidate_parallel_sampling_data(parallelizationType="permutation", mpi_cached_files_prefix='permutation') #this parallelizationType means "keep only the best, don't average"
-                
+                self.consolidate_parallel_sampling_data(parallelizationType="permutation", mpi_cached_files_prefix='permutation') #this parallelizationType means "keep only the best, don't average"                
         ####END BLOCK RELATED TO PARALLEL SAMPLING####
         ####Doing some statistics across the full permutation set.  TODO: Consider merging this into exportPostPermutationStatistics and calling that same function again, which is what I think the mcmc parallel sampling does. But the filenames are different, so some care would be needed if that is going to be done.####
         #TODO: export the allPermutationsResults to file at end of search in a nicer format.        
@@ -1025,6 +1035,7 @@ class parameter_estimation:
         if exportLog == True:
             pass #Later will do something with allPermutationsResults variable. It has one element for each result (that is, each permutation).
         with open(self.UserInput.directories['logs_and_csvs'] + "multistart_log_file.txt", 'w') as out_file:
+                self.exportResponses("map")
                 out_file.write("centerPoint: " + str(centerPoint) + "\n")
                 if self.permutation_and_doOptimizeSSR == False:# In the normal case, we are not doing SSR.               
                     out_file.write("highest_MAP_logP: " + str(self.map_logP) + "\n")
@@ -1752,6 +1763,8 @@ class parameter_estimation:
             self.opt_parameter_set = discreteParameterVector
             self.opt_SSR = self.getSSR(discreteParameterVector)
             objectiveFunctionValue = self.opt_SSR
+        if (self.UserInput.model['exportResponses'] == 'auto') or (self.UserInput.model['exportResponses'] == True):
+            self.exportResponses(choiceOrResponsesData="last")
         return [discreteParameterVector, objectiveFunctionValue]
 
     def calculateInfoGain(self):
@@ -1983,6 +1996,8 @@ class parameter_estimation:
             pickleAnObject(self.UserInput.InputParameterInitialGuess,self.UserInput.directories['pickles']+directory_name_suffix+file_name_prefix+'mcmc_initial_point_parameters'+file_name_suffix)
         if hasattr(self, 'mcmc_last_point_sampled'):
             pickleAnObject(self.mcmc_last_point_sampled, self.UserInput.directories['pickles']+directory_name_suffix+file_name_prefix+'mcmc_last_point_sampled'+file_name_suffix)
+        if (self.UserInput.model['exportResponses'] == 'auto') or (self.UserInput.model['exportResponses'] == True):
+            self.exportResponses() #This will actually call the get logP a few times, which is fine.
 
     #This function is modelled after exportPostBurnInStatistics. That is why it has the form that it does.
     def exportPostPermutationStatistics(self, searchType=''): #if it is an mcmc run, then we need to save the sampling as well.
@@ -2022,6 +2037,79 @@ class parameter_estimation:
         pickleAnObject(self.map_logP, self.UserInput.directories['pickles']+directory_name_suffix+file_name_prefix+'permutation_map_logP'+file_name_suffix)
         pickleAnObject(self.map_parameter_set, self.UserInput.directories['pickles']+directory_name_suffix+file_name_prefix+'permutation_map_parameter_set'+file_name_suffix)
         pickleAnObject(self.UserInput.InputParameterInitialGuess, self.UserInput.directories['pickles']+directory_name_suffix+file_name_prefix+'permutation_initial_point_parameters'+file_name_suffix)
+        if (self.UserInput.model['exportResponses'] == 'auto') or (self.UserInput.model['exportResponses'] == True):
+            self.exportResponses() #This will actually call the get logP a few times, which is fine.
+
+    def exportResponses(self, choiceOrResponsesData='', filenameString = '', consolidated='auto'):
+        """
+        #choiceOrResponsesData can either be a choice (a string) or can be a list with all of the simulated responses in it.
+        #When choiceOrResponsesData is a list/array, it is advised to also provide a filenameString.
+        #The choices for choiceOrResponsesData are: last, map, muap, initial (or initial_guess, observed.
+        #This function *will* run simulations using a getLogP call, for map,muap, or initial guess simulated responses, and then use that to extract the lastSimulatedResponses.
+        #consolidated is whether all responses go into one file or separate files. By default, it is set to auto and will put all the responses in one file if there is a single responses_abscissa
+        """
+        if type(choiceOrResponsesData) == type("string"):
+            choice = choiceOrResponsesData.lower()
+            if choice == "initial":
+                choice = "initial_guess"
+            if choice == "last":
+                choice = "last_called"
+        else:
+            choice = ''
+            responsesData = choiceOrResponsesData
+        if choice == '':#if the choices field is blank, then we'll export all of the normal cases by calling the function recursively.
+           self.exportResponses("last")
+           self.exportResponses("map")
+           self.exportResponses("muap")
+           self.exportResponses("initial_guess")
+           self.exportResponses("prior")
+           return None #After finishing the recursive calls, we need to also end *this* function call rather than letting it go further.
+        if choice == "last_called": #This must be before any of the other possible simulation choices.
+            if hasattr(self, "lastSimulatedResponses"):
+                responsesData = self.lastSimulatedResponses
+            else:
+                return None
+        if choice == "initial_guess": #the initial guess will always be present.
+            self.getLogP(self.UserInput.InputParameterInitialGuess)
+            responsesData = self.lastSimulatedResponses
+        if choice == "prior": #the prior will always be present.
+            self.getLogP(self.UserInput.mu_prior)
+            responsesData = self.lastSimulatedResponses
+        if choice == "map":
+            if hasattr(self, "map_parameter_set"):
+                self.getLogP(self.map_parameter_set)
+                responsesData = self.lastSimulatedResponses
+            else:
+                return None
+        if choice == "muap":
+            if hasattr(self, "map_parameter_set"):
+                self.getLogP(self.mu_AP_parameter_set)
+                responsesData = self.lastSimulatedResponses
+            else:
+                return None
+        if choice == "observed":
+            #This will always be present, so no need to make an if statement.
+            responsesData = self.UserInput.responses_observed
+        #If the code has reached here, that means that it has a responsesData to try to export.
+        if consolidated == 'auto':
+            if len(self.UserInput.responses_abscissa) == 1: #This means that the responsesData should be exportable in a single file.
+                consolidated = True
+            else:
+                consolidated = False
+        if consolidated == True:
+            headerString = 'ResponseAbscissa,' #initialize a string that will be added to.
+            for responseIndex in range(len(responsesData)): #Create a header for each column.
+                if responseIndex < len(responsesData) - 1: #we add a comma after the column heading if it is not the last response index.
+                    headerString = headerString + "Response" + str(responseIndex) + ","
+                else: #for last heading:
+                    headerString = headerString + "Response" + str(responseIndex)
+            responsesDataWithAbscissa = np.vstack((self.UserInput.responses_abscissa, responsesData))
+            np.savetxt(self.UserInput.directories['logs_and_csvs']+ "ExportedResponsesData__" + filenameString + choice + "__ResponsesConsolidated" + ".csv", responsesDataWithAbscissa.transpose(), delimiter=",", encoding =None,header=headerString, comments='')
+        else:
+            for responseIndex,responseData in enumerate(responsesData):
+                headerString = 'ResponseAbscissa,' + "Response" + str(responseIndex)
+                responseDataWithAbscissa = np.vstack((self.UserInput.responses_abscissa[responseIndex],responseData))
+                np.savetxt(self.UserInput.directories['logs_and_csvs']+ "ExportedResponsesData__" + filenameString + choice + "__Response" + str(responseIndex)  + ".csv", responseDataWithAbscissa.transpose(), delimiter=",", encoding =None, header=headerString, comments='')
         
     def getConvergenceDiagnostics(self, discrete_chains_post_burn_in_samples=[], showFigure = None):
         """
@@ -2746,6 +2834,7 @@ class parameter_estimation:
         #if self.UserInput.parameter_estimation_settings['exportAllSimulatedOutputs' == True: 
         #decided to always keep the lastSimulatedResponses in memory. Should be okay because only the most recent should be kept.
         #At least, that is my understanding after searching for "garbage" here and then reading: http://www.digi.com/wiki/developer/index.php/Python_Garbage_Collection
+        #The garbage collection link has changed: https://www.digi.com/resources/documentation/digidocs/90001537/#References/r_Python_garbage_coll.htm?Highlight=Garbage
         self.lastSimulatedResponses = copy.deepcopy(simulatedResponses)
         return simulatedResponses
     
@@ -2766,7 +2855,19 @@ class parameter_estimation:
             print("Warning: There are likelihood points that have zero probability due to receiving a None type back for the simulated responses. If there are too many points like this during an MCMC or permutationsToSamples run, the MAP and mu_AP returned will not be meaningful. Parameters: " + str(discreteParameterVectorTuple))
             return float('-inf'), None #This is intended for the case that the simulation fails, indicated by receiving an 'nan' or None type from user's simulation function.
         #Check if there are any 'nan' in the simulations array, and treat that as a failure also.
-        nans_in_array = np.isnan(simulatedResponses)        
+        try:  #normal case
+            nans_in_array = np.isnan(simulatedResponses)
+        except: #This exception is for staggered responses. It's not ideal to use an exception, but should not cause too much inefficiency.
+            nans_in_array = []
+            for responseData in simulatedResponses:
+                try:
+                    nanCheck = np.isnan(responseData).any()
+                except:
+                    nanCheck = np.isnan(np.array(responseData, dtype="float")).any() #oddly, for nested data sometimes need to specify the dtype as an array. This is intentionally in an except statement to avoid slowing down the regular case.
+                if nanCheck:
+                    nans_in_array.append(True)
+                else:
+                    nans_in_array.append(False)
         if True in nans_in_array:
             print("Warning: There are likelihood points that have zero probability due to not a number ('nan') values in the simulated responses. If there are too many points like this, the MAP and mu_AP returned will not be meaningful. Parameters: " + str(discreteParameterVectorTuple))
             return float('-inf'), None
@@ -3012,32 +3113,7 @@ class parameter_estimation:
             simulationFunction = self.UserInput.simulationFunction #Do NOT use self.UserInput.model['simulateByInputParametersOnlyFunction']  because that won't work with reduced parameter space requests.
             simulationOutputProcessingFunction = self.UserInput.simulationOutputProcessingFunction #Do NOT use self.UserInput.model['simulationOutputProcessingFunction'] because that won't work with reduced parameter space requests.
             
-            #We already have self.UserInput.responses_observed, and will use that below. So now we get the simulated responses for the guess, MAP, mu_ap etc.
-            
-            #Get mu_guess simulated output and responses. 
-            self.mu_guess_SimulatedOutput = simulationFunction( self.UserInput.InputParameterInitialGuess) #Do NOT use self.UserInput.model['InputParameterInitialGuess'] because that won't work with reduced parameter space requests.
-            #Make in internal variable in case we need to flatten.
-            mu_guess_SimulatedOutput = copy.deepcopy(self.mu_guess_SimulatedOutput)
-            if type(simulationOutputProcessingFunction) == type(None):
-                mu_guess_SimulatedResponses = mu_guess_SimulatedOutput
-                if flatten == True:
-                    mu_guess_SimulatedResponses = np.array(mu_guess_SimulatedResponses).flatten()
-                mu_guess_SimulatedResponses = nestedObjectsFunctions.makeAtLeast_2dNested(mu_guess_SimulatedResponses)
-                mu_guess_SimulatedResponses = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(mu_guess_SimulatedResponses)
-            if type(simulationOutputProcessingFunction) != type(None):
-                mu_guess_SimulatedResponses = simulationOutputProcessingFunction(mu_guess_SimulatedOutput)
-                if flatten == True:
-                    mu_guess_SimulatedResponses = np.array(mu_guess_SimulatedResponses).flatten()
-                mu_guess_SimulatedResponses =  nestedObjectsFunctions.makeAtLeast_2dNested(mu_guess_SimulatedResponses)     
-                mu_guess_SimulatedResponses = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(mu_guess_SimulatedResponses)
-            #Check if we have simulation uncertainties, and populate if so.
-            if type(self.UserInput.responses_simulation_uncertainties) != type(None):
-                #make an internal variable in case we need to flatten.
-                mu_guess_responses_simulation_uncertainties = self.get_responses_simulation_uncertainties(self.UserInput.InputParameterInitialGuess)
-                if flatten == True:
-                    mu_guess_responses_simulation_uncertainties = np.array(mu_guess_responses_simulation_uncertainties).flatten()
-                mu_guess_responses_simulation_uncertainties = nestedObjectsFunctions.makeAtLeast_2dNested(mu_guess_responses_simulation_uncertainties)
-                mu_guess_responses_simulation_uncertainties = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(mu_guess_responses_simulation_uncertainties)
+            #We already have self.UserInput.responses_observed, and will use that below. So now we get the simulated responses for the guess, MAP, mu_ap etc. We will get the map first since the guess might be a failure.
             #Get map simiulated output and simulated responses.
             self.map_SimulatedOutput = simulationFunction(self.map_parameter_set)
             #Make an internal variable in case we need to flatten.
@@ -3087,6 +3163,36 @@ class parameter_estimation:
                         mu_AP_responses_simulation_uncertainties = np.array(mu_AP_responses_simulation_uncertainties).flatten()
                     mu_AP_responses_simulation_uncertainties = nestedObjectsFunctions.makeAtLeast_2dNested(mu_AP_responses_simulation_uncertainties)
                     mu_AP_responses_simulation_uncertainties = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(mu_AP_responses_simulation_uncertainties)
+            #Get mu_guess simulated output and responses. 
+            self.mu_guess_SimulatedOutput = simulationFunction( self.UserInput.InputParameterInitialGuess) #Do NOT use self.UserInput.model['InputParameterInitialGuess'] because that won't work with reduced parameter space requests.
+            #Make in internal variable in case we need to flatten.
+            mu_guess_SimulatedOutput = copy.deepcopy(self.mu_guess_SimulatedOutput)
+            if type(simulationOutputProcessingFunction) == type(None):
+                mu_guess_SimulatedResponses = mu_guess_SimulatedOutput
+                if type(mu_guess_SimulatedResponses) != type(None):#normal case.
+                    pass
+                else: #else, we will make a 'nan' array that is the same shape as the map array. #TODO: There should be a warning printed to the logs when this occurs, because this causes the graph to have no line. Currently, we don't have any system for collecting warnings to print to the user.  Later, we'll have a global variable which is a set which we will append warnings to if they are not already in it, then print those out at the end.
+                    desiredShape = np.shape(map_SimulatedResponses)
+                    mu_guess_SimulatedResponses = np.empty((desiredShape)) #make the right shape.
+                    mu_guess_SimulatedResponses[:] = np.NaN #this fills it with nan.      
+                if flatten == True:
+                    mu_guess_SimulatedResponses = np.array(mu_guess_SimulatedResponses).flatten()
+                mu_guess_SimulatedResponses = nestedObjectsFunctions.makeAtLeast_2dNested(mu_guess_SimulatedResponses)
+                mu_guess_SimulatedResponses = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(mu_guess_SimulatedResponses)
+            if type(simulationOutputProcessingFunction) != type(None):
+                mu_guess_SimulatedResponses = simulationOutputProcessingFunction(mu_guess_SimulatedOutput)
+                if flatten == True:
+                    mu_guess_SimulatedResponses = np.array(mu_guess_SimulatedResponses).flatten()
+                mu_guess_SimulatedResponses =  nestedObjectsFunctions.makeAtLeast_2dNested(mu_guess_SimulatedResponses)     
+                mu_guess_SimulatedResponses = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(mu_guess_SimulatedResponses)
+            #Check if we have simulation uncertainties, and populate if so.
+            if type(self.UserInput.responses_simulation_uncertainties) != type(None):
+                #make an internal variable in case we need to flatten.
+                mu_guess_responses_simulation_uncertainties = self.get_responses_simulation_uncertainties(self.UserInput.InputParameterInitialGuess)
+                if flatten == True:
+                    mu_guess_responses_simulation_uncertainties = np.array(mu_guess_responses_simulation_uncertainties).flatten()
+                mu_guess_responses_simulation_uncertainties = nestedObjectsFunctions.makeAtLeast_2dNested(mu_guess_responses_simulation_uncertainties)
+                mu_guess_responses_simulation_uncertainties = nestedObjectsFunctions.convertInternalToNumpyArray_2dNested(mu_guess_responses_simulation_uncertainties)
             #make internal variables for responses_observed and responses_observed_uncertainties in case we need to flatten them.
             responses_observed = copy.deepcopy(self.UserInput.responses_observed)
             responses_observed_uncertainties = copy.deepcopy(self.UserInput.responses_observed_uncertainties)
@@ -3290,18 +3396,15 @@ class parameter_estimation:
         try:
             self.createSimulatedResponsesPlots(allResponses_x_values=[], allResponsesListsOfYArrays =[], plot_settings={},allResponsesListsOfYUncertaintiesArrays=[], showFigure=showFigure) #forcing the arguments to be blanks, because otherwise it might use some cached values.
             if verbose: print("Finished with create simulated responses plots function call.")
-        except:
-            print("Unable to make simulated response plots. This is unusual and typically means your observed values and simulated values are not the same array shape. If so, that needs to be fixed.")
-            pass
-
+        except Exception as exceptionObject:
+            print("Unable to make simulated response plots. This is unusual and typically means your observed values and simulated values are not the same array shape. If so, that needs to be fixed.")#For debugging: The exception was:" + str(exceptionObject))
 
         #Now we will call createSimulatedResponsesPlots again with flatten = True so that the series get plotted. This should only occur if all responses are scalars.
         try:
             self.createSimulatedResponsesPlots(allResponses_x_values=[], allResponsesListsOfYArrays =[], plot_settings={},allResponsesListsOfYUncertaintiesArrays=[], flatten = True) #forcing the arguments to be blanks, because otherwise it might use some cached values.
-        except:
-            print("Unable to make simulated response plots. This is unusual and typically means your observed values and simulated values are not the same array shape. If so, that needs to be fixed.")
-            pass
-            
+        except Exception as exceptionObject:
+            print("Unable to make second type of simulated response plots. This is normal if your responses are vectors and not scalars. Otherwise, it usually means your observed values and simulated values are not the same array shape. If so, that needs to be fixed.")
+                        
         print("Finished creating all plots. Only some plots are shown on screen. The fulls set of plots are in:", self.UserInput.directories['graphs']) #TODO: take the graphs string, remove the '.' at the front if present, and print the full absolute path here.
             
     def save_to_dill(self, base_file_name, file_name_prefix ='',  file_name_suffix='', file_name_extension='.dill'):

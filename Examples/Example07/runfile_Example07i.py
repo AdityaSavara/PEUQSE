@@ -4,9 +4,9 @@ import PEUQSE.UserInput as UserInput
 import processing_function_two_response #This will provide the "simulation" function.
 import numpy as np
 
-UserInput.responses['responses_abscissa'] = np.array([[0,1], [1]]) # These represent theta_1 and theta_2 abscissay points. Note that this is *nested* it is a multi-dimensional response, and produces two posteriors.
-UserInput.responses['responses_observed'] = np.array([[2,2], [3]]) # Note that this is *nested* it is a multi-dimensional response, and produces two posteriors.
-UserInput.responses['responses_observed_uncertainties'] =[[1,1],[1]] #np.array([[1], [1]]) #leave blank to create uncertainties by heuristic.
+UserInput.responses['responses_abscissa'] = np.array([[0,1], [1]], dtype="object") # These represent theta_1 and theta_2 abscissay points. Note that this is *nested* it is a multi-dimensional response, and produces two posteriors.
+UserInput.responses['responses_observed'] = np.array([[2,2], [3]], dtype="object") # Note that this is *nested* it is a multi-dimensional response, and produces two posteriors.
+UserInput.responses['responses_observed_uncertainties'] =np.array([[1,1],[1]], dtype="object") #np.array([[1], [1]]) #leave blank to create uncertainties by heuristic.
 
 UserInput.model['parameterNamesAndMathTypeExpressionsDict'] = {'theta_1':r'$\theta_{1}$','theta_2':r'$\theta_{2}$'}
 UserInput.model['InputParameterPriorValues'] = [1, 5] 

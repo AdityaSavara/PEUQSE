@@ -181,6 +181,8 @@ def makeHistogramsForEachParameter(parameterSamples,parameterNamesAndMathTypeExp
         sampledParameterHistogramMaker(parameterSamples, parameterName, parameterNamesAndMathTypeExpressionsDict, sampledParameterFiguresDictionary, sampledParameterAxesDictionary, directory=directory, parameterInitialValue=initialValue, parameterMAPValue=MAPValue, parameterMuAPValue=Mu_APValue, histogram_plot_settings=histogram_plot_settings, showFigure=showFigure)        
 
 def createSimulatedResponsesPlot(x_values, listOfYArrays, plot_settings={}, listOfYUncertaintiesArrays=[], showFigure=False, directory=''):
+    import copy
+    listOfYUncertaintiesArrays = copy.deepcopy(listOfYUncertaintiesArrays) #there are cases where the listOfYUncertaintiesArrays array needs to be edited, so we make a deep copy just in case.
     exportFigure = True #This variable should be moved to an argument or something in plot_settings.
     #First put some defaults in if not already defined.
     x_values = np.array(x_values)
@@ -213,6 +215,13 @@ def createSimulatedResponsesPlot(x_values, listOfYArrays, plot_settings={}, list
             error_linewidth = 10
     if str(error_linewidth).lower() == 'none': error_linewidth = 0 #This will hide the rror bars if they are not desired.
     if 'y_range' in plot_settings: ax0.set_ylim(plot_settings['y_range'] )
+    def is2Dsquare(arrayInput):#this helper function only returns true if the shape is 2D and if it is squarer.
+        checkResult = False #start with False and make true if the checks pass.
+        if len(np.shape(arrayInput)) == 2: #check if the length of the shape is equal to 2.
+            if np.shape(arrayInput[0]) == np.shape(arrayInput[1]): #check if both axes have same length.
+                checkResult = True
+        return checkResult
+            
     if len(listOfYArrays) == 3: #This generally means observed, mu_guess, map, in that order.
         if len(x_values) > 1: #This means there are enough data to make lines.        
             for seriesIndex in range(len(listOfYArrays)):           
@@ -240,17 +249,37 @@ def createSimulatedResponsesPlot(x_values, listOfYArrays, plot_settings={}, list
     elif len(listOfYArrays) == 4: #This generally means observed, mu_guess, map, mu_app
         if len(x_values) > 1: #This means there are enough data to make lines.        
             for seriesIndex in range(len(listOfYArrays)):
-                ax0.plot(x_values,listOfYArrays[0],'g')
+                ax0.plot(x_values,listOfYArrays[0],'g')                
                 if len(listOfYUncertaintiesArrays) >= 1: #If length is >=1, uncertainties for first data set.
+                    '''START: Code block added Nov 17th 2022 for an unusual case. Could cause problems later.'''
+                    #need to check if the uncertainty is actually a covariance.. check if the uncertainty is a square matrix, if so we will only take the diagonal.
+                    if is2Dsquare(listOfYUncertaintiesArrays[0]): #if it is square, we take the diagonal only.
+                        listOfYUncertaintiesArrays[0] = np.diagonal(listOfYUncertaintiesArrays[0])
+                    '''END: Code block added Nov 17th 2022 for an unusual case. Could cause problems later.'''
                     ax0.errorbar(x_values, listOfYArrays[0], yerr=np.array(listOfYUncertaintiesArrays[0]).flatten(), fmt='.', barsabove=False, markersize=0, linewidth=error_linewidth, color="gray", ecolor="lightgray") #markersize=0 because we want no marker for experiments data series, just a line.
                 ax0.plot(x_values,listOfYArrays[1], '#00A5DF')
                 if len(listOfYUncertaintiesArrays) > 1: #If length is >1, uncertainties for all data sets
+                    '''START: Code block added Nov 17th 2022 for an unusual case. Could cause problems later.'''
+                    #need to check if the uncertainty is actually a covariance.. check if the uncertainty is a square matrix, if so we will only take the diagonal.
+                    if is2Dsquare(listOfYUncertaintiesArrays[1]): #if it is square, we take the diagonal only.
+                        listOfYUncertaintiesArrays[1] = np.diagonal(listOfYUncertaintiesArrays[1])
+                    '''END: Code block added Nov 17th 2022 for an unusual case. Could cause problems later.'''
                     ax0.errorbar(x_values, listOfYArrays[1], yerr=np.array(listOfYUncertaintiesArrays[1]).flatten(), fmt='.', barsabove=False, markersize=0, linewidth=error_linewidth, color="gray", ecolor="lightgray") #markersize=0 because we want no marker for this.                                             
                 ax0.plot(x_values,listOfYArrays[2], 'r') 
                 if len(listOfYUncertaintiesArrays) > 1: #If length is >1, uncertainties for all data sets
+                    '''START: Code block added Nov 17th 2022 for an unusual case. Could cause problems later.'''
+                    #need to check if the uncertainty is actually a covariance.. check if the uncertainty is a square matrix, if so we will only take the diagonal.
+                    if is2Dsquare(listOfYUncertaintiesArrays[2]): #if it is square, we take the diagonal only.
+                        listOfYUncertaintiesArrays[2] = np.diagonal(listOfYUncertaintiesArrays[2])
+                    '''END: Code block added Nov 17th 2022 for an unusual case. Could cause problems later.'''
                     ax0.errorbar(x_values, listOfYArrays[2], yerr=np.array(listOfYUncertaintiesArrays[2]).flatten(), fmt='.', barsabove=False, markersize=0, linewidth=error_linewidth, color="gray", ecolor="lightgray") #markersize=0 because we want no marker for this.                    
                 ax0.plot(x_values,listOfYArrays[3], 'k')  #k is black.
                 if len(listOfYUncertaintiesArrays) > 1: #If length is >1, uncertainties for all data sets
+                    '''START: Code block added Nov 17th 2022 for an unusual case. Could cause problems later.'''
+                    #need to check if the uncertainty is actually a covariance.. check if the uncertainty is a square matrix, if so we will only take the diagonal.
+                    if is2Dsquare(listOfYUncertaintiesArrays[3]): #if it is square, we take the diagonal only.
+                        listOfYUncertaintiesArrays[3] = np.diagonal(listOfYUncertaintiesArrays[3])
+                    '''END: Code block added Nov 17th 2022 for an unusual case. Could cause problems later.'''
                     ax0.errorbar(x_values, listOfYArrays[3], yerr=np.array(listOfYUncertaintiesArrays[3]).flatten(), fmt='.', barsabove=False, markersize=0, linewidth=error_linewidth, color="gray", ecolor="lightgray") #markersize=0 because we want no marker for this.                    
         if len(x_values) == 1: #This means there are single points, and we need to make symbols, by adding an "o".
                 ax0.plot(x_values,listOfYArrays[0],'go')
