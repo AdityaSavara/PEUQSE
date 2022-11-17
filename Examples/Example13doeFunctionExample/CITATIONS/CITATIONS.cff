@@ -1,0 +1,25 @@
+---
+cff-version: 1.2.0
+message:2022-11-17T14:26:45
+title: PEUQSE Bayesian Parameter Estimation
+identifiers: 
+ - type: unique_id
+   value: https://doi.org/10.1002/cctc.202000953
+authors: 
+ - name: Aditya Savara
+ - name: Eric A. Walker
+version: 1.0.0
+doi: https://doi.org/10.1002/cctc.202000953
+---
+cff-version: 1.2.0
+message:2022-11-17T14:26:45
+title: PEUQSE Bayesian Design of Experiments
+identifiers: 
+ - type: unique_id
+   value: https://doi.org/10.1002/cctc.202000976
+authors: 
+ - name: Eric A. Walker
+ - name: Kishore Ravisankar
+ - name: Aditya Savara
+version: 1.0.2
+doi: https://doi.org/10.1002/cctc.202000976
