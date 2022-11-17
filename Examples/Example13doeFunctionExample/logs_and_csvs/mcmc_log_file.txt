@@ -1,12 +1,12 @@
 self.initial_point_parameters:[ 1.71e-01 -5.00e-05]
-MAP_logP:[-4.93523739]
-self.map_parameter_set:[ 1.71e-01 -5.00e-05]
-self.map_index:0
-self.mu_AP_parameter_set:[ 1.71e-01 -5.00e-05]
-self.stdap_parameter_set:[0. 0.]
+MAP_logP:[-6.43889103]
+self.map_parameter_set:[1.02714279e-01 3.72927439e-05]
+self.map_index:1
+self.mu_AP_parameter_set:[1.25476186e-01 8.19516261e-06]
+self.stdap_parameter_set:[3.21901978e-02 4.11501941e-05]
 self.info_gain:0.0
-evidence:0.02427151448860008
+evidence:0.004748659499016179
 posterior_cov_matrix:
-[[0. 0.]
- [0. 0.]]
-Convergence Status: The difference between the MAP parameter set and mu_AP parameter set is less than 10% of the prior standard deviations for each parameter. There is no general method for knowing when the correct solution has been obtained, but this small difference is one sign of a converged solution.
+[[ 1.55431325e-03 -1.98694933e-06]
+ [-1.98694933e-06  2.54000771e-09]]
+Convergence Status: Warning - The difference between the MAP parameter set and mu_AP parameter set is greater than 10% of the prior standard deviations in at least one parameter. This means that either your posterior distribution is asymmetric or that it is not yet converged. This may mean that you need to increase your mcmc_length, increase or decrease your mcmc_relative_step_length, or change what is used for the model response.  There is no general method for knowing the right  value for mcmc_relative_step_length since it depends on the sharpness and smoothness of the response. See for example https://www.sciencedirect.com/science/article/pii/S0039602816300632
