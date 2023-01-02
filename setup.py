@@ -22,7 +22,7 @@ EMAIL = 'AditySavara2008@u.northwestern.edu'  #Eric A. Walker is a co-author and
 AUTHOR = 'Aditya Savara'
 REQUIRES_PYTHON = '>=3.5.0'
 
-VERSION = '1.2.4'
+VERSION = '1.2.5'
 
 LICENSE = 'BSD-3-Clause'
 

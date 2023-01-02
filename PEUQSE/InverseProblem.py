@@ -381,7 +381,7 @@ class parameter_estimation:
         else:
             #Getting initial guess of parameters and populating the internal variable for it.
             if ('InputParameterInitialGuess' not in self.UserInput.model) or (len(self.UserInput.model['InputParameterInitialGuess'])== 0): #if an initial guess is not provided, we use the prior.
-                self.UserInput.model['InputParameterInitialGuess'] = np.array(self.UserInput.mu_prior, dtype='float')
+                self.UserInput.model['InputParameterInitialGuess'] = np.array(UserInput.model['InputParameterPriorValues'], dtype='float')
             #From now, we switch to self.UserInput.InputParameterInitialGuess because this is needed in case we're going to do reducedParameterSpace or grid sampling.
             self.UserInput.InputParameterInitialGuess = np.array(self.UserInput.model['InputParameterInitialGuess'], dtype='float')
             # reassure the initial guess is a numpy array
