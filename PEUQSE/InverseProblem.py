@@ -1990,7 +1990,6 @@ class parameter_estimation:
             np.savetxt(self.UserInput.directories['logs_and_csvs']+directory_name_suffix+file_name_prefix+'mcmc_burn_in_logP_and_parameter_samples'+file_name_suffix+'.csv',np.hstack((self.during_burn_in_log_posteriors_un_normed_vec, self.during_burn_in_samples)), delimiter=",")
         pickleAnObject(postBurnInStatistics,self.UserInput.directories['pickles']+directory_name_suffix+file_name_prefix+'mcmc_post_burn_in_statistics'+file_name_suffix)
         pickleAnObject(self.map_logP,self.UserInput.directories['pickles']+directory_name_suffix+file_name_prefix+'mcmc_map_logP'+file_name_suffix)
-        pickleAnObject(self.map_parameter_set,self.UserInput.directories['pickles']+directory_name_suffix+file_name_prefix+'mcmc_map_parameter_set'+file_name_suffix)
         if self.UserInput.parameter_estimation_settings['mcmc_continueSampling'] == True:
             pickleAnObject(self.UserInput.InputParameterInitialGuess,self.UserInput.directories['pickles']+directory_name_suffix+file_name_prefix+'mcmc_continued_initial_point_parameters'+file_name_suffix)
         else:
@@ -2098,19 +2097,25 @@ class parameter_estimation:
             else:
                 consolidated = False
         if consolidated == True:
-            headerString = 'ResponseAbscissa,' #initialize a string that will be added to.
-            for responseIndex in range(len(responsesData)): #Create a header for each column.
-                if responseIndex < len(responsesData) - 1: #we add a comma after the column heading if it is not the last response index.
-                    headerString = headerString + "Response" + str(responseIndex) + ","
-                else: #for last heading:
-                    headerString = headerString + "Response" + str(responseIndex)
-            responsesDataWithAbscissa = np.vstack((self.UserInput.responses_abscissa, responsesData))
-            np.savetxt(self.UserInput.directories['logs_and_csvs']+ "ExportedResponsesData__" + filenameString + choice + "__ResponsesConsolidated" + ".csv", responsesDataWithAbscissa.transpose(), delimiter=",", encoding =None,header=headerString, comments='')
+            if type(responsesData) == type(None):
+                print("No responsess data obtained, skipping exporting.")
+            else:    
+                headerString = 'ResponseAbscissa,' #initialize a string that will be added to.
+                for responseIndex in range(len(responsesData)): #Create a header for each column.
+                    if responseIndex < len(responsesData) - 1: #we add a comma after the column heading if it is not the last response index.
+                        headerString = headerString + "Response" + str(responseIndex) + ","
+                    else: #for last heading:
+                        headerString = headerString + "Response" + str(responseIndex)
+                responsesDataWithAbscissa = np.vstack((self.UserInput.responses_abscissa, responsesData))
+                np.savetxt(self.UserInput.directories['logs_and_csvs']+ "ExportedResponsesData__" + filenameString + choice + "__ResponsesConsolidated" + ".csv", responsesDataWithAbscissa.transpose(), delimiter=",", encoding =None,header=headerString, comments='')
         else:
             for responseIndex,responseData in enumerate(responsesData):
-                headerString = 'ResponseAbscissa,' + "Response" + str(responseIndex)
-                responseDataWithAbscissa = np.vstack((self.UserInput.responses_abscissa[responseIndex],responseData))
-                np.savetxt(self.UserInput.directories['logs_and_csvs']+ "ExportedResponsesData__" + filenameString + choice + "__Response" + str(responseIndex)  + ".csv", responseDataWithAbscissa.transpose(), delimiter=",", encoding =None, header=headerString, comments='')
+                if type(responseData) == type(None):
+                    print("No responsess data obtained for response", responseIndex, ", skipping exporting.")
+                else:
+                    headerString = 'ResponseAbscissa,' + "Response" + str(responseIndex)
+                    responseDataWithAbscissa = np.vstack((self.UserInput.responses_abscissa[responseIndex],responseData))
+                    np.savetxt(self.UserInput.directories['logs_and_csvs']+ "ExportedResponsesData__" + filenameString + choice + "__Response" + str(responseIndex)  + ".csv", responseDataWithAbscissa.transpose(), delimiter=",", encoding =None, header=headerString, comments='')
         
     def getConvergenceDiagnostics(self, discrete_chains_post_burn_in_samples=[], showFigure = None):
         """
@@ -2818,10 +2823,12 @@ class parameter_estimation:
         simulationOutputProcessingFunction = self.UserInput.simulationOutputProcessingFunction #Do NOT use self.UserInput.model['simulationOutputProcessingFunction'] because that won't work with reduced parameter space requests.
         simulationOutput =simulationFunction(discreteParameterVector) 
         if type(simulationOutput)==type(None):
+            self.lastSimulatedResponses = None
             return None #This is intended for the case that the simulation fails. User can return "None" for the simulation output.
         try:#This warning will not always work if there are multiple responses. #TODO: make this a loop across the number of responses. For now, just making it a "try" and "except" statement.
             if np.array(simulationOutput).any()==float('nan'):
                 print("WARNING: Your simulation output returned a 'nan' for parameter values " +str(discreteParameterVector) + ". 'nan' values cannot be processed by the PEUQSE software and this set of Parameter Values is being assigned a probability of 0.")
+                self.lastSimulatedResponses = None
                 return None #This is intended for the case that the simulation fails in some way without returning "None". 
         except:
             pass
