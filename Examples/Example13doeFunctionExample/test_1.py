@@ -28,9 +28,9 @@ prefix = ''
 
 
 """
-#This file is an example/template for when we ***don't have an analytical result*** but we know our function is working.
-#We know the function is working during template distribution because we are just using the test 12 example.
+#This file is an example/template for when we ***don't have an analytical result*** but we know our function is working. 
 In this template, we ***will not*** use the "set_expected_result" command. So we are commenting out the below lines, and will go directly to using the function to create an actual output.
+#The expected result was thus set the first time this file was run.
 """
 # # # #input for the unit that will be tested
 # # # input = 4
