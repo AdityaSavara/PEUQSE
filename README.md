@@ -87,7 +87,7 @@ We can see that in this example the position and uncertainty in "a" narrowed mor
 
 # How To Get Started
 
-1) First get anaconda (https://www.anaconda.com/products/individual). Then open an anaconda terminal (type "Anaconda Prompt" after installing anaconda). Inside the anaconda terminal, type `pip install PEUQSE[COMPLETE]`
+1) First get anaconda (https://www.anaconda.com/products/individual). Then open an anaconda terminal (for windows, press the windows key and type "Anaconda Prompt"). Inside the anaconda terminal, type `pip install PEUQSE[COMPLETE]`
 
 2) Then download the zipfile which has the Examples directory: https://github.com/AdityaSavara/PEUQSE/archive/master.zip
 
