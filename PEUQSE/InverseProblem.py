@@ -334,7 +334,7 @@ class parameter_estimation:
             self.UserInput.var_prior_scaled = np.array(UserInput.var_prior/(UserInput.scaling_uncertainties*UserInput.scaling_uncertainties))
             self.UserInput.covmat_prior_scaled = self.UserInput.covmat_prior*1.0 #First initialize, then fill.
             for parameterIndex, parameterValue in enumerate(UserInput.scaling_uncertainties):
-                UserInput.covmat_prior_scaled[parameterIndex,:] = UserInput.covmat_prior[parameterIndex,:]/parameterValue
+                UserInput.covmat_prior_scaled[parameterIndex,:] = UserInput.covmat_prior_scaled[parameterIndex,:]/parameterValue
                 #The next line needs to be on UserInput.covmat_prior_scaled and not UserInput.covmat_prior, since we're stacking the divisions.
                 UserInput.covmat_prior_scaled[:,parameterIndex] = UserInput.covmat_prior_scaled[:,parameterIndex]/parameterValue        
         
