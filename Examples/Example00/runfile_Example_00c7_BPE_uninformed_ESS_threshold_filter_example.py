@@ -23,8 +23,8 @@ UserInput.parameter_estimation_settings['scaling_uncertainties_type'] = "off"
     #UserInput.model['InputParameterInitialGuess'] = [150,400] #Can optionally change the initial guess to be different from prior means.
 
 UserInput.model['simulateByInputParametersOnlyFunction'] = simulation_model_00.simulation_function_wrapper #This must simulate with *only* the parameters listed above, and no other arguments.
-UserInput.parameter_estimation_settings['mcmc_burn_in'] = 100
-UserInput.parameter_estimation_settings['mcmc_length'] = 1500 #The uninformed prior int his example has a "bad" MCMC walker so requires lots of sampling to converge.
+UserInput.parameter_estimation_settings['mcmc_burn_in'] = 1500
+UserInput.parameter_estimation_settings['mcmc_length'] = 15000 #The uninformed prior int his example has a "bad" MCMC walker so requires lots of sampling to converge.
 UserInput.parameter_estimation_settings['mcmc_checkPointFrequency'] = 10 #This example is long enough that it's good to get updates.
 #After making the UserInput, now we make a 'parameter_estimation' object from it.
 PE_object = PEUQSE.parameter_estimation(UserInput)
