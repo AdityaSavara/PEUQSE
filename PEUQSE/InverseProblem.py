@@ -4052,17 +4052,11 @@ def geweke_diagnostic(post_burn_in_samples, initial_window=0.1, comparison_windo
         
     # Loop over start indices
     for start in start_indices:
-        # Calculate slices
-        
+        # Calculate slices       
         first_slice = post_burn_in_samples[start : start + int(initial_window * (last_index - start))]
         last_slice = post_burn_in_samples[int(last_index - comparison_window * (last_index - start)) :]
-
-        if start == 0: 
-            print("in PEUQSE Geweke", np.shape(first_slice))
-
         z_score = first_slice.mean() - last_slice.mean()
         z_score /= np.sqrt(spec_var(first_slice)/len(first_slice) + spec_var(last_slice)/len(last_slice))
-
         z_scores_total.append([start, z_score])
 
     return np.array(z_scores_total)
