@@ -4011,6 +4011,9 @@ def calculateAndPlotConvergenceDiagnostics(discrete_chains_post_burn_in_samples,
     # return both window_indicies, final ACT values each param, final ACT values each param and window, final z scores summed parameters, and final summed parameters percent outliers
     return (window_indices_act, taus_zeus[-1,:], parameter_act_for_each_window, window_indices_geweke, z_scores_sum_params_final, z_scores_sum_params_percentage_outlier)
         
+#On 10/26/24 this function was updated to use a normalized spectral variance, which greatly lengthens
+#the time until the diagnostic shows convergence. It may take 1000 times longer after this update.
+#So now the geweke diagnostic is more strict than the earlier version.
 def geweke_diagnostic(post_burn_in_samples, initial_window=0.1, comparison_window=0.5, intervals=20):
     """ Geweke diagnostic for convergence of MCMC sampling. 
     Z scores are compared from the initial window to a final window of the sampling. 
@@ -4040,14 +4043,25 @@ def geweke_diagnostic(post_burn_in_samples, initial_window=0.1, comparison_windo
     # Calculate starting indices
     start_indices = np.linspace(0, last_start_index, num=intervals, endpoint=True, dtype=int)
 
+    #Make function for spectral variance. Geweke's method uses spectral variance
+    #because the samples variances are not independent, and this helps to mitigate that.
+    def spec_var(x, order=2):
+        from statsmodels.regression.linear_model import yule_walker
+        beta, sigma = yule_walker(x, order)
+        return sigma**2 / (1. - np.sum(beta))**2
+        
     # Loop over start indices
     for start in start_indices:
         # Calculate slices
+        
         first_slice = post_burn_in_samples[start : start + int(initial_window * (last_index - start))]
         last_slice = post_burn_in_samples[int(last_index - comparison_window * (last_index - start)) :]
 
+        if start == 0: 
+            print("in PEUQSE Geweke", np.shape(first_slice))
+
         z_score = first_slice.mean() - last_slice.mean()
-        z_score /= np.sqrt(first_slice.var() + last_slice.var())
+        z_score /= np.sqrt(spec_var(first_slice)/len(first_slice) + spec_var(last_slice)/len(last_slice))
 
         z_scores_total.append([start, z_score])
 
