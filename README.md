@@ -15,6 +15,7 @@ The LICENSE is a BSD-3-Clause LICENSE.
 The recommended installation is to get Anaconda, then open an anaconda prompt and type `pip install PEUQSE[COMPLETE]` (includes all optional dependencies). Leave out the '[COMPLETE]' if you want the minimal version.
 The software can also be downloaded and used directly, or used by "python setup.py install" (the setup.py way will do basically the same thing as pip and will install the package appropriately to allow the module to be accessed by python regardless of directory, but this will not install the optional dependencies). For those who are not familiar with python, longer instructions are provided in the How to Get Started section below.
 
+The primary documentation is in the Examples directory in a file named  ExamplesAndTutorialAndGettingStarted.rtf, but new users should read the 'How to Get Started' section, below.
 
 # A Quick Introduction
 
@@ -87,7 +88,7 @@ We can see that in this example the position and uncertainty in "a" narrowed mor
 
 # How To Get Started
 
-1) First get anaconda (https://www.anaconda.com/products/individual). Then open an anaconda terminal (type "Anaconda Prompt" after installing anaconda). Inside the anaconda terminal, type `pip install PEUQSE[COMPLETE]`
+1) First get anaconda (https://www.anaconda.com/products/individual). Then open an anaconda terminal (for windows, press the windows key and type "Anaconda Prompt"). Inside the anaconda terminal, type `pip install PEUQSE[COMPLETE]`
 
 2) Then download the zipfile which has the Examples directory: https://github.com/AdityaSavara/PEUQSE/archive/master.zip
 
