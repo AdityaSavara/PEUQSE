@@ -1,3 +1,4 @@
+#Warning: CiteSoftwareConsolidatedLog.txt may not include all softwares used. It is the end-user’s responsibility to verify that the no software citations are missing relative to those recorded in the complete logfile, CiteSoftwareCheckpointsLog.txt . This verification is important to do when using two or more codes together for the first time.
 ---
 -
     timestamp: >-
@@ -20,7 +21,6 @@
     cite:
         - >-
             Savara, A. and Walker, E.A. (2020), PEUQSE Intro 1: Bayesian Parameter Estimation Considering Uncertainty or Error from both Experiments and Theory. ChemCatChem. Accepted. doi:10.1002/cctc.202000953
----
 -
     timestamp: >-
         2024-10-26T16:55:03
