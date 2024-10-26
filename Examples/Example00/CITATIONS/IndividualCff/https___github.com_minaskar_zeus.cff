@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message:2024-10-26T16:55:03
+title: zeus
+identifiers: 
+ - type: unique_id
+   value: https://github.com/minaskar/zeus
+authors: 
+ - name: Minas Karamanis
+ - name: Florian Beutler
+version: 2.0.0
