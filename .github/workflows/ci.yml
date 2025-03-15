@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches: [develop]
+    tags: ['v*']
+  pull_request:
+    branches: [develop]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    environment: ci
+    strategy:
+      matrix:
+        python-version: ['3.8']
+#, '3.9', '3.10', '3.11']
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+        cache: 'pip'
+
+    - name: Cleanup
+      run: |
+        cd Examples/Example13doeFunctionExample/
+        rm test_3.py
+        rm test_4.py
+        cd ..
+        cd ..
+
+    - name: Install dependencies
+      run: |
+        pip install UnitTesterSG
+        pip install numpy
+        pip install pandas
+        pip install matplotlib
+        pip install scipy
+        pip install zeus-mcmc
+        pip install dill
+        pip install emcee
+
+    - name: Run tests
+      env:
+        PYTHON_VERSION: ${{ matrix.python-version }}
+      run: |
+        cd Examples
+        python3 runPytestDriver.py failWithError 
+    #The "failWithError" optional argument will cause an error exitCode if any unit tests fail.

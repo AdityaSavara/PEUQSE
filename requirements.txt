@@ -1,0 +1,9 @@
+#install these requirements using: pip install -r requirements.txt
+UnitTesterSG
+numpy
+pandas
+matplotlib
+scipy
+zeus-mcmc
+dill
+emcee
