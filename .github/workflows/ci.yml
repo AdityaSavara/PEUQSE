@@ -49,6 +49,7 @@ jobs:
     - name: Run tests
       env:
         PYTHON_VERSION: ${{ matrix.python-version }}
-      run:
+      run: |
         cd Examples
-        python3 runPytestDriver.py failWithError #The "failWithError" optional argument will cause an error exitCode if any unit tests fail.
+        python3 runPytestDriver.py failWithError 
+    #The "failWithError" optional argument will cause an error exitCode if any unit tests fail.
