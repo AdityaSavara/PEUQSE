@@ -4,7 +4,6 @@ numpy
 pandas
 matplotlib
 scipy
-CiteSoft
 zeus-mcmc
 dill
 emcee
