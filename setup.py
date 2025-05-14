@@ -16,7 +16,7 @@ from setuptools import find_packages, setup, Command
 
 # Package meta-data.
 NAME = 'PEUQSE'
-DESCRIPTION = 'This is the PEUQSE package which stands for Chemical Kinetics Parameter Estimation and Uncertainty Quantification. See https://github.com/AdityaSavara/PEUQSE for more information.'
+DESCRIPTION = 'This is the PEUQSE package which stands for Parameter Estimation and Uncertainty Quantification for Science and Engineering. See https://github.com/AdityaSavara/PEUQSE for more information.'
 URL = 'https://github.com/AdityaSavara/PEUQSE'
 EMAIL = 'AditySavara2008@u.northwestern.edu'  #Eric A. Walker is a co-author and can be reached at WALKER, ERIC <walke299@email.sc.edu>
 AUTHOR = 'Aditya Savara'
