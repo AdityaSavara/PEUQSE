@@ -22,12 +22,13 @@ EMAIL = 'AditySavara2008@u.northwestern.edu'  #Eric A. Walker is a co-author and
 AUTHOR = 'Aditya Savara'
 REQUIRES_PYTHON = '>=3.5.0'
 
-VERSION = '1.2.8'
+VERSION = '1.2.9'
 
 LICENSE = 'BSD-3-Clause'
 
 # What packages are required for this module to be executed?
 REQUIRED = [
+    'numpy', 'dill', 'pandas', 'matplotlib'
 ]
 
 # What packages are optional?
