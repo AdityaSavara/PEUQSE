@@ -12,7 +12,7 @@ Parameter estimation for complex physical problems often suffers from finding â€
 The MANUAL is located in the PEUQSE directory at https://github.com/AdityaSavara/PEUQSE/tree/master/PEUQSE
 The recommended installation is to get Anaconda, then to install by conda or pip inside an anaconda prompt:
 
-`conda install conda-forge::peuqse` or  `pip install PEUQSE[COMPLETE]` (the latter includes all optional dependencies).
+`pip install PEUQSE[COMPLETE]` (includes all optional dependencies) or `conda install conda-forge::peuqse`
 
 For those who are not familiar with python, longer instructions are provided in the How to Get Started section below.
 
