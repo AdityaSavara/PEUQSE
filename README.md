@@ -9,9 +9,7 @@
 
 Parameter estimation for complex physical problems often suffers from finding ‘solutions’ that are not physically realistic. The PEUQSE software (formerly named CheKiPEUQ) provides tools for finding physically realistic parameter estimates, graphs of the parameter estimate positions within parameter space, and plots of the final simulation results.
 
-The LICENSE and MANUAL are in the PEUQSE directory and at https://github.com/AdityaSavara/PEUQSE/tree/master/PEUQSE
-The LICENSE is a BSD-3-Clause LICENSE.
-
+The MANUAL is located in the PEUQSE directory at https://github.com/AdityaSavara/PEUQSE/tree/master/PEUQSE
 The recommended installation is to get Anaconda, then to install by conda or pip inside an anaconda prompt:
 
 `conda install conda-forge::peuqse` or  `pip install PEUQSE[COMPLETE]` (the latter includes all optional dependencies).
@@ -116,3 +114,5 @@ In the relatively near future, the Examples may be separated into a complementar
 # Authors and Contributors
 
 Authors: Aditya "Ashi" Savara, Eric A. Walker, Troy Gustke
+
+The LICENSE is a BSD-3-Clause LICENSE.
